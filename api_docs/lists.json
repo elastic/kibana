@@ -393,7 +393,7 @@
                 "id": "def-server.ExceptionListClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ user, savedObjectsClient }",
+                "label": "{\n    user,\n    savedObjectsClient,\n    serverExtensionsClient,\n    enableServerExtensionPoints = true,\n  }",
                 "description": [],
                 "signature": [
                   "ConstructorOptions"
@@ -2486,6 +2486,22 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ListsApiRequestHandlerContext.getExtensionPointClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getExtensionPointClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ExtensionPointStorageClientInterface"
+            ],
+            "path": "x-pack/plugins/lists/server/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2661,7 +2677,154 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionListPreUpdateItemServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionListPreUpdateItemServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to updating the Exception List Item. Throw'ing will cause the\nupdate operation to fail"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreUpdateItem\", ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.UpdateExceptionListItemOptions",
+            "text": "UpdateExceptionListItemOptions"
+          },
+          ", ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.UpdateExceptionListItemOptions",
+            "text": "UpdateExceptionListItemOptions"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreCreateItemServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreCreateItemServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to creating a new Exception List Item. Throw'ing will cause\nthe create operation to fail"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreCreateItem\", ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.CreateExceptionListItemOptions",
+            "text": "CreateExceptionListItemOptions"
+          },
+          ", ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.CreateExceptionListItemOptions",
+            "text": "CreateExceptionListItemOptions"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExtensionPoint",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtensionPoint",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreCreateItemServerExtension",
+            "text": "ExceptionsListPreCreateItemServerExtension"
+          },
+          " | ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionListPreUpdateItemServerExtension",
+            "text": "ExceptionListPreUpdateItemServerExtension"
+          }
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ListsServerExtensionRegistrar",
+        "type": "Type",
+        "tags": [],
+        "label": "ListsServerExtensionRegistrar",
+        "description": [
+          "\nA Map of extension point type and associated Set of callbacks\n\nRegistration function for server-side extension points"
+        ],
+        "signature": [
+          "(extension: ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExtensionPoint",
+            "text": "ExtensionPoint"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ListsServerExtensionRegistrar.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "extension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreCreateItemServerExtension",
+                "text": "ExceptionsListPreCreateItemServerExtension"
+              },
+              " | ",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionListPreUpdateItemServerExtension",
+                "text": "ExceptionListPreUpdateItemServerExtension"
+              }
+            ],
+            "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "lists",
@@ -2689,7 +2852,7 @@
               "section": "def-server.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
-            ", user: string) => ",
+            ", user: string, disableServerExtensionPoints?: boolean | undefined) => ",
             {
               "pluginId": "lists",
               "scope": "server",
@@ -3048,6 +3211,19 @@
               "description": [],
               "path": "x-pack/plugins/lists/server/types.ts",
               "deprecated": false
+            },
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.getExceptionListClient.$3",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "disableServerExtensionPoints",
+              "description": [],
+              "signature": [
+                "boolean | undefined"
+              ],
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
             }
           ]
         },
@@ -3119,6 +3295,57 @@
               "label": "user",
               "description": [],
               "path": "x-pack/plugins/lists/server/types.ts",
+              "deprecated": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "lists",
+          "id": "def-server.ListPluginSetup.registerExtension",
+          "type": "Function",
+          "tags": [],
+          "label": "registerExtension",
+          "description": [],
+          "signature": [
+            "(extension: ",
+            {
+              "pluginId": "lists",
+              "scope": "server",
+              "docId": "kibListsPluginApi",
+              "section": "def-server.ExtensionPoint",
+              "text": "ExtensionPoint"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "lists",
+              "id": "def-server.ListPluginSetup.registerExtension.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "extension",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreCreateItemServerExtension",
+                  "text": "ExceptionsListPreCreateItemServerExtension"
+                },
+                " | ",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionListPreUpdateItemServerExtension",
+                  "text": "ExceptionListPreUpdateItemServerExtension"
+                }
+              ],
+              "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
               "deprecated": false
             }
           ]
