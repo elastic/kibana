@@ -10,9 +10,6 @@ import $ from 'jquery';
 import _ from 'lodash';
 import * as es from '../es/es';
 
-// NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
-// due to timing issues in our app.js tests.
-const POLL_INTERVAL = 60000;
 let pollTimeoutId;
 
 let perIndexTypes = {};
@@ -331,6 +328,6 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
       if (settings.getPolling()) {
         retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
-    }, POLL_INTERVAL);
+    }, settings.getPollInterval());
   });
 }

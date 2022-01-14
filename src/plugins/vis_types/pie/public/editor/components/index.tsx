@@ -8,7 +8,8 @@
 
 import React, { lazy } from 'react';
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-import { PieVisParams, PieTypeProps } from '../../types';
+import { PieTypeProps } from '../../types';
+import { PieVisParams } from '../../../../../chart_expressions/expression_pie/common';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 

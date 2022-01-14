@@ -439,8 +439,13 @@ export const fullResponseSchema = t.intersection([
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
+export interface RulePreviewLogs {
+  errors: string[];
+  warnings: string[];
+  startedAt?: string;
+}
+
 export interface PreviewResponse {
   previewId: string | undefined;
-  errors: string[] | undefined;
-  warnings: string[] | undefined;
+  logs: RulePreviewLogs[] | undefined;
 }

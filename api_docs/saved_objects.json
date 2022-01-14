@@ -1173,7 +1173,7 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
           ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
         ],
@@ -1196,7 +1196,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,

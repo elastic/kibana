@@ -32,6 +32,7 @@ export interface TableRequestProcessorsParams {
 export interface TableSearchRequestMeta extends BaseMeta {
   panelId?: string;
   timeField?: string;
+  normalized?: boolean;
 }
 
 export type TableSearchRequest = Record<string, any>;
