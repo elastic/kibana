@@ -92,9 +92,10 @@ export class ReportingPlugin
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
     const { elasticsearch, savedObjects, uiSettings } = core;
-    const { data, licensing, screenshotting, taskManager } = plugins;
-    // use data plugin for csv formats
-    setFieldFormats(data.fieldFormats); // FIXME: 'fieldFormats' is deprecated.
+    const { data, fieldFormats, licensing, screenshotting, taskManager } = plugins;
+
+    // use fieldFormats plugin for csv formats
+    setFieldFormats(fieldFormats);
     const reportingCore = this.reportingCore!;
 
     // async background start
@@ -110,6 +111,7 @@ export class ReportingPlugin
         uiSettings,
         store,
         data,
+        fieldFormats,
         licensing,
         screenshotting,
         taskManager,

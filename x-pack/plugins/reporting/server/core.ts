@@ -19,8 +19,9 @@ import {
   ServiceStatusLevels,
   StatusServiceSetup,
   UiSettingsServiceStart,
-} from '../../../../src/core/server';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+} from 'src/core/server';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { IEventLogService } from '../../event_log/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginStart } from '../../licensing/server';
@@ -57,6 +58,7 @@ export interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: LevelLogger;
   screenshotting: ScreenshottingStart;
