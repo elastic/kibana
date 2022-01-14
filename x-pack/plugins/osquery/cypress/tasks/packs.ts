@@ -9,6 +9,4 @@ export const preparePack = (packName: string, savedQueryId: string) => {
   cy.contains('Packs').click();
   const createdPack = cy.contains(packName);
   createdPack.click();
-  cy.waitForReact(1000);
-  cy.react('EuiTableRow').contains(savedQueryId);
 };
