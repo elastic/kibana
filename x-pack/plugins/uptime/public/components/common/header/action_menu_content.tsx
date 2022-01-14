@@ -59,13 +59,6 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
           breakdown: monitorId ? 'observer.geo.name' : 'monitor.type',
           reportDefinitions: {
             'monitor.name':
-              /*
-               * The second condition exists because we don't want to link users to an
-               * exploratory view that is filtered by a specific monitor when they're on
-               * the Uptime Overview page.
-               *
-               * This condition is intended to allow monitor filtering on all other pages.
-               */
               selectedMonitor?.monitor?.name && detailRouteMatch?.isExact === true
                 ? [selectedMonitor?.monitor?.name]
                 : [],
