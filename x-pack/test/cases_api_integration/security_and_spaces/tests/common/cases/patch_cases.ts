@@ -507,7 +507,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses['in-progress'],
               },
             ],
-            type: 'case',
           })) as CasesResponse;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
@@ -636,7 +635,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses.closed,
               },
             ],
-            type: 'case',
           })) as CasesResponse;
 
           await es.indices.refresh({ index: defaultSignalsIndex });

@@ -23,7 +23,6 @@ import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
-  SUB_CASES_PATCH_DEL_URL,
 } from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
@@ -33,12 +32,10 @@ import {
   CasePostRequest,
   CaseResponse,
   CaseStatuses,
-  SubCasesResponse,
   CasesResponse,
   CasesFindResponse,
   CommentRequest,
   CaseUserActionResponse,
-  SubCaseResponse,
   CommentResponse,
   CasesPatchRequest,
   AllCommentsResponse,
@@ -128,29 +125,17 @@ interface SetStatusCasesParams {
 export const setStatus = async ({
   supertest,
   cases,
-  type,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   cases: SetStatusCasesParams[];
-  type: 'case' | 'sub_case';
-}): Promise<CasesResponse | SubCasesResponse> => {
-  const url = type === 'case' ? CASES_URL : SUB_CASES_PATCH_DEL_URL;
-  const patchFields = type === 'case' ? { cases } : { subCases: cases };
-  const { body }: { body: CasesResponse | SubCasesResponse } = await supertest
-    .patch(url)
+}): Promise<CasesResponse> => {
+  const { body }: { body: CasesResponse } = await supertest
+    .patch(CASES_URL)
     .set('kbn-xsrf', 'true')
-    .send(patchFields)
+    .send({ cases })
     .expect(200);
   return body;
 };
-
-/**
- * Response structure for the createSubCase and createSubCaseComment functions.
- */
-export interface CreateSubCaseResp {
-  newSubCaseInfo: CaseResponse;
-  modifiedSubCases?: SubCasesResponse;
-}
 
 /**
  * Add case as a connector
@@ -337,19 +322,6 @@ export const removeServerGeneratedPropertiesFromUserAction = (
     CaseUserActionResponse,
     typeof keysToRemove[number]
   >(attributes, keysToRemove);
-};
-
-export const removeServerGeneratedPropertiesFromSubCase = (
-  subCase: SubCaseResponse | undefined
-) => {
-  if (!subCase) {
-    return;
-  }
-
-  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, [
-    'closed_at',
-    'comments',
-  ]);
 };
 
 export const removeServerGeneratedPropertiesFromCase = (

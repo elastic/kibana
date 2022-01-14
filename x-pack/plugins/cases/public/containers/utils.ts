@@ -73,12 +73,6 @@ export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases 
   total: snakeCases.total,
 });
 
-export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
-  pipe(
-    CasesStatusResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
 export const decodeCaseResponse = (respCase?: CaseResponse) =>

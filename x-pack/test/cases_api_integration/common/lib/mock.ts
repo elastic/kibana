@@ -17,7 +17,6 @@ import {
   CommentType,
   CaseStatuses,
   CasesClientPostRequest,
-  SubCaseResponse,
   CommentRequest,
   CommentRequestActionsType,
 } from '../../../../plugins/cases/common/api';
@@ -136,26 +135,6 @@ export const commentsResp = ({
     };
   });
 };
-
-export const subCaseResp = ({
-  id,
-  totalAlerts,
-  totalComment,
-  status = CaseStatuses.open,
-}: {
-  id: string;
-  status?: CaseStatuses;
-  totalAlerts: number;
-  totalComment: number;
-}): Partial<SubCaseResponse> => ({
-  status,
-  id,
-  totalAlerts,
-  totalComment,
-  closed_by: null,
-  created_by: defaultUser,
-  updated_by: defaultUser,
-});
 
 const findCommon = {
   page: 1,
