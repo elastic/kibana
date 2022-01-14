@@ -47,7 +47,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   enabled,
   eventSource,
 }) => {
-  const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
+  const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
   const defaultValue = useMemo(() => {
     if (agentId || agentPolicyIds?.length || query?.length) {
@@ -72,7 +72,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     return undefined;
   }, [agentId, agentIds, agentPolicyIds, ecs_mapping, query, savedQueryId]);
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
