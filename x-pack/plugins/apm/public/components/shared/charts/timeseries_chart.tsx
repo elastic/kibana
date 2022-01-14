@@ -552,19 +552,6 @@ export function TimeseriesChart({
           })}
         </Chart>
       </ChartContainer>
-      <div data-test-subj="apmCorrelationsTable">
-        {showCorrelationsTable && showModal && windowParameters && (
-          <CorrelationsTable<ChangePoint>
-            columns={failedTransactionsCorrelationsColumns}
-            setSelectedSignificantTerm={() => {}}
-            onTableChange={() => {}}
-            significantTerms={correlationTerms}
-            status={
-              progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
-            }
-          />
-        )}
-      </div>
     </>
   );
 
@@ -579,11 +566,23 @@ export function TimeseriesChart({
   return (
     <EuiFlyout onClose={closeModalHandler} size="l">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>Change point</h2>
-        </EuiTitle>
+        <EuiTitle size="m">{chart}</EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{chart}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <div data-test-subj="apmCorrelationsTable">
+          {showCorrelationsTable && showModal && windowParameters && (
+            <CorrelationsTable<ChangePoint>
+              columns={failedTransactionsCorrelationsColumns}
+              setSelectedSignificantTerm={() => {}}
+              onTableChange={() => {}}
+              significantTerms={correlationTerms}
+              status={
+                progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
+              }
+            />
+          )}
+        </div>
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 }
