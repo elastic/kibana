@@ -269,7 +269,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     );
 
     // adds a very small number to the max value to make sure the max value will be included
-    const smattering = 0.00000001;
+    const smattering = 0.00001;
     const endValue =
       (paletteParams?.range === 'number' ? paletteParams.rangeMax : max) + smattering;
 

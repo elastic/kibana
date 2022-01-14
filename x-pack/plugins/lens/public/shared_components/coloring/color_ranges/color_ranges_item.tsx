@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent } from 'react';
+import React, { useState, useCallback, Dispatch, FocusEvent, useContext } from 'react';
 
 import {
   EuiFieldNumber,
@@ -31,7 +31,7 @@ import {
 } from './color_ranges_item_buttons';
 
 import type { ColorRange, ColorRangeAccessor, ColorRangesActions } from './types';
-import type { DataBounds } from '../types';
+import { ColorRangesContext } from '../palette_configuration';
 import type { ColorRangeValidation } from './color_ranges_validation';
 import type { CustomPaletteParams } from '../../../../common';
 import {
@@ -46,7 +46,6 @@ export interface ColorRangesItemProps {
   index: number;
   colorRanges: ColorRange[];
   dispatch: Dispatch<ColorRangesActions>;
-  dataBounds: DataBounds;
   rangeType: CustomPaletteParams['rangeType'];
   continuity: PaletteContinuity;
   accessor: ColorRangeAccessor;
@@ -107,7 +106,6 @@ const getAppend = (
 export function ColorRangeItem({
   accessor,
   index,
-  dataBounds,
   colorRange,
   rangeType,
   colorRanges,
@@ -115,6 +113,7 @@ export function ColorRangeItem({
   continuity,
   dispatch,
 }: ColorRangesItemProps) {
+  const { dataBounds, palettes } = useContext(ColorRangesContext);
   const value = `${colorRange[accessor]}`;
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
   const [localValue, setLocalValue] = useState<string>(value || '');
@@ -135,25 +134,28 @@ export function ColorRangeItem({
         (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
 
       if (shouldSort && !isFocusStillInContent) {
-        dispatch({ type: 'sortColorRanges' });
+        dispatch({ type: 'sortColorRanges', payload: { dataBounds, palettes } });
       }
     },
-    [colorRange.start, colorRanges, dispatch, index, popoverInFocus]
+    [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes]
   );
 
   const onValueChange = useCallback(
     ({ target: { value: targetValue } }) => {
       setLocalValue(targetValue);
-      dispatch({ type: 'updateValue', payload: { index, value: targetValue, accessor } });
+      dispatch({
+        type: 'updateValue',
+        payload: { index, value: targetValue, accessor, dataBounds, palettes },
+      });
     },
-    [dispatch, index, accessor]
+    [dispatch, index, accessor, dataBounds, palettes]
   );
 
   const onUpdateColor = useCallback(
     (color) => {
-      dispatch({ type: 'updateColor', payload: { index, color } });
+      dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes  } });
     },
-    [dispatch, index]
+    [dispatch, index, dataBounds, palettes]
   );
 
   useUpdateEffect(() => {
@@ -220,7 +222,6 @@ export function ColorRangeItem({
         <EuiFlexItem grow={false}>
           <ActionButton
             index={index}
-            dataBounds={dataBounds}
             continuity={continuity}
             rangeType={rangeType}
             colorRanges={colorRanges}

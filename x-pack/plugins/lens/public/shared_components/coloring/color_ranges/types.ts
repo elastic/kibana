@@ -22,50 +22,45 @@ export interface ColorRangesState {
 }
 
 /** @internal **/
-export interface AddColorRangePayload {
+interface BasicPayload {
   dataBounds: DataBounds;
+  palettes: any;
 }
 
 /** @internal **/
-export interface DistributeEquallyPayload {
-  dataBounds: DataBounds;
-}
-
-/** @internal **/
-export interface UpdateColorPayload {
+export type UpdateColorPayload = BasicPayload & {
   index: number;
   color: string;
 }
 
 /** @internal **/
-export interface UpdateColorRangeValuePayload {
+export type UpdateColorRangeValuePayload = BasicPayload & {
   index: number;
   value: string;
   accessor: ColorRangeAccessor;
 }
 
 /** @internal **/
-export interface DeleteColorRangePayload {
+export type DeleteColorRangePayload = BasicPayload & {
   index: number;
 }
 
 /** @internal **/
-export interface UpdateContinuityPayload {
+export type UpdateContinuityPayload = BasicPayload & {
   isLast: boolean;
   continuity: PaletteContinuity;
-  dataBounds: DataBounds;
 }
 
 /** @internal **/
 export type ColorRangesActions =
-  | { type: 'reversePalette' }
-  | { type: 'sortColorRanges' }
-  | { type: 'distributeEqually'; payload: DistributeEquallyPayload }
+  | { type: 'reversePalette'; payload: BasicPayload}
+  | { type: 'sortColorRanges'; payload: BasicPayload }
+  | { type: 'distributeEqually'; payload: BasicPayload }
   | { type: 'updateContinuity'; payload: UpdateContinuityPayload }
   | { type: 'deleteColorRange'; payload: DeleteColorRangePayload }
   | {
       type: 'addColorRange';
-      payload: AddColorRangePayload;
+      payload: BasicPayload;
     }
   | { type: 'updateColor'; payload: UpdateColorPayload }
   | {

@@ -15,15 +15,18 @@ import { DataBounds } from './types';
 
 import './palette_configuration.scss';
 
-import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS, DEFAULT_CONTINUITY } from './constants';
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
-import { getSwitchToCustomParams, toColorRanges, getFallbackDataBounds } from './utils';
+import { toColorRanges, getFallbackDataBounds } from './utils';
 
-import { toColorStops } from './color_ranges/utils';
 import { ColorRanges } from './color_ranges';
 
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
 const idPrefix = htmlIdGenerator()();
+
+export const ColorRangesContext = React.createContext<{
+  dataBounds: DataBounds;
+  palettes?: PaletteRegistry;
+}>({ dataBounds: { min: 0, max: 100 } });
 
 export function CustomizablePalette({
   palettes,
@@ -40,7 +43,7 @@ export function CustomizablePalette({
 }) {
   const colorRangesToShow = toColorRanges(
     palettes,
-    activePalette?.params?.colorStops || [],
+    activePalette.params?.colorStops || [],
     activePalette,
     dataBounds
   );
@@ -56,29 +59,7 @@ export function CustomizablePalette({
         localState.activePalette !== activePalette ||
         colorRangesToShow !== localState.colorRanges
       ) {
-        let newPalette = localState.activePalette;
-
-        const continuity = localState.activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
-        const isCurrentPaletteCustom = localState.activePalette.name === CUSTOM_PALETTE;
-        const { max, colorStops } = toColorStops(localState.colorRanges, continuity);
-
-        if (isCurrentPaletteCustom && newPalette.params?.colorStops !== colorStops) {
-          newPalette = getSwitchToCustomParams(
-            palettes,
-            localState.activePalette!,
-            {
-              continuity,
-              colorStops,
-              steps: localState.activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
-              reverse: !localState.activePalette!.params?.reverse,
-              rangeMin: colorStops[0]?.stop,
-              rangeMax: max,
-            },
-            dataBounds!
-          );
-        }
-
-        setPalette(newPalette);
+        setPalette(localState.activePalette);
       }
     },
     250,
@@ -180,12 +161,18 @@ export function CustomizablePalette({
         fullWidth
         display="rowCompressed"
       >
-        <ColorRanges
-          paletteConfiguration={localState.activePalette?.params}
-          colorRanges={localState.colorRanges}
-          dataBounds={dataBounds}
-          dispatch={dispatch}
-        />
+        <ColorRangesContext.Provider
+          value={{
+            dataBounds,
+            palettes,
+          }}
+        >
+          <ColorRanges
+            paletteConfiguration={localState.activePalette?.params}
+            colorRanges={localState.colorRanges}
+            dispatch={dispatch}
+          />
+        </ColorRangesContext.Provider>
       </EuiFormRow>
     </div>
   );

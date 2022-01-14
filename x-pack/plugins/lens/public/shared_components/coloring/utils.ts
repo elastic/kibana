@@ -19,6 +19,7 @@ import {
   DEFAULT_CONTINUITY,
 } from './constants';
 import type { ColorRange } from './color_ranges';
+import { toColorStops } from './color_ranges/utils';
 import type { PaletteConfigurationState, DataBounds } from './types';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
 import {
@@ -133,18 +134,49 @@ export function changeColorPalette(
   };
 }
 
-export function updatePalette(
+export function withUpdatingPalette(
+  palettes: PaletteRegistry,
   activePalette: PaletteConfigurationState['activePalette'],
-  newParams: Partial<PaletteConfigurationState['activePalette']['params']> = {},
-  newName?: string
+  colorRanges: ColorRange[],
+  dataBounds: DataBounds,
+  continuity?: CustomPaletteParams['continuity']
+) {
+  const currentContinuity = continuity ?? activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
+  const { max, colorStops } = toColorStops(colorRanges, currentContinuity);
+
+  const newPallete = getSwitchToCustomParams(
+    palettes,
+    activePalette!,
+    {
+      continuity,
+      colorStops,
+      steps: activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
+      reverse: activePalette!.params?.reverse,
+      rangeMin: colorStops[0]?.stop,
+      rangeMax: max,
+    },
+    dataBounds!
+  );
+
+  return {
+    activePalette: newPallete,
+    colorRanges,
+  };
+}
+
+export function withUpdatingColorRanges(
+  palettes: PaletteRegistry,
+  activePalette: PaletteConfigurationState['activePalette'],
+  dataBounds: DataBounds
 ) {
   return {
-    ...activePalette,
-    name: newName ?? activePalette.name,
-    params: {
-      ...activePalette.params,
-      ...newParams,
-    },
+    colorRanges: toColorRanges(
+      palettes,
+      activePalette.params?.colorStops || [],
+      activePalette,
+      dataBounds
+    ),
+    activePalette,
   };
 }
 

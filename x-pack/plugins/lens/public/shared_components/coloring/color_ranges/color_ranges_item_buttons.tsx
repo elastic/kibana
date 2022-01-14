@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Dispatch, useCallback } from 'react';
+import React, { Dispatch, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon } from '@elastic/eui';
@@ -15,7 +15,7 @@ import { ValueMinIcon } from '../../../assets/value_min';
 import { isLastItem } from './utils';
 
 import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
-import type { DataBounds } from '../types';
+import { ColorRangesContext } from '../palette_configuration';
 import type { CustomPaletteParams } from '../../../../common';
 import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
@@ -24,7 +24,6 @@ export interface ColorRangesItemButtonProps {
   colorRanges: ColorRange[];
   rangeType: CustomPaletteParams['rangeType'];
   continuity: PaletteContinuity;
-  dataBounds: DataBounds;
   dispatch: Dispatch<ColorRangesActions>;
   accessor: ColorRangeAccessor;
 }
@@ -43,9 +42,10 @@ const switchContinuity = (isLast: boolean, continuity: PaletteContinuity) => {
 };
 
 export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButtonProps) {
+  const { dataBounds, palettes } = useContext(ColorRangesContext);
   const onExecuteAction = useCallback(() => {
-    dispatch({ type: 'deleteColorRange', payload: { index } });
-  }, [dispatch, index]);
+    dispatch({ type: 'deleteColorRange', payload: { index, dataBounds, palettes } });
+  }, [dispatch, index, dataBounds, palettes ]);
 
   const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel', {
     defaultMessage: 'Delete',
@@ -65,11 +65,11 @@ export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButto
 
 export function ColorRangeEditButton({
   index,
-  dataBounds,
   continuity,
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
+  const { dataBounds, palettes } = useContext(ColorRangesContext);
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
@@ -77,9 +77,9 @@ export function ColorRangeEditButton({
 
     dispatch({
       type: 'updateContinuity',
-      payload: { isLast, continuity: newContinuity, dataBounds },
+      payload: { isLast, continuity: newContinuity, dataBounds, palettes },
     });
-  }, [isLast, dispatch, continuity, dataBounds]);
+  }, [isLast, dispatch, continuity, dataBounds, palettes]);
 
   const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
     defaultMessage: 'Edit',
@@ -98,10 +98,10 @@ export function ColorRangeEditButton({
 
 export function ColorRangeAutoDetectButton({
   continuity,
-  dataBounds,
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
+  const { dataBounds, palettes } = useContext(ColorRangesContext);
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
@@ -109,9 +109,9 @@ export function ColorRangeAutoDetectButton({
 
     dispatch({
       type: 'updateContinuity',
-      payload: { isLast, continuity: newContinuity, dataBounds },
+      payload: { isLast, continuity: newContinuity, dataBounds, palettes },
     });
-  }, [continuity, dataBounds, dispatch, isLast]);
+  }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
   const title = isLast
     ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {

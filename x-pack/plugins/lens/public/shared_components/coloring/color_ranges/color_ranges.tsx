@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, Dispatch } from 'react';
+import React, { useState, useEffect, Dispatch, useContext } from 'react';
 
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 
@@ -18,25 +18,26 @@ import {
 
 import type { CustomPaletteParamsConfig } from '../../../../common';
 import type { ColorRange } from './types';
-import type { PaletteConfigurationActions, DataBounds } from '../types';
+import type { PaletteConfigurationActions } from '../types';
 
 import { defaultPaletteParams } from '../constants';
+
+import { ColorRangesContext } from '../palette_configuration';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  dataBounds: DataBounds;
   showExtraActions?: boolean;
   dispatch: Dispatch<PaletteConfigurationActions>;
 }
 
 export function ColorRanges({
   colorRanges,
-  dataBounds,
   paletteConfiguration,
   showExtraActions = true,
   dispatch,
 }: ColorRangesProps) {
+  const { dataBounds } = useContext(ColorRangesContext);
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
   >({});
@@ -64,7 +65,6 @@ export function ColorRanges({
             colorRanges={colorRanges}
             continuity={continuity}
             rangeType={rangeType}
-            dataBounds={dataBounds}
             index={index}
             validation={colorRangesValidity[index]}
             accessor="start"
@@ -79,7 +79,6 @@ export function ColorRanges({
             colorRanges={colorRanges}
             continuity={continuity}
             rangeType={rangeType}
-            dataBounds={dataBounds}
             index={colorRanges.length - 1}
             validation={colorRangesValidity.last}
             accessor="end"
@@ -102,7 +101,6 @@ export function ColorRanges({
             )}
             shouldDisableDistribute={Boolean(colorRanges.length === 1)}
             shouldDisableReverse={Boolean(colorRanges.length === 1)}
-            dataBounds={dataBounds}
           />
         </EuiFlexItem>
       ) : null}

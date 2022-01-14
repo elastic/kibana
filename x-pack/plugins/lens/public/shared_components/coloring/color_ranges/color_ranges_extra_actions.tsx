@@ -6,18 +6,17 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, Dispatch } from 'react';
+import React, { useCallback, Dispatch, useContext } from 'react';
 import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
 import type { ColorRangesActions } from './types';
-import type { DataBounds } from '../types';
+import { ColorRangesContext } from '../palette_configuration';
 
 export interface ColorRangesExtraActionsProps {
   dispatch: Dispatch<ColorRangesActions>;
-  dataBounds: DataBounds;
   shouldDisableAdd?: boolean;
   shouldDisableReverse?: boolean;
   shouldDisableDistribute?: boolean;
@@ -25,25 +24,25 @@ export interface ColorRangesExtraActionsProps {
 
 export function ColorRangesExtraActions({
   dispatch,
-  dataBounds,
   shouldDisableAdd = false,
   shouldDisableReverse = false,
   shouldDisableDistribute = false,
 }: ColorRangesExtraActionsProps) {
+  const { dataBounds, palettes } = useContext(ColorRangesContext);
   const onAddColorRange = useCallback(() => {
     dispatch({
       type: 'addColorRange',
-      payload: { dataBounds },
+      payload: { dataBounds, palettes },
     });
   }, [dataBounds, dispatch]);
 
   const onReversePalette = useCallback(() => {
-    dispatch({ type: 'reversePalette' });
-  }, [dispatch]);
+    dispatch({ type: 'reversePalette', payload: { dataBounds, palettes } });
+  }, [dispatch, dataBounds, palettes]);
 
   const onDistributeEqually = useCallback(() => {
-    dispatch({ type: 'distributeEqually', payload: { dataBounds } });
-  }, [dataBounds, dispatch]);
+    dispatch({ type: 'distributeEqually', payload: { dataBounds, palettes } });
+  }, [dataBounds, dispatch, palettes]);
 
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={true}>

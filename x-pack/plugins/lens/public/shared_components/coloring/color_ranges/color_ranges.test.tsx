@@ -43,7 +43,6 @@ describe('Color Ranges', () => {
         continuity: 'none',
       },
       showExtraActions: true,
-      dataBounds: { min: 0, max: 200 },
       dispatch,
     };
   });
@@ -80,7 +79,7 @@ describe('Color Ranges', () => {
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'addColorRange',
-      payload: { dataBounds: { min: 0, max: 200 } },
+      payload: { dataBounds: { min: 0, max: 100 }, palettes: undefined },
     });
   });
 
@@ -94,7 +93,13 @@ describe('Color Ranges', () => {
 
     expect(dispatch).toHaveBeenNthCalledWith(1, {
       type: 'updateValue',
-      payload: { index: 0, value: ' 65', accessor: 'start' },
+      payload: {
+        index: 0,
+        value: ' 65',
+        accessor: 'start',
+        dataBounds: { min: 0, max: 100 },
+        palettes: undefined,
+      },
     });
 
     props.colorRanges = [
@@ -108,7 +113,13 @@ describe('Color Ranges', () => {
       firstInput.simulate('blur');
     });
 
-    expect(dispatch).toHaveBeenNthCalledWith(2, { type: 'sortColorRanges' });
+    expect(dispatch).toHaveBeenNthCalledWith(2, {
+      type: 'sortColorRanges',
+      payload: {
+        dataBounds: { min: 0, max: 100 },
+        palettes: undefined,
+      },
+    });
   });
 
   it('should reverse colors when user click "reverse"', () => {
@@ -126,7 +137,13 @@ describe('Color Ranges', () => {
 
     component.update();
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'reversePalette' });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'reversePalette',
+      payload: {
+        dataBounds: { min: 0, max: 100 },
+        palettes: undefined,
+      },
+    });
   });
 
   it('should distribute equally ranges when use click on "Distribute equally" button', () => {
@@ -147,7 +164,7 @@ describe('Color Ranges', () => {
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'distributeEqually',
-      payload: { dataBounds: { min: 0, max: 200 } },
+      payload: { dataBounds: { min: 0, max: 100 }, palettes: undefined },
     });
   });
 });

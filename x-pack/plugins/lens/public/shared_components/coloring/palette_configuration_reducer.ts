@@ -16,14 +16,14 @@ import {
   updateColorRangeValue,
   getValueForContinuity,
 } from './color_ranges/utils';
-import { CUSTOM_PALETTE, DEFAULT_CONTINUITY, DEFAULT_RANGE_TYPE } from './constants';
+import { DEFAULT_CONTINUITY, DEFAULT_RANGE_TYPE } from './constants';
 
 import {
   mergePaletteParams,
   updateRangeType,
-  toColorRanges,
   changeColorPalette,
-  updatePalette,
+  withUpdatingPalette,
+  withUpdatingColorRanges,
 } from './utils';
 
 import type { PaletteConfigurationState, PaletteConfigurationActions } from './types';
@@ -34,7 +34,7 @@ export const paletteConfigurationReducer: Reducer<
 > = (state, action) => {
   switch (action.type) {
     case 'updateContinuity': {
-      const { continuity, isLast, dataBounds } = action.payload;
+      const { continuity, isLast, dataBounds, palettes } = action.payload;
       const rangeType = state.activePalette.params?.rangeType ?? DEFAULT_RANGE_TYPE;
 
       const value = getValueForContinuity(
@@ -45,96 +45,90 @@ export const paletteConfigurationReducer: Reducer<
         dataBounds
       );
 
-      const updatedRangeLimit = isLast ? { rangeMax: value } : { rangeMin: value };
-
-      return {
-        activePalette: updatePalette(
-          state.activePalette,
-          {
-            continuity,
-            ...updatedRangeLimit,
-          },
-          CUSTOM_PALETTE
-        ),
-        colorRanges: updateColorRangeValue(
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        updateColorRangeValue(
           isLast ? state.colorRanges.length - 1 : 0,
           `${value}`,
           isLast ? 'end' : 'start',
           state.colorRanges
         ),
-      };
+        dataBounds,
+        continuity
+      );
     }
     case 'addColorRange': {
-      const { dataBounds } = action.payload;
-      return {
-        activePalette: updatePalette(state.activePalette, {}, CUSTOM_PALETTE),
-        colorRanges: addColorRange(
+      const { dataBounds, palettes } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        addColorRange(
           state.colorRanges,
           state.activePalette.params?.rangeType ?? DEFAULT_RANGE_TYPE,
           dataBounds
         ),
-      };
+        dataBounds
+      );
     }
     case 'reversePalette': {
-      return {
-        activePalette: updatePalette(state.activePalette, {}, CUSTOM_PALETTE),
-        colorRanges: reversePalette(state.colorRanges),
-      };
+      const { dataBounds, palettes } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        reversePalette(state.colorRanges),
+        dataBounds
+      );
     }
     case 'distributeEqually': {
-      const { dataBounds } = action.payload;
-      return {
-        activePalette: updatePalette(state.activePalette, {}, CUSTOM_PALETTE),
-        colorRanges: distributeEqually(
+      const { dataBounds, palettes } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        distributeEqually(
           state.colorRanges,
           state.activePalette.params?.rangeType,
           state.activePalette.params?.continuity ?? DEFAULT_CONTINUITY,
           dataBounds
         ),
-      };
+        dataBounds
+      );
     }
     case 'updateColor': {
-      const { index, color } = action.payload;
-      return {
-        activePalette: updatePalette(state.activePalette, {}, CUSTOM_PALETTE),
-        colorRanges: updateColorRangeColor(index, color, state.colorRanges),
-      };
+      const { index, color, palettes, dataBounds } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        updateColorRangeColor(index, color, state.colorRanges),
+        dataBounds
+      );
     }
     case 'sortColorRanges': {
-      const newColorRanges = sortColorRanges(state.colorRanges);
-      return {
-        activePalette: updatePalette(
-          state.activePalette,
-          {
-            rangeMax: newColorRanges[newColorRanges.length - 1].end,
-            rangeMin: newColorRanges[0].start,
-          },
-          CUSTOM_PALETTE
-        ),
-        colorRanges: newColorRanges,
-      };
+      const { dataBounds, palettes } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        sortColorRanges(state.colorRanges),
+        dataBounds
+      );
     }
     case 'updateValue': {
-      const { index, value, accessor } = action.payload;
-      const newColorRanges = updateColorRangeValue(index, value, accessor, state.colorRanges);
-      return {
-        activePalette: updatePalette(
-          state.activePalette,
-          {
-            rangeMax: newColorRanges[newColorRanges.length - 1].end,
-            rangeMin: newColorRanges[0].start,
-          },
-          CUSTOM_PALETTE
-        ),
-        colorRanges: newColorRanges,
-      };
+      const { index, value, accessor, dataBounds, palettes } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        updateColorRangeValue(index, value, accessor, state.colorRanges),
+        dataBounds
+      );
     }
     case 'deleteColorRange': {
-      const { index } = action.payload;
-      return {
-        activePalette: updatePalette(state.activePalette, {}, CUSTOM_PALETTE),
-        colorRanges: deleteColorRange(index, state.colorRanges),
-      };
+      const { index, dataBounds, palettes } = action.payload;
+      return withUpdatingPalette(
+        palettes,
+        state.activePalette,
+        deleteColorRange(index, state.colorRanges),
+        dataBounds
+      );
     }
     case 'updateRangeType': {
       const { dataBounds, palettes, rangeType } = action.payload;
@@ -148,28 +142,12 @@ export const paletteConfigurationReducer: Reducer<
 
       const newPalette = mergePaletteParams(state.activePalette, paletteParams);
 
-      return {
-        colorRanges: toColorRanges(
-          palettes,
-          paletteParams.colorStops || [],
-          newPalette,
-          dataBounds
-        ),
-        activePalette: newPalette,
-      };
+      return withUpdatingColorRanges(palettes, newPalette, dataBounds);
     }
     case 'changeColorPalette': {
       const { dataBounds, palettes, palette } = action.payload;
       const newPalette = changeColorPalette(palette, state.activePalette, palettes, dataBounds);
-      return {
-        colorRanges: toColorRanges(
-          palettes,
-          newPalette.params?.colorStops || [],
-          newPalette,
-          dataBounds
-        ),
-        activePalette: newPalette,
-      };
+      return withUpdatingColorRanges(palettes, newPalette, dataBounds);
     }
     default:
       throw new Error('wrong action');
