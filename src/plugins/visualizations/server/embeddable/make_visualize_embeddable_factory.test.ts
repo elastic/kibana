@@ -9,9 +9,10 @@
 import semverGte from 'semver/functions/gte';
 import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
+import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 
-describe('saved object migrations and embeddable migrations', () => {
-  test('should have same versions registered (>7.13.0)', () => {
+describe('embeddable migrations', () => {
+  test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {
     const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
       return semverGte(version, '7.13.1');
     });
@@ -23,5 +24,41 @@ describe('saved object migrations and embeddable migrations', () => {
     }
   });
 
-  // TODO - test embedded search source migrations
+  test('should properly apply a filter migration within a legacy visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const embeddedVisualizationDoc = {
+      visState: {
+        data: {
+          searchSource: {
+            type: 'some-type',
+            migrated: false,
+          },
+        },
+      },
+    };
+
+    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory({
+      [migrationVersion]: (searchSource: SerializedSearchSourceFields) => {
+        return {
+          ...searchSource,
+          migrated: true,
+        };
+      },
+    })()?.migrations;
+
+    const migratedVisualizationDoc =
+      embeddableMigrationVersions?.[migrationVersion](embeddedVisualizationDoc);
+
+    expect(migratedVisualizationDoc).toEqual({
+      visState: {
+        data: {
+          searchSource: {
+            type: 'some-type',
+            migrated: true,
+          },
+        },
+      },
+    });
+  });
 });
