@@ -181,7 +181,6 @@
         "map": {
           "properties": {
             "bounds": {
-              "tree": "quadtree",
               "type": "geo_shape"
             },
             "description": {
