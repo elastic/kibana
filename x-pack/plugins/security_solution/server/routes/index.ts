@@ -34,7 +34,6 @@ import { updateRulesBulkRoute } from '../lib/detection_engine/routes/rules/updat
 import { patchRulesBulkRoute } from '../lib/detection_engine/routes/rules/patch_rules_bulk_route';
 import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delete_rules_bulk_route';
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
-import { getRulesCountRoute } from '../lib/detection_engine/routes/rules/get_rules_counts_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
@@ -134,8 +133,6 @@ export const initRoutes = (
 
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
-
-  getRulesCountRoute(router, isRuleRegistryEnabled);
 
   findRuleStatusInternalRoute(router);
 
