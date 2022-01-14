@@ -22,6 +22,7 @@ export type {
   AgentClient,
   ESIndexPatternService,
   PackageService,
+  PackageClient,
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
