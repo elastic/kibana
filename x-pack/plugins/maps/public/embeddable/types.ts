@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
 import type { IndexPattern } from '../../../../../src/plugins/data/common';
 import {
   Embeddable,
@@ -16,9 +17,11 @@ import { Query, Filter, TimeRange } from '../../../../../src/plugins/data/common
 import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';
+import { CoreTheme } from '../../../../../src/core/public';
 
 export interface MapEmbeddableConfig {
   editable: boolean;
+  theme$?: Observable<CoreTheme>;
 }
 
 interface MapEmbeddableState {
