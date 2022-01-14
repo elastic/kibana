@@ -562,8 +562,7 @@ export class RulesClient {
         [id],
         {
           page: 1,
-          per_page: 10000,
-          start: parsedDateStart.toISOString(),
+          per_page: (numberOfExecutions ?? 60) * 2,
           end: dateNow.toISOString(),
           sort_order: 'desc',
         },
