@@ -606,8 +606,12 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: true,
       truncateText: false,
       'data-test-subj': 'alertsTableCell-successRatio',
-      render: (value: number, all: any) => {
-        return <span data-test-subj="successRatio">{getFormattedSuccessRatio(value)}</span>;
+      render: (value: number) => {
+        return (
+          <span data-test-subj="successRatio">
+            {value !== undefined ? getFormattedSuccessRatio(value) : 'N/A'}
+          </span>
+        );
       },
     },
     {

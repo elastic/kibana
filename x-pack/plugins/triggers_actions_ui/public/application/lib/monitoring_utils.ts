@@ -6,7 +6,7 @@
  */
 import numeral from '@elastic/numeral';
 
-export function getFormattedSuccessRatio(successRatio: number | undefined) {
+export function getFormattedSuccessRatio(successRatio: number) {
   const formatted = numeral(successRatio! * 100).format('0,0');
-  return formatted === 'NaN' || !successRatio ? 'N/A' : `${formatted}%`;
+  return `${formatted}%`;
 }

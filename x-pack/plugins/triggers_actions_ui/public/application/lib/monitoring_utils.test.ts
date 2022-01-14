@@ -9,9 +9,6 @@ import { getFormattedSuccessRatio } from './monitoring_utils';
 describe('monitoring_utils', () => {
   it('should return a decimal as a percent', () => {
     expect(getFormattedSuccessRatio(0.66)).toEqual('66%');
-  });
-
-  it('should return N/A for invalid numbers', () => {
-    expect(getFormattedSuccessRatio(undefined)).toEqual('N/A');
+    expect(getFormattedSuccessRatio(0.75345345345345)).toEqual('75%');
   });
 });
