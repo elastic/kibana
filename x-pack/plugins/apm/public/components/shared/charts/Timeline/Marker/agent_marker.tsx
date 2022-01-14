@@ -10,7 +10,7 @@ import React from 'react';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
-import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
+import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { Legend } from '../legend';
 
 const NameContainer = euiStyled.div`

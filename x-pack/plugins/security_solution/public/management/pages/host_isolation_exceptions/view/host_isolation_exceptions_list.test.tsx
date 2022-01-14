@@ -169,11 +169,10 @@ describe('When on the host isolation exceptions page', () => {
         // wait for the page render
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
-            filter:
-              '(exception-list-agnostic.attributes.item_id:(*this*does*not*exists*) OR exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
             http: mockedContext.coreStart.http,
+            filter: undefined,
             page: 1,
-            perPage: 10,
+            perPage: 1,
           })
         );
 
@@ -203,13 +202,13 @@ describe('When on the host isolation exceptions page', () => {
         );
         userEvent.click(option);
 
-        // wait for the page render and request
+        // wait for the page render
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
-            filter: `((exception-list-agnostic.attributes.tags:"policy:${firstPolicy.id}"))`,
             http: mockedContext.coreStart.http,
+            filter: undefined,
             page: 1,
-            perPage: 10,
+            perPage: 1,
           })
         );
 

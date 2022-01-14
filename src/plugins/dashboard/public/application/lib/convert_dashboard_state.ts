@@ -21,7 +21,7 @@ import {
 } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
-import { ControlGroupInput } from '../../../../presentation_util/public';
+import { ControlGroupInput } from '../../../../controls/public';
 
 interface SavedObjectToDashboardStateProps {
   version: string;

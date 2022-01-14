@@ -238,7 +238,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const getUxDataHelper = async () => {
       const { fetchUxOverviewDate, hasRumData } = await import(
-        './components/app/RumDashboard/ux_overview_fetchers'
+        './components/app/rum_dashboard/ux_overview_fetchers'
       );
       const { createCallApmApi } = await import(
         './services/rest/createCallApmApi'
@@ -370,7 +370,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-edit',
-        useLatestPackageVersion: true,
+        useLatestPackageVersion: false,
         Component: getLazyAPMPolicyEditExtension(),
       });
 
