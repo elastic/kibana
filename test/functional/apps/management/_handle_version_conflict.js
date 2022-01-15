@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await es.update({
         index: '.kibana',
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
@@ -79,7 +78,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({
         index: '.kibana',
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
