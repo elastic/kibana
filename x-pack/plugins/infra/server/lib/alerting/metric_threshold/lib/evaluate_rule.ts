@@ -220,7 +220,6 @@ const getMetric: (
       return groupedResults;
     }
     const { body: result } = await esClient.search({
-      // @ts-expect-error buckets_path is not compatible
       body: searchBody,
       index,
     });

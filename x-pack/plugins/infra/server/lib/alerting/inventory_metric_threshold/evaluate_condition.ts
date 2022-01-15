@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import { mapValues, last, first } from 'lodash';
+import { mapValues } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import {
-  isTooManyBucketsPreviewException,
-  // TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
-} from '../../../../common/alerting/metrics';
-// import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../../adapters/framework';
 import { Comparator, InventoryMetricConditions } from './types';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import {
-  InfraTimerangeInput,
-  // SnapshotRequest,
-  // SnapshotCustomMetricInput,
-} from '../../../../common/http_api';
+import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InfraSource } from '../../sources';
-// import { UNGROUPED_FACTORY_KEY } from '../common/utils';
-// import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
 import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';

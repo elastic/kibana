@@ -11,8 +11,6 @@ import {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
-import { LogQueryFields } from '../../../../services/log_queries/get_log_query_fields';
-import { InfraSource } from '../../../sources';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 
