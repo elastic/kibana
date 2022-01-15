@@ -161,7 +161,7 @@ When you upgrade to 8.0.0, use the following API changes:
 
 * Use `/epm/packages/{packageName}/{version}` instead of `/epm/packages/{pkgkey}`.
 
-* Use `items[]` (or `item`) instead of `response[]` in:
+* Use `items[]` instead of `response[]` in:
 +
 [source,text]
 --
