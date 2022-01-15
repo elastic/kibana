@@ -102,6 +102,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
         const { _source, _id, _index } = response.body;
 
+        // the test can be executed against a ES version with or without _type support
+        delete response.body._type;
         expect(response.body).to.eql({
           _index,
           _id,
