@@ -165,6 +165,8 @@ describe('Detection rules, EQL', () => {
       .invoke('text')
       .then((text) => {
         expect(text).contains(this.rule.name);
+        expect(text).contains(this.rule.severity.toLowerCase());
+        expect(text).contains(this.rule.riskScore);
       });
   });
 });
