@@ -12,9 +12,10 @@ import {
 } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import { isMetricRate, isCustomMetricRate } from './is_rate';
+import { isMetricRate, isCustomMetricRate, isInterfaceRateAgg } from './is_rate';
 import { createRateAggs } from './create_rate_aggs';
 import { createLogRateAggs } from './create_log_rate_aggs';
+import { createRateAggsWithInterface } from './create_rate_agg_with_interface';
 
 export const createMetricAggregations = (
   timerange: InfraTimerangeInput,
@@ -38,18 +39,19 @@ export const createMetricAggregations = (
     return createLogRateAggs(timerange, metric);
   } else {
     const metricAgg = inventoryModel.metrics.snapshot[metric];
-    if (isMetricRate(metricAgg)) {
-      // There are two types of rates, one with an interface and one without.
-      // First we get the one with an then pass that to the one without as a fallback.
-      const fieldWithInterface = get(
+    if (isInterfaceRateAgg(metricAgg)) {
+      const field = get(
         metricAgg,
         `${metric}_interfaces.aggregations.${metric}_interface_max.max.field`
       ) as unknown as string;
-      const field = get(
+      const interfaceField = get(
         metricAgg,
-        `${metric}_max.max.field`,
-        fieldWithInterface
+        `${metric}_interfaces.terms.field`
       ) as unknown as string;
+      return createRateAggsWithInterface(timerange, metric, field, interfaceField);
+    }
+    if (isMetricRate(metricAgg)) {
+      const field = get(metricAgg, `${metric}_max.max.field`) as unknown as string;
       return createRateAggs(timerange, metric, field);
     }
     return metricAgg;

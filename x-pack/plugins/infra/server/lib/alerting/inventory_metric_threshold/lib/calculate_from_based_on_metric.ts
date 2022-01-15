@@ -12,7 +12,7 @@ import {
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
 import { InventoryMetricConditions } from '../types';
-import { isMetricRate, isCustomMetricRate } from './is_rate';
+import { isRate } from './is_rate';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 
 export const calcualteFromBasedOnMetric = (
@@ -24,9 +24,7 @@ export const calcualteFromBasedOnMetric = (
 ) => {
   const inventoryModel = findInventoryModel(nodeType);
   const metricAgg = inventoryModel.metrics.snapshot[metric];
-  const metricIsRate = isMetricRate(metricAgg);
-  const customMetricIsRate = customMetric && isCustomMetricRate(customMetric);
-  if (metricIsRate || customMetricIsRate) {
+  if (isRate(metricAgg, customMetric)) {
     return to
       .clone()
       .subtract(condition.timeSize * 2, condition.timeUnit)
