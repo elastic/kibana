@@ -83,9 +83,8 @@ describe('SuperUser - Packs', () => {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       }).click();
       cy.getBySel('superDatePickerToggleQuickMenuButton').click();
+      cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('5');
       cy.getBySel('superDatePickerToggleRefreshButton').click();
-      cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('10');
-      cy.get('button').contains('Apply').click();
       cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
         `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
       );
