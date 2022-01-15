@@ -52,6 +52,8 @@ export const createRequest = (
   const metricAggregations = createMetricAggregations(timerange, nodeType, metric, customMetric);
 
   const request: ESSearchRequest = {
+    allow_no_indices: true,
+    ignore_unavailable: true,
     index,
     body: {
       size: 0,
