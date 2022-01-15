@@ -69,6 +69,18 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
         (event: IValidatedEvent) => event?.event?.action !== 'execute'
       );
 
+      // Verify unique executionId generated per `action:execute` grouping
+      const eventExecutionIdSet = new Set();
+      events.forEach((event) => {
+        if (event?.event?.action === 'execute') {
+          eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
+          expect(eventExecutionIdSet.size).to.equal(1);
+          eventExecutionIdSet.clear();
+        } else {
+          eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
+        }
+      });
+
       const currentAlertSpan: {
         alertId?: string;
         start?: string;
