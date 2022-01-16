@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import { DataView, DataViewField, DataViewsContract } from 'src/plugins/data_views/public';
 import { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -95,7 +95,7 @@ const field = {
 const services = {
   redirectAway: () => {},
   saveIndexPattern: async () => {},
-  indexPatternService: {} as DataViewsPublicPluginStart,
+  indexPatternService: {} as DataViewsContract,
 };
 
 describe('FieldEditor', () => {
@@ -202,7 +202,7 @@ describe('FieldEditor', () => {
           redirectAway: () => {},
           indexPatternService: {
             updateSavedObject: jest.fn(() => Promise.resolve()),
-          } as unknown as DataViewsPublicPluginStart,
+          } as unknown as DataViewsContract,
         },
       },
       mockContext

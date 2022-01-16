@@ -43,7 +43,7 @@ export function plugin() {
 export type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
-  DataViewsPublicPluginStart as DataViewsContract,
+  DataViewsContract,
 } from './types';
 
 // Export plugin after all other imports

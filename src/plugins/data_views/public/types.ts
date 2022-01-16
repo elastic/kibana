@@ -30,7 +30,9 @@ export interface DataViewsServicePublic extends DataViewsService {
   getCanSaveSync: () => boolean;
 }
 
+export type DataViewsContract = PublicMethodsOf<DataViewsServicePublic>;
+
 /**
- * Data plugin public Start contract
+ * Data views plugin public Start contract
  */
 export type DataViewsPublicPluginStart = PublicMethodsOf<DataViewsServicePublic>;
