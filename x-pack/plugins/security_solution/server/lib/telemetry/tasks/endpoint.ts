@@ -7,10 +7,12 @@
 
 import { Logger } from 'src/core/server';
 import { TelemetryEventsSender } from '../sender';
-import {
+import type {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
+  ESClusterInfo,
+  ESLicense,
 } from '../types';
 import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
@@ -51,6 +53,20 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       if (!taskExecutionPeriod.last) {
         throw new Error('last execution timestamp is required');
       }
+
+      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+        receiver.fetchClusterInfo(),
+        receiver.fetchLicenseInfo(),
+      ]);
+
+      const clusterInfo =
+        clusterInfoPromise.status === 'fulfilled'
+          ? clusterInfoPromise.value
+          : ({} as ESClusterInfo);
+      const licenseInfo =
+        licenseInfoPromise.status === 'fulfilled'
+          ? licenseInfoPromise.value
+          : ({} as ESLicense | undefined);
 
       const endpointData = await fetchEndpointData(
         receiver,
@@ -199,6 +215,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
           return {
             '@timestamp': taskExecutionPeriod.current,
+            cluster_uuid: clusterInfo.cluster_uuid,
+            cluster_name: clusterInfo.cluster_name,
+            license_id: licenseInfo?.uid,
             endpoint_id: endpointAgentId,
             endpoint_version: endpoint.endpoint_version,
             endpoint_package_version: policyConfig?.package?.version || null,

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 import { getDefaultSort } from '../../lib/get_default_sort';
@@ -16,7 +16,7 @@ interface Props {
   columns: string[];
   defaultSortOrder: string;
   hideTimeColumn: boolean;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   isShortDots: boolean;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;

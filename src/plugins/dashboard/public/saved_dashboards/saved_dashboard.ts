@@ -18,7 +18,7 @@ import { extractReferences, injectReferences } from '../../common/saved_dashboar
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
 
-import { ControlStyle } from '../../../presentation_util/public';
+import { ControlStyle } from '../../../controls/public';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;

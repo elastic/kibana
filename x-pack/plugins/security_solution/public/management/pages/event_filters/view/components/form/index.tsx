@@ -19,6 +19,7 @@ import {
   EuiSuperSelectOption,
   EuiText,
   EuiHorizontalRule,
+  EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -36,7 +37,15 @@ import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/
 import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
-import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
+import {
+  NAME_LABEL,
+  NAME_ERROR,
+  DESCRIPTION_LABEL,
+  DESCRIPTION_PLACEHOLDER,
+  NAME_PLACEHOLDER,
+  OS_LABEL,
+  RULE_NAME,
+} from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 import { ABOUT_EVENT_FILTERS } from '../../translations';
@@ -134,6 +143,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
                   entry: {
                     ...arg.exceptionItems[0],
                     name: exception?.name ?? '',
+                    description: exception?.description ?? '',
                     comments: exception?.comments ?? [],
                     os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
                     tags: exception?.tags ?? [],
@@ -159,6 +169,21 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           payload: {
             entry: { ...exception, name },
             hasNameError: !name,
+          },
+        });
+      },
+      [dispatch, exception]
+    );
+
+    const handleOnDescriptionChange = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (!exception) return;
+        setHasFormChanged(true);
+        const description = e.target.value.toString().trim();
+        dispatch({
+          type: 'eventFiltersChangeForm',
+          payload: {
+            entry: { ...exception, description },
           },
         });
       },
@@ -229,6 +254,24 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [hasNameError, exception?.name, handleOnChangeName, hasBeenInputNameVisited]
     );
 
+    const descriptionInputMemo = useMemo(
+      () => (
+        <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
+          <EuiTextArea
+            id="eventFiltersFormInputDescription"
+            placeholder={DESCRIPTION_PLACEHOLDER}
+            defaultValue={exception?.description ?? ''}
+            onChange={handleOnDescriptionChange}
+            fullWidth
+            data-test-subj="eventFilters-form-description-input"
+            aria-label={DESCRIPTION_PLACEHOLDER}
+            maxLength={256}
+          />
+        </EuiFormRow>
+      ),
+      [exception?.description, handleOnDescriptionChange]
+    );
+
     const osInputMemo = useMemo(
       () => (
         <EuiFormRow label={OS_LABEL} fullWidth>
@@ -285,9 +328,10 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           </EuiText>
           <EuiSpacer size="m" />
           {nameInputMemo}
+          {descriptionInputMemo}
         </>
       ),
-      [nameInputMemo]
+      [nameInputMemo, descriptionInputMemo]
     );
 
     const criteriaSection = useMemo(

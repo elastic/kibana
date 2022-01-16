@@ -19,7 +19,6 @@ import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
@@ -74,14 +73,7 @@ export const readRulesRoute = (
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          if (currentStatus != null && rule.executionStatus.status === 'error') {
-            currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt =
-              rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate =
-              rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = RuleExecutionStatus.failed;
-          }
+
           const transformed = transform(
             rule,
             currentStatus,
