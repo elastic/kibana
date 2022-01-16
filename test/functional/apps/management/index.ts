@@ -41,6 +41,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     describe('', function () {
       this.tags('ciGroup8');
+
       loadTestFile(require.resolve('./_index_pattern_filter'));
       loadTestFile(require.resolve('./_scripted_fields_filter'));
       loadTestFile(require.resolve('./_import_objects'));
