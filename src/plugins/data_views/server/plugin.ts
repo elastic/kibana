@@ -43,7 +43,7 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
-    let dataViewRestCounter: UsageCounter;
+    let dataViewRestCounter: UsageCounter = { incrementCounter: (any) => {} };
     if (usageCollection) {
       dataViewRestCounter = usageCollection.createUsageCounter('dataViewsRest');
     }

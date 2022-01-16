@@ -74,7 +74,7 @@ export function registerRoutes(
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
-  dataViewRestCounter?: UsageCounter
+  dataViewRestCounter: UsageCounter
 ) {
   const parseMetaFields = (metaFields: string | string[]) => {
     let parsedFields: string[] = [];
@@ -134,7 +134,7 @@ export function registerRoutes(
   registerUpdateRuntimeFieldRouteLegacy(router, getStartServices, dataViewRestCounter);
   // ###
 
-  registerFieldForWildcard(router, getStartServices, dataViewRestCounter);
+  registerFieldForWildcard(router, getStartServices);
 
   router.get(
     {
