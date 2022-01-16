@@ -11,7 +11,11 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  IRouter,
+  RequestHandlerContext,
 } from '../../../../src/core/server';
+// import type { IRouter, RequestHandlerContext } from 'src/core/server';
+
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type {
   CspServerPluginSetup,
@@ -20,6 +24,8 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
+
+interface HandlerContext extends RequestHandlerContext, CspServerPluginStartDeps {}
 
 export class CspPlugin
   implements
@@ -42,7 +48,7 @@ export class CspPlugin
     this.logger.debug('csp: Setup');
     const router = core.http.createRouter();
 
-    defineRoutes(router);
+    defineRoutes(router as IRouter<HandlerContext>);
 
     return {};
   }

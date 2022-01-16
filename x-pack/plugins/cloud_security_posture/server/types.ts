@@ -10,6 +10,8 @@ import type {
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 
+import type { FleetStartContract } from '../../fleet/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -27,4 +29,6 @@ export interface CspServerPluginStartDeps {
   data: DataPluginStart;
 
   // optional
+
+  fleet: FleetStartContract;
 }

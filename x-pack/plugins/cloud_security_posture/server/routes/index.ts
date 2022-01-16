@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import { defineGetStatsRoute } from './stats/stats';
+import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineFindingsIndexRoute as defineGetFindingsIndexRoute } from './findings/findings';
-import type { IRouter } from '../../../../../src/core/server';
+import { CspServerPluginStartDeps } from '../types';
 
-export function defineRoutes(router: IRouter) {
+interface HandlerContext extends RequestHandlerContext, CspServerPluginStartDeps {}
+
+export function defineRoutes(router: IRouter<HandlerContext>) {
   defineGetStatsRoute(router);
   defineGetFindingsIndexRoute(router);
+  defineGetBenchmarksRoute(router);
 }

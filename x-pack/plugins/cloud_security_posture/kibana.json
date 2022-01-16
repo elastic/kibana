@@ -9,6 +9,7 @@
   "description": "the cloud security posture plugin",
   "server": true,
   "ui": true,
+  "optionalPlugins": ["fleet"],
   "requiredPlugins": ["navigation", "data"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredBundles": ["kibanaReact", "fleet"]
 }
