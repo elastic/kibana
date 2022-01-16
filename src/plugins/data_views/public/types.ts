@@ -26,7 +26,11 @@ export interface DataViewsPublicStartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataViewsPublicPluginSetup {}
 
+export interface DataViewsServicePublic extends DataViewsService {
+  getCanSaveSync: () => boolean;
+}
+
 /**
  * Data plugin public Start contract
  */
-export type DataViewsPublicPluginStart = PublicMethodsOf<DataViewsService>;
+export type DataViewsPublicPluginStart = PublicMethodsOf<DataViewsServicePublic>;

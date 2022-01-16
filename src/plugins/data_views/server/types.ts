@@ -17,14 +17,12 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DataViewsService } from '../common';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 
-type DataViewsServiceServer = Omit<DataViewsService, 'getCanSaveSync'>;
-
 type ServiceFactory = (
   savedObjectsClient: SavedObjectsClientContract,
   elasticsearchClient: ElasticsearchClient,
   request?: KibanaRequest,
   byPassCapabilities?: boolean
-) => Promise<DataViewsServiceServer>;
+) => Promise<DataViewsService>;
 export interface DataViewsServerPluginStart {
   dataViewsServiceFactory: ServiceFactory;
   /**
