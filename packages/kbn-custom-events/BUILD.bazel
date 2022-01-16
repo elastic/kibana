@@ -8,6 +8,7 @@ TYPES_PKG_REQUIRE_NAME = "@types/kbn__custom-events"
 
 SOURCE_FILES = glob(
   [
+    "src/fullstory.js",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.scss",
