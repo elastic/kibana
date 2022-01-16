@@ -1,0 +1,133 @@
+# Todo delete before merge to elastic/kibana
+name: Publish csp Kibana docker image
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  KIBANA_REGISTRY: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com
+  KIBANA_IMAGE_BASE: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com/kibana
+  KIBANA_IMAGE: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com/kibana:${{ github.sha }}
+  AWS_ECR_KEY: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+  AWS_ECR_SECRET: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+  AWS_ECR_REGION: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
+
+jobs:
+  publish_image_kibana:
+    name: Push KIBANA Docker image to ECR
+    runs-on: ubuntu-latest
+    # timeout-minutes: 55
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Login to ECR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.KIBANA_REGISTRY }}
+          username: ${{ env.AWS_ECR_KEY }}
+          password: ${{ env.AWS_ECR_SECRET }}
+      
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+
+      # - name: Cache Node Modules
+      #   id: cache-node-modules
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: node_modules
+      #     key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Yarn bootstrap
+        run: yarn kbn bootstrap
+
+# Currently has errors added to pre-merge CI
+      # - name: check TS
+      #   run: node scripts/type_check
+
+      # - name: eslint
+      #   run: node scripts/eslint --no-cache
+      
+      - name: Build Kibana Docker
+        run: |
+          node scripts/build --docker-images --skip-docker-ubi --skip-docker-cloud -v
+# TODO Add cache for node & bootstrap actions to try speed things up. https://www.jonathan-wilkinson.com/github-actions-cache-everything
+# https://docs.github.com/en/actions/advanced-guides/caching-dependencies-to-speed-up-workflows 
+
+      - name: Push to ECR
+        id: ecr
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ env.AWS_ECR_KEY }}
+          secret-access-key: ${{ env.AWS_ECR_SECRET }}
+          region: ${{ env.AWS_ECR_REGION }}
+          local-image: docker.elastic.co/kibana/kibana:8.1.0-SNAPSHOT 
+          image: kibana:${{ github.sha }}, kibana:csp-latest
+      # - name: Notify job failure
+      #   if: failure()
+      #   uses: archive/github-actions-slack@v1.0.3
+      #   with:
+      #     slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+      #     slack-channel: deployment-notifications
+      #     slack-text: |
+      #       Hello @here !
+      #       :no_entry: Deployment to ${{ env.KIBANA_CLUSTER }} cluster failed :no_entry:
+      #       :no_entry: :no_entry: Building KIBANA docker image failed :no_entry: :no_entry:
+      #       *Please review the logs of the failed deployment*
+      #       repo: ${{ github.repository }}
+      #       branch: ${{ github.ref }}
+      #       author: *${{ github.event.head_commit.author.name }}*
+      #       commit desc: "'${{ github.event.head_commit.message }}'' --> '${{ github.event.head_commit.url }}''"
+      #       gitflow action: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  # deploy_demo_env:
+  #   name: Deploy to demo environment
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 25
+  #   needs: [publish_image_kibana, publish_image_agent]
+  #   env:
+  #     REGION: eu-west-1
+  #     ENVIRONMENT: dev
+  #     KIBANA_CLUSTER: dev-eks
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v2
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+  #         aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+  #         aws-region: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
+
+  #     - name: Generate kubeconfig
+  #       id: generate-kubeconfig
+  #       run: |-
+  #     - name: setup python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.9
+
+  #     - name: Send Slack message (deployment-notification) on new deployment
+  #       if: success()
+  #       uses: archive/github-actions-slack@v1.0.3
+  #       with:
+  #         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+  #         slack-channel: deployment-notifications
+  #         slack-text: |
+  #           Hello @here !
+  #           :fire: New Deployment to cluster ${{ env.KIBANA_CLUSTER }} :fire:
+  #           repo: ${{ github.repository }}
+  #           branch: ${{ github.ref }}
+  #           author: *${{ github.event.head_commit.author.name }}*
+  #           commit desc: "'${{ github.event.head_commit.message }}'' --> '${{ github.event.head_commit.url }}''"
+
