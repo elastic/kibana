@@ -52,8 +52,8 @@ export default function ({ getPageObjects, getService }) {
           geometryFieldName: 'geometry',
           index: 'geo_shapes*',
           requestBody:
-            '(_source:!(geometry),docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))',
-        });
+            '(_source:!f,docvalue_fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10001,stored_fields:!(geometry,prop1))'
+          });
       });
 
       it('should have fill layer', async () => {
