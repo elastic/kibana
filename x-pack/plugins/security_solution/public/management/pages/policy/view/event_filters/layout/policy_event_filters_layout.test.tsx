@@ -11,12 +11,14 @@ import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
+import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 
 let render: () => ReturnType<AppContextTestRender['render']>;
 let mockedContext: AppContextTestRender;
@@ -34,12 +36,12 @@ describe('Policy event filters layout', () => {
 
   afterEach(() => reactTestingLibrary.cleanup());
 
-  it('should renders layout with a loader', async () => {
+  it('should render layout with a loader', async () => {
     const component = render();
     expect(component.getByTestId('policy-event-filters-loading-spinner')).toBeTruthy();
   });
 
-  it('should renders layout with no assigned event filters data when there are not event filters', async () => {
+  it('should render layout with no assigned event filters data when there are not event filters', async () => {
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );
@@ -48,7 +50,7 @@ describe('Policy event filters layout', () => {
     expect(await component.findByTestId('policy-event-filters-empty-unexisting')).not.toBeNull();
   });
 
-  it('should renders layout with no assigned event filters data when there are event filters', async () => {
+  it('should render layout with no assigned event filters data when there are event filters', async () => {
     mockedApi.responseProvider.eventFiltersList.mockImplementation(
       // @ts-expect-error
       (args) => {
@@ -69,7 +71,7 @@ describe('Policy event filters layout', () => {
     expect(await component.findByTestId('policy-event-filters-empty-unassigned')).not.toBeNull();
   });
 
-  it('should renders layout with data', async () => {
+  it('should render layout with data', async () => {
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(3)
     );
@@ -79,5 +81,48 @@ describe('Policy event filters layout', () => {
     expect((await component.findByTestId('policy-event-filters-layout-about')).textContent).toMatch(
       '3 event filters'
     );
+  });
+
+  it('should hide `Assign event filters to policy` on empty state with unassigned policies when downgraded to a gold or below license', () => {
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: false,
+    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(0)
+    );
+
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath(policyItem.id));
+    expect(component.queryByTestId('assign-event-filter-button')).toBeNull();
+  });
+
+  it('should hide the `Assign event filters to policy` button license is downgraded to gold or below', () => {
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: false,
+    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(5)
+    );
+
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath(policyItem.id));
+
+    expect(component.queryByTestId('eventFilters-assign-button')).toBeNull();
+  });
+
+  it('should hide the `Assign event filters` flyout when license is downgraded to gold or below', () => {
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: false,
+    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(2)
+    );
+
+    const component = render();
+    mockedContext.history.push(
+      `${getPolicyDetailsArtifactsListPath(policyItem.id)}/eventFilters?show=list`
+    );
+
+    expect(component.queryByTestId('eventFilters-assign-flyout')).toBeNull();
   });
 });

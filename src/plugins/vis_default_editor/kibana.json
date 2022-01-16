@@ -2,7 +2,7 @@
   "id": "visDefaultEditor",
   "version": "kibana",
   "ui": true,
-  "optionalPlugins": ["visualize"],
+  "optionalPlugins": ["visualizations"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "data", "fieldFormats", "discover", "esUiShared"],
   "owner": {
     "name": "Vis Editors",

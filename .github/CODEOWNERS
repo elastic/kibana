@@ -11,7 +11,7 @@
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Virtual teams
-/x-pack/plugins/rule_registry/ @elastic/rac
+/x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
@@ -313,9 +313,11 @@
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
+/x-pack/test/api_integration/apis/spaces/ @elastic/kibana-security
 /x-pack/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/test/functional/apps/security/ @elastic/kibana-security
+/x-pack/test/functional/apps/spaces/ @elastic/kibana-security
 /x-pack/test/security_api_integration/ @elastic/kibana-security
 /x-pack/test/security_functional/ @elastic/kibana-security
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
@@ -324,47 +326,25 @@
 /examples/preboot_example/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
-# Kibana Alerting Services
-/x-pack/plugins/alerting/ @elastic/kibana-alerting-services
-/x-pack/plugins/actions/ @elastic/kibana-alerting-services
-/x-pack/plugins/event_log/ @elastic/kibana-alerting-services
-/x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
-/x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
-/x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/kibana-alerting-services
-/x-pack/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
-/x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
-/x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
-/docs/user/alerting/ @elastic/kibana-alerting-services
-/docs/management/connectors/ @elastic/kibana-alerting-services
-#CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
+# Response Ops team
+/x-pack/plugins/alerting/ @elastic/response-ops
+/x-pack/plugins/actions/ @elastic/response-ops
+/x-pack/plugins/event_log/ @elastic/response-ops
+/x-pack/plugins/task_manager/ @elastic/response-ops
+/x-pack/test/alerting_api_integration/ @elastic/response-ops
+/x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
+/x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
+/docs/user/alerting/ @elastic/response-ops
+/docs/management/connectors/ @elastic/response-ops
+#CC# /x-pack/plugins/stack_alerts @elastic/response-ops
+/x-pack/plugins/cases @elastic/response-ops
+/x-pack/test/cases_api_integration @elastic/response-ops
 
 # Enterprise Search
-# Shared
-/x-pack/plugins/enterprise_search/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/common/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/enterprise_search/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/shared/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/__mocks__/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/lib/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/__mocks__/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/enterprise_search/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/lib/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/routes/enterprise_search/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/saved_objects/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
-# App Search
-/x-pack/plugins/enterprise_search/public/applications/app_search/ @elastic/app-search-frontend
-/x-pack/plugins/enterprise_search/server/routes/app_search/ @elastic/app-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/app_search/ @elastic/app-search-frontend
-/x-pack/plugins/enterprise_search/server/saved_objects/app_search/ @elastic/app-search-frontend
-# Workplace Search
-/x-pack/plugins/enterprise_search/public/applications/workplace_search/ @elastic/workplace-search-frontend
-/x-pack/plugins/enterprise_search/server/routes/workplace_search/ @elastic/workplace-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/workplace_search/ @elastic/workplace-search-frontend
-/x-pack/plugins/enterprise_search/server/saved_objects/workplace_search/ @elastic/workplace-search-frontend
 
 # Management Experience - Deployment Management
 /src/plugins/dev_tools/ @elastic/platform-deployment-management
@@ -403,9 +383,7 @@
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution sub teams
-/x-pack/plugins/cases @elastic/security-threat-hunting
 /x-pack/plugins/timelines @elastic/security-threat-hunting
-/x-pack/test/cases_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
