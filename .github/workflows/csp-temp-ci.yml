@@ -1,0 +1,32 @@
+# Todo !! delete before merge to elastic/kibana!!
+name: CSP temp Pre Merge CI
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Setup Node
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: kbn bootstrap
+        run: yarn kbn bootstrap
+
+      - name: check TS
+        run: node scripts/type_check
+
+      - name: eslint
+        run: node scripts/eslint --no-cache
