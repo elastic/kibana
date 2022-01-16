@@ -215,6 +215,12 @@ Config:
 
 _Note: backslashes must be escaped._
 
+#### `config-file`
+
+Custom path to project config file (.backportrc.json).
+
+CLI: `--config-file /my/project/.backportrc.json`
+
 #### `dir`
 
 Clone repository into custom directory
@@ -374,13 +380,12 @@ Config:
 
 #### `prDescription`
 
-Text that will be appended to the description of the target pull request
+Title for the target pull request
+Template values:
 
-For people who often need to add the same description to PRs they can create a bash alias:
-
-```sh
-alias backport-skip-ci='backport --prDescription "[skip-ci]"'
-```
+- `{targetBranch}`: Branch the backport PR will be targeting
+- `{commitMessages}`: Message of backported commit. For multiple commits the messages will be separated by pipes (`|`).
+- `{defaultPrDescription}`: The default PR description. Using this makes it easy to append and prepend text to the existing description
 
 CLI: `--pr-description "<text>"`, `--description "<text>"`
 
@@ -388,8 +393,15 @@ Config:
 
 ```json
 {
-  "prDescription": "skip-ci"
+  "prDescription": "Backports the following commits to {targetBranch}:\n{commitMessages}"
 }
+```
+
+**Example**
+For people who often want to append the same text, they can create a bash alias:
+
+```sh
+alias backport-skip-ci='backport --pr-description "{defaultPrDescription} [skip-ci]"'
 ```
 
 #### `prFilter`

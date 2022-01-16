@@ -1,12 +1,13 @@
 import chalk from 'chalk';
 import ora from 'ora';
+import yargs from 'yargs';
 import { ConfigFileOptions } from './options/ConfigOptions';
 import { getOptions, ValidConfigOptions } from './options/options';
 import { runSequentially, Result } from './runSequentially';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { createStatusComment } from './services/github/v3/createStatusComment';
-import { consoleLog, logger } from './services/logger';
+import { consoleLog, initLogger, logger } from './services/logger';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { getCommits } from './ui/getCommits';
 import { getTargetBranches } from './ui/getTargetBranches';
@@ -24,17 +25,23 @@ export type BackportResponse =
       error: Error;
     };
 
-export async function main(
-  argv: string[],
-  optionsFromModule?: ConfigFileOptions
+export async function backportRun(
+  processArgs: string[],
+  optionsFromModule: ConfigFileOptions = {}
 ): Promise<BackportResponse> {
+  const argv = yargs(processArgs).argv as any as ConfigFileOptions;
+  const ci = argv.ci ?? optionsFromModule.ci;
+  const logFilePath = argv.logFilePath ?? optionsFromModule.logFilePath;
+
+  initLogger({ ci, logFilePath });
+
   const spinner = ora().start('Initializing...');
 
   let options: ValidConfigOptions | null = null;
   let commits: Commit[] = [];
 
   try {
-    options = await getOptions(argv, optionsFromModule);
+    options = await getOptions(processArgs, optionsFromModule);
     spinner.stop();
     commits = await getCommits(options);
     const targetBranches = await getTargetBranches(options, commits);
@@ -80,7 +87,11 @@ export async function main(
       );
 
       consoleLog(
-        chalk.italic(`For additional details see the logs: ${getLogfilePath()}`)
+        chalk.italic(
+          `For additional details see the logs: ${getLogfilePath({
+            logFilePath,
+          })}`
+        )
       );
 
       // log file

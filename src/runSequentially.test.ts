@@ -67,9 +67,7 @@ describe('runSequentially', () => {
       multipleBranches: false,
       multipleCommits: false,
       noVerify: true,
-      prDescription: 'myPrDescription',
       prFilter: undefined,
-      prTitle: 'myPrTitle {targetBranch} {commitMessages}',
       publishStatusComment: true,
       pullNumber: undefined,
       repoName: 'kibana',
@@ -145,11 +143,9 @@ describe('runSequentially', () => {
        - #55
 
       ### Questions ?
-      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-
-      myPrDescription",
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
           "head": "sqren_authenticated:backport/7.x/pr-55",
-          "title": "myPrTitle 7.x My commit message",
+          "title": "[7.x] My commit message",
         },
       ]
     `);

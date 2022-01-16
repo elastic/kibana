@@ -3,10 +3,10 @@ import { excludeUndefined } from '../utils/excludeUndefined';
 
 export type OptionsFromCliArgs = ReturnType<typeof getOptionsFromCliArgs>;
 export function getOptionsFromCliArgs(
-  argv: readonly string[],
+  processArgs: readonly string[],
   { exitOnError = true }: { exitOnError?: boolean } = {}
 ) {
-  const yargsInstance = yargs(argv)
+  const yargsInstance = yargs(processArgs)
     .parserConfiguration({
       'strip-dashed': true,
       'strip-aliased': true,
@@ -66,6 +66,11 @@ export function getOptionsFromCliArgs(
       conflicts: ['noCherrypickRef'],
     })
 
+    .option('configFile', {
+      description: 'Path to project config',
+      type: 'string',
+    })
+
     .option('since', {
       description: 'ISO-8601 date for filtering commits',
       type: 'string',
@@ -122,6 +127,12 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
+    .option('logFilePath', {
+      hidden: true,
+      description: `Path to log file`,
+      type: 'string',
+    })
+
     .option('mainline', {
       description:
         'Parent id of merge commit. Defaults to 1 when supplied without arguments',
@@ -130,7 +141,7 @@ export function getOptionsFromCliArgs(
         if (mainline === undefined) {
           // return 1 if `--mainline` is given without a value
           // return undefined if --mainline is not supplied at all
-          return argv.includes('--mainline') ? 1 : undefined;
+          return processArgs.includes('--mainline') ? 1 : undefined;
         }
 
         // use specified mainline parent

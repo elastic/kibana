@@ -52,7 +52,6 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         assignees: [] as string[],
         authenticatedUsername: 'sqren_authenticated',
         fork: true,
-        prDescription: 'myPrSuffix',
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
@@ -110,9 +109,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
          - #2000
 
         ### Questions ?
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-
-        myPrSuffix",
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren_authenticated:backport/6.x/pr-1000_pr-2000",
             "title": "[6.x] My original commit message (#1000) | My other commit message (#2000)",
           },
@@ -209,8 +206,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
          - My original commit message (mySha)
 
         ### Questions ?
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-        ",
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren_authenticated:backport/6.x/commit-mySha",
             "title": "[6.x] My original commit message",
           },
@@ -292,8 +288,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
          - My original commit message (mySha)
 
         ### Questions ?
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-        ",
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren_authenticated:backport/6.x/commit-mySha",
             "title": "[6.x] My original commit message",
           },

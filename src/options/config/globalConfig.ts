@@ -1,20 +1,22 @@
 import makeDir from 'make-dir';
+import { HandledError } from '../../services/HandledError';
 import { getBackportDirPath, getGlobalConfigPath } from '../../services/env';
 import { chmod, writeFile } from '../../services/fs-promisified';
 import { ConfigFileOptions } from '../ConfigOptions';
 import { readConfigFile } from './readConfigFile';
 
 export async function getGlobalConfig(): Promise<ConfigFileOptions> {
-  await createGlobalConfigAndFolderIfNotExist();
   const globalConfigPath = getGlobalConfigPath();
+  await createGlobalConfigAndFolderIfNotExist(globalConfigPath);
   return readConfigFile(globalConfigPath);
 }
 
-export async function createGlobalConfigAndFolderIfNotExist() {
+export async function createGlobalConfigAndFolderIfNotExist(
+  globalConfigPath: string
+) {
   // create .backport folder
   await makeDir(getBackportDirPath());
 
-  const globalConfigPath = getGlobalConfigPath();
   const configTemplate = getConfigTemplate();
   const didCreate = await createGlobalConfigIfNotExist(
     globalConfigPath,
@@ -39,11 +41,21 @@ export async function createGlobalConfigIfNotExist(
     });
     return true;
   } catch (e) {
+    // ignore error if file already exists
     const FILE_ALREADY_EXISTS = 'EEXIST';
-    if (e.code !== FILE_ALREADY_EXISTS) {
-      throw e;
+    if (e.code === FILE_ALREADY_EXISTS) {
+      return false;
     }
-    return false;
+
+    // handle error if folder does not exist
+    const FOLDER_NOT_EXISTS = 'ENOENT';
+    if (e.code === FOLDER_NOT_EXISTS) {
+      throw new HandledError(
+        `The .backport folder (${globalConfigPath}) does not exist. `
+      );
+    }
+
+    throw e;
   }
 }
 

@@ -1,9 +1,6 @@
 #!/usr/bin/env node
-import { main } from './main';
-import { initLogger } from './services/logger';
-const args = process.argv.slice(2);
-
-initLogger();
+import { backportRun } from './backportRun';
+const processArgs = process.argv.slice(2);
 
 // this is the entrypoint when running from command line
-main(args);
+backportRun(processArgs);

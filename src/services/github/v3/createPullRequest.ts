@@ -89,8 +89,6 @@ export function getPullRequestBody({
   commits: Commit[];
   targetBranch: string;
 }) {
-  const bodySuffix = options.prDescription ? `\n${options.prDescription}` : '';
-
   const commitMessages = commits
     .map((c) => {
       const message = c.pullNumber
@@ -101,14 +99,18 @@ export function getPullRequestBody({
     })
     .join('\n');
 
-  return `# Backport
+  const defaultPrDescription = `# Backport
 
 This is an automatic backport to \`${targetBranch}\` of:
 ${commitMessages}
 
 ### Questions ?
-Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-${bodySuffix}`;
+Please refer to the [Backport tool documentation](https://github.com/sqren/backport)`;
+
+  return (options.prDescription ?? defaultPrDescription)
+    .replace('{targetBranch}', targetBranch)
+    .replace('{commitMessages}', commitMessages)
+    .replace('{defaultPrDescription}', defaultPrDescription);
 }
 
 export function getTitle({
@@ -124,7 +126,9 @@ export function getTitle({
     .map((commit) => getFirstLine(commit.originalMessage))
     .join(' | ');
 
-  return (options.prTitle ?? '[{targetBranch}] {commitMessages}')
+  const defaultPrTitle = '[{targetBranch}] {commitMessages}';
+
+  return (options.prTitle ?? defaultPrTitle)
     .replace('{targetBranch}', targetBranch)
     .replace('{commitMessages}', commitMessages)
     .slice(0, 240);

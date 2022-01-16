@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { BackportResponse } from '../../../main';
+import { BackportResponse } from '../../../backportRun';
 import { ValidConfigOptions } from '../../../options/options';
 import { HandledError } from '../../HandledError';
 import { createStatusComment, getCommentBody } from './createStatusComment';

@@ -50,7 +50,7 @@ describe('config', () => {
   });
 
   describe('createGlobalConfigIfNotExist', () => {
-    it('should create config and succeed', async () => {
+    it("should create config if it does't exist", async () => {
       jest.spyOn(fs, 'writeFile').mockResolvedValueOnce(undefined);
       const didCreate = await createGlobalConfigIfNotExist(
         '/path/to/globalConfig',
@@ -72,11 +72,26 @@ describe('config', () => {
       jest.spyOn(fs, 'writeFile').mockRejectedValueOnce(err);
 
       const didCreate = await createGlobalConfigIfNotExist(
-        'myPath',
+        '/path/to/global/config.json',
         'myConfigTemplate'
       );
 
       expect(didCreate).toEqual(false);
+    });
+
+    it("should fail gracefully if .backport folder doesn't exist", async () => {
+      const err = new Error();
+      (err as any).code = 'ENOENT';
+      jest.spyOn(fs, 'writeFile').mockRejectedValueOnce(err);
+
+      await expect(() =>
+        createGlobalConfigIfNotExist(
+          '/path/to/global/config.json',
+          'myConfigTemplate'
+        )
+      ).rejects.toThrowError(
+        'The .backport folder (/path/to/global/config.json) does not exist.'
+      );
     });
   });
 });

@@ -28,15 +28,17 @@ type Options = Partial<{
   autoMergeMethod: string;
   backportBinary: string;
   cherrypickRef: boolean;
-  ci: boolean;
+  ci: boolean; // only available via cli and module options (not project or global config)
   commitPaths: string[];
-  dir: string;
+  configFile: string; // only available via cli and module options (not project or global config)
   details: boolean;
+  dir: string;
   editor: string;
   fork: boolean;
   gitHostname: string;
   githubApiBaseUrlV3: string;
   githubApiBaseUrlV4: string;
+  logFilePath: string;
   maxNumber: number;
   multiple: boolean;
   multipleBranches: boolean;

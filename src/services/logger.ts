@@ -44,11 +44,6 @@ export function updateLogger(options: ConfigFileOptions) {
 
   // set log level
   winstonInstance.level = options.verbose ? 'debug' : 'info';
-
-  // output logs to console in ci env
-  if (options.ci) {
-    winstonInstance.add(new winston.transports.Console());
-  }
 }
 
 function redactAccessToken(str: string) {
@@ -60,54 +55,19 @@ function redactAccessToken(str: string) {
   return str;
 }
 
-export function initLogger() {
+export function initLogger({
+  ci,
+  logFilePath,
+}: {
+  ci?: boolean;
+  logFilePath?: string;
+}) {
+  const fileTransport = getFileTransport({ logFilePath });
+
   winstonInstance = winston.createLogger({
-    transports: [
-      // log to file
-      new winston.transports.File({
-        level: 'debug',
-        format: combine(
-          format.splat(),
-          format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-          winston.format.metadata({
-            fillExcept: ['message', 'level', 'timestamp', 'label'],
-          }),
-
-          format.printf((info) => {
-            // format without metadata
-            if (!info.metadata.meta) {
-              return redactAccessToken(`${info.timestamp}: ${info.message}`);
-            }
-
-            // format when metadata is a string
-            if (isString(info.metadata.meta)) {
-              return redactAccessToken(
-                `${info.timestamp}: ${info.message}\n${dedent(
-                  info.metadata.meta
-                )}\n`
-              );
-            }
-
-            if (info.metadata.meta.stack) {
-              return redactAccessToken(
-                `${info.timestamp}: ${info.message}\n${info.metadata.meta.stack}\n`
-              );
-            }
-
-            // format when metadata is an object
-
-            return redactAccessToken(
-              `${info.timestamp}: ${info.message}\n${safeJsonStringify(
-                info.metadata.meta,
-                null,
-                2
-              )}\n`
-            );
-          })
-        ),
-        filename: getLogfilePath(),
-      }),
-    ],
+    transports: ci
+      ? [fileTransport, new winston.transports.Console()]
+      : [fileTransport],
   });
 
   // wait exiting until logs have been flushed to disk
@@ -116,6 +76,52 @@ export function initLogger() {
   });
 
   return logger;
+}
+
+function getFileTransport({ logFilePath }: { logFilePath?: string }) {
+  return new winston.transports.File({
+    level: 'debug',
+    format: combine(
+      format.splat(),
+      format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      winston.format.metadata({
+        fillExcept: ['message', 'level', 'timestamp', 'label'],
+      }),
+
+      format.printf((info) => {
+        // format without metadata
+        if (!info.metadata.meta) {
+          return redactAccessToken(`${info.timestamp}: ${info.message}`);
+        }
+
+        // format when metadata is a string
+        if (isString(info.metadata.meta)) {
+          return redactAccessToken(
+            `${info.timestamp}: ${info.message}\n${dedent(
+              info.metadata.meta
+            )}\n`
+          );
+        }
+
+        if (info.metadata.meta.stack) {
+          return redactAccessToken(
+            `${info.timestamp}: ${info.message}\n${info.metadata.meta.stack}\n`
+          );
+        }
+
+        // format when metadata is an object
+
+        return redactAccessToken(
+          `${info.timestamp}: ${info.message}\n${safeJsonStringify(
+            info.metadata.meta,
+            null,
+            2
+          )}\n`
+        );
+      })
+    ),
+    filename: getLogfilePath({ logFilePath }),
+  });
 }
 
 // log levels:

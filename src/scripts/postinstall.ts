@@ -4,10 +4,12 @@ import { consoleLog } from '../services/logger';
 
 export async function postinstall() {
   try {
-    const didCreate = await createGlobalConfigAndFolderIfNotExist();
+    const globalConfigPath = getGlobalConfigPath();
+    const didCreate = await createGlobalConfigAndFolderIfNotExist(
+      globalConfigPath
+    );
     if (didCreate) {
-      const GLOBAL_CONFIG_PATH = getGlobalConfigPath();
-      consoleLog(`Global config successfully created in ${GLOBAL_CONFIG_PATH}`);
+      consoleLog(`Global config successfully created in ${globalConfigPath}`);
     }
   } catch (e) {
     consoleLog(`Global config could not be created:\n${e.stack}`);

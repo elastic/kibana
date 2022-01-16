@@ -6,7 +6,10 @@ export function getBackportDirPath() {
   return path.join(homedir(), '.backport');
 }
 
-export function getLogfilePath() {
+export function getLogfilePath({ logFilePath }: { logFilePath?: string }) {
+  if (logFilePath) {
+    return path.resolve(logFilePath);
+  }
   return path.join(homedir(), '.backport', 'backport.log');
 }
 

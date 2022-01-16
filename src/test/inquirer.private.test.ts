@@ -170,6 +170,8 @@ function runBackportAsync(
   const proc = spawn('./node_modules/.bin/ts-node', [
     '--transpile-only',
     './src/entrypoint.cli.ts',
+    '--log-file-path',
+    '/dev/null',
     ...options,
   ]);
 

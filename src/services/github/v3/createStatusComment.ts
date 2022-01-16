@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { BackportResponse } from '../../../main';
+import { BackportResponse } from '../../../backportRun';
 import { ValidConfigOptions } from '../../../options/options';
 import { redact } from '../../../utils/redact';
 import { logger } from '../../logger';

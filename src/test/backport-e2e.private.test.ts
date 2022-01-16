@@ -93,8 +93,7 @@ describe('backport e2e', () => {
          - Add ❤️ emoji (5bf29b7d)
 
         ### Questions ?
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-        ",
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "sqren:backport/7.x/commit-5bf29b7d",
             "title": "[7.x] Add ❤️ emoji",
           },
@@ -251,8 +250,7 @@ describe('backport e2e', () => {
          - Add ❤️ emoji (5bf29b7d)
 
         ### Questions ?
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-        ",
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
             "head": "backport-org:backport/7.x/commit-5bf29b7d",
             "title": "[7.x] Add ❤️ emoji",
           },

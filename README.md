@@ -76,6 +76,7 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 | --auto-assign       |                    | Assign current user to the target PR                                       | false                     |
 | --branch            | -b                 | Target branch to backport to                                               |                           |
 | --ci                |                    | Disable interactive prompts                                                | false                     |
+| --config-file       |                    | Custom path to project config file (.backportrc.json)                      |                           |
 | --dir               |                    | Clone repository into custom directory                                     | ~/.backport/repositories/ |
 | --dry-run           |                    | Perform backport without pushing to Github                                 | false                     |
 | --editor            |                    | Editor (eg. `code`) to open and resolve conflicts                          | nano                      |
@@ -90,7 +91,7 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 | --no-status-comment |                    | Do not publish a status comment to Github with the results of the backport | false                     |
 | --no-verify         |                    | Bypass the pre-commit and commit-msg hooks                                 | false                     |
 | --path              | -p                 | Filter commits by path                                                     |                           |
-| --pr-description    | --description      | Pull request description suffix                                            |                           |
+| --pr-description    | --description      | Description for pull request                                               |                           |
 | --pr-filter         |                    | Find PRs using [Github's search syntax][2]                                 |                           |
 | --pr-title          | --title            | Title of pull request                                                      |                           |
 | --pull-number       | --pr               | Backport pull request by number                                            |                           |

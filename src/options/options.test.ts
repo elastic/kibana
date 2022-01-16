@@ -1,4 +1,6 @@
+import os from 'os';
 import nock from 'nock';
+import * as fs from '../services/fs-promisified';
 import { GithubConfigOptionsResponse } from '../services/github/v4/getOptionsFromGithub/query';
 import * as logger from '../services/logger';
 import { mockConfigFiles } from '../test/mockConfigFiles';
@@ -27,6 +29,9 @@ describe('getOptions', () => {
 
   beforeEach(() => {
     mockConfigFiles(defaultConfigs);
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+    jest.spyOn(fs, 'writeFile').mockResolvedValue();
+    jest.spyOn(fs, 'chmod').mockResolvedValue();
   });
 
   describe('should throw', () => {
@@ -39,13 +44,14 @@ describe('getOptions', () => {
         projectConfig: defaultConfigs.projectConfig,
         globalConfig: { accessToken: undefined },
       });
-      await expect(() => getOptions([])).rejects
-        .toThrowErrorMatchingInlineSnapshot(`
-              "Please update your config file: \\"/Users/sqren/.backport/config.json\\".
-              It must contain a valid \\"accessToken\\".
 
-              Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
-            `);
+      await expect(() => getOptions([], { ci: true })).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+      "Please update your config file: \\"/myHomeDir/.backport/config.json\\".
+      It must contain a valid \\"accessToken\\".
+
+      Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
+      `);
     });
 
     it('when `targetBranches`, `targetBranchChoices` and `branchLabelMapping` are all empty', async () => {
@@ -55,7 +61,7 @@ describe('getOptions', () => {
         branchLabelMapping: undefined,
       });
 
-      await expect(() => getOptions([])).rejects
+      await expect(() => getOptions([], {})).rejects
         .toThrowErrorMatchingInlineSnapshot(`
               "Please specify a target branch: \\"--branch 6.1\\".
 
@@ -66,7 +72,7 @@ describe('getOptions', () => {
     it('when repoName is missing', async () => {
       mockProjectConfig({ repoName: '' });
 
-      await expect(() => getOptions([])).rejects
+      await expect(() => getOptions([], {})).rejects
         .toThrowErrorMatchingInlineSnapshot(`
               "Please specify a repo name: \\"--repo-name kibana\\".
 
@@ -77,7 +83,7 @@ describe('getOptions', () => {
     it('when repoOwner is missing', async () => {
       mockProjectConfig({ repoOwner: '' });
 
-      await expect(() => getOptions([])).rejects
+      await expect(() => getOptions([], {})).rejects
         .toThrowErrorMatchingInlineSnapshot(`
               "Please specify a repo owner: \\"--repo-owner elastic\\".
 
@@ -88,7 +94,7 @@ describe('getOptions', () => {
 
   it('should ensure that "backport" branch does not exist', async () => {
     mockGithubConfigOptions({ refName: 'backport' });
-    await expect(getOptions([])).rejects.toThrowError(
+    await expect(getOptions([], {})).rejects.toThrowError(
       'You must delete the branch "backport" to continue. See https://github.com/sqren/backport/issues/155 for details'
     );
   });
@@ -103,7 +109,7 @@ describe('getOptions', () => {
 
   it('should call updateLogger', async () => {
     mockGithubConfigOptions({});
-    await getOptions([]);
+    await getOptions([], {});
 
     expect(logger.updateLogger).toHaveBeenCalledTimes(1);
   });
@@ -119,7 +125,7 @@ describe('getOptions', () => {
         },
       ],
     });
-    const options = await getOptions([]);
+    const options = await getOptions([], {});
 
     expect(options).toEqual({
       accessToken: 'abc',
@@ -172,15 +178,15 @@ describe('getOptions', () => {
     });
 
     it('uses the `defaultBranchRef` as default', async () => {
-      const options = await getOptions([]);
+      const options = await getOptions([], {});
       expect(options.sourceBranch).toBe('some-default-branch');
     });
 
     it('uses the sourceBranch given via cli instead of `defaultBranchRef`', async () => {
-      const options = await getOptions([
-        '--source-branch',
-        'cli-source-branch',
-      ]);
+      const options = await getOptions(
+        ['--source-branch', 'cli-source-branch'],
+        {}
+      );
       expect(options.sourceBranch).toBe('cli-source-branch');
     });
   });
@@ -191,18 +197,18 @@ describe('getOptions', () => {
     });
 
     it('is enabled by default', async () => {
-      const { fork } = await getOptions([]);
+      const { fork } = await getOptions([], {});
       expect(fork).toBe(true);
     });
 
     it('can be disabled via `--no-fork` flag', async () => {
-      const { fork } = await getOptions(['--no-fork']);
+      const { fork } = await getOptions(['--no-fork'], {});
       expect(fork).toBe(false);
     });
 
     it('can be disabled via config file', async () => {
       mockProjectConfig({ fork: false });
-      const { fork } = await getOptions([]);
+      const { fork } = await getOptions([], {});
       expect(fork).toBe(false);
     });
   });
@@ -213,13 +219,13 @@ describe('getOptions', () => {
     });
 
     it('can be set via `--reviewer` flag', async () => {
-      const { reviewers } = await getOptions(['--reviewer', 'peter']);
+      const { reviewers } = await getOptions(['--reviewer', 'peter'], {});
       expect(reviewers).toEqual(['peter']);
     });
 
     it('can be set via config file', async () => {
       mockProjectConfig({ reviewers: ['john'] });
-      const { reviewers } = await getOptions([]);
+      const { reviewers } = await getOptions([], {});
       expect(reviewers).toEqual(['john']);
     });
   });
@@ -230,17 +236,17 @@ describe('getOptions', () => {
     });
 
     it('is not enabled by default', async () => {
-      const { mainline } = await getOptions([]);
+      const { mainline } = await getOptions([], {});
       expect(mainline).toBe(undefined);
     });
 
     it('can be set via `--mainline` flag', async () => {
-      const { mainline } = await getOptions(['--mainline']);
+      const { mainline } = await getOptions(['--mainline'], {});
       expect(mainline).toBe(1);
     });
 
     it('accepts numeric values', async () => {
-      const { mainline } = await getOptions(['--mainline', '2']);
+      const { mainline } = await getOptions(['--mainline', '2'], {});
       expect(mainline).toBe(2);
     });
   });
@@ -251,29 +257,29 @@ describe('getOptions', () => {
     });
 
     it('defaults to authenticated user', async () => {
-      const { author } = await getOptions([]);
+      const { author } = await getOptions([], {});
       expect(author).toBe('billy.bob');
     });
 
     it('can be overridden via `--author` flag', async () => {
-      const { author } = await getOptions(['--author', 'john.doe']);
+      const { author } = await getOptions(['--author', 'john.doe'], {});
       expect(author).toBe('john.doe');
     });
 
     it('can be reset via `--all` flag', async () => {
-      const { author } = await getOptions(['--all']);
+      const { author } = await getOptions(['--all'], {});
       expect(author).toBe(null);
     });
 
     it('can be reset via config file (similar to `--all` flag)', async () => {
       mockProjectConfig({ author: null });
-      const { author } = await getOptions([]);
+      const { author } = await getOptions([], {});
       expect(author).toBe(null);
     });
 
     it('can be overridden via config file', async () => {
       mockProjectConfig({ author: 'jane.doe' });
-      const { author } = await getOptions([]);
+      const { author } = await getOptions([], {});
       expect(author).toBe('jane.doe');
     });
   });
@@ -284,24 +290,24 @@ describe('getOptions', () => {
     });
 
     it('should default to true', async () => {
-      const { cherrypickRef } = await getOptions([]);
+      const { cherrypickRef } = await getOptions([], {});
       expect(cherrypickRef).toBe(true);
     });
 
     it('should negate with `noCherrypickRef` cli arg', async () => {
-      const { cherrypickRef } = await getOptions(['--no-cherrypick-ref']);
+      const { cherrypickRef } = await getOptions(['--no-cherrypick-ref'], {});
       expect(cherrypickRef).toBe(false);
     });
 
     it('should be settable via config file', async () => {
       mockProjectConfig({ cherrypickRef: false });
-      const { cherrypickRef } = await getOptions([]);
+      const { cherrypickRef } = await getOptions([], {});
       expect(cherrypickRef).toBe(false);
     });
 
     it('cli args overwrites config', async () => {
       mockProjectConfig({ cherrypickRef: false });
-      const { cherrypickRef } = await getOptions(['--cherrypick-ref']);
+      const { cherrypickRef } = await getOptions(['--cherrypick-ref'], {});
       expect(cherrypickRef).toBe(true);
     });
   });

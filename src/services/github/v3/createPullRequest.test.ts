@@ -24,8 +24,7 @@ describe('getPullRequestBody', () => {
        - #55
 
       ### Questions ?
-      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-      "
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 
@@ -49,8 +48,7 @@ describe('getPullRequestBody', () => {
        - My commit message (abcdefgh)
 
       ### Questions ?
-      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-      "
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 
@@ -80,14 +78,75 @@ describe('getPullRequestBody', () => {
        - Another commit message (qwertyui)
 
       ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
+    `);
+  });
+
+  it('replaces template variables in PR description', () => {
+    expect(
+      getPullRequestBody({
+        options: {
+          prDescription:
+            'Backporting the following to {targetBranch}:\n{commitMessages}',
+        } as ValidConfigOptions,
+        commits: [
+          {
+            pullNumber: 55,
+            sha: 'abcdefghijklm',
+            originalMessage: 'My commit message',
+          } as Commit,
+          {
+            sha: 'qwertyuiop',
+            originalMessage: 'Another commit message',
+          } as Commit,
+        ],
+
+        targetBranch: '7.x',
+      })
+    ).toMatchInlineSnapshot(`
+      "Backporting the following to 7.x:
+       - #55
+       - Another commit message (qwertyui)"
+    `);
+  });
+
+  it('appends text to the default descriptions', () => {
+    expect(
+      getPullRequestBody({
+        options: {
+          prDescription: '{defaultPrDescription}\n\ntext to append',
+        } as ValidConfigOptions,
+        commits: [
+          {
+            pullNumber: 55,
+            sha: 'abcdefghijklm',
+            originalMessage: 'My commit message',
+          } as Commit,
+          {
+            sha: 'qwertyuiop',
+            originalMessage: 'Another commit message',
+          } as Commit,
+        ],
+
+        targetBranch: '7.x',
+      })
+    ).toMatchInlineSnapshot(`
+      "# Backport
+
+      This is an automatic backport to \`7.x\` of:
+       - #55
+       - Another commit message (qwertyui)
+
+      ### Questions ?
       Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
-      "
+
+      text to append"
     `);
   });
 });
 
 describe('getTitle', () => {
-  it('when the default title is used', () => {
+  it('has the default title', () => {
     expect(
       getTitle({
         options: {} as ValidConfigOptions,
@@ -108,7 +167,7 @@ describe('getTitle', () => {
     ).toEqual('[7.x] My commit message | Another commit message');
   });
 
-  it('when a custom PR title is used', () => {
+  it('replaces template variables in PR title', () => {
     expect(
       getTitle({
         options: {
