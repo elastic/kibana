@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { DataViewSpec } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
@@ -59,7 +60,8 @@ const registerCreateDataViewRouteFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection: UsageCounter
   ) => {
     router.post(
       {
@@ -79,6 +81,7 @@ const registerCreateDataViewRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
+          usageCollection.incrementCounter({ counterName: path });
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,

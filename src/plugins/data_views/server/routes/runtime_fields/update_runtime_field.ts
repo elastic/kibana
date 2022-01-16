@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { RuntimeField } from 'src/plugins/data_views/common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
@@ -31,7 +32,8 @@ const updateRuntimeFieldRouteFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection: UsageCounter
   ) => {
     router.post(
       {
@@ -62,6 +64,7 @@ const updateRuntimeFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
+        usageCollection.incrementCounter({ counterName: path });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,

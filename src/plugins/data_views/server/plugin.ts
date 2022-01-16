@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
@@ -42,8 +43,11 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
-
-    registerRoutes(core.http, core.getStartServices);
+    let dataViewRestCounter: UsageCounter;
+    if (usageCollection) {
+      dataViewRestCounter = usageCollection.createUsageCounter('dataViewsRest');
+    }
+    registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);

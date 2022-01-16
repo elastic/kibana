@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { HttpServiceSetup, StartServicesAccessor } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { IndexPatternsFetcher } from './fetcher';
 import {
   registerCreateDataViewRoute,
@@ -72,7 +73,8 @@ export function registerRoutes(
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >
+  >,
+  dataViewRestCounter?: UsageCounter
 ) {
   const parseMetaFields = (metaFields: string | string[]) => {
     let parsedFields: string[] = [];
@@ -87,52 +89,52 @@ export function registerRoutes(
   const router = http.createRouter();
 
   // Data Views API
-  registerCreateDataViewRoute(router, getStartServices);
-  registerGetDataViewRoute(router, getStartServices);
-  registerDeleteDataViewRoute(router, getStartServices);
-  registerUpdateDataViewRoute(router, getStartServices);
-  registerManageDefaultDataViewRoute(router, getStartServices);
-  registerHasUserDataViewRoute(router, getStartServices);
+  registerCreateDataViewRoute(router, getStartServices, dataViewRestCounter);
+  registerGetDataViewRoute(router, getStartServices, dataViewRestCounter);
+  registerDeleteDataViewRoute(router, getStartServices, dataViewRestCounter);
+  registerUpdateDataViewRoute(router, getStartServices, dataViewRestCounter);
+  registerManageDefaultDataViewRoute(router, getStartServices, dataViewRestCounter);
+  registerHasUserDataViewRoute(router, getStartServices, dataViewRestCounter);
 
   // Fields API
-  registerUpdateFieldsRoute(router, getStartServices);
+  registerUpdateFieldsRoute(router, getStartServices, dataViewRestCounter);
 
   // Runtime Fields API
-  registerCreateRuntimeFieldRoute(router, getStartServices);
-  registerGetRuntimeFieldRoute(router, getStartServices);
-  registerDeleteRuntimeFieldRoute(router, getStartServices);
-  registerPutRuntimeFieldRoute(router, getStartServices);
-  registerUpdateRuntimeFieldRoute(router, getStartServices);
+  registerCreateRuntimeFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerGetRuntimeFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerDeleteRuntimeFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerPutRuntimeFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerUpdateRuntimeFieldRoute(router, getStartServices, dataViewRestCounter);
 
   // ###
   // Legacy Index Pattern API
   // ###
-  registerCreateDataViewRouteLegacy(router, getStartServices);
-  registerGetDataViewRouteLegacy(router, getStartServices);
-  registerDeleteDataViewRouteLegacy(router, getStartServices);
-  registerUpdateDataViewRouteLegacy(router, getStartServices);
-  registerManageDefaultDataViewRouteLegacy(router, getStartServices);
-  registerHasUserDataViewRouteLegacy(router, getStartServices);
+  registerCreateDataViewRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerGetDataViewRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerDeleteDataViewRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerUpdateDataViewRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerManageDefaultDataViewRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerHasUserDataViewRouteLegacy(router, getStartServices, dataViewRestCounter);
 
   // Fields API
-  registerUpdateFieldsRouteLegacy(router, getStartServices);
+  registerUpdateFieldsRouteLegacy(router, getStartServices, dataViewRestCounter);
 
   // Scripted Field API
-  registerCreateScriptedFieldRoute(router, getStartServices);
-  registerPutScriptedFieldRoute(router, getStartServices);
-  registerGetScriptedFieldRoute(router, getStartServices);
-  registerDeleteScriptedFieldRoute(router, getStartServices);
-  registerUpdateScriptedFieldRoute(router, getStartServices);
+  registerCreateScriptedFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerPutScriptedFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerGetScriptedFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerDeleteScriptedFieldRoute(router, getStartServices, dataViewRestCounter);
+  registerUpdateScriptedFieldRoute(router, getStartServices, dataViewRestCounter);
 
   // Runtime Fields API
-  registerCreateRuntimeFieldRouteLegacy(router, getStartServices);
-  registerGetRuntimeFieldRouteLegacy(router, getStartServices);
-  registerDeleteRuntimeFieldRouteLegacy(router, getStartServices);
-  registerPutRuntimeFieldRouteLegacy(router, getStartServices);
-  registerUpdateRuntimeFieldRouteLegacy(router, getStartServices);
+  registerCreateRuntimeFieldRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerGetRuntimeFieldRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerDeleteRuntimeFieldRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerPutRuntimeFieldRouteLegacy(router, getStartServices, dataViewRestCounter);
+  registerUpdateRuntimeFieldRouteLegacy(router, getStartServices, dataViewRestCounter);
   // ###
 
-  registerFieldForWildcard(router, getStartServices);
+  registerFieldForWildcard(router, getStartServices, dataViewRestCounter);
 
   router.get(
     {
