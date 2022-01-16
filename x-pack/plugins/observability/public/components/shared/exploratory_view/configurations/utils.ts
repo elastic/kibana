@@ -52,9 +52,16 @@ export function convertToShortUrl(series: SeriesUrl) {
 export function createExploratoryViewUrl(
   { reportType, allSeries }: { reportType: ReportViewType; allSeries: AllSeries },
   baseHref = '',
-  appId = 'observability'
+  appId = 'observability',
+  onlyPath?: boolean
 ) {
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
+
+  if (onlyPath) {
+    return `/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
+      allShortSeries as unknown as RisonValue
+    )}`;
+  }
 
   return (
     baseHref +

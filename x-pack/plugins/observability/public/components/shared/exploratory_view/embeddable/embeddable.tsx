@@ -12,11 +12,13 @@ import { AllSeries, createExploratoryViewUrl, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
-import { LensPublicStart, XYState } from '../../../../../../lens/public';
+import { LensEmbeddableInput, LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { IndexPatternState } from '../hooks/use_app_index_pattern';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { useActions } from './use_actions';
+import { AddToCaseAction } from '../header/add_to_case_action';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface ExploratoryEmbeddableProps {
@@ -39,6 +41,8 @@ export interface ExploratoryEmbeddableProps {
     timeFieldName?: string | undefined;
   }) => void;
   reportConfigMap?: ReportConfigMap;
+  withActions?: boolean | Array<'explore' | 'save' | 'addToCase'>;
+  appId?: 'security' | 'observability';
   reportType: ReportViewType | string;
   showCalculationMethod?: boolean;
   showExploreButton?: boolean;
@@ -67,12 +71,15 @@ export default function Embeddable({
   disableBorder = false,
   disableShadow = false,
   indexPatterns,
-  legendIsVisible,
   lens,
+  appId,
+  axisTitlesVisibility,
+  legendIsVisible,
   metricIcon,
   metricIconColor,
   metricPostfix,
   onBrushEnd,
+  withActions = true,
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
@@ -81,6 +88,10 @@ export default function Embeddable({
   withActions = true,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
+  const LensSaveModalComponent = lens?.SaveModalComponent;
+
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
+  const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
   const { http } = useKibana().services;
 
@@ -88,6 +99,14 @@ export default function Embeddable({
 
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+  });
 
   const layerConfigs: LayerConfig[] = getLayerConfigs(
     attributes,
@@ -167,8 +186,8 @@ export default function Embeddable({
             style={{ height: '100%' }}
             timeRange={series?.time}
             attributes={attributesJSON}
-            onBrushEnd={onBrushEnd}
-            withActions={withActions}
+            onBrushEnd={({ range }) => {}}
+            withActions={actions}
           />
         </EuiFlexItem>
         {metricPostfix && (
@@ -178,6 +197,22 @@ export default function Embeddable({
             </EuiTitle>
           </EuiFlexItem>
         )}
+        {isSaveOpen && attributesJSON && (
+          <LensSaveModalComponent
+            initialInput={attributesJSON as unknown as LensEmbeddableInput}
+            onClose={() => setIsSaveOpen(false)}
+            // if we want to do anything after the viz is saved
+            // right now there is no action, so an empty function
+            onSave={() => {}}
+          />
+        )}
+        <AddToCaseAction
+          lensAttributes={attributesJSON}
+          timeRange={series?.time}
+          autoOpen={isAddToCaseOpen}
+          setAutoOpen={setAddToCaseOpen}
+          appId={appId}
+        />
       </LensWrapper>
     </Wrapper>
   );

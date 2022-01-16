@@ -19,6 +19,7 @@ import {
   IndexPatternManagementPlugin,
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
+import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 
 const createSetupContract = (): IndexPatternManagementSetup => ({});
 
@@ -57,6 +58,7 @@ const createIndexPatternManagmentContext = (): {
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
   const dataViewFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
+  const dataViews = data.indexPatterns;
 
   return {
     chrome,
@@ -67,12 +69,14 @@ const createIndexPatternManagmentContext = (): {
     http,
     docLinks,
     data,
+    dataViews,
     dataViewFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor:
       indexPatternEditorPluginMock.createStartContract().IndexPatternEditorComponent,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
   };
 };
 

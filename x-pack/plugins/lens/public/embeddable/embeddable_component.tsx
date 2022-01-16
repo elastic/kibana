@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart } from 'kibana/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { CoreStart, ThemeServiceStart } from 'kibana/public';
+import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
@@ -52,7 +52,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
-  withActions?: boolean;
+  withActions?: boolean | Action[];
 };
 
 interface PluginsStartDependencies {
@@ -67,7 +67,8 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const factory = embeddableStart.getEmbeddableFactory('lens')!;
     const input = { ...props };
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
-    const hasActions = props.withActions === true;
+    const hasActions = Boolean(props.withActions);
+    const theme = core.theme;
 
     if (loading) {
       return <EuiLoadingChart />;
@@ -81,6 +82,8 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
           inspector={inspector}
           actionPredicate={() => hasActions}
           input={input}
+          theme={theme}
+          extraActions={Array.isArray(props.withActions) ? props.withActions : []}
         />
       );
     }
@@ -95,6 +98,10 @@ interface EmbeddablePanelWrapperProps {
   inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
+  theme: ThemeServiceStart;
+  hideHeader?: boolean;
+  showShadow?: boolean;
+  extraActions: Action[];
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
@@ -103,6 +110,10 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   actionPredicate,
   inspector,
   input,
+  theme,
+  extraActions,
+  hideHeader = false,
+  showShadow = false,
 }) => {
   useEffect(() => {
     embeddable.updateInput(input);
@@ -110,14 +121,19 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
   return (
     <EmbeddablePanel
-      hideHeader={false}
+      hideHeader={hideHeader}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
-      getActions={uiActions.getTriggerCompatibleActions}
+      getActions={async (triggerId, context) => {
+        const actions = await uiActions.getTriggerCompatibleActions(triggerId, context);
+        return [...extraActions, ...actions];
+      }}
       inspector={inspector}
       actionPredicate={actionPredicate}
-      showShadow={false}
+      showShadow={showShadow}
       showBadges={false}
       showNotifications={false}
+      theme={theme}
+      hasBorder={false}
     />
   );
 };
