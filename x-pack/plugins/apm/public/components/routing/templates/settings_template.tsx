@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { ApmMainTemplate } from './apm_main_template';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
+import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
