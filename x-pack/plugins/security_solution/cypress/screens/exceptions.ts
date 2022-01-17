@@ -56,3 +56,6 @@ export const EXCEPTIONS_TABLE_MODAL = '[data-test-subj="referenceErrorModal"]';
 export const EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContainer"]';
+
+export const EXCEPTION_FIELD_LIST =
+  '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
