@@ -8,7 +8,7 @@
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter';
-import { interpretAst } from '../../lib/run_interpreter';
+import { pluginServices } from '../../services';
 import { getArgTypeDef } from '../../lib/args';
 import { FunctionFormList as Component } from './function_form_list';
 
@@ -77,24 +77,27 @@ const componentFactory = ({
   path,
   parentPath,
   removable,
-}) => ({
-  args,
-  nestedFunctionsArgs: argsWithExprFunctions,
-  argType: argType.function,
-  argTypeDef: Object.assign(argTypeDef, {
-    args: argumentsView,
-    name: argUiConfig?.name ?? argTypeDef.name,
-    displayName: argUiConfig?.displayName ?? argTypeDef.displayName,
-    help: argUiConfig?.help ?? argTypeDef.name,
-  }),
-  argResolver: (argAst) => interpretAst(argAst, prevContext),
-  contextExpression: getExpression(prevContext),
-  expressionIndex, // preserve the index in the AST
-  nextArgType: nextArg && nextArg.function,
-  path,
-  parentPath,
-  removable,
-});
+}) => {
+  const { expressions } = pluginServices.getServices();
+  return {
+    args,
+    nestedFunctionsArgs: argsWithExprFunctions,
+    argType: argType.function,
+    argTypeDef: Object.assign(argTypeDef, {
+      args: argumentsView,
+      name: argUiConfig?.name ?? argTypeDef.name,
+      displayName: argUiConfig?.displayName ?? argTypeDef.displayName,
+      help: argUiConfig?.help ?? argTypeDef.name,
+    }),
+    argResolver: (argAst) => expressions.interpretAst(argAst, prevContext),
+    contextExpression: getExpression(prevContext),
+    expressionIndex, // preserve the index in the AST
+    nextArgType: nextArg && nextArg.function,
+    path,
+    parentPath,
+    removable,
+  };
+};
 
 /**
  * Converts expression functions at the arguments for the expression, to the array of UI component configurations.
