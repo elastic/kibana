@@ -21,7 +21,7 @@ const deleteIndexPatternRouteFactory =
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
     >,
-    usageCollection: UsageCounter
+    usageCollection?: UsageCounter
   ) => {
     router.delete(
       {
@@ -43,7 +43,7 @@ const deleteIndexPatternRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          usageCollection.incrementCounter({ counterName: path });
+          usageCollection?.incrementCounter({ counterName: path });
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,

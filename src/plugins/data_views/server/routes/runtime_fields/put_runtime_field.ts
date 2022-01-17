@@ -30,7 +30,7 @@ const putRuntimeFieldRouteFactory =
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
     >,
-    usageCollection: UsageCounter
+    usageCollection?: UsageCounter
   ) => {
     router.put(
       {
@@ -55,7 +55,7 @@ const putRuntimeFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection.incrementCounter({ counterName: path });
+        usageCollection?.incrementCounter({ counterName: path });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,

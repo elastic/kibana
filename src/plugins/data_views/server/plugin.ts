@@ -43,10 +43,8 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
-    let dataViewRestCounter: UsageCounter = { incrementCounter: (any) => {} };
-    if (usageCollection) {
-      dataViewRestCounter = usageCollection.createUsageCounter('dataViewsRest');
-    }
+    const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
+
     registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));

@@ -25,7 +25,7 @@ const deleteRuntimeFieldRouteFactory =
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
     >,
-    usageCollection: UsageCounter
+    usageCollection?: UsageCounter
   ) => {
     router.delete(
       {
@@ -47,6 +47,7 @@ const deleteRuntimeFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
+        usageCollection?.incrementCounter({ counterName: path });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,

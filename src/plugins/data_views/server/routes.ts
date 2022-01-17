@@ -74,7 +74,7 @@ export function registerRoutes(
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
-  dataViewRestCounter: UsageCounter
+  dataViewRestCounter?: UsageCounter
 ) {
   const parseMetaFields = (metaFields: string | string[]) => {
     let parsedFields: string[] = [];
