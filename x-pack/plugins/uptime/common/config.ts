@@ -17,6 +17,7 @@ const serviceConfig = schema.object({
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   syncInterval: schema.maybe(schema.string()),
   tls: schema.maybe(sslSchema),
+  devUrl: schema.maybe(schema.string()),
 });
 
 const uptimeConfig = schema.object({
