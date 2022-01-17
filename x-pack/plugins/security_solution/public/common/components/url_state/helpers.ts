@@ -177,7 +177,7 @@ export const makeMapStateToProps = () => {
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getSourcererScopes = sourcererSelectors.scopesSelector();
-  const mapStateToProps = (state: State, ownProps?: UrlStateProps & UrlStateStateToPropsType) => {
+  const mapStateToProps = (state: State, ownProps?: UrlStateProps) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;

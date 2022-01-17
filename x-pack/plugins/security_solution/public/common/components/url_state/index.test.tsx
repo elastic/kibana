@@ -319,7 +319,7 @@ describe('UrlStateContainer', () => {
 
         if (CONSTANTS.alertsPage === page) {
           await waitFor(() => {
-            expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
+            expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
               from: '2020-01-01T00:00:00.000Z',
               fromStr: 'now-1d/d',
               kind: 'relative',
@@ -328,11 +328,11 @@ describe('UrlStateContainer', () => {
               id: 'global',
             });
 
-            expect(mockSetRelativeRangeDatePicker.mock.calls[2][0]).toEqual({
-              from: 1558732849370,
+            expect(mockSetRelativeRangeDatePicker.mock.calls[0][0]).toEqual({
+              from: '2020-01-01T00:00:00.000Z',
               fromStr: 'now-15m',
               kind: 'relative',
-              to: 1558733749370,
+              to: '2020-01-01T00:00:00.000Z',
               toStr: 'now',
               id: 'timeline',
             });
