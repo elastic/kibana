@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   deleteAndConfirm,
   findAndClickButton,
@@ -15,8 +15,10 @@ import {
 import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { preparePack } from '../../tasks/packs';
+import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 
 describe('SuperUser - Packs', () => {
+  const integration = 'Osquery Manager';
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const PACK_NAME = 'Pack-name';
   const NEW_QUERY_NAME = 'new-query-name';
@@ -148,6 +150,52 @@ describe('SuperUser - Packs', () => {
       preparePack(PACK_NAME, SAVED_QUERY_ID);
       findAndClickButton('Edit');
       deleteAndConfirm('pack');
+    });
+  });
+  describe('Validate that agent is getting removed from pack if we remove agent', () => {
+    beforeEach(() => {
+      login();
+    });
+    const AGENT_NAME = 'PackTest';
+    const REMOVING_PACK = 'removing-pack';
+    it('add integration', () => {
+      cy.visit(FLEET_AGENT_POLICIES);
+      cy.contains('Create agent policy').click();
+      cy.get('input[placeholder*="Choose a name"]').type(AGENT_NAME);
+      cy.get('.euiFlyoutFooter').contains('Create agent policy').click();
+      cy.contains(`Agent policy '${AGENT_NAME}' created`);
+      cy.visit(FLEET_AGENT_POLICIES);
+      cy.contains('Default Fleet Server policy').click();
+      cy.contains('Add integration').click();
+      cy.contains(integration).click();
+      addIntegration(AGENT_NAME);
+      cy.contains('Add Elastic Agent later').click();
+      navigateTo('app/osquery/packs');
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', REMOVING_PACK);
+      findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', AGENT_NAME);
+      findAndClickButton('Save pack');
+
+      cy.getBySel('toastCloseButton').click();
+      cy.contains(REMOVING_PACK).click();
+      cy.contains(`${REMOVING_PACK} details`);
+      findAndClickButton('Edit');
+      cy.react('EuiComboBoxInput', { props: { value: AGENT_NAME } }).should('exist');
+
+      cy.visit(FLEET_AGENT_POLICIES);
+      cy.contains(AGENT_NAME).click();
+      cy.get('.euiTableCellContent')
+        .get('.euiPopover__anchor')
+        .get(`[aria-label="Open"]`)
+        .first()
+        .click();
+      cy.contains(/^Delete integration$/).click();
+      closeModalIfVisible();
+      navigateTo('app/osquery/packs');
+      cy.contains(REMOVING_PACK).click();
+      cy.contains(`${REMOVING_PACK} details`);
+      findAndClickButton('Edit');
+      cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
     });
   });
   describe.skip('Remove queries from pack', () => {
