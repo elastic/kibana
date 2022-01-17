@@ -11,6 +11,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
   KibanaThemeProvider,
@@ -18,7 +19,7 @@ import {
   toMountPoint,
 } from '../../../../../kibana_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
-import { esFilters, connectToQueryState } from '../../../../../data/public';
+import { connectToQueryState } from '../../../../../data/public';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
@@ -87,7 +88,7 @@ export const useVisualizeAppState = (
           ),
         },
         {
-          filters: esFilters.FilterStateStore.APP_STATE,
+          filters: FilterStateStore.APP_STATE,
           query: true,
         }
       );
