@@ -21,8 +21,12 @@ interface DataGridOptionsRecord {
 
 const isValidRowHeight = (rowHeight?: number) => {
   return (
+    // is number
     typeof rowHeight === 'number' &&
     !Number.isNaN(rowHeight) &&
+    // is integer
+    Math.floor(rowHeight) === rowHeight &&
+    // does rowHeight meets the range
     rowHeight >= MIN_ROW_HEIGHT &&
     rowHeight <= MAX_ROW_HEIGHT
   );
