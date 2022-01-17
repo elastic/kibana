@@ -57,6 +57,7 @@ export type {
   OverallSumIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
+export { layerTypes } from '../common';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

@@ -1,18 +1,22 @@
 {
-  "id": "3rdPartyVisLensExample",
+  "id": "thirdPartyVisLensExample",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["3rd_part_vis_lens_example"],
+  "configPath": ["third_part_vis_lens_example"],
   "server": false,
   "ui": true,
   "requiredPlugins": [
     "lens",
     "dataViews",
     "embeddable",
-    "developerExamples"
+    "developerExamples",
+    "expressions",
+    "fieldFormats"
   ],
   "optionalPlugins": [],
-  "requiredBundles": [],
+  "requiredBundles": [
+    "kibanaReact"
+  ],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

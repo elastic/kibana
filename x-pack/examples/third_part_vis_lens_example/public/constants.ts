@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface RotatingNumberState {
-  accessor: string;
-  color: string;
-}
+export const DEFAULT_COLOR = '#000000';

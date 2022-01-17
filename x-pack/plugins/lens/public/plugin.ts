@@ -182,6 +182,8 @@ export interface LensPublicStart {
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
   private editorFrameService: EditorFrameServiceType | undefined;
+  private editorFrameSetup: EditorFrameSetup | undefined;
+  private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private indexpatternDatasource: IndexPatternDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -310,6 +312,17 @@ export class LensPlugin {
     }
 
     urlForwarding.forwardApp('lens', 'lens');
+
+    return {
+      registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
+        if (this.editorFrameSetup) {
+          this.editorFrameSetup.registerVisualization(vis);
+        } else {
+          // queue visualizations if editor frame is not yet ready as it's loaded async
+          this.queuedVisualizations.push(vis);
+        }
+      },
+    };
   }
 
   private async initParts(
@@ -361,10 +374,10 @@ export class LensPlugin {
     this.heatmapVisualization.setup(core, dependencies);
     this.gaugeVisualization.setup(core, dependencies);
 
-    return {
-      registerVisualization:
-        editorFrameSetupInterface.registerVisualization.bind(editorFrameSetupInterface),
-    };
+    this.queuedVisualizations.forEach((queuedVis) => {
+      editorFrameSetupInterface.registerVisualization(queuedVis);
+    });
+    this.editorFrameSetup = editorFrameSetupInterface;
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {

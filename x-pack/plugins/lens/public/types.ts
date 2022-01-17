@@ -648,6 +648,10 @@ export interface Visualization<T = unknown> {
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
+   * Supported triggers of this visualization type when embedded somewhere
+   */
+  triggers?: string[];
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */

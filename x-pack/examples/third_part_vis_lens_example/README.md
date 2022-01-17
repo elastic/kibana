@@ -1,4 +1,4 @@
-# 3rd party Lens visualization
+# Third party Lens visualization
 
 To run this example plugin, use the command `yarn start --run-examples`.
 

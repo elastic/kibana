@@ -1,7 +1,7 @@
 {
-  "name": "3rd_party_vis_lens_example",
+  "name": "third_party_vis_lens_example",
   "version": "1.0.0",
-  "main": "target/examples/3rd_party_vis_lens_example",
+  "main": "target/examples/third_party_vis_lens_example",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

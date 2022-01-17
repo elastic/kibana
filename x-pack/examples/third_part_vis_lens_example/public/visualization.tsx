@@ -6,26 +6,17 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
+import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { getSuggestions } from './metric_suggestions';
-import { LensIconChartMetric } from '../assets/chart_metric';
-import {
-  Visualization,
-  OperationMetadata,
-} from '../../../plugins/lens/public';
-import type { MetricConfig, RotatingNumberState } from '../../common/types';
-import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, getStopsForFixedMode, shiftPalette } from '../shared_components';
-import { MetricDimensionEditor } from './dimension_editor';
+import { ThemeServiceStart } from '../../../../src/core/public';
+import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
+import { Visualization, OperationMetadata } from '../../../plugins/lens/public';
+import type { RotatingNumberState } from './types';
+import { DEFAULT_COLOR } from './constants';
+import { layerTypes } from '../../../plugins/lens/public';
 
-const toExpression = (
-  state: RotatingNumberState,
-): Ast | null => {
+const toExpression = (state: RotatingNumberState): Ast | null => {
   if (!state.accessor) {
     return null;
   }
@@ -44,7 +35,7 @@ const toExpression = (
     ],
   };
 };
-export const getMetricVisualization = ({
+export const getRotatingNumberVisualization = ({
   theme,
 }: {
   theme: ThemeServiceStart;
@@ -54,7 +45,7 @@ export const getMetricVisualization = ({
   visualizationTypes: [
     {
       id: 'rotatingNumber',
-      icon: LensIconChartMetric,
+      icon: 'refresh',
       label: 'Rotating number',
       groupLabel: 'Goal and single value',
       sortPriority: 3,
@@ -78,44 +69,56 @@ export const getMetricVisualization = ({
 
   getDescription() {
     return {
-      icon: LensIconChartMetric,
-      label: i18n.translate('xpack.lens.metric.label', {
-        defaultMessage: 'Metric',
-      }),
+      icon: 'refresh',
+      label: 'A number that rotates',
     };
   },
 
-  getSuggestions,
+  getSuggestions: ({ state, table }) => {
+    if (table.columns.length > 1) {
+      return [];
+    }
+    const column = table.columns[0];
+    if (column.operation.isBucketed || column.operation.dataType !== 'number') {
+      return [];
+    }
+    return [
+      {
+        previewIcon: 'refresh',
+        score: 0.5,
+        title: table.label || 'Rotating number',
+        state: {
+          layerId: table.layerId,
+          color: state?.color || DEFAULT_COLOR,
+          accessor: column.columnId,
+        },
+      },
+    ];
+  },
 
   initialize(addNewLayer, state) {
     return (
       state || {
         layerId: addNewLayer(),
         accessor: undefined,
-        layerType: layerTypes.DATA,
+        color: DEFAULT_COLOR,
       }
     );
   },
 
   getConfiguration(props) {
-    const hasColoring = props.state.palette != null;
-    const stops = props.state.palette?.params?.stops || [];
     return {
       groups: [
         {
           groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          groupLabel: 'Rotating number',
           layerId: props.state.layerId,
           accessors: props.state.accessor
             ? [
                 {
                   columnId: props.state.accessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring
-                    ? props.state.palette?.params?.name === CUSTOM_PALETTE
-                      ? getStopsForFixedMode(stops, props.state.palette?.params.colorStops)
-                      : stops.map(({ color }) => color)
-                    : undefined,
+                  triggerIcon: 'color',
+                  color: props.state.color,
                 },
               ]
             : [],
@@ -132,38 +135,39 @@ export const getMetricVisualization = ({
     return [
       {
         type: layerTypes.DATA,
-        label: i18n.translate('xpack.lens.metric.addLayer', {
-          defaultMessage: 'Add visualization layer',
-        }),
+        label: 'Add visualization layer',
       },
     ];
   },
 
   getLayerType(layerId, state) {
     if (state?.layerId === layerId) {
-      return state.layerType;
+      return layerTypes.DATA;
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers, { mode: 'reduced' }),
+  toExpression: (state) => toExpression(state),
+  toPreviewExpression: (state) => toExpression(state),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };
   },
 
   removeDimension({ prevState }) {
-    return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
+    return { ...prevState, accessor: undefined };
   },
 
   renderDimensionEditor(domElement, props) {
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <MetricDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
+        <EuiFormRow label="Pick a color">
+          <EuiColorPicker
+            onChange={(newColor) => {
+              props.setState({ ...props.state, color: newColor });
+            }}
+            color={props.state.color}
+          />
+        </EuiFormRow>
       </KibanaThemeProvider>,
       domElement
     );

@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataViewsPublicPluginStart, DataView } from '../../../../src/plugins/data_views/public';
-import { LensPublicStart } from '../../../plugins/lens/public';
+import { LensPublicSetup, LensPublicStart } from '../../../plugins/lens/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
-import {
-  TypedLensByValueInput,
-  PersistedIndexPatternLayer,
-  XYState,
-  LensEmbeddableInput,
-  DateHistogramIndexPatternColumn,
-} from '../../../plugins/lens/public';
+import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plugins/lens/public';
+import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
+import { getRotatingNumberVisualization } from './visualization';
+import { RotatingNumberState } from './types';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
+  lens: LensPublicSetup;
+  expressions: ExpressionsSetup;
 }
 
 export interface StartDependencies {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['attributes'] {
@@ -41,8 +43,10 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
     },
   };
 
-  const rotatingNumberConfig = {
+  const rotatingNumberConfig: RotatingNumberState = {
     accessor: 'col1',
+    color: '#ff0000',
+    layerId: 'layer1',
   };
 
   return {
@@ -78,16 +82,19 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
 export class EmbeddedLensExamplePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
-  public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { developerExamples, lens, expressions }: SetupDependencies
+  ) {
     core.application.register({
-      id: '3rd_party_lens_vis_example',
-      title: '3rd party Lens vis example',
+      id: 'third_party_lens_vis_example',
+      title: 'Third party Lens vis example',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: (params) => {
         (async () => {
-          const [, { lens, dataViews }] = await core.getStartServices();
-          const defaultDataView = await dataViews.getDefaultDataView();
-          lens.navigateToPrefilledEditor({
+          const [, { lens: lensStart, dataViews }] = await core.getStartServices();
+          const defaultDataView = await dataViews.getDefault();
+          lensStart.navigateToPrefilledEditor({
             id: '',
             timeRange: {
               from: 'now-5d',
@@ -101,19 +108,28 @@ export class EmbeddedLensExamplePlugin
     });
 
     developerExamples.register({
-      appId: '3rd_party_lens_vis_example',
-      title: '3rd party Lens visualization',
+      appId: 'third_party_lens_vis_example',
+      title: 'Third party Lens visualization',
       description: 'Add custom visualization types to the Lens editor',
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/3rd_party_lens_vis_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_lens_vis_example',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
         },
       ],
     });
+
+    expressions.registerRenderer(() =>
+      getRotatingNumberRenderer(
+        core.getStartServices().then(([, { fieldFormats }]) => fieldFormats.deserialize)
+      )
+    );
+    expressions.registerFunction(() => rotatingNumberFunction);
+
+    lens.registerVisualization(async () => getRotatingNumberVisualization({ theme: core.theme }));
   }
 
   public start() {}
