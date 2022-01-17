@@ -12,6 +12,7 @@ import { fieldFormatsMock } from '../../../field_formats/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
+import { FLEET_ASSETS_TO_IGNORE } from '../constants';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -54,7 +55,7 @@ describe('IndexPatterns', () => {
   const uiSettings = {
     get: () => Promise.resolve(false),
     getAll: () => {},
-    set: () => () => {},
+    set: jest.fn(),
     remove: jest.fn(),
   } as any as UiSettingsCommon;
   const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
@@ -308,10 +309,12 @@ describe('IndexPatterns', () => {
   });
 
   describe('getDefaultDataView', () => {
-    test('gets default data view', async () => {
+    beforeEach(() => {
       indexPatterns.clearCache();
-      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
 
+    test('gets default data view', async () => {
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
@@ -324,13 +327,11 @@ describe('IndexPatterns', () => {
       );
       savedObjectsClient.get = jest.fn(() => Promise.resolve(undefined) as Promise<any>);
       indexPatterns.clearCache();
-      expect(await indexPatterns.getDefaultDataView()).toBeUndefined();
+      expect(await indexPatterns.getDefaultDataView()).toBeNull();
     });
 
     test("default doesn't exist, grabs another data view", async () => {
-      indexPatterns.clearCache();
-      jest.clearAllMocks();
-      uiSettings.get = jest.fn().mockResolvedValue(['bar']);
+      uiSettings.get = jest.fn().mockResolvedValue('foo');
 
       savedObjectsClient.find = jest.fn(
         () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -349,6 +350,74 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
       expect(uiSettings.remove).toBeCalledTimes(1);
+      expect(uiSettings.set).toBeCalledTimes(1);
+    });
+
+    test("when default exists, it isn't overridden with first data view", async () => {
+      uiSettings.get = jest.fn().mockResolvedValue('id2');
+
+      savedObjectsClient.find = jest.fn(
+        () =>
+          Promise.resolve([
+            { id: 'id1', version: 'a', attributes: { title: 'title' } },
+            { id: 'id2', version: 'a', attributes: { title: 'title' } },
+          ]) as Promise<Array<SavedObject<any>>>
+      );
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation((type: string, id: string) =>
+          Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
+        );
+
+      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
+      expect(defaultDataViewResult).toBeInstanceOf(DataView);
+      expect(defaultDataViewResult?.id).toBe('id2');
+
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(uiSettings.remove).toBeCalledTimes(0);
+      expect(uiSettings.set).toBeCalledTimes(0);
+    });
+
+    test('when setting default it prefers user created data views', async () => {
+      savedObjectsClient.find = jest.fn(
+        () =>
+          Promise.resolve([
+            {
+              id: 'id1',
+              version: 'a',
+              attributes: { title: FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
+            },
+            {
+              id: 'id2',
+              version: 'a',
+              attributes: { title: FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
+            },
+            {
+              id: 'id3',
+              version: 'a',
+              attributes: { title: 'user-data-view' },
+            },
+          ]) as Promise<Array<SavedObject<any>>>
+      );
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation((type: string, id: string) =>
+          Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
+        );
+
+      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
+      expect(defaultDataViewResult).toBeInstanceOf(DataView);
+      expect(defaultDataViewResult?.id).toBe('id3');
+
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(uiSettings.remove).toBeCalledTimes(0);
+      expect(uiSettings.set).toBeCalledTimes(1);
     });
   });
 });
