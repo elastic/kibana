@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 
 import './add_message_variables.scss';
@@ -17,6 +18,20 @@ import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../../../alerting/common';
 import { templateActionVariable } from '../lib';
+
+const NO_EDITOR_ERROR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.jsonEditorWithMessageVariable.noEditorErrorTitle',
+  {
+    defaultMessage: 'Unable to add message variable',
+  }
+);
+
+const NO_EDITOR_ERROR_MESSAGE = i18n.translate(
+  'xpack.triggersActionsUI.components.jsonEditorWithMessageVariable.noEditorErrorMessage',
+  {
+    defaultMessage: 'Editor was not found, please refresh page and try again',
+  }
+);
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -31,7 +46,10 @@ interface Props {
 }
 
 const { useXJsonMode } = XJson;
-// Source used to insert text imperatively into the code editor
+
+// Source ID used to insert text imperatively into the code editor,
+// this value is only used to uniquely identify any single edit attempt.
+// Multiple editors can use the same ID without any issues.
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -47,12 +65,14 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;
     if (!editor) {
+      setShowErrorMessage(true);
       return;
     }
     const cursorPosition = editor.getSelection();
@@ -70,6 +90,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     } else {
       newValue = templatedVar;
     }
+    setShowErrorMessage(false);
     setXJson(newValue);
     // Keep the documents in sync with the editor content
     onDocumentsChange(convertToJson(newValue));
@@ -99,6 +120,21 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     registerEditorListeners();
   };
 
+  const renderErrorMessage = () => {
+    if (!showErrorMessage) {
+      return null;
+    }
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut size="s" color="danger" iconType="alert" title={NO_EDITOR_ERROR_TITLE}>
+          <p>{NO_EDITOR_ERROR_MESSAGE}</p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </>
+    );
+  };
+
   useEffect(() => {
     registerEditorListeners();
     return () => unregisterEditorListeners();
@@ -119,33 +155,36 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       }
       helpText={helpText}
     >
-      <CodeEditor
-        languageId={XJsonLang.ID}
-        options={{
-          renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
-          lineNumbers: 'on',
-          fontSize: 14,
-          minimap: {
-            enabled: false,
-          },
-          scrollBeyondLastLine: false,
-          folding: true,
-          wordWrap: 'on',
-          wrappingIndent: 'indent',
-          automaticLayout: true,
-        }}
-        value={xJson}
-        width="100%"
-        height="200px"
-        data-test-subj={`${paramsProperty}JsonEditor`}
-        aria-label={areaLabel}
-        editorDidMount={onEditorMount}
-        onChange={(xjson: string) => {
-          setXJson(xjson);
-          // Keep the documents in sync with the editor content
-          onDocumentsChange(convertToJson(xjson));
-        }}
-      />
+      <>
+        {renderErrorMessage()}
+        <CodeEditor
+          languageId={XJsonLang.ID}
+          options={{
+            renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
+            lineNumbers: 'on',
+            fontSize: 14,
+            minimap: {
+              enabled: false,
+            },
+            scrollBeyondLastLine: false,
+            folding: true,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
+          value={xJson}
+          width="100%"
+          height="200px"
+          data-test-subj={`${paramsProperty}JsonEditor`}
+          aria-label={areaLabel}
+          editorDidMount={onEditorMount}
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            // Keep the documents in sync with the editor content
+            onDocumentsChange(convertToJson(xjson));
+          }}
+        />
+      </>
     </EuiFormRow>
   );
 };
