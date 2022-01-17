@@ -61,10 +61,8 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
   private readonly rootScopedClient: KibanaClient;
-  private readonly allowListHeaders: string[];
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
-
   private isClosed = false;
 
   public readonly asInternalUser: KibanaClient;
@@ -96,7 +94,6 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       scoped: true,
     });
-    this.allowListHeaders = ['x-opaque-id', ...this.config.requestHeadersWhitelist];
   }
 
   asScoped(request: ScopeableRequest) {
@@ -139,14 +136,15 @@ export class ClusterClient implements ICustomClusterClient {
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
-      const requestHeaders = ensureRawRequest(request).headers;
+      const requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
-      const authHeaders = this.authHeaders ? this.authHeaders.get(request) : {};
+      const authHeaders =  this.authHeaders ? this.authHeaders.get(request) : {};
 
-      scopedHeaders = filterHeaders(
-        { ...requestHeaders, ...requestIdHeaders, ...authHeaders },
-        this.allowListHeaders
-      );
+      scopedHeaders = {
+        ...filterHeaders(requestHeaders, this.config.requestHeadersWhitelist),
+        ...requestIdHeaders,
+        ...authHeaders,
+      };
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }

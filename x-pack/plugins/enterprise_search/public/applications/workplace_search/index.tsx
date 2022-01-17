@@ -50,9 +50,10 @@ import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { errorConnecting } = useValues(HttpLogic);
-  const { enterpriseSearchVersion, kibanaVersion, errorConnectingMessage } = props;
+  const { errorConnectingMessage } = useValues(HttpLogic);
+  const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
+  const isSetupGuidePath = !!useRouteMatch(SETUP_GUIDE_PATH);
 
   if (!config.host) {
     return <WorkplaceSearchUnconfigured />;
@@ -63,8 +64,8 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
         kibanaVersion={kibanaVersion}
       />
     );
-  } else if (errorConnecting) {
-    return <ErrorState errorConnectingMessage={errorConnectingMessage} />;
+  } else if (errorConnectingMessage && !isSetupGuidePath) {
+    return <ErrorState />;
   }
 
   return <WorkplaceSearchConfigured {...props} />;
@@ -79,7 +80,6 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * Personal dashboard urls begin with /p/
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
-
   const isOrganization = !useRouteMatch(PERSONAL_PATH);
 
   setContext(isOrganization);

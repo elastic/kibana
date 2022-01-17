@@ -224,13 +224,13 @@ describe('ClusterClient', () => {
       );
     });
 
-    it('creates a scoped facade with filtered auth headers', () => {
+    it('does not filter auth headers', () => {
       const config = createConfig({
         requestHeadersWhitelist: ['authorization'],
       });
       authHeaders.get.mockReturnValue({
         authorization: 'auth',
-        other: 'nope',
+        other: 'yep',
       });
 
       const clusterClient = new ClusterClient({ config, logger, type: 'custom-type', authHeaders });
@@ -241,7 +241,12 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
+          headers: {
+            ...DEFAULT_HEADERS,
+            authorization: 'auth',
+            other: 'yep',
+            'x-opaque-id': expect.any(String),
+          },
         })
       );
     });
@@ -252,7 +257,7 @@ describe('ClusterClient', () => {
       });
       authHeaders.get.mockReturnValue({
         authorization: 'auth',
-        other: 'nope',
+        other: 'yep',
       });
 
       const clusterClient = new ClusterClient({ config, logger, type: 'custom-type', authHeaders });
@@ -267,7 +272,12 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...DEFAULT_HEADERS, authorization: 'auth', 'x-opaque-id': expect.any(String) },
+          headers: {
+            ...DEFAULT_HEADERS,
+            authorization: 'auth',
+            other: 'yep',
+            'x-opaque-id': expect.any(String),
+          },
         })
       );
     });
