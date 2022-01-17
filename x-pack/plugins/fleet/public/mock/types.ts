@@ -14,6 +14,24 @@ export type MockedFleetStartServices = MockedKeys<FleetStartServices>;
 export type MockedFleetSetupDeps = MockedKeys<FleetSetupDeps>;
 
 export type MockedFleetStartDeps = MockedKeys<FleetStartDeps>;
+export interface CustomCapabilities {
+  [x: string]: Readonly<{
+    [x: string]:
+      | boolean
+      | Readonly<{
+          [x: string]: boolean;
+        }>;
+  }>;
+  navLinks: Readonly<{
+    [x: string]: boolean;
+  }>;
+  management: {
+    [sectionId: string]: Record<string, boolean>;
+  };
+  catalogue: Record<string, boolean>;
+}
 
 // Don't wrap the `authz` property which is a promise with `jest.Mocked`
 export type MockedFleetStart = MockedKeys<Omit<FleetStart, 'authz'>> & Pick<FleetStart, 'authz'>;
+
+export type MockedCapabilities = MockedKeys<CustomCapabilities>;
