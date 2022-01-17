@@ -335,7 +335,7 @@ export const DOWN_LABEL = (
   numTimes: number
 ) =>
   i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
-    defaultMessage: `{monitorName} failed {count} times in the last {interval}. Alert when > {numTimes}`,
+    defaultMessage: `{monitorName} failed {count} times in the last {interval}. Alert when > {numTimes}.`,
     values: {
       monitorName,
       count,
