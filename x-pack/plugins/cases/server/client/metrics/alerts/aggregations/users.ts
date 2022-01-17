@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AggregationBuilder, AggregationResponse } from './types';
+import { AggregationBuilder, AggregationResponse } from '../../types';
 
-export class Users implements AggregationBuilder {
+export class AlertUsers implements AggregationBuilder {
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
   build() {

@@ -17,7 +17,6 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   VERSION,
-  TAGS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -285,7 +284,6 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_WORKFLOW_STATUS]: 'open',
           [SPACE_IDS]: ['default'],
           [VERSION]: fullSignal[VERSION],
-          [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },
