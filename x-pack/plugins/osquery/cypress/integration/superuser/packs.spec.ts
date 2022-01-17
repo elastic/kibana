@@ -79,7 +79,7 @@ describe('SuperUser - Packs', () => {
       findAndClickButton('Save and deploy changes');
     });
     // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
-    it('to click the icon and visit discover', () => {
+    it.skip('to click the icon and visit discover', () => {
       preparePack(PACK_NAME, SAVED_QUERY_ID);
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
