@@ -10,7 +10,7 @@ import { playwrightRunTests } from './playwright_start';
 
 const { argv } = yargs(process.argv.slice(2))
   .option('headless', {
-    default: true,
+    default: false,
     type: 'boolean',
     description: 'Start in headless mode',
   })
