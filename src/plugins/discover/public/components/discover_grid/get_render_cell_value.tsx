@@ -169,10 +169,15 @@ export const getRenderCellValueFn =
     if (!field?.type && rowFlattened && typeof rowFlattened[columnId] === 'object') {
       if (isDetails) {
         // nicely formatted JSON for the expanded view
-        return <span>{JSON.stringify(rowFlattened[columnId], null, 2)}</span>;
+        return (
+          <JsonCodeEditor
+            json={rowFlattened[columnId] as Record<string, unknown>}
+            width={defaultMonacoEditorWidth}
+          />
+        );
       }
 
-      return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
+      return formatFieldValue(rowFlattened[columnId], row, indexPattern, field);
     }
 
     return (
