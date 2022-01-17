@@ -48,7 +48,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
   jobIds,
   viewBy,
 }) => {
-  const { selectedItems, selection, dashboardItems, isLoading, search } = useDashboardTable();
+  const { dashboardItems, isLoading, search } = useDashboardTable();
 
   const [selectedSwimlanes, setSelectedSwimlanes] = useState<{ [key in SwimlaneType]: boolean }>({
     [SWIMLANE_TYPE.OVERALL]: true,
@@ -80,12 +80,9 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
         },
       };
     });
-  }, [selectedSwimlanes, selectedItems]);
-  const { addToDashboardAndEditCallback, addToDashboardCallback } = useAddToDashboardActions({
-    onClose,
-    getPanelsData,
-    selectedDashboards: selectedItems,
-  });
+  }, [selectedSwimlanes]);
+
+  const { addToDashboardAndEditCallback } = useAddToDashboardActions();
 
   const swimlaneTypeOptions = [
     {
@@ -139,17 +136,15 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
     />
   );
 
-  const disabled = noSwimlaneSelected || selectedItems.length === 0;
+  const disabled = noSwimlaneSelected;
+
   return (
     <AddToDashboardControl
       onClose={onClose}
-      selectedItems={selectedItems}
-      selection={selection}
       dashboardItems={dashboardItems}
       isLoading={isLoading}
       search={search}
       addToDashboardAndEditCallback={addToDashboardAndEditCallback}
-      addToDashboardCallback={addToDashboardCallback}
       disabled={disabled}
       title={title}
     >

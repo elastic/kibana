@@ -91,6 +91,7 @@ export function MachineLearningAnomalyExplorerProvider({
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
         await this.selectAllDashboards();
         await this.waitForAddAndEditDashboardButtonEnabled();
+        // FIXME swim lane embeddable tests
         await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
 
         // make sure the dashboard page actually loaded

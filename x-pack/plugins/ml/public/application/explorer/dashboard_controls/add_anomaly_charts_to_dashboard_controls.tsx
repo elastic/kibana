@@ -73,11 +73,9 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     ];
   }, [selectedCells, interval, bounds, jobIds, maxSeriesToPlot, severity]);
 
-  const { selectedItems, selection, dashboardItems, isLoading, search } = useDashboardTable();
-  const { addToDashboardAndEditCallback, addToDashboardCallback } = useAddToDashboardActions({
-    onClose,
+  const { dashboardItems, isLoading, search } = useDashboardTable();
+  const { addToDashboardAndEditCallback } = useAddToDashboardActions({
     getPanelsData,
-    selectedDashboards: selectedItems,
   });
   const title = (
     <FormattedMessage
@@ -86,7 +84,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     />
   );
 
-  const disabled = selectedItems.length < 1 && !Array.isArray(jobIds === undefined);
+  const disabled = !Array.isArray(jobIds === undefined);
 
   const extraControls = (
     <EuiFormRow
@@ -112,13 +110,10 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   return (
     <AddToDashboardControl
       onClose={onClose}
-      selectedItems={selectedItems}
-      selection={selection}
       dashboardItems={dashboardItems}
       isLoading={isLoading}
       search={search}
       addToDashboardAndEditCallback={addToDashboardAndEditCallback}
-      addToDashboardCallback={addToDashboardCallback}
       disabled={disabled}
       title={title}
     >
