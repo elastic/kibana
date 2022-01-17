@@ -17,7 +17,8 @@ import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
-let actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+getActionsClientWithRequest.mockResolvedValue(actionsClient);
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -36,22 +37,20 @@ const executeParams = {
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
+actionExecutor.initialize({
+  logger: loggerMock,
+  spaces: spacesMock,
+  getServices: () => services,
+  getActionsClientWithRequest,
+  actionTypeRegistry,
+  encryptedSavedObjectsClient,
+  eventLogger,
+  preconfiguredActions: [],
+});
 
 beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
-  actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
-  actionExecutor.initialize({
-    logger: loggerMock,
-    spaces: spacesMock,
-    getServices: () => services,
-    getActionsClientWithRequest,
-    actionTypeRegistry,
-    encryptedSavedObjectsClient,
-    eventLogger,
-    preconfiguredActions: [],
-  });
-  getActionsClientWithRequest.mockResolvedValue(actionsClient);
 });
 
 test('successfully executes', async () => {
@@ -116,7 +115,6 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute-start",
-            "kind": "action",
           },
           "kibana": Object {
             "saved_objects": Array [
@@ -136,7 +134,6 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute",
-            "kind": "action",
             "outcome": "success",
           },
           "kibana": Object {
@@ -587,17 +584,6 @@ test('writes to event log for execute and execute start', async () => {
 });
 
 function setupActionExecutorMock() {
-  actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
-  actionExecutor.initialize({
-    logger: loggerMock,
-    spaces: spacesMock,
-    getServices: () => services,
-    getActionsClientWithRequest,
-    actionTypeRegistry,
-    encryptedSavedObjectsClient,
-    eventLogger,
-    preconfiguredActions: [],
-  });
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
