@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { isFilterPinned } from '@kbn/es-query';
 
 import type { SavedObjectReference } from 'kibana/public';
 import { SaveModal } from './save_modal';
@@ -16,7 +17,7 @@ import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { esFilters, FilterManager } from '../../../../../src/plugins/data/public';
+import { FilterManager } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import type { LensAppState } from '../state_management';
@@ -378,7 +379,7 @@ export function removePinnedFilters(doc?: Document) {
     ...doc,
     state: {
       ...doc.state,
-      filters: (doc.state?.filters || []).filter((filter) => !esFilters.isFilterPinned(filter)),
+      filters: (doc.state?.filters || []).filter((filter) => !isFilterPinned(filter)),
     },
   };
 }
