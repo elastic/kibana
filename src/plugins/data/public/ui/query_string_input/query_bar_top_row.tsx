@@ -27,7 +27,6 @@ import {
   EuiButtonIcon,
   EuiPopover,
 } from '@elastic/eui';
-
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
