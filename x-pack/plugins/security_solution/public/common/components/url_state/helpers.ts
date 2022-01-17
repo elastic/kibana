@@ -29,7 +29,6 @@ import {
   ValueUrlState,
   UrlState,
   UrlStateProps,
-  UrlStateStateToPropsType,
 } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
