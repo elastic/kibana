@@ -6,7 +6,7 @@ Object {
   "type": "render",
   "value": Object {
     "visConfig": Object {
-      "addLegend": true,
+      "legendDisplay": "show",
       "addTooltip": true,
       "dimensions": Object {
         "metric": Object {
