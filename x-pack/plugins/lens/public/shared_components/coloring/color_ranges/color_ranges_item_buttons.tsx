@@ -13,6 +13,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
 import { isLastItem } from './utils';
+import { TooltipWrapper } from '../../index';
 
 import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import { ColorRangesContext } from './color_ranges_context';
@@ -69,7 +70,7 @@ export function ColorRangeEditButton({
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
-  const { dataBounds, palettes } = useContext(ColorRangesContext);
+  const { dataBounds, palettes, allowEditMinMaxValues } = useContext(ColorRangesContext);
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
@@ -86,13 +87,26 @@ export function ColorRangeEditButton({
   });
 
   return (
-    <EuiButtonIcon
-      iconType="pencil"
-      aria-label={title}
-      title={title}
-      onClick={onExecuteAction}
-      data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
-    />
+    <TooltipWrapper
+      tooltipContent={i18n.translate(
+        'xpack.lens.dynamicColoring.customPalette.disallowedEditMinMaxValues',
+        {
+          defaultMessage: `For current configuration you can not set custom value`,
+        }
+      )}
+      condition={!Boolean(allowEditMinMaxValues)}
+      position="top"
+      delay="regular"
+    >
+      <EuiButtonIcon
+        iconType="pencil"
+        aria-label={title}
+        title={title}
+        disabled={!allowEditMinMaxValues}
+        onClick={onExecuteAction}
+        data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
+      />
+    </TooltipWrapper>
   );
 }
 

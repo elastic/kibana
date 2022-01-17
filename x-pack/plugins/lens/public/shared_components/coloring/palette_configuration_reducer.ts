@@ -145,8 +145,14 @@ export const paletteConfigurationReducer: Reducer<
       return withUpdatingColorRanges(palettes, newPalette, dataBounds);
     }
     case 'changeColorPalette': {
-      const { dataBounds, palettes, palette } = action.payload;
-      const newPalette = changeColorPalette(palette, state.activePalette, palettes, dataBounds);
+      const { dataBounds, palettes, palette, allowEditMinMaxValues } = action.payload;
+      const newPalette = changeColorPalette(
+        palette,
+        state.activePalette,
+        palettes,
+        dataBounds,
+        allowEditMinMaxValues
+      );
       return withUpdatingColorRanges(palettes, newPalette, dataBounds);
     }
     default:

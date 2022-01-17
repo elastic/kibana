@@ -142,3 +142,13 @@ export const validateColorRanges = (
     last: validateColorRange(colorRanges[colorRanges.length - 1], 'end', minMax),
   };
 };
+
+export const isAllColorRangesValid = (
+  colorRanges: ColorRange[],
+  dataBounds: DataBounds,
+  rangeType: CustomPaletteParams['rangeType']
+) => {
+  return Object.values(validateColorRanges(colorRanges, dataBounds, rangeType)).every(
+    (colorRange) => colorRange.isValid
+  );
+};

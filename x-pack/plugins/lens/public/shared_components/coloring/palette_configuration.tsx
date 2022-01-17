@@ -17,7 +17,8 @@ import './palette_configuration.scss';
 
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import { toColorRanges, getFallbackDataBounds } from './utils';
-import { ColorRanges, ColorRangesContext } from './color_ranges';
+import { defaultPaletteParams } from './constants';
+import { ColorRanges, ColorRangesContext, isAllColorRangesValid } from './color_ranges';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
 
 export function CustomizablePalette({
@@ -26,12 +27,14 @@ export function CustomizablePalette({
   setPalette,
   dataBounds = getFallbackDataBounds(activePalette.params?.rangeType),
   showRangeTypeSelector = true,
+  allowEditMinMaxValues = true,
 }: {
   palettes: PaletteRegistry;
   activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: DataBounds;
   showRangeTypeSelector?: boolean;
+  allowEditMinMaxValues?: boolean;
 }) {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
   const colorRangesToShow = toColorRanges(
@@ -48,9 +51,12 @@ export function CustomizablePalette({
 
   useDebounce(
     () => {
+      const rangeType =
+        localState.activePalette?.params?.rangeType ?? defaultPaletteParams.rangeType;
       if (
-        localState.activePalette !== activePalette ||
-        colorRangesToShow !== localState.colorRanges
+        (localState.activePalette !== activePalette ||
+          colorRangesToShow !== localState.colorRanges) &&
+        isAllColorRangesValid(localState.colorRanges, dataBounds, rangeType)
       ) {
         setPalette(localState.activePalette);
       }
@@ -75,7 +81,7 @@ export function CustomizablePalette({
           setPalette={(newPalette) => {
             dispatch({
               type: 'changeColorPalette',
-              payload: { palette: newPalette, dataBounds, palettes },
+              payload: { palette: newPalette, dataBounds, palettes, allowEditMinMaxValues },
             });
           }}
           showCustomPalette
@@ -158,6 +164,7 @@ export function CustomizablePalette({
           value={{
             dataBounds,
             palettes,
+            allowEditMinMaxValues,
           }}
         >
           <ColorRanges

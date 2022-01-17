@@ -12,6 +12,7 @@ import type { DataBounds } from '../types';
 interface ColorRangesContextType {
   dataBounds: DataBounds;
   palettes: PaletteRegistry;
+  allowEditMinMaxValues?: boolean;
 }
 
 export const ColorRangesContext = React.createContext<ColorRangesContextType>(
