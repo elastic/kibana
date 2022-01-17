@@ -148,7 +148,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [agentCount, setAgentCount] = useState<number>(0);
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    SelectedPolicyTab.NEW
+    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
   );
 
   // New package policy state
@@ -161,8 +161,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     output_id: '', // TODO: Blank for now as we only support default output
     inputs: [],
   });
-
-  const [wasAgentPolicyChanged, setWasAgentPolicyChanged] = useState<boolean>(false);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -189,7 +187,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     (updatedAgentPolicy: AgentPolicy | undefined) => {
       if (updatedAgentPolicy) {
         setAgentPolicy(updatedAgentPolicy);
-        setWasAgentPolicyChanged(true);
         if (packageInfo) {
           setFormState('VALID');
         }
@@ -337,10 +334,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
   const doOnSaveNavigation = useRef<boolean>(true);
 
-  const handleInlineAgentPolicyCreate = useCallback(() => {
-    setWasAgentPolicyChanged(true);
-  }, []);
-
   // Detect if user left page
   useEffect(() => {
     return () => {
@@ -367,9 +360,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
         if (options?.path) {
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
-            // In cases where we created a new agent policy inline, we need to override the initial `path`
-            // value and navigate to the newly-created agent policy instead
-            path: wasAgentPolicyChanged ? packagePolicyPath : options.path,
+            // In cases where we want to navigate back to a new/existing policy, we need to override the initial `path`
+            // value and navigate to the actual agent policy instead
+            path: queryParamsPolicyId ? packagePolicyPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
@@ -382,7 +375,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         history.push(packagePolicyPath);
       }
     },
-    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, wasAgentPolicyChanged]
+    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, queryParamsPolicyId]
   );
 
   const onSubmit = useCallback(async () => {
@@ -400,8 +393,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       try {
         setFormState('LOADING');
         const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
-        setFormState('VALID');
-        if (resp.error) throw resp.error;
+        if (resp.error) {
+          setFormState('VALID');
+          throw resp.error;
+        }
         if (resp.data) {
           policyId = resp.data.item.id;
           setAgentPolicy(resp.data.item);
@@ -418,6 +413,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       }
     }
 
+    setFormState('LOADING');
     // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
     const { error, data } = await savePackagePolicy({
       ...packagePolicy,
@@ -506,7 +502,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicy}
-        onNewAgentPolicyCreate={handleInlineAgentPolicyCreate}
         selectedAgentPolicyId={queryParamsPolicyId}
       />
     ),
@@ -519,7 +514,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       validation,
       withSysMonitoring,
       updateSelectedPolicy,
-      handleInlineAgentPolicyCreate,
       queryParamsPolicyId,
     ]
   );
