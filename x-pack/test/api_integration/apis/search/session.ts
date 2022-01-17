@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { id: id2 } = searchRes2.body;
 
-        await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        await retry.waitFor('searches persisted into session', async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}`)
             .set('kbn-xsrf', 'foo')
@@ -648,7 +648,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { id } = searchRes.body;
 
-        await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        await retry.waitFor('searches persisted into session', async () => {
           const resp = await supertest
             .get(`/s/${spaceId}/internal/session/${sessionId}`)
             .set('kbn-xsrf', 'foo')
@@ -685,7 +685,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should complete persisten session', async () => {
+      it('should complete persisted session', async () => {
         const sessionId = `my-session-${Math.random()}`;
 
         // run search
@@ -722,7 +722,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        await retry.waitFor('searches persisted into session', async () => {
           const resp = await supertest
             .get(`/s/${spaceId}/internal/session/${sessionId}`)
             .set('kbn-xsrf', 'foo')
@@ -741,9 +741,8 @@ export default function ({ getService }: FtrProviderContext) {
         // session refresh interval is 5 seconds, wait to give a chance for status to update
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        await retry.waitForWithTimeout(
+        await retry.waitFor(
           'searches eventually complete and session gets into the complete state',
-          5000,
           async () => {
             const resp = await supertest
               .get(`/s/${spaceId}/internal/session/${sessionId}`)
