@@ -534,6 +534,7 @@ describe('SavedObjectsTable', () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern', meta: {} },
         { id: '3', type: 'dashboard', meta: {} },
+        { id: '4', type: 'dashboard', meta: { hiddenType: false } },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({

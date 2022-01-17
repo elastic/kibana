@@ -517,7 +517,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const deleteStatus = await bulkDeleteObjects(
       http,
-      selectedSavedObjects.map(({ id, type }) => ({ id, type }))
+      selectedSavedObjects
+        .filter((object) => !object.meta.hiddenType)
+        .map(({ id, type }) => ({ id, type }))
     );
 
     deleteStatus
