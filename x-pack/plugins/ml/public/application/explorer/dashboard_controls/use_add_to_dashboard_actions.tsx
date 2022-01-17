@@ -10,31 +10,36 @@ import { DashboardItem } from './use_dashboards_table';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDashboardService } from '../../services/dashboard_service';
 import { DashboardConstants } from '../../../../../../../src/plugins/dashboard/public';
-import { PLUGIN_ID } from '../../../../common/constants/app';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../../../embeddables';
+import {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalySwimlaneEmbeddableInput,
+} from '../../../embeddables';
 
-export const useAddToDashboardActions = () => {
+export const useAddToDashboardActions = (
+  getEmbeddableInput: () => {
+    type: typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
+    input: Partial<AnomalySwimlaneEmbeddableInput>;
+  }
+) => {
   const {
     services: { embeddable },
   } = useMlKibana();
   const dashboardService = useDashboardService();
 
-  const addToDashboardAndEditCallback = useCallback(async (selectedDashboard: DashboardItem) => {
-    const stateTransfer = embeddable.getStateTransfer();
-    const selectedDashboardId = selectedDashboard.id;
+  const addToDashboardAndEditCallback = useCallback(
+    async (selectedDashboard: DashboardItem) => {
+      const stateTransfer = embeddable.getStateTransfer();
+      const selectedDashboardId = selectedDashboard.id;
 
-    const dashboardPath = await dashboardService.getDashboardEditUrl(selectedDashboardId);
+      const dashboardPath = await dashboardService.getDashboardEditUrl(selectedDashboardId);
 
-    await stateTransfer.navigateToEditor(DashboardConstants.DASHBOARDS_ID, {
-      path: dashboardPath,
-      state: {
-        originatingApp: PLUGIN_ID,
-        embeddableId: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-        originatingPath: '',
-        // valueInput: {},
-      },
-    });
-  }, []);
+      await stateTransfer.navigateToWithEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, {
+        path: dashboardPath,
+        state: getEmbeddableInput(),
+      });
+    },
+    [getEmbeddableInput]
+  );
 
   return { addToDashboardAndEditCallback };
 };

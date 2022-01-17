@@ -6,7 +6,13 @@
  */
 
 import React, { FC, useCallback, useState } from 'react';
-import { EuiFormRow, EuiCheckboxGroup, EuiInMemoryTableProps, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiInMemoryTableProps,
+  EuiSpacer,
+  EuiRadioGroup,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DashboardSavedObject } from '../../../../../../../src/plugins/dashboard/public';
@@ -29,8 +35,8 @@ export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
   return {
-    type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     title: getDefaultSwimlanePanelTitle(jobIds),
+    id: htmlIdGenerator()(),
   };
 }
 
@@ -50,39 +56,32 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
 }) => {
   const { dashboardItems, isLoading, search } = useDashboardTable();
 
-  const [selectedSwimlanes, setSelectedSwimlanes] = useState<{ [key in SwimlaneType]: boolean }>({
-    [SWIMLANE_TYPE.OVERALL]: true,
-    [SWIMLANE_TYPE.VIEW_BY]: false,
-  });
+  const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType>(SWIMLANE_TYPE.OVERALL);
 
-  const getPanelsData = useCallback(async () => {
-    const swimlanes = Object.entries(selectedSwimlanes)
-      .filter(([, isSelected]) => isSelected)
-      .map(([swimlaneType]) => swimlaneType);
-
-    return swimlanes.map((swimlaneType) => {
-      const config = getDefaultEmbeddablePanelConfig(jobIds);
-      if (swimlaneType === SWIMLANE_TYPE.VIEW_BY) {
-        return {
-          ...config,
-          embeddableConfig: {
-            jobIds,
-            swimlaneType,
-            viewBy,
-          },
-        };
-      }
+  const getEmbeddableInput = useCallback(() => {
+    const config = getDefaultEmbeddablePanelConfig(jobIds);
+    if (selectedSwimlane === SWIMLANE_TYPE.VIEW_BY) {
       return {
-        ...config,
-        embeddableConfig: {
+        input: {
+          ...config,
           jobIds,
-          swimlaneType,
+          swimlaneType: selectedSwimlane,
+          viewBy,
         },
+        type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
       };
-    });
-  }, [selectedSwimlanes]);
+    }
+    return {
+      input: {
+        ...config,
+        jobIds,
+        swimlaneType: selectedSwimlane,
+      },
+      type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    };
+  }, [selectedSwimlane]);
 
-  const { addToDashboardAndEditCallback } = useAddToDashboardActions();
+  const { addToDashboardAndEditCallback } = useAddToDashboardActions(getEmbeddableInput);
 
   const swimlaneTypeOptions = [
     {
@@ -100,8 +99,6 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
     },
   ];
 
-  const noSwimlaneSelected = Object.values(selectedSwimlanes).every((isSelected) => !isSelected);
-
   const extraControls = (
     <>
       <EuiFormRow
@@ -112,15 +109,11 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
           />
         }
       >
-        <EuiCheckboxGroup
+        <EuiRadioGroup
           options={swimlaneTypeOptions}
-          idToSelectedMap={selectedSwimlanes}
+          idSelected={selectedSwimlane}
           onChange={(optionId) => {
-            const newSelection = {
-              ...selectedSwimlanes,
-              [optionId]: !selectedSwimlanes[optionId as SwimlaneType],
-            };
-            setSelectedSwimlanes(newSelection);
+            setSelectedSwimlane(optionId as SwimlaneType);
           }}
           data-test-subj="mlAddToDashboardSwimlaneTypeSelector"
         />
@@ -132,11 +125,9 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
   const title = (
     <FormattedMessage
       id="xpack.ml.explorer.addToDashboard.swimlanes.dashboardsTitle"
-      defaultMessage="Add swim lanes to dashboards"
+      defaultMessage="Add swim lane to a dashboard"
     />
   );
-
-  const disabled = noSwimlaneSelected;
 
   return (
     <AddToDashboardControl
@@ -145,7 +136,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
       isLoading={isLoading}
       search={search}
       addToDashboardAndEditCallback={addToDashboardAndEditCallback}
-      disabled={disabled}
+      disabled={false}
       title={title}
     >
       {extraControls}
