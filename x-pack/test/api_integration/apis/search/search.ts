@@ -23,13 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
         shard_delay: {
           value: delay,
         },
-        aggs: {
-          host: {
-            terms: {
-              field: 'hostname',
-            },
-          },
-        },
       },
     },
   });
