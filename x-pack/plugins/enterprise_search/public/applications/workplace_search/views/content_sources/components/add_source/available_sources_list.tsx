@@ -97,7 +97,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
 
   const visibleSources = (
     <>
-      <EuiFlexGrid columns={2} direction="column" gutterSize="m">
+      <EuiFlexGrid columns={2} direction="column" gutterSize="l">
         {sources.map((source, i) => (
           <EuiFlexItem grow={false} key={i}>
             <EuiFlexGroup
