@@ -157,10 +157,11 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
   };
-  const reason = generateAlertMessage(MonitorStatusTranslations.defaultActionMessage, {
-    ...summary,
-    statusMessage,
-  });
+  // const reason = generateAlertMessage(MonitorStatusTranslations.defaultActionMessage, {
+  //   ...summary,
+  //   statusMessage,
+  // });
+  const reason = statusMessage;
   return {
     ...summary,
     reason,
