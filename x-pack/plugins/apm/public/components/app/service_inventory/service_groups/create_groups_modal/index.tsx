@@ -21,42 +21,45 @@ export interface GroupDetails {
   description?: string;
 }
 
-export interface SelectService {
+export interface SelectServices {
   kql: string;
 }
 
 export function CreateGroupsModal({ onClose }: Props) {
   const [modalView, setModalView] = useState<ModalView>('group_details');
   const [groupDetails, setGroupDetails] = useState<GroupDetails | undefined>();
-  const [selectServices, setSelectedServices] = useState<
-    SelectService | undefined
-  >();
+
+  async function onSave(selectServices: SelectServices) {
+    const serviceGroups = {
+      ...groupDetails,
+      ...selectServices,
+    };
+
+    // TODO: call api to save it
+    onClose();
+  }
 
   return (
-    <EuiForm id="serviceGroupForm" component="form">
-      <EuiModal onClose={onClose}>
-        {modalView === 'group_details' && (
-          <GroupDetails
-            groupDetails={groupDetails}
-            onCloseModal={onClose}
-            onClickNext={(_groupDetails) => {
-              setGroupDetails(_groupDetails);
-              setModalView('select_service');
-            }}
-          />
-        )}
-        {modalView === 'select_service' && (
-          <SelectServices
-            onCloseModal={onClose}
-            onSaveClick={() => {
-              setModalView('select_service');
-            }}
-            onEditGroupDetailsClick={() => {
-              setModalView('group_details');
-            }}
-          />
-        )}
-      </EuiModal>
-    </EuiForm>
+    <EuiModal onClose={onClose} style={{ width: 600, height: 566 }}>
+      {modalView === 'group_details' && (
+        <GroupDetails
+          groupDetails={groupDetails}
+          onCloseModal={onClose}
+          onClickNext={(_groupDetails) => {
+            setGroupDetails(_groupDetails);
+            setModalView('select_service');
+          }}
+        />
+      )}
+      {modalView === 'select_service' && (
+        <SelectServices
+          onCloseModal={onClose}
+          onSaveClick={onSave}
+          onEditGroupDetailsClick={() => {
+            setModalView('group_details');
+          }}
+        />
+      )}
+    </EuiModal>
   );
 }
