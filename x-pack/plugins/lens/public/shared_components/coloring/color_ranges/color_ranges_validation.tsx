@@ -23,7 +23,6 @@ export interface ColorRangeValidation {
   errors: ColorRangeValidationErrors[];
   warnings: ColorRangeValidationWarnings[];
   isValid: boolean;
-  isAllowUseValue: boolean;
 }
 
 /** @internal **/
@@ -94,11 +93,9 @@ export const validateColorRange = (
 ) => {
   const errors: ColorRangeValidationErrors[] = [];
   let warnings: ColorRangeValidationWarnings[] = [];
-  let isAllowUseValue = true;
 
   if (Number.isNaN(colorRange[accessor])) {
     errors.push('invalidValue');
-    isAllowUseValue = false;
   }
 
   if (accessor === 'end') {
@@ -116,7 +113,6 @@ export const validateColorRange = (
   return {
     isValid: !errors.length,
     errors,
-    isAllowUseValue,
     warnings,
   } as ColorRangeValidation;
 };

@@ -32,25 +32,25 @@ interface BasicPayload {
 export interface UpdateColorPayload extends BasicPayload {
   index: number;
   color: string;
-};
+}
 
 /** @internal **/
 export interface UpdateColorRangeValuePayload extends BasicPayload {
   index: number;
   value: string;
   accessor: ColorRangeAccessor;
-};
+}
 
 /** @internal **/
 export interface DeleteColorRangePayload extends BasicPayload {
   index: number;
-};
+}
 
 /** @internal **/
 export interface UpdateContinuityPayload extends BasicPayload {
   isLast: boolean;
   continuity: PaletteContinuity;
-};
+}
 
 /** @internal **/
 export type ColorRangesActions =

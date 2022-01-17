@@ -114,16 +114,14 @@ export function ColorRangeItem({
   dispatch,
 }: ColorRangesItemProps) {
   const { dataBounds, palettes } = useContext(ColorRangesContext);
-  const value = `${colorRange[accessor]}`;
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
-  const [localValue, setLocalValue] = useState<string>(value || '');
+  const [localValue, setLocalValue] = useState<number | undefined>(colorRange[accessor]);
   const isLast = isLastItem(accessor);
   const mode = getMode(index, isLast, continuity);
   const isDisabled = mode === 'auto';
   const isColorValid = isValidColor(colorRange.color);
   const ActionButton = getActionButton(mode);
   const isValid = validation?.isValid ?? true;
-  const isAllowUseValue = validation?.isAllowUseValue ?? true;
 
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
@@ -160,10 +158,10 @@ export function ColorRangeItem({
   );
 
   useUpdateEffect(() => {
-    if (isAllowUseValue && parseFloat(value) !== parseFloat(localValue)) {
-      setLocalValue(value);
+    if (!Number.isNaN(colorRange[accessor]) && colorRange[accessor] !== localValue) {
+      setLocalValue(colorRange[accessor]);
     }
-  }, [localValue, value]);
+  }, [localValue, colorRange, accessor]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
