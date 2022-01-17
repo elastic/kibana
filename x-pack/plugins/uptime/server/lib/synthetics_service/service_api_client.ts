@@ -29,6 +29,7 @@ export interface ServiceData {
 
 export class ServiceAPIClient {
   private readonly username?: string;
+  private readonly devUrl?: string;
   private readonly authorization: string;
   private locations: ServiceLocations;
   private logger: Logger;
@@ -36,8 +37,9 @@ export class ServiceAPIClient {
 
   constructor(logger: Logger, config: ServiceConfig) {
     this.config = config;
-    const { username, password, manifestUrl } = config;
+    const { username, password, manifestUrl, devUrl } = config;
     this.username = username;
+    this.devUrl = devUrl;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -99,7 +101,7 @@ export class ServiceAPIClient {
 
       return axios({
         method,
-        url: url + (runOnce ? '/run' : '/monitors'),
+        url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output },
         headers: this.authorization
           ? {
