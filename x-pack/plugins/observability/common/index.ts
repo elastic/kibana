@@ -24,3 +24,7 @@ export const observabilityFeatureId = 'observability';
 
 // Used by Cases to install routes
 export const casesPath = '/cases';
+
+// Name of a locator created by the uptime plugin. Intended for use
+// by other plugins as well, so defined here to prevent cross-references.
+export const uptimeOverviewLocatorID = 'uptime-overview-locator';

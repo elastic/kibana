@@ -15,6 +15,7 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 
 export const tmsLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
     defaultMessage: 'Raster image tile map service using {z}/{x}/{y} url pattern.',

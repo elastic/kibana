@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SourceFiltersTable } from './source_filters_table';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -41,7 +41,7 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as IndexPattern);
+  } as DataView);
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {
@@ -93,7 +93,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={
           getIndexPatternMock({
             sourceFilters: [{ value: 'tim*' }],
-          }) as IndexPattern
+          }) as DataView
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
@@ -113,7 +113,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={
           getIndexPatternMock({
             sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
-          }) as IndexPattern
+          }) as DataView
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
@@ -157,7 +157,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={
           getIndexPatternMock({
             sourceFilters: [{ value: 'tim*' }],
-          }) as IndexPattern
+          }) as DataView
         }
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
