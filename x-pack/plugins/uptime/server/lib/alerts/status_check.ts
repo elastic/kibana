@@ -207,8 +207,9 @@ export const getStatusMessage = (
       'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
       {
         defaultMessage:
-          'below threshold with {availabilityRatio}% availability expected is {expectedAvailability}%',
+          '{monitorName} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
         values: {
+          monitorName: availMonInfo.monitorInfo.monitor.name,
           availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
           expectedAvailability: availability?.threshold,
         },
