@@ -37,6 +37,9 @@ Object {
             },
             "filters": Array [
               Object {
+                "meta": Object {
+                  "index": "index-pattern-0",
+                },
                 "query": Object {
                   "match_phrase": Object {
                     "src": "test",
