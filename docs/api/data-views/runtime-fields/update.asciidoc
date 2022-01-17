@@ -55,13 +55,13 @@ $ curl -X POST api/data_views/data_view/<data_view_id>/runtime_field/<runtime_fi
 --------------------------------------------------
 // KIBANA
 
-The API returns updated runtime field object and updated data view object:
+The API returns updated runtime field object array and updated data view object:
 
 [source,sh]
 --------------------------------------------------
 {
     "data_view": {...},
-    "field": {...}
+    "fields": [...]
 }
 --------------------------------------------------
 

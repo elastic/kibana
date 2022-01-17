@@ -37,14 +37,14 @@ $ curl -X GET api/data_views/data_view/my-view/runtime_field/foo
 --------------------------------------------------
 // KIBANA
 
-The API returns a runtime `field` object, and a `runtimeField` definition object:
+The API returns a runtime `field` object array, and a `runtimeField` definition object:
 
 [source,sh]
 --------------------------------------------------
 {
-    "field": {
+    "fields": [
         ...
-    },
+    ],
     "runtimeField": {
         ...
     }
