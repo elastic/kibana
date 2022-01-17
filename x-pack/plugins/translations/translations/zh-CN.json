@@ -238,7 +238,6 @@
     "console.settingsPage.indicesAndAliasesLabelText": "索引和别名",
     "console.settingsPage.jsonSyntaxLabel": "JSON 语法",
     "console.settingsPage.pageTitle": "控制台设置",
-    "console.settingsPage.pollingLabelText": "自动刷新自动完成建议",
     "console.settingsPage.refreshButtonLabel": "刷新自动完成建议",
     "console.settingsPage.refreshingDataDescription": "控制台通过查询 Elasticsearch 来刷新自动完成建议。如果您的集群较大或您的网络有限制，则自动刷新可能会造成问题。",
     "console.settingsPage.refreshingDataLabel": "正在刷新自动完成建议",
