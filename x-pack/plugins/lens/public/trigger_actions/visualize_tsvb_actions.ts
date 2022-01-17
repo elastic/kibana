@@ -24,6 +24,7 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
       const payload = {
         ...context,
         layers: table,
+        isVisualizeAction: true,
       };
       application.navigateToApp('lens', {
         state: { type: ACTION_CONVERT_TO_LENS, payload, originatingApp: 'TSVB' },

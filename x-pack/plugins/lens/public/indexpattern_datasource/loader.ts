@@ -236,7 +236,7 @@ export async function loadInitialState({
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
   const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
   const indexPatternIds = [];
-  if (initialContext && 'layers' in initialContext) {
+  if (initialContext && 'isVisualizeAction' in initialContext) {
     for (let layerIdx = 0; layerIdx < initialContext.layers.length; layerIdx++) {
       const layerContext = initialContext.layers[layerIdx];
       indexPatternIds.push(layerContext.indexPatternId);

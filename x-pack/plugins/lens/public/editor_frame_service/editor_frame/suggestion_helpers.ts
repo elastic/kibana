@@ -104,7 +104,7 @@ export function getSuggestions({
     // context is used to pass the state from location to datasource
     if (visualizeTriggerFieldContext) {
       // used for navigating from VizEditor to Lens
-      if ('layers' in visualizeTriggerFieldContext) {
+      if ('isVisualizeAction' in visualizeTriggerFieldContext) {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeCharts(
           datasourceState,
           visualizeTriggerFieldContext.layers
