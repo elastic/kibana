@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { applicationUsageSchema } from '../../../../../src/plugins/kibana_usage_collection/server/collectors/application_usage/schema';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  describe.only('Application Usage', function () {
+  describe('Application Usage', function () {
     this.tags('ciGroup1');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
