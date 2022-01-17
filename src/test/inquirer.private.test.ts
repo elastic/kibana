@@ -54,7 +54,7 @@ describe('inquirer cli', () => {
     ]);
 
     const lineCount = res.split('\n').length;
-    expect(lineCount).toBe(11);
+    expect(lineCount).toBeGreaterThan(10);
 
     expect(res.includes('Select commit (Use arrow keys)')).toBe(true);
   });
