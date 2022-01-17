@@ -33,6 +33,7 @@ RUNTIME_DEPS = [
   "@npm//object-hash",
   "@npm//p-limit",
   "@npm//yargs",
+  "@npm//node-fetch",
 ]
 
 TYPES_DEPS = [

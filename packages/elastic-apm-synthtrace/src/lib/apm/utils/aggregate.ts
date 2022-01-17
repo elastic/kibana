@@ -29,7 +29,6 @@ export function aggregate(events: ApmFields[], fields: string[]) {
     const id = objectHash(key);
 
     let metricset = metricsets.get(id);
-
     if (!metricset) {
       metricset = {
         key: { ...key, 'processor.event': 'metric', 'processor.name': 'metric' },

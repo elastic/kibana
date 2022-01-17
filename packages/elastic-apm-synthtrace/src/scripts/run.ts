@@ -13,6 +13,8 @@ import { startHistoricalDataUpload } from './utils/start_historical_data_upload'
 import { startLiveDataUpload } from './utils/start_live_data_upload';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { getCommonServices } from './utils/get_common_services';
+import { ApmSynthtraceKibanaClient } from '../lib/apm/client/apm_synthtrace_kibana_client';
+import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
 
 function options(y: Argv) {
   return y
@@ -22,9 +24,22 @@ function options(y: Argv) {
       string: true,
     })
     .option('target', {
-      describe: 'Elasticsearch target, including username/password',
-      demandOption: true,
+      describe: 'Elasticsearch target',
       string: true,
+    })
+    .option('cloudId', {
+      describe: 'Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration',
+      string: true,
+    })
+    .option('username', {
+      describe: 'Basic authentication username',
+      string: true,
+      demandOption: true
+    })
+    .option('password', {
+      describe: 'Basic authentication password',
+      string: true,
+      demandOption: true
     })
     .option('from', {
       description: 'The start of the time window',
@@ -76,6 +91,7 @@ function options(y: Argv) {
       },
     })
     .conflicts('to', 'live');
+    .conflicts('target', 'cloudId');
 }
 
 export type RunCliFlags = ReturnType<typeof options>['argv'];
@@ -84,16 +100,29 @@ yargs(process.argv.slice(2))
   .command('*', 'Generate data and index into Elasticsearch', options, async (argv) => {
     const runOptions = parseRunCliFlags(argv);
 
-    const { logger } = getCommonServices(runOptions);
+    const { logger, client } = getCommonServices(runOptions);
 
     const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
     const to = new Date(toMs);
     const fromMs = argv.from
       ? datemath.parse(String(argv.from))!.valueOf()
-      : toMs - intervalToMs('15m');
+      : toMs - intervalToMs('1m');
     const from = new Date(fromMs);
 
     const live = argv.live;
+
+    let forceDataStreams = false;
+    if (runOptions.cloudId) {
+      const kibanaClient = new ApmSynthtraceKibanaClient(logger);
+      await kibanaClient.migrateCloudToManagedApm(runOptions.cloudId, runOptions.username, runOptions.password);
+      forceDataStreams = true;
+    }
+
+    const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
+
+    if (argv.clean) {
+      await esClient.clean()
+    }
 
     logger.info(
       `Starting data generation\n: ${JSON.stringify(
@@ -107,17 +136,10 @@ yargs(process.argv.slice(2))
       )}`
     );
 
-    await startHistoricalDataUpload({
-      ...runOptions,
-      from,
-      to,
-    });
+    await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
 
     if (live) {
-      await startLiveDataUpload({
-        ...runOptions,
-        start: to,
-      });
+      await startLiveDataUpload(runOptions, to);
     }
   })
   .parse();

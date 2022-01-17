@@ -12,34 +12,13 @@ import { RunOptions } from './parse_run_cli_flags';
 import { getCommonServices } from './get_common_services';
 import { ApmFields } from '../../lib/apm/apm_fields';
 
-export async function startLiveDataUpload({
-  file,
-  start,
-  bucketSizeInMs,
-  intervalInMs,
-  clientWorkers,
-  batchSize,
-  target,
-  logLevel,
-  workers,
-  writeTarget,
-  scenarioOpts,
-}: RunOptions & { start: Date }) {
-  const { logger, client } = getCommonServices({ target, logLevel });
+export async function startLiveDataUpload(runOptions: RunOptions, start: Date ) {
+  const { logger, client } = getCommonServices(runOptions);
 
+
+  const file = runOptions.file;
   const scenario = await getScenario({ file, logger });
-  const { generate } = await scenario({
-    batchSize,
-    bucketSizeInMs,
-    clientWorkers,
-    file,
-    intervalInMs,
-    logLevel,
-    target,
-    workers,
-    writeTarget,
-    scenarioOpts,
-  });
+  const { generate } = await scenario(runOptions);
 
   let queuedEvents: ApmFields[] = [];
   let requestedUntil: Date = start;
@@ -48,7 +27,7 @@ export async function startLiveDataUpload({
     const end = new Date();
     if (end > requestedUntil) {
       const bucketFrom = requestedUntil;
-      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
+      const bucketTo = new Date(requestedUntil.getTime() + runOptions.bucketSizeInMs);
       // TODO this materializes into an array, assumption is that the live buffer will fit in memory
       const nextEvents = logger.perf('execute_scenario', () =>
         generate({ from: bucketFrom, to: bucketTo }).toArray()
@@ -77,13 +56,13 @@ export async function startLiveDataUpload({
       onDocument: (doc) => {
         return { index: { _index: '' } };
       },
-      concurrency: clientWorkers,
+      concurrency: runOptions.clientWorkers,
     });
   }
 
   do {
     await uploadNextBatch();
-    await delay(intervalInMs);
+    await delay(runOptions.intervalInMs);
   } while (true);
 }
 async function delay(ms: number) {

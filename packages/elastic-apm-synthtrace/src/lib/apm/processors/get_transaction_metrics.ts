@@ -63,7 +63,6 @@ export function getTransactionMetrics(events: ApmFields[]) {
       histogram.counts.push(1);
       histogram.values.push(Number(transaction['transaction.duration.us']));
     }
-
     return {
       ...metricset.key,
       'metricset.name': 'transaction',

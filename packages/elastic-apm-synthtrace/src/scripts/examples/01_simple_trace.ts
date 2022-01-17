@@ -10,9 +10,10 @@ import { apm, timerange } from '../../index';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
+import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
-  const { logger } = getCommonServices({ target, logLevel });
+const scenario: Scenario = async (runOptions:RunOptions, scenarioOpts) => {
+  const { logger } = getCommonServices(runOptions);
   // const writeTargets = await getApmWriteTargets({ client });
 
   const { numServices = 3 } = scenarioOpts || {};

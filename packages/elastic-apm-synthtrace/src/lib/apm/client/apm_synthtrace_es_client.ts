@@ -16,20 +16,26 @@ import { SpanIterable } from '../../span_iterable';
 import { StreamProcessor } from '../../stream_processor';
 
 export class ApmSynthtraceEsClient {
-  constructor(private readonly client: Client, private readonly logger: Logger) {}
+  constructor(
+    private readonly client: Client,
+    private readonly logger: Logger,
+    private readonly forceDataStreams: boolean
+  ) { }
 
   private getWriteTargets() {
-    return getApmWriteTargets({ client: this.client });
+    return getApmWriteTargets({ client: this.client, forceDataStreams: this.forceDataStreams });
   }
 
   clean() {
-    return this.getWriteTargets().then((writeTargets) =>
-      cleanWriteTargets({
+    return this.getWriteTargets().then((writeTargets) => {
+      const indices = Object.values(writeTargets);
+      this.logger.info(`Attempting to clean: ${indices}`)
+      return cleanWriteTargets({
         client: this.client,
-        targets: Object.values(writeTargets),
+        targets: indices,
         logger: this.logger,
-      })
-    );
+      });
+    });
   }
 
   async index(events: SpanIterable, concurrency?: number) {
@@ -42,16 +48,44 @@ export class ApmSynthtraceEsClient {
       datasource: new StreamProcessor({processors: StreamProcessor.apmProcessors})
         .streamAsync(events),
       // TODO bug in client not passing generic to BulkHelperOptions<>
+      onDrop: (doc) => {
+        this.logger.info(doc);
+      },
       onDocument: (doc: unknown) => {
         const d = doc as ApmFields;
-        const index =
-          writeTargets[d['processor.event'] as keyof ApmElasticsearchOutputWriteTargets];
-        return { index: { _index: index } };
+        let index = this.getIndexForEvent(d, writeTargets);
+        return { create: { _index: index } };
       },
     });
 
+    const indices = Object.values(writeTargets)
+    this.logger.info(`Indexed all data attempting to refresh: ${indices}`)
+
     return this.client.indices.refresh({
-      index: Object.values(writeTargets),
+      index: indices,
+      allow_no_indices: true
     });
+  }
+
+  private getIndexForEvent(d: ApmFields, writeTargets: ApmElasticsearchOutputWriteTargets) {
+    const eventType = d['processor.event'] as keyof ApmElasticsearchOutputWriteTargets;
+    let index = writeTargets[eventType];
+    if (!this.forceDataStreams) {
+      return index;
+    }
+
+    if (eventType == 'metric') {
+      if (!d['service.name']) {
+        index = 'metrics-apm.app-default';
+      } else {
+        const keys = Object.keys(d);
+        let noTransactionData = keys.filter(key => key.startsWith('transaction')).length == 0;
+        let noSpanData = keys.filter(key => key.startsWith('span')).length == 0;
+        if (noSpanData || noTransactionData) {
+          index = 'metrics-apm.app-default';
+        }
+      }
+    }
+    return index;
   }
 }

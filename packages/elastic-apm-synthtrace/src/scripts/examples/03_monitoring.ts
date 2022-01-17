@@ -11,9 +11,10 @@
 import { stackMonitoring, timerange } from '../../index';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
+import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async ({ target, logLevel }) => {
-  const { logger } = getCommonServices({ target, logLevel });
+const scenario: Scenario = async (runOptions:RunOptions) => {
+  const { logger } = getCommonServices(runOptions);
 
   return {
     generate: ({ from, to }) => {
