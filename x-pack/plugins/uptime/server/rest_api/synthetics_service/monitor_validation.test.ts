@@ -71,6 +71,7 @@ describe('validateMonitor', () => {
           url: 'https://test-url.com',
         },
       ],
+      [ConfigKey.NAMESPACE]: 'test-namespace',
     };
     testMetaData = {
       is_tls_enabled: false,

@@ -11,12 +11,11 @@ import {
   MonitorFields,
   isServiceLocationInvalid,
 } from '../../../common/runtime_types';
-import { Validation, Validator } from '../../../common/types';
+import { Validation } from '../../../common/types';
 
 export const digitsOnly = /^[0-9]*$/g;
 export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
-
-type ValidationLibrary = Record<string, Validator>;
+export const namespaceInvalidChars = /[\*\\/\?"<>|\s,#:-]+/;
 
 // returns true if invalid
 function validateHeaders<T>(headers: T): boolean {
@@ -55,8 +54,42 @@ const validateTimeout = ({
   return parseFloat(timeout) > schedule;
 };
 
+// returns ErrorMsg instance if invalid
+export function validateNamespace(
+  namespace?: string
+): { id: string; defaultMessage: string } | false {
+  if (!namespace || typeof namespace !== 'string' || !namespace.trim()) {
+    return {
+      id: 'xpack.uptime.namespaceValidation.requiredErrorMessage',
+      defaultMessage: 'Namespace is required',
+    };
+  } else if (namespace !== namespace.toLowerCase()) {
+    return {
+      id: 'xpack.uptime.namespaceValidation.lowercaseErrorMessage',
+      defaultMessage: 'Namespace must be lowercase',
+    };
+  } else if (namespaceInvalidChars.test(namespace)) {
+    return {
+      id: 'xpack.uptime.namespaceValidation.invalidCharactersErrorMessage',
+      defaultMessage: 'Namespace contains invalid characters',
+    };
+  }
+  // Node.js doesn't have Blob, and browser doesn't have Buffer :)
+  else if (
+    (typeof Blob === 'function' && new Blob([namespace]).size > 100) ||
+    (typeof Buffer === 'function' && Buffer.from(namespace).length > 100)
+  ) {
+    return {
+      id: 'xpack.uptime.namespaceValidation.tooLongErrorMessage',
+      defaultMessage: 'Namespace cannot be more than 100 bytes',
+    };
+  }
+
+  return false;
+}
+
 // validation functions return true when invalid
-const validateCommon: ValidationLibrary = {
+const validateCommon: Validation = {
   [ConfigKey.NAME]: ({ [ConfigKey.NAME]: value }) => {
     return !value || typeof value !== 'string';
   },
@@ -84,11 +117,11 @@ const validateCommon: ValidationLibrary = {
     );
   },
   [ConfigKey.NAMESPACE]: ({ [ConfigKey.NAMESPACE]: value }) => {
-    return !value || typeof value !== 'string';
+    return validateNamespace(value);
   },
 };
 
-const validateHTTP: ValidationLibrary = {
+const validateHTTP: Validation = {
   [ConfigKey.RESPONSE_STATUS_CHECK]: ({ [ConfigKey.RESPONSE_STATUS_CHECK]: value }) => {
     const statusCodes = value as MonitorFields[ConfigKey.RESPONSE_STATUS_CHECK];
     return statusCodes.length ? statusCodes.some((code) => !`${code}`.match(digitsOnly)) : false;
@@ -108,14 +141,14 @@ const validateHTTP: ValidationLibrary = {
   ...validateCommon,
 };
 
-const validateTCP: Record<string, Validator> = {
+const validateTCP: Validation = {
   [ConfigKey.HOSTS]: ({ [ConfigKey.HOSTS]: value }) => {
     return !value || !`${value}`.match(includesValidPort);
   },
   ...validateCommon,
 };
 
-const validateICMP: ValidationLibrary = {
+const validateICMP: Validation = {
   [ConfigKey.HOSTS]: ({ [ConfigKey.HOSTS]: value }) => !value,
   [ConfigKey.WAIT]: ({ [ConfigKey.WAIT]: value }) =>
     !!value &&
@@ -130,7 +163,7 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
   return isNaN(throttleValue) || (allowZero ? throttleValue < 0 : throttleValue <= 0);
 };
 
-const validateBrowser: ValidationLibrary = {
+const validateBrowser: Validation = {
   ...validateCommon,
   [ConfigKey.SOURCE_ZIP_URL]: ({
     [ConfigKey.SOURCE_ZIP_URL]: zipUrl,

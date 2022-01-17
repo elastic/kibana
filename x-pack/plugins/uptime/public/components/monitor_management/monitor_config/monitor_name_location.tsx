@@ -20,6 +20,7 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { Validation } from '../../../../common/types';
 import { usePolicyConfigContext } from '../../fleet_package/contexts';
 import { ServiceLocations } from './locations';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   validate: Validation;
@@ -39,9 +40,11 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
   const isLocationsInvalid = !!validate[ConfigKey.LOCATIONS]?.({
     [ConfigKey.LOCATIONS]: locations,
   });
-  const isNamespaceInvalid = !!validate[ConfigKey.NAMESPACE]?.({
+  const namespaceErrorMsg = validate[ConfigKey.NAMESPACE]?.({
     [ConfigKey.NAMESPACE]: namespace,
   });
+  const isNamespaceInvalid = !!namespaceErrorMsg;
+  const core = useKibana();
 
   return (
     <>
@@ -108,10 +111,12 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
               <EuiFormRow
                 isInvalid={isNamespaceInvalid}
                 error={
-                  <FormattedMessage
-                    id="xpack.uptime.monitorManagement.monitorNamespaceFieldError"
-                    defaultMessage="Monitor namespace is required"
-                  />
+                  namespaceErrorMsg && (
+                    <FormattedMessage
+                      id={namespaceErrorMsg.id}
+                      defaultMessage={namespaceErrorMsg.defaultMessage}
+                    />
+                  )
                 }
                 label={
                   <FormattedMessage
@@ -127,7 +132,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
                       learnMore: (
                         <EuiLink
                           target="_blank"
-                          href="https://www.elastic.co/guide/en/observability/current/synthetics-quickstart-fleet.html"
+                          href={core.services.docLinks?.links?.fleet?.datastreamsNamingScheme}
                           external
                         >
                           <FormattedMessage
@@ -146,7 +151,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
                   required={true}
                   isInvalid={isNamespaceInvalid}
                   fullWidth={true}
-                  name="data_stream.namespace"
+                  name="namespace"
                   onChange={(event) => setNamespace(event.target.value)}
                 />
               </EuiFormRow>

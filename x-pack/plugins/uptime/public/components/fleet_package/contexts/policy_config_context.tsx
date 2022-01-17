@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
 import { ScheduleUnit, ServiceLocations } from '../../../../common/runtime_types';
 import { DataStream } from '../types';
 
@@ -78,7 +79,7 @@ const defaultContext: IPolicyConfigContext = {
   isEditable: false,
   isZipUrlSourceEnabled: true,
   allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
-  defaultNamespace: 'default',
+  defaultNamespace: DEFAULT_NAMESPACE_STRING,
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -90,7 +91,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   defaultIsZipUrlTLSEnabled = false,
   defaultName = '',
   defaultLocations = [],
-  defaultNamespace = 'default',
+  defaultNamespace = DEFAULT_NAMESPACE_STRING,
   isEditable = false,
   isZipUrlSourceEnabled = true,
   allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],

@@ -17,6 +17,7 @@ import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
 import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
+import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants';
 
 interface Props {
   monitor: MonitorFields;
@@ -75,7 +76,7 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
         defaultMonitorType: monitorType,
         defaultName: defaultConfig?.[ConfigKey.NAME] || '', // TODO - figure out typing concerns for name
-        defaultNamespace: defaultConfig?.[ConfigKey.NAMESPACE] || 'default',
+        defaultNamespace: defaultConfig?.[ConfigKey.NAMESPACE] || DEFAULT_NAMESPACE_STRING,
         defaultLocations: defaultConfig.locations,
         isEditable: true,
         isZipUrlSourceEnabled: false,
