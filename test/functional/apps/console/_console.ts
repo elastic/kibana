@@ -89,9 +89,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('autocomplete to be visible', () =>
         PageObjects.console.hasAutocompleter()
       );
-      await retry.waitFor('comma to be inserted at end of the line', () =>
-        PageObjects.console.hasComma()
-      );
+      await retry.try(async () => {
+        const editor = await PageObjects.console.getRequestEditor();
+        const commas = await editor.findAllByClassName('ace_comma');
+        expect(commas.length).to.eql(2);
+      });
     });
 
     describe('with a data URI in the load_from query', () => {

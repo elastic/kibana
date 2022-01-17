@@ -102,19 +102,17 @@ export class ConsolePageObject extends FtrService {
     );
     await textArea.pressKeys(Key.ENTER);
     await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
+    await textArea.type('"bool": {}');
+    await textArea.pressKeys(Key.ENTER);
+    await textArea.pressKeys(Key.ENTER);
+    await textArea.pressKeys(Key.ENTER);
+    await textArea.pressKeys(Key.ENTER);
+    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
   }
 
   public async hasAutocompleter(): Promise<boolean> {
     try {
       return Boolean(await this.find.byCssSelector('.ace_autocomplete'));
-    } catch (e) {
-      return false;
-    }
-  }
-
-  public async hasComma(): Promise<boolean> {
-    try {
-      return Boolean(await this.find.byCssSelector('.ace_punctuation.ace_comma'));
     } catch (e) {
       return false;
     }
