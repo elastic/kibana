@@ -1049,19 +1049,43 @@ describe('CaseUserActionService', () => {
           filter: {
             arguments: [
               {
-                type: 'literal',
-                value: 'cases-user-actions.attributes.type',
+                arguments: [
+                  {
+                    type: 'literal',
+                    value: 'cases-user-actions.attributes.type',
+                  },
+                  {
+                    type: 'literal',
+                    value: 'connector',
+                  },
+                  {
+                    type: 'literal',
+                    value: false,
+                  },
+                ],
+                function: 'is',
+                type: 'function',
               },
               {
-                type: 'literal',
-                value: 'connector',
-              },
-              {
-                type: 'literal',
-                value: false,
+                arguments: [
+                  {
+                    type: 'literal',
+                    value: 'cases-user-actions.attributes.type',
+                  },
+                  {
+                    type: 'literal',
+                    value: 'create_case',
+                  },
+                  {
+                    type: 'literal',
+                    value: false,
+                  },
+                ],
+                function: 'is',
+                type: 'function',
               },
             ],
-            function: 'is',
+            function: 'or',
             type: 'function',
           },
           hasReference: {
