@@ -12,8 +12,8 @@ import { useHistory } from 'react-router-dom';
 import { LogStream } from '../../../../../../infra/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
