@@ -36,7 +36,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';

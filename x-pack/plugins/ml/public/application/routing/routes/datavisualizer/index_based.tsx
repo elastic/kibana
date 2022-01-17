@@ -25,6 +25,7 @@ export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'datavisualizer',
   path: '/jobs/new_job/datavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
