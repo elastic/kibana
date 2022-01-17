@@ -23,7 +23,7 @@ export const commonFormatters: CommonFormatMap = {
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.APM_SERVICE_NAME]: null,
   [ConfigKey.TAGS]: (fields) => arrayFormatter(fields[ConfigKey.TAGS]),
-  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
+  [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);
