@@ -207,7 +207,6 @@ export const getStatusMessage = (
         defaultMessage:
           '{interval} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
         values: {
-          monitorName: availMonInfo.monitorInfo.monitor.name,
           availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
           expectedAvailability: availability?.threshold,
           interval: getInterval(availability?.range!, availability?.rangeUnit!),
