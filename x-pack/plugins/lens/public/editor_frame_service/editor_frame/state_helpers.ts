@@ -27,6 +27,7 @@ import {
   getMissingCurrentDatasource,
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
+  getUnknownVisualizationTypeError,
 } from '../error_helper';
 import { DatasourceStates } from '../../state_management';
 
@@ -95,6 +96,12 @@ export async function persistedStateToExpression(
     return {
       ast: null,
       errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
+    };
+  }
+  if (!visualizations[visualizationType]) {
+    return {
+      ast: null,
+      errors: [getUnknownVisualizationTypeError(doc.visualizationType)],
     };
   }
   const visualization = visualizations[visualizationType!];

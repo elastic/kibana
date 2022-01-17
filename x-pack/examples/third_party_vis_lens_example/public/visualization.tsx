@@ -78,6 +78,9 @@ export const getRotatingNumberVisualization = ({
     if (table.columns.length > 1) {
       return [];
     }
+    if (state && table.changeType === 'unchanged') {
+      return [];
+    }
     const column = table.columns[0];
     if (column.operation.isBucketed || column.operation.dataType !== 'number') {
       return [];
@@ -86,7 +89,7 @@ export const getRotatingNumberVisualization = ({
       {
         previewIcon: 'refresh',
         score: 0.5,
-        title: table.label || 'Rotating number',
+        title: `Rotating ${table.label}` || 'Rotating number',
         state: {
           layerId: table.layerId,
           color: state?.color || DEFAULT_COLOR,

@@ -75,12 +75,13 @@ function RotatingNumberChart({
         height: 100%;
         text-align: center;
         font-size: 100px;
+        overflow: hidden;
       `}
     >
       <div
         className={css`
           color: ${color};
-          animation: ${rotating} 2s linear infinite;
+          animation: ${rotating} 5s linear infinite;
         `}
       >
         {value}

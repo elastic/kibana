@@ -268,7 +268,7 @@ export class Embeddable
     if (!this.savedVis) {
       return [];
     }
-    return this.deps.visualizationMap[this.savedVis.visualizationType].triggers || [];
+    return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
   public getInspectorAdapters() {
