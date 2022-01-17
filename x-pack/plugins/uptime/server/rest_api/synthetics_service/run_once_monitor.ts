@@ -42,7 +42,7 @@ export const runOnceSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     ]);
 
     if (errors) {
-      return errors;
+      return { errors };
     }
 
     return monitor;

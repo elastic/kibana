@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -22,6 +23,7 @@ import { TestRunResult } from './test_run_results';
 import { MonitorFields } from '../../../../common/runtime_types';
 import { useFetcher } from '../../../../../observability/public';
 import { runOnceMonitor } from '../../../state/api';
+import { kibanaService } from '../../../state/kibana_service';
 
 export interface TestRun {
   id: string;
@@ -37,23 +39,42 @@ export function TestNowMode({ monitor }: { monitor?: MonitorFields }) {
     }
   };
 
-  useFetcher(() => {
+  const { data, loading: isPushing } = useFetcher(() => {
     if (testRun) {
-      runOnceMonitor({
+      return runOnceMonitor({
         monitor: testRun.monitor,
         id: testRun.id,
       });
     }
+    return new Promise((resolve) => resolve(null));
   }, [testRun]);
 
+  useEffect(() => {
+    const errors = (data as { errors: Array<{ error: Error }> })?.errors;
+
+    if (errors?.length > 0) {
+      errors.forEach(({ error }) => {
+        kibanaService.toasts.addError(error, { title: PushErrorLabel });
+      });
+    }
+  }, [data]);
+
   const btnContent = <EuiButtonEmpty iconType="controlsHorizontal">{TestNowLabel}</EuiButtonEmpty>;
+
+  const errors = (data as { errors?: Array<{ error: Error }> })?.errors;
+
+  const hasErrors = errors && errors?.length > 0;
 
   const content = (
     <EuiPanel color="subdued" hasBorder={true}>
       <EuiText>{DescriptionLabel}</EuiText>
       <EuiSpacer />
 
-      {testRun && (
+      {isPushing && <EuiText>{PushingLabel}</EuiText>}
+
+      {hasErrors && !isPushing && <EuiCallOut title={PushError} color="danger" iconType="alert" />}
+
+      {testRun && !hasErrors && !isPushing && (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem key={testRun.id}>
             <TestRunResult monitorId={testRun.id} monitor={testRun.monitor} />
@@ -63,7 +84,7 @@ export function TestNowMode({ monitor }: { monitor?: MonitorFields }) {
       <EuiSpacer size="xs" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={startTestRun} isDisabled={!monitor} size="s">
+          <EuiButton onClick={startTestRun} isDisabled={!monitor} size="s" isLoading={isPushing}>
             {testRun ? UpdateTestRunLabel : StartTestRunLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -92,4 +113,16 @@ const UpdateTestRunLabel = i18n.translate('xpack.uptime.updateTestRun.label', {
 
 const DescriptionLabel = i18n.translate('xpack.uptime.testRun.description', {
   defaultMessage: 'Test your monitor and verify the results before saving',
+});
+
+const PushingLabel = i18n.translate('xpack.uptime.testRun.description', {
+  defaultMessage: 'Pushing the monitor to service...',
+});
+
+const PushError = i18n.translate('xpack.uptime.testRun.pushError', {
+  defaultMessage: 'Failed to push the monitor to service.',
+});
+
+const PushErrorLabel = i18n.translate('xpack.uptime.testRun.pushErrorLabel', {
+  defaultMessage: 'Push error',
 });

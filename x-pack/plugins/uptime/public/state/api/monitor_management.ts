@@ -66,6 +66,6 @@ export const runOnceMonitor = async ({
 }: {
   monitor: SyntheticsMonitor;
   id: string;
-}): Promise<void> => {
+}): Promise<{ errors: Array<{ error: Error }> }> => {
   return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
 };
