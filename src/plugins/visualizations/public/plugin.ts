@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
-import { isFilterPinned } from '@kbn/es-query';
 import {
   AppMountParameters,
   AppUpdater,
@@ -189,7 +188,7 @@ export class VisualizationsPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(isFilterPinned),
+              filters: data.query.filterManager.getGlobalFilters(),
             }))
           ),
         },
