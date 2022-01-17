@@ -26,7 +26,7 @@ const isValidRowHeight = (rowHeight?: number) => {
     !Number.isNaN(rowHeight) &&
     // is integer
     Math.floor(rowHeight) === rowHeight &&
-    // does rowHeight meets the range
+    // does rowHeight meet the range
     rowHeight >= MIN_ROW_HEIGHT &&
     rowHeight <= MAX_ROW_HEIGHT
   );
