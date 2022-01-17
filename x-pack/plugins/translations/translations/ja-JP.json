@@ -8388,7 +8388,6 @@
     "xpack.dataVisualizer.index.fieldNameSelect": "フィールド名",
     "xpack.dataVisualizer.index.fieldTypeSelect": "フィールド型",
     "xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification": "時間範囲の設定中にエラーが発生しました。",
-    "xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel": "完全な {indexPatternTitle} データを使用",
     "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationDescription": "異常検知は時間ベースのインデックスでのみ実行されます",
     "xpack.dataVisualizer.index.indexPatternNotBasedOnTimeSeriesNotificationTitle": "インデックスパターン {indexPatternTitle} は時系列に基づくものではありません",
     "xpack.dataVisualizer.index.lensChart.averageOfLabel": "{fieldName}の平均",
