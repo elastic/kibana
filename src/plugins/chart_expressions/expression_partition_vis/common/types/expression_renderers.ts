@@ -46,7 +46,7 @@ export interface LabelsParams {
 
 interface VisCommonParams {
   addTooltip: boolean;
-  addLegend: boolean;
+  legendDisplay: LegendDisplay;
   legendPosition: Position;
   nestedLegend: boolean;
   truncateLegend: boolean;
@@ -107,6 +107,12 @@ export enum LabelPositions {
 export enum ValueFormats {
   PERCENT = 'percent',
   VALUE = 'value',
+}
+
+export enum LegendDisplay {
+  SHOW = 'show',
+  HIDE = 'hide',
+  DEFAULT = 'default',
 }
 
 export interface BucketColumns extends DatatableColumn {

@@ -7,7 +7,7 @@
  */
 
 import { DatatableColumn } from '../../../../expressions';
-import { ChartTypes } from '../../common/types';
+import { BucketColumns, ChartTypes, LegendDisplay } from '../../common/types';
 
 type GetLegendIsFlatFn = (splitChartDimension: DatatableColumn | undefined) => boolean;
 
@@ -26,3 +26,22 @@ export const isLegendFlat = (
     [ChartTypes.MOSAIC]: isLegendFlatCommon(splitChartDimension),
     [ChartTypes.WAFFLE]: isLegendFlatWaffle(splitChartDimension),
   }[visType]);
+
+const showIfBuckets = (bucketColumns: Array<Partial<BucketColumns>>) => bucketColumns.length > 1;
+
+const showLegendDefault = (visType: ChartTypes, bucketColumns: Array<Partial<BucketColumns>>) =>
+  ({
+    [ChartTypes.PIE]: showIfBuckets(bucketColumns),
+    [ChartTypes.DONUT]: showIfBuckets(bucketColumns),
+    [ChartTypes.TREEMAP]: false,
+    [ChartTypes.MOSAIC]: false,
+    [ChartTypes.WAFFLE]: true,
+  }[visType]);
+
+export const shouldShowLegend = (
+  visType: ChartTypes,
+  legendDisplay: LegendDisplay,
+  bucketColumns: Array<Partial<BucketColumns>> = []
+) =>
+  legendDisplay === LegendDisplay.SHOW ||
+  (legendDisplay === LegendDisplay.DEFAULT && showLegendDefault(visType, bucketColumns));

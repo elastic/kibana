@@ -44,4 +44,9 @@ export type {
   Dimensions,
 } from './types/expression_renderers';
 
-export { ValueFormats, LabelPositions, EmptySizeRatios } from './types/expression_renderers';
+export {
+  ValueFormats,
+  LabelPositions,
+  EmptySizeRatios,
+  LegendDisplay,
+} from './types/expression_renderers';

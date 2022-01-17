@@ -37,8 +37,8 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.addTooltipHelpText', {
       defaultMessage: 'Show tooltip on slice hover',
     }),
-  getAddLegendArgHelp: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.args.addLegendHelpText', {
+  getLegendDisplayArgHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.args.legendDisplayHelpText', {
       defaultMessage: 'Show legend chart legend',
     }),
   getLegendPositionArgHelp: () =>

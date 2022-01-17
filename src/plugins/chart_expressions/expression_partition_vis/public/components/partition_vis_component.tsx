@@ -39,7 +39,6 @@ import {
   BucketColumns,
   ValueFormats,
   PieContainerDimensions,
-  LabelPositions,
 } from '../../common/types/expression_renderers';
 import {
   getColorPicker,
@@ -53,6 +52,7 @@ import {
   getSplitDimensionAccessor,
   getColumnByAccessor,
   isLegendFlat,
+  shouldShowLegend,
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
@@ -85,14 +85,22 @@ export interface PartitionVisComponentProps {
 }
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
+  const { visData, visParams, visType, services, syncColors } = props;
+
   const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
+
+  const { bucketColumns, metricColumn } = useMemo(
+    () => getColumns(props.visParams, props.visData),
+    [props.visData, props.visParams]
+  );
+
   const [showLegend, setShowLegend] = useState<boolean>(() => {
-    const bwcLegendStateDefault =
-      props.visParams.addLegend == null ? false : props.visParams.addLegend;
+    const bwcLegendStateDefault = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) ?? bwcLegendStateDefault;
   });
+
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -118,15 +126,15 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const handleSliceClick = useCallback(
     (
       clickedLayers: LayerValue[],
-      bucketColumns: Array<Partial<BucketColumns>>,
-      visData: Datatable,
+      buckets: Array<Partial<BucketColumns>>,
+      vData: Datatable,
       splitChartDimension?: DatatableColumn,
       splitChartFormatter?: FieldFormat
     ): void => {
       const data = getFilterClickData(
         clickedLayers,
-        bucketColumns,
-        visData,
+        buckets,
+        vData,
         splitChartDimension,
         splitChartFormatter
       );
@@ -141,9 +149,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   // handles legend action event data
   const getLegendActionEventData = useCallback(
-    (visData: Datatable) =>
+    (vData: Datatable) =>
       (series: SeriesIdentifier): ClickTriggerEvent | null => {
-        const data = getFilterEventData(visData, series);
+        const data = getFilterEventData(vData, series);
 
         return {
           name: 'filterBucket',
@@ -178,9 +186,16 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [props.uiState]);
 
   useEffect(() => {
-    setShowLegend(props.visParams.addLegend);
-    props.uiState?.set('vis.legendOpen', props.visParams.addLegend);
-  }, [props.uiState, props.visParams.addLegend]);
+    const show = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+    setShowLegend(show);
+    props.uiState?.set('vis.legendOpen', show);
+  }, [
+    bucketColumns,
+    props.uiState,
+    props.visParams.legendDisplay,
+    visParams.legendDisplay,
+    visType,
+  ]);
 
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number) => {
@@ -197,10 +212,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, visType, services, syncColors } = props;
-
-  const getSliceValue = useCallback((d: Datum, metricColumn: DatatableColumn) => {
-    const value = d[metricColumn.id];
+  const getSliceValue = useCallback((d: Datum, metric: DatatableColumn) => {
+    const value = d[metric.id];
     return Number.isFinite(value) && value >= 0 ? value : 0;
   }, []);
 
@@ -219,11 +232,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       pattern: `0,0.[${'0'.repeat(visParams.labels.percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
-
-  const { bucketColumns, metricColumn } = useMemo(
-    () => getColumns(visParams, visData),
-    [visData, visParams]
-  );
 
   const isDarkMode = props.chartsThemeService.useDarkMode();
   const layers = useMemo(

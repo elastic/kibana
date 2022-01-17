@@ -12,6 +12,7 @@ import {
   EmptySizeRatios,
   LabelPositions,
   ValueFormats,
+  LegendDisplay,
 } from '../types/expression_renderers';
 import { pieVisFunction } from './pie_vis_function';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
@@ -27,7 +28,7 @@ describe('interpreter/functions#pie', () => {
 
   const visConfig: PieVisConfig = {
     addTooltip: true,
-    addLegend: true,
+    legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     isDonut: true,
     emptySizeRatio: EmptySizeRatios.SMALL,

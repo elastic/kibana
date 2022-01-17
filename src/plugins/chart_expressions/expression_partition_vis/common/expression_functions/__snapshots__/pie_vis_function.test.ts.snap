@@ -30,7 +30,6 @@ Object {
     },
     "syncColors": false,
     "visConfig": Object {
-      "addLegend": true,
       "addTooltip": true,
       "buckets": undefined,
       "dimensions": Object {
@@ -59,6 +58,7 @@ Object {
         "values": true,
         "valuesFormat": "percent",
       },
+      "legendDisplay": "show",
       "legendPosition": "right",
       "maxLegendLines": 2,
       "metric": Object {

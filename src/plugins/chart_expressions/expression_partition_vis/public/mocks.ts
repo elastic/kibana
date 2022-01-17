@@ -7,7 +7,13 @@
  */
 
 import { Datatable } from '../../../expressions/public';
-import { BucketColumns, PartitionVisParams, LabelPositions, ValueFormats } from '../common/types';
+import {
+  BucketColumns,
+  PartitionVisParams,
+  LabelPositions,
+  ValueFormats,
+  LegendDisplay,
+} from '../common/types';
 
 export const createMockBucketColumns = (): BucketColumns[] => {
   return [
@@ -266,7 +272,7 @@ export const createMockVisData = (): Datatable => {
 
 export const createMockPieParams = (): PartitionVisParams => {
   return {
-    addLegend: true,
+    legendDisplay: LegendDisplay.SHOW,
     addTooltip: true,
     isDonut: true,
     labels: {

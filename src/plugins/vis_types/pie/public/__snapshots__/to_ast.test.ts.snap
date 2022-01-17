@@ -34,9 +34,6 @@ Object {
     },
     Object {
       "arguments": Object {
-        "addLegend": Array [
-          true,
-        ],
         "addTooltip": Array [
           true,
         ],
@@ -89,6 +86,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "legendDisplay": Array [
+          "show",
         ],
         "legendPosition": Array [
           "right",

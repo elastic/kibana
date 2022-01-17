@@ -38,6 +38,7 @@ import {
   PartitionVisParams,
   LabelPositions,
   ValueFormats,
+  LegendDisplay,
 } from '../../../../../chart_expressions/expression_partition_vis/common';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
@@ -89,8 +90,8 @@ const PieOptions = (props: PieOptionsProps) => {
   const legendUiStateValue = props.uiState?.get('vis.legendOpen');
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
   const [legendVisibility, setLegendVisibility] = useState<boolean>(() => {
-    const bwcLegendStateDefault = stateParams.addLegend == null ? false : stateParams.addLegend;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+    const bwcLegendStateDefault = stateParams.legendDisplay === LegendDisplay.SHOW;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
   });
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
@@ -180,14 +181,14 @@ const PieOptions = (props: PieOptionsProps) => {
               </EuiFlexGroup>
             </EuiFormRow>
             <SwitchOption
-              label={i18n.translate('visTypePie.editors.pie.addLegendLabel', {
+              label={i18n.translate('visTypePie.editors.pie.legendDisplayLabel', {
                 defaultMessage: 'Show legend',
               })}
-              paramName="addLegend"
+              paramName="legendDisplay"
               value={legendVisibility}
               setValue={(paramName, value) => {
                 setLegendVisibility(value);
-                setValue(paramName, value);
+                setValue(paramName, value ? LegendDisplay.SHOW : LegendDisplay.HIDE);
               }}
               data-test-subj="visTypePieAddLegendSwitch"
             />
@@ -197,7 +198,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="nestedLegend"
               value={stateParams.nestedLegend}
-              disabled={!stateParams.addLegend}
+              disabled={stateParams.legendDisplay === LegendDisplay.HIDE}
               setValue={(paramName, value) => {
                 if (props.trackUiMetric) {
                   props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');

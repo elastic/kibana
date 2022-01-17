@@ -11,7 +11,13 @@ import { storiesOf } from '@storybook/react';
 import { Datatable } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
-import { ChartTypes, LabelPositions, RenderValue, ValueFormats } from '../../common/types';
+import {
+  ChartTypes,
+  LabelPositions,
+  LegendDisplay,
+  RenderValue,
+  ValueFormats,
+} from '../../common/types';
 import { palettes, theme, getStartDeps } from '../__mocks__';
 
 const visData: Datatable = {
@@ -82,7 +88,7 @@ const config: RenderValue = {
     },
     palette: { type: 'system_palette', name: 'default' },
     addTooltip: false,
-    addLegend: false,
+    legendDisplay: LegendDisplay.HIDE,
     legendPosition: 'right',
     nestedLegend: false,
     truncateLegend: false,

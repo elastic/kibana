@@ -60,7 +60,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
   const args = {
     // explicitly pass each param to prevent extra values trapping
     addTooltip: vis.params.addTooltip,
-    addLegend: vis.params.addLegend,
+    legendDisplay: vis.params.legendDisplay,
     legendPosition: vis.params.legendPosition,
     nestedLegend: vis.params?.nestedLegend,
     truncateLegend: vis.params.truncateLegend,

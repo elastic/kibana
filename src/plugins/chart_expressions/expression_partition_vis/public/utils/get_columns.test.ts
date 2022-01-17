@@ -7,7 +7,12 @@
  */
 
 import { getColumns } from './get_columns';
-import { LabelPositions, PartitionVisParams, ValueFormats } from '../../common/types';
+import {
+  LabelPositions,
+  LegendDisplay,
+  PartitionVisParams,
+  ValueFormats,
+} from '../../common/types';
 import { createMockPieParams, createMockVisData } from '../mocks';
 
 const visParams = createMockPieParams();
@@ -140,7 +145,7 @@ describe('getColumns', () => {
 
   it('should return the first data column if no buckets specified', () => {
     const visParamsOnlyMetric: PartitionVisParams = {
-      addLegend: true,
+      legendDisplay: LegendDisplay.SHOW,
       addTooltip: true,
       labels: {
         position: LabelPositions.DEFAULT,
@@ -196,7 +201,7 @@ describe('getColumns', () => {
 
   it('should return an object with the name of the metric if no buckets specified', () => {
     const visParamsOnlyMetric: PartitionVisParams = {
-      addLegend: true,
+      legendDisplay: LegendDisplay.SHOW,
       addTooltip: true,
       isDonut: true,
       labels: {

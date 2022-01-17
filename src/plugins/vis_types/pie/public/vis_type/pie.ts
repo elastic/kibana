@@ -17,6 +17,7 @@ import {
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
+  LegendDisplay,
 } from '../../../../chart_expressions/expression_partition_vis/common';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
@@ -38,7 +39,7 @@ export const getPieVisTypeDefinition = ({
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: !showElasticChartsOptions,
+      legendDisplay: !showElasticChartsOptions ? LegendDisplay.SHOW : LegendDisplay.HIDE,
       legendPosition: Position.Right,
       nestedLegend: false,
       truncateLegend: true,

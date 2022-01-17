@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PartitionVisParams } from '../types/expression_renderers';
+import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
@@ -47,9 +47,11 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getAddTooltipArgHelp(),
       default: true,
     },
-    addLegend: {
-      types: ['boolean'],
-      help: strings.getAddLegendArgHelp(),
+    legendDisplay: {
+      types: ['string'],
+      help: strings.getLegendDisplayArgHelp(),
+      options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
+      default: LegendDisplay.HIDE,
     },
     legendPosition: {
       types: ['string'],
