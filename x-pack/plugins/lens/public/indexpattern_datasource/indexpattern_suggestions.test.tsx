@@ -1952,6 +1952,64 @@ describe('IndexPattern Data Source suggestions', () => {
       suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
     });
 
+    it("should not propose an over time suggestion if there's a top values aggregation with an high size", () => {
+      const initialState = testInitialState();
+      (initialState.layers.first.columns.col1 as { params: { size: number } }).params!.size = 6;
+      const suggestions = getDatasourceSuggestionsFromCurrentState({
+        ...initialState,
+        indexPatterns: { 1: { ...initialState.indexPatterns['1'], timeFieldName: undefined } },
+      });
+      suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
+    });
+
+    it('should not propose an over time suggestion if there are multiple bucket dimensions', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        ...initialState,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3'],
+            columns: {
+              ...initialState.layers.first.columns,
+              col2: {
+                label: 'My Op',
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'average',
+                sourceField: 'bytes',
+                scale: 'ratio',
+              },
+              col3: {
+                label: 'My Op',
+                customLabel: true,
+                dataType: 'string',
+                isBucketed: true,
+
+                // Private
+                operationType: 'terms',
+                sourceField: 'dest',
+                params: {
+                  size: 5,
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                },
+              },
+            },
+          },
+        },
+      };
+      const suggestions = getDatasourceSuggestionsFromCurrentState({
+        ...state,
+        indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
+      });
+      suggestions.forEach((suggestion) => {
+        const firstBucket = suggestion.table.columns.find(({ columnId }) => columnId === 'col1');
+        expect(firstBucket?.operation).not.toBe('date');
+      });
+    });
+
     it('returns simplified versions of table with more than 2 columns', () => {
       const initialState = testInitialState();
       const fields = [
