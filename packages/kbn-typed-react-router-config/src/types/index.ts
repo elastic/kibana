@@ -257,6 +257,18 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
       MapRoute<TRoutes[8], TParents> &
       MapRoute<TRoutes[7], TParents> &
       MapRoute<TRoutes[9], TParents>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[8], TParents> &
+      MapRoute<TRoutes[7], TParents> &
+      MapRoute<TRoutes[9], TParents> &
+      MapRoute<TRoutes[10], TParents>
   : {};
 
 // const element = null as any;
