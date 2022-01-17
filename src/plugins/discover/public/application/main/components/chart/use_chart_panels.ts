@@ -16,7 +16,7 @@ export function useChartPanels(
   toggleHideChart: () => void,
   onChangeInterval: (value: string) => void,
   closePopover: () => void,
-  hideChartState?: boolean,
+  hideChart?: boolean,
   interval?: string
 ) {
   const selectedOptionIdx = search.aggs.intervalOptions.findIndex((opt) => opt.val === interval);
@@ -27,14 +27,14 @@ export function useChartPanels(
 
   const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [
     {
-      name: !hideChartState
+      name: !hideChart
         ? i18n.translate('discover.hideChart', {
             defaultMessage: 'Hide chart',
           })
         : i18n.translate('discover.showChart', {
             defaultMessage: 'Show chart',
           }),
-      icon: !hideChartState ? 'eyeClosed' : 'eye',
+      icon: !hideChart ? 'eyeClosed' : 'eye',
       onClick: () => {
         toggleHideChart();
         closePopover();
@@ -42,7 +42,7 @@ export function useChartPanels(
       'data-test-subj': 'discoverChartToggle',
     },
   ];
-  if (!hideChartState) {
+  if (!hideChart) {
     mainPanelItems.push({
       name: i18n.translate('discover.timeIntervalWithValue', {
         defaultMessage: 'Time interval: {timeInterval}',
@@ -64,7 +64,7 @@ export function useChartPanels(
       items: mainPanelItems,
     },
   ];
-  if (!hideChartState) {
+  if (!hideChart) {
     panels.push({
       id: 1,
       initialFocusedItemIndex: selectedOptionIdx > -1 ? selectedOptionIdx : 0,

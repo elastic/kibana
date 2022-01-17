@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
     });
-    it('should persist hide histogram state when returning back to discover', async () => {
+    it('should show permitted hidden histogram state when returning back to discover', async () => {
       // close chart
       await testSubjects.click('discoverChartOptionsToggle');
       await testSubjects.click('discoverChartToggle');
