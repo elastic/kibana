@@ -234,7 +234,7 @@ const getMetric: (
         result.hits
           ? isNumber(result.hits.total)
             ? result.hits.total
-            : result.hits.total.value
+            : result.hits.total?.value ?? 0
           : 0
       ),
     };

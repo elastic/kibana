@@ -14,6 +14,7 @@ import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';
 import { LensIconChartMosaic } from '../assets/chart_mosaic';
 import { LensIconChartWaffle } from '../assets/chart_waffle';
+import { EMPTY_SIZE_RATIOS } from './constants';
 
 import type { SharedPieLayerState } from '../../common/expressions';
 import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
@@ -36,6 +37,11 @@ interface PartitionChartMeta {
     numberOptions: Array<{
       value: SharedPieLayerState['numberDisplay'];
       inputDisplay: string;
+    }>;
+    emptySizeRatioOptions?: Array<{
+      id: string;
+      value: EMPTY_SIZE_RATIOS;
+      label: string;
     }>;
   };
   legend: {
@@ -110,6 +116,30 @@ const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
   },
 ];
 
+const emptySizeRatioOptions: PartitionChartMeta['toolbarPopover']['emptySizeRatioOptions'] = [
+  {
+    id: 'emptySizeRatioOption-small',
+    value: EMPTY_SIZE_RATIOS.SMALL,
+    label: i18n.translate('xpack.lens.pieChart.emptySizeRatioOptions.small', {
+      defaultMessage: 'Small',
+    }),
+  },
+  {
+    id: 'emptySizeRatioOption-medium',
+    value: EMPTY_SIZE_RATIOS.MEDIUM,
+    label: i18n.translate('xpack.lens.pieChart.emptySizeRatioOptions.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    id: 'emptySizeRatioOption-large',
+    value: EMPTY_SIZE_RATIOS.LARGE,
+    label: i18n.translate('xpack.lens.pieChart.emptySizeRatioOptions.large', {
+      defaultMessage: 'Large',
+    }),
+  },
+];
+
 export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
   donut: {
     icon: LensIconChartDonut,
@@ -122,6 +152,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     toolbarPopover: {
       categoryOptions,
       numberOptions,
+      emptySizeRatioOptions,
     },
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,

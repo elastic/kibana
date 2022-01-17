@@ -99,3 +99,16 @@ export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
+
+export const RULE_IMPORT_MODAL = '[data-test-subj="rules-import-modal-button"]';
+
+export const RULE_IMPORT_MODAL_BUTTON = '[data-test-subj="import-data-modal-button"]';
+
+export const INPUT_FILE = 'input[type=file]';
+
+export const TOASTER = '[data-test-subj="euiToastHeader"]';
+
+export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
+
+export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
+  '[id="import-data-modal-exceptions-checkbox-label"]';

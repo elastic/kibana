@@ -244,13 +244,7 @@
             "text": "DiscoverAppLocatorParams"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
@@ -326,13 +320,7 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -348,13 +336,7 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -370,13 +352,7 @@
               "\nOptionally set a query."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -600,13 +576,7 @@
               "\nOptionally apply filters."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/url_generator.ts",
@@ -622,13 +592,7 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/url_generator.ts",
@@ -835,7 +799,25 @@
             "label": "searchSource",
             "description": [],
             "signature": [
-              "{ history: Record<string, any>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+              "{ create: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSource",
+                "text": "SearchSource"
+              },
+              "; history: ",
+              "SearchRequest",
+              "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              },
+              ">(field: K, value: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -851,7 +833,15 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; removeField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "; removeField: <K extends keyof ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              },
+              ">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -883,7 +873,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "; getField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+              "; getField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -891,7 +881,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              ">(field: K, recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -899,15 +889,23 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; create: () => ",
+              "[K]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
               },
-              "; createCopy: () => ",
+              ">(field: K) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              },
+              "[K]; createCopy: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -923,15 +921,15 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; setParent: (parent?: Pick<",
+              "; setParent: (parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
               },
-              ", \"history\" | \"setOverwriteDataViewType\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"create\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined, options?: ",
+              " | undefined, options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -975,7 +973,9 @@
               },
               "<",
               "SearchResponse",
-              "<any>>>; fetch: (options?: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -985,7 +985,9 @@
               },
               ") => Promise<",
               "SearchResponse",
-              "<any>>; onRequestStart: (handler: (searchSource: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; onRequestStart: (handler: (searchSource: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1006,8 +1008,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
@@ -1201,13 +1203,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
@@ -1221,13 +1217,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
@@ -1356,8 +1346,8 @@
           "label": "docViews",
           "description": [],
           "signature": [
-            "{ addDocView(docViewRaw: ComponentDocViewInput | ",
-            "RenderDocViewInput",
+            "{ addDocView(docViewRaw: ",
+            "DocViewInput",
             " | ",
             "DocViewInputFn",
             "): void; }"

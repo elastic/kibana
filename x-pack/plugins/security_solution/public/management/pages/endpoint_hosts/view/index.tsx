@@ -59,7 +59,7 @@ import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
-import { WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
+import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -185,14 +185,14 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
         ],
         onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
@@ -228,10 +228,7 @@ export const EndpointList = () => {
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
-        onDoneNavigateTo: [
-          'securitySolution',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
-        ],
+        onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
       },
     });
 
@@ -661,7 +658,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

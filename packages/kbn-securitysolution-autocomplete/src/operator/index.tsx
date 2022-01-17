@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { OperatorOption } from '@kbn/securitysolution-list-utils';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
 import { getOperators } from '../get_operators';
 import {
@@ -28,7 +28,7 @@ interface OperatorState {
   operatorInputWidth?: number;
   operatorOptions?: OperatorOption[];
   placeholder: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
 }
 
 export const OperatorComponent: React.FC<OperatorState> = ({

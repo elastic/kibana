@@ -72,7 +72,7 @@ export const findExistingIndices = async (
 
 export const requestIndexFieldSearch = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient }: SearchStrategyDependencies,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
   beatFields: BeatFields,
   getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<IndexFieldsStrategyResponse> => {
@@ -87,9 +87,12 @@ export const requestIndexFieldSearch = async (
       data: { indexPatterns },
     },
   ] = await getStartServices();
-  const dataViewService = await indexPatterns.indexPatternsServiceFactory(
+
+  const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
-    esClient.asCurrentUser
+    esClient.asCurrentUser,
+    kRequest,
+    true
   );
 
   let indicesExist: string[] = [];
@@ -119,6 +122,7 @@ export const requestIndexFieldSearch = async (
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
+
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
@@ -167,7 +171,6 @@ export const requestIndexFieldSearch = async (
         hits: [
           {
             _index: '',
-            _type: '',
             _id: '',
             _score: -1,
             _source: null,

@@ -20,11 +20,11 @@ export function useGetUserCasesPermissions() {
 
   useEffect(() => {
     const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities[casesFeatureId].crud_cases === 'boolean'
+      typeof uiCapabilities[casesFeatureId]?.crud_cases === 'boolean'
         ? (uiCapabilities[casesFeatureId].crud_cases as boolean)
         : false;
     const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities[casesFeatureId].read_cases === 'boolean'
+      typeof uiCapabilities[casesFeatureId]?.read_cases === 'boolean'
         ? (uiCapabilities[casesFeatureId].read_cases as boolean)
         : false;
     setCasesPermissions({

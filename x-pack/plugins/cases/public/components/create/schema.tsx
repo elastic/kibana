@@ -36,6 +36,7 @@ export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
+  selectedOwner?: string | null;
 };
 
 export const schema: FormSchema<FormProps> = {
@@ -59,6 +60,15 @@ export const schema: FormSchema<FormProps> = {
     validations: [
       {
         validator: emptyField(i18n.DESCRIPTION_REQUIRED),
+      },
+    ],
+  },
+  selectedOwner: {
+    label: i18n.SOLUTION,
+    type: FIELD_TYPES.RADIO_GROUP,
+    validations: [
+      {
+        validator: emptyField(i18n.SOLUTION_REQUIRED),
       },
     ],
   },

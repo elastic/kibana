@@ -12,10 +12,10 @@ or all indices that contain your data.
 [[data-views-read-only-access]]
 === Required permissions
 
-* Access to *Data Views* requires the <<xpack-kibana-role-management, {kib} privilege>>
+* Access to *Data Views* requires the <<kibana-role-management, {kib} privilege>>
 `Data View Management`.
 
-* To create a data view, you must have the <<xpack-kibana-role-management,{es} privilege>>
+* To create a data view, you must have the <<kibana-role-management,{es} privilege>>
 `view_index_metadata`.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges

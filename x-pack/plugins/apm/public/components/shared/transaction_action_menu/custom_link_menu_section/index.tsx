@@ -30,10 +30,10 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { CreateEditCustomLinkFlyout } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout';
-import { convertFiltersToQuery } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout/helper';
-import { LoadingStatePrompt } from '../../LoadingStatePrompt';
-import { CustomLinkToolbar } from './CustomLinkToolbar';
+import { CreateEditCustomLinkFlyout } from '../../../app/Settings/custom_link/create_edit_custom_link_flyout';
+import { convertFiltersToQuery } from '../../../app/Settings/custom_link/create_edit_custom_link_flyout/helper';
+import { LoadingStatePrompt } from '../../loading_state_prompt';
+import { CustomLinkToolbar } from './custom_link_toolbar';
 import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;

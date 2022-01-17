@@ -12,7 +12,7 @@ import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../t
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
@@ -29,6 +29,8 @@ import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_e
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { TinymathAST } from 'packages/kbn-tinymath';
+import { SavedObjectReference } from 'kibana/server';
+import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -154,12 +156,12 @@ const expectedIndexPatterns = {
   },
 };
 
-type IndexPatternBaseState = Omit<
+type DataViewBaseState = Omit<
   IndexPatternPrivateState,
   'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
 >;
 
-function enrichBaseState(baseState: IndexPatternBaseState): IndexPatternPrivateState {
+function enrichBaseState(baseState: DataViewBaseState): IndexPatternPrivateState {
   return {
     currentIndexPatternId: baseState.currentIndexPatternId,
     layers: baseState.layers,
@@ -302,7 +304,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should create a table when there is a formula without aggs', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -340,7 +342,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should generate an expression for an aggregated query', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -490,7 +492,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -536,7 +538,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should pass time shift parameter to metric agg functions', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -573,7 +575,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -703,7 +705,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should add time_scale and format function if time scale is set and supported', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -786,7 +788,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put column formatters after calculated columns', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -835,7 +837,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should rename the output from esaggs when using flat query', () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -887,7 +889,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -937,7 +939,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should collect expression references and append them', async () => {
-        const queryBaseState: IndexPatternBaseState = {
+        const queryBaseState: DataViewBaseState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -972,7 +974,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should keep correct column mapping keys with reference columns present', async () => {
-        const queryBaseState: IndexPatternBaseState = {
+        const queryBaseState: DataViewBaseState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -1010,7 +1012,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should topologically sort references', () => {
         // This is a real example of count() + count()
-        const queryBaseState: IndexPatternBaseState = {
+        const queryBaseState: DataViewBaseState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -1735,6 +1737,79 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+    });
+  });
+
+  describe('#isEqual', () => {
+    const layerId = '8bd66b66-aba3-49fb-9ff2-4bf83f2be08e';
+
+    const persistableState: IndexPatternPersistedState = {
+      layers: {
+        [layerId]: {
+          columns: {
+            'fa649155-d7f5-49d9-af26-508287431244': {
+              label: 'Count of records',
+              dataType: 'number',
+              operationType: 'count',
+              isBucketed: false,
+              scale: 'ratio',
+              sourceField: 'Records',
+            },
+          },
+          columnOrder: ['fa649155-d7f5-49d9-af26-508287431244'],
+          incompleteColumns: {},
+        },
+      },
+    };
+
+    const currentIndexPatternReference = {
+      id: 'some-id',
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern',
+    };
+
+    const references1: SavedObjectReference[] = [
+      currentIndexPatternReference,
+      {
+        id: 'some-id',
+        name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
+        type: 'index-pattern',
+      },
+    ];
+
+    const references2: SavedObjectReference[] = [
+      currentIndexPatternReference,
+      {
+        id: 'some-DIFFERENT-id',
+        name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
+        type: 'index-pattern',
+      },
+    ];
+
+    it('should be false if datasource states are using different data views', () => {
+      expect(
+        indexPatternDatasource.isEqual(persistableState, references1, persistableState, references2)
+      ).toBe(false);
+    });
+
+    it('should be false if datasource states differ', () => {
+      const differentPersistableState = cloneDeep(persistableState);
+      differentPersistableState.layers[layerId].columnOrder = ['something else'];
+
+      expect(
+        indexPatternDatasource.isEqual(
+          persistableState,
+          references1,
+          differentPersistableState,
+          references1
+        )
+      ).toBe(false);
+    });
+
+    it('should be true if datasource states are identical and they refer to the same data view', () => {
+      expect(
+        indexPatternDatasource.isEqual(persistableState, references1, persistableState, references1)
+      ).toBe(true);
     });
   });
 });

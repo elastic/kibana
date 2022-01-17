@@ -10,7 +10,7 @@ import { tcpFormatters, TCPFormatMap } from './tcp';
 import { icmpFormatters, ICMPFormatMap } from './icmp';
 import { browserFormatters, BrowserFormatMap } from './browser';
 import { commonFormatters, CommonFormatMap } from './common';
-import { DataStream } from '../../../../common/runtime_types/monitor_management';
+import { DataStream } from '../../../../common/runtime_types';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 

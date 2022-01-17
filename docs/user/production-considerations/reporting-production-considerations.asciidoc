@@ -8,7 +8,15 @@
 :keywords: administrator, analyst, concept, setup, reporting
 :description: Consider the production components that are used to generate reports.
 
-To generate reports, {kib} uses a custom build of the Chromium web browser, which runs on the {kib} server in headless mode to load {kib} and capture the rendered {kib} visualizations as images. Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to make sure it works with minimal setup. The operating system that the {kib} server uses can require additional dependencies for Chromium.
+To generate reports, {kib} uses the Chromium web browser, which runs on the server in headless mode. Chromium is an open-source project not related to Elastic, and is embedded into {kib}. Chromium may require additional OS dependencies to run properly.
+
+[NOTE]
+============
+Chromium is not embedded into {kib} for the Darwin (Mac OS) architecture. When
+running on Darwin, Reporting will download Chromium into the proper area of
+the {kib} installation path the first time the server starts. To separately
+download and install the browser, see <<reporting-manual-chromium-install>>.
+============
 
 [float]
 [[reporting-chromium-sandbox]]
@@ -20,7 +28,7 @@ For an additional layer of security, use the sandbox. The Chromium sandbox uses 
 ==== Linux sandbox
 The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel. However, many
 distributions don't have user namespaces enabled by default, or they require the CAP_SYS_ADMIN capability. The {report-features}
-automatically disable the sandbox when it is running on Debian and CentOS, as additional steps are required to enable
+automatically disable the sandbox when it is running on Debian because additional steps are required to enable
 unprivileged usernamespaces. In these situations, you'll see the following message in your {kib} startup logs:
 `Chromium sandbox provides an additional layer of protection, but is not supported for your OS.
 Automatically setting 'xpack.reporting.capture.browser.chromium.disableSandbox: true'.`

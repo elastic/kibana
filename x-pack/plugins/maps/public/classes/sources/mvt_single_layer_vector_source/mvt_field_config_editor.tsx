@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import _ from 'lodash';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { MVT_FIELD_TYPE } from '../../../../common/constants';

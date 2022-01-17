@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, useMemo, useState, useCallback } from 'react';
+import React, { memo, FC, useMemo, useState, useCallback } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -31,6 +31,7 @@ import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './he
 import { getColorPicker } from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
+import './index.scss';
 
 declare global {
   interface Window {
@@ -122,245 +123,200 @@ const getAccessor = (value: string | ExpressionValueVisDimension, columns: Datat
   return accessor.id;
 };
 
-const HeatmapComponent: FC<HeatmapRenderProps> = ({
-  data,
-  args,
-  timeZone,
-  formatFactory,
-  chartsThemeService,
-  onClickValue,
-  onSelectRange,
-  paletteService,
-  uiState,
-}) => {
-  const chartTheme = chartsThemeService.useChartsTheme();
-  const isDarkTheme = chartsThemeService.useDarkMode();
-  // legacy heatmap legend is handled by the uiState
-  const [showLegend, setShowLegend] = useState<boolean>(() => {
-    const bwcLegendStateDefault = args.legend.isVisible ?? true;
-    return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
-  });
-
-  const toggleLegend = useCallback(() => {
-    setShowLegend((value) => {
-      const newValue = !value;
-      uiState?.set?.('vis.legendOpen', newValue);
-      return newValue;
-    });
-  }, [uiState]);
-
-  const setColor = useCallback(
-    (newColor: string | null, seriesLabel: string | number) => {
-      const colors = uiState?.get('vis.colors') || {};
-      if (colors[seriesLabel] === newColor || !newColor) {
-        delete colors[seriesLabel];
-      } else {
-        colors[seriesLabel] = newColor;
-      }
-      uiState?.setSilent('vis.colors', null);
-      uiState?.set('vis.colors', colors);
-      uiState?.emit('reload');
-      uiState?.emit('colorChanged');
-    },
-    [uiState]
-  );
-
-  const legendColorPicker = useMemo(
-    () => getColorPicker(args.legend.position, setColor, uiState),
-    [args.legend.position, setColor, uiState]
-  );
-  const table = data;
-  const valueAccessor = args.valueAccessor
-    ? getAccessor(args.valueAccessor, table.columns)
-    : undefined;
-  const minMaxByColumnId = useMemo(
-    () => findMinMaxByColumnId([valueAccessor!], table),
-    [valueAccessor, table]
-  );
-
-  const paletteParams = args.palette?.params;
-  const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
-  const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
-
-  const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
-  const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
-
-  const xAxisColumn = table.columns[xAxisColumnIndex];
-  const yAxisColumn = table.columns[yAxisColumnIndex];
-  const valueColumn = table.columns.find((v) => v.id === valueAccessor);
-
-  if (!valueColumn) {
-    // Chart is not ready
-    return null;
-  }
-
-  let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
-  if (!chartData || !chartData.length) {
-    return <EmptyPlaceholder icon={HeatmapIcon} />;
-  }
-
-  if (!yAxisColumn) {
-    // required for tooltip
-    chartData = chartData.map((row) => {
-      return {
-        ...row,
-        unifiedY: '',
-      };
-    });
-  }
-  const { min, max } = minMaxByColumnId[valueAccessor!];
-  // formatters
-  const xAxisMeta = xAxisColumn?.meta;
-  const xValuesFormatter = formatFactory(xAxisMeta?.params);
-  const metricFormatter = formatFactory(
-    typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-  );
-  const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
-  const dateHistogramMeta = xAxisColumn
-    ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
-    : undefined;
-
-  // Fallback to the ordinal scale type when a single row of data is provided.
-  // Related issue https://github.com/elastic/elastic-charts/issues/1184
-  let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
-  if (isTimeBasedSwimLane && chartData.length > 1) {
-    const dateInterval = dateHistogramMeta?.interval;
-    const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
-    if (esInterval) {
-      xScale = {
-        type: ScaleType.Time,
-        interval:
-          esInterval.type === 'fixed'
-            ? {
-                type: 'fixed',
-                unit: esInterval.unit as ESFixedIntervalUnit,
-                value: esInterval.value,
-              }
-            : {
-                type: 'calendar',
-                unit: esInterval.unit as ESCalendarIntervalUnit,
-                value: esInterval.value,
-              },
-      };
-    }
-  }
-
-  const tooltip: TooltipProps = {
-    type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
-  };
-
-  const valueFormatter = (d: number) => {
-    let value = d;
-
-    if (args.percentageMode) {
-      const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
-      value = parseInt(percentageNumber.toString(), 10) / 100;
-    }
-    return metricFormatter.convert(value);
-  };
-
-  const { colors, ranges } = computeColorRanges(
+export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
+  ({
+    data,
+    args,
+    timeZone,
+    formatFactory,
+    chartsThemeService,
+    onClickValue,
+    onSelectRange,
     paletteService,
-    paletteParams,
-    isDarkTheme ? '#000' : '#fff',
-    minMaxByColumnId[valueAccessor!]
-  );
+    uiState,
+  }) => {
+    const chartTheme = chartsThemeService.useChartsTheme();
+    const isDarkTheme = chartsThemeService.useDarkMode();
+    // legacy heatmap legend is handled by the uiState
+    const [showLegend, setShowLegend] = useState<boolean>(() => {
+      const bwcLegendStateDefault = args.legend.isVisible ?? true;
+      return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
+    });
 
-  // adds a very small number to the max value to make sure the max value will be included
-  const endValue =
-    paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
-  const overwriteColors = uiState?.get('vis.colors') ?? null;
+    const toggleLegend = useCallback(() => {
+      setShowLegend((value) => {
+        const newValue = !value;
+        uiState?.set?.('vis.legendOpen', newValue);
+        return newValue;
+      });
+    }, [uiState]);
 
-  const bands = ranges.map((start, index, array) => {
-    // by default the last range is right-open
-    let end = index === array.length - 1 ? Infinity : array[index + 1];
-    // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
-    if (args.lastRangeIsRightOpen === false) {
-      const lastBand = max === start ? Infinity : endValue;
-      end = index === array.length - 1 ? lastBand : array[index + 1];
-    }
-    const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(end)}`;
-    const overwriteColor = overwriteColors?.[overwriteArrayIdx];
-    return {
-      // with the default continuity:above the every range is left-closed
-      start,
-      end,
-      // the current colors array contains a duplicated color at the beginning that we need to skip
-      color: overwriteColor ?? colors[index + 1],
-    };
-  });
-
-  const onElementClick = ((e: HeatmapElementEvent[]) => {
-    const cell = e[0][0];
-    const { x, y } = cell.datum;
-
-    const xAxisFieldName = xAxisColumn?.meta?.field;
-    const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-    const points = [
-      {
-        row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
-        column: xAxisColumnIndex,
-        value: x,
+    const setColor = useCallback(
+      (newColor: string | null, seriesLabel: string | number) => {
+        const colors = uiState?.get('vis.colors') || {};
+        if (colors[seriesLabel] === newColor || !newColor) {
+          delete colors[seriesLabel];
+        } else {
+          colors[seriesLabel] = newColor;
+        }
+        uiState?.setSilent('vis.colors', null);
+        uiState?.set('vis.colors', colors);
+        uiState?.emit('reload');
+        uiState?.emit('colorChanged');
       },
-      ...(yAxisColumn
-        ? [
-            {
-              row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
-              column: yAxisColumnIndex,
-              value: y,
-            },
-          ]
-        : []),
-    ];
+      [uiState]
+    );
 
-    const context: FilterEvent['data'] = {
-      data: points.map((point) => ({
-        row: point.row,
-        column: point.column,
-        value: point.value,
-        table,
-      })),
-      timeFieldName,
+    const legendColorPicker = useMemo(
+      () => getColorPicker(args.legend.position, setColor, uiState),
+      [args.legend.position, setColor, uiState]
+    );
+    const table = data;
+    const valueAccessor = args.valueAccessor
+      ? getAccessor(args.valueAccessor, table.columns)
+      : undefined;
+    const minMaxByColumnId = useMemo(
+      () => findMinMaxByColumnId([valueAccessor!], table),
+      [valueAccessor, table]
+    );
+
+    const paletteParams = args.palette?.params;
+    const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
+    const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
+
+    const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
+    const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
+
+    const xAxisColumn = table.columns[xAxisColumnIndex];
+    const yAxisColumn = table.columns[yAxisColumnIndex];
+    const valueColumn = table.columns.find((v) => v.id === valueAccessor);
+
+    if (!valueColumn) {
+      // Chart is not ready
+      return null;
+    }
+
+    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    if (!chartData || !chartData.length) {
+      return <EmptyPlaceholder icon={HeatmapIcon} />;
+    }
+
+    if (!yAxisColumn) {
+      // required for tooltip
+      chartData = chartData.map((row) => {
+        return {
+          ...row,
+          unifiedY: '',
+        };
+      });
+    }
+    const { min, max } = minMaxByColumnId[valueAccessor!];
+    // formatters
+    const xAxisMeta = xAxisColumn?.meta;
+    const xValuesFormatter = formatFactory(xAxisMeta?.params);
+    const metricFormatter = formatFactory(
+      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
+    );
+    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+    const dateHistogramMeta = xAxisColumn
+      ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+      : undefined;
+
+    // Fallback to the ordinal scale type when a single row of data is provided.
+    // Related issue https://github.com/elastic/elastic-charts/issues/1184
+    let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
+    if (isTimeBasedSwimLane && chartData.length > 1) {
+      const dateInterval = dateHistogramMeta?.interval;
+      const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
+      if (esInterval) {
+        xScale = {
+          type: ScaleType.Time,
+          interval:
+            esInterval.type === 'fixed'
+              ? {
+                  type: 'fixed',
+                  unit: esInterval.unit as ESFixedIntervalUnit,
+                  value: esInterval.value,
+                }
+              : {
+                  type: 'calendar',
+                  unit: esInterval.unit as ESCalendarIntervalUnit,
+                  value: esInterval.value,
+                },
+        };
+      }
+    }
+
+    const tooltip: TooltipProps = {
+      type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
     };
-    onClickValue(context);
-  }) as ElementClickListener;
 
-  const onBrushEnd = (e: HeatmapBrushEvent) => {
-    const { x, y } = e;
+    const valueFormatter = (d: number) => {
+      let value = d;
 
-    const xAxisFieldName = xAxisColumn?.meta?.field;
-    const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
+      if (args.percentageMode) {
+        const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
+        value = parseInt(percentageNumber.toString(), 10) / 100;
+      }
+      return `${metricFormatter.convert(value) ?? ''}`;
+    };
 
-    if (isTimeBasedSwimLane) {
-      const context: BrushEvent['data'] = {
-        range: x as number[],
-        table,
-        column: xAxisColumnIndex,
-        timeFieldName,
+    const { colors, ranges } = computeColorRanges(
+      paletteService,
+      paletteParams,
+      isDarkTheme ? '#000' : '#fff',
+      minMaxByColumnId[valueAccessor!]
+    );
+
+    // adds a very small number to the max value to make sure the max value will be included
+    const endValue =
+      paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
+    const overwriteColors = uiState?.get('vis.colors') ?? null;
+
+    const bands = ranges.map((start, index, array) => {
+      // by default the last range is right-open
+      let end = index === array.length - 1 ? Infinity : array[index + 1];
+      // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
+      if (args.lastRangeIsRightOpen === false) {
+        const lastBand = max === start ? Infinity : endValue;
+        end = index === array.length - 1 ? lastBand : array[index + 1];
+      }
+      const overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
+        end
+      )}`;
+      const overwriteColor = overwriteColors?.[overwriteArrayIdx];
+      return {
+        // with the default continuity:above the every range is left-closed
+        start,
+        end,
+        // the current colors array contains a duplicated color at the beginning that we need to skip
+        color: overwriteColor ?? colors[index + 1],
       };
-      onSelectRange(context);
-    } else {
-      const points: Array<{ row: number; column: number; value: string | number }> = [];
+    });
 
-      if (yAxisColumn) {
-        (y as string[]).forEach((v) => {
-          points.push({
-            row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
-            column: yAxisColumnIndex,
-            value: v,
-          });
-        });
-      }
-      if (xAxisColumn) {
-        (x as string[]).forEach((v) => {
-          points.push({
-            row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
-            column: xAxisColumnIndex,
-            value: v,
-          });
-        });
-      }
+    const onElementClick = ((e: HeatmapElementEvent[]) => {
+      const cell = e[0][0];
+      const { x, y } = cell.datum;
+
+      const xAxisFieldName = xAxisColumn?.meta?.field;
+      const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
+
+      const points = [
+        {
+          row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
+          column: xAxisColumnIndex,
+          value: x,
+        },
+        ...(yAxisColumn
+          ? [
+              {
+                row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+                column: yAxisColumnIndex,
+                value: y,
+              },
+            ]
+          : []),
+      ];
 
       const context: FilterEvent['data'] = {
         data: points.map((point) => ({
@@ -372,122 +328,174 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
         timeFieldName,
       };
       onClickValue(context);
-    }
-  };
+    }) as ElementClickListener;
 
-  const config: HeatmapSpec['config'] = {
-    grid: {
-      stroke: {
-        width:
-          args.gridConfig.strokeWidth ?? chartTheme.axes?.gridLine?.horizontal?.strokeWidth ?? 1,
-        color:
-          args.gridConfig.strokeColor ?? chartTheme.axes?.gridLine?.horizontal?.stroke ?? '#D3DAE6',
-      },
-      cellHeight: {
-        max: 'fill',
-        min: 1,
-      },
-    },
-    cell: {
-      maxWidth: 'fill',
-      maxHeight: 'fill',
-      label: {
-        visible: args.gridConfig.isCellLabelVisible ?? false,
-        minFontSize: 8,
-        maxFontSize: 18,
-        useGlobalMinFontSize: true, // override the min if there's a different directive upstream
-      },
-      border: {
-        strokeWidth: 0,
-      },
-    },
-    yAxisLabel: {
-      visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
-      // eui color subdued
-      textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
-      padding: yAxisColumn?.name ? 8 : 0,
-      name: yAxisColumn?.name ?? '',
-      ...(yAxisColumn
-        ? {
-            formatter: (v: number | string) => formatFactory(yAxisColumn.meta.params).convert(v),
-          }
-        : {}),
-    },
-    xAxisLabel: {
-      visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
-      // eui color subdued
-      textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
-      padding: xAxisColumn?.name ? 8 : 0,
-      formatter: (v: number | string) => xValuesFormatter.convert(v),
-      name: xAxisColumn?.name ?? '',
-    },
-    brushMask: {
-      fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-    },
-    brushArea: {
-      stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-    },
-    timeZone,
-  };
+    const onBrushEnd = (e: HeatmapBrushEvent) => {
+      const { x, y } = e;
 
-  return (
-    <>
-      {showLegend !== undefined && (
-        <LegendToggle
-          onClick={toggleLegend}
-          showLegend={showLegend}
-          legendPosition={args.legend.position}
-        />
-      )}
-      <Chart>
-        <Settings
-          onElementClick={onElementClick}
-          showLegend={showLegend ?? args.legend.isVisible}
-          legendPosition={args.legend.position}
-          legendColorPicker={uiState ? legendColorPicker : undefined}
-          debugState={window._echDebugStateFlag ?? false}
-          tooltip={tooltip}
-          theme={{
-            ...chartTheme,
-            legend: {
-              labelOptions: {
-                maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+      const xAxisFieldName = xAxisColumn?.meta?.field;
+      const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
+
+      if (isTimeBasedSwimLane) {
+        const context: BrushEvent['data'] = {
+          range: x as number[],
+          table,
+          column: xAxisColumnIndex,
+          timeFieldName,
+        };
+        onSelectRange(context);
+      } else {
+        const points: Array<{ row: number; column: number; value: string | number }> = [];
+
+        if (yAxisColumn) {
+          (y as string[]).forEach((v) => {
+            points.push({
+              row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+              column: yAxisColumnIndex,
+              value: v,
+            });
+          });
+        }
+        if (xAxisColumn) {
+          (x as string[]).forEach((v) => {
+            points.push({
+              row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+              column: xAxisColumnIndex,
+              value: v,
+            });
+          });
+        }
+
+        const context: FilterEvent['data'] = {
+          data: points.map((point) => ({
+            row: point.row,
+            column: point.column,
+            value: point.value,
+            table,
+          })),
+          timeFieldName,
+        };
+        onClickValue(context);
+      }
+    };
+
+    const config: HeatmapSpec['config'] = {
+      grid: {
+        stroke: {
+          width:
+            args.gridConfig.strokeWidth ?? chartTheme.axes?.gridLine?.horizontal?.strokeWidth ?? 1,
+          color:
+            args.gridConfig.strokeColor ??
+            chartTheme.axes?.gridLine?.horizontal?.stroke ??
+            '#D3DAE6',
+        },
+        cellHeight: {
+          max: 'fill',
+          min: 1,
+        },
+      },
+      cell: {
+        maxWidth: 'fill',
+        maxHeight: 'fill',
+        label: {
+          visible: args.gridConfig.isCellLabelVisible ?? false,
+          minFontSize: 8,
+          maxFontSize: 18,
+          useGlobalMinFontSize: true, // override the min if there's a different directive upstream
+        },
+        border: {
+          strokeWidth: 0,
+        },
+      },
+      yAxisLabel: {
+        visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
+        // eui color subdued
+        textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+        padding: yAxisColumn?.name ? 8 : 0,
+        name: yAxisColumn?.name ?? '',
+        ...(yAxisColumn
+          ? {
+              formatter: (v: number | string) =>
+                `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`,
+            }
+          : {}),
+      },
+      xAxisLabel: {
+        visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
+        // eui color subdued
+        textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+        padding: xAxisColumn?.name ? 8 : 0,
+        formatter: (v: number | string) => `${xValuesFormatter.convert(v) ?? ''}`,
+        name: xAxisColumn?.name ?? '',
+      },
+      brushMask: {
+        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+      },
+      brushArea: {
+        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
+      },
+      timeZone,
+    };
+
+    return (
+      <>
+        {showLegend !== undefined && (
+          <LegendToggle
+            onClick={toggleLegend}
+            showLegend={showLegend}
+            legendPosition={args.legend.position}
+          />
+        )}
+        <Chart>
+          <Settings
+            onElementClick={onElementClick}
+            showLegend={showLegend ?? args.legend.isVisible}
+            legendPosition={args.legend.position}
+            legendColorPicker={uiState ? legendColorPicker : undefined}
+            debugState={window._echDebugStateFlag ?? false}
+            tooltip={tooltip}
+            theme={{
+              ...chartTheme,
+              legend: {
+                labelOptions: {
+                  maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+                },
               },
-            },
-          }}
-          xDomain={{
-            min:
-              dateHistogramMeta && dateHistogramMeta.timeRange
-                ? new Date(dateHistogramMeta.timeRange.from).getTime()
-                : NaN,
-            max:
-              dateHistogramMeta && dateHistogramMeta.timeRange
-                ? new Date(dateHistogramMeta.timeRange.to).getTime()
-                : NaN,
-          }}
-          onBrushEnd={onBrushEnd as BrushEndListener}
-        />
-        <Heatmap
-          id="heatmap"
-          name={valueColumn.name}
-          colorScale={{
-            type: 'bands',
-            bands,
-          }}
-          data={chartData}
-          xAccessor={xAccessor}
-          yAccessor={yAccessor || 'unifiedY'}
-          valueAccessor={valueAccessor}
-          valueFormatter={valueFormatter}
-          xScale={xScale}
-          ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
-          config={config}
-          xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-        />
-      </Chart>
-    </>
-  );
-};
+            }}
+            xDomain={{
+              min:
+                dateHistogramMeta && dateHistogramMeta.timeRange
+                  ? new Date(dateHistogramMeta.timeRange.from).getTime()
+                  : NaN,
+              max:
+                dateHistogramMeta && dateHistogramMeta.timeRange
+                  ? new Date(dateHistogramMeta.timeRange.to).getTime()
+                  : NaN,
+            }}
+            onBrushEnd={onBrushEnd as BrushEndListener}
+          />
+          <Heatmap
+            id="heatmap"
+            name={valueColumn.name}
+            colorScale={{
+              type: 'bands',
+              bands,
+            }}
+            data={chartData}
+            xAccessor={xAccessor}
+            yAccessor={yAccessor || 'unifiedY'}
+            valueAccessor={valueAccessor}
+            valueFormatter={valueFormatter}
+            xScale={xScale}
+            ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
+            config={config}
+            xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+          />
+        </Chart>
+      </>
+    );
+  }
+);
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export

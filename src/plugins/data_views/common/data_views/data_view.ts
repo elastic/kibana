@@ -13,7 +13,7 @@ import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField } from '../types';
-import { CharacterNotAllowedInField, DuplicateField } from '../../../kibana_utils/common';
+import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
 
 import { IIndexPattern, IFieldType } from '../../common';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
@@ -36,7 +36,6 @@ interface SavedObjectBody {
   fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
-  intervalName?: string;
   fields?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
@@ -62,12 +61,6 @@ export class DataView implements IIndexPattern {
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
   public timeFieldName: string | undefined;
-  /**
-   * @deprecated Used by time range index patterns
-   * @removeBy 8.1
-   *
-   */
-  public intervalName: string | undefined;
   /**
    * Type is used to identify rollup index patterns
    */
@@ -117,7 +110,6 @@ export class DataView implements IIndexPattern {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
-    this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
   }
@@ -217,7 +209,6 @@ export class DataView implements IIndexPattern {
       fieldFormats: this.fieldFormatMap,
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
-      intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
     };
   }
@@ -229,40 +220,6 @@ export class DataView implements IIndexPattern {
     return {
       excludes: (this.sourceFilters && this.sourceFilters.map((filter) => filter.value)) || [],
     };
-  }
-
-  /**
-   * Add scripted field to field list
-   *
-   * @param name field name
-   * @param script script code
-   * @param fieldType
-   * @param lang
-   * @deprecated use runtime field instead
-   */
-  async addScriptedField(name: string, script: string, fieldType: string = 'string') {
-    const scriptedFields = this.getScriptedFields();
-    const names = _.map(scriptedFields, 'name');
-
-    if (name.includes('*')) {
-      throw new CharacterNotAllowedInField('*', name);
-    }
-
-    if (_.includes(names, name)) {
-      throw new DuplicateField(name);
-    }
-
-    this.fields.add({
-      name,
-      script,
-      type: fieldType,
-      scripted: true,
-      lang: 'painless',
-      aggregatable: true,
-      searchable: true,
-      count: 0,
-      readFromDocValues: false,
-    });
   }
 
   /**
@@ -331,7 +288,6 @@ export class DataView implements IIndexPattern {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
-      intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
       fieldFormatMap,

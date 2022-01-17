@@ -13,10 +13,10 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { inputsActions } from '../../store/actions';
 import { isIndexNotFoundError } from '../../utils/exceptions';
-import { HostsRiskScore } from '../../../../common/search_strategy';
+import { getHostRiskIndex, HostsRiskScore } from '../../../../common/search_strategy';
+
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { getHostRiskIndex } from '../../../helpers';
 
 export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
@@ -104,7 +104,7 @@ export const useHostsRiskScore = ({
           timerange: timerange
             ? { to: timerange.to, from: timerange.from, interval: '' }
             : undefined,
-          hostName,
+          hostNames: hostName ? [hostName] : undefined,
           defaultIndex: [getHostRiskIndex(space.id)],
         });
       });

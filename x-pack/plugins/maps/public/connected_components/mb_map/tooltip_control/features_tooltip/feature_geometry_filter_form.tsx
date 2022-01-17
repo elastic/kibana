@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Geometry, Polygon } from 'geojson';
 import rison, { RisonObject } from 'rison-node';

@@ -562,9 +562,8 @@ export function XYChart({
   } as LegendPositionConfig;
 
   const isHistogramModeEnabled = filteredLayers.some(
-    ({ isHistogram, seriesType, splitAccessor }) =>
+    ({ isHistogram, seriesType }) =>
       isHistogram &&
-      (seriesType.includes('stacked') || !splitAccessor) &&
       (seriesType.includes('stacked') ||
         !seriesType.includes('bar') ||
         !chartHasMoreThanOneBarSeries)

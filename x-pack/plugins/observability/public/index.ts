@@ -24,6 +24,7 @@ export type {
   ObservabilityPublicPluginsStart,
 };
 export { enableInspectEsQueries } from '../common/ui_settings_keys';
+export { uptimeOverviewLocatorID } from '../common';
 
 export interface ConfigSchema {
   unsafe: {
@@ -99,4 +100,4 @@ export {
   ReportTypes,
   REPORT_METRIC_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
-export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploatory_view_config';
+export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';

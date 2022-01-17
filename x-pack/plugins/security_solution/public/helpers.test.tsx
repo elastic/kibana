@@ -10,7 +10,6 @@ import { Capabilities } from '../../../../src/core/public';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import {
   parseRoute,
-  getHostRiskIndex,
   isSubPluginAvailable,
   getSubPluginRoutesByCapabilities,
   RedirectRoute,
@@ -62,12 +61,6 @@ describe('public helpers parseRoute', () => {
       path: `${nonHashLocation.search}`,
       search: nonHashLocation.search,
     });
-  });
-});
-
-describe('public helpers export getHostRiskIndex', () => {
-  it('should properly return index if space is specified', () => {
-    expect(getHostRiskIndex('testName')).toEqual('ml_host_risk_score_latest_testName');
   });
 });
 

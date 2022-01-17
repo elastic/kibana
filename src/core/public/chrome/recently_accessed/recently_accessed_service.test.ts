@@ -44,11 +44,9 @@ describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
-    // @ts-expect-error
     window.localStorage = new LocalStorageMock();
   });
   beforeEach(() => localStorage.clear());
-  // @ts-expect-error
   afterAll(() => (window.localStorage = originalLocalStorage));
 
   const getStart = async () => {

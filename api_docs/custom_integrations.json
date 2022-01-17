@@ -117,7 +117,7 @@
           "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
         ],
         "path": "src/plugins/custom_integrations/public/components/index.tsx",
         "deprecated": false,
@@ -148,7 +148,7 @@
               "A fallback component to render while things load; default is `EuiLoadingSpinner`"
             ],
             "signature": [
-              "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
             "path": "src/plugins/custom_integrations/public/components/index.tsx",
             "deprecated": false,
@@ -460,7 +460,7 @@
           "label": "registerCustomIntegration",
           "description": [],
           "signature": [
-            "(customIntegration: Pick<",
+            "(customIntegration: Omit<",
             {
               "pluginId": "customIntegrations",
               "scope": "common",
@@ -468,7 +468,7 @@
               "section": "def-common.CustomIntegration",
               "text": "CustomIntegration"
             },
-            ", \"shipper\" | \"id\" | \"title\" | \"description\" | \"uiInternalPath\" | \"isBeta\" | \"icons\" | \"categories\" | \"eprOverlap\">) => void"
+            ", \"type\">) => void"
           ],
           "path": "src/plugins/custom_integrations/server/types.ts",
           "deprecated": false,
@@ -481,7 +481,7 @@
               "label": "customIntegration",
               "description": [],
               "signature": [
-                "Pick<",
+                "Omit<",
                 {
                   "pluginId": "customIntegrations",
                   "scope": "common",
@@ -489,7 +489,7 @@
                   "section": "def-common.CustomIntegration",
                   "text": "CustomIntegration"
                 },
-                ", \"shipper\" | \"id\" | \"title\" | \"description\" | \"uiInternalPath\" | \"isBeta\" | \"icons\" | \"categories\" | \"eprOverlap\">"
+                ", \"type\">"
               ],
               "path": "src/plugins/custom_integrations/server/types.ts",
               "deprecated": false,

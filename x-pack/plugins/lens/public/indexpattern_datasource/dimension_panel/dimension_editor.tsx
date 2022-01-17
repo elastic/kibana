@@ -414,7 +414,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-            defaultMessage: 'Select a function',
+            defaultMessage: 'Functions',
           })}
         </EuiFormLabel>
         <EuiSpacer size="s" />
@@ -474,7 +474,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 />
               );
             })}
-            <EuiSpacer size="s" />
+            {selectedOperationDefinition.selectionStyle !== 'field' ? <EuiSpacer size="s" /> : null}
           </>
         ) : null}
 
@@ -531,99 +531,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
             setIsCloseable={setIsCloseable}
             paramEditorCustomProps={paramEditorCustomProps}
             {...services}
-          />
-        )}
-
-        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
-          <AdvancedOptions
-            options={[
-              {
-                title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                  defaultMessage: 'Normalize by unit',
-                }),
-                dataTestSubj: 'indexPattern-time-scaling-enable',
-                onClick: () => {
-                  setStateWrapper(
-                    setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
-                  );
-                },
-                showInPopover: Boolean(
-                  operationDefinitionMap[selectedColumn.operationType].timeScalingMode &&
-                    operationDefinitionMap[selectedColumn.operationType].timeScalingMode !==
-                      'disabled' &&
-                    Object.values(state.layers[layerId].columns).some(
-                      (col) => col.operationType === 'date_histogram'
-                    ) &&
-                    !selectedColumn.timeScale
-                ),
-                inlineElement: (
-                  <TimeScaling
-                    selectedColumn={selectedColumn}
-                    columnId={columnId}
-                    layer={state.layers[layerId]}
-                    updateLayer={setStateWrapper}
-                  />
-                ),
-              },
-              {
-                title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
-                  defaultMessage: 'Filter by',
-                }),
-                dataTestSubj: 'indexPattern-filter-by-enable',
-                onClick: () => {
-                  setFilterByOpenInitally(true);
-                  setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
-                },
-                showInPopover: Boolean(
-                  operationDefinitionMap[selectedColumn.operationType].filterable &&
-                    !selectedColumn.filter
-                ),
-                inlineElement:
-                  operationDefinitionMap[selectedColumn.operationType].filterable &&
-                  selectedColumn.filter ? (
-                    <Filtering
-                      indexPattern={currentIndexPattern}
-                      selectedColumn={selectedColumn}
-                      columnId={columnId}
-                      layer={state.layers[layerId]}
-                      updateLayer={setStateWrapper}
-                      isInitiallyOpen={filterByOpenInitially}
-                    />
-                  ) : null,
-              },
-              {
-                title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-                  defaultMessage: 'Time shift',
-                }),
-                dataTestSubj: 'indexPattern-time-shift-enable',
-                onClick: () => {
-                  setTimeShiftFocused(true);
-                  setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
-                },
-                showInPopover: Boolean(
-                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
-                    selectedColumn.timeShift === undefined &&
-                    (currentIndexPattern.timeFieldName ||
-                      Object.values(state.layers[layerId].columns).some(
-                        (col) => col.operationType === 'date_histogram'
-                      ))
-                ),
-                inlineElement:
-                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
-                  selectedColumn.timeShift !== undefined ? (
-                    <TimeShift
-                      indexPattern={currentIndexPattern}
-                      selectedColumn={selectedColumn}
-                      columnId={columnId}
-                      layer={state.layers[layerId]}
-                      updateLayer={setStateWrapper}
-                      isFocused={timeShiftedFocused}
-                      activeData={props.activeData}
-                      layerId={layerId}
-                    />
-                  ) : null,
-              },
-            ]}
           />
         )}
       </div>
@@ -735,6 +642,109 @@ export function DimensionEditor(props: DimensionEditorProps) {
         temporaryStateType={temporaryState}
       />
       {TabContent}
+
+      {!isFullscreen &&
+        !currentFieldIsInvalid &&
+        !incompleteInfo &&
+        selectedColumn &&
+        temporaryState === 'none' &&
+        selectedOperationDefinition && (
+          <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
+            <AdvancedOptions
+              options={[
+                {
+                  title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
+                    defaultMessage: 'Normalize by unit',
+                  }),
+                  dataTestSubj: 'indexPattern-time-scaling-enable',
+                  onClick: () => {
+                    setStateWrapper(
+                      setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
+                    );
+                  },
+                  showInPopover: Boolean(
+                    selectedOperationDefinition.timeScalingMode &&
+                      selectedOperationDefinition.timeScalingMode !== 'disabled' &&
+                      Object.values(state.layers[layerId].columns).some(
+                        (col) => col.operationType === 'date_histogram'
+                      ) &&
+                      !selectedColumn.timeScale
+                  ),
+                  inlineElement: (
+                    <TimeScaling
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                    />
+                  ),
+                },
+                {
+                  title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
+                    defaultMessage: 'Filter by',
+                  }),
+                  dataTestSubj: 'indexPattern-filter-by-enable',
+                  onClick: () => {
+                    setFilterByOpenInitally(true);
+                    setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
+                  },
+                  showInPopover: Boolean(
+                    selectedOperationDefinition.filterable && !selectedColumn.filter
+                  ),
+                  inlineElement:
+                    selectedOperationDefinition.filterable && selectedColumn.filter ? (
+                      <Filtering
+                        indexPattern={currentIndexPattern}
+                        selectedColumn={selectedColumn}
+                        columnId={columnId}
+                        layer={state.layers[layerId]}
+                        updateLayer={setStateWrapper}
+                        isInitiallyOpen={filterByOpenInitially}
+                        helpMessage={
+                          selectedOperationDefinition.filterable &&
+                          typeof selectedOperationDefinition.filterable !== 'boolean'
+                            ? selectedOperationDefinition.filterable.helpMessage
+                            : null
+                        }
+                      />
+                    ) : null,
+                },
+                {
+                  title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
+                    defaultMessage: 'Time shift',
+                  }),
+                  dataTestSubj: 'indexPattern-time-shift-enable',
+                  onClick: () => {
+                    setTimeShiftFocused(true);
+                    setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
+                  },
+                  showInPopover: Boolean(
+                    selectedOperationDefinition.shiftable &&
+                      selectedColumn.timeShift === undefined &&
+                      (currentIndexPattern.timeFieldName ||
+                        Object.values(state.layers[layerId].columns).some(
+                          (col) => col.operationType === 'date_histogram'
+                        ))
+                  ),
+                  inlineElement:
+                    selectedOperationDefinition.shiftable &&
+                    selectedColumn.timeShift !== undefined ? (
+                      <TimeShift
+                        indexPattern={currentIndexPattern}
+                        selectedColumn={selectedColumn}
+                        columnId={columnId}
+                        layer={state.layers[layerId]}
+                        updateLayer={setStateWrapper}
+                        isFocused={timeShiftedFocused}
+                        activeData={props.activeData}
+                        layerId={layerId}
+                      />
+                    ) : null,
+                },
+              ]}
+            />
+          </div>
+        )}
 
       {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">

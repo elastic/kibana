@@ -343,7 +343,12 @@ describe('Screenshot Observable Pipeline', () => {
 
     it('observes page exit', async () => {
       driverFactory.createPage.mockReturnValue(
-        of({ driver, exit$: throwError('Instant timeout has fired!'), metrics$: NEVER })
+        of({
+          driver,
+          unexpectedExit$: throwError('Instant timeout has fired!'),
+          metrics$: NEVER,
+          close: () => of(undefined),
+        })
       );
 
       await expect(

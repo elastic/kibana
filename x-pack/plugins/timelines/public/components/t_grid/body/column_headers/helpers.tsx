@@ -7,7 +7,7 @@
 
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { EuiDataGridColumnActions } from '@elastic/eui';
-import { get, keyBy } from 'lodash/fp';
+import { keyBy } from 'lodash/fp';
 import React from 'react';
 
 import type {
@@ -91,17 +91,12 @@ export const getColumnHeaders = (
   const browserFieldByName = getAllFieldsByName(browserFields);
   return headers
     ? headers.map((header) => {
-        const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
-
         const browserField: Partial<BrowserField> | undefined = browserFieldByName[header.id];
 
         // augment the header with metadata from browserFields:
         const augmentedHeader = {
           ...header,
-          ...get(
-            [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
-            browserFields
-          ),
+          ...browserField,
           schema: header.schema ?? getSchema(browserField?.type),
         };
 

@@ -18,6 +18,7 @@ import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
+import { getCurrentRuleStatuses } from './utils/get_current_rule_statuses';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
@@ -66,14 +67,12 @@ export const findRulesRoute = (
           filter: query.filter,
           fields: query.fields,
         });
-        const alertIds = rules.data.map((rule) => rule.id);
+        const ruleIds = rules.data.map((rule) => rule.id);
 
+        const spaceId = context.securitySolution.getSpaceId();
         const [currentStatusesByRuleId, ruleActions] = await Promise.all([
-          execLogClient.getCurrentStatusBulk({
-            ruleIds: alertIds,
-            spaceId: context.securitySolution.getSpaceId(),
-          }),
-          legacyGetBulkRuleActionsSavedObject({ alertIds, savedObjectsClient, logger }),
+          getCurrentRuleStatuses({ ruleIds, execLogClient, spaceId, logger }),
+          legacyGetBulkRuleActionsSavedObject({ alertIds: ruleIds, savedObjectsClient, logger }),
         ]);
         const transformed = transformFindAlerts(rules, currentStatusesByRuleId, ruleActions);
         if (transformed == null) {

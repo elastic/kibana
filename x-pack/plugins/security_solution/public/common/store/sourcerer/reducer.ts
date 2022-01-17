@@ -14,6 +14,7 @@ import {
   setSignalIndexName,
   setDataView,
   setDataViewLoading,
+  updateSourcererDataViews,
 } from './actions';
 import { initDataView, initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 import { validateSelectedPatterns } from './helpers';
@@ -44,6 +45,12 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
       ...dataView,
     })),
+  }))
+  .case(updateSourcererDataViews, (state, { dataView }) => ({
+    ...state,
+    kibanaDataViews: state.kibanaDataViews.map((dv) =>
+      dv.id === dataView.id ? { ...dv, ...dataView } : dv
+    ),
   }))
   .case(setSourcererScopeLoading, (state, { id, loading }) => ({
     ...state,

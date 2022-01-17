@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TableSuggestion, Visualization } from '../../types';
-import { layerTypes } from '../../../common';
+import type { GaugeShape } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import {
-  GaugeShape,
   GaugeShapes,
   GaugeTicksPositions,
   GaugeLabelMajorModes,
-  GaugeVisualizationState,
-} from '../../../common/expressions/gauge_chart';
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { TableSuggestion, Visualization } from '../../types';
+import { layerTypes } from '../../../common';
+import { GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
