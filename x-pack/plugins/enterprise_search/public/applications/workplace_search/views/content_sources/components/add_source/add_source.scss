@@ -99,8 +99,8 @@
   }
 }
 
-.organizational-content-source-label {
-  padding: 0 $euiSizeM;
-  min-height: $euiButtonHeight;
-  line-height: $euiButtonHeight;
+@media (min-width: 768px) {
+  .organizational-content-source-item {
+    max-width: calc(33.3% - 16px);
+  }
 }
