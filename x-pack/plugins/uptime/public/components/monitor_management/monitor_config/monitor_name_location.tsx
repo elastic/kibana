@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { Validation } from '../../../../common/types';
 import { usePolicyConfigContext } from '../../fleet_package/contexts';
@@ -18,10 +26,21 @@ interface Props {
 }
 
 export const MonitorNameAndLocation = ({ validate }: Props) => {
-  const { name, setName, locations = [], setLocations } = usePolicyConfigContext();
+  const {
+    name,
+    setName,
+    locations = [],
+    setLocations,
+    namespace,
+    setNamespace,
+  } = usePolicyConfigContext();
+  const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
   const isNameInvalid = !!validate[ConfigKey.NAME]?.({ [ConfigKey.NAME]: name });
   const isLocationsInvalid = !!validate[ConfigKey.LOCATIONS]?.({
     [ConfigKey.LOCATIONS]: locations,
+  });
+  const isNamespaceInvalid = !!validate[ConfigKey.NAMESPACE]?.({
+    [ConfigKey.NAMESPACE]: namespace,
   });
 
   return (
@@ -52,6 +71,89 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
           onChange={(event) => setName(event.target.value)}
         />
       </EuiFormRow>
+      {/* Advanced options toggle */}
+      <EuiFormRow>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+              onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+              flush="left"
+            >
+              <FormattedMessage
+                id="xpack.uptime.monitorManagement.advancedOptionsFieldLabel"
+                defaultMessage="Advanced options"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {!isShowingAdvanced && !!isNamespaceInvalid ? (
+            <EuiFlexItem grow={false}>
+              <EuiText color="danger" size="s">
+                <FormattedMessage
+                  id="xpack.uptime.monitorManagement.errorCountText"
+                  defaultMessage="{count, plural, one {# error} other {# errors}}"
+                  values={{ count: 1 }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFormRow>
+      {/* Advanced options content */}
+      {isShowingAdvanced ? (
+        <EuiFormRow>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <EuiFormRow
+                isInvalid={isNamespaceInvalid}
+                error={
+                  <FormattedMessage
+                    id="xpack.uptime.monitorManagement.monitorNamespaceFieldError"
+                    defaultMessage="Monitor namespace is required"
+                  />
+                }
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.monitorManagement.monitorNamespaceFieldLabel"
+                    defaultMessage="Namespace"
+                  />
+                }
+                helpText={
+                  <FormattedMessage
+                    id="xpack.uptime.monitorManagement.namespaceHelpLabel"
+                    defaultMessage="Change the default namespace. This setting changes the name of the monitor's data stream. {learnMore}."
+                    values={{
+                      learnMore: (
+                        <EuiLink
+                          target="_blank"
+                          href="https://www.elastic.co/guide/en/observability/current/synthetics-quickstart-fleet.html"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.uptime.monitorManagement.namespaceHelpLearnMoreLabel"
+                            defaultMessage="Learn More"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                }
+              >
+                <EuiFieldText
+                  autoFocus={true}
+                  defaultValue={namespace}
+                  required={true}
+                  isInvalid={isNamespaceInvalid}
+                  fullWidth={true}
+                  name="data_stream.namespace"
+                  onChange={(event) => setNamespace(event.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      ) : null}
       <ServiceLocations
         setLocations={setLocations}
         selectedLocations={locations}

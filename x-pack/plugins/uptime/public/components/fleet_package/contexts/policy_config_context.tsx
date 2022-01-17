@@ -15,6 +15,7 @@ interface IPolicyConfigContext {
   setLocations: React.Dispatch<React.SetStateAction<ServiceLocations>>;
   setIsTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setIsZipUrlTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  setNamespace: React.Dispatch<React.SetStateAction<string>>;
   monitorType: DataStream;
   defaultMonitorType: DataStream;
   isTLSEnabled?: boolean;
@@ -28,6 +29,8 @@ interface IPolicyConfigContext {
   defaultLocations?: ServiceLocations;
   locations?: ServiceLocations;
   allowedScheduleUnits?: ScheduleUnit[];
+  defaultNamespace?: string;
+  namespace?: string;
 }
 
 export interface IPolicyConfigContextProvider {
@@ -37,6 +40,7 @@ export interface IPolicyConfigContextProvider {
   defaultIsZipUrlTLSEnabled?: boolean;
   defaultName?: string;
   defaultLocations?: ServiceLocations;
+  defaultNamespace?: string;
   isEditable?: boolean;
   isZipUrlSourceEnabled?: boolean;
   allowedScheduleUnits?: ScheduleUnit[];
@@ -62,6 +66,9 @@ const defaultContext: IPolicyConfigContext = {
       'setIsZipUrlTLSEnabled was not initialized, set it when you invoke the context'
     );
   },
+  setNamespace: (_namespace: React.SetStateAction<string>) => {
+    throw new Error('setNamespace was not initialized, set it when you invoke the context');
+  },
   monitorType: initialValue, // mutable
   defaultMonitorType: initialValue, // immutable,
   defaultIsTLSEnabled: false,
@@ -71,6 +78,7 @@ const defaultContext: IPolicyConfigContext = {
   isEditable: false,
   isZipUrlSourceEnabled: true,
   allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
+  defaultNamespace: 'default',
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -82,6 +90,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   defaultIsZipUrlTLSEnabled = false,
   defaultName = '',
   defaultLocations = [],
+  defaultNamespace = 'default',
   isEditable = false,
   isZipUrlSourceEnabled = true,
   allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
@@ -91,6 +100,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   const [locations, setLocations] = useState<ServiceLocations>(defaultLocations);
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
+  const [namespace, setNamespace] = useState<string>(defaultNamespace);
 
   const value = useMemo(() => {
     return {
@@ -112,6 +122,8 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       setLocations,
       isZipUrlSourceEnabled,
       allowedScheduleUnits,
+      namespace,
+      setNamespace,
     } as IPolicyConfigContext;
   }, [
     monitorType,
@@ -127,6 +139,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
     locations,
     defaultLocations,
     allowedScheduleUnits,
+    namespace,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;

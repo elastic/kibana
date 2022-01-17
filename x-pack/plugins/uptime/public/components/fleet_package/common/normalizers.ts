@@ -79,4 +79,5 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
   [ConfigKey.TAGS]: getCommonjsonToJavascriptNormalizer(ConfigKey.TAGS),
   [ConfigKey.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKey.TIMEOUT),
+  [ConfigKey.NAMESPACE]: (fields) => fields?.[ConfigKey.NAMESPACE]?.value ?? 'default',
 };

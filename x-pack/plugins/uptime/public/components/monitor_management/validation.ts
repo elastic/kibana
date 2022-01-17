@@ -83,6 +83,9 @@ const validateCommon: ValidationLibrary = {
       !Array.isArray(locations) || locations.length < 1 || locations.some(isServiceLocationInvalid)
     );
   },
+  [ConfigKey.NAMESPACE]: ({ [ConfigKey.NAMESPACE]: value }) => {
+    return !value || typeof value !== 'string';
+  },
 };
 
 const validateHTTP: ValidationLibrary = {

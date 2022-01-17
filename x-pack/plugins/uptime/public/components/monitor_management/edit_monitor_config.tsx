@@ -74,7 +74,8 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         defaultIsTLSEnabled: isTLSEnabled,
         defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
         defaultMonitorType: monitorType,
-        defaultName: defaultConfig?.name || '', // TODO - figure out typing concerns for name
+        defaultName: defaultConfig?.[ConfigKey.NAME] || '', // TODO - figure out typing concerns for name
+        defaultNamespace: defaultConfig?.[ConfigKey.NAMESPACE] || 'default',
         defaultLocations: defaultConfig.locations,
         isEditable: true,
         isZipUrlSourceEnabled: false,
