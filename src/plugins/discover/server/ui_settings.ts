@@ -254,7 +254,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [ROW_HEIGHT_OPTION]: {
     name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
-      defaultMessage: 'Maximum lines of document explorer cell',
+      defaultMessage: 'Row height in the Document Explorer',
     }),
     value: 3,
     category: ['discover'],
