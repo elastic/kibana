@@ -13,6 +13,7 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
+  enableInfrastructureView,
 } from '../common/ui_settings_keys';
 
 /**
@@ -49,6 +50,17 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
       defaultMessage: 'Enable the comparison feature on APM UI',
+    }),
+    schema: schema.boolean(),
+  },
+  [enableInfrastructureView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureView', {
+      defaultMessage: 'Infrastructure feature',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
+      defaultMessage: 'Enable the Infrastruture view feature on APM UI',
     }),
     schema: schema.boolean(),
   },

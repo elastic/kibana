@@ -159,7 +159,10 @@ export function isJVMsTabHidden({
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
+  const showInfraTab = core.uiSettings.get<boolean>(
+    'observability:enableInfrastructureView'
+  );
 
   const router = useApmRouter();
 
@@ -250,6 +253,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
+      hidden: !showInfraTab,
     },
     {
       key: 'service-map',
