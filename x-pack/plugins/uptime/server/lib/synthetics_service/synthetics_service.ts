@@ -171,7 +171,7 @@ export class SyntheticsService {
   async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
-      this.logger.debug('No mounter found which can be pushed to service.');
+      this.logger.debug('No moniter found which can be pushed to service.');
       return;
     }
     const data = {
