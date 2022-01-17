@@ -50,6 +50,27 @@ describe('Add Integration', () => {
         .each((el) => el.text().includes('Agent policy 1'));
     });
 
+    it('should add integration to policy', () => {
+      cy.request('/api/fleet/agent_policies').then((response: any) => {
+        const agentPolicyId = response.body.items
+          .filter((policy: any) => policy.name === 'Agent policy 1')
+          .map((policy: any) => policy.id);
+
+        cy.visit(`/app/fleet/policies/${agentPolicyId}`);
+        cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.wait('@packages');
+        cy.get('.euiLoadingSpinner').should('not.exist');
+        cy.get('input[placeholder="Search for integrations"]').type('Apache');
+        cy.get(INTEGRATIONS_CARD).contains(integration).click();
+        addIntegration();
+        cy.get('.euiBasicTable-loading').should('not.exist');
+        cy.get('.euiTitle').contains('Agent policy 1');
+        clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
+        cy.get('.euiLink').contains('apache-1');
+      });
+    });
+
     it('should upgrade policies with integration update', () => {
       const oldVersion = '0.3.3';
       installPackageWithVersion('apache', oldVersion);

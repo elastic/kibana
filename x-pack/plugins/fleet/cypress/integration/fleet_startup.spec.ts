@@ -85,7 +85,7 @@ describe('Fleet startup', () => {
 
       cy.getBySel('createPolicyBtn').click();
 
-      let agentPolicyId;
+      let agentPolicyId: string;
       const startTime = Date.now();
       cy.wait('@createAgentPolicy', { timeout: 180000 }).then((xhr: any) => {
         cy.log('Create agent policy took: ' + (Date.now() - startTime) / 1000 + ' s');

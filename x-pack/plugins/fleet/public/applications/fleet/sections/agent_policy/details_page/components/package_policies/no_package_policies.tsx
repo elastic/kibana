@@ -43,6 +43,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
               state: { forAgentPolicyId: policyId },
             })
           }
+          data-test-subj="addPackagePolicyButton"
         >
           <FormattedMessage
             id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"

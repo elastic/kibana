@@ -276,6 +276,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     state: { forAgentPolicyId: agentPolicy.id },
                   });
                 }}
+                data-test-subj="addPackagePolicyButton"
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.addPackagePolicyButtonText"

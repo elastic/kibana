@@ -10,7 +10,6 @@ import {
   CONFIRM_MODAL_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   FLYOUT_CLOSE_BTN_SEL,
-  INTEGRATION_NAME_LINK,
 } from '../screens/integrations';
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
@@ -36,19 +35,15 @@ export function clickIfVisible(selector: string) {
 
 export const deleteIntegrations = async (integration: string) => {
   const ids: string[] = [];
-  cy.getBySel(INTEGRATION_NAME_LINK)
-    .each(($a) => {
-      const href = $a.attr('href') as string;
-      ids.push(href.substr(href.lastIndexOf('/') + 1));
-    })
-    .then(() => {
-      cy.request({
-        url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress' },
-        body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
-        method: 'POST',
-      });
+  cy.request('/api/fleet/package_policies').then((response: any) => {
+    response.body.items.forEach((policy: any) => ids.push(policy.id));
+    cy.request({
+      url: `/api/fleet/package_policies/delete`,
+      headers: { 'kbn-xsrf': 'cypress' },
+      body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
+      method: 'POST',
     });
+  });
 };
 
 export const installPackageWithVersion = (integration: string, version: string) => {
