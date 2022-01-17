@@ -148,7 +148,7 @@ export const getAllExceptionListsColumns = (
               namespaceType,
             })}
             aria-label="Export exception list"
-            iconType="exportAction"
+            iconType="download"
             data-test-subj="exceptionsTableExportButton"
           />
         ),
