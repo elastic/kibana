@@ -9,7 +9,6 @@ import { first, map } from 'rxjs/operators';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
@@ -38,7 +37,7 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  { licensing, usageCollection }: ReportingSetupDeps
+  usageCollection?: UsageCollectionSetup
 ) {
   if (!usageCollection) {
     return;
@@ -46,6 +45,7 @@ export function registerReportingUsageCollector(
 
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getLicense = async () => {
+    const { licensing } = await reporting.getPluginStartDeps();
     return await licensing.license$
       .pipe(
         map(({ isAvailable, type }) => ({

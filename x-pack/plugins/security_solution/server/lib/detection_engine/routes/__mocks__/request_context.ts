@@ -84,6 +84,7 @@ const createRequestContextMock = (
     lists: {
       getListClient: jest.fn(() => clients.lists.listClient),
       getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+      getExtensionPointClient: jest.fn(),
     },
   };
 };

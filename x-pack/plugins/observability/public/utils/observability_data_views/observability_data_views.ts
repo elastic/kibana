@@ -18,10 +18,11 @@ import {
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
 import { getDataHandler } from '../../data_handler';
+import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,
-  infra_metrics: null,
+  infra_metrics: infraMetricsFieldFormats,
   ux: rumFieldFormats,
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
@@ -46,7 +47,7 @@ const appToPatternMap: Record<AppDataType, string> = {
   apm: 'apm-*',
   ux: '(rum-data-view)*',
   infra_logs: '',
-  infra_metrics: '',
+  infra_metrics: '(infra-metrics-data-view)*',
   mobile: '(mobile-data-view)*',
 };
 
@@ -105,7 +106,7 @@ export class ObservabilityDataViews {
         if (fieldByName) {
           const fieldFormat = dataView.getFormatterForField(fieldByName);
           const params = fieldFormat.params();
-          if (!isParamsSame(params, format.params)) {
+          if (!isParamsSame(params, format.params) || format.id !== fieldFormat.type.id) {
             dataView.setFieldFormat(field, format);
             isParamsDifferent = true;
           }
