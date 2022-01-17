@@ -34,17 +34,20 @@ export class PlaywrightService extends FtrService {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto(`${kibanaUrl}`);
+
     const usernameLocator = page.locator('[data-test-subj=loginUsername]');
     const passwordLocator = page.locator('[data-test-subj=loginPassword]');
     const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
 
-    await usernameLocator?.type('elastic', { delay: 500 });
-    await passwordLocator?.type('changeme', { delay: 500 });
-    await submitButtonLocator?.click({ delay: 1000 });
+    const noDelayOnUserActions = process.env.TEST_DONT_DELAY_USER_ACTIONS === 'true';
+
+    await usernameLocator?.type('elastic', { delay: noDelayOnUserActions ? 0 : 500 });
+    await passwordLocator?.type('changeme', { delay: noDelayOnUserActions ? 0 : 500 });
+    await submitButtonLocator?.click({ delay: noDelayOnUserActions ? 0 : 1000 });
 
     await page.waitForSelector('#headerUserMenu');
 
-    this.storageState = await page?.context().storageState();
+    this.storageState = await page.context().storageState();
     await page.close();
 
     return this.storageState;
@@ -52,18 +55,13 @@ export class PlaywrightService extends FtrService {
 
   private async getBrowserInstance() {
     if (!this.browser) {
-      this.browser = await playwright.chromium.launch({
-        headless: !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI),
-      });
+      const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
+      this.browser = await playwright.chromium.launch({ headless });
     }
     return this.browser;
   }
 
-  public makePage(
-    options: {
-      autoLogin?: boolean;
-    } = {}
-  ) {
+  public makePage(options: { autoLogin?: boolean; journeyName: string } = { journeyName: '' }) {
     const browser$ = new Rx.Subject<ChromiumBrowser>();
     const page$ = new Rx.Subject<Page>();
     let pageToCleanup: Page | undefined;
@@ -72,6 +70,8 @@ export class PlaywrightService extends FtrService {
       const browser = await this.getBrowserInstance();
       const context = await browser.newContext({
         ...(options.autoLogin && { storageState: await this.getStorageState() }),
+        viewport: { width: 1600, height: 1200 },
+        extraHTTPHeaders: { journeyName: options.journeyName },
       });
 
       const page = await context.newPage();
@@ -87,23 +87,7 @@ export class PlaywrightService extends FtrService {
         offline: false,
       });
 
-      await page.route('**', (route) => {
-        if (route.request().url().includes('rum')) {
-          // console.log(
-          //   '------REQUEST------' +
-          //     JSON.stringify(
-          //       {
-          //         headers: route.request().headers(),
-          //         routeUrl: route.request().url(),
-          //         data: route.request().postData(),
-          //       },
-          //       null,
-          //       4
-          //     )
-          // );
-        }
-        return route.continue();
-      });
+      await page.route('**', (route) => route.continue());
 
       browser$.next(browser);
       page$.next(page);

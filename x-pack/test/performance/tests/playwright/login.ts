@@ -7,11 +7,11 @@
 import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
-  describe('perf_login_and_home', () => {
+export default function login({ getService }: FtrProviderContext) {
+  describe('Login Page', () => {
     const config = getService('config');
     const playwright = getService('playwright');
-    const { page } = playwright.makePage({ autoLogin: true });
+    const { page } = playwright.makePage({ autoLogin: false, journeyName: 'login' });
 
     it('Go to Kibana login page', async () => {
       const kibanaUrl = Url.format({
@@ -28,16 +28,12 @@ export default function ({ getService }: FtrProviderContext) {
       const passwordLocator = page.locator('[data-test-subj=loginPassword]');
       const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
 
-      await usernameLocator.type('elastic', { delay: 500 });
-      await passwordLocator.type('changeme', { delay: 500 });
-      await submitButtonLocator.click({ delay: 1000 });
-    });
+      const noDelayOnUserActions = process.env.TEST_DONT_DELAY_USER_ACTIONS === 'true';
 
-    it('Dismiss Welcome Screen', async () => {
-      await page.waitForLoadState();
-      const skipButtonLocator = page.locator('[data-test-subj=skipWelcomeScreen]');
-      await skipButtonLocator.click({ delay: 1000 });
-      await page?.waitForLoadState('networkidle');
+      await usernameLocator?.type('elastic', { delay: noDelayOnUserActions ? 0 : 500 });
+      await passwordLocator?.type('changeme', { delay: noDelayOnUserActions ? 0 : 500 });
+      await submitButtonLocator?.click({ delay: noDelayOnUserActions ? 0 : 1000 });
+      await page.waitForSelector('#headerUserMenu');
     });
   });
 }

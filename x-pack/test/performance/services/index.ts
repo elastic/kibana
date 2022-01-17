@@ -10,6 +10,5 @@ import { PlaywrightService } from './playwright';
 
 export const services = {
   es: functionalServices.es,
-
   playwright: PlaywrightService,
 };

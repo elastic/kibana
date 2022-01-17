@@ -17,10 +17,7 @@ const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
-  const testFiles = [
-    require.resolve('./tests/playwright/home.ts'),
-    // require.resolve('./tests/playwright/flight_dashboard.ts'),
-  ];
+  const testFiles = [require.resolve('./tests/playwright/index.ts')];
 
   return {
     testFiles,
