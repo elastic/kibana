@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
 import { DashboardPanelState } from '../embeddable';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { CoreStart } from 'kibana/public';
 import { ClonePanelAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -175,7 +174,7 @@ test('Clones a non-RefOrVal embeddable by reference if the panel has a savedObje
   expect(newPanel.type).toEqual(genericEmbeddable.type);
 });
 
-test('Gets a unique from the saved objects library', async () => {
+test('Gets a unique title from the saved objects library', async () => {
   coreStart.savedObjects.client.find = jest.fn().mockImplementation(({ search }) => {
     if (search === '"testFirstClone"') {
       return {
