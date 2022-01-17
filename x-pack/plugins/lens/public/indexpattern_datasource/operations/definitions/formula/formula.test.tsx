@@ -8,7 +8,7 @@
 import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn } from './formula';
-import { regenerateLayerFromAst } from './parse';
+import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
@@ -424,25 +424,36 @@ describe('formula', () => {
     });
   });
 
-  describe('regenerateLayerFromAst()', () => {
+  describe('insertOrReplaceFormulaColumn()', () => {
     let indexPattern: IndexPattern;
     let currentColumn: FormulaIndexPatternColumn;
 
     function testIsBrokenFormula(
       formula: string,
-      columnParams: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
+      partialColumn: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
     ) {
-      const mergedColumn = { ...currentColumn, ...columnParams };
+      const mergedColumn = {
+        ...currentColumn,
+        ...partialColumn,
+      };
       const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+
       expect(
-        regenerateLayerFromAst(
-          formula,
-          mergedLayer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          mergedColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          {
+            ...mergedColumn,
+            params: {
+              ...mergedColumn.params,
+              formula,
+            },
+          },
+          mergedLayer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...mergedLayer,
         columns: {
@@ -475,14 +486,21 @@ describe('formula', () => {
 
     it('should mutate the layer with new columns for valid formula expressions', () => {
       expect(
-        regenerateLayerFromAst(
-          'average(bytes)',
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: 'average(bytes)',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -514,14 +532,21 @@ describe('formula', () => {
 
     it('should create a valid formula expression for numeric literals', () => {
       expect(
-        regenerateLayerFromAst(
-          '0',
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: '0',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -672,14 +697,21 @@ describe('formula', () => {
 
     it('returns the locations of each function', () => {
       expect(
-        regenerateLayerFromAst(
-          'moving_average(average(bytes), window=7) + count()',
-          layer,
+        insertOrReplaceFormulaColumn(
           'col1',
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).locations
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: 'moving_average(average(bytes), window=7) + count()',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).meta.locations
       ).toEqual({
         col1X0: { min: 15, max: 29 },
         col1X1: { min: 0, max: 41 },
@@ -693,14 +725,22 @@ describe('formula', () => {
       const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
       const formula = 'moving_average(average(bytes), window=7) + count()';
 
-      const { newLayer } = regenerateLayerFromAst(
-        formula,
-        mergedLayer,
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
         'col1',
-        mergedColumn,
-        indexPattern,
-        operationDefinitionMap
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
       );
+
       // average and math are not filterable in the mocks
       expect(newLayer.columns).toEqual(
         expect.objectContaining({
@@ -737,14 +777,22 @@ describe('formula', () => {
       const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
       const formula = `moving_average(average(bytes), window=7, kql='${innerFilter}') + count(kql='${innerFilter}')`;
 
-      const { newLayer } = regenerateLayerFromAst(
-        formula,
-        mergedLayer,
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
         'col1',
-        mergedColumn,
-        indexPattern,
-        operationDefinitionMap
+        {
+          ...mergedColumn,
+          params: {
+            ...mergedColumn.params,
+            formula,
+          },
+        },
+        mergedLayer,
+        {
+          indexPattern,
+          operations: operationDefinitionMap,
+        }
       );
+
       // average and math are not filterable in the mocks
       expect(newLayer.columns).toEqual(
         expect.objectContaining({

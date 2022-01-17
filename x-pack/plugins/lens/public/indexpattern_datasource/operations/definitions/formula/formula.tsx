@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn, OperationDefinition } from '../index';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
-import { regenerateLayerFromAst } from './parse';
+import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
@@ -34,6 +34,12 @@ export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternCol
       };
     };
   };
+}
+
+export function isFormulaIndexPatternColumn(
+  column: BaseIndexPatternColumn
+): column is FormulaIndexPatternColumn {
+  return 'params' in column && 'formula' in (column as FormulaIndexPatternColumn).params;
 }
 
 export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'managedReference'> =
@@ -150,22 +156,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     },
     createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
       const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
-      const tempLayer = {
-        ...layer,
-        columns: {
-          ...layer.columns,
-          [targetId]: { ...currentColumn },
-        },
-      };
-      const { newLayer } = regenerateLayerFromAst(
-        currentColumn.params.formula ?? '',
-        tempLayer,
-        targetId,
-        currentColumn,
+
+      return insertOrReplaceFormulaColumn(targetId, currentColumn, layer, {
         indexPattern,
-        operationDefinitionMap
-      );
-      return newLayer;
+        operations: operationDefinitionMap,
+      }).layer;
     },
 
     paramEditor: WrappedFormulaEditor,
