@@ -14,6 +14,7 @@ import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { getDataSourceInfo } from './get_datasource_info';
 import { getSeries } from './get_series';
+import { getYExtents } from './get_extents';
 
 /*
  * This function is used to convert the TSVB model to compatible Lens model.
@@ -97,6 +98,9 @@ export const triggerVisualizeToLensOptions = async (
     };
     options[layerIdx] = triggerOptions;
   }
+
+  const extents = getYExtents(model);
+
   return {
     layers: options,
     configuration: {
@@ -112,6 +116,7 @@ export const triggerVisualizeToLensOptions = async (
         yLeft: Boolean(model.show_grid) ?? true,
         yRight: Boolean(model.show_grid) ?? true,
       },
+      extents,
     },
   };
 };

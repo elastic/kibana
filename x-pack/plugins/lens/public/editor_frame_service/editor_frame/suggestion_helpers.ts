@@ -202,7 +202,7 @@ export function getVisualizeFieldSuggestions({
     visualizeTriggerFieldContext,
   });
 
-  if (visualizeTriggerFieldContext && 'layers' in visualizeTriggerFieldContext) {
+  if (visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext) {
     const { layers, configuration } = visualizeTriggerFieldContext;
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === activeVisualization?.id
@@ -242,12 +242,8 @@ export function getVisualizeFieldSuggestions({
       visualizationState: {
         ...suggestion.visualizationState,
         fillOpacity,
-        yRightExtent: {
-          mode: 'full',
-        },
-        yLeftExtent: {
-          mode: 'full',
-        },
+        yRightExtent: configuration.extents?.yRightExtent,
+        yLeftExtent: configuration.extents?.yLeftExtent,
         legend: configuration.legend,
         gridlinesVisibilitySettings: configuration.gridLinesVisibility,
         layers: visualizationStateLayers,

@@ -162,6 +162,12 @@ export interface InitializationOptions {
   isFullEditor?: boolean;
 }
 
+interface AxisExtents {
+  mode: string;
+  lowerBound?: number;
+  upperBound?: number;
+}
+
 export interface VisualizeEditorContext {
   layers: VisualizeEditorLayersContext[];
   configuration: ChartSettings;
@@ -176,6 +182,10 @@ interface ChartSettings {
   fill?: string;
   legend?: Record<string, boolean | string>;
   gridLinesVisibility?: Record<string, boolean>;
+  extents?: {
+    yLeftExtent: AxisExtents;
+    yRightExtent: AxisExtents;
+  };
 }
 
 /**

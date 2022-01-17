@@ -104,6 +104,12 @@ export interface VisualizeEditorLayersContext {
   timeInterval?: string;
 }
 
+interface AxisExtents {
+  mode: string;
+  lowerBound?: number;
+  upperBound?: number;
+}
+
 export interface NavigateToLensOptions {
   layers: {
     [key: string]: VisualizeEditorLayersContext;
@@ -120,6 +126,10 @@ export interface NavigateToLensOptions {
       x: boolean;
       yLeft: boolean;
       yRight: boolean;
+    };
+    extents: {
+      yLeftExtent: AxisExtents;
+      yRightExtent: AxisExtents;
     };
   };
 }
