@@ -16,8 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const spacesService = getService('spaces');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/119660
-  describe.skip('search session', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('search session', () => {
     describe('session management', () => {
       it('should fail to create a session with no name', async () => {
         const sessionId = `my-session-${Math.random()}`;
@@ -285,7 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { id: id2 } = searchRes2.body;
 
-      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+      await retry.waitFor('searches persisted into session', async () => {
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)
           .set('kbn-xsrf', 'foo')
@@ -342,7 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+      await retry.waitFor('searches persisted into session', async () => {
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)
           .set('kbn-xsrf', 'foo')
@@ -361,9 +361,8 @@ export default function ({ getService }: FtrProviderContext) {
       // session refresh interval is 10 seconds, wait to give a chance for status to update
       await new Promise((resolve) => setTimeout(resolve, 10000));
 
-      await retry.waitForWithTimeout(
+      await retry.waitFor(
         'searches eventually complete and session gets into the complete state',
-        5000,
         async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}`)
@@ -428,17 +427,21 @@ export default function ({ getService }: FtrProviderContext) {
       // it might take the session a moment to be updated
       await new Promise((resolve) => setTimeout(resolve, 2500));
 
-      const getSessionSecondTime = await supertest
-        .get(`/internal/session/${sessionId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      await retry.waitFor('search session touched time updated', async () => {
+        const getSessionSecondTime = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
 
-      expect(getSessionFirstTime.body.attributes.sessionId).to.be.equal(
-        getSessionSecondTime.body.attributes.sessionId
-      );
-      expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
-        getSessionSecondTime.body.attributes.touched
-      );
+        expect(getSessionFirstTime.body.attributes.sessionId).to.be.equal(
+          getSessionSecondTime.body.attributes.sessionId
+        );
+        expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
+          getSessionSecondTime.body.attributes.touched
+        );
+
+        return true;
+      });
     });
 
     describe('with security', () => {
