@@ -448,7 +448,7 @@ export class CaseUserActionService {
     try {
       this.log.debug(`Attempting to count connectors for case id ${caseId}`);
       const connectorsFilter = buildFilter({
-        filters: ActionTypes.connector,
+        filters: [ActionTypes.connector, ActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,

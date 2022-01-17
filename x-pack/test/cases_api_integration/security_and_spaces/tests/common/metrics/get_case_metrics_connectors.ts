@@ -51,7 +51,36 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('total connectors', () => {
-      it('responds with zero values if no actions attached to a case', async () => {
+      const expectConnectorsToBe = async (caseId: string, expectedConnectors: number) => {
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId,
+          features: ['connectors'],
+        });
+
+        expect(metrics).to.eql({
+          connectors: {
+            total: expectedConnectors,
+          },
+        });
+      };
+
+      it('returns zero total connectors for a case with no connectors attached', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+        await expectConnectorsToBe(theCase.id, 0);
+      });
+
+      it('takes into account the connector from the create_case user action', async () => {
+        const theCase = await createCase(
+          supertest,
+          getPostCaseRequest({
+            connector: jiraConnector,
+          })
+        );
+        await expectConnectorsToBe(theCase.id, 1);
+      });
+
+      it('returns the correct total number of connectors', async () => {
         const theCase = await createCase(supertest, getPostCaseRequest());
 
         /**
@@ -102,17 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const metrics = await getCaseMetrics({
-          supertest,
-          caseId: theCase.id,
-          features: ['connectors'],
-        });
-
-        expect(metrics).to.eql({
-          connectors: {
-            total: 2,
-          },
-        });
+        await expectConnectorsToBe(theCase.id, 2);
       });
     });
   });
