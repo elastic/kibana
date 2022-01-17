@@ -26,6 +26,7 @@ import { registerSampleDatasetWithIntegration } from './lib/register_with_integr
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
+
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
@@ -68,14 +69,10 @@ export class SampleDataRegistry {
       this.initContext.logger.get('sample_data', 'usage')
     );
     const router = core.http.createRouter();
-    createListRoute(router, this.sampleDatasets);
-    createInstallRoute(
-      router,
-      this.sampleDatasets,
-      this.initContext.logger.get('sampleData'),
-      usageTracker
-    );
-    createUninstallRoute(router, this.sampleDatasets, usageTracker);
+    const logger = this.initContext.logger.get('sampleData');
+    createListRoute(router, this.sampleDatasets, logger);
+    createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
+    createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
@@ -170,6 +167,7 @@ export class SampleDataRegistry {
     return {};
   }
 }
+
 /** @public */
 export type SampleDataRegistrySetup = ReturnType<SampleDataRegistry['setup']>;
 
