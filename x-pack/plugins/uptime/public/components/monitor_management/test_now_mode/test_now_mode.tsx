@@ -115,7 +115,7 @@ const DescriptionLabel = i18n.translate('xpack.uptime.testRun.description', {
   defaultMessage: 'Test your monitor and verify the results before saving',
 });
 
-const PushingLabel = i18n.translate('xpack.uptime.testRun.description', {
+const PushingLabel = i18n.translate('xpack.uptime.testRun.pushing.description', {
   defaultMessage: 'Pushing the monitor to service...',
 });
 
