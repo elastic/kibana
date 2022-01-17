@@ -70,7 +70,7 @@ export class SampleDataRegistry {
     );
     const router = core.http.createRouter();
     const logger = this.initContext.logger.get('sampleData');
-    createListRoute(router, this.sampleDatasets, logger);
+    createListRoute(router, this.sampleDatasets);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker);
 
