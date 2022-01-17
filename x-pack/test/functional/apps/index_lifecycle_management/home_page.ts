@@ -19,11 +19,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const deployment = getService('deployment');
 
-  describe('Home page', async function () {
-    const isCloud = await deployment.isCloud();
+  describe('Home page', function () {
     before(async () => {
       await security.testUser.setRoles(['manage_ilm'], true);
-
+      const isCloud = await deployment.isCloud();
       if (!isCloud) {
         await esClient.snapshot.createRepository({
           name: repoName,
@@ -41,6 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
+      const isCloud = await deployment.isCloud();
       if (!isCloud) {
         await esClient.snapshot.deleteRepository({ name: repoName });
       }
