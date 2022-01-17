@@ -47,6 +47,7 @@ export interface UptimeServerSetup {
   fleet: FleetStartContract;
   security: SecurityPluginStart;
   savedObjectsClient?: SavedObjectsClientContract;
+  authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   syntheticsService: SyntheticsService;
 }

@@ -118,6 +118,9 @@ export class ServiceAPIClient {
           rxjsFrom(callServiceEndpoint(locMonitors, url)).pipe(
             tap((result) => {
               this.logger.debug(result.data);
+              this.logger.debug(
+                `Successfully called service with method ${method} with ${allMonitors.length} monitors `
+              );
             }),
             catchError((err) => {
               pushErrors.push({ locationId: id, error: err });
