@@ -56,6 +56,7 @@ const testDatasets: SampleDatasetSchema[] = [
         preserveDayOfWeekTimeOfDay: true,
       },
     ],
+    appLinks: [],
   },
 ];
 
