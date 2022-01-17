@@ -5,8 +5,7 @@
   },
   "include": [
     "index.ts",
-    "public/**/*.ts",
-    "public/*.ts",
+    "public/**/*",
     "../../../typings/**/*"
   ],
   "exclude": [],
