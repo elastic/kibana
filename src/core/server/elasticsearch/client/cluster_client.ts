@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
@@ -52,8 +52,8 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
-  public readonly asInternalUser: KibanaClient;
-  private readonly rootScopedClient: KibanaClient;
+  public readonly asInternalUser: Client;
+  private readonly rootScopedClient: Client;
 
   private isClosed = false;
 
