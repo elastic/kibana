@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PackageInfo } from '@kbn/config';
+import type { PackageInfo } from '@kbn/config';
 import { isArray, isInteger, mapKeys } from 'lodash';
 import { FullStoryApi } from './fullstory';
 

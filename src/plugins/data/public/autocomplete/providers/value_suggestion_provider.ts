@@ -57,7 +57,7 @@ export const setupValueSuggestionProvider = (
   }
 
   const requestSuggestions = memoize(
-    <T>(
+    (
       index: string,
       field: IFieldType,
       query: string,
@@ -87,7 +87,6 @@ export const setupValueSuggestionProvider = (
           signal,
         })
         .then((r) => {
-          // need to make sure this only works on FE
           reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
           reportInfo.resCount = r.length;
           // consider sending a hash of the index being queried

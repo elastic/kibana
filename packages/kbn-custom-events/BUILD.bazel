@@ -34,8 +34,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-config",
-  "//packages/kbn-config-schema",
   "@npm//js-sha256",
   "@npm//lodash",
 ]
