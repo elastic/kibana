@@ -16,7 +16,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
-import { Margins } from '../../../../../shared/charts/Timeline';
+import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './sync_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
