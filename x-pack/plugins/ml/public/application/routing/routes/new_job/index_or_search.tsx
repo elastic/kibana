@@ -41,6 +41,17 @@ const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   },
 ];
 
+const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
+      defaultMessage: 'Data View',
+    }),
+    href: '',
+  },
+];
+
 export const indexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -70,7 +81,7 @@ export const dataVizIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
