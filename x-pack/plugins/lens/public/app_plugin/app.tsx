@@ -237,8 +237,14 @@ export function App({
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const isByValueMode = getIsByValueMode();
+    const comesFromVizEditorDashboard =
+      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp;
     const breadcrumbs: EuiBreadcrumb[] = [];
-    if (isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
+    if (
+      (isLinkedToOriginatingApp || comesFromVizEditorDashboard) &&
+      getOriginatingAppName() &&
+      redirectToOrigin
+    ) {
       breadcrumbs.push({
         onClick: () => {
           redirectToOrigin();
@@ -277,6 +283,7 @@ export function App({
     chrome,
     isLinkedToOriginatingApp,
     persistedDoc,
+    initialContext,
   ]);
 
   const runSave = useCallback(
@@ -342,7 +349,7 @@ export function App({
   }, [application, initialContext]);
 
   const initialContextIsEmbedded = useMemo(() => {
-    if (initialContext && 'embeddableId' in initialContext && initialContext.embeddableId) {
+    if (initialContext && 'originatingApp' in initialContext && initialContext.originatingApp) {
       return true;
     }
     return false;
