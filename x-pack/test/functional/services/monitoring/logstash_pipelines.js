@@ -64,6 +64,18 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
       }, []);
     }
 
+    async clickPipeline(id) {
+      const anchors = await testSubjects.findAll(SUBJ_PIPELINES_IDS);
+      for (let i = 0; i < anchors.length; i++) {
+        const anchor = anchors[i];
+        if ((await anchor.getVisibleText()) === id) {
+          return anchor.click();
+        }
+      }
+
+      throw new Error(`pipeline with id ${id} not found`);
+    }
+
     async clickIdCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_ID_COL);
       const button = await headerCell.findByTagName('button');

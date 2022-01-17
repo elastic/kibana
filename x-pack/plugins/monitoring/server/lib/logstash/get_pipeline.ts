@@ -76,6 +76,17 @@ export function _enrichStateWithStatsAggregation(
   statsAggregation: any,
   timeseriesIntervalInSeconds: number
 ) {
+  // we could have data in both legacy and metricbeat collection, we pick the bucket most filled
+  const bucketCount = (aggregationKey: string) =>
+    get(
+      statsAggregation.aggregations,
+      `${aggregationKey}.scoped.total_processor_duration_stats.count`
+    );
+
+  const pipelineBucket =
+    bucketCount('pipelines_mb') > bucketCount('pipelines')
+      ? statsAggregation.aggregations.pipelines_mb
+      : statsAggregation.aggregations.pipelines;
   const logstashState = stateDocument.logstash_state || stateDocument.logstash?.node?.state;
   const vertices = logstashState?.pipeline?.representation?.graph?.vertices ?? [];
 
@@ -85,14 +96,10 @@ export function _enrichStateWithStatsAggregation(
     vertex.stats = {};
   });
 
-  const totalDurationStats =
-    statsAggregation.aggregations.pipelines.scoped.total_processor_duration_stats;
+  const totalDurationStats = pipelineBucket.scoped.total_processor_duration_stats;
   const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
-  const verticesWithStatsBuckets =
-    statsAggregation.aggregations?.pipelines.scoped.vertices?.vertex_id.buckets ??
-    statsAggregation.aggregations?.pipelines_mb.scoped.vertices?.vertex_id.buckets ??
-    [];
+  const verticesWithStatsBuckets = pipelineBucket.scoped.vertices?.vertex_id.buckets ?? [];
   verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
