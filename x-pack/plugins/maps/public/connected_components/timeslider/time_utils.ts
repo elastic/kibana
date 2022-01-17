@@ -160,33 +160,10 @@ export function getTimeRanges(timeRangeBounds: TimeRangeBounds) {
   const min = timeRangeBounds.min.valueOf();
   const max = timeRangeBounds.max.valueOf();
   const timeRange = max - min;
-  const interval = getInterval(min, max, 20);
 
   return RANGE.filter((range) => {
-    return timeRange > range.ms && range.ms >= interval;
+    const noMoreThan20Steps = timeRange / range.ms <= 31;
+    const needsAtLEastTwoSteps = timeRange / range.ms >= 2;
+    return noMoreThan20Steps && needsAtLEastTwoSteps;
   });
-}
-
-export function durationAsString(ms: number, maxPrecission = 3) {
-  const duration = moment.duration(ms);
-  const items = [
-    { timeUnit: 'years', value: Math.floor(duration.asYears()) },
-    { timeUnit: 'months', value: Math.floor(duration.asMonths()) },
-    { timeUnit: 'days', value: Math.floor(duration.asDays()) },
-    { timeUnit: 'hours', value: Math.floor(duration.hours()) },
-    { timeUnit: 'minutes', value: Math.floor(duration.minutes()) },
-  ];
-
-  const formattedItems = items.reduce((accumulator: string[], { value, timeUnit }) => {
-    if (accumulator.length >= maxPrecission || (accumulator.length === 0 && value === 0)) {
-      return accumulator;
-    }
-
-    if (value !== 0) {
-      accumulator.push(value + ' ' + timeUnit);
-    }
-    return accumulator;
-  }, []);
-
-  return formattedItems.length !== 0 ? formattedItems.join(' ') : '-';
 }

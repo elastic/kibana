@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiButton, EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getTimeRanges, durationAsString } from './time_utils';
+import { getTimeRanges, RANGE } from './time_utils';
 
 interface Props {
   timeRangeBounds: any;
@@ -21,16 +21,20 @@ export const TimeSliderPopover = (props: Props) => {
 
   const min = props.timeRangeBounds.min.valueOf();
   const max = props.timeRangeBounds.max.valueOf();
-
-  let labelText: string;
-
-  if (props.timeRangeStep === 1 || props.timeRangeStep > max - min) {
-    labelText = i18n.translate('xpack.maps.timeslider.autoPeriod', { defaultMessage: 'Auto' });
-  } else {
-    labelText = durationAsString(props.timeRangeStep);
-  }
-
+  const labelText: string = i18n.translate('xpack.maps.timeslider.autoPeriod', {
+    defaultMessage: 'Auto',
+  });
   const [label, setLabel] = useState(labelText);
+
+  useEffect(() => {
+    let newLabel = i18n.translate('xpack.maps.timeslider.autoPeriod', { defaultMessage: 'Auto' });
+    if (props.timeRangeStep !== 1 && props.timeRangeStep < max - min) {
+      newLabel = RANGE.filter((e) => {
+        return e.ms === props.timeRangeStep;
+      })[0].label;
+    }
+    setLabel(newLabel);
+  }, [max, min, props.timeRangeStep]);
 
   const renderFilteredPeriods = () => {
     const filteredPeriods = getTimeRanges(props.timeRangeBounds).map(

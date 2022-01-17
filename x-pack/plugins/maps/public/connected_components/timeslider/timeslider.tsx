@@ -12,7 +12,7 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
+import { epochToKbnDateFormat, getInterval, getTicks, getTimeRanges } from './time_utils';
 import { TimeRange, TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
@@ -68,10 +68,21 @@ class KeyedTimeslider extends Component<Props, State> {
     const min = timeRangeBounds.min.valueOf();
     const max = timeRangeBounds.max.valueOf();
     const interval = getInterval(min, max);
-    const updatedInterval =
-      props.timeRangeStep > 1 && max - min > props.timeRangeStep ? props.timeRangeStep : interval;
 
+    const ranges = getTimeRanges(timeRangeBounds);
+    const hasMatch =
+      ranges.filter((val) => {
+        return val.ms === props.timeRangeStep;
+      }).length > 0;
+
+    let updatedInterval =
+      props.timeRangeStep > 1 && max - min > props.timeRangeStep ? props.timeRangeStep : interval;
     const ticks = getTicks(min, max, interval);
+
+    if (!hasMatch) {
+      this.props.setTimeRangeStep(1);
+      updatedInterval = interval;
+    }
 
     this.defaultRange = {
       timeRangeBounds,
@@ -96,9 +107,6 @@ class KeyedTimeslider extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    // auto-select range
-    this.props.setTimeRangeStep(1);
-    this._onChange([this.state.ticks[0].value, this.state.ticks[0].value + this.state.range]);
   }
 
   _doesTimesliceCoverTimerange() {
