@@ -31,11 +31,13 @@ export const AppRootProvider = memo<{
   ({
     store,
     history,
-    coreStart: { http, notifications, uiSettings, application },
+    coreStart: { http, notifications, application, theme },
     depsStart: { data },
     children,
   }) => {
-    const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+    const kibanaTheme = useObservable(theme.theme$);
+    const isDarkMode = kibanaTheme?.darkMode || false;
+
     const services = useMemo(
       () => ({ http, notifications, application, data }),
       [application, data, http, notifications]

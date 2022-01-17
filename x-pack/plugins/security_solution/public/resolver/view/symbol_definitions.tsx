@@ -10,7 +10,8 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
 
@@ -434,7 +435,10 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
  *  3. `<use>` elements can be handled by compositor (faster)
  */
 export const SymbolDefinitions = memo(() => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
+
   return (
     <HiddenSVG>
       <defs>
