@@ -58,11 +58,12 @@ export function timefilter(): ExpressionFunctionDefinition<
         return input;
       }
 
-      const { from, to, column } = args;
+      const { from, to, column, filterGroup } = args;
       const filter: ExpressionValueFilter = {
         type: 'filter',
         filterType: 'time',
         column,
+        filterGroup,
         and: [],
       };
 
