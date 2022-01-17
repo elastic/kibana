@@ -6,24 +6,24 @@
  */
 
 const alwaysImportedTests = [
-  // require.resolve('../test/functional/config.js'),
-  // require.resolve('../test/functional_basic/config.ts'),
-  // require.resolve('../test/security_solution_endpoint/config.ts'),
-  // require.resolve('../test/plugin_functional/config.ts'),
-  // require.resolve('../test/functional_with_es_ssl/config.ts'),
-  // require.resolve('../test/functional/config_security_basic.ts'),
-  // require.resolve('../test/reporting_functional/reporting_and_security.config.ts'),
-  // require.resolve('../test/reporting_functional/reporting_without_security.config.ts'),
-  // require.resolve('../test/reporting_functional/reporting_and_deprecated_security.config.ts'),
-  // require.resolve('../test/security_functional/login_selector.config.ts'),
-  // require.resolve('../test/security_functional/oidc.config.ts'),
-  // require.resolve('../test/security_functional/saml.config.ts'),
-  // require.resolve('../test/functional_embedded/config.ts'),
-  // require.resolve('../test/functional_cors/config.ts'),
-  // require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
-  // require.resolve('../test/saved_object_tagging/functional/config.ts'),
+  require.resolve('../test/functional/config.js'),
+  require.resolve('../test/functional_basic/config.ts'),
+  require.resolve('../test/security_solution_endpoint/config.ts'),
+  require.resolve('../test/plugin_functional/config.ts'),
+  require.resolve('../test/functional_with_es_ssl/config.ts'),
+  require.resolve('../test/functional/config_security_basic.ts'),
+  require.resolve('../test/reporting_functional/reporting_and_security.config.ts'),
+  require.resolve('../test/reporting_functional/reporting_without_security.config.ts'),
+  require.resolve('../test/reporting_functional/reporting_and_deprecated_security.config.ts'),
+  require.resolve('../test/security_functional/login_selector.config.ts'),
+  require.resolve('../test/security_functional/oidc.config.ts'),
+  require.resolve('../test/security_functional/saml.config.ts'),
+  require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/functional_cors/config.ts'),
+  require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
+  require.resolve('../test/saved_object_tagging/functional/config.ts'),
   require.resolve('../test/usage_collection/config.ts'),
-  // require.resolve('../test/fleet_functional/config.ts'),
+  require.resolve('../test/fleet_functional/config.ts'),
 ];
 const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config_security_basic.ts'),
@@ -98,5 +98,5 @@ const onlyNotInCoverageTests = [
 require('../../src/setup_node_env');
 require('@kbn/test').runTestsCli([
   ...alwaysImportedTests,
-  // ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),
+  ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),
 ]);
