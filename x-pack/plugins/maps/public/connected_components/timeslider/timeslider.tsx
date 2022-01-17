@@ -188,7 +188,6 @@ class KeyedTimeslider extends Component<Props, State> {
               this.props.updateGlobalTimeRange(this.state.timeslice);
             }}
             iconType="calendar"
-            display="fill"
             aria-label={i18n.translate('xpack.maps.timeslider.setGlobalTime', {
               defaultMessage: 'Set global time to {timeslice}',
               values: { timeslice: prettyPrintTimeslice(this.state.timeslice) },
