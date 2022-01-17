@@ -64,14 +64,14 @@ The API returns created runtime field object and updated data view object:
 
 === Create runtime field API (deprecated)
 
-[[data-views-runtime-field-create-request]]
+[[data-views-runtime-field-create-request-deprecated]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
 
-[[data-views-runtime-field-create-params]]
+[[data-views-runtime-field-create-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
@@ -80,7 +80,7 @@ The API returns created runtime field object and updated data view object:
 `index_pattern_id`::
 (Required, string) The ID of the data view.
 
-[[data-views-runtime-field-create-body]]
+[[data-views-runtime-field-create-body-deprecated]]
 ==== Request body
 
 `name`:: (Required, string) The name for a runtime field.
@@ -88,7 +88,7 @@ The API returns created runtime field object and updated data view object:
 `runtimeField`:: (Required, object) The runtime field definition object.
 
 
-[[data-views-runtime-field-create-example]]
+[[data-views-runtime-field-create-example-deprecated]]
 ==== Examples
 
 Create a runtime field on a data view:

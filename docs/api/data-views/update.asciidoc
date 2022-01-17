@@ -114,14 +114,14 @@ The API returns the updated data view object:
 
 === Update data view API (deprecated)
 
-[[data-views-api-update-request]]
+[[data-views-api-update-request-deprecated]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
 
-[[data-views-api-update-path-params]]
+[[data-views-api-update-path-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
@@ -130,7 +130,7 @@ The API returns the updated data view object:
 `id`::
   (Required, string) The ID of the data view you want to update.
 
-[[data-views-api-update-request-body]]
+[[data-views-api-update-request-body-deprecated]]
 ==== Request body
 
 `refresh_fields`:: (Optional, boolean) Reloads the data view fields after
@@ -150,13 +150,13 @@ You can partially update the following fields:
 * `type`
 * `typeMeta`
 
-[[data-views-api-update-errors-codes]]
+[[data-views-api-update-errors-codes-deprecated]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[data-views-api-update-example]]
+[[data-views-api-update-example-deprecated]]
 ==== Examples
 
 Update a title of the `<my-pattern>` data view:

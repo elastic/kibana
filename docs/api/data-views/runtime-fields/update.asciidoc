@@ -69,14 +69,14 @@ The API returns updated runtime field object and updated data view object:
 
 === Update runtime field API (deprecated)
 
-[[data-views-runtime-field-update-request]]
+[[data-views-runtime-field-update-request-deprecated]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
-[[data-views-runtime-field-update-params]]
+[[data-views-runtime-field-update-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
@@ -88,7 +88,7 @@ The API returns updated runtime field object and updated data view object:
 `name`::
 (Required, string) The name of the runtime field you want to update.
 
-[[data-views-runtime-field-update-body]]
+[[data-views-runtime-field-update-body-deprecated]]
 ==== Request body
 
 `runtimeField`:: (Required, object) The runtime field definition object.
@@ -100,7 +100,7 @@ You can update following fields:
 
 
 
-[[data-views-runtime-field-update-example]]
+[[data-views-runtime-field-update-example-deprecated]]
 ==== Examples
 
 Update an existing runtime field on a data view:

@@ -101,14 +101,14 @@ The endpoint returns the updated data view object:
 
 === Update data view fields API (deprecated)
 
-[[data-views-fields-api-update-request]]
+[[data-views-fields-api-update-request-deprecated]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>/fields`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>/fields`
 
-[[data-views-fields-api-update-path-params]]
+[[data-views-fields-api-update-path-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
@@ -117,20 +117,20 @@ The endpoint returns the updated data view object:
 `id`::
 (Required, string) The ID of the data view fields you want to update.
 
-[[data-views-fields-api-update-request-body]]
+[[data-views-fields-api-update-request-body-deprecated]]
 ==== Request body
 
 `fields`::
 (Required, object) the field object
 
 
-[[data-views-fields-api-update-errors-codes]]
+[[data-views-fields-api-update-errors-codes-deprecated]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
-[[data-views-fields-api-update-example]]
+[[data-views-fields-api-update-example-deprecated]]
 ==== Examples
 
 Set popularity `count` for field `foo`:

@@ -66,14 +66,14 @@ The API returns a data view object:
 
 === Get data view API (deprecated)
 
-[[data-views-api-get-request]]
+[[data-views-api-get-request-deprecated]]
 ==== Request
 
 `GET <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
 
-[[data-views-api-get-params]]
+[[data-views-api-get-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
@@ -82,7 +82,7 @@ The API returns a data view object:
 `id`::
 (Required, string) The ID of the data view you want to retrieve.
 
-[[data-views-api-get-codes]]
+[[data-views-api-get-codes-deprecated]]
 ==== Response code
 
 `200`::
@@ -91,7 +91,7 @@ Indicates a successful call.
 `404`::
 The specified data view and ID doesn't exist.
 
-[[data-views-api-get-example]]
+[[data-views-api-get-example-deprecated]]
 ==== Example
 
 Retrieve the data view object with the `my-pattern` ID:

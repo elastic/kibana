@@ -103,20 +103,20 @@ The API returns the data view object:
 
 === Create data view API (deprecated)
 
-[[data-views-api-create-request]]
+[[data-views-api-create-request-deprecated]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern`
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern`
 
-[[data-views-api-create-path-params]]
+[[data-views-api-create-path-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[data-views-api-create-body-params]]
+[[data-views-api-create-body-params-deprecated]]
 ==== Request body
 
 `override`:: (Optional, boolean) Overrides an existing data view if a
@@ -127,13 +127,13 @@ the data view is stored. The default is `false`.
 
 `index_pattern`:: (Required, object) The data view object. All fields are optional.
 
-[[data-views-api-create-request-codes]]
+[[data-views-api-create-request-codes-deprecated]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[data-views-api-create-example]]
+[[data-views-api-create-example-deprecated]]
 ==== Examples
 
 Create a data view with a custom title:

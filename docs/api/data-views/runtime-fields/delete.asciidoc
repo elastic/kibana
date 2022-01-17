@@ -32,21 +32,21 @@ Delete a runtime field from a data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE api/data_views/data_view/<my-pattern>/runtime_field/<runtime-field-name>
+$ curl -X DELETE api/data_views/data_view/<my-view>/runtime_field/<runtime-field-name>
 --------------------------------------------------
 // KIBANA
 
-[[data-views-runtime-field-api-delete]]
+[[data-views-runtime-field-api-delete-deprecated]]
 === Delete runtime field API (deprecated)
 
-[[data-views-runtime-field-api-delete-request]]
+[[data-views-runtime-field-api-delete-request-deprecated]]
 ==== Request
 
 `DELETE <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
-[[data-views-runtime-field-api-delete-path-params]]
+[[data-views-runtime-field-api-delete-path-params-deprecated]]
 ==== Path parameters
 
 `space_id`::

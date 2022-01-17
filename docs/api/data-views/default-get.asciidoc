@@ -57,26 +57,26 @@ In case there is no default data view, the API returns:
 
 === Get default data view API (deprecated)
 
-[[data-views-api-default-get-request]]
+[[data-views-api-default-get-request-deprecated]]
 ==== Request
 
 `GET <kibana host>:<port>/api/index_patterns/default`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
 
-[[data-views-api-default-get-params]]
+[[data-views-api-default-get-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[data-views-api-default-get-codes]]
+[[data-views-api-default-get-codes-deprecated]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
-[[data-views-api-default-get-example]]
+[[data-views-api-default-get-example-deprecated]]
 ==== Example
 
 Retrieve the default data view id:
