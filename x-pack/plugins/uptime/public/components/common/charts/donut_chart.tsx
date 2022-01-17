@@ -57,9 +57,11 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },
           })}
-          {...chartTheme}
         >
-          <Settings theme={themeOverrides} />
+          <Settings
+            theme={[themeOverrides, chartTheme.theme ?? {}]}
+            baseTheme={chartTheme.baseTheme}
+          />
           <Partition
             id="spec_1"
             data={[

@@ -168,7 +168,9 @@ export function TransactionDistributionChart({
                 },
                 axes: {
                   tickLine: {
+                    visible: true,
                     size: 5,
+                    padding: 10,
                   },
                   tickLabel: {
                     fontSize: 10,

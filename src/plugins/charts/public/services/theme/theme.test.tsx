@@ -12,9 +12,11 @@ import { take } from 'rxjs/operators';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { render, act as renderAct } from '@testing-library/react';
 
-import { ThemeService, mergedLightTheme, mergedDarkTheme } from './theme';
-import { coreMock } from '../../../../../core/public/mocks';
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+
+import { ThemeService } from './theme';
+import { coreMock } from '../../../../../core/public/mocks';
 
 const { uiSettings: setupMockUiSettings } = coreMock.createSetup();
 
@@ -48,7 +50,9 @@ describe('ThemeService', () => {
       const themeService = new ThemeService();
       themeService.init(setupMockUiSettings);
 
-      expect(await themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(mergedLightTheme);
+      expect(await themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(
+        EUI_CHARTS_THEME_LIGHT.theme
+      );
     });
 
     describe('in dark mode', () => {
@@ -58,7 +62,9 @@ describe('ThemeService', () => {
         const themeService = new ThemeService();
         themeService.init(setupMockUiSettings);
 
-        expect(await themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(mergedDarkTheme);
+        expect(await themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(
+          EUI_CHARTS_THEME_DARK.theme
+        );
       });
     });
   });
@@ -94,12 +100,12 @@ describe('ThemeService', () => {
       const { useChartsTheme } = themeService;
 
       const { result } = renderHook(() => useChartsTheme());
-      expect(result.current).toBe(mergedLightTheme);
+      expect(result.current).toBe(EUI_CHARTS_THEME_LIGHT.theme);
 
       act(() => darkMode$.next(true));
-      expect(result.current).toBe(mergedDarkTheme);
+      expect(result.current).toBe(EUI_CHARTS_THEME_DARK.theme);
       act(() => darkMode$.next(false));
-      expect(result.current).toBe(mergedLightTheme);
+      expect(result.current).toBe(EUI_CHARTS_THEME_LIGHT.theme);
     });
 
     it('should not rerender when emitting the same value', () => {

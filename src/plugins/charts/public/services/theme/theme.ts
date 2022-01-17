@@ -10,17 +10,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup } from 'kibana/public';
-import { merge } from '@kbn/std';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-
-// TODO: Remove this when upgrading eui to v44.0.0
-export const mergedLightTheme = merge(EUI_CHARTS_THEME_LIGHT.theme, {
-  partition: EUI_CHARTS_THEME_LIGHT.partition,
-});
-export const mergedDarkTheme = merge(EUI_CHARTS_THEME_DARK.theme, {
-  partition: EUI_CHARTS_THEME_DARK.partition,
-});
 
 export class ThemeService {
   /** Returns default charts theme */
@@ -98,7 +89,7 @@ export class ThemeService {
   public init(uiSettings: CoreSetup['uiSettings']) {
     this._uiSettingsDarkMode$ = uiSettings.get$<boolean>('theme:darkMode');
     this._uiSettingsDarkMode$.subscribe((darkMode) => {
-      const theme = darkMode ? mergedDarkTheme : mergedLightTheme;
+      const theme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
       this._chartsTheme$.next(theme);
       this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
