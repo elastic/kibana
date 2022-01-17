@@ -8,8 +8,7 @@
 import type { IndexPattern, PersistedIndexPatternLayer } from '../../../types';
 import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
 
-import { insertOrReplaceFormulaColumn } from '.';
-import { operationDefinitionMap } from '../../operations';
+import { insertOrReplaceFormulaColumn } from './parse';
 import { convertDataViewIntoLensIndexPattern } from '../../../loader';
 
 /** @public **/
@@ -23,7 +22,6 @@ export interface FormulaPublicApi {
    * @param [column.label] - Custom formula label
    * @param layer - The layer to which the formula columns will be added
    * @param dataView - The dataView instance
-   * @param [params.operations] - Use this parameter only if you need to filter available operations in the formula.
    *
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
    */
@@ -34,8 +32,7 @@ export interface FormulaPublicApi {
       label?: string;
     },
     layer: PersistedIndexPatternLayer,
-    dataView: DataView,
-    params?: { operations?: string[] }
+    dataView: DataView
   ) => PersistedIndexPatternLayer | undefined;
 }
 
@@ -54,7 +51,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
   };
 
   return {
-    insertOrReplaceFormulaColumn: (id, { formula, label }, layer, dataView, params) => {
+    insertOrReplaceFormulaColumn: (id, { formula, label }, layer, dataView) => {
       const indexPattern = getCachedLensIndexPattern(dataView);
 
       return insertOrReplaceFormulaColumn(
@@ -71,17 +68,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
           },
         },
         { ...layer, indexPatternId: indexPattern.id },
-        {
-          indexPattern,
-          operations:
-            params?.operations?.reduce(
-              (operationsMap, item) => ({
-                ...operationsMap,
-                [item]: operationDefinitionMap[item],
-              }),
-              {}
-            ) ?? undefined,
-        }
+        { indexPattern }
       ).layer;
     },
   };
