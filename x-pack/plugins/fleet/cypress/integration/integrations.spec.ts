@@ -33,6 +33,17 @@ describe('Add Integration', () => {
     cleanupAgentPolicies();
   });
 
+  function addAndVerifyIntegration() {
+    cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
+    navigateTo(INTEGRATIONS);
+    cy.wait('@packages');
+    cy.get('.euiLoadingSpinner').should('not.exist');
+    cy.get('input[placeholder="Search for integrations"]').type('Apache');
+    cy.get(INTEGRATIONS_CARD).contains(integration).click();
+    addIntegration();
+    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
+  }
+
   describe('Real API', () => {
     afterEach(() => {
       deleteIntegrations(integration);
@@ -95,16 +106,37 @@ describe('Add Integration', () => {
         cy.getBySel(PACKAGE_VERSION).contains(newVersion);
       });
     });
-  });
 
-  function addAndVerifyIntegration() {
-    cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
-    navigateTo(INTEGRATIONS);
-    cy.wait('@packages');
-    cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.get('input[placeholder="Search for integrations"]').type('Apache');
-    cy.get(INTEGRATIONS_CARD).contains(integration).click();
-    addIntegration();
-    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
-  }
+    it('should upgrade policies without integration update', () => {
+      const oldVersion = '0.3.3';
+      installPackageWithVersion('apache', oldVersion);
+      navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
+
+      addIntegration();
+
+      cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
+      cy.getBySel(PACKAGE_VERSION).contains(oldVersion);
+
+      clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
+
+      cy.getBySel(SETTINGS_TAB).click();
+      cy.get('#upgradePoliciesCheckbox').uncheck({ force: true });
+
+      cy.getBySel(UPDATE_PACKAGE_BTN).click();
+
+      cy.getBySel(LATEST_VERSION).then(($title) => {
+        const newVersion = $title.text();
+        cy.get('#upgradePoliciesCheckbox').should('not.exist');
+        cy.getBySel('installedVersion').contains(newVersion);
+        cy.getBySel(POLICIES_TAB).click();
+        cy.getBySel(PACKAGE_VERSION).contains(oldVersion);
+
+        // upgrade integration policy
+        cy.getBySel('integrationPolicyUpgradeBtn').click();
+        cy.getBySel('saveIntegration').click();
+        cy.getBySel('saveIntegration').should('not.exist');
+        cy.getBySel(PACKAGE_VERSION).contains(newVersion);
+      });
+    });
+  });
 });
