@@ -9,6 +9,57 @@ experimental[] Retrieve a default data view ID. Kibana UI uses the default data 
 [[data-views-api-default-get-request]]
 ==== Request
 
+`GET <kibana host>:<port>/api/data_views/default`
+
+`GET <kibana host>:<port>/s/<space_id>/api/data_views/default`
+
+[[data-views-api-default-get-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[data-views-api-default-get-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+[[data-views-api-default-get-example]]
+==== Example
+
+Retrieve the default data view id:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/data_views/default
+--------------------------------------------------
+// KIBANA
+
+The API returns an ID of a default data view:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view_id": "..."
+}
+--------------------------------------------------
+
+In case there is no default data view, the API returns:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view_id": null
+}
+--------------------------------------------------
+
+
+=== Get default data view API (deprecated)
+
+[[data-views-api-default-get-request]]
+==== Request
+
 `GET <kibana host>:<port>/api/index_patterns/default`
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
@@ -53,3 +104,4 @@ In case there is no default data view, the API returns:
     "index_pattern_id": null
 }
 --------------------------------------------------
+
