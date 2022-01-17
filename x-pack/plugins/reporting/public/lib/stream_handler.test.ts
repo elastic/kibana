@@ -7,7 +7,7 @@
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../src/core/public/mocks';
 import { JobSummary, ReportApiJSON } from '../../common/types';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
@@ -46,19 +46,21 @@ const notificationsMock = {
   },
 } as unknown as NotificationsStart;
 
+const theme = themeServiceMock.createStartContract();
+
 describe('stream handler', () => {
   afterEach(() => {
     sinon.reset();
   });
 
   it('constructs', () => {
-    const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+    const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
     expect(sh).not.toBe(null);
   });
 
   describe('findChangedStatusJobs', () => {
     it('finds no changed status jobs from empty', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       const findJobs = sh.findChangedStatusJobs([]);
       findJobs.subscribe((data) => {
         expect(data).toEqual({ completed: [], failed: [] });
@@ -67,7 +69,7 @@ describe('stream handler', () => {
     });
 
     it('finds changed status jobs', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       const findJobs = sh.findChangedStatusJobs([
         'job-source-mock1',
         'job-source-mock2',
@@ -83,7 +85,7 @@ describe('stream handler', () => {
 
   describe('showNotifications', () => {
     it('show success', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       sh.showNotifications({
         completed: [
           {
@@ -104,7 +106,7 @@ describe('stream handler', () => {
     });
 
     it('show max length warning', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       sh.showNotifications({
         completed: [
           {
@@ -126,7 +128,7 @@ describe('stream handler', () => {
     });
 
     it('show csv formulas warning', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       sh.showNotifications({
         completed: [
           {
@@ -148,7 +150,7 @@ describe('stream handler', () => {
     });
 
     it('show failed job toast', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       sh.showNotifications({
         completed: [],
         failed: [
@@ -169,7 +171,7 @@ describe('stream handler', () => {
     });
 
     it('show multiple toast', (done) => {
-      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock, theme);
       sh.showNotifications({
         completed: [
           {
