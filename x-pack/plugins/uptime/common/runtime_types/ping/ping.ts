@@ -145,6 +145,7 @@ export const PingType = t.intersection([
     ecs: t.partial({
       version: t.string,
     }),
+    monitorCount: t.number,
     error: PingErrorType,
     http: t.partial({
       request: t.partial({

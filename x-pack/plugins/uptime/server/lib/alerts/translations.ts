@@ -328,6 +328,20 @@ export const durationAnomalyTranslations = {
   ],
 };
 
-export const DOWN_LABEL = i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
-  defaultMessage: 'down',
-});
+export const DOWN_LABEL = (
+  monitorName: string,
+  count: number,
+  timerangeCount: number,
+  timerangeUnit: string,
+  numTimes: number
+) =>
+  i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
+    defaultMessage: `{monitorName} failed {count} times in the last {timerangeCount} {timerangeUnit}. Alert when > {numTimes}`,
+    values: {
+      monitorName,
+      count,
+      timerangeCount,
+      timerangeUnit,
+      numTimes,
+    },
+  });
