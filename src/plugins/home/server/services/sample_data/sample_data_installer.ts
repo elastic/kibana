@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
 import { isBoom } from '@hapi/boom';
 import type {
   IScopedClusterClient,
   ISavedObjectsImporter,
   Logger,
   SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
 } from 'src/core/server';
 import type { SampleDatasetSchema, DataIndexSchema } from './lib/sample_dataset_registry_types';
 import { dateToIso8601IgnoringTime } from './lib/translate_timestamp';
 import { createIndexName } from './lib/create_index_name';
 import { insertDataIntoIndex } from './lib/insert_data_into_index';
 import { SampleDataInstallError } from './errors';
-import { findSampleObjects } from './lib/find_sample_objects';
 
 export interface SampleDataInstallerOptions {
   esClient: IScopedClusterClient;
@@ -40,20 +39,12 @@ export interface SampleDataInstallResult {
 export class SampleDataInstaller {
   private readonly esClient: IScopedClusterClient;
   private readonly soClient: SavedObjectsClientContract;
-  private readonly soImporter: ISavedObjectsImporter;
   private readonly sampleDatasets: SampleDatasetSchema[];
   private readonly logger: Logger;
 
-  constructor({
-    esClient,
-    soImporter,
-    soClient,
-    sampleDatasets,
-    logger,
-  }: SampleDataInstallerOptions) {
+  constructor({ esClient, soClient, sampleDatasets, logger }: SampleDataInstallerOptions) {
     this.esClient = esClient;
     this.soClient = soClient;
-    this.soImporter = soImporter;
     this.sampleDatasets = sampleDatasets;
     this.logger = logger;
   }
@@ -155,34 +146,34 @@ export class SampleDataInstaller {
   }
 
   private async importSavedObjects(dataset: SampleDatasetSchema) {
-    const savedObjects = dataset.savedObjects.map(({ version, ...obj }) => obj);
-    const readStream = Readable.from(savedObjects);
-
-    const { errors = [] } = await this.soImporter.import({
-      readStream,
-      overwrite: true,
-      createNewCopies: false,
+    let createResults;
+    try {
+      const savedObjects = dataset.savedObjects as SavedObjectsBulkCreateObject[];
+      createResults = await this.soClient.bulkCreate(
+        savedObjects.map(({ version, ...savedObject }) => savedObject),
+        { overwrite: true }
+      );
+    } catch (err) {
+      const errMsg = `bulkCreate failed, error: ${err.message}`;
+      throw new Error(errMsg);
+    }
+    const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
+      return Boolean(savedObjectCreateResult.error);
     });
     if (errors.length > 0) {
       const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
-        errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
+        errors
       )}`;
       this.logger.warn(errMsg);
-      throw new SampleDataInstallError(errMsg, 500);
+      throw new SampleDataInstallError(errMsg, 403);
     }
-    return savedObjects.length;
+    return dataset.savedObjects.length;
   }
 
   private async deleteSavedObjects(dataset: SampleDatasetSchema) {
     const objects = dataset.savedObjects.map(({ type, id }) => ({ type, id }));
-    const findSampleObjectsResult = await findSampleObjects({
-      client: this.soClient,
-      logger: this.logger,
-      objects,
-    });
-    const objectsToDelete = findSampleObjectsResult.filter(({ foundObjectId }) => foundObjectId);
-    const deletePromises = objectsToDelete.map(({ type, foundObjectId }) =>
-      this.soClient.delete(type, foundObjectId!).catch((err) => {
+    const deletePromises = objects.map(({ type, id }) =>
+      this.soClient.delete(type, id!).catch((err) => {
         // if the object doesn't exist, ignore the error and proceed
         if (isBoom(err) && err.output.statusCode === 404) {
           return;
@@ -200,6 +191,6 @@ export class SampleDataInstaller {
         err.body?.status ?? 500
       );
     }
-    return objectsToDelete.length;
+    return objects.length;
   }
 }

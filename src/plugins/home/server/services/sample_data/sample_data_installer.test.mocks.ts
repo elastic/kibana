@@ -10,8 +10,3 @@ export const insertDataIntoIndexMock = jest.fn();
 jest.doMock('./lib/insert_data_into_index', () => ({
   insertDataIntoIndex: insertDataIntoIndexMock,
 }));
-
-export const findSampleObjectsMock = jest.fn();
-jest.doMock('./lib/find_sample_objects', () => ({
-  findSampleObjects: findSampleObjectsMock,
-}));

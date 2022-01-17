@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
-import { insertDataIntoIndexMock, findSampleObjectsMock } from './sample_data_installer.test.mocks';
-import type { SavedObjectsImportFailure } from 'kibana/server';
+import { insertDataIntoIndexMock } from './sample_data_installer.test.mocks';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
@@ -81,25 +79,17 @@ describe('SampleDataInstaller', () => {
       sampleDatasets: testDatasets,
     });
 
-    soImporter.import.mockResolvedValue({
-      success: true,
-      successCount: 1,
-      errors: [],
-      warnings: [],
-    });
+    soClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
     soClient.delete.mockResolvedValue({});
 
     esClient.asCurrentUser.indices.getAlias.mockImplementation(() => {
       throw new Error('alias not found');
     });
-
-    findSampleObjectsMock.mockResolvedValue([]);
   });
 
   afterEach(() => {
     insertDataIntoIndexMock.mockReset();
-    findSampleObjectsMock.mockReset();
   });
 
   describe('#install', () => {
@@ -141,11 +131,9 @@ describe('SampleDataInstaller', () => {
     it('imports the saved objects', async () => {
       await installer.install('test_single_data_index');
 
-      expect(soImporter.import).toHaveBeenCalledTimes(1);
-      expect(soImporter.import).toHaveBeenCalledWith({
-        readStream: expect.any(Readable),
+      expect(soClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkCreate).toHaveBeenCalledWith(expect.any(Array), {
         overwrite: true,
-        createNewCopies: false,
       });
     });
 
@@ -181,24 +169,6 @@ describe('SampleDataInstaller', () => {
         expect('should have returned an error').toEqual('but it did not');
       } catch (e) {
         expect(e).toBeInstanceOf(SampleDataInstallError);
-        expect((e as SampleDataInstallError).httpCode).toEqual(500);
-      }
-    });
-
-    it('throws a SampleDataInstallError if the savedObject import returns any error', async () => {
-      soImporter.import.mockResolvedValue({
-        success: true,
-        successCount: 1,
-        errors: [{ type: 'type', id: 'id' } as SavedObjectsImportFailure],
-        warnings: [],
-      });
-
-      try {
-        await installer.install('test_single_data_index');
-        expect('should have returned an error').toEqual('but it did not');
-      } catch (e) {
-        expect(e).toBeInstanceOf(SampleDataInstallError);
-        expect(e.message).toContain('sample_data install errors while loading saved objects');
         expect((e as SampleDataInstallError).httpCode).toEqual(500);
       }
     });
@@ -246,16 +216,11 @@ describe('SampleDataInstaller', () => {
     });
 
     it('deletes the saved objects', async () => {
-      findSampleObjectsMock.mockResolvedValue([
-        { type: 'dashboard', id: 'foo', foundObjectId: 'foo' },
-        { type: 'dashboard', id: 'hello', foundObjectId: 'dolly' },
-      ]);
-
       await installer.uninstall('test_single_data_index');
 
       expect(soClient.delete).toHaveBeenCalledTimes(2);
-      expect(soClient.delete).toHaveBeenCalledWith('dashboard', 'foo');
-      expect(soClient.delete).toHaveBeenCalledWith('dashboard', 'dolly');
+      expect(soClient.delete).toHaveBeenCalledWith('dashboard', 'some-dashboard');
+      expect(soClient.delete).toHaveBeenCalledWith('dashboard', 'another-dashboard');
     });
 
     it('throws a SampleDataInstallError with code 404 when the dataset is not found', async () => {
@@ -277,14 +242,9 @@ describe('SampleDataInstaller', () => {
     });
 
     it('throws a SampleDataInstallError if any SO deletion fails', async () => {
-      findSampleObjectsMock.mockResolvedValue([
-        { type: 'dashboard', id: 'foo', foundObjectId: 'foo' },
-        { type: 'dashboard', id: 'hello', foundObjectId: 'dolly' },
-      ]);
-
       soClient.delete.mockImplementation(async (type: string, id: string) => {
-        if (id === 'dolly') {
-          throw new Error('could not delete dolly');
+        if (id === 'another-dashboard') {
+          throw new Error('could not delete another-dashboard');
         }
         return {};
       });
