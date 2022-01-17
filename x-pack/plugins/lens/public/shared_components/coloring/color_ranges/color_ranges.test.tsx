@@ -97,36 +97,19 @@ describe('Color Ranges', () => {
   });
 
   it('should sort ranges value on whole component blur', () => {
-    const component = renderColorRanges(props);
-    const firstInput = component.find('ColorRangeItem').first().find('input').first();
-
-    act(() => {
-      firstInput.simulate('change', { target: { value: ' 65' } });
-    });
-
-    expect(dispatch).toHaveBeenNthCalledWith(1, {
-      type: 'updateValue',
-      payload: {
-        index: 0,
-        value: ' 65',
-        accessor: 'start',
-        dataBounds: { min: 0, max: 100 },
-        palettes: {},
-      },
-    });
-
     props.colorRanges = [
       { color: '#aaa', start: 65, end: 40 },
       { color: '#bbb', start: 40, end: 60 },
       { color: '#ccc', start: 60, end: 80 },
     ];
-    component.setProps({ colorRanges: props.colorRanges });
+    const component = renderColorRanges(props);
+    const firstInput = component.find('ColorRangeItem').first().find('input').first();
 
     act(() => {
       firstInput.simulate('blur');
     });
 
-    expect(dispatch).toHaveBeenNthCalledWith(2, {
+    expect(dispatch).toHaveBeenCalledWith({
       type: 'sortColorRanges',
       payload: {
         dataBounds: { min: 0, max: 100 },
