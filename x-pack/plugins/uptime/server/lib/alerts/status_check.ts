@@ -157,11 +157,10 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
   };
-  // const reason = generateAlertMessage(MonitorStatusTranslations.defaultActionMessage, {
-  //   ...summary,
-  //   statusMessage,
-  // });
-  const reason = statusMessage;
+  const reason = generateAlertMessage(MonitorStatusTranslations.defaultActionMessage, {
+    ...summary,
+    statusMessage,
+  });
   return {
     ...summary,
     reason,
@@ -194,7 +193,6 @@ export const getStatusMessage = (
   let statusMessage = '';
   if (downMonStatus?.info) {
     statusMessage = DOWN_LABEL(
-      downMonStatus.info.monitor.name!,
       downMonStatus.count!,
       downMonStatus.interval,
       downMonStatus.numTimes
@@ -207,7 +205,7 @@ export const getStatusMessage = (
       'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
       {
         defaultMessage:
-          '{monitorName} {interval} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
+          '{interval} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
         values: {
           monitorName: availMonInfo.monitorInfo.monitor.name,
           availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
@@ -221,7 +219,7 @@ export const getStatusMessage = (
     return i18n.translate(
       'xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
       {
-        defaultMessage: '{statusMessage} and also {availabilityMessage}',
+        defaultMessage: '{statusMessage} The {availabilityMessage}',
         values: {
           statusMessage,
           availabilityMessage,
