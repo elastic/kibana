@@ -9,11 +9,11 @@ import { PluginInitializerContext } from 'kibana/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
-  AnomalyRecordDoc,
-  AnomaliesTableRecord,
-  AnomalyResultType,
-  DatafeedStats,
-  Job,
+  AnomalyRecordDoc as MlAnomalyRecordDoc,
+  AnomaliesTableRecord as MlAnomaliesTableRecord,
+  AnomalyResultType as MlAnomalyResultType,
+  DatafeedStats as MlDatafeedStats,
+  Job as MlJob,
 } from './shared';
 export {
   UnknownMLCapabilitiesError,
