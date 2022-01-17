@@ -16,7 +16,7 @@ NOTE: For emails to have a footer with a link back to {kib}, set the <<server-pu
 Email connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Sender::    The from address for all emails sent with this connector. This can be specified in `user@host-name` format or as `"human name <user@host-name>"` format. See the https://nodemailer.com/message/addresses/[Nodemailer address documentation] for more information.
+Sender::    The from address for all emails sent with this connector. This must be specified in `user@host-name` format. See the https://nodemailer.com/message/addresses/[Nodemailer address documentation] for more information.
 Service::   The name of the email service. If `service` is one of Nodemailer's https://nodemailer.com/smtp/well-known/[well-known email service providers], the `host`, `port`, and `secure` properties are defined with the default values and disabled for modification. If `service` is `MS Exchange Server`, the `host`, `port`, and `secure` properties are ignored and `tenantId`, `clientId`, `clientSecret` are required instead. If `service` is `other`, the `host` and `port` properties must be defined.
 Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this hostname is added to the allowed hosts.
 Port::      The port to connect to on the service provider.
