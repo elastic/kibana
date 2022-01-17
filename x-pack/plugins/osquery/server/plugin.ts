@@ -18,8 +18,10 @@ import {
   CoreStart,
   Plugin,
   Logger,
+  SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
+
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -30,6 +32,7 @@ import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_c
 import { ConfigType } from './config';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
 import { PLUGIN_ID } from '../common';
+import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './telemetry/sender';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
@@ -264,6 +267,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
+
+    if (registerIngestCallback) {
+      const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+
+      registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
+    }
 
     return {};
   }
