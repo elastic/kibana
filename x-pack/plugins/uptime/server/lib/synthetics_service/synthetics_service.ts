@@ -20,7 +20,7 @@ import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetic
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
-import { UptimeConfig } from '../../../common/config';
+import { ServiceConfig } from '../../../common/config';
 import { ServiceAPIClient } from './service_api_client';
 import { formatMonitorConfig } from './formatters/format_configs';
 import {
@@ -40,19 +40,17 @@ export class SyntheticsService {
   private readonly server: UptimeServerSetup;
   private apiClient: ServiceAPIClient;
 
-  private readonly config: UptimeConfig;
+  private readonly config: ServiceConfig;
   private readonly esHosts: string[];
 
   private apiKey: SyntheticsServiceApiKey | undefined;
 
-  constructor(logger: Logger, server: UptimeServerSetup) {
+  constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
-    this.config = server.config;
+    this.config = config;
 
-    const { manifestUrl, username, password } = this.config.unsafe.service;
-
-    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
+    this.apiClient = new ServiceAPIClient(logger, this.config);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
@@ -116,8 +114,7 @@ export class SyntheticsService {
   public async scheduleSyncTask(
     taskManager: TaskManagerStartContract
   ): Promise<TaskInstance | null> {
-    const interval =
-      this.config.unsafe.service.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
+    const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     try {
       await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
