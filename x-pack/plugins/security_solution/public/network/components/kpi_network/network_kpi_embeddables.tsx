@@ -88,7 +88,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       time: timerange,
                     },
                   ]}
-                  showExploreButton={false}
                   compressed
                   disableBorder
                   disableShadow
@@ -179,7 +178,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       time: timerange,
                     },
                   ]}
-                  showExploreButton={false}
                   compressed
                   disableBorder
                   disableShadow
@@ -266,7 +264,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow
@@ -296,7 +293,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                         operationType: 'unique_count',
                       },
                     ]}
-                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow
@@ -341,7 +337,6 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={true}
                     compressed
                     disableBorder
                     disableShadow

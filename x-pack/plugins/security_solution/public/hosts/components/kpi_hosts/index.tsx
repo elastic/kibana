@@ -94,7 +94,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <HostCharts from={from} to={to} />
+        <HostCharts from={from} to={to} indexNames={indexNames} />
       </>
     );
   }

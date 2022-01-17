@@ -49,12 +49,9 @@ export function getLayerConfigs(
   allSeries.forEach((series, seriesIndex) => {
     const indexPattern = indexPatterns?.[series?.dataType];
 
-    if (
-      indexPattern &&
-      !isEmpty(series.reportDefinitions) &&
-      !series.hidden &&
-      series.selectedMetricField
-    ) {
+    const hasDefinitionFields = !isEmpty(series.reportDefinitions);
+
+    if (indexPattern && hasDefinitionFields && !series.hidden && series.selectedMetricField) {
       const seriesConfig = getDefaultConfigs({
         reportType,
         indexPattern,

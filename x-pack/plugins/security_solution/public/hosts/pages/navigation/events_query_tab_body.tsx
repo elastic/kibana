@@ -133,12 +133,14 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
             options={histogramConfigs.stackByOptions}
             prepend={STACK_BY}
             value={selectedStackByOption?.value}
+            compressed={true}
           />
         )}
       </EuiFlexItem>
     ),
     [selectedStackByOption?.value, setSelectedChartOptionCallback]
   );
+
   return (
     <>
       {!globalFullScreen && (
@@ -170,7 +172,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
               dataType: 'security',
               selectedMetricField: 'EVENT_RECORDS',
               breakdown: selectedStackByOption.value,
-              time: { from: 'now-24h', to: 'now' },
+              time: { from: startDate, to: endDate },
               seriesType: 'bar_stacked',
             },
           ]}
@@ -180,7 +182,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
             yLeft: false,
             yRight: false,
           }}
-          showExploreButton={true}
           disableBorder
           disableShadow
           compressed

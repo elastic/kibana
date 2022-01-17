@@ -39,6 +39,7 @@ export const indexPatternList: Record<AppDataType, string> = {
   infra_logs: 'infra_logs_static_index_pattern_id',
   infra_metrics: 'infra_metrics_static_index_pattern_id',
   mobile: 'mobile_static_index_pattern_id',
+  security: 'security_static_data_view',
 };
 
 const appToPatternMap: Record<AppDataType, string> = {
@@ -48,6 +49,8 @@ const appToPatternMap: Record<AppDataType, string> = {
   infra_logs: '',
   infra_metrics: '(infra-metrics-data-view)*',
   mobile: '(mobile-data-view)*',
+  security: '(security-data-view)*',
+  securityAlerts: '(security-alerts-data-view)*',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
@@ -151,8 +154,8 @@ export class ObservabilityIndexPatterns {
 
     if (appIndices) {
       try {
-        const indexPatternId = getAppIndexPatternId(app, appIndices);
         const indexPatternTitle = getAppIndicesWithPattern(app, appIndices);
+        const indexPatternId = getAppIndexPatternId(app, appIndices);
         // we will get index pattern by id
         const indexPattern = await this.data?.indexPatterns.get(indexPatternId);
 

@@ -138,7 +138,6 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
             yLeft: false,
             yRight: false,
           }}
-          showExploreButton={true}
           disableBorder
           disableShadow
           compressed

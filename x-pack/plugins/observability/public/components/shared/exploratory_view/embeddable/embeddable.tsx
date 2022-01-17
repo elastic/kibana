@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiIcon, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { AllSeries, createExploratoryViewUrl, useTheme } from '../../../..';
+import { AllSeries, createExploratoryViewUrl, SeriesUrl, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
@@ -20,6 +20,7 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useDefaultTimeRange } from './use_default_time_range';
 
 export interface ExploratoryEmbeddableProps {
   alignLnsMetric?: string;
@@ -42,7 +43,6 @@ export interface ExploratoryEmbeddableProps {
   }) => void;
   reportConfigMap?: ReportConfigMap;
   withActions?: boolean | Array<'explore' | 'save' | 'addToCase'>;
-  appId?: 'security' | 'observability';
   reportType: ReportViewType | string;
   showCalculationMethod?: boolean;
   showExploreButton?: boolean;
@@ -50,7 +50,6 @@ export interface ExploratoryEmbeddableProps {
   metricIconColor?: string;
   metricPostfix?: string;
   title?: string | JSX.Element;
-  withActions?: boolean;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -72,8 +71,6 @@ export default function Embeddable({
   disableShadow = false,
   indexPatterns,
   lens,
-  appId,
-  axisTitlesVisibility,
   legendIsVisible,
   metricIcon,
   metricIconColor,
@@ -83,9 +80,8 @@ export default function Embeddable({
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
-  showExploreButton = true,
+  showExploreButton = false,
   title,
-  withActions = true,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -94,6 +90,8 @@ export default function Embeddable({
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
   const { http } = useKibana().services;
+
+  const stateTime = useDefaultTimeRange();
 
   const series = Object.entries(attributes)[0][1];
 
@@ -184,7 +182,7 @@ export default function Embeddable({
           <LensComponent
             id="exploratoryView"
             style={{ height: '100%' }}
-            timeRange={series?.time}
+            timeRange={series?.time ?? stateTime}
             attributes={attributesJSON}
             onBrushEnd={({ range }) => {}}
             withActions={actions}
@@ -208,7 +206,7 @@ export default function Embeddable({
         )}
         <AddToCaseAction
           lensAttributes={attributesJSON}
-          timeRange={series?.time}
+          timeRange={series?.time ?? stateTime}
           autoOpen={isAddToCaseOpen}
           setAutoOpen={setAddToCaseOpen}
           appId={appId}
@@ -274,10 +272,11 @@ const Wrapper = styled.div<{
 const StyledFlexGroup = styled(EuiFlexGroup)<{
   $compressed?: boolean;
 }>`
+  width: calc(100% - 30px);
   ${(props) =>
     props.$compressed
       ? `position: absolute;
-         top: 0;
+         top: -5px;
          z-index: 1;`
       : ''}
 `;

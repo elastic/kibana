@@ -35,9 +35,10 @@ interface Props {
   from: string;
   to: string;
   inputsModelId?: InputsModelId;
+  indexNames: string[];
 }
 
-export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
+export const HostCharts = ({ from, to, indexNames, inputsModelId = 'global' }: Props) => {
   const timerange = useMemo<TimeRange>(
     () => ({
       from: new Date(from).toISOString(),
@@ -64,6 +65,9 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
     },
     [dispatch, inputsModelId]
   );
+
+  indexPatternList.security = indexNames.join(',');
+
   return (
     <>
       <EuiFlexGroup>
@@ -283,7 +287,6 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={true}
                     compressed
                     disableBorder
                     disableShadow
