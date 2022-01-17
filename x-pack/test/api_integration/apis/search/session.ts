@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const spacesService = getService('spaces');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('search session', () => {
+  describe('search session', () => {
     describe('session management', () => {
       it('should fail to create a session with no name', async () => {
         const sessionId = `my-session-${Math.random()}`;
