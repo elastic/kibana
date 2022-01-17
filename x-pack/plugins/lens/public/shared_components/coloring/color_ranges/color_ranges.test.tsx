@@ -10,6 +10,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
 import { ReactWrapper } from 'enzyme';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { ColorRangesContext } from './color_ranges_context';
 
 const extraActionSelectors = {
   addColorRange: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColorRange"]',
@@ -25,6 +27,19 @@ const pageObjects = {
   distributeEqually: (component: ReactWrapper) =>
     component.find(extraActionSelectors.distributeEqually).first(),
 };
+
+function renderColorRanges(props: ColorRangesProps) {
+  return mountWithIntl(
+    <ColorRangesContext.Provider
+      value={{
+        dataBounds: { min: 0, max: 100 },
+        palettes: {} as PaletteRegistry,
+      }}
+    >
+      <ColorRanges {...props} />
+    </ColorRangesContext.Provider>
+  );
+}
 
 describe('Color Ranges', () => {
   let props: ColorRangesProps;
@@ -48,7 +63,7 @@ describe('Color Ranges', () => {
   });
 
   it('should display all the color ranges passed', () => {
-    const component = mountWithIntl(<ColorRanges {...props} />);
+    const component = renderColorRanges(props);
 
     expect(component.find('ColorRangeItem')).toHaveLength(4);
   });
@@ -61,15 +76,13 @@ describe('Color Ranges', () => {
       { color: '#ccc', start: 80, end: 90 },
       { color: '#ccc', start: 90, end: 100 },
     ];
-    const component = mountWithIntl(
-      <ColorRanges {...props} paletteConfiguration={{ maxSteps: 5 }} />
-    );
+    const component = renderColorRanges({ ...props, paletteConfiguration: { maxSteps: 5 } });
 
     expect(pageObjects.getAddColorRangeButton(component).prop('disabled')).toBe(true);
   });
 
   it('should add a new range with default color and reasonable distance from last one', () => {
-    const component = mountWithIntl(<ColorRanges {...props} />);
+    const component = renderColorRanges(props);
 
     act(() => {
       pageObjects.getAddColorRangeButton(component).simulate('click');
@@ -79,12 +92,12 @@ describe('Color Ranges', () => {
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'addColorRange',
-      payload: { dataBounds: { min: 0, max: 100 }, palettes: undefined },
+      payload: { dataBounds: { min: 0, max: 100 }, palettes: {} },
     });
   });
 
   it('should sort ranges value on whole component blur', () => {
-    const component = mountWithIntl(<ColorRanges {...props} />);
+    const component = renderColorRanges(props);
     const firstInput = component.find('ColorRangeItem').first().find('input').first();
 
     act(() => {
@@ -98,7 +111,7 @@ describe('Color Ranges', () => {
         value: ' 65',
         accessor: 'start',
         dataBounds: { min: 0, max: 100 },
-        palettes: undefined,
+        palettes: {},
       },
     });
 
@@ -117,7 +130,7 @@ describe('Color Ranges', () => {
       type: 'sortColorRanges',
       payload: {
         dataBounds: { min: 0, max: 100 },
-        palettes: undefined,
+        palettes: {},
       },
     });
   });
@@ -129,7 +142,7 @@ describe('Color Ranges', () => {
       { color: '#ccc', start: 60, end: 90 },
       { color: '#ddd', start: 90, end: 130 },
     ];
-    const component = mountWithIntl(<ColorRanges {...props} />);
+    const component = renderColorRanges(props);
 
     act(() => {
       pageObjects.reverseColors(component).simulate('click');
@@ -141,7 +154,7 @@ describe('Color Ranges', () => {
       type: 'reversePalette',
       payload: {
         dataBounds: { min: 0, max: 100 },
-        palettes: undefined,
+        palettes: {},
       },
     });
   });
@@ -154,7 +167,7 @@ describe('Color Ranges', () => {
       { color: '#ccc', start: 7, end: 8 },
     ];
 
-    const component = mountWithIntl(<ColorRanges {...props} />);
+    const component = renderColorRanges(props);
 
     act(() => {
       pageObjects.distributeEqually(component).simulate('click');
@@ -164,7 +177,7 @@ describe('Color Ranges', () => {
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'distributeEqually',
-      payload: { dataBounds: { min: 0, max: 100 }, palettes: undefined },
+      payload: { dataBounds: { min: 0, max: 100 }, palettes: {} },
     });
   });
 });
