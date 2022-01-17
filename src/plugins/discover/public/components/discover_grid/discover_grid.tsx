@@ -159,11 +159,11 @@ export interface DiscoverGridProps {
    */
   controlColumnIds?: string[];
   /**
-   * Row height from URL state / savedSearch / local embeddable state
+   * Row height from state
    */
   rowHeightState?: number;
   /**
-   * On row height update callback
+   * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
 }

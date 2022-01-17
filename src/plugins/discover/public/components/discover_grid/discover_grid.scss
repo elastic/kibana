@@ -30,19 +30,6 @@
   }
 }
 
-.normalDensityGrid {
-  & .euiDataGridRowCell.euiDataGridRowCell--controlColumn:nth-child(even) {
-    padding-left: $euiSize / 4;
-  }
-}
-
-.expandedDensityGrid {
-  & .euiDataGridRowCell.euiDataGridRowCell--controlColumn:nth-child(even) {
-    padding-top: $euiSize / 4 + 2;
-    padding-left: $euiSize / 4;
-  }
-}
-
 .dscDiscoverGrid__footer {
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;

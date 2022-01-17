@@ -20,7 +20,6 @@ import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
 import { Storage } from '../../../../../kibana_utils/public';
-import { getDefaultRowHeight } from '../../../utils/row_heights';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -64,7 +63,7 @@ export function getStateDefaults({
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
-    rowHeight: getDefaultRowHeight(config, storage),
+    rowHeight: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
