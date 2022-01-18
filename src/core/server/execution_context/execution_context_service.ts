@@ -154,7 +154,7 @@ export class ExecutionContextService
 
   private getAsHeader(): string | undefined {
     if (!this.enabled) return;
-    // requestId may not be present in the case of FakeRequest
+    // requestId may not be present if unspecified by the client or in the case of FakeRequest
     const requestId = this.requestIdStore.getStore()?.requestId ?? 'unknownId';
     const executionContext = this.contextStore.getStore()?.toString();
     const executionContextStr = executionContext ? `;kibana:${executionContext}` : '';
