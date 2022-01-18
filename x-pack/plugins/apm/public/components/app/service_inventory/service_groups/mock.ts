@@ -6,32 +6,37 @@
  */
 export const data = [
   {
-    name: 'Payments',
+    name: 'E (2)',
     totalServices: 1,
     color: '#566773',
+    createdAt: 2,
   },
   {
-    name: 'Operations',
+    name: 'A (5)',
     description: 'foo',
     color: '#B52454',
     totalServices: 24,
+    createdAt: 5,
   },
   {
-    name: 'Operations2',
+    name: 'C (1)',
     description: 'foo',
     color: '#B52454',
     totalServices: 24,
+    createdAt: 1,
   },
   {
-    name: 'Operations3',
+    name: 'B (4)',
     description: 'foo',
     color: '#B52454',
     totalServices: 24,
+    createdAt: 4,
   },
   {
-    name: 'Operations4',
+    name: 'D (3)',
     description: 'foo',
     color: '#B52454',
     totalServices: 24,
+    createdAt: 3,
   },
 ];

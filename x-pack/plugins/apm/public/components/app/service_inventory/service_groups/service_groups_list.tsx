@@ -15,57 +15,60 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ServiceGroupsOrientation } from './';
-import { data } from './mock';
+import { data as MockData } from './mock';
+
+type DataMockType = typeof MockData;
 
 interface Props {
   orientation: ServiceGroupsOrientation;
+  items: DataMockType;
 }
 
-export function ServiceGroupsList({ orientation }: Props) {
+export function ServiceGroupsList({ orientation, items }: Props) {
   const isGrid = orientation === 'grid';
   return (
     <EuiFlexGrid columns={isGrid ? undefined : 1} gutterSize="m">
-      {data.map((item) => {
+      {items.map((item) => {
+        const cardProps = {
+          style: isGrid ? { width: 286, height: 186 } : undefined,
+          icon: <EuiAvatar name={item.name} color={item.color} size="l" />,
+          title: item.name,
+          description: (
+            <EuiFlexGroup direction={isGrid ? 'column' : 'row'} gutterSize="m">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  {item.description ||
+                    i18n.translate(
+                      'xpack.apm.serviceGroups.cardsList.emptyDescription',
+                      { defaultMessage: 'No description available' }
+                    )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem style={isGrid ? undefined : { textAlign: 'end' }}>
+                <EuiText size="s">
+                  {i18n.translate(
+                    'xpack.apm.serviceGroups.cardsList.serviceCount',
+                    {
+                      defaultMessage:
+                        '{servicesCount} {servicesCount, plural, one {service} other {services}}',
+                      values: { servicesCount: item.totalServices },
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          onClick: () => {},
+        };
+
         return (
           <EuiFlexItem key={item.name}>
-            {/* @ts-ignore */}
-            <EuiCard
-              style={isGrid ? { width: 286, height: 186 } : undefined}
-              layout={isGrid ? 'vertical' : 'horizontal'}
-              icon={<EuiAvatar name={item.name} color={item.color} size="l" />}
-              title={item.name}
-              description={
-                <EuiFlexGroup
-                  direction={isGrid ? 'column' : 'row'}
-                  gutterSize="m"
-                >
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      {item.description ||
-                        i18n.translate(
-                          'xpack.apm.serviceGroups.cardsList.emptyDescription',
-                          { defaultMessage: 'No description available' }
-                        )}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    style={isGrid ? undefined : { textAlign: 'end' }}
-                  >
-                    <EuiText size="s">
-                      {i18n.translate(
-                        'xpack.apm.serviceGroups.cardsList.serviceCount',
-                        {
-                          defaultMessage:
-                            '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                          values: { servicesCount: item.totalServices },
-                        }
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              onClick={() => {}}
-            />
+            {/* This needs to be done like this, because of the way EUi defined the layout property */}
+            {isGrid ? (
+              <EuiCard layout="vertical" {...cardProps} />
+            ) : (
+              <EuiCard layout="horizontal" {...cardProps} />
+            )}
           </EuiFlexItem>
         );
       })}
