@@ -72,6 +72,8 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
 
 const idPrefix = htmlIdGenerator()();
 const DEFAULT_SIZE = 3;
+// Elasticsearch limit
+const MAXIMUM_MAX_DOC_COUNT = 100;
 export const DEFAULT_MAX_DOC_COUNT = 1;
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
@@ -346,7 +348,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
 
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
-      if (orderBy.type === 'alphabetical' || orderBy.type === 'rare') {
+      if (orderBy.type !== 'column') {
         return orderBy.type;
       }
       return `${orderBy.type}${SEPARATOR}${orderBy.columnId}`;
@@ -411,7 +413,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             label={i18n.translate('xpack.lens.indexPattern.terms.maxDocCount', {
               defaultMessage: 'Max doc count per term',
             })}
-            maxValue={100}
+            maxValue={MAXIMUM_MAX_DOC_COUNT}
             onChange={(value) => {
               updateLayer(
                 updateColumnParam({
