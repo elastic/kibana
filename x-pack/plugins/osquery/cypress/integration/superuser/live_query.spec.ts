@@ -25,8 +25,10 @@ describe('Super User - Live Query', () => {
   it('should run query and enable ecs mapping', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime;');
-    submitQuery();
+    inputQuery('select * from uptime; ');
+    cy.wait(500);
+    // checking submit by clicking cmd+enter
+    inputQuery('{command}{enter}');
 
     checkResults();
     cy.react('EuiDataGridHeaderCellWrapper', {

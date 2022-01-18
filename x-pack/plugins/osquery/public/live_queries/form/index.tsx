@@ -235,11 +235,23 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [setFieldValue]
   );
 
+  const commands = useMemo(
+    () => [
+      {
+        name: 'submitOnCmdEnter',
+        bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
+        exec: () => submit(),
+      },
+    ],
+    [submit]
+  );
+
   const queryComponentProps = useMemo(
     () => ({
       disabled: queryStatus === 'disabled',
+      commands,
     }),
-    [queryStatus]
+    [queryStatus, commands]
   );
 
   const flyoutFormDefaultValue = useMemo(
