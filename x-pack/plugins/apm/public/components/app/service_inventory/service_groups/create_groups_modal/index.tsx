@@ -30,6 +30,7 @@ export function CreateGroupsModal({ onClose }: Props) {
   const [groupDetails, setGroupDetails] = useState<GroupDetails | undefined>();
 
   async function onSave(selectServices: SelectServices) {
+    // @ts-ignore
     const serviceGroups = {
       ...groupDetails,
       ...selectServices,
