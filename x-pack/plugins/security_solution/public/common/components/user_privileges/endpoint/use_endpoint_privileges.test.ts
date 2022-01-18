@@ -46,14 +46,6 @@ describe('When using useEndpointPrivileges hook', () => {
 
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
-    // Add a daly to fleet service that provides authz information
-    const fleetAuthz = useKibana().services.fleet!.authz;
-
-    // Add a delay to the fleet Authz promise to test out the `loading` property
-    useKibana().services.fleet!.authz = new Promise((resolve) => {
-      releaseFleetAuthz = () => resolve(fleetAuthz);
-    });
-
     render = () => {
       const hookRenderResponse = renderHook(() => useEndpointPrivileges());
       ({ result, unmount } = hookRenderResponse);
@@ -78,7 +70,6 @@ describe('When using useEndpointPrivileges hook', () => {
 
     // Release the API response
     await act(async () => {
-      releaseFleetAuthz();
       await useKibana().services.fleet!.authz;
     });
 

@@ -27,6 +27,11 @@ export const getApplication = () => {
       management: {},
       navLinks: {},
       fleet: {
+        read: true,
+        write: true,
+      },
+      fleetv2: {
+        read: true,
         write: true,
       },
     },
