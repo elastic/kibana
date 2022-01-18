@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
 import React, { useState } from 'react';
@@ -43,28 +43,69 @@ export function ServiceGroups() {
   );
 
   return (
-    <>
-      <EuiFieldText
-        icon="search"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        placeholder={i18n.translate('xpack.apm.servicesGroups.filter', {
-          defaultMessage: 'Filter groups',
-        })}
-      />
-
-      <Sort
-        type={apmServiceGroupsSortType}
-        onChange={setServiceGroupsSortType}
-      />
-      <Orientation
-        type={apmServiceGroupsOrientation}
-        onChange={setServiceGroupsOrientation}
-      />
-      <ServiceGroupsList
-        orientation={apmServiceGroupsOrientation}
-        items={items}
-      />
-    </>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiFieldText
+              icon="search"
+              fullWidth
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder={i18n.translate('xpack.apm.servicesGroups.filter', {
+                defaultMessage: 'Filter groups',
+              })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <Sort
+              type={apmServiceGroupsSortType}
+              onChange={setServiceGroupsSortType}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <Orientation
+              type={apmServiceGroupsOrientation}
+              onChange={setServiceGroupsOrientation}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  {i18n.translate('xpack.apm.serviceGroups.last24Hours', {
+                    defaultMessage: 'Last 24 hous',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="m" color="subdued">
+                  |
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText style={{ fontWeight: 'bold' }} size="s">
+                  {i18n.translate('xpack.apm.serviceGroups.groupsCount', {
+                    defaultMessage:
+                      '{servicesCount} {servicesCount, plural, one {group} other {groups}}',
+                    values: { servicesCount: filteredItems.length },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ServiceGroupsList
+              orientation={apmServiceGroupsOrientation}
+              items={items}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
