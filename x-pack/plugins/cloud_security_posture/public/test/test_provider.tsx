@@ -9,12 +9,20 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { coreMock } from '../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import type { CspAppDeps } from './app';
+import type { CspAppDeps } from '../application/app';
 
 const queryClient = new QueryClient();
+const defaultCore = coreMock.createStart();
+const defaultParams = coreMock.createAppMountParameters();
 
-export const TestProvider: React.FC<CspAppDeps> = ({ core, deps, params, children }) => {
+export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
+  core = defaultCore,
+  deps = {},
+  params = defaultParams,
+  children,
+} = {}) => {
   return (
     <KibanaContextProvider services={{ ...deps, ...core }}>
       <QueryClientProvider client={queryClient}>

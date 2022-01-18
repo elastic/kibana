@@ -11,3 +11,9 @@ export const FINDINGS_ROUTE_PATH = '/api/csp/finding';
 export const AGENT_LOGS_INDEX = 'logs-k8s_cis*';
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
+
+// A mapping of in-development features to their status. These features should be hidden from users but can be easily
+// activated via a simple code change in a single location.
+export const INTERNAL_FEATURE_FLAGS = {
+  benchmarks: false,
+} as const;

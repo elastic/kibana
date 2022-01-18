@@ -8,9 +8,8 @@ import React from 'react';
 import { Findings } from './findings';
 import { MISSING_KUBEBEAT } from './translations';
 import { render, screen } from '@testing-library/react';
-import { TestProvider } from '../../application/test_provider';
+import { TestProvider } from '../../test/test_provider';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { createStubDataView } from '../../../../../../src/plugins/data_views/public/data_views/data_view.stub';
 import * as utils from './utils';
 import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/constants';
@@ -25,12 +24,9 @@ beforeEach(() => {
 });
 
 const FindingsComponentWithTestProvider = () => {
-  const core = coreMock.createStart();
-  const params = coreMock.createAppMountParameters();
   const dataMock = dataPluginMock.createStartContract();
-  const services = { core, deps: { data: dataMock }, params };
   return (
-    <TestProvider {...services}>
+    <TestProvider deps={{ data: dataMock }}>
       <Findings />
     </TestProvider>
   );

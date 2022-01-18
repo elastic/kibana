@@ -12,25 +12,30 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../src/plugins/kibana_react/public';
 import { allNavigationItems } from '../common/navigation/constants';
+import type { CspNavigationItem } from '../common/navigation/types';
 import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 
 const activeItemStyle = { fontWeight: 700 };
 
-const navItems: NonNullable<KibanaPageTemplateProps['solutionNav']>['items'] = Object.values(
-  allNavigationItems
-).map((route) => ({
-  ...route,
-  renderItem: () => (
-    <NavLink to={route.path} activeStyle={activeItemStyle}>
-      {route.name}
-    </NavLink>
-  ),
-}));
+export const getSideNavItems = (
+  navigationItems: Record<string, CspNavigationItem>
+): NonNullable<KibanaPageTemplateProps['solutionNav']>['items'] =>
+  Object.entries(navigationItems)
+    .filter(([_, navigationItem]) => !navigationItem.disabled)
+    .map(([id, navigationItem]) => ({
+      id,
+      name: navigationItem.name,
+      renderItem: () => (
+        <NavLink to={navigationItem.path} activeStyle={activeItemStyle}>
+          {navigationItem.name}
+        </NavLink>
+      ),
+    }));
 
 const defaultProps: KibanaPageTemplateProps = {
   solutionNav: {
     name: CLOUD_SECURITY_POSTURE,
-    items: navItems,
+    items: getSideNavItems(allNavigationItems),
   },
   restrictWidth: false,
   template: 'default',
