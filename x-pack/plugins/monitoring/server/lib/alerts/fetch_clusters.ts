@@ -8,7 +8,10 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster } from '../../../common/types/alerts';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
 
 interface RangeFilter {
   [field: string]: {
@@ -19,11 +22,15 @@ interface RangeFilter {
 
 export async function fetchClusters(
   esClient: ElasticsearchClient,
-  index: string,
   rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
 ): Promise<AlertCluster[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: [
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
       'hits.hits._source.cluster_uuid',

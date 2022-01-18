@@ -31,7 +31,6 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { AlertSeverity } from '../../common/enums';
 import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 type ExecutedState =
   | {
@@ -230,12 +229,8 @@ export class BaseRule {
   }
 
   protected async fetchClusters(esClient: ElasticsearchClient, params: CommonAlertParams) {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-    });
     if (!params.limit) {
-      return await fetchClusters(esClient, indexPatterns);
+      return await fetchClusters(esClient);
     }
     const limit = parseDuration(params.limit);
     const rangeFilter = this.ruleOptions.fetchClustersRange
@@ -246,7 +241,7 @@ export class BaseRule {
           },
         }
       : undefined;
-    return await fetchClusters(esClient, indexPatterns, rangeFilter);
+    return await fetchClusters(esClient, rangeFilter);
   }
 
   protected async fetchData(

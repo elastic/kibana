@@ -106,8 +106,7 @@ export function getMonitoringUsageCollector(
         : getClient().asInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
       const availableCcs = config.ui.ccs.enabled;
-      const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
-      const clusters = await fetchClusters(callCluster, elasticsearchIndex);
+      const clusters = await fetchClusters(callCluster);
       for (const cluster of clusters) {
         const license = await fetchLicenseType(callCluster, availableCcs, cluster.clusterUuid);
         const stackProducts = await getStackProductsUsage(
