@@ -26,7 +26,6 @@ export interface IAuthHeadersStorage {
   get: GetAuthHeaders;
 }
 
-
 /** @internal */
 export class AuthHeadersStorage {
   private authHeadersCache = new WeakMap<LegacyRequest, AuthHeaders>();

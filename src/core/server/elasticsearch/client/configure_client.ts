@@ -39,7 +39,6 @@ export const configureClient = (
   if (scoped) skipProductCheck(client);
   // --------------------------------------------------------------------------------- //
 
-
   instrumentEsQueryAndDeprecationLogger({ logger, client, type });
 
   return client;
