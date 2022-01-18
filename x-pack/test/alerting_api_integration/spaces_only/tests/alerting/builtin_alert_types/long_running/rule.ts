@@ -18,9 +18,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // Re-enable these once they are passing
-  // https://github.com/elastic/kibana/issues/121100
-  describe.skip('long running rule', async () => {
+  describe('long running rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
