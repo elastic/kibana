@@ -29,7 +29,7 @@ export function setupSavedObjects(
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
-    migrations: getAllMigrations(getFilterMigrations()),
+    migrations: () => getAllMigrations(getFilterMigrations()),
     mappings: {
       properties: {
         title: {
