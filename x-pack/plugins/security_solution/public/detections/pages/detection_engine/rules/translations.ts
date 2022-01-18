@@ -238,7 +238,7 @@ export const BULK_EDIT_CONFIRMATION_BODY = (elasticRulesCount: number, customRul
     {
       values: { elasticRulesCount, customRulesCount },
       defaultMessage:
-        'You are about to edit {elasticRulesCount} {elasticRulesCount, plural, =1 {Elastic rule} other {Elastic rules}}, the update action will only be applied to {customRulesCount} {customRulesCount, plural, =1 {Custom rule} other {Custom rules}} you’ve selected.',
+        'You are about to edit {elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}}, the update action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you’ve selected.',
     }
   );
 
