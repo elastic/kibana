@@ -192,12 +192,12 @@ Investigating the underlying task can help you gauge whether the problem you’r
 
 [discrete]
 [[alerting-kibana-disable]]
-=== Temporarily disable
+==== Temporarily disable
 
 A cluster may become unresponsive or sluggish if too many or expensive {kib} rules 
 are attempting to run. As a stop gap measure, you may consider temporarily overriding
 the {kib} Task Manager to gain breathing room to resolve your situation by restarting 
-{kib} after updating its config to
+{kib} after updating its config to:
 
 [source, txt]
 --------------------------------------------------
@@ -205,6 +205,7 @@ xpack.task_manager.max_workers: 1
 xpack.task_manager.poll_interval: 1m
 --------------------------------------------------
 
+For more information about these settings, refer to <<task-manager-settings-kb>>.
 
 In addition to the above methods, broadly used the next approaches and common issues:
 
