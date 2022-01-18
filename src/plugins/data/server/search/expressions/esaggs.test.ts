@@ -57,7 +57,7 @@ describe('esaggs expression function - server', () => {
     jest.clearAllMocks();
     mockHandlers = {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
-      getKibanaRequest: jest.fn().mockReturnValue({ id: 'hi' } as KibanaRequest),
+      getKibanaRequest: jest.fn().mockReturnValue({ opaqueId: 'hi' } as KibanaRequest),
       getSearchContext: jest.fn(),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
