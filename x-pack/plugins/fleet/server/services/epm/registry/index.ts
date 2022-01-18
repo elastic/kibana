@@ -204,8 +204,6 @@ async function fetchArchiveBuffer(
 ): Promise<{ archiveBuffer: Buffer; archivePath: string }> {
   const { download: archivePath } = await getInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
-  const logger = appContextService.getLogger();
-  logger.debug(`Fetching archive from ${archiveUrl}`);
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
   return { archiveBuffer, archivePath };

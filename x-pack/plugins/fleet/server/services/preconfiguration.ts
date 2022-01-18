@@ -22,6 +22,7 @@ import type {
   PackagePolicy,
   InstallResult,
 } from '../../common';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
 import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -194,7 +195,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       continue;
     }
 
-    packagesToInstall.push(pkg);
+    if (pkg.version === PRECONFIGURATION_LATEST_KEYWORD) {
+      packagesToInstall.push(pkg.name);
+    } else {
+      packagesToInstall.push(pkg);
+    }
   }
 
   // Preinstall packages specified in Kibana config
