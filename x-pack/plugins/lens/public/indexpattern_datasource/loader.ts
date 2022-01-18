@@ -6,9 +6,10 @@
  */
 
 import { uniq, mapValues, difference } from 'lodash';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { HttpSetup, SavedObjectReference } from 'kibana/public';
-import { InitializationOptions, StateSetter, VisualizeEditorContext } from '../types';
+import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { DataView } from 'src/plugins/data_views/public';
+import type { HttpSetup, SavedObjectReference } from 'kibana/public';
+import type { InitializationOptions, StateSetter, VisualizeEditorContext } from '../types';
 import {
   IndexPattern,
   IndexPatternRef,
@@ -17,6 +18,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
+
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
@@ -34,6 +36,72 @@ import { memoizedGetAvailableOperationsByMetadata } from './operations';
 type SetState = StateSetter<IndexPatternPrivateState>;
 type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
+
+export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
+  const newFields = dataView.fields
+    .filter(
+      (field) =>
+        !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
+    )
+    .map((field): IndexPatternField => {
+      // Convert the getters on the index pattern service into plain JSON
+      const base = {
+        name: field.name,
+        displayName: field.displayName,
+        type: field.type,
+        aggregatable: field.aggregatable,
+        searchable: field.searchable,
+        meta: dataView.metaFields.includes(field.name),
+        esTypes: field.esTypes,
+        scripted: field.scripted,
+        runtime: Boolean(field.runtimeField),
+      };
+
+      // Simplifies tests by hiding optional properties instead of undefined
+      return base.scripted
+        ? {
+            ...base,
+            lang: field.lang,
+            script: field.script,
+          }
+        : base;
+    })
+    .concat(documentField);
+
+  const { typeMeta, title, timeFieldName, fieldFormatMap } = dataView;
+  if (typeMeta?.aggs) {
+    const aggs = Object.keys(typeMeta.aggs);
+    newFields.forEach((field, index) => {
+      const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
+      aggs.forEach((agg) => {
+        const restriction = typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
+        if (restriction) {
+          restrictionsObj[translateToOperationName(agg)] = restriction;
+        }
+      });
+      if (Object.keys(restrictionsObj).length) {
+        newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
+      }
+    });
+  }
+
+  return {
+    id: dataView.id!, // id exists for sure because we got index patterns by id
+    title,
+    timeFieldName,
+    fieldFormatMap:
+      fieldFormatMap &&
+      Object.fromEntries(
+        Object.entries(fieldFormatMap).map(([id, format]) => [
+          id,
+          'toJSON' in format ? format.toJSON() : format,
+        ])
+      ),
+    fields: newFields,
+    getFieldByName: getFieldByNameFactory(newFields),
+    hasRestrictions: !!typeMeta?.aggs,
+  };
+}
 
 export async function loadIndexPatterns({
   indexPatternsService,
@@ -79,77 +147,10 @@ export async function loadIndexPatterns({
   }
 
   const indexPatternsObject = indexPatterns.reduce(
-    (acc, indexPattern) => {
-      const newFields = indexPattern.fields
-        .filter(
-          (field) =>
-            !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
-        )
-        .map((field): IndexPatternField => {
-          // Convert the getters on the index pattern service into plain JSON
-          const base = {
-            name: field.name,
-            displayName: field.displayName,
-            type: field.type,
-            aggregatable: field.aggregatable,
-            searchable: field.searchable,
-            meta: indexPattern.metaFields.includes(field.name),
-            esTypes: field.esTypes,
-            scripted: field.scripted,
-            runtime: Boolean(field.runtimeField),
-          };
-
-          // Simplifies tests by hiding optional properties instead of undefined
-          return base.scripted
-            ? {
-                ...base,
-                lang: field.lang,
-                script: field.script,
-              }
-            : base;
-        })
-        .concat(documentField);
-
-      const { typeMeta, title, timeFieldName, fieldFormatMap } = indexPattern;
-      if (typeMeta?.aggs) {
-        const aggs = Object.keys(typeMeta.aggs);
-        newFields.forEach((field, index) => {
-          const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
-          aggs.forEach((agg) => {
-            const restriction =
-              typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
-            if (restriction) {
-              restrictionsObj[translateToOperationName(agg)] = restriction;
-            }
-          });
-          if (Object.keys(restrictionsObj).length) {
-            newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
-          }
-        });
-      }
-
-      const currentIndexPattern: IndexPattern = {
-        id: indexPattern.id!, // id exists for sure because we got index patterns by id
-        title,
-        timeFieldName,
-        fieldFormatMap:
-          fieldFormatMap &&
-          Object.fromEntries(
-            Object.entries(fieldFormatMap).map(([id, format]) => [
-              id,
-              'toJSON' in format ? format.toJSON() : format,
-            ])
-          ),
-        fields: newFields,
-        getFieldByName: getFieldByNameFactory(newFields),
-        hasRestrictions: !!typeMeta?.aggs,
-      };
-
-      return {
-        [currentIndexPattern.id]: currentIndexPattern,
-        ...acc,
-      };
-    },
+    (acc, indexPattern) => ({
+      [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern),
+      ...acc,
+    }),
     { ...cache }
   );
 

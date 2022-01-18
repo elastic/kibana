@@ -37,7 +37,7 @@ import {
   ReferenceBasedIndexPatternColumn,
   BaseIndexPatternColumn,
 } from './definitions/column_types';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
@@ -560,14 +560,9 @@ export function replaceColumn({
 
       try {
         newLayer = newColumn.params.formula
-          ? regenerateLayerFromAst(
-              newColumn.params.formula,
-              basicLayer,
-              columnId,
-              newColumn,
+          ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
               indexPattern,
-              operationDefinitionMap
-            ).newLayer
+            }).layer
           : basicLayer;
       } catch (e) {
         newLayer = basicLayer;
