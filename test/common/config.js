@@ -60,6 +60,11 @@ export default function () {
         '--logging.appenders.deprecation.layout.type=json',
         '--logging.loggers[0].name=elasticsearch.deprecation',
         '--logging.loggers[0].appenders[0]=deprecation',
+        '--xpack.task_manager.monitored_stats_health_verbose_log.enabled=true',
+        `--logging.loggers=${JSON.stringify([
+          { name: 'plugins.security', appenders: ['console'], level: 'debug' },
+          { name: 'plugins.taskManager', appenders: ['console'], level: 'warn' },
+        ])}`,
       ],
     },
     services,

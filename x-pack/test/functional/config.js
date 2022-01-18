@@ -85,11 +85,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        '--xpack.task_manager.monitored_stats_health_verbose_log.enabled=true',
-        `--logging.loggers=${JSON.stringify([
-          { name: 'plugins.security', appenders: ['console'], level: 'debug' },
-          { name: 'plugins.taskManager', appenders: ['console'], level: 'warn' },
-        ])}`,
       ],
     },
     uiSettings: {
