@@ -7,6 +7,6 @@
 
 import type { TransformListRow } from './transform_list';
 
-export const isManagedTransform = (transform: TransformListRow) => {
+export const isManagedTransform = (transform: Partial<TransformListRow>) => {
   return transform.config?._meta?.managed;
 };
