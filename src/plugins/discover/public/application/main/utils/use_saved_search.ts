@@ -43,7 +43,6 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
-// @todo
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;

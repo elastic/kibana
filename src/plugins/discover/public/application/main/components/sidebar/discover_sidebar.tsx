@@ -158,7 +158,10 @@ export function DiscoverSidebarComponent({
     () =>
       availableFields$.next({
         fetchStatus: FetchStatus.COMPLETE,
-        fields: [...selectedFields, ...popularFields, ...unpopularFields],
+        fields:
+          selectedFields.length > 0
+            ? selectedFields
+            : [...selectedFields, ...popularFields, ...unpopularFields],
       }),
     [selectedFields, popularFields, unpopularFields, availableFields$]
   );
