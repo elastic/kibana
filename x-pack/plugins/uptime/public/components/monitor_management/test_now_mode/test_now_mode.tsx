@@ -27,11 +27,10 @@ import { kibanaService } from '../../../state/kibana_service';
 
 export interface TestRun {
   id: string;
-  isValid: boolean;
   monitor: MonitorFields;
 }
 
-export function TestNowMode({ monitor, isValid }: { monitor?: MonitorFields }) {
+export function TestNowMode({ monitor, isValid }: { monitor?: MonitorFields; isValid?: boolean }) {
   const [testRun, setTestRun] = useState<TestRun>();
 
   const startTestRun = () => {
