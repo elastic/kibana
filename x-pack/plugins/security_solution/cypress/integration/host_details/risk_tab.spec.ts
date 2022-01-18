@@ -10,6 +10,11 @@ import { loginAndWaitForHostDetailsPage } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { TABLE_CELL, TABLE_ROWS } from '../../screens/alerts_details';
+import {
+  navigateToHostRiskDetailTab,
+  openRiskFlyout,
+  waitForTableToLoad,
+} from '../../tasks/host_risk';
 
 describe('risk tab', () => {
   before(() => {
@@ -23,7 +28,7 @@ describe('risk tab', () => {
 
   it('renders risk tab', () => {
     loginAndWaitForHostDetailsPage('siem-kibana');
-    cy.get('[data-test-subj="navigation-hostRisk"]').click();
+    navigateToHostRiskDetailTab();
     waitForTableToLoad();
 
     cy.get('[data-test-subj="topHostScoreContributors"]')
@@ -35,18 +40,12 @@ describe('risk tab', () => {
 
   it('shows risk information overlay when button is clicked', () => {
     loginAndWaitForHostDetailsPage('siem-kibana');
-    cy.get('[data-test-subj="navigation-hostRisk"]').click();
+    navigateToHostRiskDetailTab();
     waitForTableToLoad();
-
-    cy.get('[data-test-subj="open-risk-information-flyout-trigger"]').click();
+    openRiskFlyout();
 
     cy.get('[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader').contains(
       'How is host risk calculated?'
     );
   });
 });
-
-export const waitForTableToLoad = () => {
-  cy.get('.euiBasicTable-loading').should('exist');
-  cy.get('.euiBasicTable-loading').should('not.exist');
-};
