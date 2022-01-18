@@ -414,11 +414,20 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
+export type Installable<T> =
+  | Installed<T>
+  | Installing<T>
+  | NotInstalled<T>
+  | InstallFailed<T>
+  | InstalledBundled<T>;
 
 export type Installed<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
+};
+
+export type InstalledBundled<T = {}> = T & {
+  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {
