@@ -33,7 +33,6 @@ export const analyticsJobExplorationRouteFactory = (
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel', {
         defaultMessage: 'Exploration',
       }),
-      href: '',
     },
   ],
 });
