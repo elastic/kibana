@@ -2,7 +2,7 @@
 name: CSP temp Pre Merge CI
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
 
