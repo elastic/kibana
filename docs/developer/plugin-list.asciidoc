@@ -516,8 +516,8 @@ Elastic.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection[monitoringCollection]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
+|This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
