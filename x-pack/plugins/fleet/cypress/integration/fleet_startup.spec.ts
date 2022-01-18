@@ -6,7 +6,6 @@
  */
 
 import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
-import { CONFIRM_MODAL_BTN } from '../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 

@@ -53,6 +53,17 @@ describe('Edit package policy', () => {
         hasErrors: false,
       },
     ]);
+    cy.intercept('/api/fleet/agent_policies/fleet-server-policy', {
+      item: {
+        id: 'fleet-server-policy',
+        name: 'Fleet server policy 1',
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        status: 'active',
+        package_policies: [{ id: 'policy-1', name: 'fleet_server-1' }],
+      },
+    });
   });
 
   it('should edit package policy', () => {
