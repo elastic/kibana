@@ -206,9 +206,11 @@ describe('custom-events', () => {
         myTest: 'abc',
       });
 
+      /* eslint-disable @typescript-eslint/naming-convention */
       expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
         myTest_str: 'abc',
       });
+      /* eslint-enable @typescript-eslint/naming-convention */
     });
 
     test('works for a string array', () => {
