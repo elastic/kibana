@@ -7,7 +7,9 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const configSchema = schema.object({});
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
 
 export type MonitoringCollectionConfig = ReturnType<typeof createConfig>;
 export function createConfig(config: TypeOf<typeof configSchema>) {

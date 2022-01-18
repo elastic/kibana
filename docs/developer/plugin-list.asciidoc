@@ -516,6 +516,10 @@ Elastic.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection[monitoringCollection]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
