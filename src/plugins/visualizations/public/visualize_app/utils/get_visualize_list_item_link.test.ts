@@ -9,8 +9,8 @@
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { ApplicationStart } from 'kibana/public';
 import { createHashHistory } from 'history';
+import { FilterStateStore } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
-import { esFilters } from '../../../../data/public';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
 
 jest.mock('../../services', () => {
@@ -104,7 +104,7 @@ describe('listing item link is correct for each app', () => {
           },
           query: { query: 'q1' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ];
