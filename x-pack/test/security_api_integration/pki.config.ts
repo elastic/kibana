@@ -65,6 +65,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--xpack.security.authc.providers=${JSON.stringify(['pki', 'basic'])}`,
+        `--logging.loggers=${JSON.stringify([
+          { name: 'plugins.security', appenders: ['console'], level: 'debug' },
+        ])}`,
       ],
     },
   };
