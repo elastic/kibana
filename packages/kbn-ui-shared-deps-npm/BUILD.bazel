@@ -30,7 +30,6 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/elastic-datemath",
-  "//packages/kbn-custom-events",
   "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
@@ -70,7 +69,6 @@ WEBPACK_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-custom-events",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
