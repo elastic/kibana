@@ -1,7 +1,7 @@
 {
   "id": "security_linux_v3",
   "title": "Security: Linux v3",
-  "description": "Security: Linux v3. Version 3 of the Linux Security Machine Learning Module, released in 2022, this module is a replacement for the v2 Linux module. This module contains all shipping ML jobs for Linux host based threat hunting and detection. Any ECS (Elastic Common Schema) compatable Linux events can be used by this module.",
+  "description": "Contains all shipping ML jobs for Linux host-based threat hunting and detection. Any ECS-compatible Linux events can be used by the jobs.",
   "type": "linux data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*,logs-*",
