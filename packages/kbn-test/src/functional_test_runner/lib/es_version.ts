@@ -18,10 +18,10 @@ export class EsVersion {
       if (!match) {
         throw new Error('unable to extract es version from ES_SNAPSHOT_MANIFEST_URL');
       }
-      return match[0];
+      return new EsVersion(match[0]);
     }
 
-    return process.env.TEST_ES_BRANCH || kibanaPackageJson.version;
+    return new EsVersion(process.env.TEST_ES_BRANCH || kibanaPackageJson.version);
   }
 
   public readonly parsed: semver.SemVer;
