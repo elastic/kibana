@@ -97,6 +97,7 @@ export const triggerVisualizeToLensOptions = async (
       metrics: [...metricsArray],
       timeInterval: model.interval || 'auto',
       format: SUPPORTED_FORMATTERS.includes(layer.formatter) ? layer.formatter : undefined,
+      ...(layer.label && { label: layer.label }),
     };
     options[layerIdx] = triggerOptions;
   }

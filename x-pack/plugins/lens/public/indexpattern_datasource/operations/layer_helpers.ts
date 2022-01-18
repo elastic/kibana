@@ -1126,6 +1126,29 @@ export function getMetricOperationTypes(field: IndexPatternField) {
   });
 }
 
+export function updateColumnLabel<C extends GenericIndexPatternColumn>({
+  layer,
+  columnId,
+  customLabel,
+}: {
+  layer: IndexPatternLayer;
+  columnId: string;
+  customLabel: string;
+}): IndexPatternLayer {
+  const oldColumn = layer.columns[columnId];
+  return {
+    ...layer,
+    columns: {
+      ...layer.columns,
+      [columnId]: {
+        ...oldColumn,
+        label: customLabel ? customLabel : oldColumn.label,
+        customLabel: Boolean(customLabel),
+      },
+    } as Record<string, GenericIndexPatternColumn>,
+  };
+}
+
 export function updateColumnParam<C extends GenericIndexPatternColumn>({
   layer,
   columnId,
@@ -1530,8 +1553,15 @@ export function getManagedColumnsFrom(
 export function computeLayerFromContext(
   isLast: boolean,
   metricsArray: VisualizeEditorLayersContext['metrics'],
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  format?: string,
+  customLabel?: string
 ): IndexPatternLayer {
+  let layer: IndexPatternLayer = {
+    indexPatternId: indexPattern.id,
+    columns: {},
+    columnOrder: [],
+  };
   if (isArray(metricsArray)) {
     const firstElement = metricsArray.shift();
     const field = firstElement
@@ -1557,29 +1587,55 @@ export function computeLayerFromContext(
           ...firstElement?.params,
         },
       };
-      return firstElement?.params?.formula
+      layer = firstElement?.params?.formula
         ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
             indexPattern,
           }).layer
         : tempLayer;
+    } else {
+      layer = insertNewColumn({
+        op: operation as OperationType,
+        layer: isLast
+          ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
+          : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
+        columnId: generateId(),
+        field: !firstElement?.isFullReference ? field ?? documentField : undefined,
+        columnParams: firstElement?.params ?? undefined,
+        incompleteFieldName: firstElement?.isFullReference ? field?.name : undefined,
+        incompleteFieldOperation: firstElement?.isFullReference
+          ? firstElement?.pipelineAggType
+          : undefined,
+        indexPattern,
+        visualizationGroups: [],
+      });
     }
-    return insertNewColumn({
-      op: operation as OperationType,
-      layer: isLast
-        ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
-        : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
-      columnId: generateId(),
-      field: !firstElement?.isFullReference ? field ?? documentField : undefined,
-      columnParams: firstElement?.params ?? undefined,
-      incompleteFieldName: firstElement?.isFullReference ? field?.name : undefined,
-      incompleteFieldOperation: firstElement?.isFullReference
-        ? firstElement?.pipelineAggType
-        : undefined,
-      indexPattern,
-      visualizationGroups: [],
-    });
   }
-  return { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+
+  // update the layer with the custom label and the format
+  const columnIds = Object.keys(layer.columns);
+  columnIds.forEach((columnId) => {
+    if (format) {
+      layer = updateColumnParam({
+        layer,
+        columnId,
+        paramName: 'format',
+        value: {
+          id: format,
+          params: {
+            decimals: 2,
+          },
+        },
+      });
+    }
+    if (customLabel) {
+      layer = updateColumnLabel({
+        layer,
+        columnId,
+        customLabel,
+      });
+    }
+  });
+  return layer;
 }
 
 export function getSplitByTermsLayer(
@@ -1590,23 +1646,14 @@ export function getSplitByTermsLayer(
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval } = layer;
   const copyMetricsArray = [...metrics];
-  let computedLayer = computeLayerFromContext(metrics.length === 1, copyMetricsArray, indexPattern);
-  if (layer.format) {
-    const columnIds = Object.keys(computedLayer.columns);
-    columnIds.forEach((columnId) => {
-      computedLayer = updateColumnParam({
-        layer: computedLayer,
-        columnId,
-        paramName: 'format',
-        value: {
-          id: layer.format,
-          params: {
-            decimals: 2,
-          },
-        },
-      });
-    });
-  }
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern,
+    layer.format,
+    layer.label
+  );
+
   return insertNewColumn({
     op: 'terms',
     layer: insertNewColumn({
@@ -1646,23 +1693,13 @@ export function getSplitByFiltersLayer(
     };
   });
   const copyMetricsArray = [...metrics];
-  let computedLayer = computeLayerFromContext(metrics.length === 1, copyMetricsArray, indexPattern);
-  if (layer.format) {
-    const columnIds = Object.keys(computedLayer.columns);
-    columnIds.forEach((columnId) => {
-      computedLayer = updateColumnParam({
-        layer: computedLayer,
-        columnId,
-        paramName: 'format',
-        value: {
-          id: layer.format,
-          params: {
-            decimals: 2,
-          },
-        },
-      });
-    });
-  }
+  const computedLayer = computeLayerFromContext(
+    metrics.length === 1,
+    copyMetricsArray,
+    indexPattern,
+    layer.format,
+    layer.label
+  );
   return insertNewColumn({
     op: 'filters',
     layer: insertNewColumn({

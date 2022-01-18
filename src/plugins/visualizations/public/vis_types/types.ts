@@ -103,6 +103,7 @@ export interface VisualizeEditorLayersContext {
   metrics: Metric[];
   timeInterval?: string;
   format?: string;
+  label?: string;
 }
 
 interface AxisExtents {
