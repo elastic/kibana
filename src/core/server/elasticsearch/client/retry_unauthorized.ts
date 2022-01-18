@@ -54,12 +54,11 @@ export type UnauthorizedErrorHandlerResult =
  */
 export interface UnauthorizedErrorHandlerToolkit {
   /**
-   * The handler cannot handle the error, or was not able to reauthenticate
-   * */
+   * The handler cannot handle the error, or was not able to authenticate.
+   */
   notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
   /**
-   * The handle was able to reauthenticate.
-   * @param params
+   * The handler was able to authenticate. Will retry the failed request with new auth headers
    */
   retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
 }

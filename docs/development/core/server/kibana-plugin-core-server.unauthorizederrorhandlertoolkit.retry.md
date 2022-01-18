@@ -4,7 +4,7 @@
 
 ## UnauthorizedErrorHandlerToolkit.retry property
 
-The handle was able to reauthenticate.
+The handler was able to authenticate. Will retry the failed request with new auth headers
 
 <b>Signature:</b>
 

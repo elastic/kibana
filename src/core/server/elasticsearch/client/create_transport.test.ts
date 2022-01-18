@@ -96,6 +96,25 @@ describe('createTransport', () => {
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
     });
 
+    it('does not mutate the arguments', async () => {
+      const transportClass = createTransportClass();
+      const constructorHeaders = { over: '9000', shared: 'from-constructor' };
+      const transport = new transportClass({
+        ...baseConstructorParams,
+        headers: constructorHeaders,
+      });
+
+      const requestParams = { method: 'GET', path: '/' };
+      const options = {
+        headers: { hello: 'dolly', shared: 'from-options' },
+      };
+
+      await transport.request(requestParams, options);
+
+      expect(requestParams).toEqual({ method: 'GET', path: '/' });
+      expect(options).toEqual({ headers: { hello: 'dolly', shared: 'from-options' } });
+    });
+
     describe('`meta` option', () => {
       it('adds `meta: true` to the options when not provided', async () => {
         const transportClass = createTransportClass();

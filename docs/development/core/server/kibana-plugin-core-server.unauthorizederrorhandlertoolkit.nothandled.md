@@ -4,7 +4,7 @@
 
 ## UnauthorizedErrorHandlerToolkit.notHandled property
 
-The handler cannot handle the error, or was not able to reauthenticate
+The handler cannot handle the error, or was not able to authenticate.
 
 <b>Signature:</b>
 
