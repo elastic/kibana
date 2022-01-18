@@ -20,7 +20,7 @@ GET _search
 
 `.trim();
 
-const LINE_NUMBER = 9;
+const LINE_NUMBER = 11;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
