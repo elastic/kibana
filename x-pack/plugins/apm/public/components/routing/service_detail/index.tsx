@@ -27,6 +27,7 @@ import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
+import { InfraOverview } from '../../app/infra_overview';
 
 function page<TPath extends string>({
   path,
@@ -264,6 +265,17 @@ export const serviceDetail = {
         defaultMessage: 'Profiling',
       }),
       element: <ServiceProfiling />,
+    }),
+    page({
+      path: '/services/{serviceName}/infra',
+      tab: 'infra',
+      title: i18n.translate('xpack.apm.views.infra.title', {
+        defaultMessage: 'Infrastructure',
+      }),
+      element: <InfraOverview />,
+      searchBarOptions: {
+        hidden: true,
+      },
     }),
     {
       path: '/services/{serviceName}/',
