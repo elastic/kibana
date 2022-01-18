@@ -10,17 +10,12 @@ import type {
   CreateExceptionListSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { FtrService } from '../../functional/ftr_provider_context';
 import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/trusted_apps/constants';
 import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
-import { ConditionEntryField } from '../../../plugins/security_solution/common/endpoint/types';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -83,16 +78,11 @@ export class EndpointArtifactsTestResources extends FtrService {
     };
   }
 
-  async createTrustedApp(): Promise<ArtifactTestData> {
+  async createTrustedApp(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData> {
     await this.ensureListExists(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION);
-    const trustedApp = this.exceptionsGenerator.generateForCreate({
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-    });
-
-    // Remove the hash field whihc the generator currently still sets to a field that is not actually valid when used with the Exception List
-    trustedApp.entries = trustedApp.entries.filter(
-      (entry) => entry.field !== ConditionEntryField.HASH
-    );
+    const trustedApp = this.exceptionsGenerator.generateTrustedAppForCreate(overrides);
 
     return this.createExceptionItem(trustedApp);
   }

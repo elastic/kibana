@@ -105,6 +105,28 @@ const entriesSchemaOptions = {
   },
 };
 
+// FIXME:PT validation for signer needs to be improved to validate `nexted` field
+//  [
+//     {
+//         "field": "process.Ext.code_signature",
+//         "entries": [
+//             {
+//                 "field": "trusted",
+//                 "value": "true",
+//                 "type": "match",
+//                 "operator": "included"
+//             },
+//             {
+//                 "field": "subject_name",
+//                 "value": "dfdfd",
+//                 "type": "match",
+//                 "operator": "included"
+//             }
+//         ],
+//         "type": "nested"
+//     }
+//   ]
+
 /*
  * Entities array schema depending on Os type using schema.conditional.
  * If OS === WINDOWS then use Windows schema,
