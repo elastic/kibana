@@ -20,6 +20,7 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
+import { initUiSettings } from './uiSettings';
 
 export class CspPlugin
   implements
@@ -43,6 +44,7 @@ export class CspPlugin
     const router = core.http.createRouter();
 
     defineRoutes(router);
+    initUiSettings(core.uiSettings);
 
     return {};
   }

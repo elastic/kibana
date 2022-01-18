@@ -12,8 +12,9 @@ import type {
   CspClientPluginSetupDeps,
   CspClientPluginStartDeps,
 } from './types';
-import { AppNavLinkStatus, AppStatus } from '../../../../src/core/public';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { ENABLE_CSP } from '../server/constants';
 
 export class CspPlugin
   implements
@@ -29,12 +30,13 @@ export class CspPlugin
     plugins: CspClientPluginSetup
   ): CspClientPluginSetup {
     // Register an application into the side navigation menu
+    const cspEnabled: boolean = core.uiSettings.get(ENABLE_CSP);
+    if (!cspEnabled) return {};
 
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      category: DEFAULT_APP_CATEGORIES.security,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application/index');

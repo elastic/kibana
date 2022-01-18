@@ -7,3 +7,7 @@
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
+export const SECURITY_SOLUTION_APP_ID = 'securitySolution';
+
+/** This Kibana Advanced Setting enables the `Cloud Security Posture` beta feature */
+export const ENABLE_CSP = 'securitySolution:enableCloudSecurityPosture' as const;
