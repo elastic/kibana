@@ -40,6 +40,11 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.uptime.unsafe.service.manifestUrl=http://test.com',
         '--xpack.uptime.unsafe.service.username=localKibanaIntegrationTestsUser',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
+        '--xpack.task_manager.monitored_stats_health_verbose_log.enabled=true',
+        `--logging.loggers=${JSON.stringify([
+          { name: 'plugins.security', appenders: ['console'], level: 'debug' },
+          { name: 'plugins.taskManager', appenders: ['console'], level: 'warn' },
+        ])}`,
       ],
     },
     esTestCluster: {
