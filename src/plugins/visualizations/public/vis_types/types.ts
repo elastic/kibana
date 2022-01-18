@@ -102,6 +102,7 @@ export interface VisualizeEditorLayersContext {
   palette?: PaletteOutput;
   metrics: Metric[];
   timeInterval?: string;
+  format?: string;
 }
 
 interface AxisExtents {

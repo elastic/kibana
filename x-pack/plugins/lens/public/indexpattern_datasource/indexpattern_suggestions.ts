@@ -26,6 +26,7 @@ import {
   getSplitByFiltersLayer,
   computeLayerFromContext,
   hasTermsWithManyBuckets,
+  updateColumnParam,
 } from './operations';
 import { hasField } from './pure_utils';
 import type {
@@ -189,11 +190,27 @@ function createNewLayerWithMetricAggregationFromVizEditor(
     return getSplitByFiltersLayer(indexPattern, dateField, layer);
   } else {
     const copyMetricsArray = [...metrics];
-    const computedLayer = computeLayerFromContext(
+    let computedLayer = computeLayerFromContext(
       metrics.length === 1,
       copyMetricsArray,
       indexPattern
     );
+    if (layer.format) {
+      const columnIds = Object.keys(computedLayer.columns);
+      columnIds.forEach((columnId) => {
+        computedLayer = updateColumnParam({
+          layer: computedLayer,
+          columnId,
+          paramName: 'format',
+          value: {
+            id: layer.format,
+            params: {
+              decimals: 2,
+            },
+          },
+        });
+      });
+    }
 
     return insertNewColumn({
       op: 'date_histogram',

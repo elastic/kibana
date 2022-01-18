@@ -1590,11 +1590,23 @@ export function getSplitByTermsLayer(
 ): IndexPatternLayer {
   const { termsParams, metrics, timeInterval } = layer;
   const copyMetricsArray = [...metrics];
-  const computedLayer = computeLayerFromContext(
-    metrics.length === 1,
-    copyMetricsArray,
-    indexPattern
-  );
+  let computedLayer = computeLayerFromContext(metrics.length === 1, copyMetricsArray, indexPattern);
+  if (layer.format) {
+    const columnIds = Object.keys(computedLayer.columns);
+    columnIds.forEach((columnId) => {
+      computedLayer = updateColumnParam({
+        layer: computedLayer,
+        columnId,
+        paramName: 'format',
+        value: {
+          id: layer.format,
+          params: {
+            decimals: 2,
+          },
+        },
+      });
+    });
+  }
   return insertNewColumn({
     op: 'terms',
     layer: insertNewColumn({
@@ -1634,11 +1646,23 @@ export function getSplitByFiltersLayer(
     };
   });
   const copyMetricsArray = [...metrics];
-  const computedLayer = computeLayerFromContext(
-    metrics.length === 1,
-    copyMetricsArray,
-    indexPattern
-  );
+  let computedLayer = computeLayerFromContext(metrics.length === 1, copyMetricsArray, indexPattern);
+  if (layer.format) {
+    const columnIds = Object.keys(computedLayer.columns);
+    columnIds.forEach((columnId) => {
+      computedLayer = updateColumnParam({
+        layer: computedLayer,
+        columnId,
+        paramName: 'format',
+        value: {
+          id: layer.format,
+          params: {
+            decimals: 2,
+          },
+        },
+      });
+    });
+  }
   return insertNewColumn({
     op: 'filters',
     layer: insertNewColumn({

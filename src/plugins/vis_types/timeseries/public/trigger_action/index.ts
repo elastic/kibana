@@ -16,12 +16,13 @@ import { getDataSourceInfo } from './get_datasource_info';
 import { getSeries } from './get_series';
 import { getYExtents } from './get_extents';
 
+const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
+
 /*
  * This function is used to convert the TSVB model to compatible Lens model.
  * Returns the Lens model, only if it is supported. If not, it returns null.
  * In case of null, the menu item is disabled and the user can't navigate to Lens.
  */
-
 export const triggerVisualizeToLensOptions = async (
   model: Panel
 ): Promise<NavigateToLensOptions | null> => {
@@ -95,6 +96,7 @@ export const triggerVisualizeToLensOptions = async (
       }),
       metrics: [...metricsArray],
       timeInterval: model.interval || 'auto',
+      format: SUPPORTED_FORMATTERS.includes(layer.formatter) ? layer.formatter : undefined,
     };
     options[layerIdx] = triggerOptions;
   }
