@@ -1546,22 +1546,21 @@ export function computeLayerFromContext(
         'managedReference'
       >;
       const tempLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
-      const newColumn = operationDefinition.buildColumn(
-        {
-          indexPattern,
-          layer: tempLayer,
+      let newColumn = operationDefinition.buildColumn({
+        indexPattern,
+        layer: tempLayer,
+      }) as FormulaIndexPatternColumn;
+      newColumn = {
+        ...newColumn,
+        params: {
+          ...newColumn.params,
+          ...firstElement?.params,
         },
-        firstElement?.params
-      ) as FormulaIndexPatternColumn;
+      };
       return firstElement?.params?.formula
-        ? regenerateLayerFromAst(
-            firstElement?.params?.formula as string,
-            tempLayer,
-            generateId(),
-            newColumn,
+        ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
             indexPattern,
-            operationDefinitionMap
-          ).newLayer
+          }).layer
         : tempLayer;
     }
     return insertNewColumn({
