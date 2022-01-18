@@ -13,16 +13,16 @@ import { useHistory } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { ApmMainTemplate } from './apm_main_template';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
+import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
     | 'agent-configurations'
+    | 'agent-keys'
     | 'anomaly-detection'
     | 'apm-indices'
-    | 'customize-ui'
-    | 'schema'
-    | 'agent-keys';
+    | 'custom-links'
+    | 'schema';
   hidden?: boolean;
 };
 
@@ -77,6 +77,17 @@ function getTabs({
       }),
     },
     {
+      key: 'agent-keys',
+      label: i18n.translate('xpack.apm.settings.agentKeys', {
+        defaultMessage: 'Agent Keys',
+      }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/agent-keys`,
+        search,
+      }),
+    },
+    {
       key: 'anomaly-detection',
       label: i18n.translate('xpack.apm.settings.anomalyDetection', {
         defaultMessage: 'Anomaly detection',
@@ -89,13 +100,13 @@ function getTabs({
       hidden: !canAccessML,
     },
     {
-      key: 'customize-ui',
+      key: 'custom-links',
       label: i18n.translate('xpack.apm.settings.customizeApp', {
-        defaultMessage: 'Customize app',
+        defaultMessage: 'Custom Links',
       }),
       href: getLegacyApmHref({
         basePath,
-        path: `/settings/customize-ui`,
+        path: `/settings/custom-links`,
         search,
       }),
     },
@@ -116,17 +127,6 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
-    },
-    {
-      key: 'agent-keys',
-      label: i18n.translate('xpack.apm.settings.agentKeys', {
-        defaultMessage: 'Agent Keys',
-      }),
-      href: getLegacyApmHref({
-        basePath,
-        path: `/settings/agent-keys`,
-        search,
-      }),
     },
   ];
 

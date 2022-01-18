@@ -110,6 +110,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           <AdvancedAgentAuthenticationSettings
             selectedApiKeyId={props.selectedApiKeyId}
             onKeyChange={props.onKeyChange}
+            initialAuthenticationSettingsOpen={!props.selectedApiKeyId}
             agentPolicyId={selectedAgentPolicyId}
           />
         </>

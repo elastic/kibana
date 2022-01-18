@@ -129,68 +129,6 @@ Object {
     "available": Object {
       "type": "boolean",
     },
-    "browser_type": Object {
-      "type": "keyword",
-    },
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": Object {
-          "type": "long",
-        },
-        "dashboard": Object {
-          "type": "long",
-        },
-        "search": Object {
-          "type": "long",
-        },
-        "visualization": Object {
-          "type": "long",
-        },
-      },
-      "available": Object {
-        "type": "boolean",
-      },
-      "deprecated": Object {
-        "type": "long",
-      },
-      "layout": Object {
-        "canvas": Object {
-          "type": "long",
-        },
-        "preserve_layout": Object {
-          "type": "long",
-        },
-        "print": Object {
-          "type": "long",
-        },
-      },
-      "sizes": Object {
-        "1.0": Object {
-          "type": "long",
-        },
-        "25.0": Object {
-          "type": "long",
-        },
-        "5.0": Object {
-          "type": "long",
-        },
-        "50.0": Object {
-          "type": "long",
-        },
-        "75.0": Object {
-          "type": "long",
-        },
-        "95.0": Object {
-          "type": "long",
-        },
-        "99.0": Object {
-          "type": "long",
-        },
-      },
-      "total": Object {
-        "type": "long",
-      },
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": Object {
@@ -433,65 +371,6 @@ Object {
       },
       "_all": Object {
         "type": "long",
-      },
-      "csv": Object {
-        "app": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
-        "available": Object {
-          "type": "boolean",
-        },
-        "deprecated": Object {
-          "type": "long",
-        },
-        "layout": Object {
-          "canvas": Object {
-            "type": "long",
-          },
-          "preserve_layout": Object {
-            "type": "long",
-          },
-          "print": Object {
-            "type": "long",
-          },
-        },
-        "sizes": Object {
-          "1.0": Object {
-            "type": "long",
-          },
-          "25.0": Object {
-            "type": "long",
-          },
-          "5.0": Object {
-            "type": "long",
-          },
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "total": Object {
-          "type": "long",
-        },
       },
       "csv_searchsource": Object {
         "app": Object {
@@ -799,20 +678,6 @@ Object {
               "type": "long",
             },
           },
-          "csv": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
           "csv_searchsource": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -886,20 +751,6 @@ Object {
             },
           },
           "PNGV2": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
-          "csv": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -999,20 +850,6 @@ Object {
               "type": "long",
             },
           },
-          "csv": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
           "csv_searchsource": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1099,20 +936,6 @@ Object {
               "type": "long",
             },
           },
-          "csv": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
           "csv_searchsource": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1186,20 +1009,6 @@ Object {
             },
           },
           "PNGV2": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
-          "csv": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -1460,20 +1269,6 @@ Object {
             "type": "long",
           },
         },
-        "csv": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "csv_searchsource": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1547,20 +1342,6 @@ Object {
           },
         },
         "PNGV2": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
-        "csv": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -1660,20 +1441,6 @@ Object {
             "type": "long",
           },
         },
-        "csv": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "csv_searchsource": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1760,20 +1527,6 @@ Object {
             "type": "long",
           },
         },
-        "csv": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "csv_searchsource": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1847,20 +1600,6 @@ Object {
           },
         },
         "PNGV2": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
-        "csv": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -1973,8 +1712,7 @@ Object {
   },
   "_all": 9,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
+  "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
@@ -1990,23 +1728,6 @@ Object {
     },
     "output_size": undefined,
     "total": 4,
-  },
-  "csv_searchsource": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "output_size": undefined,
-    "total": 5,
   },
   "csv_searchsource_immediate": Object {
     "app": Object {
@@ -2059,7 +1780,7 @@ Object {
       "total": 0,
     },
     "_all": 9,
-    "csv": Object {
+    "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
@@ -2075,23 +1796,6 @@ Object {
       },
       "output_size": undefined,
       "total": 4,
-    },
-    "csv_searchsource": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "output_size": undefined,
-      "total": 5,
     },
     "csv_searchsource_immediate": Object {
       "app": Object {
@@ -2148,11 +1852,8 @@ Object {
     },
     "statuses": Object {
       "completed": Object {
-        "csv": Object {
-          "search": 4,
-        },
         "csv_searchsource": Object {
-          "search": 5,
+          "search": 4,
         },
       },
     },
@@ -2196,11 +1897,8 @@ Object {
   },
   "statuses": Object {
     "completed": Object {
-      "csv": Object {
-        "search": 4,
-      },
       "csv_searchsource": Object {
-        "search": 5,
+        "search": 4,
       },
     },
   },
@@ -2243,23 +1941,6 @@ Object {
   },
   "_all": 0,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "total": 0,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2327,22 +2008,6 @@ Object {
       "total": 0,
     },
     "_all": 0,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2492,24 +2157,6 @@ Object {
   },
   "_all": 4,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 1,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "output_size": undefined,
-    "total": 1,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2524,7 +2171,8 @@ Object {
       "preserve_layout": 0,
       "print": 0,
     },
-    "total": 0,
+    "output_size": undefined,
+    "total": 1,
   },
   "csv_searchsource_immediate": Object {
     "app": Object {
@@ -2578,23 +2226,6 @@ Object {
       "total": 0,
     },
     "_all": 4,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 1,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "output_size": undefined,
-      "total": 1,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2609,7 +2240,8 @@ Object {
         "preserve_layout": 0,
         "print": 0,
       },
-      "total": 0,
+      "output_size": undefined,
+      "total": 1,
     },
     "csv_searchsource_immediate": Object {
       "app": Object {
@@ -2670,7 +2302,7 @@ Object {
         "PNG": Object {
           "dashboard": 1,
         },
-        "csv": Object {},
+        "csv_searchsource": Object {},
         "printable_pdf": Object {
           "canvas workpad": 1,
           "dashboard": 1,
@@ -2721,7 +2353,7 @@ Object {
       "PNG": Object {
         "dashboard": 1,
       },
-      "csv": Object {},
+      "csv_searchsource": Object {},
       "printable_pdf": Object {
         "canvas workpad": 1,
         "dashboard": 1,
@@ -2768,24 +2400,6 @@ Object {
   },
   "_all": 11,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 1,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "output_size": undefined,
-    "total": 1,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2801,7 +2415,7 @@ Object {
       "print": 0,
     },
     "output_size": undefined,
-    "total": 3,
+    "total": 1,
   },
   "csv_searchsource_immediate": Object {
     "app": Object {
@@ -2854,22 +2468,6 @@ Object {
       "total": 0,
     },
     "_all": 0,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2983,11 +2581,8 @@ Object {
   },
   "statuses": Object {
     "completed": Object {
-      "csv": Object {
-        "search": 1,
-      },
       "csv_searchsource": Object {
-        "search": 3,
+        "search": 1,
       },
       "printable_pdf": Object {
         "dashboard": 2,

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
+import { docLinks } from '../../../../../shared/doc_links';
 import { LEARN_MORE_LINK } from '../../constants';
 
 import {
@@ -42,7 +42,7 @@ export const DocumentPermissionsField: React.FC<Props> = ({
   setValue,
 }) => {
   const whichDocsLink = (
-    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+    <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
       {CONNECT_WHICH_OPTION_LINK}
     </EuiLink>
   );
@@ -64,7 +64,7 @@ export const DocumentPermissionsField: React.FC<Props> = ({
                 defaultMessage="Document-level permissions are not yet available for this source. {link}"
                 values={{
                   link: (
-                    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                    <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
                       {LEARN_MORE_LINK}
                     </EuiLink>
                   ),

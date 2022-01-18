@@ -6,3 +6,5 @@
  */
 
 export * from './uptime.journey';
+export * from './step_duration.journey';
+export * from './alerts';

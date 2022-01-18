@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -15,11 +16,10 @@ import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
-import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
 const validateKuery = (expression: string) => {
   try {
-    esKuery.fromKueryExpression(expression);
+    fromKueryExpression(expression);
   } catch (err) {
     return false;
   }
@@ -30,7 +30,7 @@ export const DEFAULT_WAFFLE_FILTERS_STATE: WaffleFiltersState = { kind: 'kuery',
 
 export const useWaffleFilters = () => {
   const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern('metrics');
+  const indexPattern = createDerivedIndexPattern();
 
   const [urlState, setUrlState] = useUrlState<WaffleFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,

@@ -30,6 +30,8 @@ const props = {
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
   timelineId: 'detections-page',
+  title: '',
+  goToTable: jest.fn(),
 };
 
 describe('AlertSummaryView', () => {
@@ -83,7 +85,7 @@ describe('AlertSummaryView', () => {
       expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
-  test.skip('Memory event code renders additional summary rows', () => {
+  test('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -105,7 +107,7 @@ describe('AlertSummaryView', () => {
     );
     expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
   });
-  test.skip('Behavior event code renders additional summary rows', () => {
+  test('Behavior event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {

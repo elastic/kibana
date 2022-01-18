@@ -21,6 +21,12 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
+}));
+
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
   const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
   return {

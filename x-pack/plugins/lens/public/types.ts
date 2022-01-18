@@ -217,6 +217,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceDimensionDropProps<T> & {
       groupId: string;
       dragging: DragContextState['dragging'];
+      prioritizedOperation?: string;
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
@@ -288,6 +289,15 @@ export interface Datasource<T = unknown, P = unknown> {
    * Given the current state layer and a columnId will verify if the column configuration has errors
    */
   isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
+  /**
+   * Are these datasources equivalent?
+   */
+  isEqual: (
+    persistableState1: P,
+    references1: SavedObjectReference[],
+    persistableState2: P,
+    references2: SavedObjectReference[]
+  ) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -302,6 +312,10 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
+  /**
+   * Collect all default visual values given the current state
+   */
+  getVisualDefaults: () => Record<string, Record<string, unknown>>;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -338,6 +352,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
 };
@@ -431,6 +446,8 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
+
+  isStaticValue?: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -475,6 +492,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   required?: boolean;
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
+  prioritizedOperation?: string;
+  suggestedValue?: () => number | undefined;
 
   /**
    * When the dimension editor is enabled for this group, all dimensions in the group

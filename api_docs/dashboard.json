@@ -70,9 +70,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "presentationUtil",
+                "pluginId": "controls",
                 "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
+                "docId": "kibControlsPluginApi",
                 "section": "def-public.ControlGroupContainer",
                 "text": "ControlGroupContainer"
               },
@@ -189,9 +189,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "presentationUtil",
+                    "pluginId": "controls",
                     "scope": "public",
-                    "docId": "kibPresentationUtilPluginApi",
+                    "docId": "kibControlsPluginApi",
                     "section": "def-public.ControlGroupContainer",
                     "text": "ControlGroupContainer"
                   },
@@ -1369,13 +1369,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
@@ -1630,7 +1624,25 @@
             "label": "searchSource",
             "description": [],
             "signature": [
-              "{ history: Record<string, any>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+              "{ create: () => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSource",
+                "text": "SearchSource"
+              },
+              "; history: ",
+              "SearchRequest",
+              "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              },
+              ">(field: K, value: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1646,7 +1658,15 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; removeField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "; removeField: <K extends keyof ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              },
+              ">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1678,7 +1698,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "; getField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+              "; getField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1686,7 +1706,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getOwnField: <K extends \"sort\" | \"version\" | \"type\" | \"query\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"from\" | \"size\" | \"source\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              ">(field: K, recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1694,15 +1714,23 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; create: () => ",
+              "[K]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
               },
-              "; createCopy: () => ",
+              ">(field: K) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
+              },
+              "[K]; createCopy: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1718,15 +1746,15 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; setParent: (parent?: Pick<",
+              "; setParent: (parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
               },
-              ", \"history\" | \"setOverwriteDataViewType\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"create\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined, options?: ",
+              " | undefined, options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1770,7 +1798,9 @@
               },
               "<",
               "SearchResponse",
-              "<any>>>; fetch: (options?: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1780,7 +1810,9 @@
               },
               ") => Promise<",
               "SearchResponse",
-              "<any>>; onRequestStart: (handler: (searchSource: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; onRequestStart: (handler: (searchSource: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1801,8 +1833,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
@@ -1820,13 +1852,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              }
+              "Query"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false,
@@ -1842,13 +1868,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
@@ -1920,7 +1940,9 @@
             "label": "controlGroupInput",
             "description": [],
             "signature": [
-              "{ controlStyle?: \"twoLine\" | \"oneLine\" | undefined; panelsJSON?: string | undefined; } | undefined"
+              "{ controlStyle?: ",
+              "ControlStyle",
+              " | undefined; panelsJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false
@@ -2010,13 +2032,7 @@
               "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "path": "src/plugins/dashboard/public/url_generator.ts",
@@ -2032,13 +2048,7 @@
               "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/url_generator.ts",
@@ -2238,21 +2248,9 @@
             "text": "RefreshInterval"
           },
           " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "Filter",
           "[] | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
+          "Query",
           " | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; viewMode?: ",
           {
             "pluginId": "embeddable",
@@ -2316,7 +2314,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"panelIndex\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"type\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2360,6 +2358,16 @@
             "type": "string",
             "tags": [],
             "label": "VIEW_DASHBOARD_URL",
+            "description": [],
+            "path": "src/plugins/dashboard/public/dashboard_constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardConstants.PRINT_DASHBOARD_URL",
+            "type": "string",
+            "tags": [],
+            "label": "PRINT_DASHBOARD_URL",
             "description": [],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
             "deprecated": false
@@ -2548,10 +2556,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/public/overview/containers/overview_risky_host_links/use_risky_hosts_dashboard_links.tsx"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx"
             }
           ]
         },
@@ -2610,22 +2614,16 @@
         "label": "findByValueEmbeddables",
         "description": [],
         "signature": [
-          "(savedObjectClient: Pick<Pick<",
+          "(savedObjectClient: Pick<",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsRepository",
-            "text": "SavedObjectsRepository"
+            "section": "def-server.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
           },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
-            "text": "Serializable"
-          },
+          ", \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
+          "Serializable",
           "; }[]>"
         ],
         "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -2639,15 +2637,15 @@
             "label": "savedObjectClient",
             "description": [],
             "signature": [
-              "Pick<Pick<",
+              "Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
+              ", \"find\">"
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
             "deprecated": false,
@@ -2720,9 +2718,9 @@
           "RawSavedDashboardPanel610",
           " | ",
           "RawSavedDashboardPanel620",
-          " | Pick<",
-          "RawSavedDashboardPanel620",
-          ", \"panelIndex\" | \"name\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\"> | ",
+          " | ",
+          "RawSavedDashboardPanel640To720",
+          " | ",
           {
             "pluginId": "dashboard",
             "scope": "common",
@@ -2755,13 +2753,7 @@
             "text": "SavedDashboardPanel630"
           },
           ")[], version: string, useMargins: boolean, uiState: { [key: string]: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           "; } | undefined) => ",
           {
             "pluginId": "dashboard",
@@ -2789,9 +2781,9 @@
               "RawSavedDashboardPanel610",
               " | ",
               "RawSavedDashboardPanel620",
-              " | Pick<",
-              "RawSavedDashboardPanel620",
-              ", \"panelIndex\" | \"name\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\"> | ",
+              " | ",
+              "RawSavedDashboardPanel640To720",
+              " | ",
               {
                 "pluginId": "dashboard",
                 "scope": "common",
@@ -2876,13 +2868,7 @@
                 "description": [],
                 "signature": [
                   "[key: string]:  ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "server",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
-                  }
+                  "SerializableRecord"
                 ],
                 "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
                 "deprecated": false
@@ -3029,9 +3015,9 @@
         "label": "RawSavedDashboardPanel730ToLatest",
         "description": [],
         "signature": [
-          "Pick<Pick<",
-          "RawSavedDashboardPanel620",
-          ", \"panelIndex\" | \"name\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\">, \"panelIndex\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
+          "Pick<",
+          "RawSavedDashboardPanel640To720",
+          ", \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly type?: string | undefined; readonly name?: string | undefined; panelIndex: string; panelRefName?: string | undefined; }"
         ],
         "path": "src/plugins/dashboard/common/bwc/types.ts",
         "deprecated": false,
@@ -3047,7 +3033,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel610",
-          ", \"columns\" | \"sort\" | \"panelIndex\" | \"title\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3063,7 +3049,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"columns\" | \"sort\" | \"panelIndex\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3079,7 +3065,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanel620",
-          ", \"columns\" | \"sort\" | \"panelIndex\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3093,9 +3079,9 @@
         "label": "SavedDashboardPanel640To720",
         "description": [],
         "signature": [
-          "Pick<Pick<",
-          "RawSavedDashboardPanel620",
-          ", \"panelIndex\" | \"name\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\">, \"panelIndex\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
+          "Pick<",
+          "RawSavedDashboardPanel640To720",
+          ", \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3117,7 +3103,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"panelIndex\" | \"title\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"type\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -3133,7 +3119,7 @@
         "signature": [
           "Pick<",
           "RawSavedDashboardPanelTo60",
-          ", \"columns\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\" | \"title\"> & { readonly id: string; readonly type: string; }"
+          ", \"columns\" | \"title\" | \"sort\" | \"size_x\" | \"size_y\" | \"row\" | \"col\" | \"panelIndex\"> & { readonly id: string; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,

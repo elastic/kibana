@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { padStart } from 'lodash';
-import { AlertType as RuleType } from '../../types';
+import { RuleType } from '../../types';
 import { parseDuration } from '../../../../alerting/common';
 
 export function formatMillisForDisplay(value: number | undefined) {

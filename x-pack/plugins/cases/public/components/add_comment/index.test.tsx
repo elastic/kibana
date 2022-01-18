@@ -12,7 +12,8 @@ import { noop } from 'lodash/fp';
 
 import { TestProviders } from '../../common/mock';
 
-import { CommentRequest, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { CommentRequest, CommentType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { usePostComment } from '../../containers/use_post_comment';
 import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';

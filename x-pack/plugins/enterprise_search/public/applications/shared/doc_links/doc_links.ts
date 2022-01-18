@@ -34,6 +34,7 @@ class DocLinks {
   public enterpriseSearchMailService: string;
   public enterpriseSearchUsersAccess: string;
   public licenseManagement: string;
+  public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
   public workplaceSearchConfluenceServer: string;
@@ -86,6 +87,7 @@ class DocLinks {
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchUsersAccess = '';
     this.licenseManagement = '';
+    this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
     this.workplaceSearchConfluenceServer = '';
@@ -139,6 +141,7 @@ class DocLinks {
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
     this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;

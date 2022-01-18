@@ -6,7 +6,7 @@
  */
 
 import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
-import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
+import { AlertsHealth, HealthStatus, RawRule, AlertExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
@@ -26,7 +26,7 @@ export const getHealth = async (
     },
   };
 
-  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
     type: 'alert',
@@ -44,7 +44,7 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
     fields: ['executionStatus'],
     type: 'alert',
@@ -62,7 +62,7 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
     fields: ['executionStatus'],
     type: 'alert',
@@ -80,7 +80,7 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+  const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: 'not alert.attributes.executionStatus.status:error',
     fields: ['executionStatus'],
     type: 'alert',

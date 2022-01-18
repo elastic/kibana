@@ -14,8 +14,8 @@ import {
 
 import {
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
 import {
@@ -505,15 +505,13 @@ describe('indicator match', () => {
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', getNewThreatIndicatorRule().name);
-        cy.get(ALERT_RULE_SEVERITY)
+        cy.get(ALERT_SEVERITY)
           .first()
           .should('have.text', getNewThreatIndicatorRule().severity.toLowerCase());
-        cy.get(ALERT_RULE_RISK_SCORE)
-          .first()
-          .should('have.text', getNewThreatIndicatorRule().riskScore);
+        cy.get(ALERT_RISK_SCORE).first().should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it.skip('Investigate alert in timeline', () => {
+      it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
@@ -542,7 +540,8 @@ describe('indicator match', () => {
             getNewThreatIndicatorRule().indicatorMappingField
           }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
             getNewThreatIndicatorRule().atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}`
+          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
+            ` byfeed.nameAbuseCH malware${accessibilityText}`
         );
       });
     });

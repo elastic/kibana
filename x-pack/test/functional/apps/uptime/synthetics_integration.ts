@@ -53,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
         name,
         type: monitorType,
+        enabled: true,
         processors: [
           {
             add_observer_metadata: {

@@ -14,5 +14,5 @@ export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
   path: API_URLS.SERVICE_LOCATIONS,
   validate: {},
   handler: async ({ server }): Promise<any> =>
-    getServiceLocations({ manifestUrl: server.config.service.manifestUrl }),
+    getServiceLocations({ manifestUrl: server.config.unsafe!.service.manifestUrl }),
 });

@@ -251,7 +251,7 @@
             "section": "def-public.ActionFactory",
             "text": "ActionFactory"
           },
-          "<Config, ExecutionContext, FactoryContext> implements Pick<",
+          "<Config, ExecutionContext, FactoryContext> implements Omit<",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -259,7 +259,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
+          "<FactoryContext>, \"getHref\">,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -762,7 +762,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(serializedAction: Pick<",
+              "(serializedAction: Omit<",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "common",
@@ -770,7 +770,7 @@
                 "section": "def-common.SerializedAction",
                 "text": "SerializedAction"
               },
-              "<Config>, \"name\" | \"config\">) => ",
+              "<Config>, \"factoryId\">) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -791,7 +791,7 @@
                 "label": "serializedAction",
                 "description": [],
                 "signature": [
-                  "Pick<",
+                  "Omit<",
                   {
                     "pluginId": "uiActionsEnhanced",
                     "scope": "common",
@@ -799,7 +799,7 @@
                     "section": "def-common.SerializedAction",
                     "text": "SerializedAction"
                   },
-                  "<Config>, \"name\" | \"config\">"
+                  "<Config>, \"factoryId\">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
@@ -839,9 +839,7 @@
                 "section": "def-common.SerializedEvent",
                 "text": "SerializedEvent"
               },
-              ", telemetryData: Record<string, ",
-              "PhraseFilterValue",
-              ">) => Record<string, any>"
+              ", telemetryData: Record<string, string | number | boolean>) => Record<string, any>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
@@ -874,9 +872,7 @@
                 "label": "telemetryData",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  "PhraseFilterValue",
-                  ">"
+                  "Record<string, string | number | boolean>"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
@@ -1582,13 +1578,7 @@
                 "text": "SerializedAction"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">, triggers: string[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1612,13 +1602,7 @@
                     "text": "SerializedAction"
                   },
                   "<",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "server",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1663,13 +1647,7 @@
                 "text": "SerializedAction"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">, triggers: string[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1709,13 +1687,7 @@
                     "text": "SerializedAction"
                   },
                   "<",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "server",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1896,13 +1868,7 @@
                 "text": "SerializedAction"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">; }[]>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
@@ -2275,7 +2241,7 @@
             "section": "def-public.ActionFactoryDefinition",
             "text": "ActionFactoryDefinition"
           },
-          "<Config, ExecutionContext, FactoryContext> extends Partial<Pick<",
+          "<Config, ExecutionContext, FactoryContext> extends Partial<Omit<",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -2283,7 +2249,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
+          "<FactoryContext>, \"getHref\">>,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -2379,7 +2345,7 @@
               "\nThis method should return a definition of a new action, normally used to\nregister it in `ui_actions` registry."
             ],
             "signature": [
-              "(serializedAction: Pick<",
+              "(serializedAction: Omit<",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "common",
@@ -2387,7 +2353,7 @@
                 "section": "def-common.SerializedAction",
                 "text": "SerializedAction"
               },
-              "<Config>, \"name\" | \"config\">) => ",
+              "<Config>, \"factoryId\">) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2408,7 +2374,7 @@
                 "label": "serializedAction",
                 "description": [],
                 "signature": [
-                  "Pick<",
+                  "Omit<",
                   {
                     "pluginId": "uiActionsEnhanced",
                     "scope": "common",
@@ -2416,7 +2382,7 @@
                     "section": "def-common.SerializedAction",
                     "text": "SerializedAction"
                   },
-                  "<Config>, \"name\" | \"config\">"
+                  "<Config>, \"factoryId\">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
                 "deprecated": false,
@@ -2619,7 +2585,7 @@
             "tags": [],
             "label": "CollectConfig",
             "description": [
-              "\n`UiComponent` that collections config for this drilldown. You can create\na React component and transform it `UiComponent` using `uiToReactComponent`\nhelper from `kibana_utils` plugin.\n\n```tsx\nimport React from 'react';\nimport { uiToReactComponent } from 'src/plugins/kibana_utils';\nimport { CollectConfigProps } from 'src/plugins/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nconst ReactCollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n\nexport const CollectConfig = uiToReactComponent(ReactCollectConfig);\n```"
+              "\n`UiComponent` that collects config for this drilldown. You can create\na React component and transform it `UiComponent` using `uiToReactComponent`\nhelper from `kibana_utils` plugin.\n\n```tsx\nimport React from 'react';\nimport { uiToReactComponent } from 'src/plugins/kibana_utils';\nimport { CollectConfigProps } from 'src/plugins/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nconst ReactCollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n\nexport const CollectConfig = uiToReactComponent(ReactCollectConfig);\n```"
             ],
             "signature": [
               "() => ",
@@ -3097,13 +3063,7 @@
                 "text": "ActionFactory"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ", object, ",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -3248,13 +3208,7 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3329,13 +3283,7 @@
             "text": "SerializedAction"
           },
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3373,15 +3321,15 @@
           "section": "def-public.SetupContract",
           "text": "SetupContract"
         },
-        " extends Pick<",
+        " extends ",
         {
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsService",
-          "text": "UiActionsService"
+          "section": "def-public.UiActionsSetup",
+          "text": "UiActionsSetup"
         },
-        ", \"addTriggerAction\" | \"attachAction\" | \"detachAction\" | \"registerAction\" | \"registerTrigger\" | \"unregisterAction\">,Pick<",
+        ",Pick<",
         "UiActionsServiceEnhancements",
         ", \"registerDrilldown\">"
       ],
@@ -3406,33 +3354,17 @@
           "section": "def-public.StartContract",
           "text": "StartContract"
         },
-        " extends Pick<",
+        " extends ",
         {
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsService",
-          "text": "UiActionsService"
+          "section": "def-public.UiActionsStart",
+          "text": "UiActionsStart"
         },
-        ", ",
-        {
-          "pluginId": "@kbn/utility-types",
-          "scope": "server",
-          "docId": "kibKbnUtilityTypesPluginApi",
-          "section": "def-server.MethodKeysOf",
-          "text": "MethodKeysOf"
-        },
-        "<",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsService",
-          "text": "UiActionsService"
-        },
-        ">>,Pick<",
+        ",Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
@@ -3835,13 +3767,7 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3902,13 +3828,7 @@
             "text": "SerializedAction"
           },
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -4022,13 +3942,7 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -4089,13 +4003,7 @@
             "text": "SerializedAction"
           },
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",

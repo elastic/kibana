@@ -9,7 +9,8 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
 import {
@@ -108,7 +109,9 @@ export async function runTests(options: RunTestsParams) {
 
         let es;
         try {
-          es = await runElasticsearch({ config, options: { ...options, log } });
+          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
+            es = await runElasticsearch({ config, options: { ...options, log } });
+          }
           await runKibanaServer({ procs, config, options });
           await runFtr({ configPath, options: { ...options, log } });
         } finally {

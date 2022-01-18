@@ -11,15 +11,15 @@ import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';
 import { xpackMocks } from '../fixtures';
-import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
+import { FleetStartContract, ExternalCallback } from '../../../fleet/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
   createArtifactsClientMock,
-  createFleetAuthzMock,
+  createMockPackageService,
 } from '../../../fleet/server/mocks';
-import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
+import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
   EndpointAppContextServiceSetupContract,
@@ -40,6 +40,11 @@ import { parseExperimentalConfigValue } from '../../common/experimental_features
 import { createCasesClientMock } from '../../../cases/server/client/mocks';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
+import { createFleetAuthzMock } from '../../../fleet/common';
+import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
+import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
+
+import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -61,6 +66,7 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
+  const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
   return {
     start: jest.fn(),
     stop: jest.fn(),
@@ -68,6 +74,8 @@ export const createMockEndpointAppContextService = (
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
+    getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
+    getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -134,17 +142,6 @@ export const createMockEndpointAppContextServiceStartContract =
   };
 
 /**
- * Create mock PackageService
- */
-
-export const createMockPackageService = (): jest.Mocked<PackageService> => {
-  return {
-    getInstallation: jest.fn(),
-    ensureInstalledPackage: jest.fn(),
-  };
-};
-
-/**
  * Creates a mock IndexPatternService for use in tests that need to interact with the Fleet's
  * ESIndexPatternService.
  *
@@ -166,7 +163,6 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
-    fetchFindLatestPackage: jest.fn().mockReturnValue('8.0.0'),
   };
 };
 
@@ -181,10 +177,13 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
 
 export function createRouteHandlerContext(
   dataClient: jest.Mocked<IScopedClusterClient>,
-  savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
+  savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
+  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ) {
-  const context =
-    xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  const context = requestContextMock.create(
+    createMockClients(),
+    overrides
+  ) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;

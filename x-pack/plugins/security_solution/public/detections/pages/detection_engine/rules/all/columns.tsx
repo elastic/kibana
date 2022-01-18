@@ -18,7 +18,7 @@ import { sum } from 'lodash';
 import React, { Dispatch } from 'react';
 
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
@@ -54,10 +54,7 @@ type HasReadActionsPrivileges =
       [x: string]: boolean;
     }>;
 
-export type TableItem = Rule & Partial<RuleStatus>;
-export type TableColumn = EuiBasicTableColumn<TableItem> | EuiTableActionsColumnType<TableItem>;
-
-const extractRuleFromRow = ({ current_status: _, failures, ...rule }: TableItem): Rule => rule;
+export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 export const getActions = (
   dispatch: React.Dispatch<RulesTableAction>,
@@ -78,9 +75,8 @@ export const getActions = (
       i18n.EDIT_RULE_SETTINGS
     ),
     icon: 'controlsHorizontal',
-    onClick: (rowItem: TableItem) => editRuleAction(rowItem.id, navigateToApp),
-    enabled: (rowItem: TableItem) =>
-      canEditRuleWithActions(extractRuleFromRow(rowItem), actionsPrivileges),
+    onClick: (rowItem: Rule) => editRuleAction(rowItem.id, navigateToApp),
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
     'data-test-subj': 'duplicateRuleAction',
@@ -93,10 +89,10 @@ export const getActions = (
     ) : (
       i18n.DUPLICATE_RULE
     ),
-    enabled: (rowItem: TableItem) => canEditRuleWithActions(rowItem, actionsPrivileges),
-    onClick: async (rowItem: TableItem) => {
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
+    onClick: async (rowItem: Rule) => {
       const createdRules = await duplicateRulesAction(
-        [extractRuleFromRow(rowItem)],
+        [rowItem],
         [rowItem.id],
         dispatch,
         dispatchToaster
@@ -127,10 +123,6 @@ export const getActions = (
   },
 ];
 
-export type EnhancedRuleStatus = RuleStatus & {
-  id: string;
-};
-
 interface GetColumnsProps {
   dispatch: React.Dispatch<RulesTableAction>;
   formatUrl: FormatUrl;
@@ -154,7 +146,7 @@ const getColumnEnabled = ({
 }: GetColumnsProps): TableColumn => ({
   field: 'enabled',
   name: i18n.COLUMN_ACTIVATE,
-  render: (_, rule: TableItem) => (
+  render: (_, rule: Rule) => (
     <EuiToolTip
       position="top"
       content={getToolTipContent(rule, hasMlPermissions, hasReadActionsPrivileges)}
@@ -180,7 +172,7 @@ const getColumnEnabled = ({
 const getColumnRuleName = ({ navigateToApp, formatUrl }: GetColumnsProps): TableColumn => ({
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: Rule['name'], item: TableItem) => (
+  render: (value: Rule['name'], item: Rule) => (
     <EuiToolTip content={value} anchorClassName="eui-textTruncate">
       <LinkAnchor
         data-test-subj="ruleName"
@@ -252,7 +244,7 @@ const getActionsColumns = ({
             hasReadActionsPrivileges
           ),
           width: '40px',
-        } as EuiTableActionsColumnType<TableItem>,
+        } as EuiTableActionsColumnType<Rule>,
       ]
     : [];
 
@@ -348,14 +340,14 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
     { ...getColumnRuleName(columnsProps), width: '28%' },
     getColumnTags(),
     {
-      field: 'current_status.bulk_create_time_durations',
+      field: 'bulk_create_time_durations',
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_INDEXING_TIMES}
           tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
         />
       ),
-      render: (value: RuleStatus['current_status']['bulk_create_time_durations'] | undefined) => (
+      render: (value: Rule['bulk_create_time_durations'] | undefined) => (
         <EuiText data-test-subj="bulk_create_time_durations" size="s">
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
@@ -364,14 +356,14 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       truncateText: true,
     },
     {
-      field: 'current_status.search_after_time_durations',
+      field: 'search_after_time_durations',
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_QUERY_TIMES}
           tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
         />
       ),
-      render: (value: RuleStatus['current_status']['search_after_time_durations'] | undefined) => (
+      render: (value: Rule['search_after_time_durations'] | undefined) => (
         <EuiText data-test-subj="search_after_time_durations" size="s">
           {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
         </EuiText>
@@ -380,7 +372,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       truncateText: true,
     },
     {
-      field: 'current_status.gap',
+      field: 'last_gap',
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_GAP}
@@ -407,7 +399,7 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
           }
         />
       ),
-      render: (value: RuleStatus['current_status']['gap'] | undefined) => (
+      render: (value: Rule['last_gap'] | undefined) => (
         <EuiText data-test-subj="gap" size="s">
           {value ?? getEmptyTagValue()}
         </EuiText>
@@ -416,18 +408,16 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
       truncateText: true,
     },
     {
-      field: 'current_status.status',
+      field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: RuleStatus['current_status']['status'] | undefined) => (
-        <RuleExecutionStatusBadge status={value} />
-      ),
+      render: (value: Rule['status'] | undefined) => <RuleExecutionStatusBadge status={value} />,
       width: '12%',
       truncateText: true,
     },
     {
-      field: 'current_status.status_date',
+      field: 'status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
-      render: (value: RuleStatus['current_status']['status_date'] | undefined) => {
+      render: (value: Rule['status_date'] | undefined) => {
         return value == null ? (
           getEmptyTagValue()
         ) : (

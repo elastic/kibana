@@ -45,8 +45,8 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
     completionTimeMinutes: 10,
     // previewImagePath: '',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['message_queue', 'kubernetes'],
   };
 }

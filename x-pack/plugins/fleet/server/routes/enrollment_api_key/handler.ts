@@ -36,7 +36,13 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
       perPage: request.query.perPage,
       kuery: request.query.kuery,
     });
-    const body: GetEnrollmentAPIKeysResponse = { list: items, total, page, perPage };
+    const body: GetEnrollmentAPIKeysResponse = {
+      list: items, // deprecated
+      items,
+      total,
+      page,
+      perPage,
+    };
 
     return response.ok({ body });
   } catch (error) {

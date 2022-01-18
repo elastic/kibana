@@ -17,19 +17,17 @@ import {
   UseMessagesStorage,
 } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from './index';
-import {
-  initialUserPrivilegesState,
-  useUserPrivileges,
-} from '../../common/components/user_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
-import { EndpointPrivileges } from '../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useHostsRiskScore } from '../containers/overview_risky_host_links/use_hosts_risk_score';
+import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
+import { EndpointPrivileges } from '../../../common/endpoint/types';
+import { useHostsRiskScore } from '../../common/containers/hosts_risk/use_hosts_risk_score';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -82,7 +80,7 @@ jest.mock('../containers/overview_cti_links/use_ti_integrations');
 const useTiIntegrationsMock = useTiIntegrations as jest.Mock;
 useTiIntegrationsMock.mockReturnValue({});
 
-jest.mock('../containers/overview_risky_host_links/use_hosts_risk_score');
+jest.mock('../../common/containers/hosts_risk/use_hosts_risk_score');
 const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
 useHostsRiskScoreMock.mockReturnValue({
   loading: false,

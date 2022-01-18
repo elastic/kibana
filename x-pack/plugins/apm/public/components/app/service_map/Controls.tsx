@@ -11,12 +11,12 @@ import React, { useContext, useEffect, useState } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
-import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
+import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { APMQueryParams } from '../../shared/Links/url_helpers';
+import { APMQueryParams } from '../../shared/links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
@@ -107,7 +107,7 @@ export function Controls() {
 
   const {
     query: { kuery },
-  } = useApmParams('/service-map', '/services/{serviceName}/service-map');
+  } = useAnyOfApmParams('/service-map', '/services/{serviceName}/service-map');
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);

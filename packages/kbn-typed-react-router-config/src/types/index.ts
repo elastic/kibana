@@ -13,97 +13,13 @@ import { RequiredKeys, ValuesType } from 'utility-types';
 // import { unconst } from '../unconst';
 import { NormalizePath } from './utils';
 
-type PathsOfRoute<TRoute extends Route> =
-  | TRoute['path']
-  | (TRoute extends { children: Route[] }
-      ? AppendPath<TRoute['path'], '/*'> | PathsOf<TRoute['children']>
-      : never);
+// type PathsOfRoute<TRoute extends Route> =
+//   | TRoute['path']
+//   | (TRoute extends { children: Route[] }
+//       ? AppendPath<TRoute['path'], '/*'> | PathsOf<TRoute['children']>
+//       : never);
 
-export type PathsOf<TRoutes extends Route[]> = TRoutes extends []
-  ? never
-  : TRoutes extends [Route]
-  ? PathsOfRoute<TRoutes[0]>
-  : TRoutes extends [Route, Route]
-  ? PathsOfRoute<TRoutes[0]> | PathsOfRoute<TRoutes[1]>
-  : TRoutes extends [Route, Route, Route]
-  ? PathsOfRoute<TRoutes[0]> | PathsOfRoute<TRoutes[1]> | PathsOfRoute<TRoutes[2]>
-  : TRoutes extends [Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-  : TRoutes extends [Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-  : TRoutes extends [Route, Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-      | PathsOfRoute<TRoutes[5]>
-  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-      | PathsOfRoute<TRoutes[5]>
-      | PathsOfRoute<TRoutes[6]>
-  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-      | PathsOfRoute<TRoutes[5]>
-      | PathsOfRoute<TRoutes[6]>
-      | PathsOfRoute<TRoutes[7]>
-  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-      | PathsOfRoute<TRoutes[5]>
-      | PathsOfRoute<TRoutes[6]>
-      | PathsOfRoute<TRoutes[7]>
-      | PathsOfRoute<TRoutes[8]>
-  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-      | PathsOfRoute<TRoutes[5]>
-      | PathsOfRoute<TRoutes[6]>
-      | PathsOfRoute<TRoutes[7]>
-      | PathsOfRoute<TRoutes[8]>
-      | PathsOfRoute<TRoutes[9]>
-  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ?
-      | PathsOfRoute<TRoutes[0]>
-      | PathsOfRoute<TRoutes[1]>
-      | PathsOfRoute<TRoutes[2]>
-      | PathsOfRoute<TRoutes[3]>
-      | PathsOfRoute<TRoutes[4]>
-      | PathsOfRoute<TRoutes[5]>
-      | PathsOfRoute<TRoutes[6]>
-      | PathsOfRoute<TRoutes[7]>
-      | PathsOfRoute<TRoutes[8]>
-      | PathsOfRoute<TRoutes[9]>
-      | PathsOfRoute<TRoutes[10]>
-  : string;
+export type PathsOf<TRoutes extends Route[]> = keyof MapRoutes<TRoutes> & string;
 
 export interface RouteMatch<TRoute extends Route = Route> {
   route: TRoute;
@@ -115,7 +31,7 @@ export interface RouteMatch<TRoute extends Route = Route> {
       params: t.Type<any>;
     }
       ? t.TypeOf<TRoute['params']>
-      : AnyObj;
+      : {};
   };
 }
 
@@ -160,11 +76,10 @@ interface ReadonlyPlainRoute {
 }
 
 export type Route = PlainRoute | ReadonlyPlainRoute;
-type AnyObj = Record<string, any>;
 
 interface DefaultOutput {
-  path: AnyObj;
-  query: AnyObj;
+  path: {};
+  query: {};
 }
 
 type OutputOfRouteMatch<TRouteMatch extends RouteMatch> = TRouteMatch extends {
@@ -191,21 +106,20 @@ type TypeOfRouteMatch<TRouteMatch extends RouteMatch> = TRouteMatch extends {
   route: { params: t.Type<any> };
 }
   ? t.TypeOf<TRouteMatch['route']['params']>
-  : AnyObj;
+  : {};
 
 type TypeOfMatches<TRouteMatches extends RouteMatch[]> = TRouteMatches extends [RouteMatch]
   ? TypeOfRouteMatch<TRouteMatches[0]>
   : TRouteMatches extends [RouteMatch, ...infer TNextRouteMatches]
   ? TypeOfRouteMatch<TRouteMatches[0]> &
-      (TNextRouteMatches extends RouteMatch[] ? TypeOfMatches<TNextRouteMatches> : AnyObj)
-  : AnyObj;
+      (TNextRouteMatches extends RouteMatch[] ? TypeOfMatches<TNextRouteMatches> : {})
+  : {};
 
 export type TypeOf<
   TRoutes extends Route[],
   TPath extends PathsOf<TRoutes>,
   TWithDefaultOutput extends boolean = true
-> = TypeOfMatches<Match<TRoutes, TPath>> &
-  (TWithDefaultOutput extends true ? DefaultOutput : AnyObj);
+> = TypeOfMatches<Match<TRoutes, TPath>> & (TWithDefaultOutput extends true ? DefaultOutput : {});
 
 export type TypeAsArgs<TObject> = keyof TObject extends never
   ? []
@@ -278,7 +192,7 @@ type MapRoute<TRoute extends Route, TParents extends Route[] = []> = MaybeUnion<
           >;
         }
       >
-    : AnyObj
+    : {}
 >;
 
 type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
@@ -343,11 +257,31 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
       MapRoute<TRoutes[8], TParents> &
       MapRoute<TRoutes[7], TParents> &
       MapRoute<TRoutes[9], TParents>
-  : AnyObj;
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[8], TParents> &
+      MapRoute<TRoutes[7], TParents> &
+      MapRoute<TRoutes[9], TParents> &
+      MapRoute<TRoutes[10], TParents>
+  : {};
 
 // const element = null as any;
 
 // const routes = unconst([
+//   {
+//     path: '/link-to/transaction/{transactionId}',
+//     element,
+//   },
+//   {
+//     path: '/link-to/trace/{traceId}',
+//     element,
+//   },
 //   {
 //     path: '/',
 //     element,
@@ -383,7 +317,7 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //             element,
 //           },
 //           {
-//             path: '/settings/customize-ui',
+//             path: '/settings/custom-links',
 //             element,
 //           },
 //           {
@@ -392,6 +326,10 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //           },
 //           {
 //             path: '/settings/anomaly-detection',
+//             element,
+//           },
+//           {
+//             path: '/settings/agent-keys',
 //             element,
 //           },
 //           {
@@ -432,11 +370,19 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //             element,
 //           },
 //           {
+//             path: '/services/:serviceName/transactions/view',
+//             element,
+//           },
+//           {
+//             path: '/services/:serviceName/dependencies',
+//             element,
+//           },
+//           {
 //             path: '/services/:serviceName/errors',
 //             element,
 //             children: [
 //               {
-//                 path: '/:groupId',
+//                 path: '/services/:serviceName/errors/:groupId',
 //                 element,
 //                 params: t.type({
 //                   path: t.type({
@@ -445,7 +391,7 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //                 }),
 //               },
 //               {
-//                 path: '/services/:serviceName',
+//                 path: '/services/:serviceName/errors',
 //                 element,
 //                 params: t.partial({
 //                   query: t.partial({
@@ -459,15 +405,33 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //             ],
 //           },
 //           {
-//             path: '/services/:serviceName/foo',
+//             path: '/services/:serviceName/metrics',
 //             element,
 //           },
 //           {
-//             path: '/services/:serviceName/bar',
+//             path: '/services/:serviceName/nodes',
+//             element,
+//             children: [
+//               {
+//                 path: '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
+//                 element,
+//               },
+//               {
+//                 path: '/services/:serviceName/nodes',
+//                 element,
+//               },
+//             ],
+//           },
+//           {
+//             path: '/services/:serviceName/service-map',
 //             element,
 //           },
 //           {
-//             path: '/services/:serviceName/baz',
+//             path: '/services/:serviceName/logs',
+//             element,
+//           },
+//           {
+//             path: '/services/:serviceName/profiling',
 //             element,
 //           },
 //           {
@@ -499,6 +463,24 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //             element,
 //           },
 //           {
+//             path: '/backends',
+//             element,
+//             children: [
+//               {
+//                 path: '/backends/{backendName}/overview',
+//                 element,
+//               },
+//               {
+//                 path: '/backends/overview',
+//                 element,
+//               },
+//               {
+//                 path: '/backends',
+//                 element,
+//               },
+//             ],
+//           },
+//           {
 //             path: '/',
 //             element,
 //           },
@@ -511,10 +493,11 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 // type Routes = typeof routes;
 
 // type Mapped = keyof MapRoutes<Routes>;
+// type Paths = PathsOf<Routes>;
 
 // type Bar = ValuesType<Match<Routes, '/*'>>['route']['path'];
 // type Foo = OutputOf<Routes, '/*'>;
-// type Baz = OutputOf<Routes, '/services/:serviceName/baz'>;
+// // type Baz = OutputOf<Routes, '/services/:serviceName/errors'>;
 
 // const { path }: Foo = {} as any;
 
@@ -522,4 +505,4 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //   return {} as any;
 // }
 
-// const params = _useApmParams('/*');
+// // const params = _useApmParams('/services/:serviceName/nodes/*');

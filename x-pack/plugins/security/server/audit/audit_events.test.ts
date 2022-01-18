@@ -15,9 +15,11 @@ import {
   httpRequestEvent,
   SavedObjectAction,
   savedObjectEvent,
+  sessionCleanupEvent,
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
+  userLogoutEvent,
 } from './audit_events';
 
 describe('#savedObjectEvent', () => {
@@ -295,6 +297,88 @@ describe('#userLoginEvent', () => {
         },
         "message": "Failed attempt to login using basic provider [name=basic1]",
         "user": undefined,
+      }
+    `);
+  });
+});
+
+describe('#userLogoutEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      userLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] is logging out using basic provider [name=basic1]",
+        "user": Object {
+          "name": "elastic",
+        },
+      }
+    `);
+
+    expect(
+      userLogoutEvent({
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [undefined] is logging out using basic provider [name=basic1]",
+        "user": undefined,
+      }
+    `);
+  });
+});
+
+describe('#sessionCleanupEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      sessionCleanupEvent({
+        usernameHash: 'abcdef',
+        sessionId: 'sid',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "session_cleanup",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+          "session_id": "sid",
+        },
+        "message": "Removing invalid or expired session for user [hash=abcdef]",
+        "user": Object {
+          "hash": "abcdef",
+        },
       }
     `);
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
@@ -18,6 +18,7 @@ import {
 import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
+import { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
@@ -82,17 +83,21 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   },
 });
 
-const defaultProps = {
+const defaultProps: MappingsEditorProps = {
   docLinks: docLinksServiceMock.createStartContract(),
+  onChange: () => undefined,
+  esNodesPlugins: [],
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) =>
-  (
-    <KibanaReactContextProvider>
-      <MappingsEditorProvider>
-        <GlobalFlyoutProvider>
-          <Comp {...defaultProps} {...props} />
-        </GlobalFlyoutProvider>
-      </MappingsEditorProvider>
-    </KibanaReactContextProvider>
-  );
+export const WithAppDependencies =
+  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>) =>
+  (props: Partial<MappingsEditorProps>) =>
+    (
+      <KibanaReactContextProvider>
+        <MappingsEditorProvider>
+          <GlobalFlyoutProvider>
+            <Comp {...defaultProps} {...props} />
+          </GlobalFlyoutProvider>
+        </MappingsEditorProvider>
+      </KibanaReactContextProvider>
+    );

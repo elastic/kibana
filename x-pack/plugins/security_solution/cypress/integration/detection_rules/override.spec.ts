@@ -139,7 +139,7 @@ describe('Detection rules, override', () => {
       getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
-        `${this.rule.riskOverride}kibana.alert.rule.risk_score`
+        `${this.rule.riskOverride}kibana.alert.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', this.rule.nameOverride);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {

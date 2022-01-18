@@ -36,7 +36,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
       },
       []
     );
-    return typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
+    return typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {

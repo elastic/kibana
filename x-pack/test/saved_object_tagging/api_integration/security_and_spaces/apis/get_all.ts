@@ -50,10 +50,12 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
       unauthorized: {
-        httpCode: 200,
+        httpCode: 403,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
-            tags: [],
+            error: 'Forbidden',
+            message: 'unauthorized',
+            statusCode: 403,
           });
         },
       },

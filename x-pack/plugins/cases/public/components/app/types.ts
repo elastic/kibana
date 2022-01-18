@@ -6,7 +6,7 @@
  */
 
 import { MutableRefObject } from 'react';
-import { Ecs, CaseViewRefreshPropInterface } from '../../../common';
+import { Ecs, CaseViewRefreshPropInterface } from '../../../common/ui/types';
 import { CasesNavigation } from '../links';
 import { CasesTimelineIntegration } from '../timeline_context';
 

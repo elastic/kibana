@@ -66,11 +66,11 @@ export default ({ getService }: FtrProviderContext) => {
           });
           await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
           const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+            .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [id] })
+            .query({ id })
             .expect(200);
-          expect(body[id]?.current_status?.last_success_message).to.eql(
+          expect(body?.last_success_message).to.eql(
             `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
           );
 
@@ -92,11 +92,11 @@ export default ({ getService }: FtrProviderContext) => {
           });
           await waitForRuleSuccessOrStatus(supertest, log, id, 'partial failure');
           const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+            .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [id] })
+            .query({ id })
             .expect(200);
-          expect(body[id]?.current_status?.last_success_message).to.eql(
+          expect(body?.last_success_message).to.eql(
             `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
           );
 

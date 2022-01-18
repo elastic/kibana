@@ -18,11 +18,12 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
+import { findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import type {
   DataContextType,
@@ -397,15 +398,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         }}
       >
         <EuiDataGrid
-          {
-            // we control the key when pagination is on to circumvent an EUI rendering bug
-            // see https://github.com/elastic/eui/issues/5391
-            ...(pagination
-              ? {
-                  key: columns.map(({ id }) => id).join('-') + '-' + pagination.pageSize,
-                }
-              : {})
-          }
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
           rowHeightsOptions={

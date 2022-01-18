@@ -42,3 +42,8 @@ export type {
 } from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
 export { pollEsNodesVersion } from './version_check/ensure_es_version';
+export {
+  isSupportedEsServer,
+  isNotFoundFromUnsupportedServer,
+  PRODUCT_RESPONSE_HEADER,
+} from './supported_server_response_check';

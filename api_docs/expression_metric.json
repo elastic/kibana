@@ -5,13 +5,23 @@
     "functions": [
       {
         "parentPluginId": "expressionMetric",
-        "id": "def-public.metricRenderer",
+        "id": "def-public.getMetricRenderer",
         "type": "Function",
         "tags": [],
-        "label": "metricRenderer",
+        "label": "getMetricRenderer",
         "description": [],
         "signature": [
-          "() => ",
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -31,23 +41,51 @@
         ],
         "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "expressionMetric",
+            "id": "def-public.getMetricRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
-      }
-    ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+      },
       {
         "parentPluginId": "expressionMetric",
-        "id": "def-public.renderers",
-        "type": "Array",
+        "id": "def-public.metricRendererFactory",
+        "type": "Function",
         "tags": [],
-        "label": "renderers",
+        "label": "metricRendererFactory",
         "description": [],
         "signature": [
-          "(() => ",
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -63,13 +101,40 @@
             "section": "def-common.MetricRendererConfig",
             "text": "MetricRendererConfig"
           },
-          ">)[]"
+          ">"
         ],
-        "path": "src/plugins/expression_metric/public/expression_renderers/index.ts",
+        "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionMetric",
+            "id": "def-public.metricRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "expressionMetric",
@@ -121,7 +186,15 @@
         "label": "metricFunction",
         "description": [],
         "signature": [
-          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"string\" | \"number\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: string | number | null, { label, labelFont, metricFont, metricFormat }: ",
+          "() => { name: \"metric\"; aliases: never[]; type: string; inputTypes: (\"number\" | \"string\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: ",
+          {
+            "pluginId": "expressionMetric",
+            "scope": "common",
+            "docId": "kibExpressionMetricPluginApi",
+            "section": "def-common.Input",
+            "text": "Input"
+          },
+          ", { label, labelFont, metricFont, metricFormat }: ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -386,7 +459,15 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<\"metric\", string | number | null, ",
+          "<\"metric\", ",
+          {
+            "pluginId": "expressionMetric",
+            "scope": "common",
+            "docId": "kibExpressionMetricPluginApi",
+            "section": "def-common.Input",
+            "text": "Input"
+          },
+          ", ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -399,10 +480,10 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionValueBoxed",
-            "text": "ExpressionValueBoxed"
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
           },
-          "<\"render\", { as: string; value: ",
+          "<",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -410,7 +491,7 @@
             "section": "def-common.Arguments",
             "text": "Arguments"
           },
-          "; }>, ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -427,13 +508,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",

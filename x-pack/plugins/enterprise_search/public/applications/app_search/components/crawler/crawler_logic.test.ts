@@ -138,6 +138,7 @@ describe('CrawlerLogic', () => {
               domainAllowlist: ['elastic.co'],
               seedUrls: [],
               sitemapUrls: [],
+              maxCrawlDepth: 10,
             },
           },
         ],

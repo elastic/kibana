@@ -19,7 +19,7 @@ import {
   CtiQueries,
   CtiDataSourceStrategyResponse,
   CtiDataSourceRequestOptions,
-} from '../../../../common';
+} from '../../../../common/search_strategy/security_solution/cti';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';

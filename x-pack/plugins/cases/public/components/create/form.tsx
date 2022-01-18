@@ -23,7 +23,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector, CaseType } from '../../../common';
+import { ActionConnector, CaseType } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -31,6 +31,9 @@ import { UsePostComment } from '../../containers/use_post_comment';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { CreateCaseOwnerSelector } from './owner_selector';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 interface ContainerProps {
   big?: boolean;
@@ -70,6 +73,10 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled } = useCasesFeatures();
 
+    const { owner } = useCasesContext();
+    const availableOwners = useAvailableCasesOwners();
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
+
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
@@ -79,13 +86,21 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
+            {canShowCaseSolutionSelection && (
+              <Container big>
+                <CreateCaseOwnerSelector
+                  availableOwners={availableOwners}
+                  isLoading={isSubmitting}
+                />
+              </Container>
+            )}
             <Container big>
               <Description isLoading={isSubmitting} />
             </Container>
           </>
         ),
       }),
-      [isSubmitting]
+      [isSubmitting, canShowCaseSolutionSelection, availableOwners]
     );
 
     const secondStep = useMemo(
@@ -156,12 +171,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     timelineIntegration,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <FormContext
-        afterCaseCreated={afterCaseCreated}
-        caseType={caseType}
-        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-        onSuccess={onSuccess}
-      >
+      <FormContext afterCaseCreated={afterCaseCreated} caseType={caseType} onSuccess={onSuccess}>
         <CreateCaseFormFields
           connectors={empty}
           isLoadingConnectors={false}

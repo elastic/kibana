@@ -6,8 +6,8 @@
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { lensEmbeddableFactory } from '../../../lens/server/embeddable/lens_embeddable_factory';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { makeLensEmbeddableFactory } from '../../../lens/server/embeddable/make_lens_embeddable_factory';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   AssociationType,
   CaseResponse,
@@ -879,7 +879,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        lensEmbeddableFactory,
+        makeLensEmbeddableFactory({}),
         commentString
       );
 
@@ -977,12 +977,16 @@ describe('common utils', () => {
         )}},"editMode":false}}`,
       ].join('\n\n');
 
-      const updatedReferences = getOrUpdateLensReferences(lensEmbeddableFactory, newCommentString, {
-        references: currentCommentReferences,
-        attributes: {
-          comment: currentCommentString,
-        },
-      } as SavedObject<CommentRequestUserType>);
+      const updatedReferences = getOrUpdateLensReferences(
+        makeLensEmbeddableFactory({}),
+        newCommentString,
+        {
+          references: currentCommentReferences,
+          attributes: {
+            comment: currentCommentString,
+          },
+        } as SavedObject<CommentRequestUserType>
+      );
 
       const expectedReferences = [
         ...nonLensCurrentCommentReferences,

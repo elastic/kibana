@@ -1,0 +1,34 @@
+get:
+  summary: Packages - Get file from registry
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              body:
+                type: object
+              statusCode:
+                type: number
+              headers:
+                type: object
+  operationId: packages-get-file
+parameters:
+  - schema:
+      type: string
+    name: pkgName
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: pkgVersion
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: filePath
+    in: path
+    required: true

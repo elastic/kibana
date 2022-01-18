@@ -11,7 +11,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../common';
+} from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -83,11 +83,47 @@ export function isWriteOperation(operation: OperationDetails): boolean {
   return Object.values(WriteOperations).includes(operation.name as WriteOperations);
 }
 
-/**
- * Definition of all APIs within the cases backend.
- */
-export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
-  // case operations
+const CaseOperations = {
+  [ReadOperations.GetCase]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_get',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.ResolveCase]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_resolve',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.FindCases]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_find',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.GetCaseIDsByAlertID]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_ids_by_alert_id_get',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetCaseMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_get_metrics',
+    verbs: accessVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
   [WriteOperations.CreateCase]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateCase,
@@ -120,6 +156,17 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+};
+
+const ConfigurationOperations = {
+  [ReadOperations.FindConfigurations]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.FindConfigurations,
+    action: 'case_configuration_find',
+    verbs: accessVerbs,
+    docType: 'case configurations',
+    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
+  },
   [WriteOperations.CreateConfiguration]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateConfiguration,
@@ -136,69 +183,16 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case configuration',
     savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
   },
-  [ReadOperations.FindConfigurations]: {
+};
+
+const AttachmentOperations = {
+  [ReadOperations.GetAttachmentMetrics]: {
     ecsType: EVENT_TYPES.access,
-    name: ReadOperations.FindConfigurations,
-    action: 'case_configuration_find',
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_get_metrics',
     verbs: accessVerbs,
-    docType: 'case configurations',
-    savedObjectType: CASE_CONFIGURE_SAVED_OBJECT,
-  },
-  [ReadOperations.GetCase]: {
-    ecsType: EVENT_TYPES.access,
-    name: ACCESS_CASE_OPERATION,
-    action: 'case_get',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.GetCaseMetrics]: {
-    ecsType: EVENT_TYPES.access,
-    name: ACCESS_CASE_OPERATION,
-    action: 'case_get_metrics',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.ResolveCase]: {
-    ecsType: EVENT_TYPES.access,
-    name: ACCESS_CASE_OPERATION,
-    action: 'case_resolve',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.FindCases]: {
-    ecsType: EVENT_TYPES.access,
-    name: ACCESS_CASE_OPERATION,
-    action: 'case_find',
-    verbs: accessVerbs,
-    docType: 'cases',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.GetCaseIDsByAlertID]: {
-    ecsType: EVENT_TYPES.access,
-    name: ACCESS_CASE_OPERATION,
-    action: 'case_ids_by_alert_id_get',
-    verbs: accessVerbs,
-    docType: 'cases',
+    docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-  },
-  [ReadOperations.GetTags]: {
-    ecsType: EVENT_TYPES.access,
-    name: ReadOperations.GetCase,
-    action: 'case_tags_get',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
-  [ReadOperations.GetReporters]: {
-    ecsType: EVENT_TYPES.access,
-    name: ReadOperations.GetReporters,
-    action: 'case_reporters_get',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetAlertsAttachedToCase]: {
     ecsType: EVENT_TYPES.access,
@@ -208,7 +202,30 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
-  // comments operations
+  [ReadOperations.GetComment]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_get',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.GetAllComments]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_get_all',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  [ReadOperations.FindComments]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_COMMENT_OPERATION,
+    action: 'case_comment_find',
+    verbs: accessVerbs,
+    docType: 'comments',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
   [WriteOperations.CreateComment]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateComment,
@@ -241,31 +258,31 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
   },
-  [ReadOperations.GetComment]: {
+};
+
+/**
+ * Definition of all APIs within the cases backend.
+ */
+export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
+  ...CaseOperations,
+  ...ConfigurationOperations,
+  ...AttachmentOperations,
+  [ReadOperations.GetTags]: {
     ecsType: EVENT_TYPES.access,
-    name: ACCESS_COMMENT_OPERATION,
-    action: 'case_comment_get',
+    name: ReadOperations.GetTags,
+    action: 'case_tags_get',
     verbs: accessVerbs,
-    docType: 'comments',
-    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
-  [ReadOperations.GetAllComments]: {
+  [ReadOperations.GetReporters]: {
     ecsType: EVENT_TYPES.access,
-    name: ACCESS_COMMENT_OPERATION,
-    action: 'case_comment_get_all',
+    name: ReadOperations.GetReporters,
+    action: 'case_reporters_get',
     verbs: accessVerbs,
-    docType: 'comments',
-    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
-  [ReadOperations.FindComments]: {
-    ecsType: EVENT_TYPES.access,
-    name: ACCESS_COMMENT_OPERATION,
-    action: 'case_comment_find',
-    verbs: accessVerbs,
-    docType: 'comments',
-    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-  },
-  // stats operations
   [ReadOperations.GetCaseStatuses]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,
@@ -274,11 +291,18 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
-  // user actions operations
   [ReadOperations.GetUserActions]: {
     ecsType: EVENT_TYPES.access,
     name: ReadOperations.GetUserActions,
     action: 'case_user_actions_get',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
+  [ReadOperations.GetUserActionMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.GetUserActionMetrics,
+    action: 'case_user_action_get_metrics',
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,

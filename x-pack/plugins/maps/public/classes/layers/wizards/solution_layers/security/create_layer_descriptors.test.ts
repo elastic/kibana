@@ -138,7 +138,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
       {
@@ -248,7 +248,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
       {
@@ -365,7 +365,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
     ]);
@@ -480,7 +480,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
       {
@@ -590,7 +590,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
       {
@@ -707,7 +707,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
     ]);
@@ -822,7 +822,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
       {
@@ -932,7 +932,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
       {
@@ -1049,7 +1049,7 @@ describe('createLayerDescriptor', () => {
           },
           type: 'VECTOR',
         },
-        type: 'VECTOR',
+        type: 'GEOJSON_VECTOR',
         visible: true,
       },
     ]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 import { ICasesConnector, CasesConnectorsMap } from './types';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';

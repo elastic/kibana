@@ -7,15 +7,12 @@
 
 import { assign, omit } from 'lodash';
 
+import { StatusAll, ResolvedCase } from '../../common/ui/types';
 import {
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
   CaseResolveResponse,
-  CASES_URL,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
@@ -25,20 +22,25 @@ import {
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
+  getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
   getSubCaseUserActionUrl,
-  StatusAll,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
   User,
-  ResolvedCase,
-} from '../../common';
-
+  CaseMetricsResponse,
+} from '../../common/api';
+import {
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
+} from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -48,6 +50,8 @@ import {
   AllCases,
   BulkUpdateStatus,
   Case,
+  CaseMetrics,
+  CaseMetricsFeature,
   CasesStatus,
   FetchCasesProps,
   SortFieldCase,
@@ -64,6 +68,7 @@ import {
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
+  decodeCaseMetricsResponse,
 } from './utils';
 
 export const getCase = async (
@@ -155,6 +160,22 @@ export const getReporters = async (signal: AbortSignal, owner: string[]): Promis
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
+};
+
+export const getCaseMetrics = async (
+  caseId: string,
+  features: CaseMetricsFeature[],
+  signal: AbortSignal
+): Promise<CaseMetrics> => {
+  const response = await KibanaServices.get().http.fetch<CaseMetricsResponse>(
+    getCaseDetailsMetricsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+      query: { features: JSON.stringify(features) },
+    }
+  );
+  return convertToCamelCase<CaseMetricsResponse, CaseMetrics>(decodeCaseMetricsResponse(response));
 };
 
 export const getCaseUserActions = async (

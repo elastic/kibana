@@ -9,9 +9,19 @@ import React from 'react';
 import { HeaderMenuPortal } from '../../../../../observability/public';
 import { AppMountParameters } from '../../../../../../../src/core/public';
 import { ActionMenuContent } from './action_menu_content';
+import { UptimeConfig } from '../../../../common/config';
 
-export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => (
-  <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
-    <ActionMenuContent />
+export const ActionMenu = ({
+  appMountParameters,
+  config,
+}: {
+  appMountParameters: AppMountParameters;
+  config: UptimeConfig;
+}) => (
+  <HeaderMenuPortal
+    setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+    theme$={appMountParameters.theme$}
+  >
+    <ActionMenuContent config={config} />
   </HeaderMenuPortal>
 );

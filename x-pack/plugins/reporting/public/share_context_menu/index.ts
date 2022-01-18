@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams } from '../../common/types';
+import type {
+  ApplicationStart,
+  IUiSettingsClient,
+  ThemeServiceSetup,
+  ToastsSetup,
+} from 'src/core/public';
+import { ILicense } from '../../../licensing/public';
+import type { LayoutParams } from '../../../screenshotting/common';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   uiSettings: IUiSettingsClient;
-  license$: LicensingPluginSetup['license$']; // FIXME: 'license$' is deprecated
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   usesUiCapabilities: boolean;
+  license: ILicense;
+  application: ApplicationStart;
+  theme: ThemeServiceSetup;
 }
 
 export interface ReportingSharingData {

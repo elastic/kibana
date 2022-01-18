@@ -27,7 +27,7 @@ import {
   IndexPattern,
   ISearchSource,
   AggConfigSerialized,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
 } from '../../data/public';
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
@@ -37,7 +37,7 @@ import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discov
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigSerialized[];
-  searchSource: SearchSourceFields;
+  searchSource: SerializedSearchSourceFields;
   savedSearchId?: string;
 }
 
@@ -200,7 +200,7 @@ export class Vis<TVisParams = VisParams> {
       data: {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
-        savedSearchId: this.data.savedSearchId,
+        ...(this.data.savedSearchId ? { savedSearchId: this.data.savedSearchId } : {}),
       },
     };
   }

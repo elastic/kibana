@@ -60,6 +60,28 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
+        "id": "def-common.Action",
+        "type": "Type",
+        "tags": [],
+        "label": "Action",
+        "description": [],
+        "signature": [
+          "{ group: string; id: string; action_type_id: string; params: ",
+          {
+            "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionIoTsAlertingTypesPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
+          "; }"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
         "id": "def-common.Actions",
         "type": "Type",
         "tags": [],
@@ -379,13 +401,12 @@
           "\nTODO: This type are originally from \"src/core/types/saved_objects.ts\", once that is package friendly remove\nthis copied type.\n\nType definition for a Saved Object attribute value\n"
         ],
         "signature": [
-          "string | number | boolean | ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
             "scope": "common",
             "docId": "kibKbnSecuritysolutionIoTsAlertingTypesPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
+            "section": "def-common.SavedObjectAttributeSingle",
+            "text": "SavedObjectAttributeSingle"
           },
           " | ",
           {
@@ -395,7 +416,7 @@
             "section": "def-common.SavedObjectAttributeSingle",
             "text": "SavedObjectAttributeSingle"
           },
-          "[] | null | undefined"
+          "[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/saved_object_attributes/index.ts",
         "deprecated": false,
@@ -433,7 +454,7 @@
         "label": "Severity",
         "description": [],
         "signature": [
-          "\"high\" | \"low\" | \"medium\" | \"critical\""
+          "\"medium\" | \"high\" | \"low\" | \"critical\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
@@ -447,7 +468,7 @@
         "label": "SeverityMapping",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[]"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
@@ -461,7 +482,7 @@
         "label": "SeverityMappingItem",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
@@ -475,7 +496,7 @@
         "label": "SeverityMappingOrUndefined",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[] | undefined"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[] | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "deprecated": false,
@@ -489,7 +510,7 @@
         "label": "SeverityOrUndefined",
         "description": [],
         "signature": [
-          "\"high\" | \"low\" | \"medium\" | \"critical\" | undefined"
+          "\"medium\" | \"high\" | \"low\" | \"critical\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
@@ -825,7 +846,7 @@
         "label": "Type",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threat_match\" | \"threshold\" | \"machine_learning\" | \"saved_query\""
+          "\"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -839,7 +860,7 @@
         "label": "TypeOrUndefined",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threat_match\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | undefined"
+          "\"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -1263,7 +1284,7 @@
         ],
         "signature": [
           "Type",
-          "<{ field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"high\" | \"low\" | \"medium\" | \"critical\"; }[] | undefined, unknown>"
+          "<{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[] | undefined, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_severity_mapping_array/index.ts",
         "deprecated": false,

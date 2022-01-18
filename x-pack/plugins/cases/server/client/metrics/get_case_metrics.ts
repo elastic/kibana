@@ -5,14 +5,16 @@
  * 2.0.
  */
 import { merge } from 'lodash';
+import Boom from '@hapi/boom';
 
-import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
-import { AlertsCount } from './alerts_count';
-import { AlertDetails } from './alert_details';
+import { AlertsCount } from './alerts/count';
+import { AlertDetails } from './alerts/details';
+import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import { MetricsHandler } from './types';
@@ -33,60 +35,72 @@ export const getCaseMetrics = async (
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Promise<CaseMetricsResponse> => {
-  const handlers = buildHandlers(params, casesClient, clientArgs);
-  await checkAuthorization(params, clientArgs);
-  checkAndThrowIfInvalidFeatures(params, handlers, clientArgs);
+  const { logger } = clientArgs;
 
-  const computedMetrics = await Promise.all(
-    params.features.map(async (feature) => {
-      const handler = handlers.get(feature);
+  try {
+    await checkAuthorization(params, clientArgs);
+    const handlers = buildHandlers(params, casesClient, clientArgs);
 
-      return handler?.compute();
-    })
-  );
+    const computedMetrics = await Promise.all(
+      Array.from(handlers).map(async (handler) => {
+        return handler.compute();
+      })
+    );
 
-  const mergedResults = computedMetrics.reduce((acc, metric) => {
-    return merge(acc, metric);
-  }, {});
+    const mergedResults = computedMetrics.reduce((acc, metric) => {
+      return merge(acc, metric);
+    }, {});
 
-  return CaseMetricsResponseRt.encode(mergedResults ?? {});
+    return CaseMetricsResponseRt.encode(mergedResults);
+  } catch (error) {
+    throw createCaseError({
+      logger,
+      message: `Failed to retrieve metrics within client for case id: ${params.caseId}: ${error}`,
+      error,
+    });
+  }
 };
 
 const buildHandlers = (
   params: CaseMetricsParams,
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
-): Map<string, MetricsHandler> => {
-  const handlers = [
-    new Lifespan(params.caseId, casesClient),
-    new AlertsCount(),
-    new AlertDetails(),
-    new Connectors(),
-  ];
+): Set<MetricsHandler> => {
+  const handlers: MetricsHandler[] = [AlertsCount, AlertDetails, Actions, Connectors, Lifespan].map(
+    (ClassName) => new ClassName({ caseId: params.caseId, casesClient, clientArgs })
+  );
 
-  const handlersByFeature = new Map<string, MetricsHandler>();
+  const uniqueFeatures = new Set(params.features);
+  const handlerFeatures = new Set<string>();
+  const handlersToExecute = new Set<MetricsHandler>();
   for (const handler of handlers) {
-    // assign each feature to the handler that owns that feature
-    handler.getFeatures().forEach((value) => handlersByFeature.set(value, handler));
+    for (const handlerFeature of handler.getFeatures()) {
+      if (uniqueFeatures.has(handlerFeature)) {
+        handler.setupFeature?.(handlerFeature);
+        handlersToExecute.add(handler);
+      }
+
+      handlerFeatures.add(handlerFeature);
+    }
   }
 
-  return handlersByFeature;
+  checkAndThrowIfInvalidFeatures(params, handlerFeatures);
+
+  return handlersToExecute;
 };
 
 const checkAndThrowIfInvalidFeatures = (
   params: CaseMetricsParams,
-  handlers: Map<string, MetricsHandler>,
-  clientArgs: CasesClientArgs
+  handlerFeatures: Set<string>
 ) => {
-  const invalidFeatures = params.features.filter((feature) => !handlers.has(feature));
+  const invalidFeatures = params.features.filter((feature) => !handlerFeatures.has(feature));
   if (invalidFeatures.length > 0) {
     const invalidFeaturesAsString = invalidFeatures.join(', ');
-    const validFeaturesAsString = [...handlers.keys()].join(', ');
+    const validFeaturesAsString = [...handlerFeatures.keys()].sort().join(', ');
 
-    throw createCaseError({
-      logger: clientArgs.logger,
-      message: `invalid features: [${invalidFeaturesAsString}], please only provide valid features: [${validFeaturesAsString}]`,
-    });
+    throw Boom.badRequest(
+      `invalid features: [${invalidFeaturesAsString}], please only provide valid features: [${validFeaturesAsString}]`
+    );
   }
 };
 

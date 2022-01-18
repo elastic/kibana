@@ -157,7 +157,7 @@ const checkIfPolicyHasTrustedAppsAssigned = async (
   }
   try {
     const policyId = policyIdFromParams(state);
-    const kuery = `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`;
+    const kuery = `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
     const trustedApps = await trustedAppsService.getTrustedAppsList({
       page: 1,
       per_page: 100,
@@ -371,6 +371,7 @@ const fetchAllPoliciesIfNeeded = async (
 
   dispatch({
     type: 'policyDetailsListOfAllPoliciesStateChanged',
+    // @ts-expect-error ts 4.5 upgrade
     payload: createLoadingResourceState(asStaleResourceState(currentPoliciesState)),
   });
 

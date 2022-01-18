@@ -22,7 +22,6 @@ import {
   GIS_API_PATH,
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
-  MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
@@ -34,8 +33,7 @@ import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta } from '../vector_source';
-import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
+import { GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
@@ -46,11 +44,8 @@ import { ISearchSource } from '../../../../../../../src/plugins/data/common/sear
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
-
-const ES_MVT_AGGS_LAYER_NAME = 'aggs';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -62,7 +57,7 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
   defaultMessage: 'Heat map',
 });
 
-export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingleLayerVectorSource {
+export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSource {
   static createDescriptor(
     descriptor: Partial<ESGeoGridSourceDescriptor>
   ): ESGeoGridSourceDescriptor {
@@ -297,7 +292,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
       const aggr = esResponse.aggregations
-        ?.compositeSplit as estypes.AggregationsCompositeBucketAggregate;
+        ?.compositeSplit as estypes.AggregationsCompositeAggregate;
       afterKey = aggr.after_key;
       if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back
@@ -424,15 +419,11 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     } as GeoJsonWithMeta;
   }
 
-  // TODO rename to getMvtSourceLayerName
-  getLayerName(): string {
-    return ES_MVT_AGGS_LAYER_NAME;
+  getTileSourceLayer(): string {
+    return 'aggs';
   }
 
-  // TODO rename to getMvtUrlTemplateWithMeta
-  async getUrlTemplateWithMeta(
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<ITiledSingleLayerMvtParams> {
+  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
@@ -447,20 +438,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     const requestType =
       this._descriptor.requestType === RENDER_AS.GRID ? RENDER_AS.GRID : RENDER_AS.POINT;
 
-    const urlTemplate = `${mvtUrlServicePath}\
+    return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &requestBody=${risonDsl}\
-&requestType=${requestType}`;
-
-    return {
-      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
-      layerName: this.getLayerName(),
-      minSourceZoom: this.getMinZoom(),
-      maxSourceZoom: this.getMaxZoom(),
-      urlTemplate,
-    };
+&requestType=${requestType}\
+&token=${refreshToken}`;
   }
 
   isFilterByMapBounds(): boolean {

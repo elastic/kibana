@@ -58,7 +58,6 @@ describe('<BrowserAdvancedFields />', () => {
 
     const syntheticsArgs = getByLabelText('Synthetics args');
     const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
-
     expect(screenshots.value).toEqual(defaultConfig[ConfigKey.SCREENSHOTS]);
     expect(syntheticsArgs).toBeInTheDocument();
   });

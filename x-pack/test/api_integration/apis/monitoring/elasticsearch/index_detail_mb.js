@@ -8,10 +8,11 @@
 import expect from '@kbn/expect';
 import indexDetailFixture from './fixtures/index_detail';
 import indexDetailAdvancedFixture from './fixtures/index_detail_advanced';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('index detail mb', () => {
     const archive =
@@ -22,11 +23,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize index with chart metrics data for the non-advanced view', async () => {

@@ -16,9 +16,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const esClient = getService('es');
+  const security = getService('security');
 
   describe('Home page', function () {
     before(async () => {
+      await security.testUser.setRoles(['manage_ilm'], true);
       await esClient.snapshot.createRepository({
         name: repoName,
         body: {
@@ -30,11 +32,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         verify: false,
       });
+
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
     });
     after(async () => {
       await esClient.snapshot.deleteRepository({ name: repoName });
       await esClient.ilm.deleteLifecycle({ name: policyName });
+      await security.testUser.restoreDefaults();
     });
 
     it('Loads the app', async () => {

@@ -12,14 +12,14 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../alerting/common';
-import { AlertExecutorOptions, AlertServices, AlertType } from '../../alerting/server';
+import { AlertExecutorOptions, AlertServices, RuleType } from '../../alerting/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
   TState extends AlertTypeState,
   TParams extends AlertTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
+> = RuleType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export type AlertTypeExecutor<
   TState extends AlertTypeState,
@@ -38,7 +38,7 @@ export type AlertTypeWithExecutor<
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {}
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
   'executor'
 > & {
   executor: AlertTypeExecutor<TState, TParams, TAlertInstanceContext, TServices>;

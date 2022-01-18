@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from 'src/core/public';
+import { OverlayModalStart, ThemeServiceStart } from 'src/core/public';
 
 import {
   EuiIcon,
@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 
-import { IIndexPattern } from '../../../../../../../data/public';
+import { DataView } from '../../../../../../../data_views/public';
 import { IndexedFieldItem } from '../../types';
 
 // localized labels
@@ -174,11 +174,12 @@ const conflictType = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;
   openModal: OverlayModalStart['open'];
+  theme: ThemeServiceStart;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -311,7 +312,8 @@ export const getConflictModalContent = ({
 const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
-  openModal: IndexedFieldProps['openModal']
+  openModal: IndexedFieldProps['openModal'],
+  theme: ThemeServiceStart
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -322,7 +324,8 @@ const getConflictBtn = (
           },
           fieldName,
           conflictDescriptions,
-        })
+        }),
+        { theme$: theme.theme$ }
       )
     );
   };
@@ -349,11 +352,18 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   renderFieldType(type: string, field: IndexedFieldItem) {
+    const conflictDescription =
+      field.conflictDescriptions && field.conflictDescriptions[field.name];
     return (
       <span>
-        {type !== 'conflict' ? type : ''}
+        {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
-          ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
+          ? getConflictBtn(
+              field.name,
+              field.conflictDescriptions,
+              this.props.openModal,
+              this.props.theme
+            )
           : ''}
       </span>
     );

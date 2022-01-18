@@ -45,7 +45,8 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
                 }}
               />
             </p>
-          </EuiCallOut>
+          </EuiCallOut>,
+          { theme$: services.core.theme.theme$ }
         )
       );
 

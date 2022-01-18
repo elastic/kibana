@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { AlertService } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 

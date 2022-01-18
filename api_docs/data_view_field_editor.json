@@ -488,7 +488,7 @@
           "\nA React component for editing custom field format params"
         ],
         "signature": [
-          "(React.ComponentClass<",
+          "React.ComponentType<",
           {
             "pluginId": "dataViewFieldEditor",
             "scope": "public",
@@ -496,15 +496,7 @@
             "section": "def-public.FormatEditorProps",
             "text": "FormatEditorProps"
           },
-          "<FormatParams>, any> & { formatId: string; }) | (React.FunctionComponent<",
-          {
-            "pluginId": "dataViewFieldEditor",
-            "scope": "public",
-            "docId": "kibDataViewFieldEditorPluginApi",
-            "section": "def-public.FormatEditorProps",
-            "text": "FormatEditorProps"
-          },
-          "<FormatParams>> & { formatId: string; })"
+          "<FormatParams>> & { formatId: string; }"
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,

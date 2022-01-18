@@ -39,7 +39,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findAllFields() {
-      return await testSubjects.findAll('lnsFieldListPanelField');
+      const fields = await testSubjects.findAll('lnsFieldListPanelField');
+      return await Promise.all(fields.map((field) => field.getVisibleText()));
     },
 
     async isLensPageOrFail() {
@@ -467,12 +468,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await comboBox.setCustom('indexPattern-dimension-time-shift', shift);
     },
 
+    async enableFilter() {
+      await testSubjects.click('indexPattern-advanced-popover');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filter-by-enable');
+      });
+    },
+
+    async setFilterBy(queryString: string) {
+      this.typeFilter(queryString);
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
+      });
+    },
+
+    async typeFilter(queryString: string) {
+      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
+      await queryInput.type(queryString);
+    },
+
     async hasFixAction() {
       return await testSubjects.exists('errorFixAction');
     },
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
+      await this.waitForVisualization();
     },
 
     async isTopLevelAggregation() {
@@ -489,8 +510,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async addFilterToAgg(queryString: string) {
       await testSubjects.click('lns-newBucket-add');
-      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
-      await queryInput.type(queryString);
+      this.typeFilter(queryString);
       // Problem here is that after typing in the queryInput a dropdown will fetch the server
       // with suggestions and show up. Depending on the cursor position and some other factors
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
@@ -504,6 +524,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.common.pressEnterKey();
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
+
+    /**
+     * Add new term to Top values/terms agg
+     * @param opts field to add
+     */
+    async addTermToAgg(field: string) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
+      ).length;
+      await testSubjects.click('indexPattern-terms-add-field');
+      // count the number of defined terms
+      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, field);
+    },
+
+    async checkTermsAreNotAvailableToAgg(fields: string[]) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
+      ).length;
+      await testSubjects.click('indexPattern-terms-add-field');
+      // count the number of defined terms
+      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
+      // await comboBox.openOptionsList(target);
+      for (const field of fields) {
+        await comboBox.setCustom(`indexPattern-dimension-field-${lastIndex}`, field);
+        await comboBox.openOptionsList(target);
+        await testSubjects.missingOrFail(`lns-fieldOption-${field}`);
+      }
+    },
+
     /**
      * Save the current Lens visualization.
      */
@@ -558,10 +609,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
+    hasVisualOptionsButton() {
+      return testSubjects.exists('lnsVisualOptionsButton');
+    },
     async openVisualOptions() {
       await retry.try(async () => {
         await testSubjects.click('lnsVisualOptionsButton');
         await testSubjects.exists('lnsVisualOptionsButton');
+      });
+    },
+    async retrySetValue(
+      input: string,
+      value: string,
+      options = {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      } as Record<string, boolean>
+    ) {
+      await retry.try(async () => {
+        await testSubjects.setValue(input, value, options);
+        expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
       });
     },
     async useCurvedLines() {
@@ -807,6 +874,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, {});
     },
 
+    async getCountOfDatatableColumns() {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      return (await $('.euiDataGridHeaderCell__content')).length;
+    },
+
     async getDatatableHeader(index = 0) {
       log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
@@ -817,13 +890,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      const table = await find.byCssSelector('.euiDataGrid');
-      const $ = await table.parseDomContent();
-      const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
-          rowIndex * columnNumber + colIndex + 2
-        })`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
       );
     },
 
@@ -1189,6 +1257,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`legend-${value}`);
       const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
       await filterIn.click();
+    },
+
+    hasEmptySizeRatioButtonGroup() {
+      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
   });
 }

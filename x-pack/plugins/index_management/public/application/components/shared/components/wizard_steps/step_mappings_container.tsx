@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
+import { useLoadNodesPlugins } from '../../../../services';
 import { CommonWizardSteps } from './types';
 import { StepMappings } from './step_mappings';
 
@@ -20,6 +21,7 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBa
     CommonWizardSteps,
     'mappings'
   >('mappings');
+  const { data: esNodesPlugins } = useLoadNodesPlugins();
 
   return (
     <StepMappings
@@ -27,6 +29,7 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBa
       onChange={updateContent}
       indexSettings={getSingleContentData('settings')}
       esDocsBase={esDocsBase}
+      esNodesPlugins={esNodesPlugins ?? []}
     />
   );
 };

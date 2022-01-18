@@ -8,3 +8,10 @@
 
 export const PLUGIN_ID = 'home';
 export const HOME_APP_BASE_PATH = `/app/${PLUGIN_ID}`;
+
+export enum TutorialsCategory {
+  LOGGING = 'logging',
+  SECURITY_SOLUTION = 'security',
+  METRICS = 'metrics',
+  OTHER = 'other',
+}

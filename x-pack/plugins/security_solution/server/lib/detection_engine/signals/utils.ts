@@ -61,6 +61,8 @@ import {
 import { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import { withSecuritySpan } from '../../../utils/with_security_span';
+
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];
@@ -116,7 +118,7 @@ export const hasReadIndexPrivileges = async (args: {
     const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
-    logger.error(buildRuleMessage(errorString));
+    logger.warn(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
@@ -166,7 +168,7 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-    logger.error(buildRuleMessage(errorString.trimEnd()));
+    logger.warn(buildRuleMessage(errorString.trimEnd()));
     await ruleStatusClient.logStatusChange({
       message: errorString.trimEnd(),
       ruleId,
@@ -193,7 +195,7 @@ export const hasTimestampFields = async (args: {
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
-    logger.error(buildRuleMessage(errorString));
+    logger.warn(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
@@ -217,21 +219,25 @@ export const checkPrivilegesFromEsClient = async (
   esClient: ElasticsearchClient,
   indices: string[]
 ): Promise<Privilege> =>
-  (
-    await esClient.transport.request({
-      path: '/_security/user/_has_privileges',
-      method: 'POST',
-      body: {
-        index: [
-          {
-            names: indices ?? [],
-            allow_restricted_indices: true,
-            privileges: ['read'],
+  withSecuritySpan(
+    'checkPrivilegesFromEsClient',
+    async () =>
+      (
+        await esClient.transport.request({
+          path: '/_security/user/_has_privileges',
+          method: 'POST',
+          body: {
+            index: [
+              {
+                names: indices ?? [],
+                allow_restricted_indices: true,
+                privileges: ['read'],
+              },
+            ],
           },
-        ],
-      },
-    })
-  ).body as Privilege;
+        })
+      ).body as Privilege
+  );
 
 export const getNumCatchupIntervals = ({
   gap,
@@ -946,10 +952,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds estypes.SearchSortResults | undefined
+ * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int

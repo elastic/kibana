@@ -16,7 +16,7 @@ import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { Document, injectFilterReferences } from '../../persistence';
+import { Document } from '../../persistence';
 
 export const getPersisted = async ({
   initialInput,
@@ -99,8 +99,6 @@ export function loadInitial(
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
-  const currentSessionId = data.search.session.getSessionId();
-
   const { lens } = store.getState();
   if (
     !initialInput ||
@@ -115,7 +113,7 @@ export function loadInitial(
           initEmpty({
             newState: {
               ...emptyState,
-              searchSessionId: currentSessionId || data.search.session.start(),
+              searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
               datasourceStates: Object.entries(result).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
@@ -164,7 +162,7 @@ export function loadInitial(
             {}
           );
 
-          const filters = injectFilterReferences(doc.state.filters, doc.references);
+          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
 
@@ -178,6 +176,7 @@ export function loadInitial(
             }
           )
             .then((result) => {
+              const currentSessionId = data.search.session.getSessionId();
               store.dispatch(
                 setState({
                   isSaveable: true,

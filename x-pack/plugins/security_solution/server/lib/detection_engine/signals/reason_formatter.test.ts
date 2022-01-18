@@ -6,18 +6,15 @@
  */
 
 import { buildReasonMessageUtil } from './reason_formatters';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SignalSourceHit } from './types';
 
 describe('reason_formatter', () => {
-  let rule: RulesSchema;
+  let name: string;
+  let severity: string;
   let mergedDoc: SignalSourceHit;
   beforeAll(() => {
-    rule = {
-      name: 'my-rule',
-      risk_score: 9000,
-      severity: 'medium',
-    } as RulesSchema; // Cast here as all fields aren't required
+    name = 'my-rule';
+    severity = 'medium';
     mergedDoc = {
       _index: 'index-1',
       _id: 'id-1',
@@ -40,7 +37,7 @@ describe('reason_formatter', () => {
   describe('buildReasonMessageUtil', () => {
     describe('when rule and mergedDoc are provided', () => {
       it('should return the full reason message', () => {
-        expect(buildReasonMessageUtil({ rule, mergedDoc })).toMatchInlineSnapshot(
+        expect(buildReasonMessageUtil({ name, severity, mergedDoc })).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
         );
       });
@@ -54,7 +51,9 @@ describe('reason_formatter', () => {
             'event.category': ['item one', 'item two'],
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toMatchInlineSnapshot(
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
           `"item one, item two event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
         );
       });
@@ -68,7 +67,9 @@ describe('reason_formatter', () => {
             'host.name': ['-'],
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toMatchInlineSnapshot(
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user created medium alert my-rule."`
         );
       });
@@ -82,7 +83,9 @@ describe('reason_formatter', () => {
             'user.name': ['-'],
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toMatchInlineSnapshot(
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, on host created medium alert my-rule."`
         );
       });
@@ -97,7 +100,7 @@ describe('reason_formatter', () => {
           },
         };
         expect(
-          buildReasonMessageUtil({ rule, mergedDoc: noDestinationPortDoc })
+          buildReasonMessageUtil({ name, severity, mergedDoc: noDestinationPortDoc })
         ).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9 by test-user on host created medium alert my-rule."`
         );
@@ -112,7 +115,7 @@ describe('reason_formatter', () => {
           },
         };
         expect(
-          buildReasonMessageUtil({ rule, mergedDoc: noDestinationPortDoc })
+          buildReasonMessageUtil({ name, severity, mergedDoc: noDestinationPortDoc })
         ).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, by test-user on host created medium alert my-rule."`
         );
@@ -127,7 +130,9 @@ describe('reason_formatter', () => {
             'source.port': ['-'],
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: noSourcePortDoc })).toMatchInlineSnapshot(
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: noSourcePortDoc })
+        ).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1 destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
         );
       });
@@ -140,7 +145,9 @@ describe('reason_formatter', () => {
             'source.port': ['-'],
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: noSourcePortDoc })).toMatchInlineSnapshot(
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: noSourcePortDoc })
+        ).toMatchInlineSnapshot(
           `"test event with process doingThings.exe, parent process didThings.exe, file sample, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
         );
       });
@@ -155,7 +162,9 @@ describe('reason_formatter', () => {
             'process.parent.name': ['-'],
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toMatchInlineSnapshot(
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
           `"test event with file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
         );
       });
@@ -170,14 +179,14 @@ describe('reason_formatter', () => {
             '@timestamp': '2021-08-11T02:28:59.101Z',
           },
         };
-        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toMatchInlineSnapshot(
-          `"test event by test-user created medium alert my-rule."`
-        );
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(`"test event by test-user created medium alert my-rule."`);
       });
     });
     describe('when only rule is provided', () => {
       it('should return the reason message without host name or user name', () => {
-        expect(buildReasonMessageUtil({ rule })).toMatchInlineSnapshot(`""`);
+        expect(buildReasonMessageUtil({ name, severity })).toMatchInlineSnapshot(`""`);
       });
     });
   });

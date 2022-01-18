@@ -24,9 +24,17 @@ import { nodeBuilder, KueryNode } from '@kbn/es-query';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import {
-  AssociationType,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
+  MAX_CONCURRENT_SEARCHES,
+  MAX_DOCS_PER_PAGE,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
+import {
+  OWNER_FIELD,
+  GetCaseIdsByAlertIdAggs,
+  AssociationType,
   CaseResponse,
   CasesFindRequest,
   CaseStatuses,
@@ -34,24 +42,18 @@ import {
   caseTypeField,
   CommentAttributes,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  GetCaseIdsByAlertIdAggs,
-  MAX_CONCURRENT_SEARCHES,
-  MAX_DOCS_PER_PAGE,
-  OWNER_FIELD,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   SubCaseResponse,
   User,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import {
   defaultSortField,
   flattenCaseSavedObject,
   flattenSubCaseSavedObject,
   groupTotalAlertsByID,
-  SavedObjectFindOptionsKueryNode,
-} from '../../common';
+} from '../../common/utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { ClientArgs } from '..';
 import { combineFilters } from '../../client/utils';

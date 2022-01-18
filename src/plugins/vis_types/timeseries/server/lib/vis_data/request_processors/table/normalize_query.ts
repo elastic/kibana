@@ -41,14 +41,16 @@ export const normalizeQuery: TableRequestProcessorsFunction = () => {
         };
 
         overwrite(normalizedSeries, `${seriesId}`, agg);
-        overwrite(normalizedSeries, `${seriesId}.meta`, meta);
+        overwrite(normalizedSeries, `${seriesId}.meta`, {
+          ...meta,
+          normalized: true,
+        });
       } else {
         overwrite(normalizedSeries, `${seriesId}`, value);
       }
     });
 
     overwrite(doc, 'aggs.pivot.aggs', normalizedSeries);
-
     return doc;
   };
 };

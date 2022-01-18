@@ -18,6 +18,11 @@ import { AlertsCountAggregation } from './types';
 jest.mock('../../../../common/lib/kibana');
 const mockDispatch = jest.fn();
 
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
   return {

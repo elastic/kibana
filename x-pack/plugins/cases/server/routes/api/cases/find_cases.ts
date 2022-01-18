@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CASES_URL, CasesFindRequest } from '../../../../common';
+import { CasesFindRequest } from '../../../../common/api';
+import { CASES_URL } from '../../../../common/constants';
 import { wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
 

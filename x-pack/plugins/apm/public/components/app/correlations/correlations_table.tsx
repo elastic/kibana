@@ -122,7 +122,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
 
 const loadingText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.loadingText',
-  { defaultMessage: 'Loading' }
+  { defaultMessage: 'Loading...' }
 );
 
 const noDataText = i18n.translate(

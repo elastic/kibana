@@ -29,7 +29,7 @@ export interface CtiEnrichmentIdentifiers {
   field: string | undefined;
   value: string | undefined;
   type: string | undefined;
-  provider: string | undefined;
+  feedName: string | undefined;
 }
 
 export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {

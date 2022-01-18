@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should allow to change timerange from the visualization in embedded mode', async () => {
         await retry.try(async () => {
-          await PageObjects.visChart.filterOnTableCell(1, 7);
+          await PageObjects.visChart.filterOnTableCell(0, 6);
           await PageObjects.header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
 

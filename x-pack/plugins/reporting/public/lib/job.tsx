@@ -7,7 +7,6 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
@@ -38,6 +37,7 @@ export class Job {
   public spaceId: ReportPayload['spaceId'];
   public browserTimezone?: ReportPayload['browserTimezone'];
   public layout: ReportPayload['layout'];
+  public version: ReportPayload['version'];
 
   public jobtype: ReportSource['jobtype'];
   public created_by: ReportSource['created_by'];
@@ -51,7 +51,6 @@ export class Job {
   public timeout: ReportSource['timeout'];
   public kibana_name: ReportSource['kibana_name'];
   public kibana_id: ReportSource['kibana_id'];
-  public browser_type: ReportSource['browser_type'];
 
   public size?: ReportOutput['size'];
   public content_type?: TaskRunResult['content_type'];
@@ -69,6 +68,7 @@ export class Job {
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
     this.layout = report.payload.layout;
+    this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;
     this.started_at = report.started_at;
@@ -80,7 +80,6 @@ export class Job {
     this.timeout = report.timeout;
     this.kibana_name = report.kibana_name;
     this.kibana_id = report.kibana_id;
-    this.browser_type = report.browser_type;
     this.browserTimezone = report.payload.browserTimezone;
     this.size = report.output?.size;
     this.content_type = report.output?.content_type;
@@ -143,34 +142,32 @@ export class Job {
     return null;
   }
 
-  getStatus() {
-    const statusLabel = jobStatusLabelsMap.get(this.status) as string;
-    const statusTimestamp = this.getStatusTimestamp();
-
-    if (statusTimestamp) {
-      return (
-        <FormattedMessage
-          id="xpack.reporting.jobStatusDetail.statusTimestampText"
-          defaultMessage="{statusLabel} at {statusTimestamp}"
-          values={{
-            statusLabel,
-            statusTimestamp: (
-              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-            ),
-          }}
-        />
-      );
-    }
-
-    return statusLabel;
+  public get prettyStatus(): string {
+    return (
+      jobStatusLabelsMap.get(this.status) ??
+      i18n.translate('xpack.reporting.jobStatusDetail.unknownText', { defaultMessage: 'Unknown' })
+    );
   }
 
-  getStatusLabel() {
-    return (
-      <>
-        {this.getStatus()} {this.getStatusMessage()}
-      </>
-    );
+  public get canLinkToKibanaApp(): boolean {
+    return Boolean(this.locatorParams);
+  }
+
+  public get isDownloadReady(): boolean {
+    return this.status === JOB_STATUSES.COMPLETED || this.status === JOB_STATUSES.WARNINGS;
+  }
+
+  public get prettyTimeout(): string {
+    if (this.timeout == null) {
+      return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSecondsUnknown', {
+        defaultMessage: 'Unknown',
+      });
+    }
+    const seconds = this.timeout / 1000;
+    return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSeconds', {
+      defaultMessage: '{timeout} seconds',
+      values: { timeout: seconds },
+    });
   }
 
   /**

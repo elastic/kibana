@@ -8,8 +8,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
@@ -20,7 +21,9 @@ import {
   connectorsMock,
 } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses, CaseType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -34,6 +37,7 @@ import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { waitForComponentToUpdate } from '../../common/test_utils';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -43,6 +47,9 @@ jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../app/use_available_owners', () => ({
+  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+}));
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -172,7 +179,7 @@ describe('AllCasesListGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.fullName
+        useGetCasesMockState.data.cases[0].createdBy.username
       );
       expect(
         wrapper
@@ -774,5 +781,104 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(doRefresh).toHaveBeenCalled();
+  });
+
+  it('shows Solution column if there are no set owners', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders owner={[]}>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeTruthy();
+    });
+  });
+
+  it('hides Solution column if there is a set owner', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeFalsy();
+    });
+  });
+
+  it('should deselect cases when refreshing', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByText('Refresh'));
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
+  });
+
+  it('should deselect cases when changing filters', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    const { rerender } = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    /** Something really weird is going on and we have to rerender
+     * to get the correct html output. Not sure why.
+     *
+     * If you run the test alone the rerender is not needed.
+     * If you run the test along with the above test
+     * then you need the rerender
+     */
+    rerender(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
   });
 });

@@ -238,7 +238,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public start(core: CoreStart): FleetStart {
+  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
@@ -260,11 +260,12 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           return { success: false };
         })
         .then((permissionsResponse) => {
-          if (permissionsResponse.success) {
+          if (permissionsResponse?.success) {
             // If superuser, give access to everything
             return calculateAuthz({
               fleet: { all: true, setup: true },
               integrations: { all: true, read: true },
+              isSuperuser: true,
             });
           } else {
             // All other users only get access to read integrations if they have the read privilege
@@ -272,6 +273,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             return calculateAuthz({
               fleet: { all: false, setup: false },
               integrations: { all: false, read: capabilities.fleet.read as boolean },
+              isSuperuser: false,
             });
           }
         }),

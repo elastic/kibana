@@ -1012,7 +1012,7 @@ export class DataRecognizer {
         // if the job has custom_urls
         if (job.config.custom_settings && job.config.custom_settings.custom_urls) {
           // loop through each url, replacing the INDEX_PATTERN_ID marker
-          job.config.custom_settings.custom_urls.forEach((cUrl) => {
+          job.config.custom_settings.custom_urls.forEach((cUrl: any) => {
             const url = cUrl.url_value;
             if (url.match(INDEX_PATTERN_ID)) {
               const newUrl = url.replace(
@@ -1117,7 +1117,7 @@ export class DataRecognizer {
       try {
         // Checks if all jobs in the module have the same time field configured
         const firstJobTimeField =
-          this._jobsForModelMemoryEstimation[0].job.config.data_description.time_field;
+          this._jobsForModelMemoryEstimation[0].job.config.data_description.time_field!;
         const isSameTimeFields = this._jobsForModelMemoryEstimation.every(
           ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
@@ -1139,7 +1139,7 @@ export class DataRecognizer {
           let latestMs = end;
           if (earliestMs === undefined || latestMs === undefined) {
             const timeFieldRange = await this._getFallbackTimeRange(
-              job.config.data_description.time_field,
+              job.config.data_description.time_field!,
               query
             );
             earliestMs = timeFieldRange.start;
@@ -1150,7 +1150,7 @@ export class DataRecognizer {
             job.config.analysis_config,
             this._indexPatternName,
             query,
-            job.config.data_description.time_field,
+            job.config.data_description.time_field!,
             earliestMs,
             latestMs
           );

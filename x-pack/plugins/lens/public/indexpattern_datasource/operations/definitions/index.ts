@@ -36,6 +36,7 @@ import { lastValueOperation } from './last_value';
 import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
 import type {
   BaseIndexPatternColumn,
+  IncompleteColumn,
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
@@ -44,7 +45,7 @@ import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { rangeOperation } from './ranges';
-import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
+import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
 export type {
   IncompleteColumn,
@@ -158,6 +159,30 @@ export interface ParamEditorProps<C> {
   paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
+export interface FieldInputProps<C> {
+  layer: IndexPatternLayer;
+  selectedColumn?: C;
+  columnId: string;
+  indexPattern: IndexPattern;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
+  onDeleteColumn?: () => void;
+  currentFieldIsInvalid: boolean;
+  incompleteField: IncompleteColumn['sourceField'] | null;
+  incompleteOperation: IncompleteColumn['operationType'];
+  incompleteParams: Omit<IncompleteColumn, 'sourceField' | 'operationType'>;
+  dimensionGroups: IndexPatternDimensionEditorProps['dimensionGroups'];
+  groupId: IndexPatternDimensionEditorProps['groupId'];
+  /**
+   * indexPatternId -> fieldName -> boolean
+   */
+  existingFields: Record<string, Record<string, boolean>>;
+  operationSupportMatrix: OperationSupportMatrix;
+  helpMessage?: React.ReactNode;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
+}
+
 export interface HelpProps<C> {
   currentColumn: C;
   uiSettings: IUiSettingsClient;
@@ -199,7 +224,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     changedColumnId: string
   ) => C;
   /**
-   * React component for operation specific settings shown in the popover editor
+   * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
@@ -268,7 +293,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * This flag is used by the formula to assign the kql= and lucene= named arguments and set up
    * autocomplete.
    */
-  filterable?: boolean;
+  filterable?: boolean | { helpMessage: string };
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -281,6 +306,18 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
+  /**
+   * React component for operation field specific behaviour
+   */
+  renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
+  /**
+   * Verify if the a new field can be added to the column
+   */
+  canAddNewField?: (column: C, field: IndexPatternField) => boolean;
+  /**
+   * Operation can influence some visual default settings. This function is used to collect default values offered
+   */
+  getDefaultVisualSettings?: (column: C) => { truncateText?: boolean };
 }
 
 interface BaseBuildColumnArgs {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PromiseType } from 'utility-types';
 export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
 export type {
@@ -26,16 +25,6 @@ export type MaybePromise<T> = T | Promise<T>;
  * Converts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function.
  */
 export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
-
-/**
- * Returns wrapped type of a `Promise`.
- */
-export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
-
-/**
- * Returns wrapped type of a promise, or returns type as is, if it is not a promise.
- */
-export type UnwrapPromiseOrReturn<T> = T extends Promise<infer U> ? U : T;
 
 /**
  * Minimal interface for an object resembling an `Observable`.

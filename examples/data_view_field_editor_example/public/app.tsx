@@ -20,23 +20,20 @@ import {
   DefaultItemAction,
 } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import {
-  DataPublicPluginStart,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
+import type { DataView, DataViewField } from '../../../src/plugins/data_views/public';
 import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_field_editor/public';
 
 interface Props {
-  indexPattern?: IndexPattern;
+  dataView?: DataView;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
 }
 
-const IndexPatternFieldEditorExample = ({ indexPattern, dataViewFieldEditor }: Props) => {
-  const [fields, setFields] = useState<IndexPatternField[]>(
-    indexPattern?.getNonScriptedFields() || []
+const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) => {
+  const [fields, setFields] = useState<DataViewField[]>(
+    dataView?.fields.getAll().filter((f) => !f.scripted) || []
   );
-  const refreshFields = () => setFields(indexPattern?.getNonScriptedFields() || []);
+  const refreshFields = () => setFields(dataView?.fields.getAll().filter((f) => !f.scripted) || []);
   const columns = [
     {
       field: 'name',
@@ -51,9 +48,9 @@ const IndexPatternFieldEditorExample = ({ indexPattern, dataViewFieldEditor }: P
           icon: 'pencil',
           type: 'icon',
           'data-test-subj': 'editField',
-          onClick: (fld: IndexPatternField) =>
+          onClick: (fld: DataViewField) =>
             dataViewFieldEditor.openEditor({
-              ctx: { dataView: indexPattern! },
+              ctx: { dataView: dataView! },
               fieldName: fld.name,
               onSave: refreshFields,
             }),
@@ -65,27 +62,27 @@ const IndexPatternFieldEditorExample = ({ indexPattern, dataViewFieldEditor }: P
           type: 'icon',
           'data-test-subj': 'deleteField',
           available: (fld) => !!fld.runtimeField,
-          onClick: (fld: IndexPatternField) =>
+          onClick: (fld: DataViewField) =>
             dataViewFieldEditor.openDeleteModal({
               fieldName: fld.name,
               ctx: {
-                dataView: indexPattern!,
+                dataView: dataView!,
               },
               onDelete: refreshFields,
             }),
         },
-      ] as Array<DefaultItemAction<IndexPatternField>>,
+      ] as Array<DefaultItemAction<DataViewField>>,
     },
   ];
 
-  const content = indexPattern ? (
+  const content = dataView ? (
     <>
-      <EuiText data-test-subj="indexPatternTitle">Index pattern: {indexPattern?.title}</EuiText>
+      <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
       <div>
         <EuiButton
           onClick={() =>
             dataViewFieldEditor.openEditor({
-              ctx: { dataView: indexPattern! },
+              ctx: { dataView },
               onSave: refreshFields,
             })
           }
@@ -94,7 +91,7 @@ const IndexPatternFieldEditorExample = ({ indexPattern, dataViewFieldEditor }: P
           Add field
         </EuiButton>
       </div>
-      <EuiInMemoryTable<IndexPatternField>
+      <EuiInMemoryTable<DataViewField>
         items={fields}
         columns={columns}
         pagination={true}
@@ -108,13 +105,13 @@ const IndexPatternFieldEditorExample = ({ indexPattern, dataViewFieldEditor }: P
       />
     </>
   ) : (
-    <p>Please create an index pattern</p>
+    <p>Please create a data view</p>
   );
 
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>Index pattern field editor demo</EuiPageHeader>
+        <EuiPageHeader>Data view field editor demo</EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>{content}</EuiPageContentBody>
         </EuiPageContent>
@@ -132,12 +129,9 @@ export const renderApp = async (
   { data, dataViewFieldEditor }: RenderAppDependencies,
   { element }: AppMountParameters
 ) => {
-  const indexPattern = (await data.indexPatterns.getDefault()) || undefined;
+  const dataView = (await data.dataViews.getDefault()) || undefined;
   ReactDOM.render(
-    <IndexPatternFieldEditorExample
-      indexPattern={indexPattern}
-      dataViewFieldEditor={dataViewFieldEditor}
-    />,
+    <DataViewFieldEditorExample dataView={dataView} dataViewFieldEditor={dataViewFieldEditor} />,
     element
   );
 

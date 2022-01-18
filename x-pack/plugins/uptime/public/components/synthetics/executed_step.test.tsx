@@ -28,7 +28,11 @@ describe('ExecutedStep', () => {
       synthetics: {
         step: {
           index: 4,
+          status: 'succeeded',
           name: 'STEP_NAME',
+          duration: {
+            us: 9999,
+          },
         },
         type: 'step/end',
       },
@@ -43,7 +47,11 @@ describe('ExecutedStep', () => {
       },
       step: {
         index: 3,
+        status: 'succeeded',
         name: 'STEP_NAME',
+        duration: {
+          us: 9999,
+        },
       },
       type: 'step/end',
     };

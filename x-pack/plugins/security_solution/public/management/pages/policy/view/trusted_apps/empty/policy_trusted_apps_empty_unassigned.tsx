@@ -10,7 +10,7 @@ import { EuiEmptyPrompt, EuiButton, EuiPageTemplate, EuiLink } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_trusted_apps_empty_hooks';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 interface CommonProps {
   policyId: string;
@@ -18,7 +18,7 @@ interface CommonProps {
 }
 
 export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, policyName }) => {
-  const { isPlatinumPlus } = useEndpointPrivileges();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
   const onClickPrimaryButtonHandler = useCallback(
@@ -49,7 +49,7 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
           />
         }
         actions={[
-          ...(isPlatinumPlus
+          ...(canCreateArtifactsByPolicy
             ? [
                 <EuiButton
                   color="primary"

@@ -13,7 +13,7 @@ import { Capabilities } from 'src/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { UserPrivilegesProvider } from '../../../common/components/user_privileges';
+import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');

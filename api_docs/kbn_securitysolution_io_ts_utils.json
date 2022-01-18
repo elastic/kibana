@@ -207,10 +207,8 @@
         ],
         "signature": [
           "<A>(validation: ",
-          "Either",
-          "<",
-          "Errors",
-          ", A>) => string[]"
+          "Validation",
+          "<A>) => string[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
         "deprecated": false,
@@ -225,10 +223,8 @@
               "The validation to get the errors from"
             ],
             "signature": [
-              "Either",
-              "<",
-              "Errors",
-              ", A>"
+              "Validation",
+              "<A>"
             ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
             "deprecated": false,

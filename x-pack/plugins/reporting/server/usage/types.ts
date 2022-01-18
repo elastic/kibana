@@ -89,7 +89,6 @@ export interface AvailableTotal {
 
 // FIXME: find a way to get this from exportTypesHandler or common/constants
 type BaseJobTypes =
-  | 'csv'
   | 'csv_searchsource'
   | 'csv_searchsource_immediate'
   | 'PNG'
@@ -129,7 +128,6 @@ export type RangeStats = JobTypes & {
 
 export type ReportingUsageType = RangeStats & {
   available: boolean;
-  browser_type: string;
   enabled: boolean;
   last7Days: RangeStats;
 };

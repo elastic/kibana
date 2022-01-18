@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { take } from 'lodash';
-import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { ApmServices } from '../../../common/config';
 
 export async function getErrorGroupIds({
@@ -15,7 +14,7 @@ export async function getErrorGroupIds({
   serviceName = 'opbeans-java',
   count = 5,
 }: {
-  apmApiClient: PromiseReturnType<ApmServices['apmApiClient']>;
+  apmApiClient: Awaited<ReturnType<ApmServices['apmApiClient']>>;
   start: number;
   end: number;
   serviceName?: string;

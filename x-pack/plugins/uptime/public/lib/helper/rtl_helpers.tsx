@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
@@ -15,6 +15,7 @@ import {
   Nullish,
 } from '@testing-library/react';
 import { Router } from 'react-router-dom';
+import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -37,17 +38,21 @@ import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mo
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 interface KibanaProps {
   services?: KibanaServices;
 }
 
 export interface KibanaProviderOptions<ExtraCore> {
-  core?: Partial<CoreStart> & ExtraCore;
+  core?: DeepPartial<CoreStart> & Partial<ExtraCore>;
   kibanaProps?: KibanaProps;
 }
 
 interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
-  children: ReactElement;
+  children: ReactElement | ReactNode;
 }
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
@@ -64,7 +69,7 @@ type Url =
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
   history?: History;
   renderOptions?: Omit<RenderOptions, 'queries'>;
-  state?: Partial<AppState>;
+  state?: Partial<AppState> | DeepPartial<AppState>;
   url?: Url;
 }
 
@@ -124,6 +129,7 @@ const mockCore: () => Partial<CoreStart> = () => {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+      ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
   };
 
@@ -136,14 +142,15 @@ export function MockKibanaProvider<ExtraCore>({
   core,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const coreOptions = {
-    ...mockCore(),
-    ...core,
-  };
+  const coreOptions = merge({}, mockCore(), core);
+
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
       <UptimeRefreshContextProvider>
-        <UptimeStartupPluginsContextProvider data={(coreOptions as any).data}>
+        <UptimeStartupPluginsContextProvider
+          data={(coreOptions as any).data}
+          observability={(coreOptions as any).observability}
+        >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
           </EuiThemeProvider>
@@ -169,6 +176,27 @@ export function MockRouter<ExtraCore>({
 }
 configure({ testIdAttribute: 'data-test-subj' });
 
+export const MockRedux = ({
+  state,
+  history = createMemoryHistory(),
+  children,
+}: {
+  state: Partial<AppState>;
+  history?: History;
+  children: React.ReactNode;
+}) => {
+  const testState: AppState = {
+    ...mockState,
+    ...state,
+  };
+
+  return (
+    <MountWithReduxProvider state={testState}>
+      <MockRouter history={history}>{children}</MockRouter>
+    </MountWithReduxProvider>
+  );
+};
+
 /* Custom react testing library render */
 export function render<ExtraCore>(
   ui: ReactElement,
@@ -181,10 +209,7 @@ export function render<ExtraCore>(
     url,
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
-  const testState: AppState = {
-    ...mockState,
-    ...state,
-  };
+  const testState: AppState = merge({}, mockState, state);
 
   if (url) {
     history = getHistoryFromUrl(url);
@@ -229,3 +254,61 @@ export const forNearestButton =
         noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
       );
     });
+
+export const makeUptimePermissionsCore = (
+  permissions: Partial<{
+    'alerting:save': boolean;
+    configureSettings: boolean;
+    save: boolean;
+    show: boolean;
+  }>
+) => {
+  return {
+    application: {
+      capabilities: {
+        uptime: {
+          'alerting:save': true,
+          configureSettings: true,
+          save: true,
+          show: true,
+          ...permissions,
+        },
+      },
+    },
+  };
+};
+
+// This function filters out the queried elements which appear only
+// either on mobile or desktop.
+//
+// It does so by filtering those with the class passed as the `classWrapper`.
+// For mobile, we filter classes which tell elements to be hidden on desktop.
+// For desktop, we do the opposite.
+//
+// We have this function because EUI will manipulate the visibility of some
+// elements through pure CSS, which we can't assert on tests. Therefore,
+// we look for the corresponding class wrapper.
+const finderWithClassWrapper =
+  (classWrapper: string) =>
+  (
+    getterFn: (f: MatcherFunction) => HTMLElement | null,
+    customAttribute?: keyof Element | keyof HTMLElement
+  ) =>
+  (text: string): HTMLElement | null =>
+    getterFn((_content: string, node: Nullish<Element>) => {
+      if (!node) return false;
+      // There are actually properties that are not in Element but which
+      // appear on the `node`, so we must cast the customAttribute as a keyof Element
+      const content = node[(customAttribute as keyof Element) ?? 'innerHTML'];
+      if (content === text && wrappedInClass(node, classWrapper)) return true;
+      return false;
+    });
+
+const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): boolean => {
+  if (element.className.includes(classWrapper)) return true;
+  if (element.parentElement) return wrappedInClass(element.parentElement, classWrapper);
+  return false;
+};
+
+export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
+export const forDesktopOnly = finderWithClassWrapper('hideForMobile');

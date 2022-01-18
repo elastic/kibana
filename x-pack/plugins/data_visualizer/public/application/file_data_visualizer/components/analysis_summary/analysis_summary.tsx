@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse, FILE_FORMATS } from '../../../../../../file_upload/common';
 
 export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
   const items = createDisplayItems(results);
@@ -60,7 +60,7 @@ function createDisplayItems(results: FindFileStructureResponse) {
       description: results.format,
     });
 
-    if (results.format === 'delimited') {
+    if (results.format === FILE_FORMATS.DELIMITED) {
       items.push({
         title: (
           <FormattedMessage

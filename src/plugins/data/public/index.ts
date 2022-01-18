@@ -83,6 +83,7 @@ export type {
   GetFieldsOptions,
   AggregationRestrictions,
   IndexPatternListItem,
+  DataViewListItem,
 } from '../common';
 export {
   ES_FIELD_TYPES,
@@ -187,6 +188,7 @@ export type {
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
+  SerializedSearchSourceFields,
   // errors
   IEsError,
   Reason,

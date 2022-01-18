@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { merge } from 'lodash';
-import { CasesContextValue, DEFAULT_FEATURES } from '../../../common';
+import { CasesContextValue, CasesFeatures } from '../../../common/ui/types';
+import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
 
@@ -16,7 +17,7 @@ export const CasesContext = React.createContext<CasesContextValue | undefined>(u
 export interface CasesContextProps
   extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'basePath' | 'features'> {
   basePath?: string;
-  features?: Partial<CasesContextValue['features']>;
+  features?: CasesFeatures;
 }
 
 export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {
@@ -29,7 +30,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
-  const [value, setValue] = useState<CasesContextStateValue>({
+  const [value, setValue] = useState<CasesContextStateValue>(() => ({
     owner,
     userCanCrud,
     basePath,
@@ -38,7 +39,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
      * of the DEFAULT_FEATURES object
      */
     features: merge({}, DEFAULT_FEATURES, features),
-  });
+  }));
 
   /**
    * `userCanCrud` prop may change by the parent plugin.

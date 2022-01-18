@@ -5,16 +5,17 @@
     "index":"ml_host_risk_score_latest_default",
     "source":{
       "@timestamp":"2021-03-10T14:51:05.766Z",
-      "risk_score":21,
+      "risk_stats": {
+        "risk_score": 21,
+        "rule_risks": [
+          {
+            "rule_name": "Unusual Linux Username",
+            "rule_risk": 42
+          }
+        ]
+      },      
       "host":{
-        "name":"ip-10-10-10-121"
-      },
-      "rules":{
-        "Unusual Linux Username":{
-          "average_risk":21,
-          "rule_count":2,
-          "rule_risk":42
-        }
+        "name":"siem-kibana"
       },
       "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
       "risk":"Low"

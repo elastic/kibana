@@ -21,10 +21,10 @@ import { History } from 'history';
 
 import {
   useRulesTable,
-  useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
   RulesSortingFields,
+  Rule,
 } from '../../../../containers/detection_engine/rules';
 
 import { FormatUrl } from '../../../../../common/components/link_to';
@@ -37,7 +37,7 @@ import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getRulesColumns, getMonitoringColumns, TableItem } from './columns';
+import { getRulesColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -144,7 +144,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       reFetchRules,
     } = rulesTable;
 
-    const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const { navigateToApp } = useKibana().services.application;
@@ -305,10 +304,10 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [reFetchRules, setRefreshRulesData]);
 
     useEffect(() => {
-      if (initLoading && !loading && !isLoadingRules && !isLoadingRulesStatuses) {
+      if (initLoading && !loading && !isLoadingRules) {
         setInitLoading(false);
       }
-    }, [initLoading, loading, isLoadingRules, isLoadingRulesStatuses]);
+    }, [initLoading, loading, isLoadingRules]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
@@ -329,8 +328,8 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const euiBasicTableSelectionProps = useMemo(
       () => ({
-        selectable: (item: TableItem) => !loadingRuleIds.includes(item.id),
-        onSelectionChange: (selected: TableItem[]) => {
+        selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
+        onSelectionChange: (selected: Rule[]) => {
           /**
            * EuiBasicTable doesn't provide declarative API to control selected rows.
            * This limitation requires us to synchronize selection state manually using setSelection().
@@ -444,17 +443,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
-    const items = useMemo(() => {
-      const rulesStatusesMap = new Map(rulesStatuses.map((item) => [item.id, item]));
-
-      return rules.map((rule) => {
-        return {
-          ...rule,
-          ...rulesStatusesMap.get(rule.id),
-        };
-      });
-    }, [rulesStatuses, rules]);
-
     const tableProps =
       selectedTab === AllRulesTabs.rules
         ? {
@@ -484,7 +472,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           growLeftSplit={false}
           title={i18n.ALL_RULES}
           subtitle={timelines.getLastUpdated({
-            showUpdating: loading || isLoadingRules || isLoadingRulesStatuses,
+            showUpdating: loading || isLoadingRules,
             updatedAt: lastUpdated,
           })}
         >
@@ -553,7 +541,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             />
             <EuiBasicTable
               itemId="id"
-              items={items}
+              items={rules}
               isSelectable={hasPermissions}
               noItemsMessage={
                 <EuiEmptyPrompt

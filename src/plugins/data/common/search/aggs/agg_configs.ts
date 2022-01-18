@@ -58,7 +58,7 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-export type GenericBucket = estypes.AggregationsBucket & {
+export type GenericBucket = estypes.AggregationsBuckets<any> & {
   [property: string]: estypes.AggregationsAggregate;
 };
 
