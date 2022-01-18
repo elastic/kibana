@@ -93,6 +93,7 @@ export async function getServiceMetadataIcons({
       agentName: undefined,
       containerType: undefined,
       cloudProvider: undefined,
+      serverlessType: undefined,
     };
   }
 
