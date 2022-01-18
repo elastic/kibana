@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, config, [], timeFrame);
+          const results = await evaluateRule(kbnClient, params, config, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               '*': {
@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: DATES.ten_thousand_plus.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, config, [], timeFrame);
+          const results = await evaluateRule(kbnClient, params, config, [], 10000, timeFrame);
           expect(results).to.eql([
             {
               web: {
@@ -184,7 +184,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -208,7 +215,14 @@ export default function ({ getService }: FtrProviderContext) {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -246,7 +260,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -287,7 +308,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: gauge.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -334,6 +362,7 @@ export default function ({ getService }: FtrProviderContext) {
             params,
             configuration,
             ['dev', 'prod'],
+            10000,
             timeFrame
           );
           expect(results).to.eql([
@@ -392,7 +421,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: rate.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -433,7 +469,14 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const timeFrame = { end: rate.max };
           const kbnClient = convertToKibanaClient(esClient);
-          const results = await evaluateRule(kbnClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            kbnClient,
+            params,
+            configuration,
+            [],
+            10000,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
