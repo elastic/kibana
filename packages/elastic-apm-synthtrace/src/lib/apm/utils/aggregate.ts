@@ -36,7 +36,6 @@ export function aggregate(events: ApmFields[], fields: string[]) {
       };
       metricsets.set(id, metricset);
     }
-
     metricset.events.push(event);
   }
 

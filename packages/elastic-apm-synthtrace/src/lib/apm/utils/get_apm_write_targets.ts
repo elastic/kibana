@@ -7,7 +7,14 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApmElasticsearchOutputWriteTargets } from './apm_events_to_elasticsearch_output';
+
+export interface ApmElasticsearchOutputWriteTargets {
+  transaction: string;
+  span: string;
+  error: string;
+  metric: string;
+  app_metric: string;
+}
 
 export async function getApmWriteTargets({
   client,
@@ -21,6 +28,7 @@ export async function getApmWriteTargets({
       transaction: "traces-apm-default",
       span: "traces-apm-default",
       metric: "metrics-apm.internal-default",
+      app_metric: "metrics-apm.app-default",
       error: "logs-apm.error-default",
     }
   }
@@ -51,12 +59,14 @@ export async function getApmWriteTargets({
       .find(({ key, writeIndexAlias }) => writeIndexAlias && key.includes(filter))
       ?.writeIndexAlias!;
   }
-
+  const metricsTarget = getDataStreamName('metrics-apm') || getAlias('-metric');
   const targets = {
     transaction: getDataStreamName('traces-apm') || getAlias('-transaction'),
     span: getDataStreamName('traces-apm') || getAlias('-span'),
-    metric: getDataStreamName('metrics-apm') || getAlias('-metric'),
+    metric: metricsTarget,
+    app_metric: metricsTarget,
     error: getDataStreamName('logs-apm') || getAlias('-error'),
+
   };
 
   if (!targets.transaction || !targets.span || !targets.metric || !targets.error) {

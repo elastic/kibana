@@ -10,7 +10,6 @@ import { Client } from '@elastic/elasticsearch';
 import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
-import { ApmElasticsearchOutputWriteTargets } from '../utils/apm_events_to_elasticsearch_output';
 import { ApmFields } from '../apm_fields';
 import { SpanIterable } from '../../span_iterable';
 import { StreamProcessor } from '../../stream_processor';
@@ -20,16 +19,25 @@ export class ApmSynthtraceEsClient {
     private readonly client: Client,
     private readonly logger: Logger,
     private readonly forceDataStreams: boolean
-  ) { }
+) { }
 
   private getWriteTargets() {
     return getApmWriteTargets({ client: this.client, forceDataStreams: this.forceDataStreams });
   }
 
   clean() {
-    return this.getWriteTargets().then((writeTargets) => {
+    return this.getWriteTargets().then(async (writeTargets) => {
       const indices = Object.values(writeTargets);
       this.logger.info(`Attempting to clean: ${indices}`)
+      if (this.forceDataStreams) {
+        for (const name of indices) {
+          const dataStream = await this.client.indices.getDataStream({name: name}, { ignore: [404]})
+          if (dataStream.data_streams && dataStream.data_streams.length > 0) {
+            return await this.client.indices.deleteDataStream({ name: name })
+          }
+        }
+      }
+
       return cleanWriteTargets({
         client: this.client,
         targets: indices,
@@ -38,22 +46,27 @@ export class ApmSynthtraceEsClient {
     });
   }
 
-  async index(events: SpanIterable, concurrency?: number) {
+  async index(events: SpanIterable, concurrency?: number, maxDocs?: number) {
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf
     await this.client.helpers.bulk<ApmFields>({
       concurrency: concurrency,
       refresh: false,
       refreshOnCompletion: false,
-      datasource: new StreamProcessor({processors: StreamProcessor.apmProcessors})
-        .streamAsync(events),
-      // TODO bug in client not passing generic to BulkHelperOptions<>
+      datasource: new StreamProcessor({processors: StreamProcessor.apmProcessors, maxSourceEvents: maxDocs})
+        // TODO https://github.com/elastic/elasticsearch-js/issues/1610
+        // having to map here is awkward, it'd be better to map just before serialization.
+        .streamToDocumentAsync(StreamProcessor.toDocument, events),
       onDrop: (doc) => {
         this.logger.info(doc);
       },
+      // TODO bug in client not passing generic to BulkHelperOptions<>
+      // https://github.com/elastic/elasticsearch-js/issues/1611
       onDocument: (doc: unknown) => {
-        const d = doc as ApmFields;
-        let index = this.getIndexForEvent(d, writeTargets);
+        const d = doc as Record<string, any>;
+        let index = this.forceDataStreams
+          ? StreamProcessor.getDataStreamForEvent(d, writeTargets)
+          : StreamProcessor.getIndexForEvent(d, writeTargets);
         return { create: { _index: index } };
       },
     });
@@ -65,27 +78,5 @@ export class ApmSynthtraceEsClient {
       index: indices,
       allow_no_indices: true
     });
-  }
-
-  private getIndexForEvent(d: ApmFields, writeTargets: ApmElasticsearchOutputWriteTargets) {
-    const eventType = d['processor.event'] as keyof ApmElasticsearchOutputWriteTargets;
-    let index = writeTargets[eventType];
-    if (!this.forceDataStreams) {
-      return index;
-    }
-
-    if (eventType == 'metric') {
-      if (!d['service.name']) {
-        index = 'metrics-apm.app-default';
-      } else {
-        const keys = Object.keys(d);
-        let noTransactionData = keys.filter(key => key.startsWith('transaction')).length == 0;
-        let noSpanData = keys.filter(key => key.startsWith('span')).length == 0;
-        if (noSpanData || noTransactionData) {
-          index = 'metrics-apm.app-default';
-        }
-      }
-    }
-    return index;
   }
 }

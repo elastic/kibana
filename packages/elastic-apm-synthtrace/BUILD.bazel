@@ -45,6 +45,7 @@ TYPES_DEPS = [
   "@npm//@types/object-hash",
   "@npm//moment",
   "@npm//p-limit",
+  "@npm//@types/node-fetch",
 ]
 
 jsts_transpiler(

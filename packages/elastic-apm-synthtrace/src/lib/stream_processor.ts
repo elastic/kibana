@@ -5,12 +5,15 @@ import { getTransactionMetrics } from './apm/processors/get_transaction_metrics'
 import { getSpanDestinationMetrics } from './apm/processors/get_span_destination_metrics';
 import { getBreakdownMetrics } from './apm/processors/get_breakdown_metrics';
 import { parseInterval } from './interval';
-import { getObserverDefaults } from './apm/defaults/get_observer_defaults';
+import { dedot } from './utils/dedot';
+import { ApmElasticsearchOutputWriteTargets } from './apm/utils/get_apm_write_targets';
 
 export interface StreamProcessorOptions {
   processors: Array<(events: ApmFields[]) => ApmFields[]>,
   flushInterval?: string;
   maxBufferSize?: number;
+  // the maximum source events to process, not the maximum documents outputted by the processor
+  maxSourceEvents?: number;
 }
 
 export class StreamProcessor {
@@ -18,8 +21,6 @@ export class StreamProcessor {
     [this.intervalAmount, this.intervalUnit] =
       this.options.flushInterval ? parseInterval(this.options.flushInterval) : parseInterval("1m");
   }
-  static readonly observerDefaults = getObserverDefaults();
-
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
   static readonly apmProcessors = [
@@ -32,6 +33,7 @@ export class StreamProcessor {
   *stream(...eventSources: SpanIterable[]) {
     let localBuffer = [];
     let flushAfter: number | null = null;
+    let sourceEventsYielded = 0;
     for (const eventSource of eventSources) {
       for (const event of eventSource) {
         const eventDate = event['@timestamp'] as number;
@@ -40,6 +42,12 @@ export class StreamProcessor {
           flushAfter = moment(eventDate).add(this.intervalAmount, this.intervalUnit).valueOf();
 
         yield StreamProcessor.enrich(event);
+        sourceEventsYielded++;
+        if (this.options.maxSourceEvents &&  sourceEventsYielded >= this.options.maxSourceEvents) {
+          console.log(`Yielded ${sourceEventsYielded} which exceeds ${this.options.maxSourceEvents}`)
+          // yielded the maximum source events, we still want the local buffer to generate derivative documents
+          break;
+        }
         if (
           (flushAfter !== null && eventDate > flushAfter) ||
           localBuffer.length === (this.options.maxBufferSize ?? 10000)
@@ -51,6 +59,11 @@ export class StreamProcessor {
           flushAfter = moment(flushAfter).add(this.intervalAmount, this.intervalUnit).valueOf();
         }
       }
+      if (this.options.maxSourceEvents &&  sourceEventsYielded >= this.options.maxSourceEvents) {
+        // yielded the maximum source events, we still want the local buffer to generate derivative documents
+        console.log(`Yielded ${sourceEventsYielded} which exceeds ${this.options.maxSourceEvents}`)
+        break;
+      }
     }
     if (localBuffer.length > 0) {
       for (const processor of this.options.processors) {
@@ -60,6 +73,11 @@ export class StreamProcessor {
   }
   async *streamAsync(...eventSources: SpanIterable[]) : AsyncIterator<ApmFields> {
     yield* this.stream(...eventSources);
+  }
+  async *streamToDocumentAsync<TDocument>(map: ((d: ApmFields) => TDocument), ...eventSources: SpanIterable[]) : AsyncIterator<ApmFields> {
+    for(const apmFields of this.stream(...eventSources)) {
+      yield map(apmFields);
+    }
   }
   streamToArray(...eventSources: SpanIterable[]) {
     return Array.from<ApmFields>(this.stream(...eventSources))
@@ -78,6 +96,47 @@ export class StreamProcessor {
       document['timestamp.us'] = document['@timestamp']! * 1000;
     }
     return document;
+  }
+
+  static toDocument(document: ApmFields) : Record<string, any> {
+    if (!document['observer']) {
+      document = StreamProcessor.enrich(document);
+    }
+    const newDoc : Record<string, any> = {} ;
+    dedot(document, newDoc);
+    if (typeof newDoc['@timestamp'] === 'number') {
+      const timestamp = newDoc['@timestamp'];
+      newDoc['@timestamp'] = new Date(timestamp).toISOString();
+    }
+    return newDoc;
+  }
+
+  static getDataStreamForEvent(d: Record<string, any>, writeTargets: ApmElasticsearchOutputWriteTargets) {
+    if (!d.processor?.event) {
+      throw Error("'processor.event' is not set on document, can not determine target index");
+    }
+    const eventType = d.processor.event as keyof ApmElasticsearchOutputWriteTargets;
+    let dataStream = writeTargets[eventType];
+    if (eventType == 'metric') {
+      if (!d.service?.name) {
+        dataStream = 'metrics-apm.app-default';
+      } else {
+        if (!d.transaction || !d.span) {
+          dataStream = 'metrics-apm.app-default';
+        }
+      }
+    }
+    return dataStream;
+  }
+
+  static getIndexForEvent(d: Record<string, any>, writeTargets: ApmElasticsearchOutputWriteTargets) {
+    if (!d.processor?.event) {
+      throw Error("'processor.event' is not set on document, can not determine target index");
+    }
+
+    const eventType = d.processor.event as keyof ApmElasticsearchOutputWriteTargets;
+    return writeTargets[eventType];
+
   }
 
 }

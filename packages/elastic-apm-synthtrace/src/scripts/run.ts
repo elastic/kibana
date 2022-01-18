@@ -51,6 +51,10 @@ function options(y: Argv) {
       description: 'Generate and index data continuously',
       boolean: true,
     })
+    .option('maxDocs', {
+      description: 'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
+      number: true,
+    })
     .option('clean', {
       describe: 'Clean APM indices before indexing new data',
       default: false,
@@ -90,7 +94,8 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
-    .conflicts('to', 'live');
+    .conflicts('to', 'live')
+    .conflicts('maxDocs', 'live')
     .conflicts('target', 'cloudId');
 }
 
@@ -104,9 +109,10 @@ yargs(process.argv.slice(2))
 
     const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
     const to = new Date(toMs);
+    const defaultTimeRange = !runOptions.maxDocs ? '15m' : '52w';
     const fromMs = argv.from
       ? datemath.parse(String(argv.from))!.valueOf()
-      : toMs - intervalToMs('1m');
+      : toMs - intervalToMs(defaultTimeRange);
     const from = new Date(fromMs);
 
     const live = argv.live;
