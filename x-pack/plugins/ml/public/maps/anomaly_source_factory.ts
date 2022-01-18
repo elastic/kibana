@@ -8,7 +8,7 @@
 import type { StartServicesAccessor } from 'kibana/public';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import type { MlDependencies } from '../application/app';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
 
@@ -22,23 +22,20 @@ export class AnomalySourceFactory {
     this.canGetJobs = canGetJobs;
   }
 
-  private async getServices(): Promise<any> {
-    const [coreStart, pluginsStart] = await this.getStartServices();
+  private async getServices(): Promise<{ mlResultsService: MlApiServices['results'] }> {
+    const [coreStart] = await this.getStartServices();
     const { mlApiServicesProvider } = await import('../application/services/ml_api_service');
-    // const { resultsApiProvider } = await import('../application/services/ml_api_service/results');
 
     const httpService = new HttpService(coreStart.http);
-    // const mlApiService = mlApiServicesProvider(httpService);
     const mlResultsService = mlApiServicesProvider(httpService).results;
-    // const mlResultsService = resultsApiProvider(httpService);
 
-    return [coreStart, pluginsStart as MlDependencies, { mlResultsService }];
+    return { mlResultsService };
   }
 
   public async create(): Promise<any> {
-    const services = await this.getServices();
+    const { mlResultsService } = await this.getServices();
     const { AnomalySource } = await import('./anomaly_source');
-    AnomalySource.services = services;
+    AnomalySource.mlResultsService = mlResultsService;
     AnomalySource.canGetJobs = this.canGetJobs;
     return AnomalySource;
   }

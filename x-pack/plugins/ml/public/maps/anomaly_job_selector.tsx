@@ -10,10 +10,11 @@ import React, { Component } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 interface Props {
   onJobChange: (jobId: string) => void;
-  mlJobsService: any; // todo: update types
+  mlJobsService: MlApiServices['jobs'];
 }
 
 interface State {
@@ -28,8 +29,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
 
   private async _loadJobs() {
     const jobIdList = await this.props.mlJobsService.jobsWithGeo();
-    // TODO update types - remove any
-    const options = jobIdList.map((jobId: any) => {
+    const options = jobIdList.map((jobId) => {
       return { label: jobId, value: jobId };
     });
     if (this._isMounted && !isEqual(options, this.state.jobIdList)) {

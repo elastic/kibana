@@ -20,7 +20,7 @@ import { AnomalySource, AnomalySourceDescriptor } from './anomaly_source';
 
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import type { MlDependencies } from '../application/app';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
 
@@ -34,19 +34,18 @@ export class AnomalyLayerWizardFactory {
     this.canGetJobs = canGetJobs;
   }
 
-  private async getServices(): Promise<any> {
-    const [coreStart, pluginsStart] = await this.getStartServices();
+  private async getServices(): Promise<{ mlJobsService: MlApiServices['jobs'] }> {
+    const [coreStart] = await this.getStartServices();
     const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
 
     const httpService = new HttpService(coreStart.http);
     const mlJobsService = jobsApiProvider(httpService);
 
-    return [coreStart, pluginsStart as MlDependencies, { mlJobsService }];
+    return { mlJobsService };
   }
 
   public async create(): Promise<LayerWizard> {
-    const services = await this.getServices();
-    const mlJobsService = services[2].mlJobsService;
+    const { mlJobsService } = await this.getServices();
     const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
 
     anomalyLayerWizard.getIsDisabled = () => !this.canGetJobs;

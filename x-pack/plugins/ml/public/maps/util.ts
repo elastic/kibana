@@ -7,7 +7,7 @@
 
 import { FeatureCollection, Feature } from 'geojson';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
-import { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import type { SearchFilters } from './anomaly_source';
 

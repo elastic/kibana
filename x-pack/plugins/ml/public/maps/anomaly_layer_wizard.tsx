@@ -26,4 +26,5 @@ export const anomalyLayerWizard: Partial<LayerWizard> = {
   title: i18n.translate('xpack.ml.maps.anomalyLayerTitle', {
     defaultMessage: 'ML Anomalies',
   }),
+  order: 100,
 };

@@ -21,6 +21,7 @@ import type { IVectorSource, SourceStatus } from '../../../maps/public';
 import { ML_ANOMALY } from './anomaly_source_factory';
 import { getResultsForJobId, MlAnomalyLayers } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 export type SearchFilters = any & {
   applyGlobalQuery: boolean;
@@ -37,14 +38,17 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 }
 
 export class AnomalySource implements IVectorSource {
-  static services: any; // TODO fix these types
+  static mlResultsService: MlApiServices['results'];
   static canGetJobs: any;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
-    // TODO: Fill in all the defaults
+    if (!(typeof descriptor.jobId === 'string')) {
+      throw new Error('Job id is required for anomaly layer creation');
+    }
+
     return {
       type: ML_ANOMALY,
-      jobId: typeof descriptor.jobId === 'string' ? descriptor.jobId : 'foobar',
+      jobId: descriptor.jobId,
       typicalActual: descriptor.typicalActual || 'typical',
     };
   }
@@ -62,7 +66,7 @@ export class AnomalySource implements IVectorSource {
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
     const results = await getResultsForJobId(
-      AnomalySource.services[2].mlResultsService,
+      AnomalySource.mlResultsService,
       this._descriptor.jobId,
       this._descriptor.typicalActual,
       searchFilters
@@ -91,7 +95,7 @@ export class AnomalySource implements IVectorSource {
 
   createField({ fieldName }: { fieldName: string }): IField {
     if (fieldName !== 'record_score') {
-      throw new Error('PEBKAC');
+      throw new Error('Record score field name is required');
     }
     return new RecordScoreField({ source: this });
   }
@@ -204,9 +208,9 @@ export class AnomalySource implements IVectorSource {
     return true;
   }
 
-  // Promise<Array<{ name: string; license: string }>>
-  async getLicensedFeatures(): Promise<any[]> {
-    return [{ name: 'layer from ML anomaly job', license: 'enterprise' }];
+  async getLicensedFeatures(): Promise<[]> {
+    // return [{ name: 'layer from ML anomaly job', license: 'enterprise' }];
+    return [];
   }
 
   getMaxZoom(): number {

@@ -12,10 +12,11 @@ import { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelector } from './anomaly_job_selector';
 import { LayerSelector } from './layer_selector';
 import { MlAnomalyLayers } from './util';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
-  mlJobsService: any; // todo: update types
+  mlJobsService: MlApiServices['jobs'];
 }
 
 interface State {
