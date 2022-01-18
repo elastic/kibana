@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is not empty`, () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/115488
+      describe.skip(`POST ${HOST_METADATA_LIST_ROUTE} when index is not empty`, () => {
         before(async () => {
           // stop the united transform and delete the index
           // otherwise it won't hit metrics-endpoint.metadata_current_default index
