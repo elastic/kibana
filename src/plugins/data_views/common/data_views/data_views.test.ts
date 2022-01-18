@@ -315,6 +315,10 @@ describe('IndexPatterns', () => {
     });
 
     test('gets default data view', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
@@ -322,20 +326,15 @@ describe('IndexPatterns', () => {
     });
 
     test('returns undefined if no data views exist', async () => {
-      savedObjectsClient.find = jest.fn(
-        () => Promise.resolve([]) as Promise<Array<SavedObject<any>>>
-      );
-      savedObjectsClient.get = jest.fn(() => Promise.resolve(undefined) as Promise<any>);
-      indexPatterns.clearCache();
+      uiSettings.get = jest.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+
       expect(await indexPatterns.getDefaultDataView()).toBeNull();
     });
 
     test("default doesn't exist, grabs another data view", async () => {
       uiSettings.get = jest.fn().mockResolvedValue('foo');
-
-      savedObjectsClient.find = jest.fn(
-        () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
-      );
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
 
       savedObjectsClient.get = jest.fn().mockResolvedValue({
         id: 'bar',
@@ -356,13 +355,10 @@ describe('IndexPatterns', () => {
     test("when default exists, it isn't overridden with first data view", async () => {
       uiSettings.get = jest.fn().mockResolvedValue('id2');
 
-      savedObjectsClient.find = jest.fn(
-        () =>
-          Promise.resolve([
-            { id: 'id1', version: 'a', attributes: { title: 'title' } },
-            { id: 'id2', version: 'a', attributes: { title: 'title' } },
-          ]) as Promise<Array<SavedObject<any>>>
-      );
+      savedObjectsClient.find = jest.fn().mockResolvedValue([
+        { id: 'id1', version: 'a', attributes: { title: 'title' } },
+        { id: 'id2', version: 'a', attributes: { title: 'title' } },
+      ]);
 
       savedObjectsClient.get = jest
         .fn()
@@ -382,26 +378,23 @@ describe('IndexPatterns', () => {
     });
 
     test('when setting default it prefers user created data views', async () => {
-      savedObjectsClient.find = jest.fn(
-        () =>
-          Promise.resolve([
-            {
-              id: 'id1',
-              version: 'a',
-              attributes: { title: FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
-            },
-            {
-              id: 'id2',
-              version: 'a',
-              attributes: { title: FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
-            },
-            {
-              id: 'id3',
-              version: 'a',
-              attributes: { title: 'user-data-view' },
-            },
-          ]) as Promise<Array<SavedObject<any>>>
-      );
+      savedObjectsClient.find = jest.fn().mockResolvedValue([
+        {
+          id: 'id1',
+          version: 'a',
+          attributes: { title: FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
+        },
+        {
+          id: 'id2',
+          version: 'a',
+          attributes: { title: FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
+        },
+        {
+          id: 'id3',
+          version: 'a',
+          attributes: { title: 'user-data-view' },
+        },
+      ]);
 
       savedObjectsClient.get = jest
         .fn()

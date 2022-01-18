@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { includes } from 'lodash';
 import { DataViewsContract } from './data_views';
 import { UiSettingsCommon } from '../types';
 
@@ -21,28 +20,7 @@ export const createEnsureDefaultDataView = (
    * one otherwise.
    */
   return async function ensureDefaultDataView(this: DataViewsContract) {
-    const patterns = await this.getIds();
-    let defaultId = await uiSettings.get('defaultIndex');
-    let defined = !!defaultId;
-    const exists = includes(patterns, defaultId);
-
-    if (defined && !exists) {
-      await uiSettings.remove('defaultIndex');
-      defaultId = defined = false;
-    }
-
-    if (defined) {
-      return;
-    }
-
-    // If there is any user index pattern created, set the first as default
-    // if there is 0 patterns, then don't even call `hasUserDataView()`
-    if (patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
-      // NOTE: here we have a bug that patterns[0] very likely is one of non-user-created data views which is hardly the best choice for a default,
-      // This code is deprecated and this wasn't fixed here. Consider migrating to `getDefaultDataView` from `DataViewService`
-      defaultId = patterns[0];
-      await uiSettings.set('defaultIndex', defaultId);
-    } else {
+    if (!(await this.getDefaultDataView())) {
       return onRedirectNoDefaultView();
     }
   };
