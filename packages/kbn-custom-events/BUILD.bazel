@@ -36,6 +36,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//js-sha256",
   "@npm//lodash",
+  "@npm//react-use"
 ]
 
 TYPES_DEPS = [
