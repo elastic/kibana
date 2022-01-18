@@ -51,6 +51,7 @@ export function getTransactionMetrics(events: ApmFields[]) {
     'host.name',
     'container.id',
     'kubernetes.pod.name',
+    'faas.coldstart',
   ]);
 
   return metricsets.map((metricset) => {

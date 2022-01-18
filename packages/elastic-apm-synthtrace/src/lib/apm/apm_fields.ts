@@ -65,6 +65,7 @@ export type ApmFields = Fields &
     'service.name': string;
     'service.environment': string;
     'service.node.name': string;
+    'service.runtime.name': string;
     'span.id': string;
     'span.name': string;
     'span.type': string;
@@ -77,5 +78,11 @@ export type ApmFields = Fields &
     'span.destination.service.response_time.count': number;
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
+    'cloud.provider': string;
+    'cloud.service.name': string;
+    'faas.coldstart': string;
+    'faas.execution': string;
+    'faas.trigger.type': string;
+    'faas.trigger.request_id': string;
   }> &
   ApmApplicationMetricFields;
