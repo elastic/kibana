@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
+  "@npm//react-use",
 ]
 
 TYPES_DEPS = [
