@@ -181,7 +181,7 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
 interface DownMonitorStatus {
   info: Ping;
   count: number | undefined;
-  interval: string;
+  interval?: string;
   numTimes: number;
 }
 
@@ -194,7 +194,7 @@ export const getStatusMessage = (
   if (downMonStatus?.info) {
     statusMessage = DOWN_LABEL(
       downMonStatus.count!,
-      downMonStatus.interval,
+      downMonStatus.interval!,
       downMonStatus.numTimes
     );
   }
@@ -384,7 +384,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         const monitorStatus = {
           info: monitorLoc.monitorInfo,
           count: monitorLoc.count,
-          interval: getInterval(timerangeCount, timerangeUnit),
+          interval: oldVersionTimeRange
+            ? oldVersionTimeRange.from.slice(-3)
+            : getInterval(timerangeCount, timerangeUnit),
           numTimes,
         };
         const monitorInfo = monitorLoc.monitorInfo;
@@ -437,7 +439,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       const monitorStatus = {
         info: downMonInfo!,
         count: downMonCount!,
-        interval: getInterval(timerangeCount, timerangeUnit),
+        interval: oldVersionTimeRange
+          ? oldVersionTimeRange.from.slice(-3)
+          : getInterval(timerangeCount, timerangeUnit),
         numTimes,
       };
       const statusMessage = getStatusMessage(monitorStatus, availMonInfo!, availability);
