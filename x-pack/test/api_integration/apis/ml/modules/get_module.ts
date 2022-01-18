@@ -30,8 +30,10 @@ const moduleIds = [
   'sample_data_weblogs',
   'security_auth',
   'security_linux',
+  'security_linux_v3',
   'security_network',
   'security_windows',
+  'security_windows_v3',
   'siem_auditbeat',
   'siem_auditbeat_auth',
   'siem_cloudtrail',
@@ -39,8 +41,6 @@ const moduleIds = [
   'siem_winlogbeat',
   'siem_winlogbeat_auth',
   'uptime_heartbeat',
-  'security_linux_v3',
-  'security_windows_v3',
 ];
 
 export default ({ getService }: FtrProviderContext) => {
