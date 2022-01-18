@@ -23,6 +23,7 @@ import {
   runBazel,
   yarnIntegrityFileExists,
 } from '../utils/bazel';
+import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -54,6 +55,9 @@ export const BootstrapCommand: ICommand = {
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
+
+    // Setup remote cache settings in .bazelrc.cache if needed
+    await setupRemoteCache(rootPath);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
