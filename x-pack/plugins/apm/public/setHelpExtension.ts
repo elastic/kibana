@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
-import { getUpgradeAssistantHref } from './components/shared/Links/kibana';
+import { getUpgradeAssistantHref } from './components/shared/links/kibana';
 
 export function setHelpExtension({ chrome, http }: CoreStart) {
   chrome.setHelpExtension({
