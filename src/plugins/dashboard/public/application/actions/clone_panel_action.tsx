@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import uuid from 'uuid';
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart, SimpleSavedObject } from 'src/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { SavedObject } from '../../services/saved_objects';
 import {
@@ -91,16 +91,19 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   }
 
   private async getCloneTitle(embeddable: IEmbeddable, rawTitle: string) {
+    if (rawTitle === '') return ''; // If
+
     const clonedTag = dashboardClonePanelAction.getClonedTag();
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
     const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
-
     let similarTitles: string[];
-    if (isReferenceOrValueEmbeddable(embeddable)) {
-      if (rawTitle === '') return '';
+    if (
+      isReferenceOrValueEmbeddable(embeddable) ||
+      !_.has(embeddable.getExplicitInput(), 'savedObjectId')
+    ) {
       const dashboard: DashboardContainer = embeddable.getRoot() as DashboardContainer;
-      similarTitles = _.filter(await dashboard.getPanelTitles(), (title) => {
+      similarTitles = _.filter(await dashboard.getPanelTitles(), (title: string) => {
         return title.startsWith(baseTitle);
       });
     } else {
@@ -121,7 +124,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       }
     }
 
-    const cloneNumbers = _.map(similarTitles, (title) => {
+    const cloneNumbers = _.map(similarTitles, (title: string) => {
       if (title.match(cloneRegex)) return 0;
       const cloneTag = title.match(cloneNumberRegex);
       return cloneTag ? parseInt(cloneTag[0].replace(/[^0-9.]/g, ''), 10) : -1;
@@ -168,6 +171,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           ...(await embeddable.getInputAsValueType()),
           id: uuid.v4(),
           title: newTitle,
+          hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
         },
       };
     } else {
@@ -191,7 +195,6 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
-
     return panelState;
   }
 }
