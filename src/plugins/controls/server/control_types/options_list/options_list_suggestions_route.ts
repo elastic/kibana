@@ -11,14 +11,19 @@ import { schema } from '@kbn/config-schema';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Observable } from 'rxjs';
-import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
-import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
+
 import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
+import { DataConfigSchema } from '../../../../data/server';
+import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
+import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
 
-export const setupOptionsListSuggestionsRoute = ({ http }: CoreSetup) => {
+export const setupOptionsListSuggestionsRoute = (
+  { http }: CoreSetup,
+  getLatestDataConfig: () => DataConfigSchema
+) => {
   const router = http.createRouter();
 
   router.post(
@@ -60,123 +65,129 @@ export const setupOptionsListSuggestionsRoute = ({ http }: CoreSetup) => {
       }
     }
   );
-};
 
-const getOptionsListSuggestions = async ({
-  abortedEvent$,
-  esClient,
-  request,
-  index,
-}: {
-  request: OptionsListRequestBody;
-  abortedEvent$: Observable<void>;
-  esClient: ElasticsearchClient;
-  index: string;
-}): Promise<OptionsListResponse> => {
-  const abortController = new AbortController();
-  abortedEvent$.subscribe(() => abortController.abort());
+  const getOptionsListSuggestions = async ({
+    abortedEvent$,
+    esClient,
+    request,
+    index,
+  }: {
+    request: OptionsListRequestBody;
+    abortedEvent$: Observable<void>;
+    esClient: ElasticsearchClient;
+    index: string;
+  }): Promise<OptionsListResponse> => {
+    const abortController = new AbortController();
+    abortedEvent$.subscribe(() => abortController.abort());
 
-  const { fieldName, searchString, selectedOptions, filters } = request;
-  const body = getOptionsListBody(fieldName, searchString, selectedOptions, filters);
-  const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
+    const { fieldName, searchString, selectedOptions, filters } = request;
+    const body = getOptionsListBody(fieldName, searchString, selectedOptions, filters);
+    const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
-  // parse raw ES response into OptionsListSuggestionResponse
-  const totalCardinality = get(rawEsResult.body, 'aggregations.unique_terms.value');
+    // parse raw ES response into OptionsListSuggestionResponse
+    const totalCardinality = get(rawEsResult.body, 'aggregations.unique_terms.value');
 
-  const suggestions = get(rawEsResult.body, 'aggregations.suggestions.buckets')?.map(
-    (suggestion: { key: string }) => suggestion.key
-  );
+    const suggestions = get(rawEsResult.body, 'aggregations.suggestions.buckets')?.map(
+      (suggestion: { key: string }) => suggestion.key
+    );
 
-  const rawInvalidSuggestions = get(rawEsResult.body, 'aggregations.validation.buckets') as {
-    [key: string]: { doc_count: number };
-  };
-  const invalidSelections =
-    rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
-      ? Object.entries(rawInvalidSuggestions)
-          ?.filter(([, value]) => value?.doc_count === 0)
-          ?.map(([key]) => key)
-      : undefined;
+    const rawInvalidSuggestions = get(rawEsResult.body, 'aggregations.validation.buckets') as {
+      [key: string]: { doc_count: number };
+    };
+    const invalidSelections =
+      rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
+        ? Object.entries(rawInvalidSuggestions)
+            ?.filter(([, value]) => value?.doc_count === 0)
+            ?.map(([key]) => key)
+        : undefined;
 
-  return {
-    suggestions,
-    totalCardinality,
-    invalidSelections,
-  };
-};
-
-const getOptionsListBody = (
-  fieldName: string,
-  searchString?: string,
-  selectedOptions?: string[],
-  filters: estypes.QueryDslQueryContainer[] = []
-) => {
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
-  const getEscapedQuery = (q: string = '') =>
-    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
-
-  // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
-  const executionHint = 'map' as const;
-
-  // Suggestions
-  const shardSize = 10;
-  const suggestionsAgg = {
-    terms: {
-      fieldName,
-      include: `${getEscapedQuery(searchString ?? '')}.*`,
-      execution_hint: executionHint,
-      shard_size: shardSize,
-    },
+    return {
+      suggestions,
+      totalCardinality,
+      invalidSelections,
+    };
   };
 
-  // Validation
-  const selectedOptionsFilters = selectedOptions?.reduce((acc, currentOption) => {
-    acc[currentOption] = { match: { [fieldName]: currentOption } };
-    return acc;
-  }, {} as { [key: string]: { match: { [key: string]: string } } });
+  const getOptionsListBody = (
+    fieldName: string,
+    searchString?: string,
+    selectedOptions?: string[],
+    filters: estypes.QueryDslQueryContainer[] = []
+  ) => {
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
+    const getEscapedQuery = (q: string = '') =>
+      q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
-  const validationAgg =
-    selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
-      ? {
-          filters: {
-            filters: selectedOptionsFilters,
-          },
-        }
-      : undefined;
+    // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
+    const executionHint = 'map' as const;
 
-  const body = {
-    size: 0,
-    // timeout, // TODO: figure out how to get timeout and terminate_after config from data plugin
-    // terminate_after,
-    query: {
-      bool: {
-        filter: filters,
+    // Suggestions
+    const shardSize = 10;
+    const suggestionsAgg = {
+      terms: {
+        fieldName,
+        include: `${getEscapedQuery(searchString ?? '')}.*`,
+        execution_hint: executionHint,
+        shard_size: shardSize,
       },
-    },
-    aggs: {
-      suggestions: suggestionsAgg,
-      ...(validationAgg ? { validation: validationAgg } : {}),
-      unique_terms: {
-        cardinality: {
-          field: fieldName,
+    };
+
+    // Validation
+    const selectedOptionsFilters = selectedOptions?.reduce((acc, currentOption) => {
+      acc[currentOption] = { match: { [fieldName]: currentOption } };
+      return acc;
+    }, {} as { [key: string]: { match: { [key: string]: string } } });
+
+    const validationAgg =
+      selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
+        ? {
+            filters: {
+              filters: selectedOptionsFilters,
+            },
+          }
+        : undefined;
+
+    const {
+      autocomplete: {
+        valueSuggestions: { terminateAfter, timeout },
+      },
+    } = getLatestDataConfig();
+
+    const body = {
+      size: 0,
+      timeout: `${timeout.asMilliseconds()}ms`,
+      terminate_after: terminateAfter.asMilliseconds(),
+      query: {
+        bool: {
+          filter: filters,
         },
       },
-    },
+      aggs: {
+        suggestions: suggestionsAgg,
+        ...(validationAgg ? { validation: validationAgg } : {}),
+        unique_terms: {
+          cardinality: {
+            field: fieldName,
+          },
+        },
+      },
+    };
+
+    // const subTypeNested = isFieldObject(field) && getFieldSubtypeNested(field);
+    // if (isFieldObject(field) && subTypeNested) {
+    //   return {
+    //     ...body,
+    //     aggs: {
+    //       nestedSuggestions: {
+    //         nested: {
+    //           path: subTypeNested.nested.path,
+    //         },
+    //         aggs: body.aggs,
+    //       },
+    //     },
+    //   };
+    // }
+
+    return body;
   };
-
-  // const subTypeNested = isFieldObject(field) && getFieldSubtypeNested(field);
-  // if (isFieldObject(field) && subTypeNested) {
-  //   return {
-  //     ...body,
-  //     aggs: {
-  //       nestedSuggestions: {
-  //         nested: {
-  //           path: subTypeNested.nested.path,
-  //         },
-  //         aggs: body.aggs,
-  //       },
-  //     },
-  //   };
-  // }
-
-  return body;
 };
