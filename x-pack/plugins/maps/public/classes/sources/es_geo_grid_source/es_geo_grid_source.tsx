@@ -399,7 +399,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
     // geotile_grid with geo_shape does not support composite aggregation
     // https://github.com/elastic/elasticsearch/issues/60626
-    const supportsCompositeAgg = !this._isGeoShape();
+    const supportsCompositeAgg = !(await this._isGeoShape());
 
     const features: Feature[] =
       supportsCompositeAgg && tooManyBuckets
