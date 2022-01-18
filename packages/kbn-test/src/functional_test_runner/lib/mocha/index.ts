@@ -11,5 +11,3 @@
 export { setupMocha } from './setup_mocha';
 // @internal
 export { runTests } from './run_tests';
-// @internal
-export { normalizeVersion } from './filter_suites';

@@ -11,9 +11,10 @@ export { LifecyclePhase } from './lifecycle_phase';
 export { readConfigFile, Config } from './config';
 export { readProviderSpec, ProviderCollection } from './providers';
 // @internal
-export { runTests, setupMocha, normalizeVersion } from './mocha';
+export { runTests, setupMocha } from './mocha';
 export { FailureMetadata } from './failure_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 
 export type { Provider } from './providers';
+export * from './es_version';

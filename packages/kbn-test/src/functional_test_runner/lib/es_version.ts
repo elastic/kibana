@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import semver from 'semver';
+import { kibanaPackageJson } from '@kbn/utils';
+
+export class EsVersion {
+  static getDefault() {
+    // example: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest-verified.json
+    const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
+    if (manifestUrl) {
+      const match = manifestUrl.match(/\d+\.\d+\.\d+/);
+      if (!match) {
+        throw new Error('unable to extract es version from ES_SNAPSHOT_MANIFEST_URL');
+      }
+      return match[0];
+    }
+
+    return process.env.TEST_ES_BRANCH || kibanaPackageJson.version;
+  }
+
+  public readonly parsed: semver.SemVer;
+
+  constructor(version: string) {
+    const parsed = semver.coerce(version);
+    if (!parsed) {
+      throw new Error(`unable to parse es version [${version}]`);
+    }
+    this.parsed = parsed;
+  }
+
+  matchRange(range: string) {
+    return semver.satisfies(this.parsed, range);
+  }
+
+  eql(version: string) {
+    return semver.compareLoose(this.parsed, version) === 0;
+  }
+}

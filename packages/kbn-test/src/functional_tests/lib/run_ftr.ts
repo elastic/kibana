@@ -40,30 +40,25 @@ async function createFtr({
 
   return {
     config,
-    ftr: new FunctionalTestRunner(
-      log,
-      configPath,
-      {
-        mochaOpts: {
-          bail: !!bail,
-          grep,
-        },
-        kbnTestServer: {
-          installDir,
-        },
-        updateBaselines,
-        updateSnapshots,
-        suiteFiles: {
-          include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
-          exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
-        },
-        suiteTags: {
-          include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
-          exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
-        },
+    ftr: new FunctionalTestRunner(log, configPath, {
+      mochaOpts: {
+        bail: !!bail,
+        grep,
       },
-      FunctionalTestRunner.getDefaultEsVersion()
-    ),
+      kbnTestServer: {
+        installDir,
+      },
+      updateBaselines,
+      updateSnapshots,
+      suiteFiles: {
+        include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
+        exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
+      },
+      suiteTags: {
+        include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
+        exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
+      },
+    }),
   };
 }
 

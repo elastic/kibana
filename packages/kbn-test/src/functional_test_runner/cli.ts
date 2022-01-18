@@ -13,7 +13,6 @@ import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/d
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
-import { normalizeVersion } from './lib/mocha/filter_suites';
 
 const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
 const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
@@ -36,15 +35,9 @@ export function runFtrCli() {
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
-      const esVersionInput = flags['es-version'];
-      if (esVersionInput && typeof esVersionInput !== 'string') {
+      const esVersion = flags['es-version'];
+      if (esVersion !== undefined && typeof esVersion !== 'string') {
         throw createFlagError('expected --es-version to be a string');
-      }
-      const esVersion = normalizeVersion(
-        esVersionInput || FunctionalTestRunner.getDefaultEsVersion()
-      );
-      if (esVersion !== esVersionInput) {
-        log.warning(`Using ${esVersion} for ES version requirement matching`);
       }
 
       const functionalTestRunner = new FunctionalTestRunner(

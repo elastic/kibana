@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import semver from 'semver';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Suite, Test } from '../../fake_mocha_types';
+import { EsVersion } from '../es_version';
 
 interface SuiteInternal extends Suite {
   _tags?: string[];
@@ -21,15 +21,7 @@ interface Options {
   mocha: any;
   include: string[];
   exclude: string[];
-  esVersion: string;
-}
-
-export function normalizeVersion(version: string) {
-  const v = semver.coerce(version);
-  if (!v) {
-    throw new Error(`unable to convert [${version}] to a valid semver version`);
-  }
-  return v.version;
+  esVersion: EsVersion;
 }
 
 /**
@@ -57,7 +49,7 @@ export function filterSuites({ log, mocha, include, exclude, esVersion }: Option
     parentSuite.suites = [];
 
     const meetsEsVersionRequirement = (suite: SuiteInternal) =>
-      !suite._esVersionRequirement || semver.satisfies(esVersion, suite._esVersionRequirement);
+      !suite._esVersionRequirement || esVersion.matchRange(suite._esVersionRequirement);
 
     for (const child of children) {
       if (meetsEsVersionRequirement(child)) {

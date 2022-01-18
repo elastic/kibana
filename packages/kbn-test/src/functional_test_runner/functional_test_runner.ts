@@ -8,8 +8,6 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
-import { kibanaPackageJson } from '@kbn/utils';
-import semver from 'semver';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -24,7 +22,7 @@ import {
   DockerServersService,
   Config,
   SuiteTracker,
-  normalizeVersion,
+  EsVersion,
 } from './lib';
 
 export class FunctionalTestRunner {
@@ -32,25 +30,12 @@ export class FunctionalTestRunner {
   public readonly failureMetadata = new FailureMetadata(this.lifecycle);
   private closed = false;
 
-  static getDefaultEsVersion() {
-    // example: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest-verified.json
-    const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
-    if (manifestUrl) {
-      const match = manifestUrl.match(/\d+\.\d+\.\d+/);
-      if (!match) {
-        throw new Error('unable to extract es version from ES_SNAPSHOT_MANIFEST_URL');
-      }
-      return match[0];
-    }
-
-    return normalizeVersion(process.env.TEST_ES_BRANCH || kibanaPackageJson.version);
-  }
-
+  private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
     private readonly configFile: string,
     private readonly configOverrides: any,
-    private readonly esVersion: string
+    esVersion?: string
   ) {
     for (const [key, value] of Object.entries(this.lifecycle)) {
       if (value instanceof LifecyclePhase) {
@@ -58,6 +43,7 @@ export class FunctionalTestRunner {
         value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
       }
     }
+    this.esVersion = esVersion ? new EsVersion(esVersion) : EsVersion.getDefault();
   }
 
   async run() {
@@ -81,10 +67,10 @@ export class FunctionalTestRunner {
             `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
           );
         }
-        const esVersion = normalizeVersion(esInfo.version.number);
-        if (semver.compareLoose(esVersion, this.esVersion) !== 0) {
+
+        if (!this.esVersion.eql(esInfo.version.number)) {
           throw new Error(
-            `ES reports a version number "${esVersion}" which doesn't match supplied es version "${this.esVersion}"`
+            `ES reports a version number "${esInfo.version.number}" which doesn't match supplied es version "${this.esVersion}"`
           );
         }
       }
@@ -186,6 +172,7 @@ export class FunctionalTestRunner {
         failureMetadata: () => this.failureMetadata,
         config: () => config,
         dockerServers: () => dockerServers,
+        esVersion: () => this.esVersion,
       });
 
       return await handler(config, coreProviders);
