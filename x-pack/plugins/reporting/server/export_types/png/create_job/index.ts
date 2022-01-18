@@ -17,6 +17,7 @@ export const createJobFnFactory: CreateJobFnFactory<
 
     return {
       ...jobParams,
+      isDeprecated: true,
       forceNow: new Date().toISOString(),
     };
   };

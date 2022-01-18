@@ -110,7 +110,7 @@ describe('Handle request to generate', () => {
           "kibana_name": undefined,
           "max_attempts": undefined,
           "meta": Object {
-            "isDeprecated": undefined,
+            "isDeprecated": true,
             "layout": "preserve_layout",
             "objectType": "cool_object_type",
           },
@@ -127,6 +127,7 @@ describe('Handle request to generate', () => {
         Object {
           "browserTimezone": "UTC",
           "headers": "hello mock cypher text",
+          "isDeprecated": true,
           "layout": Object {
             "id": "preserve_layout",
           },

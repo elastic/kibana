@@ -20,6 +20,7 @@ export const createJobFnFactory: CreateJobFnFactory<
     // return the payload
     return {
       ...jobParams,
+      isDeprecated: true,
       forceNow: new Date().toISOString(),
       objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
