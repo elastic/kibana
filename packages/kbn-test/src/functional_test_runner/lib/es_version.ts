@@ -34,10 +34,16 @@ export class EsVersion {
     this.parsed = parsed;
   }
 
+  /**
+   * Determine if the ES version matches a semver range, like >=7 or ^8.1.0
+   */
   matchRange(range: string) {
     return semver.satisfies(this.parsed, range);
   }
 
+  /**
+   * Determine if the ES version matches a specific version, ignores things like -SNAPSHOT
+   */
   eql(version: string) {
     return semver.compareLoose(this.parsed, version) === 0;
   }
