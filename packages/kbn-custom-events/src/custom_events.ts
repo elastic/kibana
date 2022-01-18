@@ -85,19 +85,29 @@ export class CustomEvents {
 
   private getFullstoryType(value: FullstoryEventValue) {
     // For arrays, make the decidion based on the first element
-    const v = isArray(value) ? value[0] : value;
+    const ia = isArray(value);
+    const v = ia ? value[0] : value;
+    let type = '';
     switch (typeof v) {
       case 'string':
-        return 'str';
+        type = 'str';
+        break;
       case 'number':
-        return isInteger(value) ? 'int' : 'real';
+        type = isInteger(v) ? 'int' : 'real';
+        break;
       case 'boolean':
-        return 'bool';
+        type = 'bool';
+        break;
       case 'object':
         if (v instanceof Date) {
-          return 'date';
+          type = 'date';
         }
+        // generic objects are not handled by this implementation, as we currently don't need them.
+        break;
     }
+
+    // convert to plural form for arrays
+    return ia ? `${type}s` : type;
   }
 
   private getCurrentMemoryState() {
@@ -119,7 +129,7 @@ export class CustomEvents {
     // format context keys as required for env vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
     return mapKeys(context, (value, key) => {
       const type = this.getFullstoryType(value);
-      return [key, type].join('_');
+      return type ? [key, type].join('_') : key;
     });
   }
 

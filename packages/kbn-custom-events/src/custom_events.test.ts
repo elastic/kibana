@@ -153,4 +153,202 @@ describe('custom-events', () => {
       /* eslint-enable @typescript-eslint/naming-convention */
     });
   });
+
+  describe('fullstory arg formatting', () => {
+    beforeEach(async () => {
+      const userIdPromise = new Promise<string>((resolve) => {
+        resolve(userId);
+      });
+      await customEvents.initialize({
+        enabled: true,
+        fullstoryOrgId,
+        esOrgId,
+        basePath: '',
+        packageInfo,
+        userIdPromise,
+      });
+
+      fullStoryApiMock.setUserVars.mockReset();
+    });
+
+    test('works for undefined', () => {
+      customEvents.setUserContext({
+        param: undefined,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        param: undefined,
+      });
+    });
+
+    test('works for a string', () => {
+      customEvents.setUserContext({
+        test: 'abc',
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_str: 'abc',
+      });
+    });
+
+    test('works for a snake case param', () => {
+      customEvents.setUserContext({
+        my_test: 'abc',
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        my_test_str: 'abc',
+      });
+    });
+
+    test('works for a camel case param', () => {
+      customEvents.setUserContext({
+        myTest: 'abc',
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        myTest_str: 'abc',
+      });
+    });
+
+    test('works for a string array', () => {
+      customEvents.setUserContext({
+        test: ['abc', 'cde'],
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_strs: ['abc', 'cde'],
+      });
+    });
+
+    test('works for a bool', () => {
+      customEvents.setUserContext({
+        test: true,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_bool: true,
+      });
+    });
+
+    test('works for a bool array', () => {
+      customEvents.setUserContext({
+        test: [true, false],
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_bools: [true, false],
+      });
+    });
+
+    test('works for an integer', () => {
+      customEvents.setUserContext({
+        test: 0,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_int: 0,
+      });
+
+      customEvents.setUserContext({
+        test: 1,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_int: 1,
+      });
+
+      customEvents.setUserContext({
+        test: -1,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_int: -1,
+      });
+    });
+
+    test('works for a integer array', () => {
+      customEvents.setUserContext({
+        test: [1, 2],
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_ints: [1, 2],
+      });
+    });
+
+    test('works for a NaN', () => {
+      customEvents.setUserContext({
+        test: NaN,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_real: NaN,
+      });
+    });
+
+    test('works for a float', () => {
+      customEvents.setUserContext({
+        test: 0.1,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_real: 0.1,
+      });
+
+      customEvents.setUserContext({
+        test: -1 / 3,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_real: -1 / 3,
+      });
+    });
+
+    test('works for a real array', () => {
+      customEvents.setUserContext({
+        test: [1.2, 2.1],
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_reals: [1.2, 2.1],
+      });
+    });
+
+    test('takes the type from the first item in the array', () => {
+      customEvents.setUserContext({
+        test: ['say', 2.1],
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        test_strs: ['say', 2.1],
+      });
+    });
+
+    test('works for a date', () => {
+      const date = new Date();
+      customEvents.setUserContext({
+        mydate: date,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        mydate_date: date,
+      });
+    });
+
+    test('works for a date array', () => {
+      const dates = [new Date(), new Date()];
+      customEvents.setUserContext({
+        mydate: dates,
+      });
+
+      expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
+        mydate_dates: dates,
+      });
+    });
+
+    test.skip('works for a object  object array', () => {
+      // objects are currently excluded by typescript types, to simplify the implementation
+    });
+  });
 });
