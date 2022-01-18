@@ -96,11 +96,7 @@ export const createAlertAttachmentUserActionBuilder = ({
 });
 
 const getFirstItem = (items?: string | string[] | null): string | null => {
-  if (items == null) {
-    return null;
-  }
-
-  return Array.isArray(items) ? (items.length > 0 ? items[0] : null) : items;
+  return Array.isArray(items) ? items[0] : items ?? null;
 };
 
 export const getRuleId = (comment: BuilderArgs['comment'], alertData?: Ecs): string | null =>
