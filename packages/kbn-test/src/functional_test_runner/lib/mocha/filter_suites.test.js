@@ -13,6 +13,7 @@ import { create as createSuite } from 'mocha/lib/suite';
 import Test from 'mocha/lib/test';
 
 import { filterSuites } from './filter_suites';
+import { EsVersion } from '../es_version';
 
 function setup({ include, exclude, esVersion = '8.0.0' }) {
   return new Promise((resolve) => {
@@ -72,7 +73,7 @@ function setup({ include, exclude, esVersion = '8.0.0' }) {
       mocha,
       include,
       exclude,
-      esVersion,
+      esVersion: new EsVersion(esVersion),
     });
 
     mocha.run();

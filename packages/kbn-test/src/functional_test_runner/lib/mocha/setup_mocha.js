@@ -22,7 +22,7 @@ import { validateCiGroupTags } from './validate_ci_group_tags';
  *  @param  {ToolingLog} log
  *  @param  {Config} config
  *  @param  {ProviderCollection} providers
- *  @param  {string} esVersion
+ *  @param  {EsVersion} esVersion
  *  @return {Promise<Mocha>}
  */
 export async function setupMocha(lifecycle, log, config, providers, esVersion) {
