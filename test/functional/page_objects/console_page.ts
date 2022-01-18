@@ -84,29 +84,8 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async promptAutocomplete() {
-    // This focusses the cursor on the bottom of the text area
-    const editor = await this.getEditor();
-    const content = await editor.findByCssSelector('.ace_content');
-    await content.click();
     const textArea = await this.testSubjects.find('console-textarea');
     // There should be autocomplete for this on all license levels
-    await textArea.pressKeys('\nGET s');
-    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
-    await textArea.pressKeys(Key.ENTER);
-    await textArea.type(
-      `
-      {
-        "query": {
-          "match": {}
-      `
-    );
-    await textArea.pressKeys(Key.ENTER);
-    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
-    await textArea.type('"bool": {}');
-    await textArea.pressKeys(Key.ENTER);
-    await textArea.pressKeys(Key.ENTER);
-    await textArea.pressKeys(Key.ENTER);
-    await textArea.pressKeys(Key.ENTER);
     await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
   }
 
@@ -116,5 +95,43 @@ export class ConsolePageObject extends FtrService {
     } catch (e) {
       return false;
     }
+  }
+
+  public async enterRequest(request: string = '\nGET _search') {
+    const textArea = await this.getEditorTextArea();
+    await textArea.pressKeys(request);
+    await textArea.pressKeys(Key.ENTER);
+  }
+
+  public async enterText(text: string) {
+    const textArea = await this.getEditorTextArea();
+    await textArea.pressKeys(text);
+  }
+
+  public async getEditorTextArea() {
+    // This focusses the cursor on the bottom of the text area
+    const editor = await this.getEditor();
+    const content = await editor.findByCssSelector('.ace_content');
+    await content.click();
+    return await this.testSubjects.find('console-textarea');
+  }
+
+  public async getVisibleTextAt(lineIndex: number) {
+    const editor = await this.getEditor();
+    const lines = await editor.findAllByClassName('ace_line_group');
+
+    if (lines.length < lineIndex) {
+      throw new Error(`No line with index: ${lineIndex}`);
+    }
+
+    const line = lines[lineIndex];
+    const text = await line.getVisibleText();
+
+    return text.trim();
+  }
+
+  public async pressEnter() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.ENTER);
   }
 }

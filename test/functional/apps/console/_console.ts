@@ -20,6 +20,8 @@ GET _search
 
 `.trim();
 
+const LINE_NUMBER = 9;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
@@ -85,14 +87,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Ensure that the text area can be interacted with
       await PageObjects.console.dismissTutorial();
       expect(await PageObjects.console.hasAutocompleter()).to.be(false);
+      await PageObjects.console.enterRequest();
       await PageObjects.console.promptAutocomplete();
       await retry.waitFor('autocomplete to be visible', () =>
         PageObjects.console.hasAutocompleter()
       );
+    });
+
+    it('should add comma after previous non empty line on autocomplete', async () => {
+      await PageObjects.console.dismissTutorial();
+      await PageObjects.console.enterRequest();
+      await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.promptAutocomplete();
+
       await retry.try(async () => {
-        const editor = await PageObjects.console.getRequestEditor();
-        const commas = await editor.findAllByClassName('ace_comma');
-        expect(commas.length).to.eql(2);
+        const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+        log.debug(textOfPreviousNonEmptyLine);
+        const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
+        expect(lastChar).to.be.equal(',');
       });
     });
 
