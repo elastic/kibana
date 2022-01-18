@@ -20,7 +20,7 @@ import {
   HeaderMenuPortal,
   InspectorContextProvider,
 } from '../../../../observability/public';
-import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
+import { ScrollToTopOnPathChange } from '../../components/app/main/ScrollToTopOnPathChange';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,

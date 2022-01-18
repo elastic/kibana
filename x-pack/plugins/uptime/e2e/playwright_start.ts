@@ -14,18 +14,22 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 import './journeys';
 import { createApmAndObsUsersAndRoles } from '../../apm/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
 
+const listOfJourneys = [
+  'uptime',
+  'StepsDuration',
+  'TlsFlyoutInAlertingApp',
+  'StatusFlyoutInAlertingApp',
+] as const;
+
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
   return async ({ getService }: any) => {
     const result = await playwrightStart(getService, headless, match);
 
-    if (
-      result?.uptime &&
-      result.uptime.status !== 'succeeded' &&
-      result.StepsDuration &&
-      result.StepsDuration.status !== 'succeeded'
-    ) {
-      throw new Error('Tests failed');
-    }
+    listOfJourneys.forEach((journey) => {
+      if (result?.[journey] && result[journey].status !== 'succeeded') {
+        throw new Error('Tests failed');
+      }
+    });
   };
 }
 

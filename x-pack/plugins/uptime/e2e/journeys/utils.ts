@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Page } from '@elastic/synthetics';
-import { byTestId } from './uptime.journey';
+import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {
@@ -32,3 +31,12 @@ export async function loginToKibana({
 
   await waitForLoadingToFinish({ page });
 }
+
+export const byTestId = (testId: string) => {
+  return `[data-test-subj=${testId}]`;
+};
+
+export const assertText = async ({ page, text }: { page: Page; text: string }) => {
+  await page.waitForSelector(`text=${text}`);
+  expect(await page.$(`text=${text}`)).toBeTruthy();
+};
