@@ -10,14 +10,10 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiButton,
-  EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiSpacer,
   EuiTitle,
   EuiText,
