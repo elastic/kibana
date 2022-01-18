@@ -260,7 +260,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         );
         return telemetryPayloads.length;
       } catch (err) {
-        logger.warn('could not complete endpoint alert telemetry task', err);
+        logger.warn('could not complete endpoint alert telemetry task');
         return 0;
       }
     },
