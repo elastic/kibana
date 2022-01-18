@@ -40,7 +40,7 @@ const moduleIds = [
   'siem_winlogbeat_auth',
   'uptime_heartbeat',
   'security_linux_v3',
-  'security_windows_v3'
+  'security_windows_v3',
 ];
 
 export default ({ getService }: FtrProviderContext) => {
