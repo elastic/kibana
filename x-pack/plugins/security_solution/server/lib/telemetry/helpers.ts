@@ -9,7 +9,14 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import { PolicyData } from '../../../common/endpoint/types';
+import type {
+  ExceptionListItem,
+  ESClusterInfo,
+  ESLicense,
+  ListTemplate,
+  TelemetryEvent,
+} from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -200,6 +207,14 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
  * @param label_list the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
-export function createUsageCounterLabel(labelList: string[]): string {
-  return labelList.join('-');
-}
+export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
+
+/**
+ * Resiliantly handles an edge case where the endpoint config details are not present
+ *
+ * @returns the endpoint policy configuration
+ */
+export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
+  const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
+  return epPolicyConfig ? epPolicyConfig : null;
+};
