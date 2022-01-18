@@ -6,7 +6,6 @@
  */
 
 import { InfraTimerangeInput } from '../../../../../common/http_api';
-import { calculateRateTimeranges } from './calculate_rate_timeranges';
 
 export const createLogRateAggs = (timerange: InfraTimerangeInput, id: string) => {
   const intervalInSeconds = (timerange.to - timerange.from) / 1000;
