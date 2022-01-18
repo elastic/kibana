@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { type DiagnosticResult, type ConnectionRequestParams } from '@elastic/elasticsearch';
+import type { DiagnosticResult, ConnectionRequestParams } from '@elastic/elasticsearch';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 interface ResponseFixtureOptions {
