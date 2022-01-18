@@ -29,7 +29,7 @@ import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -39,7 +39,6 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
-import { QUERY_INVALID } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 

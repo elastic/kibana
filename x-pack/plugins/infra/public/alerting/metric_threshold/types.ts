@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricExpressionParams } from '../../../common/alerting/metrics';
+import { FilterQuery, MetricExpressionParams } from '../../../common/alerting/metrics';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
@@ -54,7 +54,7 @@ export interface ExpressionChartData {
 export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
-  filterQuery?: string | symbol;
+  filterQuery?: FilterQuery;
   sourceId: string;
   filterQueryText?: string;
   alertOnNoData?: boolean;

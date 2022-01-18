@@ -7,16 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValidationResult } from '../../../../../triggers_actions_ui/public';
-import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
-
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
+import {
+  Comparator,
+  FilterQuery,
+  InventoryMetricConditions,
+  QUERY_INVALID,
+} from '../../../../common/alerting/metrics';
 
 export function validateMetricThreshold({
   criteria,
   filterQuery,
 }: {
   criteria: InventoryMetricConditions[];
-  filterQuery?: string | typeof QUERY_INVALID;
+  filterQuery?: FilterQuery;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {

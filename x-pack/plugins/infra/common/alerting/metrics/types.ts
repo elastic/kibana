@@ -108,3 +108,7 @@ export interface CountMetricExpressionParams extends BaseMetricExpressionParams 
 }
 
 export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;
+
+export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
+
+export type FilterQuery = string | typeof QUERY_INVALID;

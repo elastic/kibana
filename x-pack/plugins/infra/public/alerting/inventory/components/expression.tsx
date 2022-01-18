@@ -31,7 +31,12 @@ import {
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
 } from '../../../../../triggers_actions_ui/public';
-import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import {
+  Comparator,
+  FilterQuery,
+  InventoryMetricConditions,
+  QUERY_INVALID,
+} from '../../../../common/alerting/metrics';
 import {
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
@@ -59,7 +64,6 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
-import { QUERY_INVALID } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -76,7 +80,7 @@ type Props = Omit<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string | symbol;
+      filterQuery?: FilterQuery;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
