@@ -1,0 +1,42 @@
+{
+    "job_id": "v3_windows_rare_user_type10_remote_login",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "event.code": "4624"
+            }
+          }
+        ],
+        "must": [
+          {
+            "bool": {
+              "should": [
+                {
+                  "match": {
+                    "winlog.event_data.LogonType": {
+                      "query": "10",
+                      "operator": "OR"
+                    }
+                  }
+                },
+                {
+                  "match": {
+                    "winlog.logon.type": {
+                      "query": "RemoteInteractive",
+                      "operator": "OR"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
