@@ -129,12 +129,12 @@ const getMosaicSpecificConfig: GetConfigFn = (...args) => {
 
 const getSpecificConfig: GetConfigByTypeFn = (chartType, ...args) =>
   ({
-    [ChartTypes.PIE]: getPieSpecificConfig(...args),
-    [ChartTypes.DONUT]: getDonutSpecificConfig(...args),
-    [ChartTypes.TREEMAP]: getTreemapSpecificConfig(...args),
-    [ChartTypes.MOSAIC]: getMosaicSpecificConfig(...args),
-    [ChartTypes.WAFFLE]: getWaffleSpecificConfig(...args),
-  }[chartType]);
+    [ChartTypes.PIE]: getPieSpecificConfig,
+    [ChartTypes.DONUT]: getDonutSpecificConfig,
+    [ChartTypes.TREEMAP]: getTreemapSpecificConfig,
+    [ChartTypes.MOSAIC]: getMosaicSpecificConfig,
+    [ChartTypes.WAFFLE]: getWaffleSpecificConfig,
+  }[chartType](...args));
 
 export const getConfig: GetConfigByTypeFn = (
   chartType,
