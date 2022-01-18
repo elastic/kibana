@@ -56,35 +56,35 @@ export const getEqlFn = ({
     name,
     type: 'eql_raw_response',
     inputTypes: ['kibana_context', 'null'],
-    help: i18n.translate('data.search.esdsl.help', {
+    help: i18n.translate('data.search.eql.help', {
       defaultMessage: 'Run Elasticsearch request',
     }),
     args: {
       query: {
         types: ['string'],
         aliases: ['_', 'q', 'query'],
-        help: i18n.translate('data.search.esdsl.q.help', {
+        help: i18n.translate('data.search.eql.q.help', {
           defaultMessage: 'Query DSL',
         }),
         required: true,
       },
       index: {
         types: ['string'],
-        help: i18n.translate('data.search.esdsl.index.help', {
+        help: i18n.translate('data.search.eql.index.help', {
           defaultMessage: 'ElasticSearch index to query',
         }),
         required: true,
       },
       size: {
         types: ['number'],
-        help: i18n.translate('data.search.esdsl.size.help', {
+        help: i18n.translate('data.search.eql.size.help', {
           defaultMessage: 'ElasticSearch searchAPI size parameter',
         }),
         default: 10,
       },
       field: {
         types: ['string'],
-        help: i18n.translate('data.search.esdsl.field.help', {
+        help: i18n.translate('data.search.eql.field.help', {
           defaultMessage: 'List of fields to retrieve',
         }),
         multi: true,
