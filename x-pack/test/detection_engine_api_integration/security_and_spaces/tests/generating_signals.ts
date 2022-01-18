@@ -864,7 +864,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 788,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });
@@ -933,7 +933,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               count: 21,
-              from: '1900-01-01T00:00:00.000Z',
+              from: '2019-02-19T07:12:05.332Z',
             },
           });
         });

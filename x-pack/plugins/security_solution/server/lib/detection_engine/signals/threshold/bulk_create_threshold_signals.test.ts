@@ -102,12 +102,12 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
                 from: new Date('2020-12-17T16:28:03.000Z'), // from min_timestamp
                 terms: [
                   {
-                    field: 'host.name',
-                    value: 'garden-gnomes',
-                  },
-                  {
                     field: 'source.ip',
                     value: '127.0.0.1',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'garden-gnomes',
                   },
                 ],
                 cardinality: [
