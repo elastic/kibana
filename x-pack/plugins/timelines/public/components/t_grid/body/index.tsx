@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
@@ -395,7 +395,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     // Clean any removed custom field that may still be present in stored columnHeaders
     useEffect(() => {
-      if (browserFields && columnHeaders) {
+      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
         columnHeaders.forEach(({ id: columnId }) => {
           if (browserFields.base?.fields?.[columnId] == null) {
             const [category] = columnId.split('.');

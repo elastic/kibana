@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -144,9 +144,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectAll, selectAll]);
 
-    // Clean any removed custom field that may still be present in stored columnHeaders
     useEffect(() => {
-      if (browserFields && columnHeaders) {
+      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
         columnHeaders.forEach(({ id: columnId }) => {
           if (browserFields.base?.fields?.[columnId] == null) {
             const [category] = columnId.split('.');

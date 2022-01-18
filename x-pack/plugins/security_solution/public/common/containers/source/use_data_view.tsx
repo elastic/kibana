@@ -44,7 +44,7 @@ export const useDataView = (): {
     selectedDataViewId: string,
     scopeId?: SourcererScopeName,
     needToBeInit?: boolean
-  ) => void;
+  ) => Promise<IndexFieldsStrategyResponse>;
 } => {
   const { data } = useKibana().services;
   const abortCtrl = useRef<Record<string, AbortController>>({});
@@ -82,63 +82,66 @@ export const useDataView = (): {
           );
         }
 
-        const subscription = data.search
-          .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
-            {
-              dataViewId: selectedDataViewId,
-              onlyCheckIfIndicesExist: false,
-            },
-            {
-              abortSignal: abortCtrl.current[selectedDataViewId].signal,
-              strategy: 'indexFields',
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                const patternString = response.indicesExist.sort().join();
-                if (needToBeInit && scopeId) {
-                  dispatch(
-                    sourcererActions.setSelectedDataView({
-                      id: scopeId,
-                      selectedDataViewId,
-                      selectedPatterns: response.indicesExist,
-                    })
-                  );
-                }
+        const searchObservable = data.search.search<
+          IndexFieldsStrategyRequest<'dataView'>,
+          IndexFieldsStrategyResponse
+        >(
+          {
+            dataViewId: selectedDataViewId,
+            onlyCheckIfIndicesExist: false,
+          },
+          {
+            abortSignal: abortCtrl.current[selectedDataViewId].signal,
+            strategy: 'indexFields',
+          }
+        );
+        const subscription = searchObservable.subscribe({
+          next: (response) => {
+            if (isCompleteResponse(response)) {
+              const patternString = response.indicesExist.sort().join();
+              if (needToBeInit && scopeId) {
                 dispatch(
-                  sourcererActions.setDataView({
-                    browserFields: getBrowserFields(patternString, response.indexFields),
-                    docValueFields: getDocValueFields(patternString, response.indexFields),
-                    id: selectedDataViewId,
-                    indexFields: getEsFields(response.indexFields),
-                    loading: false,
-                    runtimeMappings: response.runtimeMappings,
+                  sourcererActions.setSelectedDataView({
+                    id: scopeId,
+                    selectedDataViewId,
+                    selectedPatterns: response.indicesExist,
                   })
                 );
-                searchSubscription$.current[selectedDataViewId]?.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading({ id: selectedDataViewId, loading: false });
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current[selectedDataViewId]?.unsubscribe();
               }
-            },
-            error: (msg) => {
-              if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
-                // reload app if security solution data view is deleted
-                return location.reload();
-              }
-              setLoading({ id: selectedDataViewId, loading: false });
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
+              dispatch(
+                sourcererActions.setDataView({
+                  browserFields: getBrowserFields(patternString, response.indexFields),
+                  docValueFields: getDocValueFields(patternString, response.indexFields),
+                  id: selectedDataViewId,
+                  indexFields: getEsFields(response.indexFields),
+                  loading: false,
+                  runtimeMappings: response.runtimeMappings,
+                })
+              );
               searchSubscription$.current[selectedDataViewId]?.unsubscribe();
-            },
-          });
+            } else if (isErrorResponse(response)) {
+              setLoading({ id: selectedDataViewId, loading: false });
+              addWarning(i18n.ERROR_BEAT_FIELDS);
+              searchSubscription$.current[selectedDataViewId]?.unsubscribe();
+            }
+          },
+          error: (msg) => {
+            if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
+              // reload app if security solution data view is deleted
+              return location.reload();
+            }
+            setLoading({ id: selectedDataViewId, loading: false });
+            addError(msg, {
+              title: i18n.FAIL_BEAT_FIELDS,
+            });
+            searchSubscription$.current[selectedDataViewId]?.unsubscribe();
+          },
+        });
         searchSubscription$.current = {
           ...searchSubscription$.current,
           [selectedDataViewId]: subscription,
         };
+        return searchObservable.toPromise();
       };
       if (searchSubscription$.current[selectedDataViewId]) {
         searchSubscription$.current[selectedDataViewId].unsubscribe();
@@ -146,7 +149,7 @@ export const useDataView = (): {
       if (abortCtrl.current[selectedDataViewId]) {
         abortCtrl.current[selectedDataViewId].abort();
       }
-      asyncSearch();
+      return asyncSearch();
     },
     [addError, addWarning, data.search, dispatch, setLoading]
   );

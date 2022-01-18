@@ -54,9 +54,9 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         dataViewFieldEditor?.openEditor({
           ctx: { dataView },
-          onSave: (field: DataViewField) => {
+          onSave: async (field: DataViewField) => {
             // Fetch the updated list of fields
-            indexFieldsSearch(selectedDataViewId);
+            await indexFieldsSearch(selectedDataViewId);
 
             // Add the new field to the event table
             dispatch(
