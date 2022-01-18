@@ -841,6 +841,11 @@ export default function (providerContext: FtrProviderContext) {
                 policy_template: 'package_policy_upgrade',
                 type: 'test_input_new_2',
                 enabled: true,
+                vars: {
+                  test_input_new_2_var_1: {
+                    value: 'Test input value 1',
+                  },
+                },
                 streams: [
                   {
                     id: 'test-package_policy_upgrade-xxxx',
