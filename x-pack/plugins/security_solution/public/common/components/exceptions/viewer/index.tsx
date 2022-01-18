@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
@@ -18,6 +18,7 @@ import type {
 import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
+import { useUserData } from '../../../../../public/detections/components/user_info';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
@@ -105,6 +106,17 @@ const ExceptionsViewerComponent = ({
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState });
   const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
+  const [supportedListTypes, setSupportedListTypes] = useState<ExceptionListTypeEnum[]>([]);
+
+  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+
+  useEffect((): void => {
+    if (!canUserCRUD || !hasIndexWrite) {
+      setSupportedListTypes([]);
+    } else {
+      setSupportedListTypes(availableListTypes);
+    }
+  }, [availableListTypes, canUserCRUD, hasIndexWrite]);
 
   const setExceptions = useCallback(
     ({
@@ -356,7 +368,7 @@ const ExceptionsViewerComponent = ({
 
         <ExceptionsViewerHeader
           isInitLoading={isInitLoading}
-          supportedListTypes={availableListTypes}
+          supportedListTypes={supportedListTypes}
           detectionsListItems={totalDetectionsItems}
           endpointListItems={totalEndpointItems}
           onFilterChange={handleFilterChange}
@@ -374,6 +386,7 @@ const ExceptionsViewerComponent = ({
         />
 
         <ExceptionsViewerItems
+          disableActions={!canUserCRUD || !hasIndexWrite}
           showEmpty={showEmpty}
           showNoResults={showNoResults}
           isInitLoading={isInitLoading}
