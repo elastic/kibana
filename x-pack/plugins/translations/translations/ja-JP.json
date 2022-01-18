@@ -16203,7 +16203,6 @@
     "xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink": "インデックス名の制限に関する詳細。",
     "xpack.ml.dataFrameAnalyticsBreadcrumbs.analyticsMapLabel": "分析マップ",
     "xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel": "探索",
-    "xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel": "データフレーム分析",
     "xpack.ml.dataFrameAnalyticsLabel": "データフレーム分析",
     "xpack.ml.dataFrameAnalyticsTabLabel": "データフレーム分析",
     "xpack.ml.dataGrid.CcsWarningCalloutBody": "インデックスパターンのデータの取得中に問題が発生しました。ソースプレビューとクラスター横断検索を組み合わせることは、バージョン7.10以上ではサポートされていません。変換を構成して作成することはできます。",

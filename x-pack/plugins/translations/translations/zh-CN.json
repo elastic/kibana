@@ -16414,7 +16414,6 @@
     "xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink": "详细了解索引名称限制。",
     "xpack.ml.dataFrameAnalyticsBreadcrumbs.analyticsMapLabel": "分析地图",
     "xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel": "探查",
-    "xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel": "数据帧分析",
     "xpack.ml.dataFrameAnalyticsLabel": "数据帧分析",
     "xpack.ml.dataFrameAnalyticsTabLabel": "数据帧分析",
     "xpack.ml.dataGrid.CcsWarningCalloutBody": "检索索引模式的数据时有问题。源预览和跨集群搜索仅在 7.10 及以上版本上受支持。可能需要配置和创建转换。",
