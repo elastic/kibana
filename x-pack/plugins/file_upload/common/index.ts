@@ -5,8 +5,30 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110898
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './constants';
-export * from './types';
+export {
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
+  FILE_FORMATS,
+  FILE_SIZE_DISPLAY_FORMAT,
+  INDEX_META_DATA_CREATED_BY,
+  MAX_FILE_SIZE,
+  MAX_FILE_SIZE_BYTES,
+  MB,
+  UI_SETTING_MAX_FILE_SIZE,
+} from './constants';
+export type {
+  AnalysisResult,
+  Doc,
+  FindFileStructureErrorResponse,
+  FindFileStructureResponse,
+  FormattedOverrides,
+  HasImportPermission,
+  Settings,
+  Mappings,
+  ImportDoc,
+  InputData,
+  InputOverrides,
+  IngestPipeline,
+  IngestPipelineWrapper,
+  ImportFailure,
+  ImportResponse,
+} from './types';
