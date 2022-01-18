@@ -11,12 +11,12 @@ import { Readable } from 'stream';
 
 import {
   errors,
-  type Client,
-  type ConnectionRequestParams,
-  type TransportRequestOptions,
-  type TransportRequestParams,
-  type DiagnosticResult,
-  type RequestBody,
+  Client,
+  ConnectionRequestParams,
+  TransportRequestOptions,
+  TransportRequestParams,
+  DiagnosticResult,
+  RequestBody,
 } from '@elastic/elasticsearch';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
@@ -363,6 +363,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
             "path": "/_path",
             "query": undefined,
           },
+          "url": Object {
+            "path": "/_path",
+            "query": undefined,
+          },
         }
       `);
 
@@ -397,6 +401,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
               "headers": Object {},
               "status_code": 400,
             },
+          },
+          "url": Object {
+            "path": "/_path",
+            "query": undefined,
           },
           "url": Object {
             "path": "/_path",

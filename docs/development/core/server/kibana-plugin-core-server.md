@@ -229,6 +229,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
+|  [UnauthorizedErrorHandlerNotHandledResult](./kibana-plugin-core-server.unauthorizederrorhandlernothandledresult.md) |  |
+|  [UnauthorizedErrorHandlerOptions](./kibana-plugin-core-server.unauthorizederrorhandleroptions.md) |  |
+|  [UnauthorizedErrorHandlerResultRetryParams](./kibana-plugin-core-server.unauthorizederrorhandlerresultretryparams.md) |  |
+|  [UnauthorizedErrorHandlerRetryResult](./kibana-plugin-core-server.unauthorizederrorhandlerretryresult.md) |  |
+|  [UnauthorizedErrorHandlerToolkit](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.md) | Toolkit passed to a [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) used to generate responses from the handler |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
@@ -327,4 +332,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
 |  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |
+|  [UnauthorizedError](./kibana-plugin-core-server.unauthorizederror.md) |  |
+|  [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) | A handler used to handle unauthorized error returned by elasticsearch |
+|  [UnauthorizedErrorHandlerResult](./kibana-plugin-core-server.unauthorizederrorhandlerresult.md) |  |
 
