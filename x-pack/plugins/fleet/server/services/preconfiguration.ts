@@ -23,10 +23,7 @@ import type {
   InstallResult,
 } from '../../common';
 import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
-import {
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_LATEST_KEYWORD,
-} from '../constants';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
@@ -183,13 +180,28 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // Install bundled packages first before we install any preconfigured packages
   const bundledInstallResults = await installBundledPackages(soClient, esClient, spaceId);
 
+  const packagesToInstall = [];
+
+  for (const pkg of packages) {
+    // We don't support preconfiguring a bundled package. Preconfigured packages will be installed from the package
+    // registry if it is available while bundled packages will be installed from disk. In order to avoid version conflicts
+    // we only support one or the other, preferring bundled packages if they are avaiable.
+    if (bundledInstallResults.some((x) => x.name === pkg.name)) {
+      logger.warn(
+        `Preconfigured package ${pkg.name} will be skipped as a bundled version of this package is included with Kibana`
+      );
+
+      continue;
+    }
+
+    packagesToInstall.push(pkg);
+  }
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
     esClient,
-    packagesToInstall: packages.map((pkg) =>
-      pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
-    ),
+    packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
   });

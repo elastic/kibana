@@ -11,7 +11,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
-const BUNDLED_PACKAGES = ['apm'];
+const BUNDLED_PACKAGES = ['apm', 'synthetics'];
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
