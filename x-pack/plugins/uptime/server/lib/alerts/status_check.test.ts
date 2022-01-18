@@ -75,7 +75,7 @@ const mockStatusAlertDocument = (
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `first with url ${monitorInfo?.url?.full} failed 234 times in the last undefined undefined. Alert when > 5.`,
+      [ALERT_REASON]: `First failed 234 times in the last undefined undefined. Alert when > 5.`,
     },
     id: getInstanceId(
       monitorInfo,
@@ -89,13 +89,11 @@ const mockAvailabilityAlertDocument = (monitor: GetMonitorAvailabilityResult) =>
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `Monitor ${monitorInfo.monitor.name || monitorInfo.monitor.id} with url ${
-        monitorInfo?.url?.full
-      } is below threshold with ${(monitor.availabilityRatio! * 100).toFixed(
+      [ALERT_REASON]: `${
+        monitorInfo.monitor.name || monitorInfo.monitor.id
+      }  is below threshold with ${(monitor.availabilityRatio! * 100).toFixed(
         2
-      )}% availability expected is 99.34% from ${
-        monitorInfo.observer?.geo?.name
-      }. The latest error message is ${monitorInfo.error?.message || ''}`,
+      )}% availability expected is 99.34% from ${monitorInfo.observer?.geo?.name}.`,
     },
     id: getInstanceId(monitorInfo, `${monitorInfo?.monitor.id}-${monitorInfo.observer?.geo?.name}`),
   };
@@ -220,13 +218,13 @@ describe('status check alert', () => {
             "lastTriggeredAt": "foo date string",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
-            "monitorName": "first",
+            "monitorName": "First",
             "monitorType": "myType",
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor first with url localhost:8080 is down from harrisburg. The latest error message is error message 1",
-            "statusMessage": "down",
+            "reason": "First from harrisburg failed 234 times in the last undefined undefined. Alert when > 5.",
+            "statusMessage": "failed 234 times in the last undefined undefined. Alert when > 5.",
           },
         ]
       `);
@@ -285,12 +283,12 @@ describe('status check alert', () => {
             "lastTriggeredAt": "foo date string",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
-            "monitorName": "first",
+            "monitorName": "First",
             "monitorType": "myType",
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor first with url localhost:8080 is down from harrisburg. The latest error message is error message 1",
+            "reason": "First from harrisburg is down.",
             "statusMessage": "down",
           },
         ]
@@ -341,12 +339,12 @@ describe('status check alert', () => {
             "lastTriggeredAt": "7.7 date",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
-            "monitorName": "first",
+            "monitorName": "First",
             "monitorType": "myType",
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor first with url localhost:8080 is down from harrisburg. The latest error message is error message 1",
+            "reason": "First from harrisburg is down.",
             "statusMessage": "down",
           },
         ]
@@ -555,12 +553,12 @@ describe('status check alert', () => {
             "lastTriggeredAt": "foo date string",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
-            "monitorName": "first",
+            "monitorName": "First",
             "monitorType": "myType",
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor first with url localhost:8080 is down from harrisburg. The latest error message is error message 1",
+            "reason": "First from harrisburg is down.",
             "statusMessage": "down",
           },
         ]
@@ -753,7 +751,7 @@ describe('status check alert', () => {
             "monitorUrl": "https://foo.com",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor Foo with url https://foo.com is below threshold with 99.28% availability expected is 99.34% from harrisburg. The latest error message is ",
+            "reason": "Foo from harrisburg is below threshold with 99.28% availability expected is 99.34%.",
             "statusMessage": "below threshold with 99.28% availability expected is 99.34%",
           },
         ]

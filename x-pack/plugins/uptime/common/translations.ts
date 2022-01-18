@@ -20,10 +20,10 @@ export const VALUE_MUST_BE_AN_INTEGER = i18n.translate('xpack.uptime.settings.in
 
 export const MonitorStatusTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage: '{monitorName} with url {monitorUrl} {statusMessage}',
+    defaultMessage: '{monitorName} from {observerLocation} {statusMessage}',
     values: {
       monitorName: '{{state.monitorName}}',
-      monitorUrl: '{{{state.monitorUrl}}}',
+      observerLocation: '{{state.observerLocation}}',
       statusMessage: '{{{state.statusMessage}}}',
     },
   }),
