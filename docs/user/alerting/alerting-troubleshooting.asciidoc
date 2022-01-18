@@ -190,18 +190,7 @@ When diagnosing the health state of the task, you will most likely be interested
 
 Investigating the underlying task can help you gauge whether the problem you’re seeing is rooted in the rule not running at all, whether it’s running and failing, or whether it is running, but exhibiting behavior that is different than what was expected (at which point you should focus on the rule itself, rather than the task).
 
-In addition to the above methods, broadly used the next approaches and common issues:
-
-* <<alerting-common-issues, Alerting common issues>>
-* <<event-log-index, Querying Event log index>>
-* <<testing-connectors, Testing connectors using Connectors UI and `kbn-action` tool>>
-
-include::troubleshooting/alerting-common-issues.asciidoc[]
-include::troubleshooting/event-log-index.asciidoc[]
-include::troubleshooting/testing-connectors.asciidoc[]
-
-
-[float]
+[discrete]
 [[alerting-kibana-disable]]
 === Temporarily disable
 
@@ -215,3 +204,14 @@ the {kib} Task Manager to gain breathing room to resolve your situation by resta
 xpack.task_manager.max_workers: 1
 xpack.task_manager.poll_interval: 1m
 --------------------------------------------------
+
+
+In addition to the above methods, broadly used the next approaches and common issues:
+
+* <<alerting-common-issues, Alerting common issues>>
+* <<event-log-index, Querying Event log index>>
+* <<testing-connectors, Testing connectors using Connectors UI and `kbn-action` tool>>
+
+include::troubleshooting/alerting-common-issues.asciidoc[]
+include::troubleshooting/event-log-index.asciidoc[]
+include::troubleshooting/testing-connectors.asciidoc[]
