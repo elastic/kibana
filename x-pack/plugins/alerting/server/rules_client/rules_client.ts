@@ -557,14 +557,14 @@ export class RulesClient {
     this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
 
-    const eventLogPageOptions = dateStart
+    const eventLogPageOptions = numberOfExecutions
       ? {
-          per_page: 10000,
-          start: parsedDateStart.toISOString(),
-        }
-      : {
           per_page: numberOfExecutions ?? 60,
           filter: 'event.provider: alerting AND event.action:execute',
+        }
+      : {
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
         };
     try {
       const queryResults = await eventLogClient.findEventsBySavedObjectIds(

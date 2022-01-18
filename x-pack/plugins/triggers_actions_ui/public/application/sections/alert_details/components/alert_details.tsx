@@ -50,7 +50,7 @@ export type AlertDetailsProps = {
   alertType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
-  refreshToken: number;
+  refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({

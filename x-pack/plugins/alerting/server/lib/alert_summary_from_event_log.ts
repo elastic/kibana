@@ -57,6 +57,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (provider !== EVENT_LOG_PROVIDER) continue;
 
     const action = event?.event?.action;
+
     if (action === undefined) continue;
 
     if (action === EVENT_LOG_ACTIONS.execute) {
