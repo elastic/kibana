@@ -7,7 +7,7 @@
 
 import type {
   BulkOperationContainer,
-  SortResults,
+  SearchSortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient, Logger } from 'src/core/server';
@@ -564,7 +564,7 @@ export class SessionIndex {
     });
 
     try {
-      let searchAfter: SortResults | undefined;
+      let searchAfter: SearchSortResults | undefined;
       for (let i = 0; i < SESSION_INDEX_CLEANUP_BATCH_LIMIT; i++) {
         const { body: searchResponse } =
           await this.options.elasticsearchClient.search<SessionIndexValue>({
