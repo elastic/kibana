@@ -6,22 +6,14 @@
  */
 
 import { Unit } from '@elastic/datemath';
-import { Comparator, AlertStates } from '../common/types';
+import {
+  Aggregators,
+  AlertStates,
+  Comparator,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../../../../common/alerting/metrics';
 
-export { Comparator, AlertStates };
-export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
-
-export enum Aggregators {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-  P95 = 'p95',
-  P99 = 'p99',
-}
+export { Comparator, AlertStates, METRIC_THRESHOLD_ALERT_TYPE_ID };
 
 interface BaseMetricExpressionParams {
   timeSize: number;

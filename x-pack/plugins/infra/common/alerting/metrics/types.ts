@@ -37,6 +37,14 @@ export enum Aggregators {
   P99 = 'p99',
 }
 
+export enum AlertStates {
+  OK,
+  ALERT,
+  WARNING,
+  NO_DATA,
+  ERROR,
+}
+
 const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
 const metricAnomalyMetricRT = rt.union([
   rt.literal('memory_usage'),

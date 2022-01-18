@@ -6,21 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  InventoryMetricConditions,
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/inventory_metric_threshold/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
-import { QUERY_INVALID } from './expression';
+import type { ValidationResult } from '../../../../../triggers_actions_ui/public';
+import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+
+export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 export function validateMetricThreshold({
   criteria,
   filterQuery,
 }: {
   criteria: InventoryMetricConditions[];
-  filterQuery?: string | symbol;
+  filterQuery?: string | typeof QUERY_INVALID;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
