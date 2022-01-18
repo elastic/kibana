@@ -68,6 +68,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
           '!diversified_sampler',
           '!multi_terms',
           '!significant_text',
+          '!rare_terms',
         ],
       },
       {
@@ -84,6 +85,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
           '!diversified_sampler',
           '!multi_terms',
           '!significant_text',
+          '!rare_terms',
         ],
       },
     ],

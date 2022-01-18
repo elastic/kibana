@@ -179,6 +179,7 @@ export class DocLinksService {
           significant_terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-significantterms-aggregation.html`,
           terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html`,
           terms_doc_count_error: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-terms-aggregation.html#_per_bucket_document_count_error`,
+          rare_terms: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-rare-terms-aggregation.html`,
           avg: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-avg-aggregation.html`,
           avg_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-avg-bucket-aggregation.html`,
           max_bucket: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-max-bucket-aggregation.html`,
@@ -746,6 +747,7 @@ export interface DocLinksStart {
       readonly significant_terms: string;
       readonly terms: string;
       readonly terms_doc_count_error: string;
+      readonly rare_terms: string;
       readonly avg: string;
       readonly avg_bucket: string;
       readonly max_bucket: string;
