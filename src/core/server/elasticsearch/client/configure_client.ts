@@ -6,17 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Client, Transport, HttpConnection } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type {
-  TransportRequestParams,
-  TransportRequestOptions,
-  TransportResult,
-} from '@elastic/elasticsearch';
-
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { createTransport } from './create_transport';
 
 const noop = () => undefined;
 
@@ -35,22 +30,7 @@ export const configureClient = (
   }
 ): KibanaClient => {
   const clientOptions = parseClientOptions(config, scoped);
-  class KibanaTransport extends Transport {
-    request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts: TransportRequestOptions = options || {};
-      const opaqueId = getExecutionContext();
-      if (opaqueId && !opts.opaqueId) {
-        // rewrites headers['x-opaque-id'] if it presents
-        opts.opaqueId = opaqueId;
-      }
-      // Enforce the client to return TransportResult.
-      // It's required for bwc with responses in 7.x version.
-      if (opts.meta === undefined) {
-        opts.meta = true;
-      }
-      return super.request(params, opts) as Promise<TransportResult<any, any>>;
-    }
-  }
+  const KibanaTransport = createTransport({ getExecutionContext });
 
   const client = new Client({
     ...clientOptions,

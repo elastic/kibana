@@ -17,11 +17,11 @@ import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from '.
 import { ScriptedFieldItem } from './types';
 import { IndexPatternManagmentContext } from '../../../types';
 
-import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import { DataView, DataViewsPublicPluginStart } from '../../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 
 interface ScriptedFieldsTableProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   fieldFilter?: string;
   scriptedFieldLanguageFilter?: string;
   helpers: {
@@ -30,7 +30,7 @@ interface ScriptedFieldsTableProps {
   };
   onRemoveField?: () => void;
   painlessDocLink: string;
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   userEditPermission: boolean;
 }
 
