@@ -31,7 +31,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     }
 
     // specifically needed for the synthetics service api key generation
-    server.savedObjectsClient = savedObjectsClient;
+    server.authSavedObjectsClient = savedObjectsClient;
 
     const isInspectorEnabled = await context.core.uiSettings.client.get<boolean>(
       enableInspectEsQueries
