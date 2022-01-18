@@ -42,6 +42,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'errors'
     | 'metrics'
     | 'nodes'
+    | 'infra'
     | 'service-map'
     | 'logs'
     | 'profiling';
@@ -239,6 +240,16 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'JVMs',
       }),
       hidden: isJVMsTabHidden({ agentName, runtimeName }),
+    },
+    {
+      key: 'infra',
+      href: router.link('/services/{serviceName}/infra', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.infraTabLabel', {
+        defaultMessage: 'Infrastructure',
+      }),
     },
     {
       key: 'service-map',
