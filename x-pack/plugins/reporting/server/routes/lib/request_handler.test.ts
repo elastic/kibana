@@ -8,7 +8,7 @@
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../..';
-import { JobParamsPDF, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
 import {
@@ -52,7 +52,7 @@ describe('Handle request to generate', () => {
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
   let requestHandler: RequestHandler;
 
-  const mockJobParams: JobParamsPDF = {
+  const mockJobParams: JobParamsPDFDeprecated = {
     browserTimezone: 'UTC',
     objectType: 'cool_object_type',
     title: 'cool_title',
