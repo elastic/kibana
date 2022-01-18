@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  IndicesIndexStatePrefixedSettings,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndicesIndexStatePrefixedSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
