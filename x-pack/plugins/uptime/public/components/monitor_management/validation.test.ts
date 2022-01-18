@@ -13,7 +13,7 @@ import {
   ScheduleUnit,
   ServiceLocations,
 } from '../../../common/runtime_types';
-import { validate } from './validation';
+import { validate, validateCommon } from './validation';
 
 describe('[Monitor Management] validation', () => {
   const commonPropsValid: Partial<MonitorFields> = {
@@ -27,7 +27,28 @@ describe('[Monitor Management] validation', () => {
         label: 'EU West',
       },
     ] as ServiceLocations,
+    [ConfigKey.NAME]: 'test-name',
+    [ConfigKey.NAMESPACE]: 'namespace',
   };
+
+  describe('Common monitor fields', () => {
+    it('should return false for all valid props', () => {
+      const result = Object.values(validateCommon).map((validator) => {
+        return validator ? validator(commonPropsValid) : true;
+      });
+
+      expect(result.reduce((previous, current) => previous || current)).toBeFalsy();
+    });
+
+    it('should invalidate on invalid namespace', () => {
+      const validatorFn = validateCommon[ConfigKey.NAMESPACE];
+      const result = [undefined, null, '', '*/&<>:', 'A', 'a'.repeat(101)].map((testValue) =>
+        validatorFn?.({ [ConfigKey.NAMESPACE]: testValue } as Partial<MonitorFields>)
+      );
+
+      expect(result.reduce((previous, current) => previous && current)).toBeTruthy();
+    });
+  });
 
   describe('HTTP', () => {
     const httpPropsValid: Partial<HTTPFields> = {

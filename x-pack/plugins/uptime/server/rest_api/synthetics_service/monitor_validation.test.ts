@@ -426,6 +426,7 @@ function getJsonPayload() {
     '    "TLSv1.2"' +
     '  ],' +
     '  "name": "test-monitor-name",' +
+    '  "namespace": "test-namespace",' +
     '  "locations": [{' +
     '    "id": "eu-west-01",' +
     '    "label": "Europe West",' +

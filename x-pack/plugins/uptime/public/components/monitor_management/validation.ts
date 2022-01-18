@@ -89,7 +89,7 @@ export function validateNamespace(
 }
 
 // validation functions return true when invalid
-const validateCommon: Validation = {
+export const validateCommon: Validation = {
   [ConfigKey.NAME]: ({ [ConfigKey.NAME]: value }) => {
     return !value || typeof value !== 'string';
   },

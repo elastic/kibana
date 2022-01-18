@@ -44,7 +44,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
     [ConfigKey.NAMESPACE]: namespace,
   });
   const isNamespaceInvalid = !!namespaceErrorMsg;
-  const core = useKibana();
+  const { services } = useKibana();
 
   return (
     <>
@@ -132,7 +132,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
                       learnMore: (
                         <EuiLink
                           target="_blank"
-                          href={core.services.docLinks?.links?.fleet?.datastreamsNamingScheme}
+                          href={services.docLinks?.links?.fleet?.datastreamsNamingScheme}
                           external
                         >
                           <FormattedMessage
