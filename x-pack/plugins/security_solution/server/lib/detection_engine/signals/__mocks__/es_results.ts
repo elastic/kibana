@@ -14,6 +14,7 @@ import type {
   SignalHit,
   WrappedSignalHit,
   AlertAttributes,
+  AlertSourceHit,
 } from '../types';
 import { SavedObject } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
@@ -25,6 +26,15 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
 import { RuleParams } from '../../schemas/rule_schemas';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_UUID,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_KIND,
+} from '@kbn/rule-data-utils';
+import { ALERT_ANCESTORS } from '../../../../../common/field_maps/field_names';
 
 export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<AlertAttributes<T>> => {
   return {
@@ -170,6 +180,122 @@ export const sampleDocNoSortId = (
   sort: [],
 });
 
+export const sampleAlertDocNoSortId = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
+  ...sampleDocNoSortId(someUuid, ip),
+  _source: {
+    event: {
+      kind: 'signal',
+    },
+    signal: {
+      ancestors: [
+        {
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
+      ],
+      reason: 'reasonable reason',
+      rule: {
+        id: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
+        description: 'Descriptive description',
+      },
+      status: 'open',
+    },
+  },
+  fields: {},
+});
+
+export const sampleAlertDocAADNoSortId = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): AlertSourceHit & { _source: Required<AlertSourceHit>['_source'] } => ({
+  _index: 'myFakeSignalIndex',
+  _score: 100,
+  _version: 1,
+  _id: someUuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    source: {
+      ip: ip ?? '127.0.0.1',
+    },
+    [EVENT_KIND]: 'signal',
+    [ALERT_UUID]: someUuid,
+    [ALERT_REASON]: 'reasonable reason',
+    [ALERT_WORKFLOW_STATUS]: 'open',
+    [ALERT_ANCESTORS]: [
+      {
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+    ],
+    [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
+    [ALERT_RULE_PARAMETERS]: {
+      description: 'Descriptive description',
+      meta: { someMeta: 'someField' },
+      timeline_id: 'some-timeline-id',
+      timeline_title: 'some-timeline-title',
+      risk_score: 50,
+      severity: 'high',
+      note: 'Noteworthy notes',
+      license: 'Elastic License',
+      author: ['Elastic'],
+      false_positives: [],
+      from: 'now-6m',
+      rule_id: 'rule-1',
+      max_signals: 10000,
+      risk_score_mapping: [],
+      severity_mapping: [],
+      to: 'now',
+      references: ['http://example.com', 'https://example.com'],
+      version: 1,
+      immutable: false,
+      namespace: 'default',
+      output_index: '',
+      building_block_type: undefined,
+      exceptions_list: [],
+      rule_name_override: undefined,
+      timestamp_override: undefined,
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            id: 'TA0000',
+            name: 'test tactic',
+            reference: 'https://attack.mitre.org/tactics/TA0000/',
+          },
+          technique: [
+            {
+              id: 'T0000',
+              name: 'test technique',
+              reference: 'https://attack.mitre.org/techniques/T0000/',
+              subtechnique: [
+                {
+                  id: 'T0000.000',
+                  name: 'test subtechnique',
+                  reference: 'https://attack.mitre.org/techniques/T0000/000/',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': [ip ?? '127.0.0.1'],
+  },
+  sort: [],
+});
+
 export const sampleDocNoSortIdWithTimestamp = (
   someUuid: string = sampleIdGuid,
   ip?: string
@@ -177,6 +303,38 @@ export const sampleDocNoSortIdWithTimestamp = (
   _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
 } => {
   const doc = sampleDocNoSortId(someUuid, ip);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
+
+export const sampleAlertDocNoSortIdWithTimestamp = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleAlertDocNoSortId(someUuid, ip);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
+
+export const sampleAlertDocAADNoSortIdWithTimestamp = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): AlertSourceHit & {
+  _source: Required<AlertSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleAlertDocAADNoSortId(someUuid, ip);
   return {
     ...doc,
     _source: {
