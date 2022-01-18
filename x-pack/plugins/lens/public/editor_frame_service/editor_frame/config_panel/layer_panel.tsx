@@ -597,6 +597,7 @@ export function LayerPanel(
                   paramEditorCustomProps: activeGroup.paramEditorCustomProps,
                   supportFieldFormat: activeGroup.supportFieldFormat !== false,
                   layerType: activeVisualization.getLayerType(layerId, visualizationState),
+                  panelRef,
                 }}
               />
             )}

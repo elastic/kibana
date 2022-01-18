@@ -165,6 +165,11 @@ export const getPieVisualization = ({
             supportsMoreColumns: sortedColumns.length < PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
             requiredMinDimensionCount: PartitionChartsMeta[state.shape].requiredMinDimensionCount,
+            sortable:
+              state.shape === 'mosaic'
+                ? // Make only the first level of mosaic sortable
+                  (op, colIndex) => op.isBucketed && op.scale === 'ordinal' && colIndex === 0
+                : undefined,
           };
       }
     };

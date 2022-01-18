@@ -10,6 +10,13 @@ import type { Operation } from '../../../types';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '../definitions';
 
+export interface SortOverrideType {
+  type: 'alphabetical' | 'none' | 'column' | 'terms';
+  columnId: string;
+  direction?: 'asc' | 'desc';
+  terms?: string[];
+}
+
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
@@ -17,6 +24,7 @@ export interface BaseIndexPatternColumn extends Operation {
   timeScale?: TimeScaleUnit;
   filter?: Query;
   timeShift?: string;
+  sortOverride?: SortOverrideType;
 }
 
 // Formatting can optionally be added to any column

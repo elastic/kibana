@@ -144,6 +144,10 @@ export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
         if (params) {
           memo[columnId] = params;
         }
+        if (column.sortOverride) {
+          memo[columnId] = memo[columnId] || {};
+          memo[columnId].sortOverride = column.sortOverride;
+        }
       }
       return memo;
     },

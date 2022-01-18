@@ -19,11 +19,10 @@ import {
   BaseIndexPatternColumn,
   OperationType,
   getExistingColumnGroups,
-  isReferenced,
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
 } from './operations';
-import { hasField } from './pure_utils';
+import { hasField, isReferenced } from './pure_utils';
 import type {
   IndexPattern,
   IndexPatternPrivateState,

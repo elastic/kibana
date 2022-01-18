@@ -54,6 +54,7 @@ import {
   CalloutWarning,
   LabelInput,
   DimensionEditorTab,
+  SortingCriteria,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
@@ -634,6 +635,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     },
   ];
 
+  const currentGroup = dimensionGroups.find(({ groupId }) => groupId === props.groupId);
+
   return (
     <div id={columnId}>
       {hasTabs ? <DimensionEditorTabs tabs={tabs} /> : null}
@@ -786,6 +789,35 @@ export function DimensionEditor(props: DimensionEditorProps) {
           (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
             <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
           ) : null}
+
+          {!incompleteInfo &&
+            selectedColumn &&
+            temporaryState === 'none' &&
+            props.panelRef &&
+            currentGroup?.sortable?.(
+              selectedColumn,
+              currentGroup.accessors.findIndex((accessor) => accessor.columnId === columnId)
+            ) && (
+              <SortingCriteria
+                currentColumn={selectedColumn}
+                layer={state.layers[props.layerId]}
+                columnId={columnId}
+                layerId={layerId}
+                activeData={props.activeData}
+                panelRef={props.panelRef}
+                onChange={(value) => {
+                  updateLayer({
+                    columns: {
+                      ...state.layers[layerId].columns,
+                      [columnId]: {
+                        ...selectedColumn,
+                        sortOverride: value,
+                      },
+                    },
+                  });
+                }}
+              />
+            )}
         </div>
       )}
     </div>

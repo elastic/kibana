@@ -213,6 +213,27 @@ function getExpressionForLayer(
       }
     );
 
+    const sortOverrideFunction: ExpressionAstFunction = Object.entries(layer.columns).reduce(
+      (memo, [id, { sortOverride }]) => {
+        memo.arguments.type.push(sortOverride?.type || 'none');
+        memo.arguments.columnId.push(sortOverride?.columnId || id);
+        memo.arguments.direction.push(sortOverride?.direction || 'asc');
+        memo.arguments.terms.push(sortOverride?.terms?.join('$$$') || '');
+
+        return memo;
+      },
+      {
+        type: 'function',
+        function: 'lens_table_sorting',
+        arguments: {
+          type: [] as string[],
+          columnId: [] as string[],
+          direction: [] as string[],
+          terms: [] as string[],
+        },
+      }
+    );
+
     if (esAggEntries.length === 0) {
       return {
         type: 'expression',
@@ -229,6 +250,7 @@ function getExpressionForLayer(
           ...expressions,
           ...formatterOverrides,
           ...timeScaleFunctions,
+          sortOverrideFunction,
         ],
       };
     }
@@ -266,6 +288,7 @@ function getExpressionForLayer(
         ...expressions,
         ...formatterOverrides,
         ...timeScaleFunctions,
+        sortOverrideFunction,
       ],
     };
   }

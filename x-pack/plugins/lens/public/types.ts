@@ -376,6 +376,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
+  panelRef?: MutableRefObject<HTMLDivElement | null>;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -512,6 +513,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
+  sortable?: (operation: OperationMetadata, colIndex: number) => boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {

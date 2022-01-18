@@ -124,12 +124,15 @@ export function getAccessorColorConfig(
         color: currentYConfig?.color || defaultReferenceLineColor,
       };
     }
+
     const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
     const rank = colorAssignments[currentPalette.name].getRank(
       layer,
       columnToLabel[accessor] || accessor,
       accessor
     );
+    const isHidden = currentYConfig?.hidden;
+
     const customColor =
       currentYConfig?.color ||
       (totalSeriesCount != null
@@ -147,7 +150,7 @@ export function getAccessorColorConfig(
         : undefined);
     return {
       columnId: accessor as string,
-      triggerIcon: customColor ? 'color' : 'disabled',
+      triggerIcon: isHidden ? 'invisible' : customColor ? 'color' : 'disabled',
       color: customColor ?? undefined,
     };
   });

@@ -6,7 +6,7 @@
  */
 
 import type { DataType } from '../types';
-import type { DraggedField } from './types';
+import type { DraggedField, IndexPatternLayer } from './types';
 import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -39,5 +39,27 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
     ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
+  );
+}
+
+export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
+  const allReferences = Object.values(layer.columns).flatMap((col) =>
+    'references' in col ? col.references : []
+  );
+  return allReferences.includes(columnId);
+}
+
+export function isSortableByColumn(
+  layer: IndexPatternLayer,
+  columnId: string,
+  allowReferenceColumns: boolean = false
+) {
+  const column = layer.columns[columnId];
+  return (
+    column &&
+    !column.isBucketed &&
+    column.operationType !== 'last_value' &&
+    (allowReferenceColumns || !('references' in column)) &&
+    !isReferenced(layer, columnId)
   );
 }

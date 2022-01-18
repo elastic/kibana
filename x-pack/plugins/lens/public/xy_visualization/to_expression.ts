@@ -356,6 +356,7 @@ export const buildExpression = (
                                     ? [yConfig.iconPosition || 'auto']
                                     : ['auto'],
                                 textVisibility: [yConfig.textVisibility || false],
+                                hidden: [yConfig.hidden ?? false],
                               },
                             },
                           ],
