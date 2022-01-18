@@ -289,7 +289,7 @@ describe('Task Runner Cancel', () => {
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
-    ).toHaveBeenCalledTimes(2); // The second time is to update the monitoring stats
+    ).toHaveBeenCalledTimes(1);
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
     ).toHaveBeenCalledWith(

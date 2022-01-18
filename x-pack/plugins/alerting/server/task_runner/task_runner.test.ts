@@ -353,6 +353,19 @@ describe('Task Runner', () => {
       'alert',
       '1',
       {
+        monitoring: {
+          execution: {
+            calculated_metrics: {
+              success_ratio: 1,
+            },
+            history: [
+              {
+                success: true,
+                timestamp: 0,
+              },
+            ],
+          },
+        },
         executionStatus: {
           error: null,
           lastDuration: 0,
@@ -4523,6 +4536,19 @@ describe('Task Runner', () => {
       'alert',
       '1',
       {
+        monitoring: {
+          execution: {
+            calculated_metrics: {
+              success_ratio: 1,
+            },
+            history: [
+              {
+                success: true,
+                timestamp: 0,
+              },
+            ],
+          },
+        },
         executionStatus: {
           error: null,
           lastDuration: 0,
