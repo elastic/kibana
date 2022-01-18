@@ -391,13 +391,13 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   toggleErrors,
   expanded,
 }) => {
-  const { data: lastResultsData, isFetched } = usePackQueryLastResults({
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
     logsDataView,
   });
 
-  const { data: errorsData, isFetched: errorsFetched } = usePackQueryErrors({
+  const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
     interval,
     logsDataView,
@@ -408,7 +408,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     [queryId, interval, toggleErrors]
   );
 
-  if (!isFetched || !errorsFetched) {
+  if (isLoading || errorsLoading) {
     return <EuiLoadingSpinner />;
   }
 

@@ -190,7 +190,7 @@ Specifies the default timeout for the all rule types tasks. The time is formatte
 +
 `<count>[ms,s,m,h,d,w,M,Y]` 
 +
-For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
+For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.cancelAlertsOnRuleTimeout`::
 Specifies whether to skip writing alerts and scheduling actions if rule execution is cancelled due to timeout. Default: `true`. This setting can be overridden by individual rule types.
