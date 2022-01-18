@@ -24,8 +24,11 @@ describe('TestNowMode', function () {
   });
 
   it('should send run once request on click', async function () {
-    const {} = render(<TestNowMode monitor={{ type: 'browser' } as MonitorFields} />);
+    const {} = render(
+      <TestNowMode isValid={true} monitor={{ type: 'browser' } as MonitorFields} />
+    );
     const btn = await screen.findByText('Start test run');
+
     fireEvent.click(btn);
 
     expect(await screen.findByText('Update test run')).toBeInTheDocument();
