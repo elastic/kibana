@@ -21,7 +21,6 @@ import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { assign, fill } from 'lodash';
 import moment from 'moment';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
 
 export interface ComponentOpts {
