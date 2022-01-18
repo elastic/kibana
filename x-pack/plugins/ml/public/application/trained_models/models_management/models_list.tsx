@@ -8,7 +8,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -50,7 +49,6 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
-import { MlPageHeader } from '../../components/page_header';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -687,30 +685,6 @@ export const ModelsList: FC = () => {
 
   return (
     <>
-      <MlPageHeader>
-        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage id="xpack.ml.trainedModels.title" defaultMessage="Trained Models" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
-                defaultMessage: 'Experimental',
-              })}
-              size="m"
-              color="hollow"
-              tooltipContent={i18n.translate(
-                'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
-                {
-                  defaultMessage:
-                    "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
-                }
-              )}
-              tooltipPosition={'right'}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </MlPageHeader>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats && (

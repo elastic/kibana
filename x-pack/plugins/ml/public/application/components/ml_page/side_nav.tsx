@@ -13,6 +13,7 @@ import { useUrlState } from '../../util/url_state';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import { ML_APP_NAME } from '../../../../common/constants/app';
+import type { MlRoute } from '../../routing';
 
 export type TabId =
   | 'access-denied'
@@ -20,12 +21,14 @@ export type TabId =
   | 'data_frame_analytics'
   | 'trained_models'
   | 'datavisualizer'
+  | 'data_view_datavisualizer'
+  | 'filedatavisualizer'
   | 'overview'
   | 'settings';
 
 export interface Tab {
   id: TabId;
-  name: any;
+  name: string;
   disabled: boolean;
   betaTag?: JSX.Element;
   items?: Tab[];
@@ -76,6 +79,22 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Data Visualizer',
       }),
       disabled: false,
+      items: [
+        {
+          id: 'filedatavisualizer',
+          name: i18n.translate('xpack.ml.navMenu.fileDataVisualizerLinkText', {
+            defaultMessage: 'File',
+          }),
+          disabled: false,
+        },
+        {
+          id: 'data_view_datavisualizer',
+          name: i18n.translate('xpack.ml.navMenu.dataViewDataVisualizerLinkText', {
+            defaultMessage: 'Data View',
+          }),
+          disabled: false,
+        },
+      ],
     },
   ];
 }
@@ -119,6 +138,20 @@ export const TAB_DATA: Record<TabId, TabData> = {
       defaultMessage: 'Data Visualizer',
     }),
   },
+  data_view_datavisualizer: {
+    testSubject: 'mlMainTab dataVisualizer dataViewDatavisualizer',
+    name: i18n.translate('xpack.ml.dataViewDataVisualizerTabLabel', {
+      defaultMessage: 'Data View',
+    }),
+    pathId: 'datavisualizer_index_select',
+  },
+  filedatavisualizer: {
+    testSubject: 'mlMainTab dataVisualizer fileDatavisualizer',
+    name: i18n.translate('xpack.ml.fileDataVisualizerTabLabel', {
+      defaultMessage: 'File',
+    }),
+    pathId: 'filedatavisualizer',
+  },
   settings: {
     testSubject: 'mlMainTab settings',
     name: i18n.translate('xpack.ml.settingsTabLabel', {
@@ -133,7 +166,8 @@ export const TAB_DATA: Record<TabId, TabData> = {
   },
 };
 
-export function useSideNavItems(activeRouteId: string | undefined) {
+export function useSideNavItems(activeRoute: MlRoute | undefined) {
+  const activeRouteId = activeRoute?.id;
   const {
     services: {
       chrome: { docTitle },
@@ -174,7 +208,7 @@ export function useSideNavItems(activeRouteId: string | undefined) {
 
   const tabs = getTabs(!isFullLicense());
 
-  function getTabItem(tab: Tab): EuiSideNavItemType<any> {
+  function getTabItem(tab: Tab): EuiSideNavItemType<unknown> {
     const { id, disabled, items } = tab;
     const testSubject = TAB_DATA[id].testSubject;
     const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
@@ -182,7 +216,7 @@ export function useSideNavItems(activeRouteId: string | undefined) {
     return {
       id,
       name: tab.name,
-      isSelected: id === activeRouteId,
+      isSelected: id === activeRouteId || activeRoute?.path.includes(`${id}/`),
       disabled,
       onClick: () => {
         redirectToTab(defaultPathId);

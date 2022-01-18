@@ -59,7 +59,7 @@ export const Page: FC = () => {
       <MlPageHeader>
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsList.title"
-          defaultMessage="Data frame analytics"
+          defaultMessage="Data Frame Analytics"
         />
       </MlPageHeader>
 

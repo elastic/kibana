@@ -44,7 +44,7 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly detection jobs" />
+        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly Detection Jobs" />
       </MlPageHeader>
       <HeaderMenuPortal>
         <JobsActionMenu />
