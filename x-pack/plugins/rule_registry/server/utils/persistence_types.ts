@@ -16,6 +16,7 @@ import {
 } from '../../../alerting/server';
 import { WithoutReservedActionGroups } from '../../../alerting/common';
 import { IRuleDataClient } from '../rule_data_client';
+import { BulkResponseErrorAggregation } from './utils';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -27,6 +28,7 @@ export type PersistenceAlertService = <T>(
 
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<T & { _id: string; _index: string }>;
+  errors: BulkResponseErrorAggregation;
 }
 
 export interface PersistenceServices {
