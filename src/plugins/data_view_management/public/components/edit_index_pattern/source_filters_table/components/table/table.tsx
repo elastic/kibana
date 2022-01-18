@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -69,7 +69,7 @@ const cancelAria = i18n.translate(
 );
 
 export interface TableProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
