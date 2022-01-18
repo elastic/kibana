@@ -46,37 +46,35 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   const preventLinksFromShowing =
     (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) && visParams.labels.show;
-  const saveRescaleFactor = !preventLinksFromShowing;
 
   const usingOuterSizeRatio =
-    dimensions && !isSplitChart && !saveRescaleFactor
+    dimensions && !isSplitChart
       ? {
           outerSizeRatio:
             // Cap the ratio to 1 and then rescale
             rescaleFactor * Math.min(MAX_SIZE / Math.min(dimensions?.width, dimensions?.height), 1),
         }
-      : { outerSizeRatio: undefined };
+      : null;
 
-  const config: Config = { ...usingOuterSizeRatio };
+  const config: Config = { ...(usingOuterSizeRatio ?? {}) };
 
-  if (!visParams.labels.show) {
-    // Force all labels to be linked, then prevent links from showing
-    config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
-  }
-
-  if (visParams.labels.last_level && visParams.labels.show) {
+  if (
+    visParams.labels.show &&
+    visParams.labels.position === LabelPositions.DEFAULT &&
+    visParams.labels.last_level
+  ) {
     config.linkLabel = {
       maxCount: Number.POSITIVE_INFINITY,
       maximumSection: Number.POSITIVE_INFINITY,
-      maxTextLength: visParams.labels.truncate ?? undefined,
     };
   }
 
   if (preventLinksFromShowing) {
+    // Prevent links from showing
     config.linkLabel = { maxCount: 0 };
   }
 
-  if (saveRescaleFactor && dimensions && !isSplitChart) {
+  if (!preventLinksFromShowing && dimensions && !isSplitChart) {
     // shrink up to 20% to give some room for the linked values
     config.outerSizeRatio = rescaleFactor;
   }
@@ -163,7 +161,7 @@ export const getConfig: GetConfigByTypeFn = (
   return {
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
-    specialFirstInnermostSector: false, // ?
+    specialFirstInnermostSector: true,
     minFontSize: 10,
     maxFontSize: 16,
     emptySizeRatio: 0,
@@ -174,7 +172,7 @@ export const getConfig: GetConfigByTypeFn = (
       maxCount: 5,
       fontSize: 11,
       textColor: chartTheme.axes?.axisTitle?.fill,
-      maxTextLength: visParams.labels.truncate ?? undefined,
+      ...(visParams.labels.truncate ? { maxTextLength: visParams.labels.truncate } : {}),
     },
     ...usingMargin,
     ...getSpecificConfig(chartType, visParams, visData, chartTheme, dimensions, rescaleFactor),
