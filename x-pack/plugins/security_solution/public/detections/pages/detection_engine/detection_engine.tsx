@@ -130,10 +130,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+
+  const {
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
-  const loading = userInfoLoading || listsConfigLoading;
+  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
@@ -211,8 +218,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [setShowOnlyThreatIndicatorAlerts]
   );
-
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
 
@@ -340,6 +345,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                     filters={alertsHistogramDefaultFilters}
                     query={query}
                     signalIndexName={signalIndexName}
+                    runtimeMappings={runtimeMappings}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={2}>
@@ -351,6 +357,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                     titleSize={'s'}
                     signalIndexName={signalIndexName}
                     updateDateRange={updateDateRangeCallback}
+                    runtimeMappings={runtimeMappings}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

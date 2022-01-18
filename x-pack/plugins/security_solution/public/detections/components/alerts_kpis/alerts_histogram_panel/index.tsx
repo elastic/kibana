@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitleSize } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -76,6 +77,7 @@ interface AlertsHistogramPanelProps {
   timelineId?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -100,6 +102,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
     titleSize = 'm',
+    runtimeMappings,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -125,7 +128,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         selectedStackByOption,
         from,
         to,
-        buildCombinedQueries(combinedQueries)
+        buildCombinedQueries(combinedQueries),
+        runtimeMappings
       ),
       indexName: signalIndexName,
     });
@@ -231,15 +235,18 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             selectedStackByOption,
             from,
             to,
-            !isEmpty(converted) ? [converted] : []
+            !isEmpty(converted) ? [converted] : [],
+            runtimeMappings
           )
         );
       } catch (e) {
         setIsInspectDisabled(true);
-        setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption, from, to, []));
+        setAlertsQuery(
+          getAlertsHistogramQuery(selectedStackByOption, from, to, [], runtimeMappings)
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedStackByOption, from, to, query, filters, combinedQueries]);
+    }, [selectedStackByOption, from, to, query, filters, combinedQueries, runtimeMappings]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {

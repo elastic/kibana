@@ -197,6 +197,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
@@ -250,6 +251,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
