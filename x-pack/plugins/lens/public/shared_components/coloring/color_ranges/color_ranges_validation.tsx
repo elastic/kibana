@@ -121,7 +121,7 @@ export const validateColorRanges = (
   colorRanges: ColorRange[],
   dataBounds: DataBounds,
   rangeType: CustomPaletteParams['rangeType']
-) => {
+): Record<string, ColorRangeValidation> => {
   let minMax: [number, number] | undefined;
 
   if ((dataBounds.fallback && rangeType === 'percent') || !dataBounds.fallback) {
