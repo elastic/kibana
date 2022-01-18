@@ -281,6 +281,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 options={agentPolicyOptions}
                 value={selectedPolicyId || undefined}
                 onChange={(e) => setSelectedPolicyId(e.target.value)}
+                data-test-subj="agentPolicySelect"
               />
             </AgentPolicyFormRow>
           </EuiDescribedFormGroup>
