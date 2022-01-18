@@ -344,7 +344,7 @@ describe('KibanaRequest', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({ body: { requestId: req.id } });
+        return res.ok({ body: { requestId: req.opaqueId } });
       });
       await server.start();
 

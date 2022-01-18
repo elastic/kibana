@@ -340,7 +340,9 @@ export class HttpServer {
       const parentContext = executionContext?.getParentContextFrom(request.headers);
       if (parentContext) executionContext?.set(parentContext);
 
-      executionContext?.setRequestId(requestId);
+      if (requestId) {
+        executionContext?.setRequestId(requestId);
+      }
 
       request.app = {
         ...(request.app ?? {}),

@@ -16,31 +16,31 @@ import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
 
 describe('KibanaRequest', () => {
-  describe('id property', () => {
+  describe('opaqueId property', () => {
     it('uses the request.app.requestId property if present', () => {
       const request = httpServerMock.createRawRequest({
         app: { requestId: 'fakeId' },
       });
       const kibanaRequest = KibanaRequest.from(request);
-      expect(kibanaRequest.id).toEqual('fakeId');
+      expect(kibanaRequest.opaqueId).toEqual('fakeId');
     });
 
-    it('generates a new UUID if request.app property is not present', () => {
+    it('is undefined if request.app property is not present', () => {
       // Undefined app property
       const request = httpServerMock.createRawRequest({
         app: undefined,
       });
       const kibanaRequest = KibanaRequest.from(request);
-      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+      expect(kibanaRequest.opaqueId).toBeUndefined();
     });
 
-    it('generates a new UUID if request.app.requestId property is not present', () => {
+    it('is undefined if request.app.requestId property is not present', () => {
       // Undefined app.requestId property
       const request = httpServerMock.createRawRequest({
         app: {},
       });
       const kibanaRequest = KibanaRequest.from(request);
-      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+      expect(kibanaRequest.opaqueId).toBeUndefined();
     });
   });
 

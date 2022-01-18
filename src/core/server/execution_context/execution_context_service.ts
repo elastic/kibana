@@ -79,8 +79,8 @@ export class ExecutionContextService
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
-    this.contextStore = new AsyncLocalStorage<IExecutionContextContainer>();
-    this.requestIdStore = new AsyncLocalStorage<{ requestId: string }>();
+    this.contextStore = new AsyncLocalStorage();
+    this.requestIdStore = new AsyncLocalStorage();
   }
 
   setup(): InternalExecutionContextSetup {

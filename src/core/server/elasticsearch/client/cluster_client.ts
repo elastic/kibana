@@ -92,12 +92,13 @@ export class ClusterClient implements ICustomClusterClient {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
       const requestHeaders = ensureRawRequest(request).headers ?? {};
-      const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
+      const opaqueIdHeaders =
+        isKibanaRequest(request) && request.opaqueId ? { 'x-opaque-id': request.opaqueId } : {};
       const authHeaders = this.getAuthHeaders(request) ?? {};
 
       scopedHeaders = {
         ...filterHeaders(requestHeaders, this.config.requestHeadersWhitelist),
-        ...requestIdHeaders,
+        ...opaqueIdHeaders,
         ...authHeaders,
       };
     } else {
