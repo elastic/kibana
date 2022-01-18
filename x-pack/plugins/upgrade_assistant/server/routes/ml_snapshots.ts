@@ -78,10 +78,12 @@ const verifySnapshotUpgrade = async (
 
     const isSuccessful = Boolean(
       mlSnapshotDeprecations.find((snapshotDeprecation) => {
+        // This regex will match all the bracket pairs from the deprecation message, at the moment
+        // that should match 3 pairs: snapshotId, jobId and version in which the snapshot was made.
         const regex = /(?<=\[).*?(?=\])/g;
         const matches = snapshotDeprecation.message.match(regex);
 
-        if (matches?.length === 2) {
+        if (matches?.length === 3) {
           // If there is no matching snapshot, we assume the deprecation was resolved successfully
           return matches[0] === snapshotId && matches[1] === jobId ? false : true;
         }
@@ -130,7 +132,11 @@ const getModelSnapshotUpgradeStatus = async (
   }
 };
 
-export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerMlSnapshotRoutes({
+  router,
+  log,
+  lib: { handleEsError },
+}: RouteDependencies) {
   // Upgrade ML model snapshot
   router.post(
     {
@@ -256,7 +262,7 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
                     'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
                     {
                       defaultMessage:
-                        "The upgrade that was started for this model snapshot doesn't exist anymore.",
+                        'The upgrade process for this model snapshot failed. Check the Elasticsearch logs for more details.',
                     }
                   ),
                 },
@@ -286,7 +292,7 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
                 body: {
                   message:
                     upgradeSnapshotError?.body?.error?.reason ||
-                    'There was an error upgrading your snapshot. Check the Elasticsearch logs for more details.',
+                    'The upgrade process for this model snapshot stopped yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
                 },
               });
             }
@@ -310,12 +316,15 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
               });
             }
 
+            log.error(
+              `Failed to determine status of the ML model upgrade, upgradeStatus is not defined and snapshot upgrade is not completed. snapshotId=${snapshotId} and jobId=${jobId}`
+            );
             return response.customError({
               statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
               body: {
                 message:
                   upgradeSnapshotError?.body?.error?.reason ||
-                  'There was an error upgrading your snapshot. Check the Elasticsearch logs for more details.',
+                  'The upgrade process for this model snapshot completed yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
               },
             });
           }

@@ -79,7 +79,8 @@ export const getEditorOpener =
                 requireTimestampField={requireTimestampField}
               />
             </I18nProvider>
-          </KibanaReactContextProvider>
+          </KibanaReactContextProvider>,
+          { theme$: core.theme.theme$ }
         ),
         {
           hideCloseButton: true,
