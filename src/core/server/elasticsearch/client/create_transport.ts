@@ -33,8 +33,7 @@ export const createTransport = ({
   class KibanaTransport extends Transport {
     private headers: IncomingHttpHeaders = {};
 
-    constructor(options: TransportOptions) {
-      const { headers = {}, ...otherOptions } = options;
+    constructor({ headers = {}, ...otherOptions }: TransportOptions) {
       super(otherOptions);
       this.headers = headers;
     }
