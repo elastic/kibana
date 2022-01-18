@@ -95,11 +95,11 @@ export default function ({ getService }: FtrProviderContext) {
           sourceId: 'default',
           threshold: [100],
           comparator: '>',
-          shouldFire: [false],
+          shouldFire: [true],
           shouldWarn: [false],
           isNoData: [false],
           isError: false,
-          currentValue: 0.8713333333333334,
+          currentValue: 1.109,
         },
         'host-1': {
           metric: 'cpu',
@@ -108,11 +108,11 @@ export default function ({ getService }: FtrProviderContext) {
           sourceId: 'default',
           threshold: [100],
           comparator: '>',
-          shouldFire: [true],
+          shouldFire: [false],
           shouldWarn: [false],
           isNoData: [false],
           isError: false,
-          currentValue: 1.1636666666666668,
+          currentValue: 0.7703333333333333,
         },
       });
     });
@@ -135,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           shouldWarn: [false],
           isNoData: [false],
           isError: false,
-          currentValue: 1.0622333333333334,
+          currentValue: 1.0376666666666665,
         },
         'host-1': {
           metric: 'cpu',
@@ -144,11 +144,11 @@ export default function ({ getService }: FtrProviderContext) {
           sourceId: 'default',
           threshold: [100],
           comparator: '>',
-          shouldFire: [true],
+          shouldFire: [false],
           shouldWarn: [false],
           isNoData: [false],
           isError: false,
-          currentValue: 1.0942666666666665,
+          currentValue: 0.9192,
         },
       });
     });
