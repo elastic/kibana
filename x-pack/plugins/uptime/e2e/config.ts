@@ -44,6 +44,11 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
+        `--xpack.uptime.unsafe.service.manifestUrl=${process.env.SYNTHETICS_SERVICE_MANIFEST}`,
+        `--xpack.uptime.unsafe.service.username=${process.env.SYNTHETICS_SERVICE_USERNAME}`,
+        `--xpack.uptime.unsafe.service.password=${process.env.SYNTHETICS_SERVICE_PASSWORD}`,
+        '--xpack.uptime.unsafe.service.enabled=true',
+        '--xpack.uptime.ui.unsafe.monitorManagement.enabled=true',
       ],
     },
   };
