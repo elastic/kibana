@@ -175,6 +175,9 @@ test('Clones a non-RefOrVal embeddable by reference if the panel has a savedObje
 });
 
 test('Gets a unique title from the saved objects library', async () => {
+  const dashboard = genericEmbeddable.getRoot() as IContainer;
+  const panel = dashboard.getInput().panels[genericEmbeddable.id] as DashboardPanelState;
+  panel.explicitInput.savedObjectId = 'holySavedObjectBatman';
   coreStart.savedObjects.client.find = jest.fn().mockImplementation(({ search }) => {
     if (search === '"testFirstClone"') {
       return {
