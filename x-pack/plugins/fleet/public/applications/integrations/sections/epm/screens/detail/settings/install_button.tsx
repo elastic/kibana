@@ -31,8 +31,8 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> &
 };
 export function InstallButton(props: InstallationButtonProps) {
   const { name, numOfAssets, title, version } = props;
-  const hasFleetWriteCapabilities = useFleetCapabilities().write;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().all;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
   const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();

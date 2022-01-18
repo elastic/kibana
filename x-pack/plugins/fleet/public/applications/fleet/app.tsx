@@ -130,8 +130,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const core = useStartServices();
   const { notifications, application } = core;
   const { capabilities } = application;
-  const hasFleetWritePermissions = capabilities.fleetv2.write;
-  const hasIntegrationsPermissions = capabilities.fleet.write || capabilities.fleet.read;
+  const hasFleetWritePermissions = capabilities.fleetv2.all;
+  const hasIntegrationsPermissions = capabilities.fleet.all || capabilities.fleet.read;
   const hasPrivileges = hasFleetWritePermissions && hasIntegrationsPermissions;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);

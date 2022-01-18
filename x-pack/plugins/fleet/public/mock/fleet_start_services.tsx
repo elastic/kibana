@@ -64,12 +64,12 @@ const configureStartServices = (
     // Fleet - returned by useFleetCapabilities hook
     fleetv2: {
       read: true,
-      write: true,
+      all: true,
     },
     // Integration - returned by useIntegrationsCapabilities hook
     fleet: {
       read: true,
-      write: true,
+      all: true,
     },
   };
 

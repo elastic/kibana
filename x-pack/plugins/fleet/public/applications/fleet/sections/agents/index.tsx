@@ -32,7 +32,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();
-  const capabilities = useFleetCapabilities();
+  const hasFleetReadCapabilites = useFleetCapabilities().read;
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
@@ -93,7 +93,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) {
     return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
-  if (!capabilities.read) {
+  if (!hasFleetReadCapabilites) {
     return <NoAccessPage />;
   }
 

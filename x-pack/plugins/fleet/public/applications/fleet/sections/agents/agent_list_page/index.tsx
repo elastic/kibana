@@ -68,7 +68,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, agentPolicy, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasFleetWriteCapabilites = useFleetCapabilities().write;
+  const hasFleetWriteCapabilites = useFleetCapabilities().all;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
@@ -152,7 +152,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasFleetWriteCapabilites = useFleetCapabilities().write;
+  const hasFleetWriteCapabilites = useFleetCapabilities().all;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 

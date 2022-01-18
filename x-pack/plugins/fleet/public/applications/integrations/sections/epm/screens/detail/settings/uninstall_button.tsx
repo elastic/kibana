@@ -35,8 +35,8 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   title,
   version,
 }) => {
-  const hasFleetWriteCapabilities = useFleetCapabilities().write;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().all;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
   const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();

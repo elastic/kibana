@@ -43,7 +43,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasFleetWriteCapabilites = useFleetCapabilities().write;
+  const hasFleetWriteCapabilites = useFleetCapabilities().all;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>({
     name: '',
     description: '',

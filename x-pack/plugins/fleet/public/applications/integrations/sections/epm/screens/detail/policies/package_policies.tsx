@@ -105,8 +105,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   });
   const { updatableIntegrations } = usePackageInstallations();
   const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
-  const hasFleetWriteCapabilities = useFleetCapabilities().write;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().all;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
   const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
 
   const packageAndAgentPolicies = useMemo((): Array<{

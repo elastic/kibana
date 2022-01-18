@@ -56,8 +56,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasFleetWriteCapabilities = useFleetCapabilities().write;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().all;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
   const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
@@ -242,7 +242,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
-              return (
+              return hasAllWritePermissions ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
                   packagePolicy={packagePolicy}
@@ -251,6 +251,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     packagePolicyId: packagePolicy.id,
                   })}?from=fleet-policy-list`}
                 />
+              ) : (
+                <></>
               );
             },
           },

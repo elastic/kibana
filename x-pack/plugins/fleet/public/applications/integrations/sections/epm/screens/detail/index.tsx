@@ -99,8 +99,8 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasFleetWriteCapabilities = useFleetCapabilities().write;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().all;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
   const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -388,7 +388,8 @@ export function Detail() {
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet. Contact your adminstrator."
+                                // fix this message
+                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet. Contact your administrator."
                               />
                             ),
                           }

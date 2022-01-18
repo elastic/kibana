@@ -255,11 +255,11 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {
       authz: calculateAuthz({
         fleet: {
-          all: capabilities.fleetv2.write as boolean,
+          all: capabilities.fleetv2.all as boolean,
           setup: false,
         },
         integrations: {
-          all: capabilities.fleet.write as boolean,
+          all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
         },
         isSuperuser: false,

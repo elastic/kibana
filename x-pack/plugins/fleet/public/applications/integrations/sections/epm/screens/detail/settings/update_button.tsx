@@ -83,8 +83,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const { getPath } = useLink();
 
   const { notifications } = useStartServices();
-  const hasFleetWriteCapabilities = useFleetCapabilities().write;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().all;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
   const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
 
   const installPackage = useInstallPackage();

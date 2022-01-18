@@ -51,7 +51,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();
-    const hasFleetWriteCapabilites = useFleetCapabilities().write;
+    const hasFleetWriteCapabilites = useFleetCapabilities().all;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,

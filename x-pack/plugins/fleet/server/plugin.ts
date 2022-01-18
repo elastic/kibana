@@ -7,6 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+
+import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
@@ -227,12 +229,14 @@ export class FleetPlugin
         id: `fleetv2`,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
+        app: [PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: 'All Spaces is required for Fleet access.',
         reserved: {
-          description:
-            'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
+          description: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
+            defaultMessage:
+              'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
+          }),
           privileges: [
             {
               id: 'fleet-setup',
@@ -250,31 +254,26 @@ export class FleetPlugin
         },
         privileges: {
           all: {
-            api: [
-              `${PLUGIN_ID}-read`,
-              `${PLUGIN_ID}-all`,
-              `${INTEGRATIONS_PLUGIN_ID}-read`,
-              `${INTEGRATIONS_PLUGIN_ID}-all`,
-            ],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            app: [PLUGIN_ID],
             requireAllSpaces: true,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
             },
-            ui: ['show', 'read', 'write'],
+            ui: ['read', 'all'],
           },
           read: {
-            api: [`${PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
-            catalogue: ['fleet'], // TODO: check if this is actually available to read user
+            api: [`${PLUGIN_ID}-read`],
+            app: [PLUGIN_ID],
+            catalogue: ['fleet'],
             requireAllSpaces: true,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
             },
-            ui: ['show', 'read'],
+            ui: ['read'],
             disabled: true,
           },
         },
@@ -286,7 +285,6 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: 'Access to Integrations is also included in access to Fleet.',
         privileges: {
           all: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
@@ -297,7 +295,7 @@ export class FleetPlugin
               all: allSavedObjectTypes,
               read: [],
             },
-            ui: ['show', 'read', 'write'],
+            ui: ['read', 'all'],
           },
           read: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`],
@@ -307,7 +305,7 @@ export class FleetPlugin
               all: [],
               read: allSavedObjectTypes,
             },
-            ui: ['show', 'read'],
+            ui: ['read'],
           },
         },
       });

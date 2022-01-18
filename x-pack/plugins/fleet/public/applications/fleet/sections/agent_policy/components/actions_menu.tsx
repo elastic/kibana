@@ -30,8 +30,8 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const hasFleetWriteCapabilities = useFleetCapabilities().write;
-    const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+    const hasFleetWriteCapabilities = useFleetCapabilities().all;
+    const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
     const hasAllWritePermissions = (hasFleetWriteCapabilities &&
       hasIntWriteCapabilities) as boolean;
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);

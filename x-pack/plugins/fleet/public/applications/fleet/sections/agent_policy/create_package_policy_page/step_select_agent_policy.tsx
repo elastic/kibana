@@ -63,7 +63,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   // Create new agent policy flyout state
-  const hasFleetWriteCapabilites = useFleetCapabilities().write;
+  const hasFleetWriteCapabilites = useFleetCapabilities().all;
   const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
     useState<boolean>(false);
 
