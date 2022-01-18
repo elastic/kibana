@@ -30,10 +30,11 @@ import {
 import { extract, inject } from '../../common/embeddable_factory';
 
 export const makeLensEmbeddableFactory =
-  (filterMigrations: MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
+  (getFilterMigrations: () => MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
     return {
       id: DOC_TYPE,
-      migrations: mergeMigrationFunctionMaps(getLensFilterMigrations(filterMigrations), {
+      // TODO - embeddable factory migrations should accept a function that evaluates to a MigrationFunctionMap like we allow for saved object definitions.
+      migrations: mergeMigrationFunctionMaps(getLensFilterMigrations(getFilterMigrations()), {
         // This migration is run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
         '7.13.1': (state) => {
           const lensState = state as unknown as { attributes: LensDocShapePre712 };

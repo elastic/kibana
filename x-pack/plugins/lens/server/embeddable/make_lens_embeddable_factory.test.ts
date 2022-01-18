@@ -15,7 +15,7 @@ describe('embeddable migrations', () => {
     const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
       return semverGte(version, '7.13.1');
     });
-    const embeddableMigrationVersions = makeLensEmbeddableFactory({})()?.migrations;
+    const embeddableMigrationVersions = makeLensEmbeddableFactory(() => ({}))()?.migrations;
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
         Object.keys(embeddableMigrationVersions).sort()
@@ -43,14 +43,14 @@ describe('embeddable migrations', () => {
       },
     };
 
-    const embeddableMigrationVersions = makeLensEmbeddableFactory({
+    const embeddableMigrationVersions = makeLensEmbeddableFactory(() => ({
       [migrationVersion]: (filters: Filter[]) => {
         return filters.map((filterState) => ({
           ...filterState,
           migrated: true,
         }));
       },
-    })()?.migrations;
+    }))()?.migrations;
 
     const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);
 
