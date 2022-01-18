@@ -11,7 +11,7 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  getRulesImportToast,
+  getRulesImportExportToast,
   importRules,
   importRulesWithOverwriteAll,
 } from '../../tasks/alerts_detection_rules';
@@ -35,7 +35,10 @@ describe('Import rules', () => {
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      getRulesImportToast(['Successfully imported 1 rule', 'Successfully imported 2 exceptions.']);
+      getRulesImportExportToast([
+        'Successfully imported 1 rule',
+        'Successfully imported 2 exceptions.',
+      ]);
     });
   });
 
@@ -51,7 +54,7 @@ describe('Import rules', () => {
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      getRulesImportToast(['Failed to import 1 rule', 'Failed to import 2 exceptions']);
+      getRulesImportExportToast(['Failed to import 1 rule', 'Failed to import 2 exceptions']);
     });
   });
 
@@ -67,7 +70,10 @@ describe('Import rules', () => {
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      getRulesImportToast(['Successfully imported 1 rule', 'Successfully imported 2 exceptions.']);
+      getRulesImportExportToast([
+        'Successfully imported 1 rule',
+        'Successfully imported 2 exceptions.',
+      ]);
     });
   });
 });
