@@ -50,6 +50,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
           fullWidth={true}
           name="name"
           onChange={(event) => setName(event.target.value)}
+          data-test-subj="monitorManagementMonitorName"
         />
       </EuiFormRow>
       <ServiceLocations
