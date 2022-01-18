@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { kibanaPackageJson } from '@kbn/utils';
+import semver from 'semver';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -67,6 +69,25 @@ export class FunctionalTestRunner {
         ...readProviderSpec('Service', config.get('services')),
         ...readProviderSpec('PageObject', config.get('pageObjects')),
       ]);
+
+      // validate es version
+      if (providers.hasService('es')) {
+        const es = (await providers.getService('es')) as unknown as EsClient;
+        let esInfo;
+        try {
+          esInfo = await es.info();
+        } catch (error) {
+          throw new Error(
+            `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
+          );
+        }
+        const esVersion = normalizeVersion(esInfo.version.number);
+        if (semver.compareLoose(esVersion, this.esVersion) !== 0) {
+          throw new Error(
+            `ES reports a version number "${esVersion}" which doesn't match supplied es version "${this.esVersion}"`
+          );
+        }
+      }
 
       await providers.loadAll();
 
