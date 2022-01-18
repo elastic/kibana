@@ -14,7 +14,16 @@ import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
 import { Filter } from '../../../../../src/plugins/data/public';
 
-export class RecordScoreTooltipProperty implements ITooltipProperty {
+export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
+  record_score: { label: 'Record score', type: 'number' },
+  timestamp: { label: 'Timestamp', type: 'string' },
+  fieldName: { label: 'Field label', type: 'string' },
+  functionDescription: { label: 'Function description', type: 'string' },
+  actual: { label: 'Actual', type: 'string' },
+  typical: { label: 'Typical', type: 'string' },
+};
+
+export class AnomalySourceTooltipProperty implements ITooltipProperty {
   private readonly _label: string;
   private readonly _value: string;
 
@@ -48,30 +57,33 @@ export class RecordScoreTooltipProperty implements ITooltipProperty {
   }
 }
 
-export class RecordScoreField implements IField {
+// this needs to be generic so it works for all fields in anomaly record result
+export class AnomalySourceField implements IField {
   private readonly _source: AnomalySource;
+  private readonly _field: string;
 
-  constructor({ source }: { source: AnomalySource }) {
+  constructor({ source, field }: { source: AnomalySource; field: string }) {
     this._source = source;
+    this._field = field;
   }
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
-    return new RecordScoreTooltipProperty(
+    return new AnomalySourceTooltipProperty(
       await this.getLabel(),
       _.escape(Array.isArray(value) ? value.join() : value ? value : '')
     );
   }
 
   async getDataType(): Promise<string> {
-    return 'number';
+    return ANOMALY_SOURCE_FIELDS[this._field].type;
   }
 
   async getLabel(): Promise<string> {
-    return 'Record score';
+    return ANOMALY_SOURCE_FIELDS[this._field].label;
   }
 
   getName(): string {
-    return 'record_score';
+    return this._field;
   }
 
   getMbFieldName(): string {

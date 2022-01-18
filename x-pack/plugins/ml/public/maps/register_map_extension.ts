@@ -13,7 +13,7 @@ import { AnomalyLayerWizardFactory } from './anomaly_layer_wizard_factory';
 export async function registerMapExtension(
   mapsSetupApi: MapsSetupApi,
   core: MlCoreSetup,
-  canGetJobs: any // update this type
+  canGetJobs: boolean
 ) {
   const anomalySourceFactory = new AnomalySourceFactory(core.getStartServices, canGetJobs);
   const anomalyLayerWizardFactory = new AnomalyLayerWizardFactory(

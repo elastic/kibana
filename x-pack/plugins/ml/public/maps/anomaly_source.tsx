@@ -10,7 +10,11 @@ import React, { ReactElement } from 'react';
 import { FieldFormatter, MAX_ZOOM, MIN_ZOOM, VECTOR_SHAPE_TYPE } from '../../../maps/common';
 import { AbstractSourceDescriptor, MapExtent } from '../../../maps/common/descriptor_types';
 import { ITooltipProperty } from '../../../maps/public';
-import { RecordScoreField, RecordScoreTooltipProperty } from './record_score_field';
+import {
+  AnomalySourceField,
+  AnomalySourceTooltipProperty,
+  ANOMALY_SOURCE_FIELDS,
+} from './anomaly_source_field';
 import type { Adapters } from '../../../../../src/plugins/inspector/common/adapters';
 import type { GeoJsonWithMeta } from '../../../maps/public';
 import type { IField } from '../../../maps/public';
@@ -39,7 +43,7 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 
 export class AnomalySource implements IVectorSource {
   static mlResultsService: MlApiServices['results'];
-  static canGetJobs: any;
+  static canGetJobs: boolean;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
     if (!(typeof descriptor.jobId === 'string')) {
@@ -75,7 +79,7 @@ export class AnomalySource implements IVectorSource {
     return {
       data: results,
       meta: {
-        // Set this to true if data is incomplete (e.g. capping number of results to first 10k)
+        // Set this to true if data is incomplete (e.g. capping number of results to first 1k)
         areResultsTrimmed: false,
       },
     };
@@ -97,7 +101,7 @@ export class AnomalySource implements IVectorSource {
     if (fieldName !== 'record_score') {
       throw new Error('Record score field name is required');
     }
-    return new RecordScoreField({ source: this });
+    return new AnomalySourceField({ source: this, field: fieldName });
   }
 
   async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
@@ -141,7 +145,7 @@ export class AnomalySource implements IVectorSource {
 
   getFieldByName(fieldName: string): IField | null {
     if (fieldName === 'record_score') {
-      return new RecordScoreField({ source: this });
+      return new AnomalySourceField({ source: this, field: fieldName });
     }
     return null;
   }
@@ -164,11 +168,11 @@ export class AnomalySource implements IVectorSource {
   }
 
   getFieldNames(): string[] {
-    return ['record_score'];
+    return Object.keys(ANOMALY_SOURCE_FIELDS);
   }
 
   async getFields(): Promise<IField[]> {
-    return [new RecordScoreField({ source: this })];
+    return this.getFieldNames().map((field) => new AnomalySourceField({ source: this, field }));
   }
 
   getGeoGridPrecision(zoom: number): number {
@@ -224,7 +228,7 @@ export class AnomalySource implements IVectorSource {
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceStatus {
     return {
       tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
-        defaultMessage: `Shows anomalies`,
+        defaultMessage: 'Shows anomalies',
       }),
       areResultsTrimmed: false, // set to true if data is incomplete
     };
@@ -246,8 +250,11 @@ export class AnomalySource implements IVectorSource {
   async getTooltipProperties(properties: { [p: string]: any } | null): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
     for (const key in properties) {
-      if (key === 'record_score') {
-        tooltipProperties.push(new RecordScoreTooltipProperty('Record score', properties[key]));
+      if (properties.hasOwnProperty(key)) {
+        const label = ANOMALY_SOURCE_FIELDS[key]?.label;
+        if (label) {
+          tooltipProperties.push(new AnomalySourceTooltipProperty(label, properties[key]));
+        }
       }
     }
     return tooltipProperties;
@@ -338,11 +345,11 @@ export class AnomalySource implements IVectorSource {
   }
 
   async addFeature() {
-    // TODO
+    // should not be called
   }
 
   async deleteFeature() {
-    // TODO
+    // should not be called
   }
 
   getUpdateDueToTimeslice() {

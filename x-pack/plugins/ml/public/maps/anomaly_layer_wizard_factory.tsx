@@ -29,7 +29,7 @@ export class AnomalyLayerWizardFactory {
 
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
-    private canGetJobs: any
+    private canGetJobs: boolean
   ) {
     this.canGetJobs = canGetJobs;
   }

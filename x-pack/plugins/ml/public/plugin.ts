@@ -174,7 +174,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       if (pluginsSetup.maps) {
         // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
-        const canGetJobs = capabilities.ml?.canGetJobs || false;
+        const canGetJobs = capabilities.ml?.canGetJobs === true || false;
         await registerMapExtension(pluginsSetup.maps, core, canGetJobs);
       }
 

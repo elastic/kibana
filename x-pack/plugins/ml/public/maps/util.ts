@@ -7,6 +7,7 @@
 
 import { FeatureCollection, Feature } from 'geojson';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import type { SearchFilters } from './anomaly_source';
@@ -46,7 +47,14 @@ export async function getResultsForJobId(
   }
 
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
-  let hits: Array<{ typical: number[]; actual: number[]; record_score: number }> = [];
+  let hits: Array<{
+    actual: number[];
+    fieldName?: string;
+    functionDescription: string;
+    typical: number[];
+    record_score: number;
+    timestamp: string;
+  }> = [];
 
   try {
     resp = await mlResultsService.anomalySearch(
@@ -80,6 +88,9 @@ export async function getResultsForJobId(
           .reverse();
       }
       return {
+        fieldName: _source.field_name,
+        functionDescription: _source.function_description,
+        timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
         typical,
         actual,
         record_score: Math.floor(_source.record_score),
@@ -105,6 +116,11 @@ export async function getResultsForJobId(
       type: 'Feature',
       geometry,
       properties: {
+        actual: result.actual,
+        typical: result.typical,
+        fieldName: result.fieldName,
+        functionDescription: result.functionDescription,
+        timestamp: result.timestamp,
         record_score: result.record_score,
       },
     };
