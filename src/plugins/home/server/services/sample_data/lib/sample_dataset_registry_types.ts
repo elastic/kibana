@@ -28,3 +28,11 @@ export enum EmbeddableTypes {
   VISUALIZE_EMBEDDABLE_TYPE = 'visualization',
 }
 export type SampleDatasetProvider = () => SampleDatasetSchema;
+
+/** This type is used to identify an object in a sample dataset. */
+export interface SampleObject {
+  /** The type of the sample object. */
+  type: string;
+  /** The ID of the sample object. */
+  id: string;
+}
