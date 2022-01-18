@@ -15,11 +15,12 @@ export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField
   return (
     ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
       (isPopulatedObject(arg, ['type', 'script']) &&
-        Object.keys(arg).length === 2 &&
+        // Can be a string
         (typeof arg.script === 'string' ||
-          (isPopulatedObject(arg.script, ['source']) &&
-            Object.keys(arg.script).length === 1 &&
-            typeof arg.script.source === 'string')))) &&
+          // Can be InlineScript
+          (isPopulatedObject(arg.script, ['source']) && typeof arg.script.source === 'string') ||
+          // Can be StoredScriptId
+          (isPopulatedObject(arg.script, ['id']) && typeof arg.script.id === 'string')))) &&
     RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
 }
