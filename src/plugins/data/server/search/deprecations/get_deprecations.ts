@@ -22,19 +22,18 @@ export async function getDeprecations(ctx: GetDeprecationsContext): Promise<Depr
   return [
     {
       title: i18n.translate('data.deprecations.courierBatchSearchesSettingTitle', {
-        defaultMessage: 'The courier:batchSearches advanced setting is being removed',
+        defaultMessage: 'courier:batchSearches is deprecated',
       }),
       message: i18n.translate('data.deprecations.courierBatchSearchesSettingMessage', {
         defaultMessage:
-          'This setting is currently enabled, which means search requests will use the legacy _search behavior rather than _async_search.',
+          'courier:batchSearches is currently enabled, and search requests use the legacy _search behavior.',
       }),
       level: 'warning',
       deprecationType: 'feature',
       correctiveActions: {
         manualSteps: [
           i18n.translate('data.deprecations.manualStepOneMessage', {
-            defaultMessage:
-              'Set the courier:batchSearches setting to false to use _async_search, which is the behavior in 8.0+.',
+            defaultMessage: 'Set courier:batchSearches to false to use _async_search instead.',
           }),
         ],
       },
