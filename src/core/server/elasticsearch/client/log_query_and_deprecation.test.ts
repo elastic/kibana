@@ -344,7 +344,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         Object {
           "http": Object {
             "request": Object {
-              "headers": Object {},
               "id": "opaque-id",
               "method": "GET",
             },
@@ -358,7 +357,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           },
           "url": Object {
             "path": "/_path",
-            "query": undefined,
           },
         }
       `);
@@ -383,7 +381,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         Object {
           "http": Object {
             "request": Object {
-              "headers": Object {},
               "id": "opaque-id",
               "method": "GET",
             },
@@ -397,7 +394,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           },
           "url": Object {
             "path": "/_path",
-            "query": undefined,
           },
         }
       `);

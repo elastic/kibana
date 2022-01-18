@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DiagnosticResult, ConnectionRequestParams } from '@elastic/elasticsearch';
+import type { RequestEvent } from '@elastic/elasticsearch';
+import type { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 interface ResponseFixtureOptions {
-  requestParams?: Partial<ConnectionRequestParams>;
+  requestParams?: Partial<TransportRequestParams>;
 
   response?: {
     body?: any;
@@ -21,7 +22,7 @@ interface ResponseFixtureOptions {
 function createResponseEvent({
   requestParams = {},
   response = {},
-}: ResponseFixtureOptions = {}): DiagnosticResult {
+}: ResponseFixtureOptions = {}): RequestEvent {
   return {
     body: response.body ?? {},
     statusCode: response.statusCode ?? 200,
@@ -29,7 +30,6 @@ function createResponseEvent({
     meta: {
       request: {
         params: {
-          headers: requestParams.headers ?? { 'content-length': '123' },
           method: requestParams.method ?? 'get',
           path: requestParams.path ?? '/path',
           querystring: requestParams.querystring ?? '?wait_for_completion=true',
@@ -37,8 +37,9 @@ function createResponseEvent({
         options: {
           id: '42',
         },
-      } as DiagnosticResult['meta']['request'],
-    } as DiagnosticResult['meta'],
+        id: '42',
+      } as RequestEvent['meta']['request'],
+    } as RequestEvent['meta'],
     warnings: null,
   };
 }
@@ -47,18 +48,10 @@ describe('getEcsResponseLog', () => {
   describe('filters sensitive headers', () => {
     test('redacts Authorization and Cookie headers by default', () => {
       const event = createResponseEvent({
-        requestParams: { headers: { authorization: 'a', cookie: 'b', 'user-agent': 'hi' } },
         response: { headers: { 'content-length': '123', 'set-cookie': 'c' } },
       });
       const log = getEcsResponseLog(event);
-      // @ts-expect-error ECS custom field
-      expect(log.http.request.headers).toMatchInlineSnapshot(`
-        Object {
-          "authorization": "[REDACTED]",
-          "cookie": "[REDACTED]",
-          "user-agent": "hi",
-        }
-      `);
+
       // @ts-expect-error ECS custom field
       expect(log.http.response.headers).toMatchInlineSnapshot(`
         Object {
@@ -69,23 +62,13 @@ describe('getEcsResponseLog', () => {
     });
 
     test('does not mutate original headers', () => {
-      const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
       const resHeaders = { c: 'bar' };
       const event = createResponseEvent({
-        requestParams: { headers: reqHeaders },
         response: { headers: resHeaders },
       });
 
       const log = getEcsResponseLog(event);
-      expect(reqHeaders).toMatchInlineSnapshot(`
-        Object {
-          "a": "foo",
-          "b": Array [
-            "hello",
-            "world",
-          ],
-        }
-      `);
+
       expect(resHeaders).toMatchInlineSnapshot(`
         Object {
           "c": "bar",
@@ -93,20 +76,7 @@ describe('getEcsResponseLog', () => {
       `);
 
       // @ts-expect-error ECS custom field
-      log.http.request.headers.a = 'testA';
-      // @ts-expect-error ECS custom field
-      log.http.request.headers.b[1] = 'testB';
-      // @ts-expect-error ECS custom field
-      log.http.request.headers.c = 'testC';
-      expect(reqHeaders).toMatchInlineSnapshot(`
-        Object {
-          "a": "foo",
-          "b": Array [
-            "hello",
-            "testB",
-          ],
-        }
-      `);
+      log.http.response.headers.c = 'testC';
       expect(resHeaders).toMatchInlineSnapshot(`
         Object {
           "c": "bar",
@@ -115,21 +85,12 @@ describe('getEcsResponseLog', () => {
     });
 
     test('does not mutate original headers when redacting sensitive data', () => {
-      const reqHeaders = { authorization: 'a', cookie: 'b', 'user-agent': 'hi' };
       const resHeaders = { 'content-length': '123', 'set-cookie': 'c' };
       const event = createResponseEvent({
-        requestParams: { headers: reqHeaders },
         response: { headers: resHeaders },
       });
       getEcsResponseLog(event);
 
-      expect(reqHeaders).toMatchInlineSnapshot(`
-          Object {
-            "authorization": "a",
-            "cookie": "b",
-            "user-agent": "hi",
-          }
-        `);
       expect(resHeaders).toMatchInlineSnapshot(`
           Object {
             "content-length": "123",
@@ -147,9 +108,6 @@ describe('getEcsResponseLog', () => {
         Object {
           "http": Object {
             "request": Object {
-              "headers": Object {
-                "content-length": "123",
-              },
               "id": undefined,
               "method": "GET",
             },
@@ -163,7 +121,6 @@ describe('getEcsResponseLog', () => {
           },
           "url": Object {
             "path": "/path",
-            "query": "?wait_for_completion=true",
           },
         }
       `);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { IncomingHttpHeaders } from 'http';
-import type { DiagnosticResult } from '@elastic/elasticsearch';
+import type { RequestEvent } from '@elastic/elasticsearch';
 import type { LogMeta } from '@kbn/logging';
 
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
@@ -36,27 +36,24 @@ function cloneAndFilterHeaders(headers?: IncomingHttpHeaders) {
  *
  * @internal
  */
-export function getEcsResponseLog(event: DiagnosticResult, bytes?: number): LogMeta {
+export function getEcsResponseLog(event: RequestEvent, bytes?: number): LogMeta {
   const meta: LogMeta = {
     http: {
       request: {
         id: event.meta.request.options.opaqueId,
         method: event.meta.request.params.method.toUpperCase(),
-        // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
-        headers: cloneAndFilterHeaders(event.meta.request.params.headers),
       },
       response: {
         body: {
           bytes,
         },
-        status_code: event.statusCode,
+        status_code: event.statusCode || undefined,
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: cloneAndFilterHeaders(event.headers),
       },
     },
     url: {
       path: event.meta.request.params.path,
-      query: event.meta.request.params.querystring,
     },
   };
 
