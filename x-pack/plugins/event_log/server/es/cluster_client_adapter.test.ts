@@ -455,13 +455,9 @@ describe('getExistingIndexAliases', () => {
 
 describe('setIndexAliasToHidden', () => {
   test('should call cluster with given index name and aliases', async () => {
-    await clusterClientAdapter.setIndexAliasToHidden('foo-bar-000001', {
-      aliases: {
-        'foo-bar': {
-          is_write_index: true,
-        },
-      },
-    });
+    await clusterClientAdapter.setIndexAliasToHidden('foo-bar', [
+      { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
+    ]);
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
@@ -478,18 +474,11 @@ describe('setIndexAliasToHidden', () => {
     });
   });
 
-  test('should update multiple aliases at once and preserve existing alias settings', async () => {
-    await clusterClientAdapter.setIndexAliasToHidden('foo-bar-000001', {
-      aliases: {
-        'foo-bar': {
-          is_write_index: true,
-        },
-        'foo-b': {
-          index_routing: 'index',
-          routing: 'route',
-        },
-      },
-    });
+  test('should update multiple indices for an alias at once and preserve existing alias settings', async () => {
+    await clusterClientAdapter.setIndexAliasToHidden('foo-bar', [
+      { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
+      { alias: 'foo-bar', indexName: 'foo-bar-000002', index_routing: 'index', routing: 'route' },
+    ]);
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
       body: {
         actions: [
@@ -503,8 +492,8 @@ describe('setIndexAliasToHidden', () => {
           },
           {
             add: {
-              index: 'foo-bar-000001',
-              alias: 'foo-b',
+              index: 'foo-bar-000002',
+              alias: 'foo-bar',
               is_hidden: true,
               index_routing: 'index',
               routing: 'route',
@@ -518,15 +507,11 @@ describe('setIndexAliasToHidden', () => {
   test('should throw error when call cluster throws an error', async () => {
     clusterClient.indices.updateAliases.mockRejectedValue(new Error('Fail'));
     await expect(
-      clusterClientAdapter.setIndexAliasToHidden('foo-bar-000001', {
-        aliases: {
-          'foo-bar': {
-            is_write_index: true,
-          },
-        },
-      })
+      clusterClientAdapter.setIndexAliasToHidden('foo-bar', [
+        { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
+      ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error setting existing index aliases for index foo-bar-000001 to is_hidden: Fail"`
+      `"error setting existing index aliases for alias foo-bar to is_hidden: Fail"`
     );
   });
 });
