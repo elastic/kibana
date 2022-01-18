@@ -9,7 +9,12 @@ import { of } from 'rxjs';
 import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
+import {
+  render as reactTestLibRender,
+  RenderOptions,
+  Nullish,
+  MatcherFunction,
+} from '@testing-library/react';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
@@ -369,3 +374,18 @@ export const mockIndexPattern = createStubIndexPattern({
     fields: JSON.parse(indexPatternData.attributes.fields),
   },
 });
+
+// This function allows us to query for the nearest button with test
+// no matter whether it has nested tags or not (as EuiButton elements do).
+export const forNearestButton =
+  (getByText: (f: MatcherFunction) => HTMLElement | null) =>
+  (text: string): HTMLElement | null =>
+    getByText((_content: string, node: Nullish<Element>) => {
+      if (!node) return false;
+      const noOtherButtonHasText = Array.from(node.children).every(
+        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
+      );
+      return (
+        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
+      );
+    });
