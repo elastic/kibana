@@ -33,7 +33,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
       const agentService = osqueryContext.service.getAgentService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-
+      console.log('IDO!!!!');
       const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
