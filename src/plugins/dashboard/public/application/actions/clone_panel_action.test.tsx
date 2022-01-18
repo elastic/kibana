@@ -242,7 +242,7 @@ test('Gets a unique title from the saved objects library', async () => {
   );
 });
 
-test('Gets a unique title from dashboard', async () => {
+test('Gets a unique title from the dashboard', async () => {
   const dashboard = genericEmbeddable.getRoot() as DashboardContainer;
   const action = new ClonePanelAction(coreStart);
 
