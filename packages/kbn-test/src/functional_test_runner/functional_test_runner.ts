@@ -41,7 +41,7 @@ export class FunctionalTestRunner {
       return match[0];
     }
 
-    return normalizeVersion(kibanaPackageJson.version);
+    return normalizeVersion(process.env.TEST_ES_BRANCH || kibanaPackageJson.version);
   }
 
   constructor(
