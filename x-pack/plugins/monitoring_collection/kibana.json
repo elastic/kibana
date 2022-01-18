@@ -1,0 +1,15 @@
+{
+  "id": "monitoringCollection",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Stack Monitoring",
+    "githubTeam": "stack-monitoring-ui"
+  },
+  "configPath": ["monitoring_collection"],
+  "requiredPlugins": [],
+  "optionalPlugins": [
+  ],
+  "server": true,
+  "ui": false
+}
