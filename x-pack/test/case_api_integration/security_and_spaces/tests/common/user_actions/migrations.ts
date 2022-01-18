@@ -248,7 +248,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         );
         expect(newValDecoded.index).to.be('.internal.alerts-security.alerts-default-000001');
         expect(newValDecoded.rule.id).to.be(null);
-        expect(newValDecoded.rule.index).to.be(null);
+        expect(newValDecoded.rule.name).to.be(null);
       });
 
       it('does not modify non-alert attachments', async () => {

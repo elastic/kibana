@@ -125,14 +125,19 @@ export function removeRuleInformation(
       return originalDocWithReferences;
     }
 
+    const encodedValue = JSON.stringify({
+      ...decodedNewValueData,
+      rule: {
+        id: null,
+        name: null,
+      },
+    });
+
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
-        rule: {
-          id: null,
-          name: null,
-        },
+        new_value: encodedValue,
       },
       references: doc.references ?? [],
     };
@@ -161,13 +166,13 @@ function isAlertUserAction(
   action?: string,
   actionFields?: string[],
   newValue?: unknown | null
-): boolean {
+): newValue is AlertCommentOptional {
   return isCreateComment(action, actionFields) && isAlertObject(newValue);
 }
 
 type AlertCommentOptional = Partial<CommentRequestAlertType>;
 
-function isAlertObject(data?: unknown | null): data is AlertCommentOptional {
+function isAlertObject(data?: unknown | null): boolean {
   const unsafeAlertData = data as AlertCommentOptional;
 
   return (

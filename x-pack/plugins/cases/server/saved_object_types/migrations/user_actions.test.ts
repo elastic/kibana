@@ -7,7 +7,9 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { cloneDeep, omit } from 'lodash';
 import {
+  SavedObject,
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectsMigrationLogger,
@@ -709,11 +711,10 @@ describe('user action migrations', () => {
         references: [],
       };
 
-      expect(removeRuleInformation(doc, context)).toEqual({
-        ...doc,
-        attributes: { ...doc.attributes, rule: { id: null, name: null } },
-        references: [],
-      });
+      const newDoc = removeRuleInformation(doc, context) as SavedObject<{ new_value: string }>;
+      ensureRuleFieldsAreNull(newDoc);
+
+      expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
     });
 
     it('sets the rule fields to null for a generated alert', () => {
@@ -729,11 +730,10 @@ describe('user action migrations', () => {
         references: [],
       };
 
-      expect(removeRuleInformation(doc, context)).toEqual({
-        ...doc,
-        attributes: { ...doc.attributes, rule: { id: null, name: null } },
-        references: [],
-      });
+      const newDoc = removeRuleInformation(doc, context) as SavedObject<{ new_value: string }>;
+      ensureRuleFieldsAreNull(newDoc);
+
+      expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
     });
 
     it('preserves the references field', () => {
@@ -749,10 +749,21 @@ describe('user action migrations', () => {
         references: [{ id: '123', name: 'hi', type: 'awesome' }],
       };
 
-      expect(removeRuleInformation(doc, context)).toEqual({
-        ...doc,
-        attributes: { ...doc.attributes, rule: { id: null, name: null } },
-      });
+      const newDoc = removeRuleInformation(doc, context) as SavedObject<{ new_value: string }>;
+      ensureRuleFieldsAreNull(newDoc);
+
+      expect(docWithoutNewValue(newDoc)).toEqual(docWithoutNewValue(doc));
     });
   });
 });
+
+const docWithoutNewValue = (doc: {}) => {
+  const copyOfDoc = cloneDeep(doc);
+  return omit(copyOfDoc, 'attributes.new_value');
+};
+
+const ensureRuleFieldsAreNull = (doc: SavedObject<{ new_value: string }>) => {
+  const decodedNewValue = JSON.parse(doc.attributes.new_value);
+
+  expect(decodedNewValue.rule).toEqual({ id: null, name: null });
+};
