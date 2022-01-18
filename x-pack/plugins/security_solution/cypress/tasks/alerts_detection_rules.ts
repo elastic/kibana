@@ -275,7 +275,7 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const getRulesImportToast = (headers: string[]) => {
+export const getRulesImportExportToast = (headers: string[]) => {
   cy.get(TOASTER)
     .should('exist')
     .then(($els) => {
