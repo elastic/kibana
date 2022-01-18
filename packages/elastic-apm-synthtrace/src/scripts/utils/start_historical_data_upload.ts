@@ -24,6 +24,7 @@ export async function startHistoricalDataUpload({
   target,
   file,
   writeTarget,
+  scenarioOpts,
 }: RunOptions & { from: number; to: number }) {
   let requestedUntil: number = from;
 
@@ -57,6 +58,7 @@ export async function startHistoricalDataUpload({
       target,
       workers,
       writeTarget,
+      scenarioOpts,
     };
 
     const worker = new Worker(Path.join(__dirname, './upload_next_batch.js'), {

@@ -8,7 +8,7 @@
 import type { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
-import type { CustomPaletteParams, LayerType } from '../../common';
+import type { CustomPaletteParams, LayerType, PersistableFilter } from '../../common';
 
 export type OperationTypePre712 =
   | 'avg'
@@ -191,9 +191,16 @@ export interface LensDocShape715<VisualizationState = unknown> {
     };
     visualization: VisualizationState;
     query: Query;
-    filters: Filter[];
+    filters: PersistableFilter[];
   };
 }
+
+export type LensDocShape810<VisualizationState = unknown> = Omit<
+  LensDocShape715<VisualizationState>,
+  'filters'
+> & {
+  filters: Filter[];
+};
 
 export type VisState716 =
   // Datatable

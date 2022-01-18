@@ -39,7 +39,7 @@ jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
