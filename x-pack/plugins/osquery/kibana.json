@@ -16,6 +16,7 @@
     "discover",
     "features",
     "navigation",
+    "taskManager",
     "triggersActionsUi",
     "security"
   ],

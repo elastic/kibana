@@ -21,6 +21,7 @@ import {
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
+import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -33,7 +34,8 @@ import { ConfigType } from './config';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
 import { PLUGIN_ID } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
-import { TelemetryEventsSender } from './telemetry/sender';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -209,12 +211,16 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly logger: Logger;
   private context: PluginInitializerContext;
   private readonly osqueryAppContextService = new OsqueryAppContextService();
+  private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
     this.logger = initializerContext.logger.get();
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryReceiver = new TelemetryReceiver(this.logger);
   }
 
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
@@ -240,6 +246,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       osqueryContext,
       usageCollection: plugins.usageCollection,
     });
+
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
+
     defineRoutes(router, osqueryContext);
 
     core.getStartServices().then(([, depsStart]) => {
@@ -248,7 +257,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
     });
 
-    osqueryContext.telemetryEventsSender.setup(plugins.telemetry);
+    this.telemetryEventsSender.setup(
+      this.telemetryReceiver,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
 
     return {};
   }
@@ -266,7 +280,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerIngestCallback,
     });
 
-    this.telemetryEventsSender.start(plugins.telemetry, core);
+    this.telemetryReceiver.start(core, this.osqueryAppContextService);
+
+    this.telemetryEventsSender.start(
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryReceiver
+    );
 
     if (registerIngestCallback) {
       const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
@@ -279,7 +299,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
   public stop() {
     this.logger.debug('osquery: Stopped');
-    this.osqueryAppContextService.stop();
     this.telemetryEventsSender.stop();
+    this.osqueryAppContextService.stop();
   }
 }

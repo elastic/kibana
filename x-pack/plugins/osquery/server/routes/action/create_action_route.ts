@@ -23,7 +23,7 @@ import { EventSourceOrUndefined } from '../../../common/schemas/common';
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
-import { sendTelemetryEvents } from '../../telemetry/services/live_query_sender';
+// import { sendTelemetryEvents } from '../../telemetry/services/live_query_sender';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -85,20 +85,28 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           body: action,
         });
 
-        try {
-          sendTelemetryEvents(
-            osqueryContext.logFactory.get(),
-            osqueryContext.telemetryEventsSender,
-            {
-              agent_selection,
-              ecs_mapping: request.body.ecs_mapping,
-              event_source,
-              query: request.body.query,
-              saved_query: !!request.body.saved_query_id,
-            }
-          );
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
+        // try {
+        //   const clusterId = sender.getClusterID();
+        //   const [isTelemetryOptedIn, username] = await Promise.all([
+        //     sender.isTelemetryOptedIn(),
+        //     security?.authc.getCurrentUser(request)?.username,
+        //   ]);
+        //   if (isTelemetryOptedIn && clusterId) {
+        //     context.telemetryEventsSender.sendOnDemand();
+        //     sendTelemetryEvents(
+        //       osqueryContext.logFactory.get(),
+        //       osqueryContext.telemetryEventsSender,
+        //       {
+        //         agent_selection,
+        //         ecs_mapping: request.body.ecs_mapping,
+        //         event_source,
+        //         query: request.body.query,
+        //         saved_query: !!request.body.saved_query_id,
+        //       }
+        //     );
+        //   }
+        //   // eslint-disable-next-line no-empty
+        // } catch (e) {}
 
         return response.ok({
           body: {
