@@ -13,7 +13,8 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
-import { useExploratoryView } from '../contexts/exploatory_view_config';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
+import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -84,7 +85,10 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
-          if ((e as HttpFetchError).body.error === 'Forbidden') {
+          if (
+            e instanceof DataViewInsufficientAccessError ||
+            (e as HttpFetchError).body === 'Forbidden'
+          ) {
             setIndexPatternErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
