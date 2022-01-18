@@ -27,6 +27,7 @@ import { EcsEventKind } from '@kbn/logging';
 import { EcsEventOutcome } from '@kbn/logging';
 import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
+import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IncomingHttpHeaders } from 'http';
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
@@ -36,7 +37,7 @@ import { LogLevel as LogLevel_2 } from '@kbn/logging';
 import { LogLevelId } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
-import type { MaybePromise } from '@kbn/utility-types';
+import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
@@ -940,6 +941,7 @@ export interface ElasticsearchServiceSetup {
     legacy: {
         readonly config$: Observable<ElasticsearchConfig>;
     };
+    setUnauthorizedErrorHandler: (handler: UnauthorizedErrorHandler) => void;
 }
 
 // @public (undocumented)
@@ -3058,6 +3060,49 @@ export interface UiSettingsServiceStart {
 
 // @public
 export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image' | 'color';
+
+// @public (undocumented)
+export type UnauthorizedError = errors.ResponseError & {
+    statusCode: 401;
+};
+
+// @public
+export type UnauthorizedErrorHandler = (options: UnauthorizedErrorHandlerOptions, toolkit: UnauthorizedErrorHandlerToolkit) => MaybePromise<UnauthorizedErrorHandlerResult>;
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerNotHandledResult {
+    // (undocumented)
+    type: 'notHandled';
+}
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerOptions {
+    // (undocumented)
+    error: UnauthorizedError;
+    // (undocumented)
+    request: KibanaRequest;
+}
+
+// @public (undocumented)
+export type UnauthorizedErrorHandlerResult = UnauthorizedErrorHandlerRetryResult | UnauthorizedErrorHandlerNotHandledResult;
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerResultRetryParams {
+    // (undocumented)
+    authHeaders: AuthHeaders;
+}
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerRetryResult extends UnauthorizedErrorHandlerResultRetryParams {
+    // (undocumented)
+    type: 'retry';
+}
+
+// @public
+export interface UnauthorizedErrorHandlerToolkit {
+    notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
+    retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
+}
 
 // @public
 export interface UserProvidedValues<T = any> {
