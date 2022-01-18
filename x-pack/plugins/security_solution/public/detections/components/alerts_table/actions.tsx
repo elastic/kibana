@@ -258,17 +258,18 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
   );
 };
 
-export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
+export const isEqlRuleWithGroupId = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   const groupId = getField(ecsData, ALERT_GROUP_ID);
-  return ruleType?.length && ruleType[0] === 'eql' && groupId?.length;
+  const isEql = ruleType === 'eql' || (Array.isArray(ruleType) && ruleType[0] === 'eql');
+  return isEql && groupId?.length > 0;
 };
 
-export const isThresholdRule = (ecsData: Ecs) => {
+export const isThresholdRule = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   return (
     ruleType === 'threshold' ||
-    (Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold')
+    (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'threshold')
   );
 };
 
@@ -288,7 +289,7 @@ export const buildAlertsKqlFilter = (
         },
       },
       meta: {
-        alias: 'Alert Ids',
+        alias: `Alert Ids: ${alertIds.join()}`,
         negate: false,
         disabled: false,
         type: 'phrases',
@@ -333,9 +334,9 @@ export const buildTimelineDataProviderOrFilter = (
   };
 };
 
-export const buildEqlDataProviderOrFilter = (
+const buildEqlDataProviderOrFilter = (
   alertsIds: string[],
-  ecs: Ecs[] | Ecs
+  ecs: Ecs
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
   if (!isEmpty(alertsIds) && Array.isArray(ecs)) {
     return {
@@ -344,9 +345,7 @@ export const buildEqlDataProviderOrFilter = (
         'signal.group.id',
         ecs.reduce<string[]>((acc, ecsData) => {
           const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
-          const alertGroupId = alertGroupIdField?.length
-            ? alertGroupIdField[0]
-            : 'unknown-group-id';
+          const alertGroupId = alertGroupIdField?.length ? alertGroupIdField : 'unknown-group-id';
           if (!acc.includes(alertGroupId)) {
             return [...acc, alertGroupId];
           }
@@ -355,9 +354,9 @@ export const buildEqlDataProviderOrFilter = (
       ),
     };
   } else if (!Array.isArray(ecs)) {
-    const alertGroupIdField: string[] = getField(ecs, ALERT_GROUP_ID);
+    const alertGroupIdField = getField(ecs, ALERT_GROUP_ID);
     const queryMatchField = getFieldKey(ecs, ALERT_GROUP_ID);
-    const alertGroupId = alertGroupIdField?.length ? alertGroupIdField[0] : 'unknown-group-id';
+    const alertGroupId = alertGroupIdField?.length ? alertGroupIdField : 'unknown-group-id';
     return {
       dataProviders: [
         {
@@ -395,12 +394,15 @@ export const sendAlertToTimelineAction = async ({
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
-  const timelineId =
-    Array.isArray(ruleTimelineId) && ruleTimelineId.length > 0 ? ruleTimelineId[0] : '';
+  const timelineId = !isEmpty(ruleTimelineId)
+    ? Array.isArray(ruleTimelineId)
+      ? ruleTimelineId[0]
+      : ruleTimelineId
+    : '';
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
-  if (!isEmpty(timelineId) && isEmpty(alertIds)) {
+  if (!isEmpty(timelineId) && isThresholdRule(ecsData) === false) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
@@ -446,8 +448,6 @@ export const sendAlertToTimelineAction = async ({
           timeline: {
             ...timeline,
             title: '',
-            timelineType: TimelineType.default,
-            templateTimelineId: null,
             status: TimelineStatus.draft,
             dataProviders,
             eventType: 'all',
@@ -518,7 +518,7 @@ export const sendAlertToTimelineAction = async ({
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlRuleWithGroupId(ecsData)) {
-      const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
+      const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecsData);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;
     }
