@@ -102,7 +102,7 @@ export const DatavisualizerSelector: FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.selector.importDataTitle"
-                  defaultMessage="Visualize data from file"
+                  defaultMessage="Visualize data from a file"
                 />
               }
               description={
@@ -134,15 +134,10 @@ export const DatavisualizerSelector: FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.selector.selectDataViewTitle"
-                  defaultMessage="Visualize data from data view"
+                  defaultMessage="Visualize data from a data view"
                 />
               }
-              description={
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.selector.selectDataViewDescription"
-                  defaultMessage="Visualize the data in an existing Elasticsearch index."
-                />
-              }
+              description={''}
               footer={
                 <EuiButton
                   target="_self"
