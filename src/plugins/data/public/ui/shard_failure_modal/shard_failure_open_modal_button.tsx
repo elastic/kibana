@@ -12,6 +12,7 @@ import { EuiButton, EuiTextAlign } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getOverlays } from '../../services';
+import { ThemeServiceStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ShardFailureRequest } from './shard_failure_types';
@@ -20,6 +21,7 @@ import { ShardFailureRequest } from './shard_failure_types';
 export interface ShardFailureOpenModalButtonProps {
   request: ShardFailureRequest;
   response: estypes.SearchResponse<any>;
+  theme: ThemeServiceStart;
   title: string;
 }
 
@@ -28,6 +30,7 @@ export interface ShardFailureOpenModalButtonProps {
 export default function ShardFailureOpenModalButton({
   request,
   response,
+  theme,
   title,
 }: ShardFailureOpenModalButtonProps) {
   function onClick() {
@@ -38,7 +41,8 @@ export default function ShardFailureOpenModalButton({
           response={response}
           title={title}
           onClose={() => modal.close()}
-        />
+        />,
+        { theme$: theme.theme$ }
       ),
       {
         className: 'shardFailureModal',
