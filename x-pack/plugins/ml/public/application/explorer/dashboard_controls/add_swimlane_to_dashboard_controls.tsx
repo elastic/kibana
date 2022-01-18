@@ -60,28 +60,19 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
 
   const getEmbeddableInput = useCallback(() => {
     const config = getDefaultEmbeddablePanelConfig(jobIds);
-    if (selectedSwimlane === SWIMLANE_TYPE.VIEW_BY) {
-      return {
-        input: {
-          ...config,
-          jobIds,
-          swimlaneType: selectedSwimlane,
-          viewBy,
-        },
-        type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-      };
-    }
+
     return {
-      input: {
-        ...config,
-        jobIds,
-        swimlaneType: selectedSwimlane,
-      },
-      type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+      ...config,
+      jobIds,
+      swimlaneType: selectedSwimlane,
+      ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY ? { viewBy } : {}),
     };
   }, [selectedSwimlane]);
 
-  const { addToDashboardAndEditCallback } = useAddToDashboardActions(getEmbeddableInput);
+  const { addToDashboardAndEditCallback } = useAddToDashboardActions(
+    ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    getEmbeddableInput
+  );
 
   const swimlaneTypeOptions = [
     {

@@ -11,16 +11,22 @@ import { useMlKibana } from '../../contexts/kibana';
 import { useDashboardService } from '../../services/dashboard_service';
 import { DashboardConstants } from '../../../../../../../src/plugins/dashboard/public';
 import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalyChartsEmbeddableInput,
   AnomalySwimlaneEmbeddableInput,
 } from '../../../embeddables';
 
-export const useAddToDashboardActions = (
-  getEmbeddableInput: () => {
-    type: typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
-    input: Partial<AnomalySwimlaneEmbeddableInput>;
-  }
-) => {
+export function useAddToDashboardActions<
+  T extends typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE | typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
+>(
+  type: T,
+  getEmbeddableInput: () => Partial<
+    T extends typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE
+      ? AnomalySwimlaneEmbeddableInput
+      : AnomalyChartsEmbeddableInput
+  >
+) {
   const {
     services: { embeddable },
   } = useMlKibana();
@@ -35,11 +41,14 @@ export const useAddToDashboardActions = (
 
       await stateTransfer.navigateToWithEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, {
         path: dashboardPath,
-        state: getEmbeddableInput(),
+        state: {
+          type,
+          input: getEmbeddableInput(),
+        },
       });
     },
     [getEmbeddableInput]
   );
 
   return { addToDashboardAndEditCallback };
-};
+}

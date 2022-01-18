@@ -68,7 +68,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           }),
           icon: 'documentEdit',
           type: 'icon',
-          available: () => !disabled,
+          enabled: () => !disabled,
           onClick: async (item) => {
             await addToDashboardAndEditCallback(item);
           },
