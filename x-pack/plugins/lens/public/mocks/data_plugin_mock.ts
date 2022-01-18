@@ -7,7 +7,8 @@
 
 import { Observable, Subject } from 'rxjs';
 import moment from 'moment';
-import { DataPublicPluginStart, esFilters, Filter } from '../../../../../src/plugins/data/public';
+import { isFilterPinned, Filter } from '@kbn/es-query';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
@@ -84,7 +85,7 @@ export function mockDataPlugin(
       getFilters: () => filters,
       getGlobalFilters: () => {
         // @ts-ignore
-        return filters.filter(esFilters.isFilterPinned);
+        return filters.filter(isFilterPinned);
       },
       removeAll: () => {
         filters = [];

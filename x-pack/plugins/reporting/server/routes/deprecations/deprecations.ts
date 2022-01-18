@@ -50,6 +50,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
           return res.notFound();
         }
       } catch (e) {
+        logger.error(e);
         return res.customError({ statusCode: e.statusCode, body: e.message });
       }
 
@@ -86,6 +87,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
           };
           return res.ok({ body: response });
         } catch (e) {
+          logger.error(e);
           return res.customError({
             statusCode: e?.statusCode ?? 500,
             body: { message: e.message },
