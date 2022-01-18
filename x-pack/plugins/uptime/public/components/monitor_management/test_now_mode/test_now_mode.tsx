@@ -27,10 +27,11 @@ import { kibanaService } from '../../../state/kibana_service';
 
 export interface TestRun {
   id: string;
+  isValid: boolean;
   monitor: MonitorFields;
 }
 
-export function TestNowMode({ monitor }: { monitor?: MonitorFields }) {
+export function TestNowMode({ monitor, isValid }: { monitor?: MonitorFields }) {
   const [testRun, setTestRun] = useState<TestRun>();
 
   const startTestRun = () => {
@@ -84,7 +85,13 @@ export function TestNowMode({ monitor }: { monitor?: MonitorFields }) {
       <EuiSpacer size="xs" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={startTestRun} isDisabled={!monitor} size="s" isLoading={isPushing}>
+          <EuiButton
+            onClick={startTestRun}
+            isDisabled={!monitor}
+            size="s"
+            isLoading={isPushing}
+            disabled={!isValid}
+          >
             {testRun ? UpdateTestRunLabel : StartTestRunLabel}
           </EuiButton>
         </EuiFlexItem>

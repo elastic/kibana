@@ -7,7 +7,7 @@
 
 import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
@@ -18,6 +18,7 @@ import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   monitor: SyntheticsMonitor;
@@ -84,7 +85,9 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
     <Redirect to={MONITOR_MANAGEMENT} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
+      <EuiFlexItem>
+        <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -115,6 +118,11 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
     </EuiFlexGroup>
   );
 };
+
+const WarningText = euiStyled(EuiText)`
+    box-shadow: -4px 0 ${(props) => props.theme.eui.euiColorWarning};
+    padding-left: 8px;
+`;
 
 const DISCARD_LABEL = i18n.translate('xpack.uptime.monitorManagement.discardLabel', {
   defaultMessage: 'Discard',

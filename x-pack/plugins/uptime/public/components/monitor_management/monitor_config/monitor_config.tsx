@@ -40,14 +40,14 @@ export const MonitorConfig = () => {
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
-            <EuiResizablePanel initialSize={50} minSize="30%" mode="collapsible">
+            <EuiResizablePanel initialSize={55} minSize="30%" mode="collapsible">
               <MonitorFields />
             </EuiResizablePanel>
 
             <EuiResizableButton />
 
-            <EuiResizablePanel initialSize={50} minSize="200px" mode="main">
-              {config && <TestNowMode monitor={config as MonitorFieldsType} />}
+            <EuiResizablePanel initialSize={45} minSize="200px" mode="main">
+              {config && <TestNowMode monitor={config as MonitorFieldsType} isValid={isValid} />}
             </EuiResizablePanel>
           </>
         )}
