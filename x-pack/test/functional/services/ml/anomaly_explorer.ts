@@ -89,10 +89,7 @@ export function MachineLearningAnomalyExplorerProvider({
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
-        await this.selectAllDashboards();
-        await this.waitForAddAndEditDashboardButtonEnabled();
-        // FIXME swim lane embeddable tests
-        await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+        await testSubjects.clickWhenNotDisabled('~mlEmbeddableAddAndEditDashboard');
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();
@@ -103,7 +100,7 @@ export function MachineLearningAnomalyExplorerProvider({
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
-        'Anomaly swimlane should be displayed in dashboard'
+        'Anomaly swim lane should be displayed in dashboard'
       );
     },
 
@@ -113,13 +110,6 @@ export function MachineLearningAnomalyExplorerProvider({
 
     async waitForDashboardsToLoad() {
       await testSubjects.existOrFail('mlDashboardSelectionTable loaded', { timeout: 60 * 1000 });
-    },
-
-    async waitForAddAndEditDashboardButtonEnabled() {
-      await retry.tryForTime(3000, async () => {
-        const isEnabled = await testSubjects.isEnabled('mlAddAndEditDashboardButton');
-        expect(isEnabled).to.eql(true, 'Button to add and edit dashboard should be enabled');
-      });
     },
 
     async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
@@ -146,17 +136,6 @@ export function MachineLearningAnomalyExplorerProvider({
         expectedSearchValue,
         `Dashboard search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
       );
-    },
-
-    async selectAllDashboards() {
-      await retry.tryForTime(3000, async () => {
-        await testSubjects.clickWhenNotDisabled(
-          'mlDashboardSelectionTable loaded > checkboxSelectAll'
-        );
-        expect(
-          await testSubjects.isChecked('mlDashboardSelectionTable loaded > checkboxSelectAll')
-        ).to.eql(true, 'Checkbox to select all dashboards should be selected');
-      });
     },
 
     async assertClearSelectionButtonVisible(expectVisible: boolean) {

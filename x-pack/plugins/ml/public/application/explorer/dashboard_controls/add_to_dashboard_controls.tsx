@@ -72,6 +72,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
           onClick: async (item) => {
             await addToDashboardAndEditCallback(item);
           },
+          'data-test-subj': 'mlEmbeddableAddAndEditDashboard',
         },
       ],
     },
