@@ -268,6 +268,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
   ];
 
+  const isLoading =
+    (enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest) ||
+    (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest);
+
   return (
     <DefaultLayout section="enrollment_tokens">
       {isModalOpen && (
@@ -311,14 +315,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiBasicTable<EnrollmentAPIKey>
-        loading={
-          (enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest) ||
-          (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest)
-        }
+        loading={isLoading}
         hasActions={true}
         noItemsMessage={
-          (enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest) ||
-          (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest) ? (
+          isLoading ? (
             <FormattedMessage
               id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
               defaultMessage="Loading enrollment tokens..."
