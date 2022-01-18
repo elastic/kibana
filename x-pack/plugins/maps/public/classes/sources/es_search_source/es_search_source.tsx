@@ -72,6 +72,7 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
@@ -590,7 +591,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch({ legacyHitsTotal: false });
+    const resp = await searchSource.fetch({
+      legacyHitsTotal: false,
+      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+    });
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -893,6 +897,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       abortSignal: abortController.signal,
       sessionId: searchFilters.searchSessionId,
       legacyHitsTotal: false,
+      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
     });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
