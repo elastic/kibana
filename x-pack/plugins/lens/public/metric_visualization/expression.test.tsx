@@ -8,7 +8,7 @@
 import { MetricChart } from './expression';
 import { MetricConfig, metricChart } from '../../common/expressions';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
 import { layerTypes } from '../../common';
@@ -94,6 +94,7 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
+          style={Object {}}
         >
           <AutoScale
             key="3"
@@ -101,7 +102,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={Object {}}
             >
               3
             </div>
@@ -132,6 +132,7 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
+          style={Object {}}
         >
           <AutoScale
             key="last"
@@ -139,7 +140,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={Object {}}
             >
               last
             </div>
@@ -169,6 +169,7 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
+          style={Object {}}
         >
           <AutoScale
             key="3"
@@ -176,7 +177,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={Object {}}
             >
               3
             </div>
@@ -206,6 +206,7 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
+          style={Object {}}
         >
           <AutoScale
             key="3"
@@ -213,7 +214,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={Object {}}
             >
               3
             </div>
@@ -287,6 +287,7 @@ describe('metric_expression', () => {
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
+          style={Object {}}
         >
           <AutoScale
             key="0"
@@ -294,7 +295,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__value"
               data-test-subj="lns_metric_value"
-              style={Object {}}
             >
               0
             </div>
@@ -337,7 +337,7 @@ describe('metric_expression', () => {
         colors: ['red', 'yellow', 'green'],
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -346,7 +346,9 @@ describe('metric_expression', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+      expect(
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
+      ).toEqual(
         expect.objectContaining({
           color: 'red',
         })
@@ -368,7 +370,7 @@ describe('metric_expression', () => {
         continuity: 'above',
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -378,7 +380,7 @@ describe('metric_expression', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
       ).not.toEqual(
         expect.objectContaining({
           color: expect.any(String),
@@ -400,7 +402,7 @@ describe('metric_expression', () => {
         continuity: 'below',
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -410,7 +412,7 @@ describe('metric_expression', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
       ).not.toEqual(
         expect.objectContaining({
           color: expect.any(String),
@@ -432,7 +434,7 @@ describe('metric_expression', () => {
         colors: ['red', 'yellow', 'green'],
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -442,7 +444,7 @@ describe('metric_expression', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
       ).not.toEqual(
         expect.objectContaining({
           color: expect.any(String),
@@ -464,7 +466,7 @@ describe('metric_expression', () => {
         colors: ['red', 'yellow', 'green'],
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -474,7 +476,7 @@ describe('metric_expression', () => {
       );
 
       expect(
-        instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
       ).not.toEqual(
         expect.objectContaining({
           color: expect.any(String),
@@ -496,7 +498,7 @@ describe('metric_expression', () => {
         colors: ['red', 'yellow', 'green'],
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -505,7 +507,9 @@ describe('metric_expression', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+      expect(
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
+      ).toEqual(
         expect.objectContaining({
           color: 'green',
         })
@@ -526,7 +530,7 @@ describe('metric_expression', () => {
         colors: ['red', 'yellow', 'green'],
       };
 
-      const instance = shallow(
+      const instance = mount(
         <MetricChart
           data={data}
           args={args}
@@ -535,7 +539,9 @@ describe('metric_expression', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lns_metric_value"]').first().prop('style')).toEqual(
+      expect(
+        instance.find('[data-test-subj="lnsVisualizationContainer"]').first().prop('style')
+      ).toEqual(
         expect.objectContaining({
           color: 'red',
         })

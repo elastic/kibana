@@ -509,9 +509,17 @@ export function toColorRanges(
   );
 }
 
-export function getContrastColor(color: string, isDarkTheme: boolean) {
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
-  const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
+export function getContrastColor(
+  color: string,
+  isDarkTheme: boolean,
+  darkTextProp: 'euiColorInk' | 'euiTextColor' = 'euiColorInk',
+  lightTextProp: 'euiColorGhost' | 'euiTextColor' = 'euiColorGhost'
+) {
+  // when in light theme both text color and colorInk are dark and the choice
+  // may depends on the specific context.
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars[darkTextProp];
+  // Same thing for light color in dark theme
+  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorGhost;
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;

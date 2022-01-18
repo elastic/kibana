@@ -97,7 +97,8 @@ function getColorStyling(
     [cssProp]: color,
   };
   if (colorMode === ColorMode.Background && color) {
-    styling.color = getContrastColor(color, isDarkTheme);
+    // set to "euiTextColor" for both light and dark color, depending on the theme
+    styling.color = getContrastColor(color, isDarkTheme, 'euiTextColor', 'euiTextColor');
   }
   return styling;
 }
@@ -142,13 +143,17 @@ export function MetricChart({
   const color = getColorStyling(rawValue, colorMode, palette, uiSettings.get('theme:darkMode'));
 
   return (
-    <VisualizationContainer className="lnsMetricExpression__container">
+    <VisualizationContainer className="lnsMetricExpression__container" style={color}>
       <AutoScale key={value}>
-        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value" style={color}>
+        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
           {value}
         </div>
         {mode === 'full' && (
-          <div data-test-subj="lns_metric_title" className="lnsMetricExpression__title">
+          <div
+            data-test-subj="lns_metric_title"
+            className="lnsMetricExpression__title"
+            style={colorMode === ColorMode.Background ? color : undefined}
+          >
             {metricTitle}
           </div>
         )}
