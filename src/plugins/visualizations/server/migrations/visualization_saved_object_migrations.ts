@@ -1217,11 +1217,11 @@ const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateF
   );
 
 export const getAllMigrations = (
-  getSearchSourceMigrations: () => MigrateFunctionsObject
+  searchSourceMigrations: MigrateFunctionsObject
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
     getVisualizationSearchSourceMigrations(
-      getSearchSourceMigrations()
+      searchSourceMigrations
     ) as unknown as SavedObjectMigrationMap
   );

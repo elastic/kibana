@@ -44,5 +44,5 @@ export const getVisualizationSavedObjectType = (
       visState: { type: 'text', index: false },
     },
   },
-  migrations: () => getAllMigrations(getSearchSourceMigrations),
+  migrations: () => getAllMigrations(getSearchSourceMigrations()),
 });
