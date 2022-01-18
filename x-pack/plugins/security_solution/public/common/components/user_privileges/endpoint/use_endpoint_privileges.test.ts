@@ -34,7 +34,6 @@ describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
   let result: RenderResult<EndpointPrivileges>;
   let unmount: ReturnType<typeof renderHook>['unmount'];
-  let releaseFleetAuthz: () => void;
   let render: () => RenderHookResult<void, EndpointPrivileges>;
 
   beforeEach(() => {
