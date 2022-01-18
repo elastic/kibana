@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
 import { Unit } from '@elastic/datemath';
+import * as rt from 'io-ts';
+import { SnapshotCustomMetricInput } from '../../http_api';
 import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
-import { SnapshotCustomMetricInput } from '../../http_api';
 
-// TODO: Have threshold and inventory alerts import these types from this file instead of from their
-// local directories
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 export const METRIC_ANOMALY_ALERT_TYPE_ID = 'metrics.alert.anomaly';
@@ -88,3 +86,25 @@ export interface InventoryMetricThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
 }
+
+interface BaseMetricExpressionParams {
+  timeSize: number;
+  timeUnit: Unit;
+  sourceId?: string;
+  threshold: number[];
+  comparator: Comparator;
+  warningComparator?: Comparator;
+  warningThreshold?: number[];
+}
+
+export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Exclude<Aggregators, Aggregators.COUNT>;
+  metric: string;
+}
+
+export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Aggregators.COUNT;
+  metric: never;
+}
+
+export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;

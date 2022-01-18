@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  MetricExpressionParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/metric_threshold/types';
-import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricExpressionParams } from '../../../common/alerting/metrics';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
+import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;

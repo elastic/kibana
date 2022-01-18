@@ -6,13 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  MetricExpressionParams,
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
+import { ValidationResult } from '../../../../../triggers_actions_ui/public';
+import { Comparator, MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { QUERY_INVALID } from './expression';
 
 export function validateMetricThreshold({

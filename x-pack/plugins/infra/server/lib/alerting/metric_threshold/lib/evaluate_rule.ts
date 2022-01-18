@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
+import { first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
+import moment from 'moment';
 import {
+  Aggregators,
+  Comparator,
   isTooManyBucketsPreviewException,
+  MetricExpressionParams,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
-import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
+import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
+import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
-import { MetricExpressionParams, Comparator, Aggregators } from '../types';
-import { getElasticsearchMetricQuery } from './metric_query';
 import { createTimerange } from './create_timerange';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 interface AggregationWithoutIntervals {
   aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
