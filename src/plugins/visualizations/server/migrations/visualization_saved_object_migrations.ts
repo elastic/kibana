@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn, mapValues, mergeWith } from 'lodash';
-import type {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
+import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
+import { mergeSavedObjectMigrationMaps } from 'kibana/server';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 
 import {
@@ -1191,21 +1187,6 @@ const visualizationSavedObjectTypeMigrations = {
   ),
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
-};
-
-const mergeSavedObjectMigrationMaps = (
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
-): SavedObjectMigrationMap => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
-    }
-    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(state, context), context);
-  };
-
-  return mergeWith({ ...obj1 }, obj2, customizer);
 };
 
 /**

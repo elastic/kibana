@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { cloneDeep, mergeWith } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationContext,
 } from 'src/core/server';
+import { mergeSavedObjectMigrationMaps } from 'kibana/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
@@ -466,21 +466,6 @@ const lensMigrations: SavedObjectMigrationMap = {
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
   '8.1.0': renameFilterReferences,
-};
-
-export const mergeSavedObjectMigrationMaps = (
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
-): SavedObjectMigrationMap => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
-    }
-    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(state, context), context);
-  };
-
-  return mergeWith({ ...obj1 }, obj2, customizer);
 };
 
 export const getAllMigrations = (

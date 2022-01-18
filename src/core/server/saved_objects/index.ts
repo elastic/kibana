@@ -84,6 +84,7 @@ export type {
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
 } from './migrations';
+export { mergeSavedObjectMigrationMaps } from './migrations';
 
 export type {
   SavedObjectsNamespaceType,

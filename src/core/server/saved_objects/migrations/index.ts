@@ -14,3 +14,4 @@ export type {
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
 } from './types';
+export { mergeSavedObjectMigrationMaps } from './utils';
