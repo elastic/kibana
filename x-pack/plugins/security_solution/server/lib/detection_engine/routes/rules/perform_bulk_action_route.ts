@@ -16,6 +16,7 @@ import type { RulesClient } from '../../../../../../alerting/server';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
+  RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -40,7 +41,6 @@ import { buildSiemResponse } from '../utils';
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_ROUTE_CONCURRENCY = 5;
-const MAX_RULES_PER_PAGE = 100;
 
 type RuleActionFn = (rule: Rule) => Promise<void>;
 
@@ -237,9 +237,9 @@ export const performBulkActionRoute = (
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
 
-      if (body?.ids && body.ids.length > MAX_RULES_PER_PAGE) {
+      if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
         return siemResponse.error({
-          body: `More than ${MAX_RULES_PER_PAGE} ids sent for bulk edit action.`,
+          body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
           statusCode: 400,
         });
       }

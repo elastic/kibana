@@ -402,3 +402,9 @@ export const WARNING_TRANSFORM_STATES = new Set([
 export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
+
+/**
+ * Max number of rules to display on UI in table, hence max number of rules that can be edited in a single bulk edit API request
+ */
+export const RULES_TABLE_MAX_PAGE_SIZE = 100;
+export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];

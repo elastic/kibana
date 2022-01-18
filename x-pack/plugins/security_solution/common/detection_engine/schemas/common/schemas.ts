@@ -479,6 +479,8 @@ const bulkActionEditPayloadTags = t.type({
   value: tags,
 });
 
+export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
+
 const bulkActionEditPayloadIndexPatterns = t.type({
   type: t.union([
     t.literal(BulkActionEditType.add_index_patterns),
@@ -487,6 +489,10 @@ const bulkActionEditPayloadIndexPatterns = t.type({
   ]),
   value: index,
 });
+
+export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
+  typeof bulkActionEditPayloadIndexPatterns
+>;
 
 const bulkActionEditPayloadTimeline = t.type({
   type: t.literal(BulkActionEditType.set_timeline),

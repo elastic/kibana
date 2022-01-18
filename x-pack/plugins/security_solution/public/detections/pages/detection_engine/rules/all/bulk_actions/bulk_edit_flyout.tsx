@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -20,143 +20,34 @@ import {
 import * as i18n from '../../translations';
 
 import {
-  BulkAction,
   BulkActionEditType,
+  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
-import {
-  Field,
-  Form,
-  getUseField,
-  useForm,
-  ERROR_CODE,
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  ValidationFunc,
-} from '../../../../../../shared_imports';
+import { IndexPatternsForm } from './forms/index_patterns_form';
+import { TagsForm } from './forms/tags_form';
 
-import { IndexPatternsForm, schema as indexPatternsFormSchema } from './forms/index_patterns_form';
-import { TagsForm, schema as tagsFormSchema } from './forms/tags_form';
-
-type BulkeEditForm = IndexPatternForm | TagsForm;
-
-interface FormComponentProps<T> {
-  data: T;
-  onChange: (formState: FormState<T>) => void;
-  editAction: BulkActionEditType;
-}
-
-const isIndexPatternsEditAction = (editAction: BulkActionEditType) =>
-  [
-    BulkActionEditType.add_index_patterns,
-    BulkActionEditType.delete_index_patterns,
-    BulkActionEditType.set_index_patterns,
-  ].includes(editAction);
-
-const isTagsEditAction = (editAction: BulkActionEditType) =>
-  [
-    BulkActionEditType.add_tags,
-    BulkActionEditType.delete_tags,
-    BulkActionEditType.set_tags,
-  ].includes(editAction);
-
-const computeFormSchema = (editAction: BulkActionEditType) => {
-  if (isIndexPatternsEditAction(editAction)) {
-    return indexPatternsFormSchema;
-  }
-  if (isTagsEditAction(editAction)) {
-    return tagsFormSchema;
-  }
-};
-
-export const FormComponent = <T,>({ data, onChange, editAction }: FormComponentProps<T>) => {
-  const schema = computeFormSchema(editAction);
-  const { form } = useForm<T>({
-    defaultValue: data,
-    schema,
-  });
-
-  const { isValid, validate, getFormData } = form;
-
-  useEffect(() => {
-    const updatedFormState = { isValid, getData: getFormData, validate };
-
-    // Forward the state to the parent
-    onChange(updatedFormState);
-  }, [onChange, isValid, getFormData, validate]);
-
-  return (
-    <Form form={form}>
-      {isIndexPatternsEditAction(editAction) ? (
-        <IndexPatternsForm editAction={editAction} form={form} />
-      ) : isTagsEditAction(editAction) ? (
-        <TagsForm editAction={editAction} form={form} />
-      ) : null}
-    </Form>
-  );
-};
-
-interface FormState<T> {
-  isValid: boolean | undefined;
-  getData(): T;
-  validate(): Promise<boolean>;
-}
+import { initialState, FormState } from './forms/use_parent_state_form';
 
 interface Props {
   onClose: () => void;
-  onConfirm: (formState: IndexPatternForm) => void;
+  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
   editAction: BulkActionEditType;
+  rulesCount: number;
 }
 
-const flyoutTitleMap: Record<BulkActionEditType, string> = {
-  [BulkActionEditType.add_index_patterns]: 'Add index patterns',
-  [BulkActionEditType.delete_index_patterns]: 'Delete index patterns',
-  [BulkActionEditType.add_tags]: 'Add tags',
-  [BulkActionEditType.delete_tags]: 'Delete tags',
-};
-
-const prepareConfirmData = (editAction: BulkActionEditType, formData: FormData) => {
-  if (isIndexPatternsEditAction(editAction)) {
-    const bulkActionEditType = formData.overwrite
-      ? BulkActionEditType.set_index_patterns
-      : editAction;
-    return { value: formData.index, type: bulkActionEditType };
-  }
-
-  if (isTagsEditAction(editAction)) {
-    const bulkActionEditType = formData.overwrite ? BulkActionEditType.set_tags : editAction;
-    return { value: formData.tags, type: bulkActionEditType };
-  }
-};
-
-const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction }: Props) => {
-  const initialFormData = useMemo(() => {
-    if (isIndexPatternsEditAction(editAction)) {
-      return { index: [], overwrite: false };
-    }
-    if (isTagsEditAction(editAction)) {
-      return { tags: [], overwrite: false };
-    }
-  }, [editAction]);
-
-  const initialState = {
-    isValid: undefined,
-    getData: () => ({}),
-    validate: async () => true,
-  } as FormState<typeof initialFormData>;
-
-  const [formState, setFormState] = useState<FormState<typeof initialFormData>>(initialState);
+const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }: Props) => {
+  const [formState, setFormState] = useState<FormState>(initialState);
 
   const handleSave = async () => {
     const isValid = await formState.validate();
     if (isValid) {
-      onConfirm(prepareConfirmData(editAction, formState.getData()));
+      onConfirm(formState.getEditActionPayload());
     }
   };
 
   const sendForm = useCallback(
-    async (updatedFormState: FormState<typeof initialFormData>) => {
+    async (updatedFormState: FormState) => {
       setFormState(updatedFormState);
     },
     [setFormState]
@@ -165,17 +56,33 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction }: Props) => {
 
   const flyoutTitleId = 'Bulk edit flyout';
 
+  const formSwitch = useMemo(() => {
+    switch (editAction) {
+      case BulkActionEditType.add_index_patterns:
+      case BulkActionEditType.delete_index_patterns:
+      case BulkActionEditType.set_index_patterns:
+        return (
+          <IndexPatternsForm onChange={sendForm} editAction={editAction} rulesCount={rulesCount} />
+        );
+
+      case BulkActionEditType.add_tags:
+      case BulkActionEditType.delete_tags:
+      case BulkActionEditType.set_tags:
+        return <TagsForm onChange={sendForm} editAction={editAction} rulesCount={rulesCount} />;
+
+      default:
+        return null;
+    }
+  }, [sendForm, editAction, rulesCount]);
+
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutTitleId} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{flyoutTitleMap[editAction] ?? null}</h2>
+          <h2 id={flyoutTitleId}>{formState.formTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <FormComponent onChange={sendForm} data={initialFormData} editAction={editAction} />
-      </EuiFlyoutBody>
-
+      <EuiFlyoutBody>{formSwitch}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

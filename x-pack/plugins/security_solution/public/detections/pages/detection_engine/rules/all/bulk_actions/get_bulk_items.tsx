@@ -56,7 +56,7 @@ interface GetBatchItems {
   filterOptions: FilterOptions;
   confirmDeletion: () => Promise<boolean>;
   confirmBulkEdit: () => Promise<boolean>;
-  performBulkEdit: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
+  completeBulkEditForm: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
   fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   selectedItemsCount: number;
 }

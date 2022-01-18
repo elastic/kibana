@@ -47,7 +47,10 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
+import {
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  RULES_TABLE_PAGE_SIZE_OPTIONS,
+} from '../../../../../../common/constants';
 import { AllRulesTabs } from '.';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -273,7 +276,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
         totalItemCount: pagination.total,
-        pageSizeOptions: [5, 10, 20, 50, 100],
+        pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
       }),
       [pagination]
     );
@@ -574,6 +577,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         )}
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
+            rulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}

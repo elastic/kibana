@@ -10,14 +10,14 @@ import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import * as i18n from '../../../translations';
 
 import {
-  BulkAction,
   BulkActionEditType,
+  BulkActionEditPayloadTags,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
+  Form,
   Field,
   getUseField,
-  FormHook,
   useFormData,
   ERROR_CODE,
   FIELD_TYPES,
@@ -26,14 +26,16 @@ import {
   ValidationFunc,
 } from '../../../../../../../shared_imports';
 
+import { useParentStateForm, FormState } from './use_parent_state_form';
+
 const CommonUseField = getUseField({ component: Field });
 
-interface TagsFormSchema {
+interface TagsFormData {
   tags: string[];
   overwrite: boolean;
 }
 
-export const schema: FormSchema<TagsFormSchema> = {
+export const schema: FormSchema<TagsFormData> = {
   tags: {
     fieldsToValidateOnChange: ['tags'],
     type: FIELD_TYPES.COMBO_BOX,
@@ -55,28 +57,47 @@ export const schema: FormSchema<TagsFormSchema> = {
   },
 };
 
+const initialFormData: TagsFormData = { tags: [], overwrite: false };
+
+const getFormConfig = (editAction: BulkActionEditType) =>
+  editAction === BulkActionEditType.add_index_patterns
+    ? {
+        tagsLabel: 'Add tags for selected rules',
+        formTitle: 'Add tags',
+      }
+    : {
+        tagsLabel: 'Delete tags for selected rules',
+        formTitle: 'Delete tags',
+      };
+
 interface Props {
   editAction: BulkActionEditType;
-  form: FormHook;
+  onChange: (form: FormState) => void;
+  rulesCount: number;
 }
+const TagsFormComponent = ({ editAction, onChange, rulesCount }: Props) => {
+  const formConfig = getFormConfig(editAction);
 
-const TagsFormComponent = ({ editAction, form }: Props) => {
+  const { form } = useParentStateForm({
+    data: initialFormData,
+    schema,
+    onChange,
+    config: {
+      formTitle: formConfig.formTitle,
+      prepareEditActionPayload: (formData: TagsFormData) =>
+        ({
+          value: formData.tags,
+          type: formData.overwrite ? BulkActionEditType.set_tags : editAction,
+        } as BulkActionEditPayloadTags),
+    },
+  });
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
 
-  const tagsSchemaProps =
-    editAction === BulkActionEditType.add_tags
-      ? {
-          label: 'Add tags for selected rules',
-        }
-      : {
-          label: 'Delete tags for selected rules',
-        };
-
   return (
-    <>
+    <Form form={form}>
       <CommonUseField
         path="tags"
-        config={{ ...schema.tags, ...tagsSchemaProps }}
+        config={{ ...schema.tags, label: formConfig.tagsLabel }}
         componentProps={{
           idAria: 'detectionEngineBulkEditTags',
           'data-test-subj': 'detectionEngineBulkEditTags',
@@ -88,7 +109,6 @@ const TagsFormComponent = ({ editAction, form }: Props) => {
       {editAction === BulkActionEditType.add_tags ? (
         <CommonUseField
           path="overwrite"
-          config={schema.overwrite}
           componentProps={{
             idAria: 'detectionEngineBulkEditOverwriteTags',
             'data-test-subj': 'detectionEngineBulkEditOverwriteTags',
@@ -98,13 +118,12 @@ const TagsFormComponent = ({ editAction, form }: Props) => {
       {overwrite && (
         <EuiFormRow>
           <EuiCallOut color="warning">
-            <p>
-              You’re about to overwrite tags for [1] selected rules, press Save to apply changes.
-            </p>
+            You’re about to overwrite tags for {rulesCount} selected rules, press Save to apply
+            changes.
           </EuiCallOut>
         </EuiFormRow>
       )}
-    </>
+    </Form>
   );
 };
 
