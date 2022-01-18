@@ -306,18 +306,10 @@ function toQuery(
  * Exported only for unit tests.
  */
 export function existingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
-  const missingFields = new Set(allFields.map((f) => f.name));
-
-  for (const filteredField of filteredFields) {
-    if (missingFields.size === 0) {
-      break;
-    }
-
-    missingFields.delete(filteredField.name);
-  }
+  const filteredFieldsSet = new Set(filteredFields.map((f) => f.name));
 
   return allFields
-    .filter((field) => field.isScript || field.runtimeField || !missingFields.has(field.name))
+    .filter((field) => field.isScript || field.runtimeField || filteredFieldsSet.has(field.name))
     .map((f) => f.name);
 }
 
