@@ -762,6 +762,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                             defaultMessage: 'Delete ECS mapping row',
                           }
                         )}
+                        id={`${defaultValue?.key}-trash`}
                         iconType="trash"
                         color="danger"
                         onClick={handleDeleteClick}
@@ -1103,7 +1104,7 @@ export const ECSMappingEditorField = React.memo(
         {Object.entries(value).map(([ecsKey, ecsValue]) => (
           <ECSMappingEditorForm
             // eslint-disable-next-line
-          ref={(formRef) => {
+            ref={(formRef) => {
               if (formRef) {
                 formRefs.current[ecsKey] = formRef;
               }
@@ -1123,7 +1124,7 @@ export const ECSMappingEditorField = React.memo(
         {!euiFieldProps?.isDisabled && (
           <ECSMappingEditorForm
             // eslint-disable-next-line
-          ref={(formRef) => {
+            ref={(formRef) => {
               if (formRef) {
                 formRefs.current.new = formRef;
               }

@@ -12,7 +12,7 @@
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -29,7 +29,7 @@
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -46,7 +46,7 @@
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -64,7 +64,7 @@
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -81,7 +81,7 @@
       "type": "config",
       "updated_at": "2017-09-21T18:49:16.302Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -104,7 +104,7 @@
         "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
       }
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -137,7 +137,7 @@
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -156,7 +156,7 @@
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -174,7 +174,7 @@
       "type": "config",
       "updated_at": "2017-09-21T18:49:16.302Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -198,7 +198,7 @@
         "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
       }
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -232,7 +232,7 @@
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -251,7 +251,7 @@
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -269,7 +269,7 @@
       "type": "config",
       "updated_at": "2017-09-21T18:49:16.302Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -293,7 +293,7 @@
         "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
       }
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -327,7 +327,7 @@
       "type": "dashboard",
       "updated_at": "2017-09-21T18:57:40.826Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -343,7 +343,7 @@
       "type": "globaltype",
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -360,7 +360,7 @@
       "namespaces": ["*"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -377,7 +377,7 @@
       "namespaces": ["default", "space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -394,7 +394,7 @@
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -411,7 +411,7 @@
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -428,7 +428,7 @@
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -446,7 +446,7 @@
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -464,7 +464,7 @@
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -481,7 +481,7 @@
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -499,7 +499,7 @@
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -635,7 +635,7 @@
       "namespaces": ["default"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -652,6 +652,6 @@
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }

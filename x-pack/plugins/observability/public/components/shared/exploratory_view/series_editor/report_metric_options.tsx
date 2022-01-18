@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiToolTip,
   EuiPopover,
@@ -43,6 +43,10 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
       selectedMetricField: value,
     });
   };
+
+  const focusButton = useCallback((ref: HTMLButtonElement) => {
+    ref?.focus();
+  }, []);
 
   if (!series.dataType) {
     return null;
@@ -107,6 +111,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               fill
               size="s"
               isLoading={!indexPattern && loading}
+              buttonRef={focusButton}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>
