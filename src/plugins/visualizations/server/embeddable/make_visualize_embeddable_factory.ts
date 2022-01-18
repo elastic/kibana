@@ -117,6 +117,7 @@ export const makeVisualizeEmbeddableFactory =
     return {
       id: 'visualization',
       // TODO - embeddable factory migrations should accept a function that evaluates to a MigrationFunctionMap like we allow for saved object definitions.
+      // https://github.com/elastic/kibana/issues/123309
       migrations: mergeMigrationFunctionMaps(
         getEmbeddedVisualizationSearchSourceMigrations(getSearchSourceMigrations()),
         {

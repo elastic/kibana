@@ -82,7 +82,7 @@ export interface PersistableState<P extends SerializableRecord = SerializableRec
    * keyed by the Kibana version using semver, where the version indicates to
    * which version the state will be migrated to.
    */
-  migrations: MigrateFunctionsObject;
+  migrations: MigrateFunctionsObject | (() => MigrateFunctionsObject);
 }
 
 /**

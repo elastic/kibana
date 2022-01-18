@@ -34,6 +34,7 @@ export const makeLensEmbeddableFactory =
     return {
       id: DOC_TYPE,
       // TODO - embeddable factory migrations should accept a function that evaluates to a MigrationFunctionMap like we allow for saved object definitions.
+      // https://github.com/elastic/kibana/issues/123309
       migrations: mergeMigrationFunctionMaps(getLensFilterMigrations(getFilterMigrations()), {
         // This migration is run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
         '7.13.1': (state) => {
