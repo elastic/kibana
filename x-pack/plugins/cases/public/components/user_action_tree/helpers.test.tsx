@@ -249,121 +249,130 @@ describe('User action tree helpers', () => {
     });
   });
 
-  describe.each([
-    ['getRuleId', getRuleId],
-    ['getRuleName', getRuleName],
-  ])('%s', (name, funcToExec) => {
-    it('returns the first entry in the comment field', () => {
-      const comment = {
-        rule: {
-          id: ['1', '2'],
-          name: ['1', '2'],
-        },
-      } as unknown as CommentRequestAlertType;
+  describe('rule getters', () => {
+    describe.each([
+      ['getRuleId', getRuleId],
+      ['getRuleName', getRuleName],
+    ])('%s null checks', (name, funcToExec) => {
+      it('returns null if the comment field is an empty string', () => {
+        const comment = {
+          rule: {
+            id: '',
+            name: '',
+          },
+        } as unknown as CommentRequestAlertType;
 
-      expect(funcToExec(comment)).toEqual('1');
+        expect(funcToExec(comment)).toBeNull();
+      });
+
+      it('returns null if the comment field is an empty string in an array', () => {
+        const comment = {
+          rule: {
+            id: [''],
+            name: [''],
+          },
+        } as unknown as CommentRequestAlertType;
+
+        expect(funcToExec(comment)).toBeNull();
+      });
+
+      it('returns null if the comment does not have a rule field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+
+        expect(funcToExec(comment)).toBeNull();
+      });
+
+      it('returns null if the signals and alert field is an empty string', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '', name: '' } },
+          kibana: { alert: { rule: { uuid: '', name: '' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toBeNull();
+      });
     });
 
-    it('returns null if the comment field is an empty string', () => {
-      const comment = {
-        rule: {
-          id: '',
-          name: '',
-        },
-      } as unknown as CommentRequestAlertType;
+    describe.each([
+      ['getRuleId', getRuleId, '1'],
+      ['getRuleName', getRuleName, 'Rule name1'],
+    ])('%s', (name, funcToExec, expectedResult) => {
+      it('returns the first entry in the comment field', () => {
+        const comment = {
+          rule: {
+            id: ['1', '2'],
+            name: ['Rule name1', 'Rule name2'],
+          },
+        } as unknown as CommentRequestAlertType;
 
-      expect(funcToExec(comment)).toBeNull();
-    });
+        expect(funcToExec(comment)).toEqual(expectedResult);
+      });
 
-    it('returns null if the comment field is an empty string in an array', () => {
-      const comment = {
-        rule: {
-          id: [''],
-          name: [''],
-        },
-      } as unknown as CommentRequestAlertType;
+      it('returns signal field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = { signal: { rule: { id: '1', name: 'Rule name1' } } } as unknown as Ecs;
 
-      expect(funcToExec(comment)).toBeNull();
-    });
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
 
-    it('returns null if the comment does not have a rule field', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
+      it('returns kibana alert field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          kibana: { alert: { rule: { uuid: '1', name: 'Rule name1' } } },
+        } as unknown as Ecs;
 
-      expect(funcToExec(comment)).toBeNull();
-    });
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
 
-    it('returns signal field', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = { signal: { rule: { id: '1', name: '1' } } } as unknown as Ecs;
+      it('returns signal field even when kibana alert field is defined', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '1', name: 'Rule name1' } },
+          kibana: { alert: { rule: { uuid: 'rule id1', name: 'other rule name1' } } },
+        } as unknown as Ecs;
 
-      expect(funcToExec(comment, alert)).toEqual('1');
-    });
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
 
-    it('returns kibana alert field', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = { kibana: { alert: { rule: { uuid: '1', name: '1' } } } } as unknown as Ecs;
+      it('returns the first entry in the signals field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '1', name: 'Rule name1' } },
+          kibana: { alert: { rule: { uuid: 'rule id1', name: 'other rule name1' } } },
+        } as unknown as Ecs;
 
-      expect(funcToExec(comment, alert)).toEqual('1');
-    });
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
 
-    it('returns signal field even when kibana alert field is defined', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = {
-        signal: { rule: { id: 'signal', name: 'signal' } },
-        kibana: { alert: { rule: { uuid: '1', name: '1' } } },
-      } as unknown as Ecs;
+      it('returns the alert field if the signals field is an empty string', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '', name: '' } },
+          kibana: { alert: { rule: { uuid: '1', name: 'Rule name1' } } },
+        } as unknown as Ecs;
 
-      expect(funcToExec(comment, alert)).toEqual('signal');
-    });
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
 
-    it('returns the first entry in the signals field', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = {
-        signal: { rule: { id: ['signal1', 'signal2'], name: ['signal1', 'signal2'] } },
-        kibana: { alert: { rule: { uuid: '1', name: '1' } } },
-      } as unknown as Ecs;
+      it('returns the alert field if the signals field is an empty string in an array', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: [''], name: [''] } },
+          kibana: { alert: { rule: { uuid: '1', name: 'Rule name1' } } },
+        } as unknown as Ecs;
 
-      expect(funcToExec(comment, alert)).toEqual('signal1');
-    });
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
 
-    it('returns the alert field if the signals field is an empty string', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = {
-        signal: { rule: { id: '', name: '' } },
-        kibana: { alert: { rule: { uuid: '1', name: '1' } } },
-      } as unknown as Ecs;
+      it('returns the alert field first item if the signals field is an empty string in an array', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: [''], name: [''] } },
+          kibana: { alert: { rule: { uuid: ['1', '2'], name: ['Rule name1', 'Rule name2'] } } },
+        } as unknown as Ecs;
 
-      expect(funcToExec(comment, alert)).toEqual('1');
-    });
-
-    it('returns the alert field if the signals field is an empty string in an array', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = {
-        signal: { rule: { id: [''], name: [''] } },
-        kibana: { alert: { rule: { uuid: '1', name: '1' } } },
-      } as unknown as Ecs;
-
-      expect(funcToExec(comment, alert)).toEqual('1');
-    });
-
-    it('returns the alert field first item if the signals field is an empty string in an array', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = {
-        signal: { rule: { id: [''], name: [''] } },
-        kibana: { alert: { rule: { uuid: ['1', '2'], name: ['1', '2'] } } },
-      } as unknown as Ecs;
-
-      expect(funcToExec(comment, alert)).toEqual('1');
-    });
-
-    it('returns null if the signals and alert field is an empty string', () => {
-      const comment = {} as unknown as CommentRequestAlertType;
-      const alert = {
-        signal: { rule: { id: '', name: '' } },
-        kibana: { alert: { rule: { uuid: '', name: '' } } },
-      } as unknown as Ecs;
-
-      expect(funcToExec(comment, alert)).toBeNull();
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
     });
   });
 });
