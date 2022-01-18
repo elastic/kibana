@@ -28,14 +28,14 @@ export function CustomizablePalette({
   setPalette,
   dataBounds = getFallbackDataBounds(activePalette.params?.rangeType),
   showRangeTypeSelector = true,
-  allowEditMinMaxValues = true,
+  disableSwitchingContinuity = false,
 }: {
   palettes: PaletteRegistry;
   activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: DataBounds;
   showRangeTypeSelector?: boolean;
-  allowEditMinMaxValues?: boolean;
+  disableSwitchingContinuity?: boolean;
 }) {
   const idPrefix = useMemo(() => htmlIdGenerator()(), []);
   const colorRangesToShow = toColorRanges(
@@ -82,7 +82,7 @@ export function CustomizablePalette({
           setPalette={(newPalette) => {
             dispatch({
               type: 'changeColorPalette',
-              payload: { palette: newPalette, dataBounds, palettes, allowEditMinMaxValues },
+              payload: { palette: newPalette, dataBounds, palettes, disableSwitchingContinuity },
             });
           }}
           showCustomPalette
@@ -165,7 +165,7 @@ export function CustomizablePalette({
           value={{
             dataBounds,
             palettes,
-            allowEditMinMaxValues,
+            disableSwitchingContinuity,
           }}
         >
           <ColorRanges

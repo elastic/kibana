@@ -98,14 +98,16 @@ export function changeColorPalette(
   activePalette: PaletteConfigurationState['activePalette'],
   palettes: PaletteRegistry,
   dataBounds: DataBounds,
-  allowEditMinMaxValues: boolean
+  disableSwitchingContinuity: boolean
 ) {
   const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
   const newParams: CustomPaletteParams = {
     ...activePalette.params,
     name: newPalette.name,
     colorStops: undefined,
-    continuity: allowEditMinMaxValues ? DEFAULT_CONTINUITY : 'all',
+    continuity: disableSwitchingContinuity
+      ? activePalette.params?.continuity ?? DEFAULT_CONTINUITY
+      : DEFAULT_CONTINUITY,
     reverse: false, // restore the reverse flag
   };
 

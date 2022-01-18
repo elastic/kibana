@@ -33,7 +33,7 @@ export interface ChangeColorPalettePayload {
   palette: PaletteOutput<CustomPaletteParams>;
   palettes: PaletteRegistry;
   dataBounds: DataBounds;
-  allowEditMinMaxValues: boolean;
+  disableSwitchingContinuity: boolean;
 }
 
 export type PaletteConfigurationActions =

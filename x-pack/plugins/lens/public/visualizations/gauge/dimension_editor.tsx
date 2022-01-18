@@ -167,7 +167,7 @@ export function GaugeDimensionEditor(
                     palettes={props.paletteService}
                     activePalette={activePalette}
                     dataBounds={currentMinMax}
-                    allowEditMinMaxValues={false}
+                    disableSwitchingContinuity={true}
                     setPalette={(newPalette) => {
                       // if the new palette is not custom, replace the rangeMin with the artificial one
                       if (

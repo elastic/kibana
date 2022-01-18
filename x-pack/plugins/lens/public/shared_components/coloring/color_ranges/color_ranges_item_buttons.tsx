@@ -70,7 +70,7 @@ export function ColorRangeEditButton({
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
-  const { dataBounds, palettes, allowEditMinMaxValues } = useContext(ColorRangesContext);
+  const { dataBounds, palettes, disableSwitchingContinuity } = useContext(ColorRangesContext);
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
@@ -94,7 +94,7 @@ export function ColorRangeEditButton({
           defaultMessage: `For current configuration you can not set custom value`,
         }
       )}
-      condition={!Boolean(allowEditMinMaxValues)}
+      condition={Boolean(disableSwitchingContinuity)}
       position="top"
       delay="regular"
     >
@@ -102,7 +102,7 @@ export function ColorRangeEditButton({
         iconType="pencil"
         aria-label={title}
         title={title}
-        disabled={!allowEditMinMaxValues}
+        disabled={disableSwitchingContinuity}
         onClick={onExecuteAction}
         data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
       />
