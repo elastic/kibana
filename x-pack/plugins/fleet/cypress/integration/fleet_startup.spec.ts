@@ -6,14 +6,11 @@
  */
 
 import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import { CONFIRM_MODAL_BTN } from '../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
-  beforeEach(() => {
-    navigateTo(FLEET);
-  });
-
   function navigateToTab(tab: string) {
     cy.getBySel(tab).click();
     cy.get('.euiBasicTable-loading').should('not.exist');
@@ -53,6 +50,7 @@ describe('Fleet startup', () => {
   // skipping Fleet Server enroll, to enable, comment out runner.ts line 23
   describe.skip('Fleet Server', () => {
     it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
+      navigateTo(FLEET);
       cy.get('.euiBadge').contains('Healthy');
 
       verifyPolicy('Fleet Server policy', ['Fleet Server']);
@@ -69,7 +67,9 @@ describe('Fleet startup', () => {
       cleanupAgentPolicies();
     });
 
-    before(() => {});
+    beforeEach(() => {
+      navigateTo(FLEET);
+    });
 
     it('should have no agent policy by default', () => {
       cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
@@ -123,6 +123,77 @@ describe('Fleet startup', () => {
       cy.getBySel('fleetServerAddHostBtn').click();
       cy.getBySel('fleetServerGenerateServiceTokenBtn').click();
       cy.get('.euiCodeBlock__code').contains('--fleet-server-policy=fleet-server-policy');
+    });
+  });
+
+  describe('Edit settings', () => {
+    beforeEach(() => {
+      cy.intercept('/api/fleet/settings', {
+        item: { id: 'fleet-default-settings', fleet_server_hosts: [] },
+      });
+      cy.intercept('/api/fleet/outputs', {
+        items: [
+          {
+            id: 'fleet-default-output',
+            name: 'default',
+            type: 'elasticsearch',
+            is_default: true,
+            is_default_monitoring: true,
+          },
+        ],
+      });
+
+      cy.visit('/app/fleet/settings');
+      cy.getBySel('toastCloseButton').click();
+    });
+
+    it('should update hosts', () => {
+      cy.getBySel('editHostsBtn').click();
+      cy.get('[placeholder="Specify host URL"').type('http://localhost:8220');
+
+      cy.intercept('/api/fleet/settings', {
+        item: { id: 'fleet-default-settings', fleet_server_hosts: ['http://localhost:8220'] },
+      });
+      cy.intercept('PUT', '/api/fleet/settings', {
+        fleet_server_hosts: ['http://localhost:8220'],
+      }).as('updateSettings');
+
+      cy.getBySel('saveApplySettingsBtn').click();
+      cy.getBySel(CONFIRM_MODAL_BTN).click();
+
+      cy.wait('@updateSettings').then((interception) => {
+        expect(interception.request.body.fleet_server_hosts[0]).to.equal('http://localhost:8220');
+      });
+    });
+
+    it('should update outputs', () => {
+      cy.getBySel('editOutputBtn').click();
+      cy.get('[placeholder="Specify name"').clear().type('output-1');
+
+      cy.intercept('/api/fleet/outputs', {
+        items: [
+          {
+            id: 'fleet-default-output',
+            name: 'output-1',
+            type: 'elasticsearch',
+            is_default: true,
+            is_default_monitoring: true,
+          },
+        ],
+      });
+      cy.intercept('PUT', '/api/fleet/outputs/fleet-default-output', {
+        name: 'output-1',
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+      }).as('updateOutputs');
+
+      cy.getBySel('saveApplySettingsBtn').click();
+      cy.getBySel(CONFIRM_MODAL_BTN).click();
+
+      cy.wait('@updateOutputs').then((interception) => {
+        expect(interception.request.body.name).to.equal('output-1');
+      });
     });
   });
 });

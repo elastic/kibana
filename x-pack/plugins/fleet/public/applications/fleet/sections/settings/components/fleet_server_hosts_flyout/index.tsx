@@ -93,6 +93,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               isLoading={form.isLoading}
               isDisabled={form.isDisabled}
               onClick={form.submit}
+              data-test-subj="saveApplySettingsBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.saveButton"
