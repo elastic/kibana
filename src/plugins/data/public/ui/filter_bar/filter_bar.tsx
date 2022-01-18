@@ -16,7 +16,7 @@ import {
   // disableFilter,
   // pinFilter,
   // toggleFilterDisabled,
-  // toggleFilterNegated,
+  toggleFilterNegated,
   // unpinFilter,
 } from '@kbn/es-query';
 import classNames from 'classnames';
@@ -108,6 +108,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           indexPatterns={props?.indexPatterns}
           onClick={() => {}}
           onRemove={onRemoveFilterGroup}
+          onUpdate={onUpdateFilterGroup}
+          filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
         />
       );
       GroupBadge.push(badge);
@@ -199,6 +201,32 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     });
     onFiltersUpdated(updatedFilters);
     props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
+    groupRef.current?.focus();
+  }
+
+  function onUpdateFilterGroup(
+    updatedMultipleFilters: Filter[],
+    groupId: string,
+    toggleNegate = false
+  ) {
+    const multipleFilters = [...props.multipleFilters];
+    const notAffectedFilters = multipleFilters.filter(
+      (filter) => filter.groupId !== Number(groupId)
+    );
+    const finalMultipleFilters = [...notAffectedFilters, ...updatedMultipleFilters];
+    props?.onMultipleFiltersUpdated?.(finalMultipleFilters);
+    const filters = [...props.filters];
+    const toggleNegatedFilters = toggleNegate ? filters?.map(toggleFilterNegated) : filters;
+    const updatedFilters: Filter[] = [];
+
+    finalMultipleFilters.forEach((filter) => {
+      toggleNegatedFilters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+    onFiltersUpdated(updatedFilters);
     groupRef.current?.focus();
   }
 

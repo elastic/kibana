@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiFlexItem, useInnerText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexItem,
+  useInnerText,
+  EuiTextColor,
+  EuiPopover,
+  EuiContextMenu,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
-import React, { FC } from 'react';
-import type { Filter } from '@kbn/es-query';
+import React, { FC, useState } from 'react';
+import { Filter, toggleFilterDisabled } from '@kbn/es-query';
 import { FILTERS } from '../../../common';
 import { existsOperator, isOneOfOperator } from './filter_editor/lib/filter_operators';
 import { IIndexPattern } from '../..';
@@ -37,6 +44,8 @@ interface Props {
   onClick: (filter: Filter) => void;
   onRemove: (groupId: string) => void;
   groupId: string;
+  filtersGroupsCount: number;
+  onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -45,7 +54,125 @@ export const FilterExpressionItem: FC<Props> = ({
   onClick,
   onRemove,
   groupId,
+  filtersGroupsCount,
+  onUpdate,
 }: Props) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  function handleBadgeClick() {
+    // if (e.shiftKey) {
+    //   onToggleDisabled();
+    // } else {
+    //   setIsPopoverOpen(!isPopoverOpen);
+    // }
+    setIsPopoverOpen(!isPopoverOpen);
+  }
+
+  function onDuplicate() {
+    const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
+      return { ...filter, groupId: filtersGroupsCount + 1 };
+    });
+    const finalFilters = [...multipleUpdatedFilters, ...groupedFilters];
+    onUpdate?.(finalFilters, groupId, false);
+  }
+
+  function onToggleNegated() {
+    const isNegated = groupedFilters[0].groupNegated;
+    const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
+      return { ...filter, groupNegated: !isNegated };
+    });
+
+    onUpdate?.(multipleUpdatedFilters, groupId, true);
+  }
+
+  function onToggleDisabled() {
+    const multipleUpdatedFilters = groupedFilters?.map(toggleFilterDisabled);
+    onUpdate?.(multipleUpdatedFilters, groupId, true);
+  }
+
+  function getPanels() {
+    const mainPanelItems = [
+      {
+        name: i18n.translate('data.filter.filterBar.editFilterButtonLabel', {
+          defaultMessage: `Edit`,
+        }),
+        icon: 'pencil',
+        panel: 1,
+        'data-test-subj': 'editFilter',
+      },
+      {
+        name: i18n.translate('data.filter.filterBar.invertFilterButtonLabel', {
+          defaultMessage: `Invert`,
+        }),
+        icon: 'invert',
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onToggleNegated();
+        },
+        'data-test-subj': 'negateFilter',
+      },
+      {
+        name: i18n.translate('data.filter.filterBar.duplicateFilterButtonLabel', {
+          defaultMessage: `Duplicate`,
+        }),
+        icon: 'copy',
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onDuplicate();
+        },
+        'data-test-subj': 'negateFilter',
+      },
+      {
+        name: groupedFilters[0].meta.disabled
+          ? i18n.translate('data.filter.filterBar.enableFilterButtonLabel', {
+              defaultMessage: `Re-enable`,
+            })
+          : i18n.translate('data.filter.filterBar.disableFilterButtonLabel', {
+              defaultMessage: `Temporarily disable`,
+            }),
+        icon: `${groupedFilters[0].meta.disabled ? 'eye' : 'eyeClosed'}`,
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onToggleDisabled();
+        },
+        'data-test-subj': 'disableFilter',
+      },
+      {
+        name: i18n.translate('data.filter.filterBar.deleteFilterButtonLabel', {
+          defaultMessage: `Remove`,
+        }),
+        icon: 'trash',
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onRemove(groupId);
+        },
+        'data-test-subj': 'deleteFilter',
+      },
+    ];
+
+    return [
+      {
+        id: 0,
+        items: mainPanelItems,
+      },
+      // {
+      //   id: 1,
+      //   width: FILTER_EDITOR_WIDTH,
+      //   content: (
+      //     <div>
+      //       <FilterEditor
+      //         filter={filter}
+      //         indexPatterns={indexPatterns}
+      //         onSubmit={onSubmit}
+      //         onCancel={() => {
+      //           setIsPopoverOpen(false);
+      //         }}
+      //         timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+      //       />
+      //     </div>
+      //   ),
+      // },
+    ];
+  }
   /**
    * Checks if filter field exists in any of the index patterns provided,
    * Because if so, a filter for the wrong index pattern may still be applied.
@@ -253,7 +380,7 @@ export const FilterExpressionItem: FC<Props> = ({
   }
 
   const badge = (
-    <EuiFlexItem key={groupId} grow={false} className="globalFilterBar__flexItem">
+    <EuiFlexItem key={groupId} className="globalFilterExpression__flexItem">
       <EuiBadge
         title={filterText}
         color="hollow"
@@ -273,21 +400,31 @@ export const FilterExpressionItem: FC<Props> = ({
           defaultMessage: 'Remove {title}',
           values: { title: filterText },
         })}
-        // onClickAriaLabel={i18n.translate('data.filter.filterBar.savedQueryBadgeAriaLabel', {
-        //   defaultMessage: 'Selected saved objects actions',
-        // })}
-        // onClick={() => onClick(savedQuery)}
+        onClickAriaLabel={i18n.translate('data.filter.filterBar.filteradgeClickIconAriaLabel', {
+          defaultMessage: 'Filter actions',
+        })}
+        onClick={handleBadgeClick}
       >
         <div ref={ref}>
-          {/* {filterExpression.length > 1 && <EuiTextColor>(</EuiTextColor>} */}
           {filterExpression.map((expression) => {
             return <>{expression}</>;
           })}
-          {/* {filterExpression.length > 1 && <EuiTextColor>)</EuiTextColor>} */}
         </div>
       </EuiBadge>
     </EuiFlexItem>
   );
 
-  return badge;
+  return (
+    <EuiPopover
+      id={`popoverFor_filter${groupId}`}
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
+      button={badge}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+    </EuiPopover>
+  );
 };
