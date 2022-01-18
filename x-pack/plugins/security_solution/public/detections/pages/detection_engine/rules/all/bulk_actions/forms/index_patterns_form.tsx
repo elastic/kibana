@@ -109,8 +109,8 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onChange }: Props)
         path="index"
         config={{ ...schema.index, label: formConfig.indexLabel }}
         componentProps={{
-          idAria: 'detectionEngineBulkEditIndices',
-          'data-test-subj': 'detectionEngineBulkEditIndices',
+          idAria: 'detectionEngineBulkEditIndexPatterns',
+          'data-test-subj': 'detectionEngineBulkEditIndexPatterns',
           euiFieldProps: {
             fullWidth: true,
             placeholder: '',
@@ -123,8 +123,8 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onChange }: Props)
         <CommonUseField
           path="overwrite"
           componentProps={{
-            idAria: 'detectionEngineBulkEditOverwriteIndices',
-            'data-test-subj': 'detectionEngineBulkEditOverwriteIndices',
+            idAria: 'detectionEngineBulkEditOverwriteIndexPatterns',
+            'data-test-subj': 'detectionEngineBulkEditOverwriteIndexPatterns',
           }}
         />
       )}

@@ -200,7 +200,7 @@ export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
 );
 
 export const BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsHelpText',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
       'Select the default index pattern of Elasticsearch indices from the dropdown where you would like update rules to run. You can also add custom index patterns and hit Enter in this form field.',
@@ -208,14 +208,14 @@ export const BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
 );
 
 export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsIndexComboboxLabel',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxLabel',
   {
     defaultMessage: 'Add index patterns for selected rules',
   }
 );
 
 export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_REQUIRED_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsIndexRequiredErrorMessage',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.indexPatternsRequiredErrorMessage',
   {
     defaultMessage: 'A minimum of one index pattern is required.',
   }
@@ -236,7 +236,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.tra
 );
 
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsIndexComboboxLabel',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxLabel',
   {
     defaultMessage: 'Delete index patterns for selected rules',
   }
@@ -246,6 +246,56 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsTitle',
   {
     defaultMessage: 'Delete index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.tagsComboboxHelpText',
+  {
+    defaultMessage:
+      'Add one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxLabel',
+  {
+    defaultMessage: 'Add tags for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_TAGS_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.tagsComoboxRequiredErrorMessage',
+  {
+    defaultMessage: 'A minimum of one tag is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsTitle',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Overwrite all selected rules tags',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsComboboxLabel',
+  {
+    defaultMessage: 'Delete tags for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsTitle',
+  {
+    defaultMessage: 'Delete tags',
   }
 );
 

@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import * as i18n from '../../../translations';
 
 import {
@@ -39,21 +41,22 @@ export const schema: FormSchema<TagsFormData> = {
   tags: {
     fieldsToValidateOnChange: ['tags'],
     type: FIELD_TYPES.COMBO_BOX,
-    helpText:
-      'Add one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+    helpText: i18n.BULK_EDIT_FLYOUT_FORM_TAGS_HELP_TEXT,
     validations: [
       {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          return fieldValidators.emptyField('A minimum of one tag is required.')(...args);
+          return fieldValidators.emptyField(i18n.BULK_EDIT_FLYOUT_FORM_TAGS_REQUIRED_ERROR)(
+            ...args
+          );
         },
       },
     ],
   },
   overwrite: {
     type: FIELD_TYPES.CHECKBOX,
-    label: 'Overwrite all selected rules tags',
+    label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_OVERWRITE_LABEL,
   },
 };
 
@@ -62,12 +65,12 @@ const initialFormData: TagsFormData = { tags: [], overwrite: false };
 const getFormConfig = (editAction: BulkActionEditType) =>
   editAction === BulkActionEditType.add_index_patterns
     ? {
-        tagsLabel: 'Add tags for selected rules',
-        formTitle: 'Add tags',
+        tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL,
+        formTitle: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE,
       }
     : {
-        tagsLabel: 'Delete tags for selected rules',
-        formTitle: 'Delete tags',
+        tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_LABEL,
+        formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE,
       };
 
 interface Props {
@@ -103,6 +106,7 @@ const TagsFormComponent = ({ editAction, onChange, rulesCount }: Props) => {
           'data-test-subj': 'detectionEngineBulkEditTags',
           euiFieldProps: {
             fullWidth: true,
+            placeholder: '',
           },
         }}
       />
@@ -118,8 +122,12 @@ const TagsFormComponent = ({ editAction, onChange, rulesCount }: Props) => {
       {overwrite && (
         <EuiFormRow>
           <EuiCallOut color="warning">
-            You’re about to overwrite tags for {rulesCount} selected rules, press Save to apply
-            changes.
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setTagsWarningCallout"
+              defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
+              apply changes."
+              values={{ rulesCount }}
+            />
           </EuiCallOut>
         </EuiFormRow>
       )}
