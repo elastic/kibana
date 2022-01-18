@@ -17,6 +17,7 @@ import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
+  getExecutionTimeoutsPerDayCount,
 } from './alerting_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
@@ -92,29 +93,40 @@ export function telemetryTaskRunner(
           getTotalCountAggregations(esClient, kibanaIndex),
           getTotalCountInUse(esClient, kibanaIndex),
           getExecutionsPerDayCount(esClient, eventLogIndex),
+          getExecutionTimeoutsPerDayCount(esClient, eventLogIndex),
         ])
-          .then(([totalCountAggregations, totalInUse, totalExecutions]) => {
-            return {
-              state: {
-                runs: (state.runs || 0) + 1,
-                ...totalCountAggregations,
-                count_active_by_type: totalInUse.countByType,
-                count_active_total: totalInUse.countTotal,
-                count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
-                count_rules_namespaces: totalInUse.countNamespaces,
-                count_rules_executions_per_day: totalExecutions.countTotal,
-                count_rules_executions_by_type_per_day: totalExecutions.countByType,
-                count_rules_executions_failured_per_day: totalExecutions.countTotalFailures,
-                count_rules_executions_failured_by_reason_per_day:
-                  totalExecutions.countFailuresByReason,
-                count_rules_executions_failured_by_reason_by_type_per_day:
-                  totalExecutions.countFailuresByReasonByType,
-                avg_execution_time_per_day: totalExecutions.avgExecutionTime,
-                avg_execution_time_by_type_per_day: totalExecutions.avgExecutionTimeByType,
-              },
-              runAt: getNextMidnight(),
-            };
-          })
+          .then(
+            ([
+              totalCountAggregations,
+              totalInUse,
+              dailyExecutionCounts,
+              dailyExecutionTimeoutCounts,
+            ]) => {
+              return {
+                state: {
+                  runs: (state.runs || 0) + 1,
+                  ...totalCountAggregations,
+                  count_active_by_type: totalInUse.countByType,
+                  count_active_total: totalInUse.countTotal,
+                  count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                  count_rules_namespaces: totalInUse.countNamespaces,
+                  count_rules_executions_per_day: dailyExecutionCounts.countTotal,
+                  count_rules_executions_by_type_per_day: dailyExecutionCounts.countByType,
+                  count_rules_executions_failured_per_day: dailyExecutionCounts.countTotalFailures,
+                  count_rules_executions_failured_by_reason_per_day:
+                    dailyExecutionCounts.countFailuresByReason,
+                  count_rules_executions_failured_by_reason_by_type_per_day:
+                    dailyExecutionCounts.countFailuresByReasonByType,
+                  count_rules_executions_timeouts_per_day: dailyExecutionTimeoutCounts.countTotal,
+                  count_rules_executions_timeouts_by_type_per_day:
+                    dailyExecutionTimeoutCounts.countByType,
+                  avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
+                  avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
+                },
+                runAt: getNextMidnight(),
+              };
+            }
+          )
           .catch((errMsg) => {
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
@@ -128,5 +140,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }

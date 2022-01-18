@@ -127,6 +127,8 @@ export function createAlertingUsageCollector(
           count_rules_executions_failured_per_day: 0,
           count_rules_executions_failured_by_reason_per_day: {},
           count_rules_executions_failured_by_reason_by_type_per_day: {},
+          count_rules_executions_timeouts_per_day: 0,
+          count_rules_executions_timeouts_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
         };
@@ -169,6 +171,8 @@ export function createAlertingUsageCollector(
       count_rules_executions_failured_per_day: { type: 'long' },
       count_rules_executions_failured_by_reason_per_day: byReasonSchema,
       count_rules_executions_failured_by_reason_by_type_per_day: byReasonSchemaByType,
+      count_rules_executions_timeouts_per_day: { type: 'long' },
+      count_rules_executions_timeouts_by_type_per_day: byTypeSchema,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
     },

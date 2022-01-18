@@ -17,6 +17,8 @@ export interface AlertingUsage {
   count_rules_executions_failured_per_day: number;
   count_rules_executions_failured_by_reason_per_day: Record<string, number>;
   count_rules_executions_failured_by_reason_by_type_per_day: Record<string, Record<string, number>>;
+  count_rules_executions_timeouts_per_day: number;
+  count_rules_executions_timeouts_by_type_per_day: Record<string, number>;
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
   throttle_time: {
