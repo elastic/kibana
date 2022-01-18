@@ -11,12 +11,12 @@ import { Readable } from 'stream';
 
 import {
   errors,
-  type Client,
-  type ConnectionRequestParams,
-  type TransportRequestOptions,
-  type TransportRequestParams,
-  type DiagnosticResult,
-  type RequestBody,
+  Client,
+  ConnectionRequestParams,
+  TransportRequestOptions,
+  TransportRequestParams,
+  DiagnosticResult,
+  RequestBody,
 } from '@elastic/elasticsearch';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
