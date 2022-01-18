@@ -23,17 +23,7 @@ import {
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
 
 const getAllMigrations = (): MigrateFunctionsObject => {
-  const searchSourceMigrations = {
-    '8.1.0': (state: SerializedSearchSourceFields) => {
-      return {
-        ...state,
-        query: {
-          language: 'kuery',
-          query: 'NOT extension.keyword: css',
-        },
-      };
-    },
-  };
+  const searchSourceMigrations = {};
 
   // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
   // them the correct input and that we correctly map the response
