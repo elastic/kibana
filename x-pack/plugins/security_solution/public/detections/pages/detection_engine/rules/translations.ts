@@ -224,24 +224,6 @@ export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
     }
   );
 
-export const BULK_EDIT_REJECT_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditReject',
-  {
-    defaultMessage:
-      'Elastic rules are not modifiable. The update action will only be applied to Custom rules.',
-  }
-);
-
-export const BULK_EDIT_CONFIRMATION_BODY = (elasticRulesCount: number, customRulesCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationBody',
-    {
-      values: { elasticRulesCount, customRulesCount },
-      defaultMessage:
-        'You are about to edit {elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}}, the update action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you’ve selected.',
-    }
-  );
-
 export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButtonLabel',
   {

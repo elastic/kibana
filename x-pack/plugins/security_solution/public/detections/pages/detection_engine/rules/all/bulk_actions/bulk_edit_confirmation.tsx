@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import * as i18n from '../../translations';
 
 interface Props {
@@ -37,7 +39,10 @@ const BulkEditConfirmationComponent = ({
         defaultFocusedButton="confirm"
         data-test-subj="bulkEditRejectModal"
       >
-        <p>{i18n.BULK_EDIT_REJECT_BODY}</p>
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditRejectionDescription"
+          defaultMessage="Elastic rules are not modifiable. The update action will only be applied to Custom rules."
+        />
       </EuiConfirmModal>
     );
   }
@@ -52,7 +57,11 @@ const BulkEditConfirmationComponent = ({
       defaultFocusedButton="confirm"
       data-test-subj="bulkEditConfirmationModal"
     >
-      <p>{i18n.BULK_EDIT_CONFIRMATION_BODY(elasticRulesCount, customRulesCount)}</p>
+      <FormattedMessage
+        id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDescription"
+        defaultMessage="You are about to edit {elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}}, the update action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you’ve selected."
+        values={{ elasticRulesCount, customRulesCount }}
+      />
     </EuiConfirmModal>
   );
 };
