@@ -8,20 +8,14 @@
 
 import { getRequestId } from './get_request_id';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-}));
-
 describe('getRequestId', () => {
   describe('when allowFromAnyIp is true', () => {
-    it('generates a UUID if no x-opaque-id header is present', () => {
+    it('returns undefined if no x-opaque-id header is present', () => {
       const request = {
         headers: {},
         raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
       } as any;
-      expect(getRequestId(request, { allowFromAnyIp: true, ipAllowlist: [] })).toEqual(
-        'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-      );
+      expect(getRequestId(request, { allowFromAnyIp: true, ipAllowlist: [] })).toBeUndefined();
     });
 
     it('uses x-opaque-id header value if present', () => {
@@ -39,14 +33,12 @@ describe('getRequestId', () => {
 
   describe('when allowFromAnyIp is false', () => {
     describe('and ipAllowlist is empty', () => {
-      it('generates a UUID even if x-opaque-id header is present', () => {
+      it('returns undefined even if x-opaque-id header is present', () => {
         const request = {
           headers: { 'x-opaque-id': 'id from header' },
           raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
         } as any;
-        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: [] })).toEqual(
-          'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-        );
+        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: [] })).toBeUndefined();
       });
     });
 
@@ -61,24 +53,24 @@ describe('getRequestId', () => {
         );
       });
 
-      it('generates a UUID if request comes from untrusted IP address', () => {
+      it('does not use x-opaque-id header if request comes from untrusted IP address', () => {
         const request = {
           headers: { 'x-opaque-id': 'id from header' },
           raw: { req: { socket: { remoteAddress: '5.5.5.5' } } },
         } as any;
-        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })).toEqual(
-          'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-        );
+        expect(
+          getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })
+        ).toBeUndefined();
       });
 
-      it('generates UUID if request comes from trusted IP address but no x-opaque-id header is present', () => {
+      it('returns undefined if request comes from trusted IP address but no x-opaque-id header is present', () => {
         const request = {
           headers: {},
           raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
         } as any;
-        expect(getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })).toEqual(
-          'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-        );
+        expect(
+          getRequestId(request, { allowFromAnyIp: false, ipAllowlist: ['1.1.1.1'] })
+        ).toBeUndefined();
       });
     });
   });

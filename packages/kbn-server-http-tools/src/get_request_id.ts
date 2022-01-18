@@ -7,16 +7,20 @@
  */
 
 import { Request } from '@hapi/hapi';
-import uuid from 'uuid';
 
+/**
+ * Return the requestId for this request from its `x-opaque-id` header,
+ * depending on the `server.requestId` configuration, or undefined
+ * if the value should not be used.
+ */
 export function getRequestId(
   request: Request,
   { allowFromAnyIp, ipAllowlist }: { allowFromAnyIp: boolean; ipAllowlist: string[] }
-): string {
+): string | undefined {
   const remoteAddress = request.raw.req.socket?.remoteAddress;
   return allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
     (remoteAddress && ipAllowlist.includes(remoteAddress))
-    ? request.headers['x-opaque-id'] ?? uuid.v4()
-    : uuid.v4();
+    ? request.headers['x-opaque-id']
+    : undefined;
 }

@@ -32,7 +32,7 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
  * @internal
  */
 export interface KibanaRequestState extends RequestApplicationState {
-  requestId: string;
+  requestId?: string;
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
@@ -127,21 +127,19 @@ export class KibanaRequest<
     const body = routeValidator.getBody(req.payload, 'request body');
     return { query, params, body };
   }
+
   /**
-   * A identifier to identify this request.
+   * The (optional) opaqueId of this request.
    *
-   * @remarks
-   * Depending on the user's configuration, this value may be sourced from the
-   * incoming request's `X-Opaque-Id` header which is not guaranteed to be unique
-   * per request.
+   * @remarks This value is sourced from the incoming request's `X-Opaque-Id` header
+   *          which is not guaranteed to be unique per request.
    */
-  public readonly id: string;
+  public readonly opaqueId?: string;
   /**
    * A UUID to identify this request.
    *
-   * @remarks
-   * This value is NOT sourced from the incoming request's `X-Opaque-Id` header. it
-   * is always a UUID uniquely identifying the request.
+   * @remarks This value is NOT sourced from the incoming request's `X-Opaque-Id` header.
+   *          it is always a UUID uniquely identifying the request.
    */
   public readonly uuid: string;
   /** a WHATWG URL standard object. */
@@ -186,11 +184,11 @@ export class KibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
-    // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
+    // The `opaqueId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
     // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
     const appState = request.app as KibanaRequestState | undefined;
-    this.id = appState?.requestId ?? uuid.v4();
+    this.opaqueId = appState?.requestId;
     this.uuid = appState?.requestUuid ?? uuid.v4();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
