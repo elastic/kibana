@@ -49,7 +49,6 @@ export async function getColdstartRate({
   start: number;
   end: number;
 }): Promise<{
-  noHits: boolean;
   transactionColdstartRate: Coordinate[];
   average: number | null;
 }> {
@@ -101,10 +100,8 @@ export async function getColdstartRate({
     params
   );
 
-  const noHits = resp.hits.total.value === 0;
-
   if (!resp.aggregations) {
-    return { noHits, transactionColdstartRate: [], average: null };
+    return { transactionColdstartRate: [], average: null };
   }
 
   const transactionColdstartRate = getTransactionColdstartRateTimeSeries(
@@ -115,7 +112,7 @@ export async function getColdstartRate({
     resp.aggregations.coldstartStates
   );
 
-  return { noHits, transactionColdstartRate, average };
+  return { transactionColdstartRate, average };
 }
 
 export async function getColdstartRatePeriods({
@@ -162,7 +159,7 @@ export async function getColdstartRatePeriods({
           start: comparisonStart,
           end: comparisonEnd,
         })
-      : { noHits: true, transactionColdstartRate: [], average: null };
+      : { transactionColdstartRate: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

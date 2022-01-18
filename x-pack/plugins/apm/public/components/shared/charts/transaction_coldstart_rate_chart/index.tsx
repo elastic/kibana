@@ -44,12 +44,10 @@ type ColdstartRate =
 
 const INITIAL_STATE: ColdstartRate = {
   currentPeriod: {
-    noHits: true,
     transactionColdstartRate: [],
     average: null,
   },
   previousPeriod: {
-    noHits: true,
     transactionColdstartRate: [],
     average: null,
   },
