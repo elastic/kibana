@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 
-import { IIndexPattern } from '../../../../../../../data/public';
+import { DataView } from '../../../../../../../data_views/public';
 import { IndexedFieldItem } from '../../types';
 
 // localized labels
@@ -174,7 +174,7 @@ const conflictType = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;

@@ -157,7 +157,7 @@ function getLensAttributes(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            indexRefName: 'filter-index-pattern-0',
+            index: 'filter-index-pattern-0',
             negate: false,
             alias: null,
             disabled: false,
@@ -180,7 +180,7 @@ function getLensAttributes(
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,
-                  indexRefName: 'filter-index-pattern-0',
+                  index: 'filter-index-pattern-0',
                   key: 'query',
                   negate: false,
                   type: 'custom',
@@ -391,13 +391,13 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   toggleErrors,
   expanded,
 }) => {
-  const { data: lastResultsData, isFetched } = usePackQueryLastResults({
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
     logsDataView,
   });
 
-  const { data: errorsData, isFetched: errorsFetched } = usePackQueryErrors({
+  const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
     actionId,
     interval,
     logsDataView,
@@ -408,7 +408,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     [queryId, interval, toggleErrors]
   );
 
-  if (!isFetched || !errorsFetched) {
+  if (isLoading || errorsLoading) {
     return <EuiLoadingSpinner />;
   }
 

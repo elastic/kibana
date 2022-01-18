@@ -185,7 +185,7 @@ There are two things you can do to if you'd like to ensure a field is searchable
 1. Index your additional data as {apm-guide-ref}/metadata.html[labels] instead.
 These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
 
-2. Use the {apm-guide-ref}/configuration-template.html[`append_fields`] feature. As an example,
+2. Use the `append_fields` feature. As an example,
 adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
 
 [source,yml]
