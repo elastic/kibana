@@ -69,6 +69,7 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
+  private actionInfo: ActionInfo | undefined;
 
   constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
@@ -126,14 +127,18 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-          await getActionsClientWithRequest(request, source),
-          encryptedSavedObjectsClient,
-          preconfiguredActions,
-          actionId,
-          namespace.namespace
-        );
+            await getActionsClientWithRequest(request, source),
+            encryptedSavedObjectsClient,
+            preconfiguredActions,
+            actionId,
+            namespace.namespace
+          );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
+
+        if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+          this.actionInfo = actionInfo;
+        }
 
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
@@ -296,13 +301,15 @@ export class ActionExecutor {
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-    const actionInfo = await getActionInfoInternal(
-      await getActionsClientWithRequest(request, source),
-      encryptedSavedObjectsClient,
-      preconfiguredActions,
-      actionId,
-      namespace.namespace
-    );
+    if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+      this.actionInfo = await getActionInfoInternal(
+        await getActionsClientWithRequest(request, source),
+        encryptedSavedObjectsClient,
+        preconfiguredActions,
+        actionId,
+        namespace.namespace
+      );
+    }
     const task = taskInfo
       ? {
           task: {
@@ -315,8 +322,8 @@ export class ActionExecutor {
     const event = createActionEventLogRecordObject({
       actionId,
       action: EVENT_LOG_ACTIONS.executeTimeout,
-      message: `action: ${actionInfo.actionTypeId}:${actionId}: '${
-        actionInfo.name ?? ''
+      message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
+        this.actionInfo.name ?? ''
       }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
       ...namespace,
       ...task,
@@ -324,7 +331,7 @@ export class ActionExecutor {
         {
           type: 'action',
           id: actionId,
-          typeId: actionInfo.actionTypeId,
+          typeId: this.actionInfo.actionTypeId,
           relation: SAVED_OBJECT_REL_PRIMARY,
         },
       ],
