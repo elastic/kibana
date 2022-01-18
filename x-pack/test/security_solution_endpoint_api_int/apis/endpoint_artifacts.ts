@@ -80,10 +80,11 @@ export default function ({ getService }: FtrProviderContext) {
           {
             method: 'put',
             path: EXCEPTION_LIST_ITEM_URL,
-            getBody: () => ({
-              id: trustedAppData.artifact.id,
-              item_id: trustedAppData.artifact.item_id,
-            }),
+            getBody: () =>
+              exceptionsGenerator.generateTrustedAppForUpdate({
+                id: trustedAppData.artifact.id,
+                item_id: trustedAppData.artifact.item_id,
+              }),
           },
         ];
 
@@ -192,23 +193,23 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
+
+          describe('and elastic license is less than Platinum Plus', () => {
+            it(`should error on [${trustedAppApiCall.method}] if attempting to modify policy id`);
+
+            it(`should error on [${trustedAppApiCall.method}] if attempting to remove policy id`);
+
+            it(
+              `should allow update on [${trustedAppApiCall.method}] to global artifact (from policy specific)`
+            );
+          });
         }
-
-        describe('and elastic license is less than Platinum Plus', () => {
-          it('should error on [${trustedAppApiCall.method}] if attempting to modify policy id');
-
-          it('should error on [${trustedAppApiCall.method}] if attempting to remove policy id');
-
-          it(
-            'should allow update on [${trustedAppApiCall.method}] to global artifact (from policy specific'
-          );
-        });
       });
     });
 
     describe('and user is NOT authorized to manage endpoint security', () => {
       describe('and attempting to access Trusted apps', () => {
-        it('should error if on create');
+        it('should error on create');
 
         it('should error update');
       });

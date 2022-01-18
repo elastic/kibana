@@ -8,6 +8,7 @@
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
@@ -20,13 +21,18 @@ type NonNullableTypeProperties<T> = {
 };
 
 /**
- * Normalizes the Create type to remove `undefined`/`null` from the returned type since the generator or sure to
- * create a value for (almost) all perperties
+ * Normalizes the create type to remove `undefined`/`null` from the returned type since the generator or sure to
+ * create a value for (almost) all properties
  */
 type CreateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
   Omit<CreateExceptionListItemSchema, 'meta'>
 > &
   Pick<CreateExceptionListItemSchema, 'meta'>;
+
+type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
+  Omit<UpdateExceptionListItemSchema, 'meta'>
+> &
+  Pick<UpdateExceptionListItemSchema, 'meta'>;
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
@@ -148,6 +154,43 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       namespace_type,
       os_types,
       tags,
+      ...overrides,
+    };
+  }
+
+  generateTrustedAppForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateTrustedApp();
+
+    return {
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version: _version ?? 'some value',
       ...overrides,
     };
   }
