@@ -129,19 +129,90 @@ export const BULK_ACTION_DELETE = i18n.translate(
   }
 );
 
+export const BULK_ACTION_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.indexPatternsTitle',
+  {
+    defaultMessage: 'Index patterns',
+  }
+);
+
+export const BULK_ACTION_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.tagsTitle',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
 export const BULK_ACTION_ADD_INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPattersTitle',
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPatternsTitle',
   {
     defaultMessage: 'Add index patterns',
   }
 );
 
 export const BULK_ACTION_DELETE_INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteIndexPattersTitle',
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteIndexPatternsTitle',
   {
     defaultMessage: 'Delete index patterns',
   }
 );
+
+export const BULK_ACTION_ADD_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addTagsTitle',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_ACTION_DELETE_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteTagsTitle',
+  {
+    defaultMessage: 'Delete tags',
+  }
+);
+
+export const BULK_ACTION_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
+  {
+    defaultMessage: 'Options',
+  }
+);
+
+export const BULK_EDIT_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditSuccessToastTitle',
+  {
+    defaultMessage: 'Rules changes updated',
+  }
+);
+
+export const BULK_EDIT_SUCCESS_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditSuccessToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'You’ve successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.',
+    }
+  );
+
+export const BULK_EDIT_ERROR_TOAST_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update',
+    }
+  );
+
+export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'There {rulesCount, plural, =1 {is # rule is} other {are # rules are}} failed to update the actions you’ve applied.',
+    }
+  );
 
 export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
   i18n.translate(
@@ -149,7 +220,7 @@ export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
     {
       values: { elasticRulesCount },
       defaultMessage:
-        '{elasticRulesCount} {elasticRulesCount, plural, =1 {Elastic rule} other {Elastic rules}} cannot be edited',
+        '{elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}} cannot be edited',
     }
   );
 
@@ -179,21 +250,21 @@ export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
 );
 
 export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationConfirmButtonLabel',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmation.confirmButtonLabel',
   {
     defaultMessage: 'Edit custom rules',
   }
 );
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutFormSaveButtonLabel',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
   {
     defaultMessage: 'Save',
   }
 );
 
 export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutFormCloseButtonLabel',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
   {
     defaultMessage: 'Close',
   }

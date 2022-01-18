@@ -16,6 +16,7 @@ import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import React, { Dispatch } from 'react';
 import type { ToastsStart } from 'src/core/public';
+
 import * as i18n from '../../translations';
 
 import { RulesTableAction } from '../../../../../containers/detection_engine/rules/rules_table';
@@ -245,20 +246,24 @@ export const getBatchItems = ({
         payload: { edit: [editPayload] },
         onSuccess: () => {
           toastsApi.addSuccess({
-            title: 'Rules changes updated',
-            text: `You’ve successfully updated ${customRulesCount} rule.`,
+            title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
+            text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(customRulesCount),
           });
         },
         onError: (error: Error) => {
-          toastsApi.addError(error, {
-            title: 'Some rules failed to update',
-            toastMessage: (
-              <>
-                There some rules are failed to update the actions you’ve applied.{' '}
-                <a>Show failed rules</a>
-              </>
-            ) as unknown as string,
-          });
+          // if response doesn't have number of failed rules, it means the whole bulk action failed.
+          // TODO: define correct typings
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const failedRulesCount = (error as any)?.body?.attributes?.rules?.failed;
+
+          if (isNaN(failedRulesCount)) {
+            toastsApi.addError(error, { title: i18n.BULK_ACTION_FAILED });
+          } else {
+            toastsApi.addError(error, {
+              title: i18n.BULK_EDIT_ERROR_TOAST_TITLE(failedRulesCount),
+              toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCIRPTION(failedRulesCount),
+            });
+          }
         },
       });
 
@@ -285,7 +290,7 @@ export const getBatchItems = ({
   return [
     {
       id: 0,
-      title: 'Options',
+      title: i18n.BULK_ACTION_MENU_TITLE,
       items: [
         {
           key: i18n.BULK_ACTION_ENABLE,
@@ -309,15 +314,15 @@ export const getBatchItems = ({
         ...(isRulesBulkEditEnabled
           ? [
               {
-                key: 'Index patterns',
-                name: 'Index patterns',
+                key: i18n.BULK_ACTION_INDEX_PATTERNS,
+                name: i18n.BULK_ACTION_INDEX_PATTERNS,
                 'data-test-subj': 'indexPatternsBulkEditRule',
                 disabled: isEditDisabled,
                 panel: 2,
               },
               {
-                key: 'Tags',
-                name: 'Tags',
+                key: i18n.BULK_ACTION_TAGS,
+                name: i18n.BULK_ACTION_TAGS,
                 'data-test-subj': 'tagsBulkEditRule',
                 disabled: isEditDisabled,
                 panel: 1,
@@ -365,11 +370,11 @@ export const getBatchItems = ({
     },
     {
       id: 1,
-      title: 'Options',
+      title: i18n.BULK_ACTION_MENU_TITLE,
       items: [
         {
-          key: 'Add tags',
-          name: 'Add tags',
+          key: i18n.BULK_ACTION_ADD_TAGS,
+          name: i18n.BULK_ACTION_ADD_TAGS,
           'data-test-subj': 'addTagsBulkEditRule',
           onClick: handleBulkEdit(BulkActionEditType.add_tags),
           disabled: isEditDisabled,
@@ -377,8 +382,8 @@ export const getBatchItems = ({
           toolTipPosition: 'right',
         },
         {
-          key: 'Delete tags',
-          name: 'Delete tags',
+          key: i18n.BULK_ACTION_DELETE_TAGS,
+          name: i18n.BULK_ACTION_DELETE_TAGS,
           'data-test-subj': 'deleteTagsBulkEditRule',
           onClick: handleBulkEdit(BulkActionEditType.delete_tags),
           disabled: isEditDisabled,
@@ -389,7 +394,7 @@ export const getBatchItems = ({
     },
     {
       id: 2,
-      title: 'Options',
+      title: i18n.BULK_ACTION_MENU_TITLE,
       items: [
         {
           key: i18n.BULK_ACTION_ADD_INDEX_PATTERNS,

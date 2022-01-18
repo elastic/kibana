@@ -63,7 +63,7 @@ export const schema: FormSchema<TagsFormData> = {
 const initialFormData: TagsFormData = { tags: [], overwrite: false };
 
 const getFormConfig = (editAction: BulkActionEditType) =>
-  editAction === BulkActionEditType.add_index_patterns
+  editAction === BulkActionEditType.add_tags
     ? {
         tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL,
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE,
