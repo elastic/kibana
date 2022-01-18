@@ -7,11 +7,17 @@
  */
 
 import { mapValues } from 'lodash';
-import { useEffect } from 'react';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { customEvents } from '.';
 
+/**
+ * Sets custom event context to be used with following events and clears the context upon unmounting.
+ * This hook should be used on the top most level of the application and should not be nested.
+ *
+ * @param context custom event context to be used with following events
+ */
 export function useCustomEventContext(context: Record<string, string | number | undefined>) {
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     customEvents.setCustomEventContext(context);
     return () => {
       customEvents.setCustomEventContext(mapValues(context, () => undefined));
