@@ -11,8 +11,8 @@ export const ADD_TO_TIMELINE = i18n.translate('xpack.timelines.hoverActions.addT
   defaultMessage: 'Add to timeline investigation',
 });
 
-export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string) =>
+export const ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE = (fieldOrValue: string, isTimeline: boolean) =>
   i18n.translate('xpack.timelines.hoverActions.addToTimeline.addedFieldMessage', {
-    values: { fieldOrValue },
-    defaultMessage: `Added {fieldOrValue} to timeline`,
+    values: { fieldOrValue, isTimeline },
+    defaultMessage: `Added {fieldOrValue} to {isTimeline, select, true {timeline} false {template}}`,
   });
