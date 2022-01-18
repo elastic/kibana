@@ -6,6 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type {
   Logger,
   KibanaRequest,
@@ -78,7 +79,8 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext
+    { taskInstance }: RunContext,
+    usageCounter?: UsageCounter
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -92,6 +94,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!);
+    >(ruleType, taskInstance, this.taskRunnerContext!, usageCounter);
   }
 }

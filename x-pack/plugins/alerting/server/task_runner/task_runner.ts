@@ -8,6 +8,7 @@ import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -94,6 +95,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
 
@@ -108,8 +110,10 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext
+    context: TaskRunnerContext,
+    usageCounter?: UsageCounter
   ) {
+    this.usageCounter = usageCounter;
     this.context = context;
     this.logger = context.logger;
     this.ruleType = ruleType;
