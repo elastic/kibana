@@ -89,7 +89,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
-  buildColumn({ previousColumn }, columnParams) {
+  buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
@@ -111,14 +111,6 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
             },
           })) ?? []),
         ],
-      };
-    }
-
-    const filterColumnsParams = columnParams as FiltersIndexPatternColumn['params'];
-
-    if (filterColumnsParams) {
-      params = {
-        filters: filterColumnsParams.filters,
       };
     }
 

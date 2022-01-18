@@ -57,7 +57,6 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = rest as unknown as SavedObjectAttributes;
-    // gets the title and description from the Viz editor saved object
 
     const result = await this.client.create(
       DOC_TYPE,

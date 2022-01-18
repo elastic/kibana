@@ -41,6 +41,7 @@ import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './defin
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
+import { isSortableByColumn } from './definitions/terms/helpers';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -1654,7 +1655,8 @@ export function getSplitByTermsLayer(
     layer.label
   );
 
-  return insertNewColumn({
+  const columnId = generateId();
+  let termsLayer = insertNewColumn({
     op: 'terms',
     layer: insertNewColumn({
       op: 'date_histogram',
@@ -1667,12 +1669,38 @@ export function getSplitByTermsLayer(
         interval: timeInterval,
       },
     }),
-    columnId: generateId(),
+    columnId,
     field: splitField,
-    columnParams: termsParams ?? undefined,
     indexPattern,
     visualizationGroups: [],
   });
+  const termsColumnParams = termsParams as TermsIndexPatternColumn['params'];
+  if (termsColumnParams) {
+    for (const [param, value] of Object.entries(termsColumnParams)) {
+      let paramValue = value;
+      if (param === 'orderBy') {
+        const existingMetricColumn = Object.entries(termsLayer.columns)
+          .filter(([colId]) => isSortableByColumn(termsLayer, colId))
+          .map(([id]) => id)[0];
+
+        paramValue = (
+          termsColumnParams && termsColumnParams.orderBy.type === 'column'
+            ? {
+                type: 'column',
+                columnId: existingMetricColumn,
+              }
+            : termsColumnParams?.orderBy ?? undefined
+        ) as TermsIndexPatternColumn['params']['orderBy'];
+      }
+      termsLayer = updateColumnParam({
+        layer: termsLayer,
+        columnId,
+        paramName: param,
+        value: paramValue,
+      });
+    }
+  }
+  return termsLayer;
 }
 
 export function getSplitByFiltersLayer(
@@ -1700,7 +1728,8 @@ export function getSplitByFiltersLayer(
     layer.format,
     layer.label
   );
-  return insertNewColumn({
+  const columnId = generateId();
+  let filtersLayer = insertNewColumn({
     op: 'filters',
     layer: insertNewColumn({
       op: 'date_histogram',
@@ -1713,10 +1742,19 @@ export function getSplitByFiltersLayer(
         interval: timeInterval,
       },
     }),
-    columnId: generateId(),
+    columnId,
     field: undefined,
-    columnParams: filterParams ? { filters: filterParams } : undefined,
     indexPattern,
     visualizationGroups: [],
   });
+
+  if (filterParams) {
+    filtersLayer = updateColumnParam({
+      layer: filtersLayer,
+      columnId,
+      paramName: 'filters',
+      value: filterParams,
+    });
+  }
+  return filtersLayer;
 }

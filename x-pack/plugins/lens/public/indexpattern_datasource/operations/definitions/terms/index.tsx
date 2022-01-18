@@ -110,7 +110,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ layer, field, indexPattern }, params) {
+  buildColumn({ layer, field, indexPattern }) {
     const existingMetricColumn = Object.entries(layer.columns)
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
@@ -118,17 +118,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const previousBucketsLength = Object.values(layer.columns).filter(
       (col) => col && col.isBucketed
     ).length;
-
-    const termsColumnParams = params as TermsIndexPatternColumn['params'];
-
-    const orderBy = (
-      termsColumnParams && termsColumnParams.orderBy.type === 'column'
-        ? {
-            type: 'column',
-            columnId: existingMetricColumn,
-          }
-        : termsColumnParams?.orderBy ?? undefined
-    ) as TermsIndexPatternColumn['params']['orderBy'];
 
     return {
       label: ofName(field.displayName),
@@ -138,25 +127,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: termsColumnParams
-          ? termsColumnParams.size
-          : previousBucketsLength === 0
-          ? 5
-          : DEFAULT_SIZE,
-        orderBy: orderBy
-          ? orderBy
-          : existingMetricColumn
+        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
+        orderBy: existingMetricColumn
           ? {
               type: 'column',
               columnId: existingMetricColumn,
             }
           : { type: 'alphabetical', fallback: true },
-        orderDirection: termsColumnParams
-          ? termsColumnParams.orderDirection
-          : existingMetricColumn
-          ? 'desc'
-          : 'asc',
-        otherBucket: params ? termsColumnParams.otherBucket : !indexPattern.hasRestrictions,
+        orderDirection: existingMetricColumn ? 'desc' : 'asc',
+        otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
       },
     };
