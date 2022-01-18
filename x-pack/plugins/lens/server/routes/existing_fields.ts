@@ -61,7 +61,7 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
       const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
       const [includeFrozen, useSampling]: boolean[] = await Promise.all([
         uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-        uiSettingsClient.get(FIELD_EXISTENCE_SETTING)
+        uiSettingsClient.get(FIELD_EXISTENCE_SETTING),
       ]);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
