@@ -127,21 +127,29 @@ class KeyedTimeslider extends Component<Props, State> {
   };
 
   _onNext = () => {
+    let lastTick = this.state.max;
+    if (this.props.timeRangeStep !== 1) {
+      lastTick = this.state.ticks[this.state.ticks.length - 1].value;
+    }
     const from =
-      this._doesTimesliceCoverTimerange() || this.state.timeslice[1] === this.state.max
+      this._doesTimesliceCoverTimerange() || this.state.timeslice[1] === lastTick
         ? this.state.ticks[0].value
         : this.state.timeslice[1];
     const to = from + this.state.range;
-    this._onChange([from, to <= this.state.max ? to : this.state.max]);
+    this._onChange([from, to <= lastTick ? to : lastTick]);
   };
 
   _onPrevious = () => {
+    let firstTick = this.state.min;
+    if (this.props.timeRangeStep !== 1) {
+      firstTick = this.state.ticks[0].value;
+    }
     const to =
-      this._doesTimesliceCoverTimerange() || this.state.timeslice[0] === this.state.min
+      this._doesTimesliceCoverTimerange() || this.state.timeslice[0] === firstTick
         ? this.state.ticks[this.state.ticks.length - 1].value
         : this.state.timeslice[0];
     const from = to - this.state.range;
-    this._onChange([from < this.state.min ? this.state.min : from, to]);
+    this._onChange([from < firstTick ? firstTick : from, to]);
   };
 
   _propagateChange = _.debounce((value: [number, number]) => {
