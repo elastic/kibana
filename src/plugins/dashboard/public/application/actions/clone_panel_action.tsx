@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import uuid from 'uuid';
 
-import { CoreStart, SimpleSavedObject } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { SavedObject } from '../../services/saved_objects';
 import {
