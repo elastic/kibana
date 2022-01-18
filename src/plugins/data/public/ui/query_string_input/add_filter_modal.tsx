@@ -35,6 +35,7 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiIcon,
+  EuiFieldText,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -109,6 +110,7 @@ export function AddFilterModal({
     getIndexPatternFromFilter(filter, indexPatterns)
   );
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
+  const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
     {
@@ -351,8 +353,7 @@ export function AddFilterModal({
     if (!$state || !$state.store) {
       return; // typescript validation
     }
-    // const alias = useCustomLabel ? customLabel : null;
-    const alias = null;
+    const alias = customLabel || null;
     if (addFilterMode === 'query_builder') {
       const { index, disabled = false, negate = false } = filter.meta;
       const newIndex = index || indexPatterns[0].id!;
@@ -632,25 +633,45 @@ export function AddFilterModal({
       </EuiModalBody>
       <EuiHorizontalRule margin="none" />
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+          {addFilterMode !== 'saved_filters' && (
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate('data.filter.filterEditor.createCustomLabelInputLabel', {
+                  defaultMessage: 'Label (optional)',
+                })}
+                display="columnCompressed"
+              >
+                <EuiFieldText
+                  value={`${customLabel}`}
+                  onChange={(e) => setCustomLabel(e.target.value)}
+                  compressed
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>
-              {i18n.translate('xpack.lens.palette.saveModal.cancelLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="plusInCircleFilled"
-              fill
-              onClick={onAddFilter}
-              data-test-subj="canvasCustomElementForm-submit"
-            >
-              {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
-                defaultMessage: 'Add filter',
-              })}
-            </EuiButton>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onCancel}>
+                  {i18n.translate('xpack.lens.palette.saveModal.cancelLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="plusInCircleFilled"
+                  fill
+                  onClick={onAddFilter}
+                  data-test-subj="canvasCustomElementForm-submit"
+                >
+                  {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
+                    defaultMessage: 'Add filter',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
