@@ -18,7 +18,6 @@ import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
-getActionsClientWithRequest.mockResolvedValue(actionsClient);
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -51,6 +50,7 @@ actionExecutor.initialize({
 beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
+  getActionsClientWithRequest.mockResolvedValue(actionsClient);
 });
 
 test('successfully executes', async () => {
@@ -115,6 +115,7 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute-start",
+            "kind": "action",
           },
           "kibana": Object {
             "saved_objects": Array [
@@ -134,6 +135,7 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute",
+            "kind": "action",
             "outcome": "success",
           },
           "kibana": Object {
