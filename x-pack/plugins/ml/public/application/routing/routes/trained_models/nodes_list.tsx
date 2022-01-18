@@ -23,7 +23,7 @@ export const nodesListRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('TRAINED_MODELS'),
   ],
   enableDatePicker: true,
 });

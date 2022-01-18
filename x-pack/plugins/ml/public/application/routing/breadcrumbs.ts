@@ -101,12 +101,16 @@ export const breadcrumbOnClickFactory = (
 
 export const getBreadcrumbWithUrlForApp = (
   breadcrumbName: Breadcrumb,
-  navigateToPath: NavigateToPath,
-  basePath: string
+  navigateToPath?: NavigateToPath,
+  basePath?: string
 ): EuiBreadcrumb => {
   return {
     text: breadcrumbs[breadcrumbName].text,
-    href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
-    onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
+    ...(navigateToPath && basePath
+      ? {
+          href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
+          onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
+        }
+      : {}),
   };
 };

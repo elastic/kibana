@@ -32,7 +32,7 @@ export const settingsRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB'),
   ],
 });
 

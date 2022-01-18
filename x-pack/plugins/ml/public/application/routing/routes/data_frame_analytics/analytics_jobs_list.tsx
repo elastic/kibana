@@ -24,7 +24,7 @@ export const analyticsJobsListRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB'),
   ],
   'data-test-subj': 'mlPageDataFrameAnalytics',
   enableDatePicker: true,

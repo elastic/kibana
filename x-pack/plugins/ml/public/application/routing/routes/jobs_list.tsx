@@ -32,7 +32,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB'),
   ],
   'data-test-subj': 'mlPageJobManagement',
   enableDatePicker: true,
