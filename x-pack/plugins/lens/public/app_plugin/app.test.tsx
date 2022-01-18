@@ -24,12 +24,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import {
-  esFilters,
-  FilterManager,
-  IndexPattern,
-  Query,
-} from '../../../../../src/plugins/data/public';
+import { FilterManager, IndexPattern, Query } from '../../../../../src/plugins/data/public';
+import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { LensByValueInput } from '../embeddable/embeddable';
@@ -147,7 +143,7 @@ describe('Lens App', () => {
     const services = makeDefaultServicesForApp();
     const indexPattern = { id: 'index1' } as unknown as IndexPattern;
     const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    const pinnedFilter = buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
       return [];
     });
@@ -668,10 +664,10 @@ describe('Lens App', () => {
         const indexPattern = { id: 'index1' } as unknown as IndexPattern;
         const field = { name: 'myfield' } as unknown as FieldSpec;
         const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-        const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-        const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+        const unpinned = buildExistsFilter(field, indexPattern);
+        const pinned = buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
-          FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+          FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
         });
         const { services } = await save({
           initialSavedObjectId: defaultSavedObjectId,
@@ -882,14 +878,12 @@ describe('Lens App', () => {
         }),
       });
       act(() =>
-        services.data.query.filterManager.setFilters([
-          esFilters.buildExistsFilter(field, indexPattern),
-        ])
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
       );
       instance.update();
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [buildExistsFilter(field, indexPattern)],
         }),
       });
     });
@@ -932,9 +926,7 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
-        services.data.query.filterManager.setFilters([
-          esFilters.buildExistsFilter(field, indexPattern),
-        ])
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
       );
       instance.update();
       expect(lensStore.getState()).toEqual({
@@ -1067,9 +1059,9 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      const unpinned = buildExistsFilter(field, indexPattern);
+      const pinned = buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
       act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
@@ -1124,9 +1116,9 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      const unpinned = buildExistsFilter(field, indexPattern);
+      const pinned = buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
       act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
