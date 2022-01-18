@@ -34,11 +34,7 @@ import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import {
-  AvailableFields$,
-  DataAvailableFieldsMsg,
-  DataDocuments$,
-} from '../../utils/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 

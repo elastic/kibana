@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 import { isPopulatedObject } from '../utils/object_utils';
-import { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
+import { DataViewField, IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { TimeBucketsInterval } from '../services/time_buckets';
 
 export interface FieldData {
@@ -28,7 +28,6 @@ export interface Field {
   safeFieldName: string;
 }
 
-// @todo: check
 export function isValidField(arg: unknown): arg is Field {
   return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
 }
@@ -210,6 +209,7 @@ export interface OverallStatsSearchStrategyParams {
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   aggregatableFields: string[];
   nonAggregatableFields: string[];
+  fieldsToFetch?: DataViewField[];
 }
 
 export interface FieldStatsSearchStrategyReturnBase {
