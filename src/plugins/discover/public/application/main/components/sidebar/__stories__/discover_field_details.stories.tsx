@@ -13,8 +13,13 @@ import { DiscoverFieldDetails } from '../discover_field_details';
 import { DataView, IndexPatternField } from '../../../../../../../data_views/common';
 import { fieldSpecMap } from './fields';
 import { numericField as field } from './fields';
+import { Bucket } from '../types';
 
-const details = { buckets: [], error: '', exists: 1, total: 2, columns: [] };
+const buckets = [
+  { count: 1, display: 'Stewart', percent: 50.0, value: 'Stewart' },
+  { count: 1, display: 'Perry', percent: 50.0, value: 'Perry' },
+] as Bucket[];
+const details = { buckets, error: '', exists: 1, total: 2, columns: [] };
 
 const fieldFormatInstanceType = {};
 const defaultMap = {
@@ -57,22 +62,26 @@ const dataView = new DataView({
 
 storiesOf('components/sidebar/DiscoverFieldDetails', module)
   .add('default', () => (
-    <DiscoverFieldDetails
-      field={field}
-      indexPattern={dataView}
-      details={details}
-      onAddFilter={() => {
-        alert('On add filter clicked');
-      }}
-    />
+    <div style={{ width: '50%' }}>
+      <DiscoverFieldDetails
+        field={field}
+        indexPattern={dataView}
+        details={details}
+        onAddFilter={() => {
+          alert('On add filter clicked');
+        }}
+      />
+    </div>
   ))
   .add('scripted', () => (
-    <DiscoverFieldDetails
-      field={scriptedField}
-      indexPattern={dataView}
-      details={details}
-      onAddFilter={() => {}}
-    />
+    <div style={{ width: '50%' }}>
+      <DiscoverFieldDetails
+        field={scriptedField}
+        indexPattern={dataView}
+        details={details}
+        onAddFilter={() => {}}
+      />
+    </div>
   ))
   .add('error', () => (
     <DiscoverFieldDetails

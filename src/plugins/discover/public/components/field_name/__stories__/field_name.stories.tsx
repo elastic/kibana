@@ -8,6 +8,7 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { FieldName } from '../field_name';
 import { IndexPatternField } from '../../../../../data_views/common';
 
@@ -22,9 +23,25 @@ const field = new IndexPatternField({
   readFromDocValues: true,
 });
 
+const renderFieldName = (fldName: {} | null | undefined) => {
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      style={{ width: '30%', alignItems: 'flex-start', padding: '4px' }}
+    >
+      {fldName}
+    </EuiFlexGroup>
+  );
+};
+
 storiesOf('components/FieldName/FieldNameStories', module)
-  .add('default', () => <FieldName fieldName={'Discover test'} />)
-  .add('with field type', () => <FieldName fieldName={'Discover test'} fieldType={'number'} />)
-  .add('with field mapping', () => (
-    <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
-  ));
+  .add('default', () => renderFieldName(<FieldName fieldName={'Discover test'} />))
+  .add('with field type', () =>
+    renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />)
+  )
+  .add('with field mapping', () =>
+    renderFieldName(
+      <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
+    )
+  );
