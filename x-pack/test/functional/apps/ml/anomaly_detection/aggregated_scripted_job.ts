@@ -396,7 +396,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is enabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(
@@ -442,7 +441,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is disabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(

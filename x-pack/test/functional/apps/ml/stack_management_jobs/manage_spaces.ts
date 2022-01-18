@@ -174,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToStackManagementJobsListPage();
 
           // AD
-          await ml.jobTable.filterWithSearchString(testData.adJobId);
+          await ml.jobTable.filterWithSearchString(testData.adJobId, 1, 'stackMgmtJobList');
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, [
             testData.initialSpace,
           ]);
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // AD
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.jobTable.filterWithSearchString(testData.adJobId);
+          await ml.jobTable.filterWithSearchString(testData.adJobId, 1, 'stackMgmtJobList');
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, expectedJobRowSpaces);
 
           // DFA
