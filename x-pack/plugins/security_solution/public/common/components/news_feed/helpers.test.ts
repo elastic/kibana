@@ -47,10 +47,10 @@ describe('helpers', () => {
       expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
-    test('it should NOT transform a version if it omits the dash in `SNAPSHOT`', () => {
+    test('it should transform a version if it omits the dash in `SNAPSHOT`', () => {
       const version = '8.0.0SNAPSHOT';
 
-      expect(removeSuffixFromVersion(version)).toEqual('8.0.0SNAPSHOT');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should NOT transform an undefined version', () => {

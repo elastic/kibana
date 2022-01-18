@@ -8,17 +8,17 @@
 import { get } from 'lodash/fp';
 import moment from 'moment';
 import uuid from 'uuid';
-
+import semverCoerce from 'semver/functions/coerce';
 import { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
 import { KibanaServices } from '../../lib/kibana';
 
 /**
- * Removes the `-SNAPSHOT` that is sometimes appended to the Kibana version,
- * (e.g. `8.0.0-SNAPSHOT`), which is typically only seen in non-production
+ * Removes the suffix that is sometimes appended to the Kibana version,
+ * (e.g. `8.0.0-SNAPSHOT-rc1`), which is typically only seen in non-production
  * environments
  */
 export const removeSuffixFromVersion = (kibanaVersion?: string) =>
-  kibanaVersion?.split('-')[0] ?? kibanaVersion;
+  semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
 /**
  * Combines the URL specified in the `newsFeedUrlSetting`, e.g.
