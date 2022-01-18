@@ -30,11 +30,11 @@ export function getCommentsFromNode(node: Node): TextWithLinks | undefined {
 }
 
 export function getJSDocs(node: Node): JSDoc[] | undefined {
-  if (Node.isJSDocableNode(node)) {
+  if (Node.isJSDocable(node)) {
     return node.getJsDocs();
   } else if (Node.isVariableDeclaration(node)) {
     const gparent = node.getParent()?.getParent();
-    if (Node.isJSDocableNode(gparent)) {
+    if (Node.isJSDocable(gparent)) {
       return gparent.getJsDocs();
     }
   }

@@ -74,24 +74,26 @@ export function ServiceOverviewThroughputChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/throughput',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                comparisonStart,
+                comparisonEnd,
+                transactionName,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              comparisonStart,
-              comparisonEnd,
-              transactionName,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [
