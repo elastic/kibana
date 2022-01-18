@@ -90,6 +90,7 @@ import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 import { CachedUiSettingsClient } from './services';
+import { getDeprecations } from './deprecations';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -147,6 +148,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         return this.asScoped(request);
       }
     );
+    core.deprecations.registerDeprecations({ getDeprecations });
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
