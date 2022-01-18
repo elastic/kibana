@@ -1318,18 +1318,23 @@ describe('status check alert', () => {
             rangeUnit: 'm',
           }
         )
-      ).toMatchInlineSnapshot(`"below threshold with 58.04% availability expected is 90%"`);
+      ).toMatchInlineSnapshot(`5 minutes availability is 58.04%. Alert when < 90%.`);
     });
 
     it('creates message for down and availability item', () => {
       expect(
         getStatusMessage(
-          makePing({
-            id: 'test-node-service',
-            location: 'fairbanks',
-            name: 'Test Node Service',
-            url: 'http://localhost:12349',
-          }),
+          {
+            info: makePing({
+              id: 'test-node-service',
+              location: 'fairbanks',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+            }),
+            count: 235,
+            numTimes: 10,
+            interval: '30 days',
+          },
           {
             monitorId: 'test-node-service',
             location: 'harrisburg',
