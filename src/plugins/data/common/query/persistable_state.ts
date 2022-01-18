@@ -61,12 +61,5 @@ export const migrateToLatest = (filters: Filter[], version: string) => {
 };
 
 export const getAllMigrations = (): MigrateFunctionsObject => {
-  return {
-    '8.1.0': (filters) => {
-      return (filters || []).map((filterState) => ({
-        ...filterState,
-        meta: { ...filterState.meta, disabled: !filterState.meta?.disabled },
-      }));
-    },
-  };
+  return {};
 };
