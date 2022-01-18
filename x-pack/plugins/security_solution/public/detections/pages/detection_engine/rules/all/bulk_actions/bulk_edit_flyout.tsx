@@ -90,12 +90,12 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-              {i18n.BULK_EDIT_FLYOUT_FORM_SAVE}
+              {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={handleSave} fill disabled={isValid === false}>
-              {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
+              {i18n.BULK_EDIT_FLYOUT_FORM_SAVE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

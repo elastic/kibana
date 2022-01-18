@@ -195,7 +195,57 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
 export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutFormCloseButtonLabel',
   {
-    defaultMessage: 'CLose',
+    defaultMessage: 'Close',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsHelpText',
+  {
+    defaultMessage:
+      'Select the default index pattern of Elasticsearch indices from the dropdown where you would like update rules to run. You can also add custom index patterns and hit Enter in this form field.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsIndexComboboxLabel',
+  {
+    defaultMessage: 'Add index patterns for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsIndexRequiredErrorMessage',
+  {
+    defaultMessage: 'A minimum of one index pattern is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsTitle',
+  {
+    defaultMessage: 'Add index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Overwrite all selected rules index patterns',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsIndexComboboxLabel',
+  {
+    defaultMessage: 'Delete index patterns for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsTitle',
+  {
+    defaultMessage: 'Delete index patterns',
   }
 );
 

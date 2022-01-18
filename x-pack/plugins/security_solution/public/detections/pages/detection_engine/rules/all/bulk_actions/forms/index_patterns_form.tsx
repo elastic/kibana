@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import * as i18n from '../../../translations';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../../../../common/constants';
@@ -42,21 +44,22 @@ export const schema: FormSchema<IndexPatternsFormData> = {
   index: {
     fieldsToValidateOnChange: ['index'],
     type: FIELD_TYPES.COMBO_BOX,
-    helpText:
-      'Add index pattern of Elasticsearch indices where you would like update rules to run.',
+    helpText: i18n.BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT,
     validations: [
       {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          return fieldValidators.emptyField('A minimum of one index pattern is required.')(...args);
+          return fieldValidators.emptyField(
+            i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_REQUIRED_ERROR
+          )(...args);
         },
       },
     ],
   },
   overwrite: {
     type: FIELD_TYPES.CHECKBOX,
-    label: 'Overwrite all selected rules index patterns',
+    label: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_OVERWRITE_LABEL,
   },
 };
 
@@ -65,12 +68,12 @@ const initialFormData: IndexPatternsFormData = { index: [], overwrite: false };
 const getFormConfig = (editAction: BulkActionEditType) =>
   editAction === BulkActionEditType.add_index_patterns
     ? {
-        indexLabel: 'Add index patterns for selected rules',
-        formTitle: 'Add index patterns',
+        indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL,
+        formTitle: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE,
       }
     : {
-        indexLabel: 'Delete index patterns for selected rules',
-        formTitle: 'Delete index patterns',
+        indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_LABEL,
+        formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_TITLE,
       };
 
 interface Props {
@@ -128,8 +131,12 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onChange }: Props)
       {overwrite && (
         <EuiFormRow>
           <EuiCallOut color="warning">
-            You’re about to overwrite index patterns for {rulesCount} selected rules, press Save to
-            apply changes.
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWarningCallout"
+              defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
+              apply changes."
+              values={{ rulesCount }}
+            />
           </EuiCallOut>
         </EuiFormRow>
       )}
