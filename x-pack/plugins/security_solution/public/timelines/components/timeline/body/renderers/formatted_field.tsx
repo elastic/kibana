@@ -215,7 +215,6 @@ const FormattedFieldValueComponent: React.FC<{
       Component,
       eventId,
       fieldName,
-      linkValue,
       isDraggable,
       truncate,
       title,
