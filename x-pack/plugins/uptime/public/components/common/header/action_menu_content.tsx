@@ -115,6 +115,7 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
           href={syntheticExploratoryViewLink}
           color="text"
           iconType="visBarVerticalStacked"
+          data-test-subj={'uptimeExploreDataButton'}
         >
           {ANALYZE_DATA}
         </EuiHeaderLink>
