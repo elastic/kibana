@@ -556,16 +556,21 @@ export class RulesClient {
 
     this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
+
+    const eventLogPageOptions = dateStart
+      ? {
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
+        }
+      : {
+          per_page: numberOfExecutions ?? 60,
+          filter: 'event.provider: alerting AND event.action:execute',
+        };
     try {
       const queryResults = await eventLogClient.findEventsBySavedObjectIds(
         'alert',
         [id],
-        {
-          page: 1,
-          per_page: (numberOfExecutions ?? 60) * 2,
-          end: dateNow.toISOString(),
-          sort_order: 'desc',
-        },
+        { ...eventLogPageOptions, page: 1, sort_order: 'desc', end: dateNow.toISOString() },
         rule.legacyId !== null ? [rule.legacyId] : undefined
       );
       events = queryResults.data;

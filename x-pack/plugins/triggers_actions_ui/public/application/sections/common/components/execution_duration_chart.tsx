@@ -15,11 +15,13 @@ import {
   EuiEmptyPrompt,
   EuiTitle,
   EuiSelect,
+  EuiLoadingChart,
 } from '@elastic/eui';
 import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { assign, fill } from 'lodash';
 import moment from 'moment';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
 
 export interface ComponentOpts {
@@ -29,6 +31,7 @@ export interface ComponentOpts {
   };
   numberOfExecutions: number;
   onChangeDuration: (length: number) => void;
+  isLoading?: boolean;
 }
 
 const NUM_EXECUTIONS_OPTIONS = [120, 60, 30, 15].map((value) => ({
@@ -48,6 +51,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   executionDuration,
   numberOfExecutions,
   onChangeDuration,
+  isLoading,
 }: ComponentOpts) => {
   const paddedExecutionDurations = padOrTruncateDurations(
     executionDuration.valuesWithTimestamp,
@@ -89,75 +93,82 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-
-      {executionDuration.valuesWithTimestamp &&
-      Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
-        <>
-          <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
-            <Settings
-              theme={{
-                lineSeriesStyle: {
-                  point: { visible: false },
-                  line: { stroke: lightEuiTheme.euiColorAccent },
-                },
-              }}
-            />
-            <BarSeries
-              id="executionDuration"
-              name={i18n.translate(
-                'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
-                {
-                  defaultMessage: `Duration`,
-                }
-              )}
-              xScaleType="linear"
-              yScaleType="linear"
-              xAccessor={0}
-              yAccessors={[1]}
-              data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
-                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
-                val,
-              ])}
-              minBarHeight={2}
-            />
-            <LineSeries
-              id="rule_duration_avg"
-              name={i18n.translate(
-                'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
-                {
-                  defaultMessage: `Avg Duration`,
-                }
-              )}
-              xScaleType="linear"
-              yScaleType="linear"
-              xAccessor={0}
-              yAccessors={[1]}
-              data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
-                timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
-                val ? executionDuration.average : null,
-              ])}
-              curve={CurveType.CURVE_NATURAL}
-            />
-            <Axis id="left-axis" position="left" tickFormat={(d) => formatMillisForDisplay(d)} />
-          </Chart>
-        </>
-      ) : (
-        <>
-          <EuiEmptyPrompt
-            data-test-subj="executionDurationChartEmpty"
-            body={
-              <>
-                <p>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData"
-                    defaultMessage="There are no available executions for this rule."
-                  />
-                </p>
-              </>
-            }
-          />
-        </>
+      {isLoading && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false} style={{ height: '80px', justifyContent: 'center' }}>
+            <EuiLoadingChart size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
+      {!isLoading &&
+        (executionDuration.valuesWithTimestamp &&
+        Object.entries(executionDuration.valuesWithTimestamp).length > 0 ? (
+          <>
+            <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
+              <Settings
+                theme={{
+                  lineSeriesStyle: {
+                    point: { visible: false },
+                    line: { stroke: lightEuiTheme.euiColorAccent },
+                  },
+                }}
+              />
+              <BarSeries
+                id="executionDuration"
+                name={i18n.translate(
+                  'xpack.triggersActionsUI.sections.executionDurationChart.durationLabel',
+                  {
+                    defaultMessage: `Duration`,
+                  }
+                )}
+                xScaleType="linear"
+                yScaleType="linear"
+                xAccessor={0}
+                yAccessors={[1]}
+                data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
+                  timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
+                  val,
+                ])}
+                minBarHeight={2}
+              />
+              <LineSeries
+                id="rule_duration_avg"
+                name={i18n.translate(
+                  'xpack.triggersActionsUI.sections.executionDurationChart.avgDurationLabel',
+                  {
+                    defaultMessage: `Avg Duration`,
+                  }
+                )}
+                xScaleType="linear"
+                yScaleType="linear"
+                xAccessor={0}
+                yAccessors={[1]}
+                data={paddedExecutionDurations.map(([timestamp, val], ndx) => [
+                  timestamp ? moment(timestamp).format('D MMM YYYY @ HH:mm:ss') : ndx,
+                  val ? executionDuration.average : null,
+                ])}
+                curve={CurveType.CURVE_NATURAL}
+              />
+              <Axis id="left-axis" position="left" tickFormat={(d) => formatMillisForDisplay(d)} />
+            </Chart>
+          </>
+        ) : (
+          <>
+            <EuiEmptyPrompt
+              data-test-subj="executionDurationChartEmpty"
+              body={
+                <>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData"
+                      defaultMessage="There are no available executions for this rule."
+                    />
+                  </p>
+                </>
+              }
+            />
+          </>
+        ))}
     </EuiPanel>
   );
 };

@@ -22,6 +22,7 @@ type WithAlertSummaryProps = {
   ruleType: RuleType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
+  refreshToken?: number;
 } & Pick<AlertApis, 'loadAlertSummary'>;
 
 export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
@@ -30,6 +31,7 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
   readOnly,
   requestRefresh,
   loadAlertSummary: loadAlertSummary,
+  refreshToken,
 }) => {
   const {
     notifications: { toasts },
@@ -37,27 +39,39 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
 
   const [alertSummary, setAlertSummary] = useState<AlertSummary | null>(null);
   const [numberOfExecutions, setNumberOfExecutions] = useState(60);
+  const [isLoadingChart, setIsLoadingChart] = useState(true);
   const ruleID = useRef<string | null>(null);
+  const refreshTokenRef = useRef(refreshToken);
+
+  const getAlertSummaryWithLoadingState = useCallback(
+    async (executions: number = numberOfExecutions) => {
+      setIsLoadingChart(true);
+      await getAlertSummary(ruleID.current!, loadAlertSummary, setAlertSummary, toasts, executions);
+      setIsLoadingChart(false);
+    },
+    [setIsLoadingChart, ruleID, loadAlertSummary, setAlertSummary, toasts, numberOfExecutions]
+  );
 
   useEffect(() => {
     if (ruleID.current !== rule.id) {
       ruleID.current = rule.id;
-      getAlertSummary(
-        ruleID.current,
-        loadAlertSummary,
-        setAlertSummary,
-        toasts,
-        numberOfExecutions
-      );
+      getAlertSummaryWithLoadingState();
     }
-  }, [rule, ruleID, numberOfExecutions, loadAlertSummary, setAlertSummary, toasts]);
+  }, [rule, ruleID, getAlertSummaryWithLoadingState]);
+
+  useEffect(() => {
+    if (refreshTokenRef.current !== refreshToken) {
+      refreshTokenRef.current = refreshToken;
+      getAlertSummaryWithLoadingState();
+    }
+  }, [refreshToken, refreshTokenRef, getAlertSummaryWithLoadingState]);
 
   const onChangeDuration = useCallback(
     (executions: number) => {
       setNumberOfExecutions(executions);
-      getAlertSummary(ruleID.current!, loadAlertSummary, setAlertSummary, toasts, executions);
+      getAlertSummaryWithLoadingState(executions);
     },
-    [ruleID, setNumberOfExecutions, loadAlertSummary, setAlertSummary, toasts]
+    [getAlertSummaryWithLoadingState]
   );
 
   return alertSummary ? (
@@ -68,6 +82,7 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
       readOnly={readOnly}
       alertSummary={alertSummary}
       numberOfExecutions={numberOfExecutions}
+      isLoadingChart={isLoadingChart}
       onChangeDuration={onChangeDuration}
     />
   ) : (
