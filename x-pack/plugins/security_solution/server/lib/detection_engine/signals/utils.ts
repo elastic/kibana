@@ -118,7 +118,7 @@ export const hasReadIndexPrivileges = async (args: {
     const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
-    logger.error(buildRuleMessage(errorString));
+    logger.warn(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
@@ -168,7 +168,7 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-    logger.error(buildRuleMessage(errorString.trimEnd()));
+    logger.warn(buildRuleMessage(errorString.trimEnd()));
     await ruleStatusClient.logStatusChange({
       message: errorString.trimEnd(),
       ruleId,
@@ -195,7 +195,7 @@ export const hasTimestampFields = async (args: {
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
-    logger.error(buildRuleMessage(errorString));
+    logger.warn(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
