@@ -514,13 +514,16 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <span>
-        {
-        "object.value": [
-          100
-        ]
-      }
-      </span>
+      <JsonCodeEditor
+        json={
+          Object {
+            "object.value": Array [
+              100,
+            ],
+          }
+        }
+        width={370}
+      />
     `);
   });
 
