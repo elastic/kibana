@@ -13,12 +13,15 @@ import { SyntheticsProviders } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
+import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
   const { error, loading } = useLocations();
+
+  useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
   return (
     <Loader
@@ -57,3 +60,7 @@ const ERROR_BODY_LABEL = i18n.translate(
     defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
   }
 );
+
+const ADD_MONITOR_CRUMB = i18n.translate('xpack.uptime.monitorManagement.monitorManagementCrumb', {
+  defaultMessage: 'Add monitor',
+});
