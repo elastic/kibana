@@ -35,8 +35,7 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "@npm//js-sha256",
-  "@npm//lodash",
-  "@npm//react-use"
+  "@npm//lodash"
 ]
 
 TYPES_DEPS = [
@@ -45,6 +44,7 @@ TYPES_DEPS = [
   "@npm//js-sha256",
   "@npm//lodash",
   "@npm//@types/react",
+  "@npm//react-use",
 ]
 
 jsts_transpiler(
