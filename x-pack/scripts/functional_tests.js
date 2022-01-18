@@ -91,7 +91,6 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
   require.resolve('../test/examples/config.ts'),
-  require.resolve('../test/performance/config.ts'),
   require.resolve('../test/functional_execution_context/config.ts'),
 ];
 
