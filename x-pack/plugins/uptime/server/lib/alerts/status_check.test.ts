@@ -1281,15 +1281,18 @@ describe('status check alert', () => {
   describe('statusMessage', () => {
     it('creates message for down item', () => {
       expect(
-        getStatusMessage(
-          makePing({
+        getStatusMessage({
+          info: makePing({
             id: 'test-node-service',
             location: 'fairbanks',
             name: 'Test Node Service',
             url: 'http://localhost:12349',
-          })
-        )
-      ).toMatchInlineSnapshot(`"down"`);
+          }),
+          count: 235,
+          numTimes: 10,
+          interval: '30 days',
+        })
+      ).toMatchInlineSnapshot(`failed 235 times in the last 30 days. Alert when > 10.`);
     });
 
     it('creates message for availability item', () => {
