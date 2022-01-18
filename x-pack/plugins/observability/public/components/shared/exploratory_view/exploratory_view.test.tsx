@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/dom';
 import { render, mockAppIndexPattern } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
-import * as obsvInd from './utils/observability_index_patterns';
+import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
 import * as pluginHook from '../../../hooks/use_plugin_context';
 import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 
@@ -40,8 +40,8 @@ describe('ExploratoryView', () => {
       },
     });
 
-    jest.spyOn(obsvInd, 'ObservabilityIndexPatterns').mockReturnValue({
-      getIndexPattern: jest.fn().mockReturnValue(indexPattern),
+    jest.spyOn(obsvDataViews, 'ObservabilityDataViews').mockReturnValue({
+      getDataView: jest.fn().mockReturnValue(indexPattern),
     } as any);
   });
 

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
 import { GenericIndexPatternColumn } from '../indexpattern';
+import { isColumnFormatted } from '../operations/definitions/helpers';
 
 const supportedFormats: Record<string, { title: string }> = {
   number: {
@@ -55,11 +56,9 @@ const RANGE_MAX = 15;
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
-
-  const currentFormat =
-    'params' in selectedColumn && selectedColumn.params && 'format' in selectedColumn.params
-      ? selectedColumn.params.format
-      : undefined;
+  const currentFormat = isColumnFormatted(selectedColumn)
+    ? selectedColumn.params?.format
+    : undefined;
 
   const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
 
