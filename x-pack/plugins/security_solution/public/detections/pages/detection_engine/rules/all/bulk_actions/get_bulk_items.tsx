@@ -26,7 +26,7 @@ import {
   enableRulesAction,
   exportRulesAction,
 } from '.././actions';
-import { ActionToaster, displayWarningToast } from '../../../../../../common/components/toasters';
+import { ActionToaster } from '../../../../../../common/components/toasters';
 import { Rule } from '../../../../../containers/detection_engine/rules';
 import * as detectionI18n from '../../../translations';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
@@ -230,7 +230,7 @@ export const getBatchItems = ({
     try {
       const editPayload = await completeBulkEditForm(bulkEditActionType);
       const rulesBulkAction = initRulesBulkAction({
-        visibleRuleIds: customSelectedRuleIds,
+        visibleRuleIds: selectedRuleIds,
         selectedItemsCount: customRulesCount,
         action: BulkAction.edit,
         dispatch,
