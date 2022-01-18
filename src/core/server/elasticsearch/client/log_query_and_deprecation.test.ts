@@ -363,10 +363,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
             "path": "/_path",
             "query": undefined,
           },
-          "url": Object {
-            "path": "/_path",
-            "query": undefined,
-          },
         }
       `);
 
@@ -401,10 +397,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
               "headers": Object {},
               "status_code": 400,
             },
-          },
-          "url": Object {
-            "path": "/_path",
-            "query": undefined,
           },
           "url": Object {
             "path": "/_path",
