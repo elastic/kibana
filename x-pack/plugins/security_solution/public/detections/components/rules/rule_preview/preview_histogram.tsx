@@ -21,7 +21,6 @@ import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { formatDate } from '../../../../common/components/super_date_picker';
 import { FieldValueThreshold } from '../threshold_input';
-import { FieldValueQueryBar } from '../query_bar';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -37,7 +36,6 @@ interface PreviewHistogramProps {
   spaceId: string;
   threshold?: FieldValueThreshold;
   ruleType: Type;
-  query: FieldValueQueryBar;
   index: string[];
 }
 
@@ -50,7 +48,6 @@ export const PreviewHistogram = ({
   spaceId,
   threshold,
   ruleType,
-  query,
   index,
 }: PreviewHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
@@ -68,7 +65,6 @@ export const PreviewHistogram = ({
     endDate,
     spaceId,
     threshold: isThresholdRule ? threshold : undefined,
-    query,
     index,
     ruleType,
   });

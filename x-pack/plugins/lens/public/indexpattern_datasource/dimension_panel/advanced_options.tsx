@@ -16,6 +16,7 @@ export function AdvancedOptions(props: {
     onClick: () => void;
     showInPopover: boolean;
     inlineElement: React.ReactElement | null;
+    helpPopup?: string | null;
   }>;
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);

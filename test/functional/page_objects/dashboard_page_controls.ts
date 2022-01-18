@@ -7,8 +7,7 @@
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { OPTIONS_LIST_CONTROL } from '../../../src/plugins/presentation_util/common/controls/';
-import { ControlWidth } from '../../../src/plugins/presentation_util/public/components/controls';
+import { OPTIONS_LIST_CONTROL, ControlWidth } from '../../../src/plugins/controls/common';
 
 import { FtrService } from '../ftr_provider_context';
 

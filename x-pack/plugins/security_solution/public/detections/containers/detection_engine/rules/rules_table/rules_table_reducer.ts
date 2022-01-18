@@ -14,6 +14,7 @@ export type LoadingRuleAction =
   | 'disable'
   | 'export'
   | 'delete'
+  | 'edit'
   | null;
 
 export interface RulesTableState {
