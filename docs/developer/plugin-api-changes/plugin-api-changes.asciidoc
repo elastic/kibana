@@ -56,7 +56,7 @@ Refer to https://github.com/elastic/kibana/pull/112505[#112505]
 ====
 
 `IndexPatterns.create` has been removed in favor of `IndexPatterns.createAndSave`,
-to enforce saving index patterns. This is to eliminate the
+to enforce saving index patterns. This eliminates the
 creation an index pattern that can't be referenced by other saved objects or {kib} apps.
 
 Refer to https://github.com/elastic/kibana/pull/82643[#82643]
