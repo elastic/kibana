@@ -75,7 +75,11 @@ export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYP
 };
 
 type LegendText = string | JSX.Element;
-export const getLegendText = (chartData: ChartData, maxChartColumns: number): LegendText => {
+export const getLegendText = (
+  chartData: ChartData,
+  maxChartColumns: number,
+  isNumeric = false
+): LegendText => {
   if (chartData.type === 'unsupported') {
     return i18n.translate('xpack.dataVisualizer.dataGridChart.histogramNotAvailable', {
       defaultMessage: 'Chart not supported.',
@@ -105,6 +109,14 @@ export const getLegendText = (chartData: ChartData, maxChartColumns: number): Le
         </tbody>
       </table>
     );
+  }
+
+  if (isOrdinalChartData(chartData) && isNumeric) {
+    // The original data could be numerical but also ordinal (e.g. "2340")
+    return i18n.translate('xpack.dataVisualizer.dataGridChart.singleTopValueLegend', {
+      defaultMessage: `{cardinality, plural, one {# top value} other {# top values}}`,
+      values: { cardinality: chartData.cardinality },
+    });
   }
 
   if (isOrdinalChartData(chartData) && chartData.cardinality <= maxChartColumns) {
@@ -140,7 +152,8 @@ interface ColumnChart {
 export const useColumnChart = (
   chartData: ChartData,
   columnType: EuiDataGridColumn,
-  maxChartColumns: number
+  maxChartColumns: number,
+  isNumeric?: boolean
 ): ColumnChart => {
   const fieldType = getFieldType(columnType.schema);
 
@@ -204,7 +217,7 @@ export const useColumnChart = (
 
   return {
     data,
-    legendText: getLegendText(chartData, maxChartColumns),
+    legendText: getLegendText(chartData, maxChartColumns, isNumeric),
     xScaleType,
   };
 };

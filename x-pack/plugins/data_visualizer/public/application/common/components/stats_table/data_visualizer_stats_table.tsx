@@ -287,7 +287,12 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           if (item.type === JOB_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
-              return <IndexBasedNumberContentPreview config={item} />;
+              // If the cardinality is only low, show the top values instead of a distribution chart
+              return item.stats?.distribution?.percentiles.length <= 2 ? (
+                <TopValuesPreview config={item} isNumeric={true} />
+              ) : (
+                <IndexBasedNumberContentPreview config={item} />
+              );
             } else {
               return <FileBasedNumberContentPreview config={item} />;
             }

@@ -23,6 +23,7 @@ interface Props {
   dataTestSubj: string;
   hideLabel?: boolean;
   maxChartColumns: number;
+  isNumeric?: boolean;
 }
 
 const zeroSize = { bottom: 0, left: 0, right: 0, top: 0 };
@@ -34,8 +35,9 @@ export const ColumnChart: FC<Props> = ({
   dataTestSubj,
   hideLabel,
   maxChartColumns,
+  isNumeric,
 }) => {
-  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
 
   return (
     <div data-test-subj={dataTestSubj}>
