@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Client, Transport } from '@elastic/elasticsearch';
-
-import type {
-  TransportRequestParams,
-  TransportRequestOptions,
-} from '@elastic/elasticsearch/lib/Transport';
+import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { createTransport } from './create_transport';
 
 const noop = () => undefined;
 
@@ -33,17 +29,7 @@ export const configureClient = (
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
-  class KibanaTransport extends Transport {
-    request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts = options || {};
-      const opaqueId = getExecutionContext();
-      if (opaqueId && !opts.opaqueId) {
-        // rewrites headers['x-opaque-id'] if it presents
-        opts.opaqueId = opaqueId;
-      }
-      return super.request(params, opts);
-    }
-  }
+  const KibanaTransport = createTransport({ getExecutionContext });
 
   const client = new Client({ ...clientOptions, Transport: KibanaTransport });
 
@@ -52,6 +38,7 @@ export const configureClient = (
   // come up with a better approach in https://github.com/elastic/kibana/issues/110675 //
   if (scoped) skipProductCheck(client);
   // --------------------------------------------------------------------------------- //
+
 
   instrumentEsQueryAndDeprecationLogger({ logger, client, type });
 

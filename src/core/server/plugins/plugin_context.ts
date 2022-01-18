@@ -156,6 +156,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,

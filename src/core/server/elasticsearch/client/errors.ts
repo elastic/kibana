@@ -8,6 +8,7 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
+/** @public */
 export type UnauthorizedError = ResponseError & {
   statusCode: 401;
 };
