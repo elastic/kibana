@@ -73,10 +73,10 @@ export class FunctionalTestRunner {
           );
         }
 
-        if (!this.esVersion.eql(esInfo.version.number)) {
+        if (!this.esVersion.eql(esInfo.body.version.number)) {
           throw new Error(
             `ES reports a version number "${
-              esInfo.version.number
+              esInfo.body.version.number
             }" which doesn't match supplied es version "${this.esVersion.toString()}"`
           );
         }
