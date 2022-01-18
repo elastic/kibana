@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('performance', function () {
-    this.tags('ciGroup8');
-
-    loadTestFile(require.resolve('./home'));
-  });
-}
+export * from './observability_data_views';

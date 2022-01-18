@@ -41,6 +41,10 @@ jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
+jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
+
 jest.mock('react-reverse-portal', () => ({
   InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
