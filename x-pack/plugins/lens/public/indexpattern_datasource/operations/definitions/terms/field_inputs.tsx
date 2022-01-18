@@ -109,6 +109,7 @@ export function FieldInputs({
           label={i18n.translate('xpack.lens.indexPattern.terms.addField', {
             defaultMessage: 'Add field',
           })}
+          isDisabled={column.params.orderBy.type === 'rare'}
         />
       </>
     );
