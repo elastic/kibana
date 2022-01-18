@@ -6,7 +6,7 @@
  */
 
 import { contextMock } from './context.mock';
-import { initializeEs } from './init';
+import { initializeEs, parseIndexAliases } from './init';
 
 describe('initializeEs', () => {
   let esContext = contextMock.create();
@@ -267,11 +267,10 @@ describe('initializeEs', () => {
     });
 
     await initializeEs(esContext);
-    expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
-    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith(
-      'foo-bar-000001',
-      testAliases
-    );
+    expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith('foo-bar', [
+      { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
+    ]);
   });
 
   test(`should not update existing index aliases if any exist and are already hidden`, async () => {
@@ -310,6 +309,9 @@ describe('initializeEs', () => {
         'foo-bar': {
           is_write_index: true,
         },
+        'bar-foo': {
+          is_write_index: true,
+        },
       },
     };
     esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({
@@ -321,17 +323,18 @@ describe('initializeEs', () => {
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
-    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith(
-      'foo-bar-000001',
-      testAliases
-    );
-    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith(
-      'foo-bar-000002',
-      testAliases
-    );
+    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledTimes(2);
+    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith('foo-bar', [
+      { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
+      { alias: 'foo-bar', indexName: 'foo-bar-000002', is_write_index: true },
+    ]);
+    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith('bar-foo', [
+      { alias: 'bar-foo', indexName: 'foo-bar-000001', is_write_index: true },
+      { alias: 'bar-foo', indexName: 'foo-bar-000002', is_write_index: true },
+    ]);
     expect(esContext.logger.error).toHaveBeenCalledTimes(1);
     expect(esContext.logger.error).toHaveBeenCalledWith(
-      `error setting existing \"foo-bar-000001\" index aliases - Fail`
+      `error setting existing \"foo-bar\" index aliases - Fail`
     );
     expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
   });
@@ -382,5 +385,72 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIndex).not.toHaveBeenCalled();
+  });
+});
+
+describe('parseIndexAliases', () => {
+  test('should parse IndicesGetAliasResponse into desired format', () => {
+    const indexGetAliasResponse = {
+      '.kibana-event-log-7.15.2-000003': {
+        aliases: {
+          '.kibana-event-log-7.15.2': {
+            is_write_index: true,
+          },
+          another_alias: {
+            is_write_index: true,
+          },
+        },
+      },
+      '.kibana-event-log-7.15.2-000002': {
+        aliases: {
+          '.kibana-event-log-7.15.2': {
+            is_write_index: false,
+          },
+        },
+      },
+      '.kibana-event-log-7.15.2-000001': {
+        aliases: {
+          '.kibana-event-log-7.15.2': {
+            is_write_index: false,
+          },
+        },
+      },
+      '.kibana-event-log-8.0.0-000001': {
+        aliases: {
+          '.kibana-event-log-8.0.0': {
+            is_write_index: true,
+            is_hidden: true,
+          },
+        },
+      },
+    };
+    expect(parseIndexAliases(indexGetAliasResponse)).toEqual([
+      {
+        alias: '.kibana-event-log-7.15.2',
+        indexName: '.kibana-event-log-7.15.2-000003',
+        is_write_index: true,
+      },
+      {
+        alias: 'another_alias',
+        indexName: '.kibana-event-log-7.15.2-000003',
+        is_write_index: true,
+      },
+      {
+        alias: '.kibana-event-log-7.15.2',
+        indexName: '.kibana-event-log-7.15.2-000002',
+        is_write_index: false,
+      },
+      {
+        alias: '.kibana-event-log-7.15.2',
+        indexName: '.kibana-event-log-7.15.2-000001',
+        is_write_index: false,
+      },
+      {
+        alias: '.kibana-event-log-8.0.0',
+        indexName: '.kibana-event-log-8.0.0-000001',
+        is_hidden: true,
+        is_write_index: true,
+      },
+    ]);
   });
 });

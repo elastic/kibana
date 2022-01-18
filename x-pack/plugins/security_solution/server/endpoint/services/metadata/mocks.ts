@@ -7,7 +7,10 @@
 
 import { SavedObjectsServiceStart } from 'kibana/server';
 import { EndpointMetadataService } from './endpoint_metadata_service';
-import { savedObjectsServiceMock } from '../../../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from '../../../../../../../src/core/server/mocks';
 import {
   createMockAgentPolicyService,
   createMockAgentService,
@@ -17,7 +20,7 @@ import {
 import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/server';
 import {
   EndpointFleetServicesFactory,
-  EndpointFleetServicesInterface,
+  EndpointInternalFleetServicesInterface,
 } from '../endpoint_fleet_services';
 
 const createCustomizedPackagePolicyService = () => {
@@ -43,7 +46,8 @@ export interface EndpointMetadataServiceTestContextMock {
   agentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
   endpointMetadataService: EndpointMetadataService;
-  fleetServices: EndpointFleetServicesInterface;
+  fleetServices: EndpointInternalFleetServicesInterface;
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 
 export const createEndpointMetadataServiceTestContextMock = (
@@ -53,7 +57,10 @@ export const createEndpointMetadataServiceTestContextMock = (
   packagePolicyService: ReturnType<
     typeof createPackagePolicyServiceMock
   > = createCustomizedPackagePolicyService(),
-  packageService: ReturnType<typeof createMockPackageService> = createMockPackageService()
+  packageService: ReturnType<typeof createMockPackageService> = createMockPackageService(),
+  logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']> = loggingSystemMock
+    .create()
+    .get()
 ): EndpointMetadataServiceTestContextMock => {
   const fleetServices = new EndpointFleetServicesFactory({
     agentService,
@@ -65,7 +72,8 @@ export const createEndpointMetadataServiceTestContextMock = (
   const endpointMetadataService = new EndpointMetadataService(
     savedObjectsStart,
     agentPolicyService,
-    packagePolicyService
+    packagePolicyService,
+    logger
   );
 
   return {
@@ -75,5 +83,6 @@ export const createEndpointMetadataServiceTestContextMock = (
     packagePolicyService,
     endpointMetadataService,
     fleetServices,
+    logger,
   };
 };

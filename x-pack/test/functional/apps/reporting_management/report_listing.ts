@@ -18,8 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/75044
-  describe.skip('Listing of Reports', function () {
+  describe('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin', // to access stack management
@@ -47,8 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Confirm single report deletion works', async () => {
       log.debug('Checking for reports.');
       await retry.try(async () => {
-        await testSubjects.click('checkboxSelectRow-krb7arhe164k0763b50bjm29');
+        await testSubjects.click('checkboxSelectRow-krazcyw4156m0763b503j7f9');
       });
+
       const deleteButton = await testSubjects.find('deleteReportButton');
       await retry.waitFor('delete button to become enabled', async () => {
         return await deleteButton.isEnabled();
@@ -57,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.exists('confirmModalBodyText');
       await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
-        await testSubjects.waitForDeleted('checkboxSelectRow-krb7arhe164k0763b50bjm29');
+        await testSubjects.waitForDeleted('checkboxSelectRow-krazcyw4156m0763b503j7f9');
       });
     });
 
@@ -66,13 +66,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const previousButton = await testSubjects.find('pagination-button-previous');
       expect(await previousButton.getAttribute('disabled')).to.be('true');
 
-      await testSubjects.find('checkboxSelectRow-krb7arhe164k0763b50bjm29'); // find first row of page 1
+      await testSubjects.find('checkboxSelectRow-krazcyw4156m0763b503j7f9'); // find first row of page 1
 
       await testSubjects.click('pagination-button-1'); // click page 2
-      await testSubjects.find('checkboxSelectRow-kraz0qle154g0763b569zz83'); // wait for first row of page 2
-
-      await testSubjects.click('pagination-button-2'); // click page 3
-      await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5'); // wait for first row of page 3
+      await testSubjects.find('checkboxSelectRow-k9a9xj3i0gpe1457b16qaduc'); // wait for first row of page 2
 
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
@@ -82,12 +79,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const list = await pageObjects.reporting.getManagementList();
       expectSnapshot(list).toMatchInline(`
         Array [
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 10:29 PM",
-            "report": "Automated report",
-            "status": "Done, warnings detected",
-          },
           Object {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:47 PM",
@@ -141,6 +132,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "createdAt": "2021-07-19 @ 06:38 PM",
             "report": "[Flights] Global Flight Dashboard",
             "status": "Done",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 02:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Failed",
           },
         ]
       `);

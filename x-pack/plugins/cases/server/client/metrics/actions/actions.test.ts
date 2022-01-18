@@ -25,6 +25,8 @@ const clientArgs = {
   authorization: { getAuthorizationFilter },
 } as unknown as CasesClientArgs;
 
+const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientArgs };
+
 describe('Actions', () => {
   beforeAll(() => {
     getAuthorizationFilter.mockResolvedValue({});
@@ -37,14 +39,14 @@ describe('Actions', () => {
 
   it('returns empty values when no features set up', async () => {
     attachmentService.executeCaseActionsAggregations.mockResolvedValue(undefined);
-    const handler = new Actions('', clientMock, clientArgs);
+    const handler = new Actions(constructorOptions);
     expect(await handler.compute()).toEqual({});
   });
 
   it('returns zero values when aggregation returns undefined', async () => {
     attachmentService.executeCaseActionsAggregations.mockResolvedValue(undefined);
 
-    const handler = new Actions('', clientMock, clientArgs);
+    const handler = new Actions(constructorOptions);
     handler.setupFeature('actions.isolateHost');
 
     expect(await handler.compute()).toEqual({
@@ -60,7 +62,7 @@ describe('Actions', () => {
   it('returns zero values when aggregation returns empty object', async () => {
     attachmentService.executeCaseActionsAggregations.mockResolvedValue({});
 
-    const handler = new Actions('', clientMock, clientArgs);
+    const handler = new Actions(constructorOptions);
     handler.setupFeature('actions.isolateHost');
 
     expect(await handler.compute()).toEqual({
@@ -78,7 +80,7 @@ describe('Actions', () => {
       actions: { buckets: [] },
     });
 
-    const handler = new Actions('', clientMock, clientArgs);
+    const handler = new Actions(constructorOptions);
     handler.setupFeature('actions.isolateHost');
 
     expect(await handler.compute()).toEqual({
@@ -96,7 +98,7 @@ describe('Actions', () => {
       actions: { buckets: [{ key: 'otherAction', doc_count: 10 }] },
     });
 
-    const handler = new Actions('', clientMock, clientArgs);
+    const handler = new Actions(constructorOptions);
     handler.setupFeature('actions.isolateHost');
 
     expect(await handler.compute()).toEqual({
@@ -117,7 +119,7 @@ describe('Actions', () => {
       },
     });
 
-    const handler = new Actions('', clientMock, clientArgs);
+    const handler = new Actions(constructorOptions);
     handler.setupFeature('actions.isolateHost');
 
     expect(await handler.compute()).toEqual({
