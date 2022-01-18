@@ -107,14 +107,18 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     return this.getMetricFields();
   }
 
-  getValueAggsDsl(indexPattern: IndexPattern) {
+  getValueAggsDsl(indexPattern: IndexPattern, metricsFilter?: (metric: IESAggField) => boolean) {
     const valueAggsDsl: { [key: string]: unknown } = {};
-    this.getMetricFields().forEach((esAggMetric) => {
-      const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
-      if (aggDsl) {
-        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
-      }
-    });
+    this.getMetricFields()
+      .filter((esAggMetric) => {
+        return metricsFilter ? metricsFilter(esAggMetric) : true;
+      })
+      .forEach((esAggMetric) => {
+        const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
+        if (aggDsl) {
+          valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
+        }
+      });
     return valueAggsDsl;
   }
 

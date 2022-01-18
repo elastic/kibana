@@ -15,6 +15,7 @@ import { IStyleProperty } from '../../../styles/vector/properties/style_property
 import {
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
+  GRID_RESOLUTION,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,
@@ -57,6 +58,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     indexPatternId: documentSource.getIndexPatternId(),
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
+    resolution: GRID_RESOLUTION.COARSE,
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
