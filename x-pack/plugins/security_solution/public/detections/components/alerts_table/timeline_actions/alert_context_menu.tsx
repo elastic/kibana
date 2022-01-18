@@ -291,9 +291,9 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
    */
   const useRuleIndices = useMemo(() => {
     if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
-      return enrichedAlert['kibana.alert.rule.parameters'].index;
+      return enrichedAlert['kibana.alert.rule.parameters'].index as unknown as string[];
     } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
-      return enrichedAlert.signal.rule.index;
+      return enrichedAlert.signal.rule.index as unknown as string[];
     }
     return ruleIndices;
   }, [enrichedAlert, ruleIndices]);
