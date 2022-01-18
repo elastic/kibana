@@ -105,8 +105,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
-
-        console.log(pluginsStart);
         return renderApp(
           coreStart,
           {
