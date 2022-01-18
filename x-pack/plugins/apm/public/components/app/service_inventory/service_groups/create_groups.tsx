@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { CreateGroupsModal } from './create_groups_modal';
 
 export function CreateGroups() {
-  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   return (
     <>
       <EuiButton

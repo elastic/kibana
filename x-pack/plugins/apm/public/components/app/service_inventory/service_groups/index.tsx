@@ -4,78 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiAvatar,
-  EuiCard,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiText,
-  EuiButtonGroup,
-  EuiIcon,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { data } from './mock';
+import React from 'react';
+import { useLocalStorage } from '../../../../hooks/useLocalStorage';
+import { ServiceGroupsList } from './service_groups_list';
+
+export type ServiceGroupsOrientation = 'grid' | 'list';
 
 export function ServiceGroups() {
-  const [toggleIdSelected, setToggleIdSelected] = useState(`grid`);
-
-  const isGrid = toggleIdSelected === 'grid';
+  const [apmServiceGroupsOrientation, setServiceGroupsOrientation] =
+    useLocalStorage<ServiceGroupsOrientation>(
+      'apm.serviceGroupsOrientation',
+      'grid'
+    );
 
   return (
     <>
       <EuiButtonGroup
-        legend="This is a basic group"
+        legend={i18n.translate('xpack.apm.serviceGroups.orientation', {
+          defaultMessage: 'Service groups orientation',
+        })}
         options={[
           { id: `grid`, label: <EuiIcon type="grid" /> },
           { id: `list`, label: <EuiIcon type="list" /> },
         ]}
-        idSelected={toggleIdSelected}
-        onChange={(id) => setToggleIdSelected(id)}
+        idSelected={apmServiceGroupsOrientation}
+        onChange={(id) =>
+          setServiceGroupsOrientation(id as ServiceGroupsOrientation)
+        }
       />
-      <EuiFlexGrid columns={isGrid ? undefined : 1}>
-        {data.map((item) => {
-          return (
-            <EuiFlexItem key={item.name}>
-              {/* @ts-ignore */}
-              <EuiCard
-                style={isGrid ? { width: 286, height: 186 } : undefined}
-                layout={isGrid ? 'vertical' : 'horizontal'}
-                icon={
-                  <EuiAvatar name={item.name} color={item.color} size="l" />
-                }
-                title={item.name}
-                description={
-                  <EuiFlexGroup
-                    direction={isGrid ? 'column' : 'row'}
-                    gutterSize="m"
-                  >
-                    <EuiFlexItem>
-                      <EuiText size="s">{item.description}</EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      style={isGrid ? undefined : { textAlign: 'end' }}
-                    >
-                      <EuiText size="s">
-                        {i18n.translate(
-                          'xpack.apm.serviceGroups.cardsList.serviceCount',
-                          {
-                            defaultMessage:
-                              '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                            values: { servicesCount: item.totalServices },
-                          }
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGrid>
+      <ServiceGroupsList orientation={apmServiceGroupsOrientation} />
     </>
   );
 }
