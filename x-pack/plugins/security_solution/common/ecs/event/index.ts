@@ -57,3 +57,11 @@ export enum EventCode {
   // behavior
   BEHAVIOR = 'behavior',
 }
+
+export enum EventCategory {
+  PROCESS = 'process',
+  FILE = 'file',
+  NETWORK = 'network',
+  DNS = 'dns',
+  REGISTRY = 'registry',
+}
