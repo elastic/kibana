@@ -13,7 +13,7 @@ import type { Filter, ISearchSource, SerializedSearchSourceFields } from 'src/pl
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
-import { AppState } from '../application/main/services/discover_state';
+import { AppState, isEqualFilters } from '../application/main/services/discover_state';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -26,7 +26,7 @@ export async function getSharingData(
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
-  const existingFilter = searchSource.getField('filter');
+  let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
   searchSource.setField(
     'sort',
@@ -56,9 +56,17 @@ export async function getSharingData(
 
   return {
     getSearchSource: (absoluteTime?: boolean): SerializedSearchSourceFields => {
+      const absoluteFilter = data.query.timefilter.timefilter.createFilter(index);
       const timeFilter = absoluteTime
-        ? data.query.timefilter.timefilter.createFilter(index)
+        ? absoluteFilter
         : data.query.timefilter.timefilter.createRelativeFilter(index);
+
+      // remove timeFilter from existing filter
+      if (Array.isArray(existingFilter)) {
+        existingFilter.filter((current) => isEqualFilters(current, absoluteFilter));
+      } else if (isEqualFilters(existingFilter, absoluteFilter)) {
+        existingFilter = undefined;
+      }
 
       if (existingFilter && timeFilter) {
         searchSource.setField(
