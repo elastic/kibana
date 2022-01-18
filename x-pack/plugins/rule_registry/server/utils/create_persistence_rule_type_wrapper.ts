@@ -10,6 +10,7 @@ import { chunk } from 'lodash';
 import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
+import { errorAggregator } from './utils';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -77,7 +78,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [] };
+                  return { createdAlerts: [], errors: {} };
                 }
 
                 const augmentedAlerts = filteredAlerts.map((alert) => {
@@ -102,7 +103,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   });
 
                 if (response == null) {
-                  return { createdAlerts: [] };
+                  return { createdAlerts: [], errors: {} };
                 }
 
                 return {
@@ -116,10 +117,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       };
                     })
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
+                  errors: errorAggregator(response.body, [409]),
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [] };
+                return { createdAlerts: [], errors: {} };
               }
             },
           },

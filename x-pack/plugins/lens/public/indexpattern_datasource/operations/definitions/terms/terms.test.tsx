@@ -67,7 +67,7 @@ describe('terms', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'Top value of category',
+          label: 'Top values of source',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -79,7 +79,7 @@ describe('terms', () => {
           sourceField: 'source',
         } as TermsIndexPatternColumn,
         col2: {
-          label: 'Count',
+          label: 'Count of records',
           dataType: 'number',
           isBucketed: false,
           sourceField: 'Records',
@@ -107,6 +107,30 @@ describe('terms', () => {
             field: ['source'],
             size: [3],
             otherBucket: [true],
+          }),
+        })
+      );
+    });
+
+    it('should reflect rare terms params correctly', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'rare', maxDocCount: 3 } },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggRareTerms',
+          arguments: expect.objectContaining({
+            field: ['source'],
+            max_doc_count: [3],
           }),
         })
       );
@@ -1379,6 +1403,64 @@ describe('terms', () => {
       expect(select.prop('disabled')).toEqual(false);
     });
 
+    it('should disable missing bucket and other bucket setting for rarity sorting', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={{
+            ...(layer.columns.col1 as TermsIndexPatternColumn),
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              orderBy: { type: 'rare', maxDocCount: 3 },
+            },
+          }}
+        />
+      );
+
+      const select1 = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select1.prop('disabled')).toEqual(true);
+
+      const select2 = instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select2.prop('disabled')).toEqual(true);
+    });
+
+    it('should disable size input and show max doc count input', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={{
+            ...(layer.columns.col1 as TermsIndexPatternColumn),
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              orderBy: { type: 'rare', maxDocCount: 3 },
+            },
+          }}
+        />
+      );
+
+      const numberInputs = instance.find(ValuesInput);
+
+      expect(numberInputs).toHaveLength(2);
+
+      expect(numberInputs.first().prop('disabled')).toBeTruthy();
+      expect(numberInputs.last().prop('disabled')).toBeFalsy();
+      expect(numberInputs.last().prop('value')).toEqual(3);
+    });
+
     it('should disable missing bucket setting if field is not a string', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
@@ -1462,6 +1544,7 @@ describe('terms', () => {
       expect(select.prop('options')!.map(({ value }) => value)).toEqual([
         'column$$$col2',
         'alphabetical',
+        'rare',
       ]);
     });
 
