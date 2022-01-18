@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
 
@@ -25,12 +24,6 @@ export const nodesListRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.nodesListLabel', {
-        defaultMessage: 'Nodes Overview',
-      }),
-      href: '',
-    },
   ],
   enableDatePicker: true,
 });
