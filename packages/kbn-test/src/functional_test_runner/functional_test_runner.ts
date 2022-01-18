@@ -7,6 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -21,6 +22,7 @@ import {
   DockerServersService,
   Config,
   SuiteTracker,
+  normalizeVersion,
 } from './lib';
 
 export class FunctionalTestRunner {
@@ -28,10 +30,25 @@ export class FunctionalTestRunner {
   public readonly failureMetadata = new FailureMetadata(this.lifecycle);
   private closed = false;
 
+  static getDefaultEsVersion() {
+    // example: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest-verified.json
+    const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
+    if (manifestUrl) {
+      const match = manifestUrl.match(/\d+\.\d+\.\d+/);
+      if (!match) {
+        throw new Error('unable to extract es version from ES_SNAPSHOT_MANIFEST_URL');
+      }
+      return match[0];
+    }
+
+    return normalizeVersion(kibanaPackageJson.version);
+  }
+
   constructor(
     private readonly log: ToolingLog,
     private readonly configFile: string,
-    private readonly configOverrides: any
+    private readonly configOverrides: any,
+    private readonly esVersion: string
   ) {
     for (const [key, value] of Object.entries(this.lifecycle)) {
       if (value instanceof LifecyclePhase) {
@@ -61,7 +78,7 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
@@ -107,14 +124,14 @@ export class FunctionalTestRunner {
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
       ]);
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
       const countTests = (suite: Suite): number =>
         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
 
       return {
         testCount: countTests(mocha.suite),
-        excludedTests: mocha.excludedTests.map((t: Test) => t.fullTitle()),
+        testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
     });
   }

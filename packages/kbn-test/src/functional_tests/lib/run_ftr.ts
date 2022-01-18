@@ -40,25 +40,30 @@ async function createFtr({
 
   return {
     config,
-    ftr: new FunctionalTestRunner(log, configPath, {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
+    ftr: new FunctionalTestRunner(
+      log,
+      configPath,
+      {
+        mochaOpts: {
+          bail: !!bail,
+          grep,
+        },
+        kbnTestServer: {
+          installDir,
+        },
+        updateBaselines,
+        updateSnapshots,
+        suiteFiles: {
+          include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
+          exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
+        },
+        suiteTags: {
+          include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
+          exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
+        },
       },
-      kbnTestServer: {
-        installDir,
-      },
-      updateBaselines,
-      updateSnapshots,
-      suiteFiles: {
-        include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
-        exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
-      },
-      suiteTags: {
-        include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
-        exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
-      },
-    }),
+      FunctionalTestRunner.getDefaultEsVersion()
+    ),
   };
 }
 
@@ -71,15 +76,15 @@ export async function assertNoneExcluded({ configPath, options }: CreateFtrParam
   }
 
   const stats = await ftr.getTestStats();
-  if (stats.excludedTests.length > 0) {
+  if (stats.testsExcludedByTag.length > 0) {
     throw new CliError(`
-      ${stats.excludedTests.length} tests in the ${configPath} config
+      ${stats.testsExcludedByTag.length} tests in the ${configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags:
 
       ${JSON.stringify(options.suiteTags)}
 
-      - ${stats.excludedTests.join('\n      - ')}
+      - ${stats.testsExcludedByTag.join('\n      - ')}
     `);
   }
 }

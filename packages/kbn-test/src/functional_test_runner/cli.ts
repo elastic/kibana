@@ -13,6 +13,7 @@ import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/d
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
+import { normalizeVersion } from './lib/mocha/filter_suites';
 
 const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
 const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
@@ -35,6 +36,17 @@ export function runFtrCli() {
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
+      const esVersionInput = flags['es-version'];
+      if (esVersionInput && typeof esVersionInput !== 'string') {
+        throw createFlagError('expected --es-version to be a string');
+      }
+      const esVersion = normalizeVersion(
+        esVersionInput || FunctionalTestRunner.getDefaultEsVersion()
+      );
+      if (esVersion !== esVersionInput) {
+        log.warning(`Using ${esVersion} for ES version requirement matching`);
+      }
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
         makeAbsolutePath(flags.config as string),
@@ -57,7 +69,8 @@ export function runFtrCli() {
           },
           updateBaselines: flags.updateBaselines || flags.u,
           updateSnapshots: flags.updateSnapshots || flags.u,
-        }
+        },
+        esVersion
       );
 
       if (flags.throttle) {
@@ -131,6 +144,7 @@ export function runFtrCli() {
           'include-tag',
           'exclude-tag',
           'kibana-install-dir',
+          'es-version',
         ],
         boolean: [
           'bail',
@@ -150,6 +164,7 @@ export function runFtrCli() {
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
+          --es-version       the elasticsearch version, formatted as "x.y.z"
           --include=file     a test file to be included, pass multiple times for multiple files
           --exclude=file     a test file to be excluded, pass multiple times for multiple files
           --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only

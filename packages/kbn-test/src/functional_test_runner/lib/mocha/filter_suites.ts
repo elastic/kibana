@@ -6,6 +6,32 @@
  * Side Public License, v 1.
  */
 
+import semver from 'semver';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Suite, Test } from '../../fake_mocha_types';
+
+interface SuiteInternal extends Suite {
+  _tags?: string[];
+  _esVersionRequirement?: string;
+  suites: SuiteInternal[];
+}
+
+interface Options {
+  log: ToolingLog;
+  mocha: any;
+  include: string[];
+  exclude: string[];
+  esVersion: string;
+}
+
+export function normalizeVersion(version: string) {
+  const v = semver.coerce(version);
+  if (!v) {
+    throw new Error(`unable to convert [${version}] to a valid semver version`);
+  }
+  return v.version;
+}
+
 /**
  * Given a mocha instance that has already loaded all of its suites, filter out
  * the suites based on the include/exclude tags. If there are include tags then
@@ -16,23 +42,46 @@
  * @param options.include an array of tags that suites must be tagged with to be run
  * @param options.exclude an array of tags that will be used to exclude suites from the run
  */
-export function filterSuitesByTags({ log, mocha, include, exclude }) {
-  mocha.excludedTests = [];
+export function filterSuites({ log, mocha, include, exclude, esVersion }: Options) {
+  mocha.testsExcludedByTag = [];
+  mocha.testsExcludedByEsVersion = [];
+
   // collect all the tests from some suite, including it's children
-  const collectTests = (suite) =>
+  const collectTests = (suite: SuiteInternal): Test[] =>
     suite.suites.reduce((acc, s) => acc.concat(collectTests(s)), suite.tests);
+
+  // traverse the test graph and exclude any tests which don't meet their esVersionRequirement
+  log.info('Only running suites which are compatible with ES version', esVersion);
+  (function recurse(parentSuite: SuiteInternal) {
+    const children = parentSuite.suites;
+    parentSuite.suites = [];
+
+    const meetsEsVersionRequirement = (suite: SuiteInternal) =>
+      !suite._esVersionRequirement || semver.satisfies(esVersion, suite._esVersionRequirement);
+
+    for (const child of children) {
+      if (meetsEsVersionRequirement(child)) {
+        parentSuite.suites.push(child);
+        recurse(child);
+      } else {
+        mocha.testsExcludedByEsVersion = mocha.testsExcludedByEsVersion.concat(collectTests(child));
+      }
+    }
+  })(mocha.suite);
 
   // if include tags were provided, filter the tree once to
   // only include branches that are included at some point
   if (include.length) {
     log.info('Only running suites (and their sub-suites) if they include the tag(s):', include);
 
-    const isIncluded = (suite) =>
+    const isIncludedByTags = (suite: SuiteInternal) =>
       !suite._tags ? false : suite._tags.some((t) => include.includes(t));
-    const isChildIncluded = (suite) =>
+
+    const isIncluded = (suite: SuiteInternal) => isIncludedByTags(suite);
+    const isChildIncluded = (suite: SuiteInternal): boolean =>
       suite.suites.some((s) => isIncluded(s) || isChildIncluded(s));
 
-    (function recurse(parentSuite) {
+    (function recurse(parentSuite: SuiteInternal) {
       const children = parentSuite.suites;
       parentSuite.suites = [];
 
@@ -47,13 +96,13 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
         // itself, so strip out its tests and recurse to filter
         // out child suites which are not included
         if (isChildIncluded(child)) {
-          mocha.excludedTests = mocha.excludedTests.concat(child.tests);
+          mocha.testsExcludedByTag = mocha.testsExcludedByTag.concat(child.tests);
           child.tests = [];
           parentSuite.suites.push(child);
           recurse(child);
           continue;
         } else {
-          mocha.excludedTests = mocha.excludedTests.concat(collectTests(child));
+          mocha.testsExcludedByTag = mocha.testsExcludedByTag.concat(collectTests(child));
         }
       }
     })(mocha.suite);
@@ -64,9 +113,10 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
   if (exclude.length) {
     log.info('Filtering out any suites that include the tag(s):', exclude);
 
-    const isNotExcluded = (suite) => !suite._tags || !suite._tags.some((t) => exclude.includes(t));
+    const isNotExcluded = (suite: SuiteInternal) =>
+      !suite._tags || !suite._tags.some((t) => exclude.includes(t));
 
-    (function recurse(parentSuite) {
+    (function recurse(parentSuite: SuiteInternal) {
       const children = parentSuite.suites;
       parentSuite.suites = [];
 
@@ -77,7 +127,7 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
           parentSuite.suites.push(child);
           recurse(child);
         } else {
-          mocha.excludedTests = mocha.excludedTests.concat(collectTests(child));
+          mocha.testsExcludedByTag = mocha.testsExcludedByTag.concat(collectTests(child));
         }
       }
     })(mocha.suite);
