@@ -71,7 +71,6 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 113478
   visualizations: 90000
-  visualize: 57431
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
@@ -121,3 +120,4 @@ pageLoadAssetSize:
   expressionGauge: 25000
   controls: 34788
   expressionPie: 26338
+  sharedUX: 16225
