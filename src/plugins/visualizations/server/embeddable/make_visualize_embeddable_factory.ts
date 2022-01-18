@@ -113,11 +113,12 @@ const getEmbeddedVisualizationSearchSourceMigrations = (
   );
 
 export const makeVisualizeEmbeddableFactory =
-  (searchSourceMigrations: MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
+  (getSearchSourceMigrations: () => MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
     return {
       id: 'visualization',
+      // TODO - embeddable factory migrations should accept a function that evaluates to a MigrationFunctionMap like we allow for saved object definitions.
       migrations: mergeMigrationFunctionMaps(
-        getEmbeddedVisualizationSearchSourceMigrations(searchSourceMigrations),
+        getEmbeddedVisualizationSearchSourceMigrations(getSearchSourceMigrations()),
         {
           // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
           '7.13.1': (state) =>

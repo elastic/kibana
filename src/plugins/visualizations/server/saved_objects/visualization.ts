@@ -11,7 +11,7 @@ import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 
 export const getVisualizationSavedObjectType = (
-  searchSourceMigrations: MigrateFunctionsObject
+  getSearchSourceMigrations: () => MigrateFunctionsObject
 ): SavedObjectsType => ({
   name: 'visualization',
   hidden: false,
@@ -44,5 +44,5 @@ export const getVisualizationSavedObjectType = (
       visState: { type: 'text', index: false },
     },
   },
-  migrations: getAllMigrations(searchSourceMigrations),
+  migrations: () => getAllMigrations(getSearchSourceMigrations),
 });

@@ -13,10 +13,12 @@ import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {
-    const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
-      return semverGte(version, '7.13.1');
-    });
-    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory({})()?.migrations;
+    const savedObjectMigrationVersions = Object.keys(getAllMigrations(() => ({}))).filter(
+      (version) => {
+        return semverGte(version, '7.13.1');
+      }
+    );
+    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory(() => ({}))()?.migrations;
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
         Object.keys(embeddableMigrationVersions).sort()
@@ -38,20 +40,20 @@ describe('embeddable migrations', () => {
       },
     };
 
-    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory({
+    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory(() => ({
       [migrationVersion]: (searchSource: SerializedSearchSourceFields) => {
         return {
           ...searchSource,
           migrated: true,
         };
       },
-    })()?.migrations;
+    }))()?.migrations;
 
     const migratedVisualizationDoc =
       embeddableMigrationVersions?.[migrationVersion](embeddedVisualizationDoc);
 
     expect(migratedVisualizationDoc).toEqual({
-      visState: {
+      savedVis: {
         data: {
           searchSource: {
             type: 'some-type',

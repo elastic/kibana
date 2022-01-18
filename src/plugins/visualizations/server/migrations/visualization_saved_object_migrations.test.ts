@@ -60,7 +60,7 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
 };
 
 describe('migration visualization', () => {
-  const visualizationSavedObjectTypeMigrations = getAllMigrations({});
+  const visualizationSavedObjectTypeMigrations = getAllMigrations(() => ({}));
 
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
@@ -2452,9 +2452,9 @@ describe('migration visualization', () => {
     } as SavedObjectUnsanitizedDoc;
 
     const versionToTest = '1.2.3';
-    const visMigrations = getAllMigrations({
+    const visMigrations = getAllMigrations(() => ({
       [versionToTest]: (state) => ({ ...state, migrated: true }),
-    });
+    }));
 
     expect(
       visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)

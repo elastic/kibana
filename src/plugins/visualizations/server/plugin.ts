@@ -46,8 +46,10 @@ export class VisualizationsPlugin
   ) {
     this.logger.debug('visualizations: Setup');
 
-    const searchSourceMigrations = plugins.data.search.searchSource.getAllMigrations();
-    core.savedObjects.registerType(getVisualizationSavedObjectType(searchSourceMigrations));
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
+    core.savedObjects.registerType(getVisualizationSavedObjectType(getSearchSourceMigrations));
     core.capabilities.registerProvider(capabilitiesProvider);
 
     core.uiSettings.register({
@@ -70,7 +72,7 @@ export class VisualizationsPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(
-      makeVisualizeEmbeddableFactory(searchSourceMigrations)()
+      makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
     );
 
     return {};
