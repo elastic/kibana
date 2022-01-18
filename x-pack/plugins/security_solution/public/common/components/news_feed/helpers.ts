@@ -17,8 +17,8 @@ import { KibanaServices } from '../../lib/kibana';
  * (e.g. `8.0.0-SNAPSHOT`), which is typically only seen in non-production
  * environments
  */
-export const removeSnapshotFromVersion = (kibanaVersion?: string) =>
-  kibanaVersion?.replace(/-SNAPSHOT/gi, '') ?? kibanaVersion;
+export const removeSuffixFromVersion = (kibanaVersion?: string) =>
+  kibanaVersion?.split('-')[0] ?? kibanaVersion;
 
 /**
  * Combines the URL specified in the `newsFeedUrlSetting`, e.g.
@@ -36,7 +36,7 @@ export const getNewsFeedUrl = ({
 }) =>
   [
     newsFeedUrlSetting?.trim().replace(/\/$/, ''),
-    `v${removeSnapshotFromVersion(getKibanaVersion())}.json`,
+    `v${removeSuffixFromVersion(getKibanaVersion())}.json`,
   ].join('/');
 
 /** Fall back to this language when extracting i18n news items from the feed */
