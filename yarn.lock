@@ -3114,6 +3114,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+  version "0.0.0"
+  uid ""
+
 "@kbn/utility-types@link:bazel-bin/packages/kbn-utility-types":
   version "0.0.0"
   uid ""
@@ -5957,6 +5961,14 @@
   uid ""
 
 "@types/kbn__ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
   version "0.0.0"
   uid ""
 

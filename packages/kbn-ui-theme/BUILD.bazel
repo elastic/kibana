@@ -1,18 +1,14 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-ui-shared-deps-src"
-PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-src"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__ui-shared-deps-src"
+PKG_BASE_NAME = "kbn-ui-theme"
+PKG_REQUIRE_NAME = "@kbn/ui-theme"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__ui-theme"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*",
-  ],
-  exclude = [
-    "**/*.md",
+    "src/**/*.ts",
   ],
 )
 
@@ -24,41 +20,30 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "flot_charts/package.json",
   "package.json",
-  "README.md"
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-datemath",
-  "//packages/elastic-safer-lodash-set",
-  "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-i18n",
-  "//packages/kbn-i18n-react",
-  "//packages/kbn-monaco",
-  "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-ui-theme",
+  "@npm//@elastic/eui",
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath:npm_module_types",
-  "//packages/elastic-safer-lodash-set:npm_module_types",
-  "//packages/kbn-analytics:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-monaco:npm_module_types",
-  "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
-  "//packages/kbn-ui-theme:npm_module_types",
-  "@npm//webpack",
+  "@npm//@elastic/eui",
+  "@npm//@types/node",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
 )
 
 ts_config(
@@ -75,38 +60,19 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = TYPES_DEPS,
-  allow_js = True,
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   source_map = True,
+  root_dir = "src",
   tsconfig = ":tsconfig",
-)
-
-webpack(
-  name = "shared_built_assets",
-  data = RUNTIME_DEPS + [
-    "//:package.json",
-    ":srcs",
-    ":tsconfig",
-    ":webpack.config.js",
-  ],
-  output_dir = True,
-  args = [
-    "--config",
-    "$(location webpack.config.js)",
-    "--output-path",
-    "$(@D)",
-    "--display=minimal"
-  ],
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
