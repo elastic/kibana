@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IncomingHttpHeaders } from 'http';
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
 import { errors, Client, ApiError, RequestEvent } from '@elastic/elasticsearch';
 import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import numeral from '@elastic/numeral';
+import { getEcsResponseLog } from './get_ecs_response_log';
 import { Logger } from '../../logging';
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
@@ -37,6 +39,14 @@ export function getErrorMessage(error: ApiError): string {
   return `[${error.name}]: ${error.message}`;
 }
 
+function getContentLength(headers?: IncomingHttpHeaders | null): number | undefined {
+  const contentLength = headers && headers['content-length'];
+  if (contentLength) {
+    const val = parseInt(contentLength, 10);
+    return !isNaN(val) ? val : undefined;
+  }
+}
+
 /**
  * returns a string in format:
  *
@@ -46,10 +56,10 @@ export function getErrorMessage(error: ApiError): string {
  *
  * so it could be copy-pasted into the Dev console
  */
-function getResponseMessage(event: RequestEvent): string {
+function getResponseMessage(event: RequestEvent, bytesMsg: string): string {
   const errorMeta = getRequestDebugMeta(event);
   const body = errorMeta.body ? `\n${errorMeta.body}` : '';
-  return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
+  return `${errorMeta.statusCode}${bytesMsg}\n${errorMeta.method} ${errorMeta.url}${body}`;
 }
 
 /**
@@ -92,21 +102,19 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const deprecationLogger = logger.get('deprecation');
   client.on('response', (error, event) => {
     if (event) {
-      const opaqueId = event.meta.request.options.opaqueId;
-      const meta = opaqueId
-        ? {
-            http: { request: { id: event.meta.request.options.opaqueId } },
-          }
-        : undefined; // do not clutter logs if opaqueId is not present
+      const bytes = getContentLength(event.headers);
+      const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
+      const meta = getEcsResponseLog(event, bytes);
+
       let queryMsg = '';
       if (error) {
         if (error instanceof errors.ResponseError) {
-          queryMsg = `${getResponseMessage(event)} ${getErrorMessage(error)}`;
+          queryMsg = `${getResponseMessage(event, bytesMsg)} ${getErrorMessage(error)}`;
         } else {
           queryMsg = getErrorMessage(error);
         }
       } else {
-        queryMsg = getResponseMessage(event);
+        queryMsg = getResponseMessage(event, bytesMsg);
       }
 
       queryLogger.debug(queryMsg, meta);

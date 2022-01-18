@@ -7,6 +7,8 @@
 
 // Base API paths
 
+export const INTERNAL_ROOT = `/internal/fleet`;
+
 export const API_ROOT = `/api/fleet`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
@@ -118,4 +120,6 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
+  RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
+  RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
 };

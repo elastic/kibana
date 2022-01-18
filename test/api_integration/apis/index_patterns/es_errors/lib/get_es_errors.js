@@ -25,7 +25,6 @@ export async function getDocNotFoundError(es) {
   try {
     await es.get({
       index: 'basic_index',
-      type: 'type',
       id: '1234',
     });
   } catch (err) {
