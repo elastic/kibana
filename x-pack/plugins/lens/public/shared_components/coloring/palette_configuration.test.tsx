@@ -29,6 +29,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+// mocking isAllColorRangesValid function
+jest.mock('./color_ranges/color_ranges_validation', () => {
+  const original = jest.requireActual('./color_ranges/color_ranges_validation');
+
+  return {
+    ...original,
+    isAllColorRangesValid: () => true,
+  };
+});
+
 describe('palette panel', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
   let props: {

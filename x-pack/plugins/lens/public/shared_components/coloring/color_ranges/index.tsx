@@ -7,5 +7,4 @@
 
 export { ColorRanges } from './color_ranges';
 export { ColorRangesContext } from './color_ranges_context';
-export { isAllColorRangesValid } from './color_ranges_validation';
 export type { ColorRange, ColorRangesActions } from './types';

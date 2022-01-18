@@ -163,6 +163,13 @@ export function ColorRangeItem({
     }
   }, [localValue, colorRange, accessor]);
 
+  const selectNewColorText = i18n.translate(
+    'xpack.lens.dynamicColoring.customPalette.selectNewColor',
+    {
+      defaultMessage: 'Select a new color',
+    }
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
       <EuiFlexItem grow={false}>
@@ -171,17 +178,14 @@ export function ColorRangeItem({
             onChange={onUpdateColor}
             button={
               isColorValid ? (
-                <EuiColorPickerSwatch
-                  color={colorRange.color}
-                  aria-label={i18n.translate(
-                    'xpack.lens.dynamicColoring.customPalette.selectNewColor',
-                    {
-                      defaultMessage: 'Select a new color',
-                    }
-                  )}
-                />
+                <EuiColorPickerSwatch color={colorRange.color} aria-label={selectNewColorText} />
               ) : (
-                <EuiButtonIcon color="danger" iconType="pencil" />
+                <EuiButtonIcon
+                  color="danger"
+                  iconType="stopSlash"
+                  iconSize="l"
+                  aria-label={selectNewColorText}
+                />
               )
             }
             secondaryInputDisplay="top"

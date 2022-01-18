@@ -18,7 +18,8 @@ import './palette_configuration.scss';
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import { toColorRanges, getFallbackDataBounds } from './utils';
 import { defaultPaletteParams } from './constants';
-import { ColorRanges, ColorRangesContext, isAllColorRangesValid } from './color_ranges';
+import { ColorRanges, ColorRangesContext } from './color_ranges';
+import { isAllColorRangesValid } from './color_ranges/color_ranges_validation';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
 
 export function CustomizablePalette({
