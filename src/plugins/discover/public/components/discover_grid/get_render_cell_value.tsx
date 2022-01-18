@@ -177,7 +177,7 @@ export const getRenderCellValueFn =
         );
       }
 
-      return formatFieldValue(rowFlattened[columnId], row, indexPattern, field);
+      return (<span>{ formatFieldValue(rowFlattened[columnId], row, indexPattern, field) }</span>);
     }
 
     return (
