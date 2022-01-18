@@ -59,6 +59,7 @@ interface GetBatchItems {
   completeBulkEditForm: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
   fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   selectedItemsCount: number;
+  isRulesBulkEditEnabled: boolean;
 }
 
 // eslint-disable-next-line complexity
@@ -81,6 +82,7 @@ export const getBatchItems = ({
   completeBulkEditForm,
   fetchCustomRulesCount,
   selectedItemsCount,
+  isRulesBulkEditEnabled,
 }: GetBatchItems): EuiContextMenuPanelDescriptor[] => {
   const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
 
@@ -299,20 +301,24 @@ export const getBatchItems = ({
           toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',
         },
-        {
-          key: 'Index patterns',
-          name: 'Index patterns',
-          'data-test-subj': 'indexPatternsBulkEditRule',
-          disabled: isEditDisabled,
-          panel: 2,
-        },
-        {
-          key: 'Tags',
-          name: 'Tags',
-          'data-test-subj': 'tagsBulkEditRule',
-          disabled: isEditDisabled,
-          panel: 1,
-        },
+        ...(isRulesBulkEditEnabled
+          ? [
+              {
+                key: 'Index patterns',
+                name: 'Index patterns',
+                'data-test-subj': 'indexPatternsBulkEditRule',
+                disabled: isEditDisabled,
+                panel: 2,
+              },
+              {
+                key: 'Tags',
+                name: 'Tags',
+                'data-test-subj': 'tagsBulkEditRule',
+                disabled: isEditDisabled,
+                panel: 1,
+              },
+            ]
+          : []),
         {
           key: i18n.BULK_ACTION_EXPORT,
           name: i18n.BULK_ACTION_EXPORT,
@@ -339,7 +345,7 @@ export const getBatchItems = ({
             <EuiTextColor
               color={isDeleteDisabled ? euiThemeVars.euiButtonColorDisabledText : 'danger'}
             >
-              {i18n.BATCH_ACTION_DELETE_SELECTED}
+              {i18n.BULK_ACTION_DELETE}
             </EuiTextColor>
           ),
           'data-test-subj': 'deleteRuleBulk',

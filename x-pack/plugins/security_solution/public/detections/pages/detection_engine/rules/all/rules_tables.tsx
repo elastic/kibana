@@ -55,6 +55,7 @@ import { AllRulesTabs } from '.';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
 import { useBulkEditFormFlyout } from '../../../../containers/detection_engine/rules/rules_table/use_bulk_edit_form_flyout';
 import { useCustomRulesCount } from '../../../../containers/detection_engine/rules/rules_table/use_custom_rules_count';
@@ -156,6 +157,8 @@ export const RulesTables = React.memo<RulesTableProps>(
     const mlCapabilities = useMlCapabilities();
     const { navigateToApp } = useKibana().services.application;
 
+    const isRulesBulkEditEnabled = useIsExperimentalFeatureEnabled('rulesBulkEditEnabled');
+
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -248,6 +251,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           completeBulkEditForm,
           fetchCustomRulesCount,
           selectedItemsCount,
+          isRulesBulkEditEnabled,
         });
       },
       [
@@ -268,6 +272,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         completeBulkEditForm,
         selectedItemsCount,
         fetchCustomRulesCount,
+        isRulesBulkEditEnabled,
       ]
     );
 

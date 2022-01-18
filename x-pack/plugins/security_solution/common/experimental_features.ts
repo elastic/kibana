@@ -22,6 +22,7 @@ export const allowedExperimentalValues = Object.freeze({
   riskyHostsEnabled: false,
   securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
+  rulesBulkEditEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
