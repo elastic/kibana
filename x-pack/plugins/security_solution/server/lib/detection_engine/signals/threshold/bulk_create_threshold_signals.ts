@@ -141,7 +141,6 @@ const getTransformedHits = (
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
     const termsHash = getThresholdTermsHash(bucket.terms);
-    const signalHit = signalHistory[termsHash];
 
     const source = {
       [TIMESTAMP]: bucket.maxTimestamp,
