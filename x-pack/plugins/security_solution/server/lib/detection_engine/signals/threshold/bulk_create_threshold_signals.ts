@@ -22,11 +22,7 @@ import {
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
 import { GenericBulkCreateResponse } from '../bulk_create_factory';
-import {
-  calculateThresholdSignalUuid,
-  getThresholdAggregationParts,
-  getThresholdTermsHash,
-} from '../utils';
+import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
   MultiAggBucket,
@@ -140,8 +136,6 @@ const getTransformedHits = (
     0,
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
-    const termsHash = getThresholdTermsHash(bucket.terms);
-
     const source = {
       [TIMESTAMP]: bucket.maxTimestamp,
       ...bucket.terms.reduce<object>((termAcc, term) => {
