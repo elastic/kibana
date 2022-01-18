@@ -265,7 +265,7 @@ export class Embeddable
   }
 
   public supportedTriggers() {
-    if (!this.savedVis) {
+    if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
     return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];

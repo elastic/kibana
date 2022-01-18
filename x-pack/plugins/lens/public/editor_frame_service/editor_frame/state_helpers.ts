@@ -101,7 +101,7 @@ export async function persistedStateToExpression(
   if (!visualizations[visualizationType]) {
     return {
       ast: null,
-      errors: [getUnknownVisualizationTypeError(doc.visualizationType)],
+      errors: [getUnknownVisualizationTypeError(visualizationType)],
     };
   }
   const visualization = visualizations[visualizationType!];

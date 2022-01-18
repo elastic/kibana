@@ -221,7 +221,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (unknownVisError) {
       setLocalState((s) => ({
         ...s,
-        expressionBuildError: [getUnknownVisualizationTypeError(visualization.activeId)],
+        expressionBuildError: [getUnknownVisualizationTypeError(visualization.activeId!)],
       }));
     }
   }, [
