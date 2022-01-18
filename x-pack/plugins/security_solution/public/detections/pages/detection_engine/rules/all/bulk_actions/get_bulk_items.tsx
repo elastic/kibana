@@ -56,7 +56,9 @@ interface GetBatchItems {
   filterOptions: FilterOptions;
   confirmDeletion: () => Promise<boolean>;
   confirmBulkEdit: () => Promise<boolean>;
-  completeBulkEditForm: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
+  completeBulkEditForm: (
+    bulkActionEditType: BulkActionEditType
+  ) => Promise<BulkActionEditPayload | null>;
   fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   selectedItemsCount: number;
   isRulesBulkEditEnabled: boolean;
@@ -231,6 +233,9 @@ export const getBatchItems = ({
 
     try {
       const editPayload = await completeBulkEditForm(bulkEditActionType);
+      if (editPayload == null) {
+        throw Error('Bulk edit payload is empty');
+      }
       const rulesBulkAction = initRulesBulkAction({
         visibleRuleIds: selectedRuleIds,
         selectedItemsCount: customRulesCount,

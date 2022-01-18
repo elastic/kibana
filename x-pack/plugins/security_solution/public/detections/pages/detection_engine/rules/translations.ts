@@ -172,16 +172,30 @@ export const BULK_EDIT_CONFIRMATION_BODY = (elasticRulesCount: number, customRul
   );
 
 export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButton',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButtonLabel',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationConfirmButton',
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationConfirmButtonLabel',
   {
     defaultMessage: 'Edit custom rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutFormSaveButtonLabel',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutFormCloseButtonLabel',
+  {
+    defaultMessage: 'CLose',
   }
 );
 

@@ -54,8 +54,6 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
   );
   const { isValid } = formState;
 
-  const flyoutTitleId = 'Bulk edit flyout';
-
   const formSwitch = useMemo(() => {
     switch (editAction) {
       case BulkActionEditType.add_index_patterns:
@@ -76,10 +74,15 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
   }, [sendForm, editAction, rulesCount]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutTitleId} size="s">
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={formState.formTitle ?? undefined}
+      size="s"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{formState.formTitle}</h2>
+          <h2>{formState.formTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{formSwitch}</EuiFlyoutBody>
@@ -87,12 +90,12 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-              Close
+              {i18n.BULK_EDIT_FLYOUT_FORM_SAVE}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={handleSave} fill disabled={isValid === false}>
-              Save
+              {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

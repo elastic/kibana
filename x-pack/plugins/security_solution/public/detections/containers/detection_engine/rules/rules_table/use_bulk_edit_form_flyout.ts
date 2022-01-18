@@ -7,11 +7,14 @@
 import { useState, useCallback, useRef } from 'react';
 import { useAsyncConfirmation } from './use_async_confirmation';
 
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  BulkActionEditType,
+  BulkActionEditPayload,
+} from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
 export const useBulkEditFormFlyout = () => {
-  const dataFormRef = useRef<unknown>();
+  const dataFormRef = useRef<BulkActionEditPayload | null>(null);
   const [actionType, setActionType] = useState<BulkActionEditType>();
   const [isBulkEditFlyoutVisible, showBulkEditFlyout, hideBulkEditFlyout] = useBoolState();
 
@@ -33,7 +36,7 @@ export const useBulkEditFormFlyout = () => {
   );
 
   const handleBulkEditFormConfirm = useCallback(
-    <T>(data: T) => {
+    (data: BulkActionEditPayload) => {
       dataFormRef.current = data;
       onConfirm();
     },

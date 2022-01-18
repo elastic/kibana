@@ -13,9 +13,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../../../../../common/constants';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
 import {
-  BulkAction,
   BulkActionEditType,
-  BulkActionEditPayload,
   BulkActionEditPayloadIndexPatterns,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
@@ -25,7 +23,6 @@ import {
   Form,
   Field,
   getUseField,
-  FormHook,
   useFormData,
   ERROR_CODE,
   FIELD_TYPES,
@@ -131,10 +128,8 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onChange }: Props)
       {overwrite && (
         <EuiFormRow>
           <EuiCallOut color="warning">
-            <p>
-              You’re about to overwrite index patterns for {rulesCount} selected rules, press Save
-              to apply changes.
-            </p>
+            You’re about to overwrite index patterns for {rulesCount} selected rules, press Save to
+            apply changes.
           </EuiCallOut>
         </EuiFormRow>
       )}
