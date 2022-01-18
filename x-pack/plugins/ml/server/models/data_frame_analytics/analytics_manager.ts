@@ -19,7 +19,7 @@ import {
   DataFrameAnalyticsStats,
   MapElements,
 } from '../../../common/types/data_frame_analytics';
-import { INDEX_META_DATA_CREATED_BY } from '../../../../file_upload/common';
+import { FILE_UPLOAD } from '../../../../file_upload/common';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ExtendAnalyticsMapArgs,
@@ -458,7 +458,7 @@ export class AnalyticsManager {
             if (
               link.isWildcardIndexPattern === false &&
               (link.meta === undefined ||
-                link.meta?.created_by.includes(INDEX_META_DATA_CREATED_BY))
+                link.meta?.created_by.includes(FILE_UPLOAD.INDEX_META_DATA_CREATED_BY))
             ) {
               rootIndexPattern = nextLinkId;
               complete = true;

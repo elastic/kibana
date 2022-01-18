@@ -6,14 +6,16 @@
  */
 
 import numeral from '@elastic/numeral';
-import {
-  MAX_FILE_SIZE,
-  MAX_FILE_SIZE_BYTES,
+import { FILE_UPLOAD } from '../../common';
+import { getUiSettings } from '../kibana_services';
+
+const {
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
+  MAX_FILE_SIZE,
+  MAX_FILE_SIZE_BYTES,
   UI_SETTING_MAX_FILE_SIZE,
-} from '../../common';
-import { getUiSettings } from '../kibana_services';
+} = FILE_UPLOAD;
 
 export function getMaxBytes() {
   const maxFileSize = getUiSettings().get(UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE);

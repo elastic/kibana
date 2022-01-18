@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-export {
-  ABSOLUTE_MAX_FILE_SIZE_BYTES,
-  FILE_FORMATS,
-  FILE_SIZE_DISPLAY_FORMAT,
-  INDEX_META_DATA_CREATED_BY,
-  MAX_FILE_SIZE,
-  MAX_FILE_SIZE_BYTES,
-  MB,
-  UI_SETTING_MAX_FILE_SIZE,
-} from './constants';
+/**
+ * @internal
+ */
+export { FILE_UPLOAD } from './constants';
+
+/**
+ * @internal
+ */
 export type {
   AnalysisResult,
-  Doc,
   FindFileStructureErrorResponse,
   FindFileStructureResponse,
   FormattedOverrides,
@@ -25,6 +22,7 @@ export type {
   Settings,
   Mappings,
   ImportDoc,
+  ImportDocMessage,
   InputData,
   InputOverrides,
   IngestPipeline,

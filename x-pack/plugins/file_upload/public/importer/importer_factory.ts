@@ -8,7 +8,7 @@
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
 import { ImportFactoryOptions } from './types';
-import { FILE_FORMATS } from '../../common/constants';
+import { FILE_UPLOAD } from '../../common';
 
 export function importerFactory(format: string, options: ImportFactoryOptions) {
   switch (format) {
@@ -16,10 +16,10 @@ export function importerFactory(format: string, options: ImportFactoryOptions) {
     // file into messages, then sending these to ES for further processing
     // in an ingest pipeline in documents containing a single "message"
     // field (like Filebeat does)
-    case FILE_FORMATS.DELIMITED:
-    case FILE_FORMATS.SEMI_STRUCTURED_TEXT:
+    case FILE_UPLOAD.FILE_FORMATS.DELIMITED:
+    case FILE_UPLOAD.FILE_FORMATS.SEMI_STRUCTURED_TEXT:
       return new MessageImporter(options);
-    case FILE_FORMATS.NDJSON:
+    case FILE_UPLOAD.FILE_FORMATS.NDJSON:
       return new NdjsonImporter();
     default:
       return;
