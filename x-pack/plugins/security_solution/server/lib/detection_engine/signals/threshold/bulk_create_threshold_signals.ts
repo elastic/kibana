@@ -102,6 +102,7 @@ const getTransformedHits = (
             ].filter((term) => term.field != null),
             cardinality: val.cardinality,
             maxTimestamp: val.maxTimestamp,
+            minTimestamp: val.minTimestamp,
             docCount: val.docCount,
           };
           acc.push(el as MultiAggBucket);
@@ -124,6 +125,7 @@ const getTransformedHits = (
               ]
             : undefined,
           maxTimestamp: bucket.max_timestamp.value_as_string,
+          minTimestamp: bucket.min_timestamp.value_as_string,
           docCount: bucket.doc_count,
         };
         acc.push(el as MultiAggBucket);
@@ -162,8 +164,7 @@ const getTransformedHits = (
         // threshold set in the timeline search. The upper bound will always be
         // the `original_time` of the signal (the timestamp of the latest event
         // in the set).
-        from:
-          signalHit?.lastSignalTimestamp != null ? new Date(signalHit.lastSignalTimestamp) : from,
+        from: new Date(bucket.minTimestamp) ?? from,
       },
     };
 
