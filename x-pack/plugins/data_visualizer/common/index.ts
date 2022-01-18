@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110898
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './constants';
-export * from './types';
+export {
+  FILE_DATA_VIS_TAB_ID,
+  FILE_SIZE_DISPLAY_FORMAT,
+  JOB_FIELD_TYPES,
+  NON_AGGREGATABLE_FIELD_TYPES,
+  OMIT_FIELDS,
+  applicationPath,
+  featureId,
+  featureTitle,
+} from './constants';
+export type {
+  DataVisualizerTableState,
+  FieldRequestConfig,
+  JobFieldType,
+  SavedSearchSavedObject,
+} from './types';
+export { isSavedSearchSavedObject } from './types';
