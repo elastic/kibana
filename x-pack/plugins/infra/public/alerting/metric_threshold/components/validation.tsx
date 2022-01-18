@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 import { Comparator, MetricExpressionParams } from '../../../../common/alerting/metrics';
-import { QUERY_INVALID } from './expression';
+
+export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 export function validateMetricThreshold({
   criteria,
   filterQuery,
 }: {
   criteria: MetricExpressionParams[];
-  filterQuery?: string | symbol;
+  filterQuery?: string | typeof QUERY_INVALID;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
