@@ -10,7 +10,6 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import { Client, errors } from '@elastic/elasticsearch';
-
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
@@ -26,7 +25,7 @@ const createApiResponse = <T>({
   statusCode = 200,
   headers = {},
   warnings = null,
-  params,
+  params = { method: 'GET', path: '/path', querystring: '?wait_for_completion=true' },
   requestOptions = {},
 }: {
   body: T;
@@ -76,10 +75,14 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     jest.clearAllMocks();
   });
 
-  function createResponseWithBody(body?: RequestBody) {
+  function createResponseWithBody(
+    body?: RequestBody,
+    params?: { headers?: Record<string, string> }
+  ) {
     return createApiResponse({
       body: {},
       statusCode: 200,
+      headers: params?.headers ?? {},
       params: {
         method: 'GET',
         path: '/foo',
@@ -106,15 +109,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
 
       client.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
-            undefined,
-          ],
-        ]
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
 
@@ -131,15 +129,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       );
 
       client.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}",
-            undefined,
-          ],
-        ]
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
 
@@ -158,15 +151,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       );
 
       client.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        [buffer]",
-            undefined,
-          ],
-        ]
+        [buffer]"
       `);
     });
 
@@ -185,15 +173,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       );
 
       client.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
         GET /foo?hello=dolly
-        [stream]",
-            undefined,
-          ],
-        ]
+        [stream]"
       `);
     });
 
@@ -203,14 +186,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       const response = createResponseWithBody();
 
       client.emit('response', null, response);
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
-        GET /foo?hello=dolly",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
+        GET /foo?hello=dolly"
       `);
     });
 
@@ -229,14 +207,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       client.emit('response', null, response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "200
-        GET /foo?city=M%C3%BCnich",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200
+        GET /foo?city=M%C3%BCnich"
       `);
     });
 
@@ -264,15 +237,10 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "500
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "500
         GET /foo?hello=dolly
-        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error",
-            undefined,
-          ],
-        ]
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}} [internal server error]: internal server error"
       `);
     });
 
@@ -282,14 +250,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       const response = createApiResponse({ body: {} });
       client.emit('response', new errors.TimeoutError('message', response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "[TimeoutError]: message",
-            undefined,
-          ],
-        ]
-      `);
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(
+        `"[TimeoutError]: message"`
+      );
     });
 
     it('logs debug when the client emits an ResponseError returned by elasticsearch', () => {
@@ -312,14 +275,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "400
-        GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "400
+        GET /_path?hello=dolly [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]"
       `);
     });
 
@@ -339,14 +297,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "400
-        GET /_path [undefined]: {\\"error\\":{}}",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "400
+        GET /_path [undefined]: {\\"error\\":{}}"
       `);
 
       logger.debug.mockClear();
@@ -362,14 +315,9 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       });
       client.emit('response', new errors.ResponseError(response), response);
 
-      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "400
-        GET /_path [undefined]: Response Error",
-            undefined,
-          ],
-        ]
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "400
+        GET /_path [undefined]: Response Error"
       `);
     });
 
@@ -397,7 +345,18 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           "http": Object {
             "request": Object {
               "id": "opaque-id",
+              "method": "GET",
             },
+            "response": Object {
+              "body": Object {
+                "bytes": undefined,
+              },
+              "headers": Object {},
+              "status_code": 400,
+            },
+          },
+          "url": Object {
+            "path": "/_path",
           },
         }
       `);
@@ -423,9 +382,43 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           "http": Object {
             "request": Object {
               "id": "opaque-id",
+              "method": "GET",
+            },
+            "response": Object {
+              "body": Object {
+                "bytes": undefined,
+              },
+              "headers": Object {},
+              "status_code": 400,
             },
           },
+          "url": Object {
+            "path": "/_path",
+          },
         }
+      `);
+    });
+
+    it('logs response size', () => {
+      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+
+      const response = createResponseWithBody(
+        {
+          seq_no_primary_term: true,
+          query: {
+            term: { user: 'kimchy' },
+          },
+        },
+        {
+          headers: { 'content-length': '12345678' },
+        }
+      );
+
+      client.emit('response', null, response);
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+        "200 - 11.8MB
+        GET /foo?hello=dolly
+        {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
   });
