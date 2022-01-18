@@ -6,30 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from 'kibana/public';
+import type { EMSClient } from '@elastic/ems-client';
 import { MapsEmsPlugin } from './plugin';
-import { IServiceSettings } from './service_settings';
-import type { MapsEmsConfig } from '../config';
-
-/** @public */
-export type {
-  VectorLayer,
-  FileLayerField,
-  FileLayer,
-  TmsLayer,
-  IServiceSettings,
-} from './service_settings';
+import type { MapConfig } from '../config';
+import type { EMSSettings } from '../common';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export { TMS_IN_YML_ID } from '../common';
+export type { MapConfig, TileMapConfig } from '../config';
+export type { EMSConfig } from '../common';
 
-export type { MapsEmsConfig } from '../config';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MapsEmsPluginPublicSetup {}
 
-export interface MapsEmsPluginSetup {
-  config: MapsEmsConfig;
-  getServiceSettings: () => Promise<IServiceSettings>;
+export interface MapsEmsPluginPublicStart {
+  config: MapConfig;
+  createEMSSettings(): EMSSettings;
+  createEMSClient(): Promise<EMSClient>;
 }
-export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;

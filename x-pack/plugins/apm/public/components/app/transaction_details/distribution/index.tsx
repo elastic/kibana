@@ -33,7 +33,7 @@ import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
-import { HeightRetainer } from '../../../shared/HeightRetainer';
+import { HeightRetainer } from '../../../shared/height_retainer';
 import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
 
 // Enforce min height so it's consistent across all tabs on the same level

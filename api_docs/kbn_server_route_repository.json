@@ -202,6 +202,32 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-server.RouteState",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteState",
+        "description": [],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-server.RouteState.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[endpoint: string]: any",
+            "description": [],
+            "signature": [
+              "[endpoint: string]:  any"
+            ],
+            "path": "packages/kbn-server-route-repository/src/typings.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
         "id": "def-server.ServerRouteRepository",
         "type": "Interface",
         "tags": [],
@@ -306,7 +332,13 @@
                 "text": "ServerRouteRepository"
               },
               "<TRouteHandlerResources, TRouteCreateOptions, ",
-              "RouteState",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "server",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-server.RouteState",
+                "text": "RouteState"
+              },
               ">>(repository: TServerRouteRepository) => TServerRouteRepository extends ",
               {
                 "pluginId": "@kbn/server-route-repository",

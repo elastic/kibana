@@ -197,7 +197,7 @@ exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
               },
             ],
           },
-          Symbol(Symbol.observable): [MockFunction],
+          "undefined": [MockFunction],
         }
       }
     >
@@ -427,7 +427,7 @@ exports[`useUrlParams gets the expected values using the context 1`] = `
               },
             ],
           },
-          Symbol(Symbol.observable): [MockFunction],
+          "undefined": [MockFunction],
         }
       }
     >
