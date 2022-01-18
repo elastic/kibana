@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { CancellationToken } from '../../../../common';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { createMockLevelLogger } from '../../../test_helpers/create_mock_levellogger';
 import { ScrollConfig } from '../../../types';
 import { createHitIterator } from './hit_iterator';

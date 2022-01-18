@@ -8,7 +8,7 @@
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
-import { CancellationToken } from '../../../../common';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { cryptoFactory, LevelLogger } from '../../../lib';
 import {
   createMockConfig,
@@ -69,7 +69,7 @@ test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await runTask(
     'pngJobId',
@@ -97,7 +97,7 @@ test(`passes browserTimezone to generatePng`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
@@ -115,7 +115,7 @@ test(`returns content of generatePng`, async () => {
   const testContent = 'raw string from get_screenhots';
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   await runTask(
     'pngJobId',
