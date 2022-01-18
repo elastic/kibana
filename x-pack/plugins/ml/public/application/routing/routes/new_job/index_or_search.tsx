@@ -72,6 +72,7 @@ export const dataVizIndexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'data_view_datavisualizer',
   path: '/datavisualizer_index_select',
   render: (props, deps) => (
     <PageWrapper

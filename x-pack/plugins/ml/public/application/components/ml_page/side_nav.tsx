@@ -13,6 +13,7 @@ import { useUrlState } from '../../util/url_state';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import { ML_APP_NAME } from '../../../../common/constants/app';
+import type { MlRoute } from '../../routing';
 
 export type TabId =
   | 'access-denied'
@@ -165,7 +166,8 @@ export const TAB_DATA: Record<TabId, TabData> = {
   },
 };
 
-export function useSideNavItems(activeRouteId: string | undefined) {
+export function useSideNavItems(activeRoute: MlRoute | undefined) {
+  const activeRouteId = activeRoute?.id;
   const {
     services: {
       chrome: { docTitle },
@@ -214,7 +216,7 @@ export function useSideNavItems(activeRouteId: string | undefined) {
     return {
       id,
       name: tab.name,
-      isSelected: id === activeRouteId,
+      isSelected: id === activeRouteId || activeRoute?.path.includes(`${id}/`),
       disabled,
       onClick: () => {
         redirectToTab(defaultPathId);
