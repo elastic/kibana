@@ -26,6 +26,7 @@ import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants'
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
+import { mount as mountDrift } from './driftChat';
 
 export interface CloudConfigType {
   id?: string;
@@ -37,6 +38,9 @@ export interface CloudConfigType {
   full_story: {
     enabled: boolean;
     org_id?: string;
+  };
+  drift?: {
+    chat_url: string;
   };
 }
 
@@ -79,6 +83,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const application = core.getStartServices().then(([coreStart]) => {
       return coreStart.application;
     });
+
     this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
@@ -120,8 +125,22 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start(coreStart: CoreStart, { security }: CloudStartDependencies) {
-    const { deployment_url: deploymentUrl, base_url: baseUrl } = this.config;
+    const { deployment_url: deploymentUrl, base_url: baseUrl, drift } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
+
+    if (drift?.chat_url || true) {
+      const defaultChatUrl = 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html';
+      coreStart.application.currentAppId$.subscribe((appId) => {
+        // when an app is mounted the Drift chat gets unmounted
+        // so, to keep Drift on a page mount Drift on every navigation to an app
+        // and as I haven't found better way to keep tracking an app mounting
+        // I use `currentAppId` for this purpose
+        mountDrift({
+          chatUrl: drift?.chat_url || defaultChatUrl,
+          appId,
+        });
+      });
+    }
 
     const setLinks = (authorized: boolean) => {
       if (!authorized) return;

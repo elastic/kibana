@@ -28,6 +28,10 @@ const fullStoryConfigSchema = schema.object({
   ),
 });
 
+const driftChatConfigSchema = schema.object({
+  chat_url: schema.maybe(schema.string()),
+});
+
 const configSchema = schema.object({
   id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
@@ -37,6 +41,7 @@ const configSchema = schema.object({
   deployment_url: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   full_story: fullStoryConfigSchema,
+  drift: schema.maybe(driftChatConfigSchema),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -50,6 +55,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     deployment_url: true,
     organization_url: true,
     full_story: true,
+    drift: true,
   },
   schema: configSchema,
 };
