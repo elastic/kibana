@@ -17,7 +17,10 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
 
-const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => {
+const convertToVisDimension = (
+  columns: DatatableColumn[],
+  accessor: string
+): ExpressionValueVisDimension | undefined => {
   const column = columns.find((c) => c.id === accessor);
   if (!column) return;
   return {
@@ -27,7 +30,7 @@ const convertToVisDimension = (columns: DatatableColumn[], accessor: string) => 
       params: { ...column.meta.params?.params },
     },
     type: 'vis_dimension',
-  } as ExpressionValueVisDimension;
+  };
 };
 
 const prepareHeatmapLogTable = (
@@ -70,12 +73,14 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.legendConfig.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
+      default: `{${EXPRESSION_HEATMAP_LEGEND_NAME}}`,
     },
     gridConfig: {
       types: [EXPRESSION_HEATMAP_GRID_NAME],
       help: i18n.translate('expressionHeatmap.function.gridConfig.help', {
         defaultMessage: 'Configure the heatmap layout.',
       }),
+      default: `{${EXPRESSION_HEATMAP_GRID_NAME}}`,
     },
     showTooltip: {
       types: ['boolean'],
@@ -118,6 +123,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
         defaultMessage: 'The id of the value column or the corresponding dimension',
       }),
+      required: true,
     },
     // not supported yet, small multiples accessor
     splitRowAccessor: {

@@ -53,7 +53,6 @@ describe('default cell actions', () => {
     });
 
     expect(columnsWithCellActions[0]?.cellActions?.length).toEqual(5);
-    expect(columnsWithCellActions[0]?.cellActions![4]).toEqual(EmptyComponent);
   });
 
   const columnHeadersToTest = COLUMNS_WITH_LINKS.map((c) => [

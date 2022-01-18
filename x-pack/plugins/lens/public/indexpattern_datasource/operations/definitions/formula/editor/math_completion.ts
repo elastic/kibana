@@ -347,8 +347,9 @@ export async function getNamedArgumentSuggestions({
           if (typeof dateHistogramInterval === 'undefined') return true;
           const parsedValue = parseTimeShift(value);
           return (
-            typeof parsedValue === 'string' ||
-            Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval)
+            parsedValue !== 'previous' &&
+            (parsedValue === 'invalid' ||
+              Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval))
           );
         })
         .map(({ value }) => value),

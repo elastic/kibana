@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { IndexPattern } from '../../../../../../plugins/data/public';
+import type { DataView } from '../../../../../../plugins/data_views/public';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
@@ -18,13 +18,13 @@ import { CreateEditField } from './create_edit_field';
 export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;
 
 const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
-  const { setBreadcrumbs, data } = useKibana<IndexPatternManagmentContext>().services;
-  const [indexPattern, setIndexPattern] = useState<IndexPattern>();
+  const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagmentContext>().services;
+  const [indexPattern, setIndexPattern] = useState<DataView>();
   const fieldName =
     props.match.params.fieldName && decodeURIComponent(props.match.params.fieldName);
 
   useEffect(() => {
-    data.indexPatterns.get(props.match.params.id).then((ip: IndexPattern) => {
+    dataViews.get(props.match.params.id).then((ip: DataView) => {
       setIndexPattern(ip);
       if (ip) {
         setBreadcrumbs(
@@ -32,7 +32,7 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
         );
       }
     });
-  }, [props.match.params.id, fieldName, setBreadcrumbs, data.indexPatterns]);
+  }, [props.match.params.id, fieldName, setBreadcrumbs, dataViews]);
 
   if (indexPattern) {
     return (
