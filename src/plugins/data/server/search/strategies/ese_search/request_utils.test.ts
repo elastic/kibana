@@ -111,6 +111,18 @@ describe('request utils', () => {
       });
       expect(params).toHaveProperty('keep_on_completion', false);
     });
+
+    test('Sends `enable_fields_emulation` for BWC with CCS', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const mockConfig = getMockSearchSessionsConfig({
+        defaultExpiration: moment.duration(3, 'd'),
+        enabled: false,
+      });
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
+      expect(params).toHaveProperty('enable_fields_emulation', true);
+    });
   });
 
   describe('getDefaultAsyncGetParams', () => {

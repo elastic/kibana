@@ -44,7 +44,9 @@ export async function getDefaultAsyncSubmitParams(
     | 'ignore_unavailable'
     | 'track_total_hits'
     | 'keep_on_completion'
-  >
+  > & {
+    enable_fields_emulation: boolean;
+  }
 > {
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
@@ -66,6 +68,7 @@ export async function getDefaultAsyncSubmitParams(
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
     // If search sessions are used, set the initial expiration time.
+    enable_fields_emulation: true, // See https://github.com/elastic/elasticsearch/pull/75745
   };
 }
 

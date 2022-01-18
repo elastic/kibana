@@ -19,13 +19,7 @@ export function getShardTimeout(config: SharedGlobalConfig): Pick<Search, 'timeo
 export async function getDefaultSearchParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>
 ): Promise<
-  Pick<
-    Search,
-    | 'max_concurrent_shard_requests'
-    | 'ignore_unavailable'
-    | 'track_total_hits'
-    | 'enable_fields_emulation'
-  >
+  Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>
 > {
   const maxConcurrentShardRequests = await uiSettingsClient.get<number>(
     UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
@@ -35,7 +29,6 @@ export async function getDefaultSearchParams(
       maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
     ignore_unavailable: true, // Don't fail if the index/indices don't exist
     track_total_hits: true,
-    enable_fields_emulation: true, // See https://github.com/elastic/elasticsearch/pull/75745
   };
 }
 

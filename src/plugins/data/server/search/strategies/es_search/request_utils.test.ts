@@ -80,13 +80,12 @@ describe('request utils', () => {
     });
 
     describe('other defaults', () => {
-      test('returns ignore_unavailable, track_total_hits, and enable_fields_emulation', async () => {
+      test('returns ignore_unavailable and track_total_hits', async () => {
         const result = await getDefaultSearchParams({
           get: jest.fn(),
         } as unknown as IUiSettingsClient);
         expect(result).toHaveProperty('ignore_unavailable', true);
         expect(result).toHaveProperty('track_total_hits', true);
-        expect(result).toHaveProperty('enable_fields_emulation', true);
       });
     });
   });
