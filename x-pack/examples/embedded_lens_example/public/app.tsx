@@ -28,6 +28,7 @@ import {
   XYState,
   LensEmbeddableInput,
   DateHistogramIndexPatternColumn,
+  DatatableVisualizationState,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
@@ -106,6 +107,68 @@ function getLensAttributes(
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: xyConfig,
+    },
+  };
+}
+
+function getLensAttributesDatatable(
+  defaultIndexPattern: IndexPattern
+): TypedLensByValueInput['attributes'] {
+  const dataLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1', 'col2'],
+    columns: {
+      col2: {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'Count of records',
+        operationType: 'count',
+        scale: 'ratio',
+        sourceField: 'Records',
+      },
+      col1: {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: { interval: 'auto' },
+        scale: 'interval',
+        sourceField: defaultIndexPattern.timeFieldName!,
+      } as DateHistogramIndexPatternColumn,
+    },
+  };
+
+  const tableConfig: DatatableVisualizationState = {
+    layerId: 'layer1',
+    layerType: 'data',
+    columns: [{ columnId: 'col1' }, { columnId: 'col2' }],
+  };
+
+  return {
+    visualizationType: 'lnsDatatable',
+    title: 'Prefilled from example app',
+    references: [
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-layer-layer1',
+        type: 'index-pattern',
+      },
+    ],
+    state: {
+      datasourceStates: {
+        indexpattern: {
+          layers: {
+            layer1: dataLayer,
+          },
+        },
+      },
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: tableConfig,
     },
   };
 }
@@ -241,6 +304,29 @@ export const App = (props: {
                   style={{ height: 500 }}
                   timeRange={time}
                   attributes={getLensAttributes(props.defaultIndexPattern, color)}
+                  onLoad={(val) => {
+                    setIsLoading(val);
+                  }}
+                  onBrushEnd={({ range }) => {
+                    setTime({
+                      from: new Date(range[0]).toISOString(),
+                      to: new Date(range[1]).toISOString(),
+                    });
+                  }}
+                  onFilter={(_data) => {
+                    // call back event for on filter event
+                  }}
+                  onTableRowClick={(_data) => {
+                    // call back event for on table row click event
+                  }}
+                  viewMode={ViewMode.VIEW}
+                />
+                <LensComponent
+                  id=""
+                  style={{ height: 500 }}
+                  timeRange={time}
+                  attributes={getLensAttributesDatatable(props.defaultIndexPattern)}
+                  disableTriggers
                   onLoad={(val) => {
                     setIsLoading(val);
                   }}

@@ -340,6 +340,38 @@ describe('DatatableComponent', () => {
     });
   });
 
+  test('it should not invoke executeTriggerActions if interactivity is set to false', async () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={{
+          ...data,
+          dateRange: {
+            fromDate: new Date('2020-04-20T05:00:00.000Z'),
+            toDate: new Date('2020-05-03T05:00:00.000Z'),
+          },
+        }}
+        args={args}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive={false}
+      />
+    );
+
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+
+    await waitForWrapperUpdate(wrapper);
+
+    wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
+
+    expect(onDispatchEvent).not.toHaveBeenCalled();
+  });
+
   test('it shows emptyPlaceholder for undefined bucketed data', () => {
     const { args, data } = sampleArgs();
     const emptyData: LensMultiTable = {

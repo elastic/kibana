@@ -58,6 +58,8 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
 
+  const isInteractive = props.interactive ?? true;
+
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
     sortingColumnId: props.args.sortingColumnId,
@@ -333,9 +335,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [visibleColumns]
   );
 
-  const sorting = useMemo<EuiDataGridSorting>(
-    () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
-    [onEditAction, sortBy, sortDirection]
+  const sorting = useMemo<EuiDataGridSorting | undefined>(
+    () =>
+      isInteractive
+        ? createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction)
+        : undefined,
+    [onEditAction, sortBy, sortDirection, isInteractive]
   );
 
   const renderSummaryRow = useMemo(() => {
