@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "metricbeat-2022-01-13",
+    "index": "metricbeat-2022-01-18",
     "mappings": {
       "date_detection": false,
       "dynamic_templates": [
@@ -99,6 +99,28 @@
                     "pct": {
                       "scaling_factor": 1000,
                       "type": "scaled_float"
+                    }
+                  }
+                }
+              }
+            },
+            "network": {
+              "properties": {
+                "in": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "name": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                },
+                "out": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
                     }
                   }
                 }
