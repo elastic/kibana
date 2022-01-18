@@ -89,7 +89,8 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     // TODO: Add a link to docs to explain how to add index patterns
     return (
       <EuiText color="danger" className="eui-textNoWrap">
-        {indexPatternError.body.error === 'Forbidden'
+        {indexPatternError.body?.error === 'Forbidden' ||
+        indexPatternError.name === 'DataViewInsufficientAccessError'
           ? NO_PERMISSIONS
           : indexPatternError.body.message}
       </EuiText>
