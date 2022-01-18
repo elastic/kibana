@@ -633,7 +633,11 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`".gz"`);
+    expect(component).toMatchInlineSnapshot(`
+      <Fragment>
+        .gz
+      </Fragment>
+    `);
 
     const componentWithDetails = shallow(
       <DiscoverGridCellValue
