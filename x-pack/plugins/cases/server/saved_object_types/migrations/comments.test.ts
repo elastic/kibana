@@ -9,6 +9,7 @@ import {
   createCommentsMigrations,
   mergeMigrationFunctionMaps,
   migrateByValueLensVisualizations,
+  removeRuleInformation,
   stringifyCommentWithoutTrailingNewline,
 } from './comments';
 import {
@@ -29,6 +30,7 @@ import {
   MigrateFunctionsObject,
 } from '../../../../../../src/plugins/kibana_utils/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { CommentType } from '../../../common/api';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
@@ -394,6 +396,81 @@ describe('comments migrations', () => {
       expect(stringifyCommentWithoutTrailingNewline(originalComment, parsedString)).toEqual(
         'awesome     '
       );
+    });
+  });
+
+  describe('removeRuleInformation', () => {
+    it('does not modify non-alert comment', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'user',
+        },
+        type: 'abc',
+        references: [],
+      };
+
+      expect(removeRuleInformation(doc)).toEqual(doc);
+    });
+
+    it('sets the rule fields to null', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {
+          type: CommentType.alert,
+          rule: {
+            id: '123',
+            name: 'hello',
+          },
+        },
+      };
+
+      expect(removeRuleInformation(doc)).toEqual({
+        ...doc,
+        attributes: { ...doc.attributes, rule: { id: null, name: null } },
+        references: [],
+      });
+    });
+
+    it('sets the rule fields to null for a generated alert', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {
+          type: CommentType.generatedAlert,
+          rule: {
+            id: '123',
+            name: 'hello',
+          },
+        },
+      };
+
+      expect(removeRuleInformation(doc)).toEqual({
+        ...doc,
+        attributes: { ...doc.attributes, rule: { id: null, name: null } },
+        references: [],
+      });
+    });
+
+    it('preserves the references field', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {
+          type: CommentType.alert,
+          rule: {
+            id: '123',
+            name: 'hello',
+          },
+        },
+        references: [{ id: '123', name: 'hi', type: 'awesome' }],
+      };
+
+      expect(removeRuleInformation(doc)).toEqual({
+        ...doc,
+        attributes: { ...doc.attributes, rule: { id: null, name: null } },
+      });
     });
   });
 });
