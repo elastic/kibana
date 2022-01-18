@@ -375,8 +375,8 @@ export function getOptionsFromCliArgs(
 
     // filters
     author: all ? null : author,
-    dateSince: since,
-    dateUntil: until,
+    dateSince: since ? new Date(since).toISOString() : undefined,
+    dateUntil: until ? new Date(until).toISOString() : undefined,
 
     // `multiple` is a cli-only flag to override `multipleBranches` and `multipleCommits`
     multipleBranches: multiple ?? multipleBranches,

@@ -23,8 +23,9 @@ const HOMEDIR_PATH = resolve(
 );
 const REPO_OWNER = 'backport-org';
 const REPO_NAME = 'integration-test';
-const BRANCH_NAME = 'backport/7.x/commit-5bf29b7d';
-const AUHTOR = 'sqren';
+const BRANCH_WITH_ONE_COMMIT = 'backport/7.x/commit-5bf29b7d';
+const BRANCH_WITH_TWO_COMMITS = 'backport/7.x/commit-5bf29b7d_pr-2';
+const AUTHOR = 'sqren';
 
 describe('backport e2e', () => {
   afterAll(() => {
@@ -56,13 +57,13 @@ describe('backport e2e', () => {
       });
 
       const options = await getOptions([], {
-        githubApiBaseUrlV3: 'https://api.foo.com',
-        ci: true,
-        sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
-        author: AUHTOR,
         accessToken,
-        repoOwner: 'backport-org',
+        author: AUTHOR,
+        ci: true,
+        githubApiBaseUrlV3: 'https://api.foo.com',
         repoName: 'integration-test',
+        repoOwner: 'backport-org',
+        sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
       });
       const commits = await getCommits(options);
       const targetBranches: string[] = ['7.x'];
@@ -113,109 +114,24 @@ describe('backport e2e', () => {
     it('should create branch in the fork (sqren/integration-test)', async () => {
       const branches = await getBranches({
         accessToken,
-        repoOwner: AUHTOR,
+        repoOwner: AUTHOR,
         repoName: REPO_NAME,
       });
       expect(branches.map((b) => b.name)).toEqual([
         '7.x',
-        BRANCH_NAME,
+        BRANCH_WITH_ONE_COMMIT,
         'master',
       ]);
     });
-
-    it('should have cherry picked the correct commit', async () => {
-      const branches = await getBranches({
-        accessToken,
-        repoOwner: AUHTOR,
-        repoName: REPO_NAME,
-      });
-
-      const sha = branches.find((branch) => branch.name === '7.x')?.commit.sha;
-      expect(sha).toEqual('b68e4fcaaf4427fe1e902c718b3bb3f07b560fb5');
-    });
   });
 
-  // describe.skip('when two commits are backported', () => {
-  //   let createPullRequestsMockCalls: unknown[];
-  //   let res: Awaited<ReturnType<typeof runSequentially>>;
-  //   let accessToken: string;
-
-  //   beforeAll(async () => {
-  //     accessToken = await getDevAccessToken();
-  //     await resetState(accessToken);
-
-  //     createPullRequestsMockCalls = mockCreatePullRequest({
-  //       number: 1337,
-  //       html_url: 'myHtmlUrl',
-  //     });
-
-  //     const options = {
-  //       githubApiBaseUrlV3: 'https://api.foo.com',
-  //       ci: true,
-  //       sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
-  //       author: AUHTOR,
-  //       accessToken,
-  //       repoOwner: 'backport-org',
-  //       reponame: 'integration-test',
-  //     } as ValidConfigOptions;
-  //     const commits = await getCommits(options);
-  //     const targetBranches: string[] = ['7.x'];
-
-  //     res = await runSequentially({ options, commits, targetBranches });
-  //   });
-
-  //   it('sends the correct http body when creating pull request', () => {
-  //     expect(createPullRequestsMockCalls).toMatchInlineSnapshot();
-  //   });
-
-  //   it('returns pull request', () => {
-  //     expect(res).toEqual([
-  //       { pullRequestUrl: 'myHtmlUrl', success: true, targetBranch: '6.0' },
-  //     ]);
-  //   });
-
-  //   it('should not create new branches in origin (backport-org/integration-test)', async () => {
-  //     const branches = await getBranches({
-  //       accessToken,
-  //       repoOwner: REPO_OWNER,
-  //       repoName: REPO_NAME,
-  //     });
-  //     expect(branches.map((b) => b.name)).toEqual(['7.x', '* master']);
-  //   });
-
-  //   it('should create branch in the fork (sqren/integration-test)', async () => {
-  //     const branches = await getBranches({
-  //       accessToken,
-  //       repoOwner: AUHTOR,
-  //       repoName: REPO_NAME,
-  //     });
-  //     expect(branches.map((b) => b.name)).toEqual([
-  //       '7.x',
-  //       'backport/6.0/pr-85_commit-2e63475c',
-  //       'master',
-  //     ]);
-  //   });
-
-  //   it('should have cherry picked the correct commit', async () => {
-  //     const branches = await getBranches({
-  //       accessToken,
-  //       repoOwner: AUHTOR,
-  //       repoName: REPO_NAME,
-  //     });
-
-  //     const sha = branches.find((branch) => branch.name === '7.x')?.commit.sha;
-  //     expect(sha).toEqual('foo');
-  //   });
-  // });
-
-  describe('when disabling fork mode', () => {
+  describe('when two commits are backported', () => {
+    let createPullRequestsMockCalls: unknown[];
     let res: Awaited<ReturnType<typeof runSequentially>>;
     let accessToken: string;
-    let createPullRequestsMockCalls: unknown[];
 
     beforeAll(async () => {
       accessToken = await getDevAccessToken();
-
       await resetState(accessToken);
 
       createPullRequestsMockCalls = mockCreatePullRequest({
@@ -224,14 +140,106 @@ describe('backport e2e', () => {
       });
 
       const options = await getOptions([], {
-        author: AUHTOR,
-        githubApiBaseUrlV3: 'https://api.foo.com',
-        ci: true,
-        sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
         accessToken,
-        repoOwner: 'backport-org',
+        author: AUTHOR,
+        ci: true,
+        githubApiBaseUrlV3: 'https://api.foo.com',
         repoName: 'integration-test',
+        repoOwner: 'backport-org',
+      });
+      const commits = [
+        ...(await getCommits({
+          ...options,
+          sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
+        })),
+        ...(await getCommits({
+          ...options,
+          sha: '59d6ff1ca90a4ce210c0a4f0e159214875c19d60',
+        })),
+      ];
+
+      const targetBranches: string[] = ['7.x'];
+      res = await runSequentially({ options, commits, targetBranches });
+    });
+
+    it('contains both commits in the pull request body', () => {
+      expect(createPullRequestsMockCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "base": "7.x",
+            "body": "# Backport
+
+        This is an automatic backport to \`7.x\` of:
+         - Add ❤️ emoji (5bf29b7d)
+         - #2
+
+        ### Questions ?
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)",
+            "head": "sqren:backport/7.x/commit-5bf29b7d_pr-2",
+            "title": "[7.x] Add ❤️ emoji | Add family emoji (#2)",
+          },
+        ]
+      `);
+    });
+
+    it('returns the pull request response', () => {
+      expect(res).toEqual([
+        {
+          didUpdate: false,
+          pullRequestNumber: 1337,
+          status: 'success',
+          pullRequestUrl: 'myHtmlUrl',
+          targetBranch: '7.x',
+        },
+      ]);
+    });
+
+    it('should not create new branches in origin (backport-org/integration-test)', async () => {
+      const branches = await getBranches({
+        accessToken,
+        repoOwner: REPO_OWNER,
+        repoName: REPO_NAME,
+      });
+      expect(branches.map((b) => b.name)).toEqual(['7.x', 'master']);
+    });
+
+    it('should create branch in the fork (sqren/integration-test)', async () => {
+      const branches = await getBranches({
+        accessToken,
+        repoOwner: AUTHOR,
+        repoName: REPO_NAME,
+      });
+      expect(branches.map((b) => b.name)).toEqual([
+        '7.x',
+        BRANCH_WITH_TWO_COMMITS,
+        'master',
+      ]);
+    });
+  });
+
+  describe('when disabling fork mode', () => {
+    let res: Awaited<ReturnType<typeof runSequentially>>;
+    let accessToken: string;
+    let createPullRequestsMockCalls: unknown[];
+
+    beforeAll(async () => {
+      accessToken = await getDevAccessToken();
+      await resetState(accessToken);
+
+      createPullRequestsMockCalls = mockCreatePullRequest({
+        number: 1337,
+        html_url: 'myHtmlUrl',
+      });
+
+      const options = await getOptions([], {
+        accessToken,
+        author: AUTHOR,
+        ci: true,
         fork: false,
+        githubApiBaseUrlV3: 'https://api.foo.com',
+        repoName: 'integration-test',
+        repoOwner: 'backport-org',
+        sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
       });
       const commits = await getCommits(options);
       const targetBranches: string[] = ['7.x'];
@@ -278,7 +286,7 @@ describe('backport e2e', () => {
       });
       expect(branches.map((b) => b.name)).toEqual([
         '7.x',
-        BRANCH_NAME,
+        BRANCH_WITH_ONE_COMMIT,
         'master',
       ]);
     });
@@ -286,20 +294,10 @@ describe('backport e2e', () => {
     it('should NOT create branch in the fork (sqren/integration-test)', async () => {
       const branches = await getBranches({
         accessToken,
-        repoOwner: AUHTOR,
+        repoOwner: AUTHOR,
         repoName: REPO_NAME,
       });
       expect(branches.map((b) => b.name)).toEqual(['7.x', 'master']);
-    });
-
-    it('should cherry pick the correct commit', async () => {
-      const branches = await getBranches({
-        accessToken,
-        repoOwner: REPO_OWNER,
-        repoName: REPO_NAME,
-      });
-      const sha = branches.find((branch) => branch.name === '7.x')?.commit.sha;
-      expect(sha).toEqual('b68e4fcaaf4427fe1e902c718b3bb3f07b560fb5');
     });
   });
 });
@@ -379,14 +377,21 @@ async function resetState(accessToken: string) {
     accessToken,
     repoOwner: REPO_OWNER,
     repoName: REPO_NAME,
-    branchName: BRANCH_NAME,
+    branchName: BRANCH_WITH_ONE_COMMIT,
   });
 
   await deleteBranch({
     accessToken,
-    repoOwner: AUHTOR,
+    repoOwner: AUTHOR,
     repoName: REPO_NAME,
-    branchName: BRANCH_NAME,
+    branchName: BRANCH_WITH_ONE_COMMIT,
+  });
+
+  await deleteBranch({
+    accessToken,
+    repoOwner: AUTHOR,
+    repoName: REPO_NAME,
+    branchName: BRANCH_WITH_TWO_COMMITS,
   });
 
   await del(E2E_TEST_DATA_PATH);

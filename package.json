@@ -28,6 +28,7 @@
     "prepublishOnly": "tsc --project ./tsconfig.prod.json",
     "test": "jest",
     "test-private": "jest --config ./jest.config.private.js",
+    "test-mutation": "jest --config ./jest.config.mutation.js",
     "test-all": "yarn lint && jest --config ./jest.config.all.js",
     "start": "ts-node --transpile-only ./src/entrypoint.cli.ts"
   },

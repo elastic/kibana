@@ -4,6 +4,8 @@ import { getDevAccessToken } from './private/getDevAccessToken';
 
 const TIMEOUT_IN_SECONDS = 10;
 
+jest.setTimeout(15000);
+
 describe('inquirer cli', () => {
   let devAccessToken: string;
 
@@ -33,8 +35,6 @@ describe('inquirer cli', () => {
       'backport-org',
       '--repo-name',
       'backport-e2e',
-      '--author',
-      'sqren',
       '--accessToken',
       devAccessToken,
     ]);
@@ -67,8 +67,6 @@ describe('inquirer cli', () => {
       'foo',
       '--repo-name',
       'bar',
-      '--author',
-      'some-user',
       '--accessToken',
       'some-token',
     ]);
@@ -123,6 +121,40 @@ describe('inquirer cli', () => {
         4. Add family emoji (#2) 7.x
         5. Add \`backport\` dep
         6. Merge pull request #1 from backport-org/add-heart-emoji"
+    `);
+  });
+
+  it(`should limit commits by since and until`, async () => {
+    jest.setTimeout(TIMEOUT_IN_SECONDS * 1000 * 1.1);
+    const output = await runBackportAsync(
+      [
+        '--branch',
+        'foo',
+        '--repo-owner',
+        'backport-org',
+        '--repo-name',
+        'backport-e2e',
+        '--accessToken',
+        devAccessToken,
+        '--since',
+        '2020-08-15T00:00:00.000Z',
+        '--until',
+        '2020-08-15T14:00:00.000Z',
+      ],
+      { waitForString: 'Select commit' }
+    );
+
+    expect(output).toMatchInlineSnapshot(`
+      "? Select commit (Use arrow keys)
+      ❯ 1. Add 🍏 emoji (#5) 7.x, 7.8
+        2. Add family emoji (#2) 7.x
+        3. Add \`backport\` dep
+        4. Merge pull request #1 from backport-org/add-heart-emoji
+        5. Update .backportrc.json
+        6. Bump to 8.0.0
+        7. Add package.json
+        8. Update .backportrc.json
+        9. Create .backportrc.json"
     `);
   });
 

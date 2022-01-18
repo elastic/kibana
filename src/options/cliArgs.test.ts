@@ -177,4 +177,36 @@ describe('getOptionsFromCliArgs', () => {
       expect(res.targetBranches).toEqual(['6.0']);
     });
   });
+
+  describe('since/until', () => {
+    it('should always be UTC time (configured globally in jest.config.js)', () => {
+      expect(new Date().getTimezoneOffset()).toBe(0);
+    });
+
+    it('accepts ISO dates', () => {
+      const argv = [
+        '--since',
+        '2020-08-15T00:00:00.000Z',
+        '--until',
+        '2020-08-15T14:00:00.000Z',
+      ];
+      const res = getOptionsFromCliArgs(argv);
+      expect(res.dateSince).toEqual('2020-08-15T00:00:00.000Z');
+      expect(res.dateUntil).toEqual('2020-08-15T14:00:00.000Z');
+    });
+
+    it('accepts non-ISO dates', () => {
+      const argv = ['--since', '2020-08-15', '--until', '2020-08-15 14:00'];
+      const res = getOptionsFromCliArgs(argv);
+      expect(res.dateSince).toEqual('2020-08-15T00:00:00.000Z');
+      expect(res.dateUntil).toEqual('2020-08-15T14:00:00.000Z');
+    });
+
+    it('accepts years', () => {
+      const argv = ['--since', '2020', '--until', '2021'];
+      const res = getOptionsFromCliArgs(argv);
+      expect(res.dateSince).toEqual('2020-01-01T00:00:00.000Z');
+      expect(res.dateUntil).toEqual('2021-01-01T00:00:00.000Z');
+    });
+  });
 });
