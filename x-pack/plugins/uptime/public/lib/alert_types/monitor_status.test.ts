@@ -202,7 +202,7 @@ describe('monitor status alert type', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "defaultActionMessage": "Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}",
+        "defaultActionMessage": "{{state.monitorName}} from {{state.observerLocation}} {{state.statusMessage}}.",
         "description": "Alert when a monitor is down or an availability threshold is breached.",
         "documentationUrl": [Function],
         "format": [Function],
