@@ -11,8 +11,6 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
-const BUNDLED_PACKAGES = ['apm', 'synthetics'];
-
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -56,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
         };
         const listResponse = await fetchLimitedPackageList();
 
-        expect(listResponse.items.sort()).to.eql(['endpoint', ...BUNDLED_PACKAGES].sort());
+        expect(listResponse.items.sort()).to.eql(['endpoint'].sort());
       });
 
       it('allows user with only read permission to access', async () => {
