@@ -40,7 +40,6 @@ export default function ({ getService }: FtrProviderContext) {
           const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe);
           const result = await client.search({
             index,
-            // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
             body: searchBody,
           });
 
@@ -63,7 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const result = await client.search({
           index,
-          // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
           body: searchBody,
         });
 
@@ -85,7 +83,6 @@ export default function ({ getService }: FtrProviderContext) {
           );
           const result = await client.search({
             index,
-            // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
             body: searchBody,
           });
 
@@ -106,7 +103,6 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const result = await client.search({
           index,
-          // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
           body: searchBody,
         });
 
