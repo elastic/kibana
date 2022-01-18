@@ -22,7 +22,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
   handler: async (context, request, response) => {
     const { client: esClient } = context.core.elasticsearch;
     let savedObjectsClient: SavedObjectsClientContract;
-    if (server.config?.unsafe?.service?.enabled) {
+    if (server.config?.service?.enabled) {
       savedObjectsClient = context.core.savedObjects.getClient({
         includedHiddenTypes: [syntheticsServiceApiKey.name],
       });

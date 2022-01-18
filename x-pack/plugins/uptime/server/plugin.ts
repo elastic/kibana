@@ -73,11 +73,11 @@ export class Plugin implements PluginType {
       cloud: plugins.cloud,
     } as UptimeServerSetup;
 
-    if (this.server?.config?.unsafe?.service.enabled) {
+    if (this.server?.config?.service?.enabled) {
       this.syntheticService = new SyntheticsService(
         this.logger,
         this.server,
-        this.server.config.unsafe.service
+        this.server.config.service
       );
 
       this.syntheticService.registerSyncTask(plugins.taskManager);
@@ -98,7 +98,7 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    if (this.server?.config?.unsafe?.service.enabled) {
+    if (this.server?.config?.service?.enabled) {
       this.savedObjectsClient = new SavedObjectsClient(
         coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
       );
@@ -115,7 +115,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.server?.config?.unsafe?.service?.enabled) {
+    if (this.server?.config?.service?.enabled) {
       this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {

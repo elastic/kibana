@@ -73,7 +73,7 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {config.ui?.unsafe?.monitorManagement?.enabled && (
+      {config.ui?.monitorManagement?.enabled && (
         <EuiHeaderLink
           aria-label={i18n.translate('xpack.uptime.page_header.manageLink.label', {
             defaultMessage: 'Navigate to the Uptime monitor management page',

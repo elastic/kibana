@@ -186,7 +186,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
         rightSideItems: [],
       },
     },
-    ...(config.ui?.unsafe?.monitorManagement?.enabled
+    ...(config.ui?.monitorManagement?.enabled
       ? [
           {
             title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
