@@ -129,7 +129,7 @@ test('Should show add button if the policy is not managed and showAddAgent=true'
   });
 });
 
-test('Should show add button if the policy is managed and showAddAgent=true', async () => {
+test('Should not show add button if the policy is managed and showAddAgent=true', async () => {
   const agentPolicy = createMockAgentPolicy({ is_managed: true });
   const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
   const { utils } = renderMenu({ agentPolicy, packagePolicy, showAddAgent: true });
