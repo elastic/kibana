@@ -166,7 +166,7 @@ export class AuditService {
             session_id: sessionId,
             ...event.kibana,
           },
-          trace: { id: request.id },
+          trace: { id: request.opaqueId },
         });
       },
     });
