@@ -14,9 +14,13 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '../..';
 
+/**
+ * Merges two saved object migration maps.
+ * @public
+ */
 export const mergeSavedObjectMigrationMaps = (
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
+  map1: SavedObjectMigrationMap,
+  map2: SavedObjectMigrationMap
 ): SavedObjectMigrationMap => {
   const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
     if (!srcValue || !objValue) {
@@ -26,5 +30,5 @@ export const mergeSavedObjectMigrationMaps = (
       objValue(srcValue(state, context), context);
   };
 
-  return mergeWith({ ...obj1 }, obj2, customizer);
+  return mergeWith({ ...map1 }, map2, customizer);
 };

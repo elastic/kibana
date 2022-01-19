@@ -1451,6 +1451,9 @@ export type MakeUsageFromSchema<T> = {
 };
 
 // @public
+export const mergeSavedObjectMigrationMaps: (map1: SavedObjectMigrationMap, map2: SavedObjectMigrationMap) => SavedObjectMigrationMap;
+
+// @public
 export interface MetricsServiceSetup {
     readonly collectionInterval: number;
     getOpsMetrics$: () => Observable<OpsMetrics>;
