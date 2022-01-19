@@ -118,6 +118,47 @@ describe('syncMvtSourceData', () => {
     sinon.assert.notCalled(syncContext.stopLoading);
   });
 
+  test('Should re-sync with forceRefreshDueToDrawing when there are no changes in source state or search state', async () => {
+    const syncContext = {
+      ...new MockSyncContext({ dataFilters: {} }),
+      forceRefreshDueToDrawing: true,
+    };
+    const prevRequestMeta = {
+      ...syncContext.dataFilters,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+      fieldNames: [],
+      sourceMeta: {},
+      isForceRefresh: false,
+    };
+
+    await syncMvtSourceData({
+      layerId: 'layer1',
+      prevDataRequest: {
+        getMeta: () => {
+          return prevRequestMeta;
+        },
+        getData: () => {
+          return {
+            tileMinZoom: 4,
+            tileMaxZoom: 14,
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
+          };
+        },
+      } as unknown as DataRequest,
+      requestMeta: { ...prevRequestMeta },
+      source: mockSource,
+      syncContext,
+    });
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.stopLoading);
+  });
+
   test('Should re-sync when there are changes to search state', async () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
     const prevRequestMeta = {
