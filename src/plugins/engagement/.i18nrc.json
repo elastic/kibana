@@ -1,0 +1,7 @@
+{
+  "prefix": "engagement",
+  "paths": {
+    "engagement": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

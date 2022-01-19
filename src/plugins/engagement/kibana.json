@@ -1,0 +1,16 @@
+{
+  "id": "engagement",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Shared UX",
+    "githubTeam": "shared-ux"
+  },
+  "description": "A plugin for engaging with the active user.",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "sharedUX"
+  ],
+  "optionalPlugins": []
+}

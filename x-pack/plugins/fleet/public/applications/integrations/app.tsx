@@ -21,6 +21,7 @@ import {
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { EngagementChat } from '../../../../../../src/plugins/engagement/public';
 
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -73,17 +74,20 @@ export const IntegrationsAppContext: React.FC<{
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
                           <startServices.customIntegrations.ContextProvider>
-                            <Router history={history}>
-                              <AgentPolicyContextProvider>
-                                <PackageInstallProvider
-                                  notifications={startServices.notifications}
-                                  theme$={theme$}
-                                >
-                                  <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                  {children}
-                                </PackageInstallProvider>
-                              </AgentPolicyContextProvider>
-                            </Router>
+                            <startServices.engagement.ServicesContext>
+                              <Router history={history}>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider
+                                    notifications={startServices.notifications}
+                                    theme$={theme$}
+                                  >
+                                    <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                    {children}
+                                    <EngagementChat />
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </Router>
+                            </startServices.engagement.ServicesContext>
                           </startServices.customIntegrations.ContextProvider>
                         </FleetStatusProvider>
                       </UIExtensionsContext.Provider>

@@ -24,6 +24,7 @@
     // requiredPlugins from ./kibana.json
     { "path": "../licensing/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/engagement/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json

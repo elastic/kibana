@@ -16,6 +16,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import type { EngagementPluginStart } from 'src/plugins/engagement/public';
 
 import type {
   CustomIntegrationsStart,
@@ -94,6 +95,7 @@ export interface FleetStartDeps {
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  engagement: EngagementPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, FleetStartDeps {

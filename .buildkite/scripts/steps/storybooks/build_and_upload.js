@@ -20,6 +20,7 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'dashboard',
   'data_enhanced',
+  'engagement',
   'embeddable',
   'expression_error',
   'expression_image',

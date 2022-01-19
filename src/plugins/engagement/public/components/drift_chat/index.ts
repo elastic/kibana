@@ -5,17 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/* eslint-disable import/no-default-export */
 
-import { SharedUXPlugin } from './plugin';
+import { DriftChat } from './drift_chat';
+export { DriftChat } from './drift_chat';
 
 /**
- * Creates the Shared UX plugin.
+ * Exporting the DriftChat component as a default export so it can be
+ * loaded by React.lazy.
  */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-
-export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';
-export { Fallback, withSuspense } from './components/utility';
+export default DriftChat;
