@@ -70,6 +70,7 @@ export interface PartitionVisParams extends VisCommonParams {
   showValuesInLegend?: boolean;
   respectSourceOrder?: boolean;
   emptySizeRatio?: EmptySizeRatios;
+  startFromSecondLargestSlice?: boolean;
 }
 
 export interface PieVisConfig extends VisCommonConfig {
@@ -77,6 +78,7 @@ export interface PieVisConfig extends VisCommonConfig {
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
   respectSourceOrder?: boolean;
+  startFromSecondLargestSlice?: boolean;
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {

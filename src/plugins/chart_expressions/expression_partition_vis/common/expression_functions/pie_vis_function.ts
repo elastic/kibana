@@ -104,6 +104,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
+    startFromSecondLargestSlice: {
+      types: ['boolean'],
+      help: strings.getStartFromSecondLargestSliceArgHelp(),
+      default: true,
+    },
   },
   fn(context, args, handlers) {
     const visConfig: PartitionVisParams = {

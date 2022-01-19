@@ -46,6 +46,8 @@ const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
   dimensions,
   rescaleFactor = 1
 ) => {
+  const { startFromSecondLargestSlice } = visParams;
+
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   const preventLinksFromShowing =
     (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) && visParams.labels.show;
@@ -61,6 +63,10 @@ const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
 
   const config: Config = { ...(usingOuterSizeRatio ?? {}) };
 
+  if (startFromSecondLargestSlice !== undefined) {
+    config.specialFirstInnermostSector = startFromSecondLargestSlice;
+  }
+
   if (
     visParams.labels.show &&
     visParams.labels.position === LabelPositions.DEFAULT &&
@@ -72,9 +78,12 @@ const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
     };
   }
 
-  if (preventLinksFromShowing) {
+  if (preventLinksFromShowing || !visParams.labels.show) {
     // Prevent links from showing
-    config.linkLabel = { maxCount: 0 };
+    config.linkLabel = {
+      maxCount: 0,
+      ...(!visParams.labels.show ? { maximumSection: Number.POSITIVE_INFINITY } : {}),
+    };
   }
 
   if (!preventLinksFromShowing && dimensions && !isSplitChart) {
@@ -163,7 +172,6 @@ export const getConfig: GetConfigFn = (
   return {
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
-    specialFirstInnermostSector: true,
     minFontSize: 10,
     maxFontSize: 16,
     emptySizeRatio: 0,

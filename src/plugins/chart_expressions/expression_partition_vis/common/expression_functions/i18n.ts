@@ -70,6 +70,13 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.respectSourceOrderHelpText', {
       defaultMessage: 'Keeps an order of the elements, returned from the datasource',
     }),
+  getStartFromSecondLargestSliceArgHelp: () =>
+    i18n.translate(
+      'expressionPartitionVis.reusable.function.args.startPlacementWithSecondLargestSliceHelpText',
+      {
+        defaultMessage: 'Starts placement with the second largest slice',
+      }
+    ),
   getEmptySizeRatioArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.emptySizeRatioHelpText', {
       defaultMessage: 'Defines donut inner empty area size',

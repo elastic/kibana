@@ -8,6 +8,7 @@
 
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
+import type { FormatFactory } from '../../../../../field_formats/common';
 import { PaletteRegistry } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
@@ -15,6 +16,24 @@ import { sortPredicateByType } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 
 const EMPTY_SLICE = Symbol('empty_slice');
+
+const generateFormatters = (
+  visParams: PartitionVisParams,
+  visData: Datatable,
+  formatter: FieldFormatsStart
+) => {
+  if (!visParams.labels.show) {
+    return {};
+  }
+
+  return visData.columns.reduce<Record<string, ReturnType<FormatFactory>>>(
+    (newFormatters, column) => ({
+      ...newFormatters,
+      [column.id]: formatter.deserialize(column.meta.params),
+    }),
+    {}
+  );
+};
 
 export const getLayers = (
   chartType: ChartTypes,
@@ -37,6 +56,8 @@ export const getLayers = (
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';
   }
+  const formatters = generateFormatters(visParams, visData, formatter);
+
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
   if (!syncColors && columns[1]?.id && palettes && visParams.palette) {
@@ -49,16 +70,11 @@ export const getLayers = (
   }
   return columns.map((col, layerIndex) => {
     return {
-      groupByRollup: (d: Datum) => {
-        return col.id ? d[col.id] ?? EMPTY_SLICE : col.name;
-      },
+      groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
-        if (!visParams.labels.show || d === EMPTY_SLICE) {
-          return '';
-        }
-        if (col.format) {
-          return formatter.deserialize(col.format).convert(d) ?? '';
+        if (col?.meta?.params) {
+          return col?.id ? formatters[col?.id].convert(d) ?? '' : '';
         }
         return String(d);
       },

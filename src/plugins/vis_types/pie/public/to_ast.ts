@@ -74,6 +74,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     buckets: schemas.segment?.map(prepareDimension),
     splitColumn: schemas.split_column?.map(prepareDimension),
     splitRow: schemas.split_row?.map(prepareDimension),
+    startFromSecondLargestSlice: false,
   };
 
   const visTypePie = buildExpressionFunction<PieVisExpressionFunctionDefinition>(
