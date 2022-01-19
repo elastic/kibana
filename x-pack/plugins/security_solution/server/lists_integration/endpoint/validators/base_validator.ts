@@ -73,7 +73,7 @@ export class BaseValidator {
 
   protected async validateCanManageEndpointArtifacts(): Promise<void> {
     if (!(await this.endpointAuthzPromise).canAccessEndpointManagement) {
-      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 401);
+      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
     }
   }
 
@@ -96,7 +96,7 @@ export class BaseValidator {
     if (this.isItemByPolicy(item) && !(await this.isAllowedToCreateArtifactsByPolicy())) {
       throw new EndpointArtifactExceptionValidationError(
         'Your license level does not allow create/update of by policy artifacts',
-        401
+        403
       );
     }
   }
