@@ -55,7 +55,7 @@ export class IndexPatternStatsCollector {
     let pointCount = 0;
     let shapeCount = 0;
 
-    const indexPatternIds = await this._indexPatternsService.getIds(true);
+    const indexPatternIds = await this._indexPatternsService.getIds();
     await asyncForEach(indexPatternIds, async (indexPatternId) => {
       let indexPattern;
       try {
