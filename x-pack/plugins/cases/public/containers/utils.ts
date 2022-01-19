@@ -6,7 +6,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { camelCase, isArray, isObject } from 'lodash';
+import { camelCase, isArray, isObject, transform, snakeCase } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -40,6 +40,12 @@ import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
+export const covertToSnakeCase = (obj: Record<string, unknown>) =>
+  transform(obj, (acc: Record<string, unknown>, value, key, target) => {
+    const camelKey = Array.isArray(target) ? key : snakeCase(key);
+    acc[camelKey] = isObject(value) ? covertToSnakeCase(value as Record<string, unknown>) : value;
+  });
+
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {
@@ -51,8 +57,8 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
     }
   }, []);
 
-export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
-  Object.entries(snakeCase).reduce((acc, [key, value]) => {
+export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
+  Object.entries(obj).reduce((acc, [key, value]) => {
     if (isArray(value)) {
       set(acc, camelCase(key), convertArrayToCamelCase(value));
     } else if (isObject(value)) {
@@ -64,7 +70,7 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
   }, {} as U);
 
 export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
-  cases: snakeCases.cases.map((snakeCase) => convertToCamelCase<CaseResponse, Case>(snakeCase)),
+  cases: snakeCases.cases.map((theCase) => convertToCamelCase<CaseResponse, Case>(theCase)),
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,
   countClosedCases: snakeCases.count_closed_cases,

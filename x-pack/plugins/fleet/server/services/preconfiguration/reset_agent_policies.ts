@@ -84,16 +84,22 @@ async function _deleteExistingData(
   logger: Logger,
   agentPolicyId?: string
 ) {
-  let existingPolicies: AgentPolicy[];
+  let existingPolicies: AgentPolicy[] = [];
 
   if (agentPolicyId) {
-    const policy = await agentPolicyService.get(soClient, agentPolicyId);
-    if (!policy || !policy.is_preconfigured) {
+    const policy = await agentPolicyService.get(soClient, agentPolicyId).catch((err) => {
+      if (err.output?.statusCode === 404) {
+        return undefined;
+      }
+      throw err;
+    });
+    if (policy && !policy.is_preconfigured) {
       throw new Error('Invalid policy');
     }
-    existingPolicies = [policy];
-  }
-  {
+    if (policy) {
+      existingPolicies = [policy];
+    }
+  } else {
     existingPolicies = (
       await agentPolicyService.list(soClient, {
         perPage: SO_SEARCH_LIMIT,
@@ -120,6 +126,7 @@ async function _deleteExistingData(
   const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
     perPage: SO_SEARCH_LIMIT,
     showInactive: true,
+    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
   });
 
   if (enrollmentApiKeys.length > 0) {

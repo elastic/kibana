@@ -29,7 +29,7 @@ export const TrainedModelsNavigationBar: FC<{
       {
         id: 'trained_models',
         name: i18n.translate('xpack.ml.trainedModels.modelsTabLabel', {
-          defaultMessage: 'Models',
+          defaultMessage: 'Trained Models',
         }),
         path: '/trained_models',
         testSubj: 'mlTrainedModelsTab',
@@ -39,7 +39,7 @@ export const TrainedModelsNavigationBar: FC<{
             {
               id: 'nodes',
               name: i18n.translate('xpack.ml.trainedModels.nodesTabLabel', {
-                defaultMessage: 'Nodes',
+                defaultMessage: 'Nodes Overview',
               }),
               path: '/trained_models/nodes',
               testSubj: 'mlNodesOverviewTab',

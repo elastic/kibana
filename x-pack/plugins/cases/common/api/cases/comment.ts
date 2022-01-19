@@ -95,6 +95,14 @@ export const CommentResponseRt = rt.intersection([
   }),
 ]);
 
+export const CommentResponseTypeUserRt = rt.intersection([
+  AttributesTypeUserRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
 export const CommentResponseTypeAlertsRt = rt.intersection([
   AttributesTypeAlertsRt,
   rt.type({
@@ -153,6 +161,7 @@ export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
+export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
