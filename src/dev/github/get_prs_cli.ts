@@ -47,23 +47,34 @@ export async function getPullRequests() {
         }
       }
 
+      let query = '';
+
+      if (flags.query) {
+        if (typeof flags.query !== 'string') {
+          throw createFlagError('please provide valid string in --query flag');
+        }
+        query = flags.query;
+      }
+
       fs.mkdirSync(flags.dest, { recursive: true });
       const filename = Path.resolve(
         flags.dest,
         `kibana_prs_${new Date().toISOString().split('T').join('-')}.csv`
       );
-      await savePrsToCsv(log, githubToken, labelsPath, filename, mergedSince);
+      await savePrsToCsv(log, githubToken, labelsPath, filename, query, mergedSince);
     },
     {
       description: `
-        Create a csv file with PRs to be tests for upcoming release
+        Create a csv file with PRs to be tests for upcoming release,
+        require GITHUB_TOKEN variable to be set in advance
     `,
       flags: {
-        string: ['path', 'dest', 'merged-since'],
+        string: ['path', 'dest', 'query', 'merged-since'],
         help: `
-        --path             Required, path to json file to operate on, see src/dev/example.json
-        --dest             Required, path to the save csv file to
-        --merged-since     Optional, date 'yyyy-mm-dd' to look PRs from
+        --path             Required, path to json file with labels to operate on, see src/dev/example.json
+        --dest             Required, generated csv file location
+        --query            Optional, overrides default query
+        --merged-since     Optional, start date in 'yyyy-mm-dd' format
       `,
       },
     }

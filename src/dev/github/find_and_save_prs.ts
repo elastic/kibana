@@ -26,17 +26,19 @@ export async function savePrsToCsv(
   githubToken: string,
   labelsPath: string,
   filename: string,
+  query: string,
   mergedSince: string
 ) {
-  const octokit = new Octokit({
-    auth: githubToken,
-  });
+  const repo = `repo:"elastic/kibana"`;
+  const defaultQuery = 'is:pull-request+is:merged+sort:updated-desc';
+  const perPage = 100;
+  const searchApiLimit = 1000;
 
-  let q = 'repo:"elastic/kibana"+is:pull-request+is:merged+sort:updated-desc';
-
-  if (mergedSince.length > 0) {
-    q += `+merged:>=${mergedSince}`;
-  }
+  let q =
+    repo +
+    '+' +
+    (query.length > 0 ? query : defaultQuery) +
+    (mergedSince.length > 0 ? `+merged:>=${mergedSince}` : '');
 
   const rawData = fs.readFileSync(labelsPath, 'utf8');
   const labels = JSON.parse(rawData) as Labels;
@@ -44,46 +46,41 @@ export async function savePrsToCsv(
   labels.include.map((label) => (q += `+label:${label}`));
   labels.exclude.map((label) => (q += ` -label:"${label}"`));
 
-  const items: PR[] = [];
-  const perPage = 100;
-  let page = 1;
-  let hasMorePages = true;
-  let prCount = 0;
+  log.debug(`Github query: ${q}`);
 
-  while (hasMorePages) {
-    const response = await octokit.search.issuesAndPullRequests({ q, per_page: perPage, page });
-    if (page === 1) {
-      log.info(`Found ${(prCount = response.data.total_count)} PRs`);
-      // Only the first 1000 search results are available via pagination
-      if (prCount > 1000) {
-        throw new Error(`Too many PRs, adjust query to have less than 1000`);
-      }
-    }
-
-    if (page < Math.ceil(prCount / perPage)) {
-      page += 1;
-    } else {
-      hasMorePages = false;
-    }
-
-    items.push(
-      ...response.data.items.map((i) => {
+  const octokit = new Octokit({
+    auth: githubToken,
+  });
+  const items: PR[] = await octokit.paginate(
+    'GET /search/issues',
+    { q, per_page: perPage },
+    (response) =>
+      response.data.map((item: Octokit.SearchIssuesAndPullRequestsResponseItemsItem) => {
         return {
-          title: i.title,
-          url: i.html_url,
-          releaseLabel: i.labels
-            .filter((l) => l.name.startsWith('release_note'))
-            .map((l) => l.name)
+          title: item.title,
+          url: item.html_url,
+          releaseLabel: item.labels
+            .filter((label) => label.name.trim().startsWith('release_note'))
+            .map((label) => label.name)
             .join(','),
         } as PR;
       })
+  );
+
+  // https://docs.github.com/en/rest/reference/search
+  if (items.length >= searchApiLimit) {
+    log.warning(
+      `Search API limit is 1000 results per search, try to adjust the query. Saving first 1000 PRs`
     );
+  } else {
+    log.info(`Found ${items.length} PRs`);
   }
 
   let csv = '';
   for (const i of items) {
     csv += `${i.title}\t${i.url}\t${i.releaseLabel}\r\n`;
   }
+
   fs.writeFileSync(filename, csv);
   log.info(`Saved to ${filename}`);
 }
