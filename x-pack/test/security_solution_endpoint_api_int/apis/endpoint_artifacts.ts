@@ -13,9 +13,15 @@ import { PolicyTestResourceInfo } from '../../security_solution_endpoint/service
 import { ArtifactTestData } from '../../security_solution_endpoint/services/endpoint_artifacts';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../plugins/security_solution/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+  ROLES,
+} from '../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
@@ -25,69 +31,77 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
+
+      // create role/user
+      await createUserAndRole(getService, ROLES.detections_admin);
     });
 
     after(async () => {
       if (fleetEndpointPolicy) {
         await fleetEndpointPolicy.cleanup();
       }
+
+      // delete role/user
+      await deleteUserAndRole(getService, ROLES.detections_admin);
     });
 
-    describe('and has authorization to manage endpoint security', () => {
-      describe('and creating or updating rusted apps', () => {
-        const exceptionsGenerator = new ExceptionsListItemGenerator();
-        const anEndpointArtifactError = (res: { body: { message: string } }) => {
-          expect(res.body.message).to.match(/EndpointArtifactError/);
-        };
-        const anErrorMessageWith = (
-          value: string | RegExp
-        ): ((res: { body: { message: string } }) => void) => {
-          return (res) => {
-            if (value instanceof RegExp) {
-              expect(res.body.message).to.match(value);
-            } else {
-              expect(res.body.message).to.be(value);
-            }
-          };
-        };
+    const anEndpointArtifactError = (res: { body: { message: string } }) => {
+      expect(res.body.message).to.match(/EndpointArtifactError/);
+    };
+    const anErrorMessageWith = (
+      value: string | RegExp
+    ): ((res: { body: { message: string } }) => void) => {
+      return (res) => {
+        if (value instanceof RegExp) {
+          expect(res.body.message).to.match(value);
+        } else {
+          expect(res.body.message).to.be(value);
+        }
+      };
+    };
 
-        let trustedAppData: ArtifactTestData;
+    describe('and accessing trusted apps', () => {
+      const exceptionsGenerator = new ExceptionsListItemGenerator();
+      let trustedAppData: ArtifactTestData;
 
-        beforeEach(async () => {
-          trustedAppData = await endpointArtifactTestResources.createTrustedApp({
-            tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${fleetEndpointPolicy.packagePolicy.id}`],
-          });
+      type TrustedAppApiCallsInterface = Array<{
+        method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+        path: string;
+        // The body just needs to have the properties we care about in the tests. This should cover most
+        // mocks used for testing that support different interfaces
+        getBody: () => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
+      }>;
+
+      beforeEach(async () => {
+        trustedAppData = await endpointArtifactTestResources.createTrustedApp({
+          tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${fleetEndpointPolicy.packagePolicy.id}`],
         });
+      });
 
-        afterEach(async () => {
-          if (trustedAppData) {
-            await trustedAppData.cleanup();
-          }
-        });
+      afterEach(async () => {
+        if (trustedAppData) {
+          await trustedAppData.cleanup();
+        }
+      });
 
-        type TrustedAppApiCallsInterface = Array<{
-          method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
-          path: string;
-          getBody: () => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
-        }>;
+      const trustedAppApiCalls: TrustedAppApiCallsInterface = [
+        {
+          method: 'post',
+          path: EXCEPTION_LIST_ITEM_URL,
+          getBody: () => exceptionsGenerator.generateTrustedAppForCreate(),
+        },
+        {
+          method: 'put',
+          path: EXCEPTION_LIST_ITEM_URL,
+          getBody: () =>
+            exceptionsGenerator.generateTrustedAppForUpdate({
+              id: trustedAppData.artifact.id,
+              item_id: trustedAppData.artifact.item_id,
+            }),
+        },
+      ];
 
-        const trustedAppApiCalls: TrustedAppApiCallsInterface = [
-          {
-            method: 'post',
-            path: EXCEPTION_LIST_ITEM_URL,
-            getBody: () => exceptionsGenerator.generateTrustedAppForCreate(),
-          },
-          {
-            method: 'put',
-            path: EXCEPTION_LIST_ITEM_URL,
-            getBody: () =>
-              exceptionsGenerator.generateTrustedAppForUpdate({
-                id: trustedAppData.artifact.id,
-                item_id: trustedAppData.artifact.item_id,
-              }),
-          },
-        ];
-
+      describe('and has authorization to manage endpoint security', () => {
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = trustedAppApiCall.getBody();
@@ -193,25 +207,22 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
-
-          describe('and elastic license is less than Platinum Plus', () => {
-            it(`should error on [${trustedAppApiCall.method}] if attempting to modify policy id`);
-
-            it(`should error on [${trustedAppApiCall.method}] if attempting to remove policy id`);
-
-            it(
-              `should allow update on [${trustedAppApiCall.method}] to global artifact (from policy specific)`
-            );
-          });
         }
       });
-    });
 
-    describe('and user is NOT authorized to manage endpoint security', () => {
-      describe('and attempting to access Trusted apps', () => {
-        it('should error on create');
-
-        it('should error update');
+      describe('and user DOES NOT have authorization to manage endpoint security', () => {
+        for (const trustedAppApiCall of trustedAppApiCalls) {
+          it(`should error on [${trustedAppApiCall.method}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLES.detections_admin, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(403, {
+                status_code: 403,
+                message: 'EndpointArtifactError: Endpoint authorization failure',
+              });
+          });
+        }
       });
     });
   });
