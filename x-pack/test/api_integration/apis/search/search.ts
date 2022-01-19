@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('post', () => {
-      it('should return 200 with final response if wait_for_completion_timeout is long enough', async function () {
+      it('should return 200 with final response without search id if wait_for_completion_timeout is long enough', async function () {
         const resp = await supertest
           .post(`/internal/search/ese`)
           .set('kbn-xsrf', 'foo')
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body).to.have.property('rawResponse');
       });
 
-      it('should return 200 with partial response if wait_for_completion_timeout is not long enough', async function () {
+      it('should return 200 with search id and partial response if wait_for_completion_timeout is not long enough', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body).to.have.property('rawResponse');
       });
 
-      it('should retrieve results with id', async function () {
+      it('should retrieve results from completed search with search id', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
@@ -140,6 +140,41 @@ export default function ({ getService }: FtrProviderContext) {
 
           return true;
         });
+      });
+
+      it('should retrieve results from in-progress search with search id', async function () {
+        await markRequiresShardDelayAgg(this);
+
+        const resp = await supertest
+          .post(`/internal/search/ese`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              body: {
+                query: {
+                  match_all: {},
+                },
+                ...shardDelayAgg('10s'),
+              },
+              wait_for_completion_timeout: '1ms',
+            },
+          })
+          .expect(200);
+
+        const { id } = resp.body;
+        expect(id).not.to.be(undefined);
+        expect(resp.body.isPartial).to.be(true);
+        expect(resp.body.isRunning).to.be(true);
+
+        const resp2 = await supertest
+          .post(`/internal/search/ese/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(200);
+
+        expect(resp2.body.id).not.to.be(undefined);
+        expect(resp2.body.isPartial).to.be(true);
+        expect(resp2.body.isRunning).to.be(true);
       });
 
       it('should fail without kbn-xref header', async () => {
@@ -313,7 +348,7 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
       });
 
-      it('should delete a search', async function () {
+      it('should delete an in-progress search', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
@@ -336,6 +371,60 @@ export default function ({ getService }: FtrProviderContext) {
         expect(id).not.to.be(undefined);
         expect(resp.body.isPartial).to.be(true);
         expect(resp.body.isRunning).to.be(true);
+
+        await supertest
+          .delete(`/internal/search/ese/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .send()
+          .expect(200);
+
+        // try to re-fetch
+        await supertest
+          .post(`/internal/search/ese/${id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(404);
+      });
+
+      it('should delete a completed search', async function () {
+        await markRequiresShardDelayAgg(this);
+
+        const resp = await supertest
+          .post(`/internal/search/ese`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              body: {
+                query: {
+                  match_all: {},
+                },
+                ...shardDelayAgg('3s'),
+              },
+              wait_for_completion_timeout: '1ms',
+            },
+          })
+          .expect(200);
+
+        const { id } = resp.body;
+        expect(id).not.to.be(undefined);
+        expect(resp.body.isPartial).to.be(true);
+        expect(resp.body.isRunning).to.be(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        await retry.tryForTime(10000, async () => {
+          const resp2 = await supertest
+            .post(`/internal/search/ese/${id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({})
+            .expect(200);
+
+          expect(resp2.body.id).not.to.be(undefined);
+          expect(resp2.body.isPartial).to.be(false);
+          expect(resp2.body.isRunning).to.be(false);
+
+          return true;
+        });
 
         await supertest
           .delete(`/internal/search/ese/${id}`)
