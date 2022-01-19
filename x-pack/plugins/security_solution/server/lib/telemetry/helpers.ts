@@ -9,11 +9,8 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
-  ESClusterInfo,
-  ESLicense,
   ListTemplate,
   TelemetryEvent,
 } from './types';
@@ -23,7 +20,7 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
 } from './constants';
-import { TrustedApp } from '../../../common/endpoint/types';
+import { TrustedApp, PolicyData } from '../../../common/endpoint/types';
 
 /**
  * Determines the when the last run was in order to execute to.

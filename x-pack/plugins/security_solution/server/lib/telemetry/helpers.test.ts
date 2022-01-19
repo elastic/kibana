@@ -21,7 +21,7 @@ import {
   isPackagePolicyList,
   templateExceptionList,
 } from './helpers';
-import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
+import type { ExceptionListItem } from './types';
 import { PolicyData } from '../../../common/endpoint/types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
