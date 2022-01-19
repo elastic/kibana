@@ -225,7 +225,6 @@ export function useDiscoverState({
     onChangeIndexPattern,
     onUpdateQuery,
     searchSource,
-    setState,
     state,
     stateContainer,
   };
