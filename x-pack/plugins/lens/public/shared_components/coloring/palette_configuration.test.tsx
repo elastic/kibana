@@ -187,7 +187,7 @@ describe('palette panel', () => {
           params: expect.objectContaining({
             rangeType: 'number',
             rangeMin: 5,
-            rangeMax: 200,
+            rangeMax: Number.POSITIVE_INFINITY,
           }),
         })
       );
@@ -198,7 +198,7 @@ describe('palette panel', () => {
           params: expect.objectContaining({
             rangeType: 'percent',
             rangeMin: 0,
-            rangeMax: 100,
+            rangeMax: Number.POSITIVE_INFINITY,
           }),
         })
       );
