@@ -51,15 +51,12 @@ export const MONITOR_MANAGEMENT_CRUMB = i18n.translate(
   }
 );
 
-export const ADD_MONITOR_CRUMB = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorManagementCrumb',
-  {
-    defaultMessage: 'Add monitor',
-  }
-);
+export const ADD_MONITOR_CRUMB = i18n.translate('xpack.uptime.monitorManagement.addMonitorCrumb', {
+  defaultMessage: 'Add monitor',
+});
 
 export const EDIT_MONITOR_CRUMB = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorManagementCrumb',
+  'xpack.uptime.monitorManagement.editMonitorCrumb',
   {
     defaultMessage: 'Edit monitor',
   }
