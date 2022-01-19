@@ -202,7 +202,7 @@ describe('monitor status alert type', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "defaultActionMessage": "{{state.monitorName}} from {{state.observerLocation}} {{state.statusMessage}}.",
+        "defaultActionMessage": "{{state.monitorName}} from {{state.observerLocation}} {{{state.statusMessage}}}.",
         "description": "Alert when a monitor is down or an availability threshold is breached.",
         "documentationUrl": [Function],
         "format": [Function],
