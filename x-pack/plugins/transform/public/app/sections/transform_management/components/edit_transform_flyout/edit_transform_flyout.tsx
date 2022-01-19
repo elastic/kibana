@@ -38,6 +38,8 @@ import {
   applyFormFieldsToTransformConfig,
   useEditTransformFlyout,
 } from './use_edit_transform_flyout';
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
@@ -99,6 +101,14 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
+      {isManagedTransform({ config }) ? (
+        <ManagedTransformsWarningCallout
+          count={1}
+          action={i18n.translate('xpack.transform.transformList.editManagedTransformsDescription', {
+            defaultMessage: 'editing',
+          })}
+        />
+      ) : null}
       <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
         <EditTransformFlyoutForm
           editTransformFlyout={[state, dispatch]}

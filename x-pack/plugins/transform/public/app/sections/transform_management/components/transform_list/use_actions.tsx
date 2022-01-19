@@ -19,6 +19,7 @@ import { useEditAction } from '../action_edit';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 import { useCreateAlertRuleAction } from '../action_create_alert';
+import { StopActionModal } from '../action_stop/stop_action_modal';
 
 export const useActions = ({
   forceDisable,
@@ -42,6 +43,8 @@ export const useActions = ({
     modals: (
       <>
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
+        {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
+
         {editAction.config && editAction.isFlyoutVisible && (
           <EditTransformFlyout
             closeFlyout={editAction.closeFlyout}

@@ -220,6 +220,7 @@ export function jobsProvider(
       const tempJob: MlSummaryJob = {
         id: job.job_id,
         description: job.description || '',
+        customSettings: job.custom_settings,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         processed_record_count: job.data_counts?.processed_record_count,
         earliestStartTimestampMs: getEarliestDatafeedStartTime(
@@ -319,10 +320,17 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
+        removeUnClonableCustomSettings(job);
         result.job = job;
       }
     }
     return result;
+  }
+
+  function removeUnClonableCustomSettings(job: Job) {
+    if (isPopulatedObject(job.custom_settings)) {
+      delete job.custom_settings.managed;
+    }
   }
 
   async function createFullJobsList(jobIds: string[] = []) {
