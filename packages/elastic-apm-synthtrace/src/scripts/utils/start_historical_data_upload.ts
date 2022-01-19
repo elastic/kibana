@@ -17,8 +17,8 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
 
   const { generate } = await scenario(runOptions);
 
-  //if we want to generate a maximum number of documents reverse generation to descend from now.
-  [from, to] = (runOptions.maxDocs) ? [to, from] : [from, to]
+  //if we want to generate a maximum number of documents reverse generation to descend.
+  [from, to] = (runOptions.maxDocs && from > to) ? [to, from] : [from, to]
 
   logger.info(`Generating data from ${from} to ${to}`)
 

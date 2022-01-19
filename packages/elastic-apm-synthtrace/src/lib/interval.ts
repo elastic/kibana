@@ -51,18 +51,6 @@ export class Interval implements Iterable<number> {
     return new Array<number>(this.yieldRate).fill(timestamp);
   }
 
-  private* _generateAscending(): Iterable<number> {
-    let now = this.from;
-    do {
-      yield* this.yieldRateTimestamps(now.getTime());
-      now = new Date(
-        moment(now)
-          .add(this.intervalAmount, this.intervalUnit)
-          .valueOf(),
-      );
-    } while (now < this.to);
-  }
-
   private* _gen(cb: (m: moment.Moment) => moment.Moment): Iterable<number> {
     let now = this.from;
     do {

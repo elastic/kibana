@@ -55,6 +55,10 @@ function options(y: Argv) {
       description: 'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
       number: true,
     })
+    .option('numShards', {
+      description: 'Updates the component templates to update the number of primary shards, requires cloudId to be provided',
+      number: true,
+    })
     .option('clean', {
       describe: 'Clean APM indices before indexing new data',
       default: false,
@@ -117,14 +121,18 @@ yargs(process.argv.slice(2))
 
     const live = argv.live;
 
+
     let forceDataStreams = false;
     if (runOptions.cloudId) {
       const kibanaClient = new ApmSynthtraceKibanaClient(logger);
       await kibanaClient.migrateCloudToManagedApm(runOptions.cloudId, runOptions.username, runOptions.password);
       forceDataStreams = true;
     }
-
     const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
+
+    if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
+      await esClient.updateComponentTemplates(runOptions.numShards)
+    }
 
     if (argv.clean) {
       await esClient.clean()

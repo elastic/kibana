@@ -46,6 +46,22 @@ export class ApmSynthtraceEsClient {
     });
   }
 
+  async updateComponentTemplates(numberOfPrimaryShards: number) {
+    const response = await this.client.cluster.getComponentTemplate({name: "*apm*@custom"});
+    for (const componentTemplate of response.component_templates) {
+      if (componentTemplate.component_template._meta?.package?.name !== "apm") continue;
+
+      componentTemplate.component_template.template.settings = {
+        index: {
+          number_of_shards: `${numberOfPrimaryShards}`
+        }
+      };
+
+      const putTemplate = await this.client.cluster.putComponentTemplate({name: componentTemplate.name, ...componentTemplate.component_template})
+      console.log(`- updated component template ${componentTemplate.name}, acknowledged: ${putTemplate.acknowledged}`)
+    }
+  }
+
   async index(events: SpanIterable, concurrency?: number, maxDocs?: number) {
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf
