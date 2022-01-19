@@ -14,7 +14,7 @@ import type {
 } from './types';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { ENABLE_CSP } from '../server/constants';
+import { ENABLE_CSP } from '../common/constants';
 
 export class CspPlugin
   implements

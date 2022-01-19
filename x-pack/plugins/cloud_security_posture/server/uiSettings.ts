@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '../../../../src/core/server';
-import { SECURITY_SOLUTION_APP_ID, ENABLE_CSP } from './constants';
+import { SECURITY_SOLUTION_APP_ID } from './constants';
+import { ENABLE_CSP } from '../common/constants';
 
 export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   uiSettings.register({

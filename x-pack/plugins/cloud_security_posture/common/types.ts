@@ -10,10 +10,10 @@ export type Evaluation = 'passed' | 'failed' | 'NA';
 export type Score = number;
 
 export interface Stats {
-  postureScore?: Score;
-  totalFindings?: number;
-  totalPassed?: number;
-  totalFailed?: number;
+  postureScore: Score;
+  totalFindings: number;
+  totalPassed: number;
+  totalFailed: number;
 }
 
 export interface BenchmarkStats extends Stats {

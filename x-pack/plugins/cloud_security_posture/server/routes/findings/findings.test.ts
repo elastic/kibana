@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-
 import { getLatestCycleIds } from './get_latest_cycle_ids';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
