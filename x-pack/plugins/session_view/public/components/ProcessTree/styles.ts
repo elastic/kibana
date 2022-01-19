@@ -20,8 +20,6 @@ export const useStyles = () => {
       overflow: 'auto',
       height: '100%',
       backgroundColor: euiTheme.colors.lightestShade,
-      display: 'flex',
-      flexDirection: 'column',
     };
 
     const selectionArea: CSSObject = {

@@ -29,20 +29,13 @@ export interface User {
   name: string;
 }
 
-export interface EventResultBody {
-  hits: any[];
-  total: number;
-}
-
 export interface ProcessEventResults {
-  events: EventResultBody;
-  alerts: EventResultBody;
+  events: any[];
 }
 
 export interface ProcessFields {
   args: string[];
   args_count: number;
-  command_line: string;
   entity_id: string;
   executable: string;
   interactive: boolean;
@@ -51,7 +44,8 @@ export interface ProcessFields {
   pid: number;
   pgid: number;
   user: User;
-  end?: string;
+  start: Date;
+  end?: Date;
   exit_code?: number;
 }
 
@@ -117,6 +111,11 @@ export interface ProcessEvent {
   kibana?: {
     alert: ProcessEventAlert;
   };
+}
+
+export interface ProcessEventsPage {
+  events: ProcessEvent[],
+  cursor: string,
 }
 
 export interface Process {

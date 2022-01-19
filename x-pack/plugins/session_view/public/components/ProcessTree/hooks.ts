@@ -13,13 +13,13 @@ import {
   Process,
   ProcessEvent,
   ProcessMap,
+  ProcessEventsPage,
 } from '../../../common/types/process_tree';
 import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
-  forward: ProcessEvent[];
-  backward?: ProcessEvent[];
+  data: ProcessEventsPage[];
   searchQuery?: string;
 }
 
@@ -108,15 +108,14 @@ export class ProcessImpl implements Process {
 
 export const useProcessTree = ({
   sessionEntityId,
-  forward,
-  backward,
+  data,
   searchQuery,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
   // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = forward.find((event) => event.event.kind === EventKind.event);
+  const fakeLeaderEvent = data[0].events.find((event) => event.event.kind === EventKind.event);
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
@@ -129,36 +128,43 @@ export const useProcessTree = ({
   };
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
-  const [forwardIndex, setForwardIndex] = useState(0);
-  const [backwardIndex, setBackwardIndex] = useState(0);
+  const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
   useEffect(() => {
     let eventsProcessMap: ProcessMap = processMap;
-    if (backward) {
-      eventsProcessMap = processNewEvents(
-        eventsProcessMap,
-        backward.slice(0, backward.length - backwardIndex),
-        orphans,
-        sessionEntityId,
-        true
-      );
-      setBackwardIndex(backward.length);
-    }
+    let newOrphans: Process[] = orphans;
+    let newProcessedPages: ProcessEventsPage[] = [];
 
-    eventsProcessMap = processNewEvents(
-      eventsProcessMap,
-      forward.slice(forwardIndex),
-      orphans,
-      sessionEntityId
-    );
-    setForwardIndex(forward.length);
+    data.forEach((page, i) => {
+      const processed = processedPages.find(processed => processed.cursor === page.cursor);
+
+      if (!processed) {
+        console.log('processing page of events');
+
+        const backwards = i < processedPages.length;
+
+        const result = <[ProcessMap, Process[]]>processNewEvents(
+          eventsProcessMap,
+          page.events,
+          orphans,
+          sessionEntityId,
+          backwards
+        )
+
+        eventsProcessMap = result[0];
+        newOrphans = result[1];
+
+        newProcessedPages.push(page);
+      }
+    });
 
     setProcessMap({ ...eventsProcessMap });
-    setOrphans([...orphans]);
+    setProcessedPages([...processedPages, ...newProcessedPages])
+    setOrphans(newOrphans);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forward, backward]);
+  }, [data]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
@@ -167,5 +173,5 @@ export const useProcessTree = ({
   }, [searchQuery]);
 
   // return the root session leader process, and a list of orphans
-  return { sessionLeader: processMap[sessionEntityId], orphans, searchResults };
+  return { sessionLeader: processMap[sessionEntityId], processMap, orphans, searchResults };
 };

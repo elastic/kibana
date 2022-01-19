@@ -4,22 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../ProcessTreeNode';
 import { useProcessTree } from './hooks';
-import { ProcessEvent, Process } from '../../../common/types/process_tree';
+import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
+
+type FetchFunction = () => void;
 
 interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
-  // bi-directional paging support. allows us to load
-  // processes before and after a particular process.entity_id
-  // implementation in-complete. see hooks.js
-  forward: ProcessEvent[]; // load next
-  backward?: ProcessEvent[]; // load previous
+  data: ProcessEventsPage[];
+
+  jumpToEvent?: ProcessEvent;
+  isFetching: boolean;
+  hasNextPage: boolean | undefined;
+  hasPreviousPage: boolean | undefined;
+  fetchNextPage: FetchFunction;
+  fetchPreviousPage: FetchFunction;
 
   // plain text search query (only searches "process.working_directory process.args.join(' ')"
   searchQuery?: string;
@@ -27,24 +34,26 @@ interface ProcessTreeDeps {
   // currently selected process
   selectedProcess?: Process | null;
   onProcessSelected?: (process: Process) => void;
-  hideOrphans?: boolean;
 }
 
 export const ProcessTree = ({
   sessionEntityId,
-  forward,
-  backward,
+  data,
+  jumpToEvent,
+  isFetching,
+  hasNextPage,
+  hasPreviousPage,
+  fetchNextPage,
+  fetchPreviousPage,
   searchQuery,
   selectedProcess,
   onProcessSelected,
-  hideOrphans = true,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
-  const { sessionLeader, orphans, searchResults } = useProcessTree({
+  const { sessionLeader, processMap, orphans, searchResults } = useProcessTree({
     sessionEntityId,
-    forward,
-    backward,
+    data,
     searchQuery,
   });
 
@@ -54,14 +63,9 @@ export const ProcessTree = ({
   useScroll({
     div: scrollerRef.current,
     handler: (pos: number, endReached: boolean) => {
-      if (endReached) {
-        // eslint-disable-next-line no-console
-        console.log('end reached');
-        // TODO: call load more
+      if (!isFetching && endReached) {
+        fetchNextPage();
       }
-
-      // eslint-disable-next-line no-console
-      console.log(pos);
     },
   });
 
@@ -97,19 +101,15 @@ export const ProcessTree = ({
     if (processEl) {
       processEl.prepend(selectionAreaEl);
 
-      const container = processEl.parentElement;
+      const cTop = scrollerRef.current.scrollTop;
+      const cBottom = cTop + scrollerRef.current.clientHeight;
 
-      if (container) {
-        const cTop = container.scrollTop;
-        const cBottom = cTop + container.clientHeight;
+      const eTop = processEl.offsetTop;
+      const eBottom = eTop + processEl.clientHeight;
+      const isVisible = eTop >= cTop && eBottom <= cBottom;
 
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
-
-        if (!isVisible) {
-          processEl.scrollIntoView();
-        }
+      if (!isVisible) {
+        processEl.scrollIntoView({ block: 'center' });
       }
     }
   }, []);
@@ -120,37 +120,51 @@ export const ProcessTree = ({
     }
   }, [selectedProcess, selectProcess]);
 
-  // TODO: bubble the results up to parent component session_view, and show results navigation
-  // navigating should
-  // eslint-disable-next-line no-console
-  console.log(searchResults);
-
-  const renderOrphans = () => {
-    if (!hideOrphans) {
-      return orphans.map((process) => {
-        return (
-          <ProcessTreeNode
-            key={process.id}
-            isOrphan
-            process={process}
-            onProcessSelected={onProcessSelected}
-          />
-        );
-      });
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      selectProcess(searchResults[0]);
     }
-  };
+  }, [searchResults])
+
+  useEffect(() => {
+    if (jumpToEvent && data.length === 2) {
+      const process = processMap[jumpToEvent.process.entity_id];
+
+      if (process) {
+        selectProcess(process);
+      }
+    }
+  }, [jumpToEvent, processMap])
+
+  function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
+    return (
+      <EuiButton fullWidth onClick={() => func()} isLoading={isFetching}>
+        {text}
+      </EuiButton>
+    );
+  }
 
   return (
     <div ref={scrollerRef} css={styles.scroller} data-test-subj="sessionViewProcessTree">
+      {hasPreviousPage &&
+        renderLoadMoreButton(
+          <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />,
+          fetchPreviousPage
+        )}
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
           process={sessionLeader}
+          orphans={orphans}
           onProcessSelected={onProcessSelected}
         />
       )}
-      {renderOrphans()}
       <div ref={selectionAreaRef} css={styles.selectionArea} />
+      {hasNextPage &&
+        renderLoadMoreButton(
+          <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,
+          fetchNextPage
+        )}
     </div>
   );
 };

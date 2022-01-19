@@ -5,68 +5,91 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import type { Logger } from 'kibana/server';
 import { IRouter } from '../../../../../src/core/server';
+import { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch';
 import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
-export const registerProcessEventsRoute = (router: IRouter) => {
+export const registerProcessEventsRoute = (router: IRouter, logger: Logger) => {
   router.get(
     {
       path: PROCESS_EVENTS_ROUTE,
       validate: {
         query: schema.object({
-          sessionEntityId: schema.maybe(schema.string()),
+          sessionEntityId: schema.string(),
+          cursor: schema.maybe(schema.string()),
+          forward: schema.maybe(schema.boolean()),
         }),
       },
     },
     async (context, request, response) => {
       const client = context.core.elasticsearch.client.asCurrentUser;
+      const { sessionEntityId, cursor, forward = true } = request.query;
+      const body = await doSearch(client, sessionEntityId, cursor, forward);
 
-      // TODO: would be good to figure out how to add securitySolution as a dep
-      // and make use of this way of getting the siem-signals index, instead of
-      // hardcoding it.
-      // const siemClient = context.securitySolution.getAppClient();
-      // const alertsIndex = siemClient.getSignalsIndex(),
-
-      const { sessionEntityId } = request.query;
-
-      const search = await client.search({
-        index: ['cmd'],
-        body: {
-          query: {
-            match: {
-              'process.entry.entity_id': sessionEntityId,
-            },
-          },
-          size: PROCESS_EVENTS_PER_PAGE,
-          sort: [{ '@timestamp': 'asc' }],
-        },
-      });
-
-      // temporary approach. ideally we'd pull from both these indexes above, but unfortunately
-      // our new fields like process.entry.entity_id won't have a mapping in the .siem-signals index
-      // this should hopefully change once we update ECS or endpoint-package..
-      // for demo purpose we just load all alerts, and stich it together on the frontend.
-      const alerts = await client.search({
-        index: ['.siem-signals-default'],
-        body: {
-          size: PROCESS_EVENTS_PER_PAGE,
-          sort: [{ '@timestamp': 'asc' }],
-        },
-      });
-
-      alerts.body.hits.hits = alerts.body.hits.hits.map((hit: any) => {
-        hit._source = expandDottedObject(hit._source);
-
-        return hit;
-      });
-
-      return response.ok({
-        body: {
-          events: search.body.hits,
-          alerts: alerts.body.hits,
-        },
-      });
+      return response.ok({ body });
     }
   );
+};
+
+const doSearch = async (
+  client: ElasticsearchClient,
+  sessionEntityId: string,
+  cursor: string | undefined,
+  forward = true
+) => {
+  // Temporary hack. Updates .siem-signals-default index to include a mapping for process.entry.entity_id
+  // TODO: find out how to do proper index mapping migrations...
+  let siemSignalsExists = true;
+
+  try {
+    await client.indices.putMapping({
+      index: '.siem-signals-default',
+      body: {
+        properties: {
+          'process.entry.entity_id': {
+            type: 'keyword',
+          },
+        },
+      },
+    });
+  } catch (err) {
+    siemSignalsExists = false;
+  }
+
+  const indices = ['cmd'];
+
+  if (siemSignalsExists) {
+    indices.push('.siem-signals-default');
+  }
+
+  const search = await client.search({
+    index: indices,
+    body: {
+      query: {
+        match: {
+          'process.entry.entity_id': sessionEntityId,
+        },
+      },
+      size: PROCESS_EVENTS_PER_PAGE,
+      sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
+      search_after: cursor ? [cursor] : undefined,
+    },
+  });
+
+  const events = search.body.hits.hits.map((hit: any) => {
+    // the .siem-signals-default index flattens many properties. this util unflattens them.
+    hit._source = expandDottedObject(hit._source);
+
+    return hit;
+  });
+
+  if (!forward) {
+    events.reverse();
+  }
+
+  return {
+    events,
+  };
 };

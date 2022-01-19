@@ -5,53 +5,72 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
-import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
+import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
 
-export const useFetchSessionViewProcessEvents = (sessionEntityId: string) => {
+export const useFetchSessionViewProcessEvents = (
+  sessionEntityId: string,
+  jumpToEvent: ProcessEvent | undefined
+) => {
   const { http } = useKibana<CoreStart>().services;
 
-  return useQuery<ProcessEventResults, Error>(['sessionViewProcessEvents', sessionEntityId], () =>
-    http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
-      query: {
-        sessionEntityId,
+  const jumpToCursor = jumpToEvent && jumpToEvent['@timestamp'].toISOString();
+
+  const query = useInfiniteQuery(
+    'sessionViewProcessEvents',
+    async ({ pageParam = {} }) => {
+      let { cursor, forward } = pageParam;
+
+      if (!cursor && jumpToCursor) {
+        cursor = jumpToCursor;
+      }
+
+      const res = await http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+        query: {
+          sessionEntityId,
+          cursor,
+          forward,
+        },
+      });
+
+      const events = res.events.map((event: any) => event._source as ProcessEvent);
+
+      return { events, cursor };
+    },
+    {
+      getNextPageParam: (lastPage, pages) => {
+        if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
+          return {
+            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
+            forward: true,
+          };
+        }
       },
-    })
-  );
-};
-
-export const useParseSessionViewProcessEvents = (getData: ProcessEventResults | undefined) => {
-  const [data, setData] = useState<ProcessEvent[]>([]);
-  const { events, alerts } = getData || {};
-
-  const sortEvents = (a: ProcessEvent, b: ProcessEvent) => {
-    if (a['@timestamp'].valueOf() < b['@timestamp'].valueOf()) {
-      return -1;
-    } else if (a['@timestamp'].valueOf() > b['@timestamp'].valueOf()) {
-      return 1;
+      getPreviousPageParam: (firstPage, pages) => {
+        if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
+          return {
+            cursor: firstPage.events[0]['@timestamp'],
+            forward: false,
+          };
+        }
+      },
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     }
-
-    return 0;
-  };
+  );
 
   useEffect(() => {
-    const eventsSource: ProcessEvent[] = (events?.hits || []).map(
-      (event: any) => event._source as ProcessEvent
-    );
-    const alertsSource: ProcessEvent[] = (alerts?.hits || []).map((event: any) => {
-      return event._source as ProcessEvent;
-    });
-    const all: ProcessEvent[] = eventsSource.concat(alertsSource).sort(sortEvents);
-    setData(all);
-  }, [events, alerts]);
+    if (jumpToEvent && query.data?.pages.length === 1) {
+      query.fetchPreviousPage();
+    }
+  }, [query.data]);
 
-  return {
-    data,
-  };
+  return query;
 };
 
 export const useSearchQuery = () => {

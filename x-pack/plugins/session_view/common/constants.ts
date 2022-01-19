@@ -18,4 +18,4 @@ export const RECENT_SESSION_ROUTE = '/internal/session_view/recent_session_route
 export const SESSION_ENTRY_LEADERS_ROUTE = '/internal/session_view/session_entry_leaders_route';
 export const TEST_SAVED_OBJECT = 'session_view_test_saved_object';
 
-export const PROCESS_EVENTS_PER_PAGE = 2000;
+export const PROCESS_EVENTS_PER_PAGE = 1000;
