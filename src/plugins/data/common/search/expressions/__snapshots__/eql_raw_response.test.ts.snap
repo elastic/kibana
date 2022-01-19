@@ -44,13 +44,13 @@ exports[`eqlRawResponse converts sequences to table simple docs response 1`] = `
 Object {
   "columns": Array [
     Object {
-      "id": "category.0",
+      "id": "category",
       "meta": Object {
-        "field": "category.0",
+        "field": "category",
         "params": Object {},
-        "type": "string",
+        "type": "object",
       },
-      "name": "category.0",
+      "name": "category",
     },
     Object {
       "id": "currency",
@@ -89,58 +89,22 @@ Object {
       "name": "customer_gender",
     },
     Object {
-      "id": "products.0.base_price",
+      "id": "products",
       "meta": Object {
-        "field": "products.0.base_price",
+        "field": "products",
         "params": Object {},
-        "type": "number",
+        "type": "object",
       },
-      "name": "products.0.base_price",
+      "name": "products",
     },
     Object {
-      "id": "products.0.discount_percentage",
+      "id": "sku",
       "meta": Object {
-        "field": "products.0.discount_percentage",
+        "field": "sku",
         "params": Object {},
-        "type": "number",
+        "type": "object",
       },
-      "name": "products.0.discount_percentage",
-    },
-    Object {
-      "id": "products.1.base_price",
-      "meta": Object {
-        "field": "products.1.base_price",
-        "params": Object {},
-        "type": "number",
-      },
-      "name": "products.1.base_price",
-    },
-    Object {
-      "id": "products.1.discount_percentage",
-      "meta": Object {
-        "field": "products.1.discount_percentage",
-        "params": Object {},
-        "type": "number",
-      },
-      "name": "products.1.discount_percentage",
-    },
-    Object {
-      "id": "sku.0",
-      "meta": Object {
-        "field": "sku.0",
-        "params": Object {},
-        "type": "string",
-      },
-      "name": "sku.0",
-    },
-    Object {
-      "id": "sku.1",
-      "meta": Object {
-        "field": "sku.1",
-        "params": Object {},
-        "type": "string",
-      },
-      "name": "sku.1",
+      "name": "sku",
     },
     Object {
       "id": "geoip.country_iso_code",
@@ -185,7 +149,9 @@ Object {
   },
   "rows": Array [
     Object {
-      "category.0": "Men's Clothing",
+      "category": Array [
+        "Men's Clothing",
+      ],
       "currency": "EUR",
       "customer_first_name": "Oliver",
       "customer_full_name": "Oliver Rios",
@@ -194,15 +160,25 @@ Object {
       "geoip.country_iso_code": "GB",
       "geoip.location.lat": 51.5,
       "geoip.location.lon": -0.1,
-      "products.0.base_price": 20.99,
-      "products.0.discount_percentage": 0,
-      "products.1.base_price": 24.99,
-      "products.1.discount_percentage": 0,
-      "sku.0": "ZO0417504175",
-      "sku.1": "ZO0535205352",
+      "products": Array [
+        Object {
+          "base_price": 20.99,
+          "discount_percentage": 0,
+        },
+        Object {
+          "base_price": 24.99,
+          "discount_percentage": 0,
+        },
+      ],
+      "sku": Array [
+        "ZO0417504175",
+        "ZO0535205352",
+      ],
     },
     Object {
-      "category.0": "Men's Clothing",
+      "category": Array [
+        "Men's Clothing",
+      ],
       "currency": "EUR",
       "customer_first_name": "Boris",
       "customer_full_name": "Boris Bradley",
@@ -211,12 +187,20 @@ Object {
       "geoip.country_iso_code": "GB",
       "geoip.location.lat": 51.5,
       "geoip.location.lon": -0.1,
-      "products.0.base_price": 32.99,
-      "products.0.discount_percentage": 0,
-      "products.1.base_price": 28.99,
-      "products.1.discount_percentage": 0,
-      "sku.0": "ZO0112101121",
-      "sku.1": "ZO0530405304",
+      "products": Array [
+        Object {
+          "base_price": 32.99,
+          "discount_percentage": 0,
+        },
+        Object {
+          "base_price": 28.99,
+          "discount_percentage": 0,
+        },
+      ],
+      "sku": Array [
+        "ZO0112101121",
+        "ZO0530405304",
+      ],
     },
   ],
   "type": "datatable",
