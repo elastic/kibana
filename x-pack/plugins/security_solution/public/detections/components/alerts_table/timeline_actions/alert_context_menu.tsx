@@ -275,7 +275,7 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
     indexName: signalIndexName,
   });
 
-  const enrichedAlert = useMemo(() => {
+  const enrichedAlert: AlertData | undefined = useMemo(() => {
     if (isLoadingAlertData === false) {
       const hit = data?.hits.hits[0];
       if (!hit) {
