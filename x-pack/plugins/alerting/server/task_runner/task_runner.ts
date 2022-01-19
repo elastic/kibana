@@ -485,15 +485,14 @@ export class TaskRunner<
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
         );
+        // Usage counter for telemetry
+        // This keeps track of how many times action executions were skipped after rule
+        // execution completed successfully after the execution timeout
+        // This can occur when rule executors do not short circuit execution in response
+        // to timeout
+        this.countUsageOfActionExecutionAfterRuleCancellation();
       }
     }
-
-    // Usage counter for telemetry
-    // This keeps track of how many times action executions were skipped after rule
-    // execution completed successfully after the execution timeout
-    // This can occur when rule executors do not short circuit execution in response
-    // to timeout
-    this.countUsageOfActionExecutionAfterRuleCancellation();
 
     return {
       alertTypeState: updatedRuleTypeState || undefined,
