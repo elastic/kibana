@@ -489,6 +489,7 @@ class PackagePolicyService {
             title: packagePolicy.package?.title || '',
             version: packagePolicy.package?.version || '',
           },
+          policy_id: packagePolicy.policy_id,
         });
       } catch (error) {
         result.push({
