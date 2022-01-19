@@ -21,6 +21,6 @@ export const mlModules: string[] = [
   'security_linux',
   'security_network',
   'security_windows',
-  'security_linux_v3', 
+  'security_linux_v3',
   'security_windows_v3',
 ];
