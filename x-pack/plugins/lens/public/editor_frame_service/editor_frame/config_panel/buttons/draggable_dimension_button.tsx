@@ -81,6 +81,13 @@ export function DraggableDimensionButton({
     (dropTypes.includes('swap_incompatible') || dropTypes.includes('swap_compatible'))
   );
 
+  const canCombine = Boolean(
+    dropTypes &&
+      (dropTypes.includes('combine_compatible') ||
+        dropTypes.includes('field_combine') ||
+        dropTypes.includes('combine_incompatible'))
+  );
+
   const value = useMemo(
     () => ({
       columnId,
@@ -91,6 +98,7 @@ export function DraggableDimensionButton({
       humanData: {
         canSwap,
         canDuplicate,
+        canCombine,
         label,
         groupLabel: group.groupLabel,
         position: accessorIndex + 1,
@@ -108,6 +116,7 @@ export function DraggableDimensionButton({
       group.filterOperations,
       canDuplicate,
       canSwap,
+      canCombine,
     ]
   );
 
@@ -129,7 +138,6 @@ export function DraggableDimensionButton({
     (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
     [value, onDrop]
   );
-
   return (
     <div
       ref={registerNewButtonRefMemoized}
