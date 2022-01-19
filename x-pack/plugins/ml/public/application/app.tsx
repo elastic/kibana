@@ -87,6 +87,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     dataVisualizer: deps.dataVisualizer,
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
+    dashboard: deps.dashboard,
     ...coreStart,
   };
 

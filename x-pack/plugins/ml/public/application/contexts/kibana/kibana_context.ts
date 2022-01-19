@@ -22,6 +22,7 @@ import type { MapsStartApi } from '../../../../../maps/public';
 import type { DataVisualizerPluginStart } from '../../../../../data_visualizer/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
 import type { FieldFormatsRegistry } from '../../../../../../../src/plugins/field_formats/common';
+import type { DashboardSetup } from '../../../../../../../src/plugins/dashboard/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
@@ -34,6 +35,7 @@ interface StartPlugins {
   dataVisualizer?: DataVisualizerPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
+  dashboard: DashboardSetup;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

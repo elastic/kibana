@@ -43,6 +43,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+
   const menuItems = useMemo(() => {
     const items = [];
     if (canEditDashboards) {
@@ -91,20 +92,17 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           </EuiPopover>
         </EuiFlexItem>
       )}
-      {isAddDashboardsActive && selectedJobs && (
+      {isAddDashboardsActive && selectedJobs ? (
         <AddAnomalyChartsToDashboardControl
-          onClose={async (callback) => {
+          onClose={async () => {
             setIsAddDashboardActive(false);
-            if (callback) {
-              await callback();
-            }
           }}
           selectedCells={selectedCells}
           bounds={bounds}
           interval={interval}
           jobIds={jobIds}
         />
-      )}
+      ) : null}
     </>
   );
 };

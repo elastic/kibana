@@ -49,6 +49,7 @@ import type {
   FieldFormatsSetup,
   FieldFormatsStart,
 } from '../../../../src/plugins/field_formats/public';
+import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -60,6 +61,7 @@ export interface MlStartDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
   fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
 }
 
 export interface MlSetupDependencies {
@@ -76,6 +78,7 @@ export interface MlSetupDependencies {
   alerting?: AlertingSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  dashboard: DashboardSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -120,6 +123,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
+            dashboard: pluginsStart.dashboard,
           },
           params
         );
