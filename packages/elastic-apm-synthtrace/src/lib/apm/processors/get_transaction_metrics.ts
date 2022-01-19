@@ -34,12 +34,15 @@ export function getTransactionMetrics(events: ApmFields[]) {
     .map((transaction) => {
       return {
         ...transaction,
+        // TODO trace.root not used from 8.0.0 onwards, remove?
         ['trace.root']: transaction['parent.id'] === undefined,
+        ['transaction.root']: transaction['parent.id'] === undefined,
       };
     });
 
   const metricsets = aggregate(transactions, [
     'trace.root',
+    'transaction.root',
     'transaction.name',
     'transaction.type',
     'event.outcome',
