@@ -5,38 +5,38 @@
     ],
     "max_empty_searches": 10,
     "query": {
-      "bool": {
-        "filter": [
-          {
-            "term": {
-              "event.code": "4624"
-            }
+       "bool": {
+      "filter": [
+        {
+          "term": {
+            "winlog.event_data.LogonType": "10"
           }
-        ],
-        "must": [
-          {
-            "bool": {
-              "should": [
-                {
-                  "match": {
-                    "winlog.event_data.LogonType": {
-                      "query": "10",
-                      "operator": "OR"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "winlog.logon.type": {
-                      "query": "RemoteInteractive",
-                      "operator": "OR"
-                    }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "event.type": {
+                    "query": "authentication_success",
+                    "operator": "OR"
                   }
                 }
-              ]
-            }
+              },
+              {
+                "match": {
+                  "event.action": {
+                    "query": "logged-in",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
           }
-        ]
-      }
+        }
+      ]
+    }
     }
   }
