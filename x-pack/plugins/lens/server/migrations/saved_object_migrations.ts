@@ -13,9 +13,9 @@ import {
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { mergeSavedObjectMigrationMaps } from 'kibana/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {

@@ -8,7 +8,7 @@
 
 import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
 import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
-import { mergeSavedObjectMigrationMaps } from 'kibana/server';
+import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
 import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
 
 import {
