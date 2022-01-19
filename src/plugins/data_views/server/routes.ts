@@ -35,9 +35,7 @@ export function registerRoutes(
 
   const router = http.createRouter();
 
-  Object.entries(routes).forEach(([, route]) =>
-    route(router, getStartServices, dataViewRestCounter)
-  );
+  routes.forEach((route) => route(router, getStartServices, dataViewRestCounter));
 
   registerFieldForWildcard(router, getStartServices);
 
