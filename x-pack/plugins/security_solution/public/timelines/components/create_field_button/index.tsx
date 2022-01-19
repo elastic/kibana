@@ -58,7 +58,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
             // Fetch the updated list of fields
             await indexFieldsSearch(selectedDataViewId);
 
-            // Add the new field to the event table
+            // Add the new field to the event table, after waiting for browserFields to be stored
             dispatch(
               upsertColumn({
                 column: {

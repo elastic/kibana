@@ -75,7 +75,6 @@ jest.mock('../../lib/kibana', () => ({
         },
         search: {
           search: mockSearch.mockImplementation(() => ({
-            toPromise: jest.fn().mockResolvedValue(null),
             subscribe: jest.fn().mockImplementation(() => ({
               error: jest.fn(),
               next: jest.fn(),

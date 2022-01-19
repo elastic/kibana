@@ -103,7 +103,6 @@ describe('source/index.tsx', () => {
           data: {
             search: {
               search: jest.fn().mockReturnValue({
-                toPromise: jest.fn().mockResolvedValue(null),
                 subscribe: ({ next }: { next: Function }) => {
                   next(mockSearchResponse);
                   return mock;
@@ -119,23 +118,23 @@ describe('source/index.tsx', () => {
       await act(async () => {
         const { rerender, waitForNextUpdate, result } = renderHook<
           string,
-          { indexFieldsSearch: (id: string) => void }
+          { indexFieldsSearch: (id: string) => Promise<void> }
         >(() => useDataView(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
         await waitForNextUpdate();
         rerender();
-        act(() => result.current.indexFieldsSearch('neato'));
-        expect(mockDispatch.mock.calls[0][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
-          payload: { id: 'neato', loading: true },
-        });
-        const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
-        expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
-        expect(payload.id).toEqual('neato');
-        expect(Object.keys(payload.browserFields)).toHaveLength(12);
-        expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
+        await result.current.indexFieldsSearch('neato');
       });
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
+        payload: { id: 'neato', loading: true },
+      });
+      const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
+      expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
+      expect(payload.id).toEqual('neato');
+      expect(Object.keys(payload.browserFields)).toHaveLength(12);
+      expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
     });
   });
 });
