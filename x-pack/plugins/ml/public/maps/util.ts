@@ -14,6 +14,16 @@ import { VectorSourceRequestMeta } from '../../../maps/common';
 
 export type MlAnomalyLayers = 'typical' | 'actual' | 'connected';
 
+// Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
+function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
+  const convertWithRounding = (point: string) => Math.round(Number(point) * 100) / 100;
+  const convert = (point: string) => Number(point);
+  return actualCoordinateStr
+    .split(',')
+    .map(round ? convertWithRounding : convert)
+    .reverse();
+}
+
 export async function getResultsForJobId(
   mlResultsService: MlApiServices['results'],
   jobId: string,
@@ -49,9 +59,11 @@ export async function getResultsForJobId(
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
   let hits: Array<{
     actual: number[];
+    actualDisplay: number[];
     fieldName?: string;
     functionDescription: string;
     typical: number[];
+    typicalDisplay: number[];
     record_score: number;
     timestamp: string;
   }> = [];
@@ -72,27 +84,27 @@ export async function getResultsForJobId(
       const geoResults = _source.geo_results;
       const actualCoordStr = geoResults && geoResults.actual_point;
       const typicalCoordStr = geoResults && geoResults.typical_point;
-      let typical;
-      let actual;
-      // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
+      let typical: number[] = [];
+      let typicalDisplay: number[] = [];
+      let actual: number[] = [];
+      let actualDisplay: number[] = [];
+
       if (actualCoordStr !== undefined) {
-        actual = actualCoordStr
-          .split(',')
-          .map((point: string) => Number(point))
-          .reverse();
+        actual = getCoordinates(actualCoordStr);
+        actualDisplay = getCoordinates(actualCoordStr, true);
       }
       if (typicalCoordStr !== undefined) {
-        typical = typicalCoordStr
-          .split(',')
-          .map((point: string) => Number(point))
-          .reverse();
+        typical = getCoordinates(typicalCoordStr);
+        typicalDisplay = getCoordinates(typicalCoordStr, true);
       }
       return {
         fieldName: _source.field_name,
         functionDescription: _source.function_description,
         timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
         typical,
+        typicalDisplay,
         actual,
+        actualDisplay,
         record_score: Math.floor(_source.record_score),
       };
     });
@@ -116,7 +128,9 @@ export async function getResultsForJobId(
       geometry,
       properties: {
         actual: result.actual,
+        actualDisplay: result.actualDisplay,
         typical: result.typical,
+        typicalDisplay: result.typicalDisplay,
         fieldName: result.fieldName,
         functionDescription: result.functionDescription,
         timestamp: result.timestamp,

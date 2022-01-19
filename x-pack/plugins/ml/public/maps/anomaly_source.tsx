@@ -50,7 +50,7 @@ export class AnomalySource implements IVectorSource {
     return {
       type: ML_ANOMALY,
       jobId: descriptor.jobId,
-      typicalActual: descriptor.typicalActual || 'typical',
+      typicalActual: descriptor.typicalActual || 'actual',
     };
   }
 
@@ -148,7 +148,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSourceStatus() {
-    return { tooltipContent: null, areResultsTrimmed: false };
+    return { tooltipContent: null, areResultsTrimmed: true };
   }
 
   getType(): string {
@@ -226,7 +226,8 @@ export class AnomalySource implements IVectorSource {
       tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
         defaultMessage: 'Shows anomalies',
       }),
-      areResultsTrimmed: false, // set to true if data is incomplete
+      // set to true if data is incomplete (we limit to first 1000 results)
+      areResultsTrimmed: true,
     };
   }
 

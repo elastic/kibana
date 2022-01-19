@@ -73,7 +73,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     const selector = this.state.jobId ? (
       <LayerSelector
         onChange={this.onTypicalActualChange}
-        typicalActual={this.state.typicalActual || 'typical'}
+        typicalActual={this.state.typicalActual || 'actual'}
       />
     ) : null;
     return (

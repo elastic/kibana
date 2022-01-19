@@ -12,11 +12,11 @@ import type { LayerWizard } from '../../../maps/public';
 export const anomalyLayerWizard: Partial<LayerWizard> = {
   categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS, LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.ml.maps.anomalyLayerDescription', {
-    defaultMessage: 'Create anomalies layers',
+    defaultMessage: 'Display anomalies from a machine learning job',
   }),
   disabledReason: i18n.translate('xpack.ml.maps.anomalyLayerUnavailableMessage', {
     defaultMessage:
-      'Whatever reason the user cannot see ML card (likely because no enterprise license or no ML privileges)',
+      'Anomalies layers are a subscription feature. Ensure you have the right subscription and access to Machine Learning.',
   }),
   icon: 'outlierDetectionJob',
   getIsDisabled: () => {

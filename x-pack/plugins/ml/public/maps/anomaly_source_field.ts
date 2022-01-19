@@ -7,6 +7,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { escape } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { IField, IVectorSource } from '../../../maps/public';
 import { FIELD_ORIGIN } from '../../../maps/common';
 import { TileMetaFeature } from '../../../maps/common/descriptor_types';
@@ -15,12 +16,42 @@ import { ITooltipProperty } from '../../../maps/public';
 import { Filter } from '../../../../../src/plugins/data/public';
 
 export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
-  record_score: { label: 'Record score', type: 'number' },
-  timestamp: { label: 'Timestamp', type: 'string' },
-  fieldName: { label: 'Field label', type: 'string' },
-  functionDescription: { label: 'Function description', type: 'string' },
-  actual: { label: 'Actual', type: 'string' },
-  typical: { label: 'Typical', type: 'string' },
+  record_score: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerRecordScoreLabel', {
+      defaultMessage: 'Record score',
+    }),
+    type: 'number',
+  },
+  timestamp: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerTimeStampLabel', {
+      defaultMessage: 'Time',
+    }),
+    type: 'string',
+  },
+  fieldName: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerFieldNameLabel', {
+      defaultMessage: 'Field name',
+    }),
+    type: 'string',
+  },
+  functionDescription: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerFunctionDescriptionLabel', {
+      defaultMessage: 'Function',
+    }),
+    type: 'string',
+  },
+  actualDisplay: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
+      defaultMessage: 'Actual',
+    }),
+    type: 'string',
+  },
+  typicalDisplay: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {
+      defaultMessage: 'Typical',
+    }),
+    type: 'string',
+  },
 };
 
 export class AnomalySourceTooltipProperty implements ITooltipProperty {

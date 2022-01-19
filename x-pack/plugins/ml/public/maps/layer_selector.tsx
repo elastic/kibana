@@ -56,8 +56,8 @@ export class LayerSelector extends Component<Props, State> {
           singleSelection={true}
           onChange={this.onSelect}
           options={[
-            { value: 'typical', label: 'typical' },
             { value: 'actual', label: 'actual' },
+            { value: 'typical', label: 'typical' },
             { value: 'connected', label: 'connected' },
           ]}
           selectedOptions={options}

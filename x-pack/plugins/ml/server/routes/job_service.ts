@@ -292,8 +292,6 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiName JobsSummary
    * @apiDescription Returns a list of anomaly detection jobs with analysis config with fields supported by maps.
    *
-   * @apiSchema (body) optionalJobIdsSchema
-   *
    * @apiSuccess {Array} jobIds list of job ids.
    */
   router.get(

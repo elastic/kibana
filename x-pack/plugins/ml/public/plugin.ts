@@ -117,7 +117,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
-            // @ts-ignore
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
