@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { merge, mergeWith, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
@@ -16,6 +16,7 @@ import type {
   RegistryElasticsearch,
   InstallablePackage,
   IndexTemplate,
+  IndexTemplateMappings,
 } from '../../../../types';
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
@@ -40,6 +41,12 @@ import {
 } from './template';
 import { buildDefaultSettings } from './default_settings';
 
+const mergeWithArrayConcat = (a: any, b: any) =>
+  mergeWith(a, b, (val1, val2) => {
+    if (isArray(val1)) {
+      return val1.concat(val2);
+    }
+  });
 export const installTemplates = async (
   installablePackage: InstallablePackage,
   esClient: ElasticsearchClient,
@@ -233,12 +240,13 @@ const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName 
   name.endsWith(userSettingsSuffix);
 
 function buildComponentTemplates(params: {
+  mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, packageName, defaultSettings } = params;
+  const { templateName, registryElasticsearch, packageName, defaultSettings, mappings } = params;
   const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
   const settingsTemplateName = `${templateName}${settingsSuffix}`;
   const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
@@ -246,15 +254,36 @@ function buildComponentTemplates(params: {
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
 
-  if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
-    templatesMap[mappingsTemplateName] = {
-      template: {
-        mappings: registryElasticsearch['index_template.mappings'],
+  const baseMapping = {
+    // All the dynamic field mappings
+    dynamic_templates: [
+      // This makes sure all mappings are keywords by default
+      {
+        strings_as_keyword: {
+          mapping: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          match_mapping_type: 'string',
+        },
       },
-      _meta,
-    };
-  }
+    ],
+    // As we define fields ahead, we don't need any automatic field detection
+    // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
+    date_detection: false,
+    // All the properties we know from the fields.yml file
+    properties: mappings.properties,
+    _meta,
+  };
 
+  const packageMappings = registryElasticsearch && registryElasticsearch['index_template.mappings'];
+  templatesMap[mappingsTemplateName] = {
+    template: {
+      // dynamic_templates arrays should be concatenated together not overlayed
+      mappings: mergeWithArrayConcat(baseMapping, packageMappings || {}),
+    },
+    _meta,
+  };
   templatesMap[settingsTemplateName] = {
     template: {
       settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
@@ -274,6 +303,7 @@ function buildComponentTemplates(params: {
 }
 
 async function installDataStreamComponentTemplates(params: {
+  mappings: IndexTemplateMappings;
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   esClient: ElasticsearchClient;
@@ -281,9 +311,17 @@ async function installDataStreamComponentTemplates(params: {
   packageName: string;
   defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, esClient, packageName, defaultSettings, logger } =
-    params;
+  const {
+    templateName,
+    registryElasticsearch,
+    esClient,
+    packageName,
+    defaultSettings,
+    logger,
+    mappings,
+  } = params;
   const templates = buildComponentTemplates({
+    mappings,
     templateName,
     registryElasticsearch,
     packageName,
@@ -424,6 +462,7 @@ export async function installTemplate({
   });
 
   const composedOfTemplates = await installDataStreamComponentTemplates({
+    mappings,
     templateName,
     registryElasticsearch: dataStream.elasticsearch,
     esClient,
@@ -436,7 +475,6 @@ export async function installTemplate({
     type: dataStream.type,
     templateIndexPattern,
     fields: validFields,
-    mappings,
     pipelineName,
     packageName,
     composedOfTemplates,
