@@ -925,7 +925,7 @@ describe('CaseUserActionService', () => {
       });
     });
 
-    describe('getUniqueConnectorOfCase', () => {
+    describe('getUniqueConnectors', () => {
       const findResponse = createUserActionFindSO(createConnectorUserAction());
       const aggregationResponse = {
         aggregations: {
@@ -970,7 +970,7 @@ describe('CaseUserActionService', () => {
       });
 
       it('it returns an empty array if the response is not valid', async () => {
-        const res = await service.getUniqueConnectorOfCase({
+        const res = await service.getUniqueConnectors({
           unsecuredSavedObjectsClient,
           caseId: '123',
         });
@@ -984,7 +984,7 @@ describe('CaseUserActionService', () => {
           ...aggregationResponse,
         } as unknown as Promise<SavedObjectsFindResponse>);
 
-        const res = await service.getUniqueConnectorOfCase({
+        const res = await service.getUniqueConnectors({
           unsecuredSavedObjectsClient,
           caseId: '123',
         });
@@ -997,106 +997,91 @@ describe('CaseUserActionService', () => {
       });
 
       it('it returns the unique connectors', async () => {
-        await service.getUniqueConnectorOfCase({
+        await service.getUniqueConnectors({
           unsecuredSavedObjectsClient,
           caseId: '123',
         });
 
-        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
-          aggs: {
-            references: {
-              aggregations: {
-                connectors: {
-                  aggregations: {
-                    ids: {
-                      aggregations: {
-                        docs: {
-                          aggregations: {
-                            top_docs: {
-                              top_hits: {
-                                size: 1,
-                                sort: [
-                                  {
-                                    'cases-user-actions.created_at': {
-                                      order: 'desc',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
+        expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "aggs": Object {
+                "references": Object {
+                  "aggregations": Object {
+                    "connectors": Object {
+                      "aggregations": Object {
+                        "ids": Object {
+                          "terms": Object {
+                            "field": "cases-user-actions.references.id",
+                            "size": 100,
                           },
-                          reverse_nested: {},
                         },
                       },
-                      terms: {
-                        field: 'cases-user-actions.references.id',
-                        size: 100,
+                      "filter": Object {
+                        "term": Object {
+                          "cases-user-actions.references.type": "action",
+                        },
                       },
                     },
                   },
-                  filter: {
-                    term: {
-                      'cases-user-actions.references.type': 'action',
-                    },
+                  "nested": Object {
+                    "path": "cases-user-actions.references",
                   },
                 },
               },
-              nested: {
-                path: 'cases-user-actions.references',
+              "filter": Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "type": "literal",
+                        "value": "cases-user-actions.attributes.type",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": "connector",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": false,
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "type": "literal",
+                        "value": "cases-user-actions.attributes.type",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": "create_case",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": false,
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "or",
+                "type": "function",
               },
+              "hasReference": Object {
+                "id": "123",
+                "type": "cases",
+              },
+              "page": 1,
+              "perPage": 1,
+              "sortField": "created_at",
+              "type": "cases-user-actions",
             },
-          },
-          filter: {
-            arguments: [
-              {
-                arguments: [
-                  {
-                    type: 'literal',
-                    value: 'cases-user-actions.attributes.type',
-                  },
-                  {
-                    type: 'literal',
-                    value: 'connector',
-                  },
-                  {
-                    type: 'literal',
-                    value: false,
-                  },
-                ],
-                function: 'is',
-                type: 'function',
-              },
-              {
-                arguments: [
-                  {
-                    type: 'literal',
-                    value: 'cases-user-actions.attributes.type',
-                  },
-                  {
-                    type: 'literal',
-                    value: 'create_case',
-                  },
-                  {
-                    type: 'literal',
-                    value: false,
-                  },
-                ],
-                function: 'is',
-                type: 'function',
-              },
-            ],
-            function: 'or',
-            type: 'function',
-          },
-          hasReference: {
-            id: '123',
-            type: 'cases',
-          },
-          page: 1,
-          perPage: 1,
-          sortField: 'created_at',
-          type: 'cases-user-actions',
-        });
+          ]
+        `);
       });
     });
   });

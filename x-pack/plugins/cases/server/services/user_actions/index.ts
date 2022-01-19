@@ -436,7 +436,7 @@ export class CaseUserActionService {
     }
   }
 
-  public async getUniqueConnectorOfCase({
+  public async getUniqueConnectors({
     caseId,
     filter,
     unsecuredSavedObjectsClient,
@@ -504,25 +504,6 @@ export class CaseUserActionService {
                 terms: {
                   field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
                   size,
-                },
-                aggregations: {
-                  docs: {
-                    reverse_nested: {},
-                    aggregations: {
-                      top_docs: {
-                        top_hits: {
-                          sort: [
-                            {
-                              [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
-                                order: 'desc',
-                              },
-                            },
-                          ],
-                          size: 1,
-                        },
-                      },
-                    },
-                  },
                 },
               },
             },

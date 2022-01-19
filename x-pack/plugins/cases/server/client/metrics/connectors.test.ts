@@ -32,13 +32,13 @@ describe('Connectors', () => {
   });
 
   it('returns zero as total if the are no connectors', async () => {
-    userActionService.getUniqueConnectorOfCase.mockResolvedValue([]);
+    userActionService.getUniqueConnectors.mockResolvedValue([]);
     const handler = new Connectors(constructorOptions);
     expect(await handler.compute()).toEqual({ connectors: { total: 0 } });
   });
 
   it('returns the correct number of connectors', async () => {
-    userActionService.getUniqueConnectorOfCase.mockResolvedValue([
+    userActionService.getUniqueConnectors.mockResolvedValue([
       { id: '865b6040-7533-11ec-8bcc-a9fc6f9d63b2' },
       { id: '915c2600-7533-11ec-8bcc-a9fc6f9d63b2' },
       { id: 'b2635b10-63e1-11ec-90af-6fe7d490ff66' },

@@ -26,7 +26,7 @@ export class Connectors extends BaseHandler {
       Operations.getUserActionMetrics
     );
 
-    const uniqueConnectors = await userActionService.getUniqueConnectorOfCase({
+    const uniqueConnectors = await userActionService.getUniqueConnectors({
       unsecuredSavedObjectsClient,
       caseId,
       filter: authorizationFilter,
