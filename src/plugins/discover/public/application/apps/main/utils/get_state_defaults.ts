@@ -48,7 +48,7 @@ export function getStateDefaults({
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
-  const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
+  const chartHidden = storage.get(CHART_HIDDEN_KEY);
 
   const defaultState = {
     query,
@@ -59,7 +59,9 @@ export function getStateDefaults({
     index: indexPattern?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
-    hideChart: chartHidden ? chartHidden : undefined,
+    hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
+    viewMode: undefined,
+    hideAggregatedPreview: undefined,
     savedQuery: undefined,
   } as AppState;
   if (savedSearch.grid) {
