@@ -92,6 +92,7 @@ function onCombineCompatible({
       getOperationHelperForMultipleFields(targetColumn.operationType)?.({
         targetColumn,
         sourceColumn,
+        indexPattern,
       }) ?? {},
   };
 
@@ -151,7 +152,12 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     !isDraggedField(droppedItem) ||
     !newOperation ||
     (shouldAddField &&
-      !hasOperationSupportForMultipleFields(targetColumn, undefined, droppedItem.field))
+      !hasOperationSupportForMultipleFields(
+        indexPattern,
+        targetColumn,
+        undefined,
+        droppedItem.field
+      ))
   ) {
     return false;
   }
@@ -162,6 +168,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
           getOperationHelperForMultipleFields(targetColumn.operationType)?.({
             targetColumn,
             field: droppedItem.field,
+            indexPattern,
           }) || {},
       }
     : undefined;

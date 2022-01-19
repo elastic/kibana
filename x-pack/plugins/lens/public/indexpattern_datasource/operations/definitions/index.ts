@@ -317,6 +317,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
     targetColumn: C;
     sourceColumn?: GenericIndexPatternColumn;
     field?: IndexPatternField;
+    indexPattern: IndexPattern;
   }) => Partial<P>;
   /**
    * Verify if the a new field can be added to the column
@@ -325,6 +326,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
     targetColumn: C;
     sourceColumn?: GenericIndexPatternColumn;
     field?: IndexPatternField;
+    indexPattern: IndexPattern;
   }) => boolean;
   /**
    * Returns the list of current fields for a multi field operation

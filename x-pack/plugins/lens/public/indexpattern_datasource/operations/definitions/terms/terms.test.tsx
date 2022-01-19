@@ -1826,6 +1826,7 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn('source'),
           sourceColumn: createMultiTermsColumn('source'),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual(false);
     });
@@ -1835,6 +1836,7 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn(['source', 'bytes', 'dest']),
           sourceColumn: createMultiTermsColumn(['source', 'dest']),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual(false);
     });
@@ -1847,6 +1849,7 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn('source'),
           field,
+          indexPattern,
         })
       ).toEqual(false);
     });
@@ -1856,6 +1859,7 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
           sourceColumn: createMultiTermsColumn(['bytes', 'dest']),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual(true);
     });
@@ -1864,7 +1868,8 @@ describe('terms', () => {
       expect(
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
-          sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'geo.src']),
+          sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual(true);
     });
@@ -1873,7 +1878,8 @@ describe('terms', () => {
       expect(
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
-          sourceColumn: createMultiTermsColumn(['bytes', 'geo.src']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual(true);
     });
@@ -1884,6 +1890,7 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
           sourceColumn: createMultiTermsColumn(['bytes', 'geo.src', 'dest', 'memory']),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual(false);
     });
@@ -1896,6 +1903,7 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn('source'),
           field,
+          indexPattern,
         })
       ).toEqual(true);
     });
@@ -1908,8 +1916,42 @@ describe('terms', () => {
         termsOperation.canAddNewField?.({
           targetColumn: createMultiTermsColumn(['bytes', 'geo.src', 'dest', 'memory', 'source']),
           field,
+          indexPattern,
         })
       ).toEqual(false);
+    });
+
+    it('should reject if the passed field is a scripted field', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('scripted')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['bytes', 'source', 'dest', 'memory']),
+          field,
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should reject if the entire column has scripted field', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['scripted', 'scripted']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should be positive if the entire column can be added (because ignoring scripted fields)', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'memory', 'dest', 'scripted']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(true);
     });
   });
 
@@ -1918,9 +1960,10 @@ describe('terms', () => {
       expect(
         termsOperation.getParamsForMultipleFields?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
-          sourceColumn: createMultiTermsColumn(['bytes', 'geo.src']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'geo.src']) });
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']) });
     });
 
     it('should return existing multiterms with only new fields from source column', () => {
@@ -1928,6 +1971,7 @@ describe('terms', () => {
         termsOperation.getParamsForMultipleFields?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
           sourceColumn: createMultiTermsColumn(['bytes', 'dest']),
+          indexPattern: defaultProps.indexPattern,
         })
       ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes']) });
     });
@@ -1936,9 +1980,10 @@ describe('terms', () => {
       expect(
         termsOperation.getParamsForMultipleFields?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
-          sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'geo.src']),
+          sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'geo.src']) });
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']) });
     });
 
     it('should append field to multiterms', () => {
@@ -1949,8 +1994,22 @@ describe('terms', () => {
         termsOperation.getParamsForMultipleFields?.({
           targetColumn: createMultiTermsColumn('source'),
           field,
+          indexPattern,
         })
       ).toEqual({ secondaryFields: expect.arrayContaining(['bytes']) });
+    });
+
+    it('should not append scripted field to multiterms', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('scripted')!;
+
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: [] });
     });
 
     it('should add both sourceColumn and field (as last term) to the targetColumn', () => {
@@ -1959,10 +2018,24 @@ describe('terms', () => {
       expect(
         termsOperation.getParamsForMultipleFields?.({
           targetColumn: createMultiTermsColumn(['source', 'dest']),
-          sourceColumn: createMultiTermsColumn(['geo.src']),
+          sourceColumn: createMultiTermsColumn(['memory']),
           field,
+          indexPattern,
         })
-      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'geo.src', 'bytes']) });
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'memory', 'bytes']) });
+    });
+
+    it('should not add sourceColumn field if it has only scripted field', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('bytes')!;
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['scripted']),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes']) });
     });
   });
 });

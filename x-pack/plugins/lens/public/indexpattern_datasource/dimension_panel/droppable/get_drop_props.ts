@@ -143,8 +143,15 @@ function getDropPropsForField({
       (hasField(targetColumn) && targetColumn.sourceField !== dragging.field.name) ||
       !hasField(targetColumn)
     ) {
+      const layerIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
       return hasField(targetColumn) &&
-        hasOperationSupportForMultipleFields(targetColumn, undefined, dragging.field)
+        layerIndexPattern &&
+        hasOperationSupportForMultipleFields(
+          layerIndexPattern,
+          targetColumn,
+          undefined,
+          dragging.field
+        )
         ? {
             dropTypes: ['field_replace', 'field_combine'],
           }
@@ -193,7 +200,7 @@ function getDropPropsForCompatibleGroup(
   if (canSwap) {
     dropTypes.push('swap_compatible');
   }
-  if (hasOperationSupportForMultipleFields(targetColumn, sourceColumn)) {
+  if (hasOperationSupportForMultipleFields(indexPattern, targetColumn, sourceColumn)) {
     dropTypes.push('combine_compatible');
   }
   // return undefined if no drop action is available
@@ -232,7 +239,7 @@ function getDropPropsFromIncompatibleGroup({
       if (canSwap) {
         dropTypes.push('swap_incompatible');
       }
-      if (hasOperationSupportForMultipleFields(targetColumn, sourceColumn)) {
+      if (hasOperationSupportForMultipleFields(layerIndexPattern, targetColumn, sourceColumn)) {
         dropTypes.push('combine_incompatible');
       }
     } else {

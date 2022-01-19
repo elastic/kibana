@@ -68,26 +68,29 @@ export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColum
     return [];
   }
   return (
-    operationDefinitions
-      .find(({ type }) => targetColumn.operationType === type)
-      ?.getCurrentFields?.(targetColumn) ?? [targetColumn.sourceField]
+    operationDefinitionMap[targetColumn.operationType]?.getCurrentFields?.(targetColumn) ?? [
+      targetColumn.sourceField,
+    ]
   );
 }
 
 export function getOperationHelperForMultipleFields(operationType: string) {
-  const op = operationDefinitions.find(({ type }) => operationType === type);
-  return op?.getParamsForMultipleFields;
+  return operationDefinitionMap[operationType]?.getParamsForMultipleFields;
 }
 
 export function hasOperationSupportForMultipleFields(
+  indexPattern: IndexPattern,
   targetColumn: BaseIndexPatternColumn,
   sourceColumn?: BaseIndexPatternColumn,
   field?: IndexPatternField
 ) {
   return Boolean(
-    operationDefinitions
-      .find(({ type }) => targetColumn.operationType === type)
-      ?.canAddNewField?.({ targetColumn, sourceColumn, field })
+    operationDefinitionMap[targetColumn.operationType]?.canAddNewField?.({
+      targetColumn,
+      sourceColumn,
+      field,
+      indexPattern,
+    })
   );
 }
 
