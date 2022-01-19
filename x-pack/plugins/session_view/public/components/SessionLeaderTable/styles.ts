@@ -6,12 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
   const cached = useMemo(() => {
     const rowButtonContainer: CSSObject = {
       display: 'flex',
@@ -26,7 +23,7 @@ export const useStyles = () => {
       rowButtonContainer,
       rowCheckbox,
     };
-  }, [euiTheme]);
+  }, []);
 
   return cached;
 };

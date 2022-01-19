@@ -31,6 +31,9 @@ describe('ProcessTreeAlerts component', () => {
 
       expect(renderResult.queryByTestId('sessionViewAlertDetails')).toBeTruthy();
       mockAlerts.forEach((alert) => {
+        if (!alert.kibana) {
+          return;
+        }
         const { uuid, rule, original_event: event, workflow_status: status } = alert.kibana.alert;
         const { name, query, severity } = rule;
 

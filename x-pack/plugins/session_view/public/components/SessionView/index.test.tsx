@@ -30,7 +30,7 @@ describe('SessionView component', () => {
     describe('And no data exists', () => {
       beforeEach(async () => {
         mockedApi.mockResolvedValue({
-          events: []
+          events: [],
         });
       });
 

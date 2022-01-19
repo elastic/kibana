@@ -45,8 +45,8 @@ export const SessionLeaderTablePage = (props: RouteComponentProps) => {
           <EuiFlexItem>
             <SessionLeaderTable />
           </EuiFlexItem>
-        </EuiFlexGroup>  
+        </EuiFlexGroup>
       </EuiPageContent>
-    </EuiPage> 
-  )
+    </EuiPage>
+  );
 };

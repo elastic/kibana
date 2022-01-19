@@ -32,6 +32,6 @@ export const sessionEntryLeadersRoute = (router: IRouter) => {
           session_entry_leader: result?.body?._source,
         },
       });
-    },
+    }
   );
 };

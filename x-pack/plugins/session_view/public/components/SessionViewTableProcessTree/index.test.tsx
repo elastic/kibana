@@ -36,11 +36,7 @@ const mockActionProps: ActionProps = {
 jest.mock('../SessionView/index.tsx', () => {
   return {
     SessionView: () => {
-      return (
-        <div data-test-subj="SessionView">
-          Mock
-        </div>
-      );
+      return <div data-test-subj="SessionView">Mock</div>;
     },
   };
 });
@@ -50,7 +46,8 @@ jest.mock('../SessionLeaderTable/index.tsx', () => {
     SessionLeaderTable: (props: SessionLeaderTableProps) => {
       const { onOpenSessionViewer = () => {} } = props;
       return (
-        <div 
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+        <div
           data-test-subj="SessionLeaderTable"
           onClick={() => onOpenSessionViewer(mockActionProps)}
         >
@@ -93,8 +90,8 @@ describe('SessionViewTableProcessTree component', () => {
 
     it('Switches to session view when the user picks a session', async () => {
       renderResult = mockedContext.render(<SessionViewTableProcessTree />);
-      const sessionLeaderTable = renderResult.queryByTestId('SessionLeaderTable');
-      sessionLeaderTable && fireEvent.click(sessionLeaderTable);
+      const sessionLeaderTable = renderResult.getByTestId('SessionLeaderTable');
+      fireEvent.click(sessionLeaderTable);
       await waitForApiCall();
 
       // Now that we fetched the entity id, session view should be visible
@@ -104,15 +101,15 @@ describe('SessionViewTableProcessTree component', () => {
 
     it('Close button works', async () => {
       renderResult = mockedContext.render(<SessionViewTableProcessTree />);
-      const sessionLeaderTable = renderResult.queryByTestId('SessionLeaderTable');
-      sessionLeaderTable && fireEvent.click(sessionLeaderTable);
+      const sessionLeaderTable = renderResult.getByTestId('SessionLeaderTable');
+      fireEvent.click(sessionLeaderTable);
       await waitForApiCall();
 
       expect(renderResult.queryByTestId('SessionView')).toBeTruthy();
       expect(renderResult.queryByTestId('SessionLeaderTable')).toBeNull();
 
-      const closeButton = renderResult.queryByTestId('session-view-close-button');
-      closeButton && fireEvent.click(closeButton);
+      const closeButton = renderResult.getByTestId('session-view-close-button');
+      fireEvent.click(closeButton);
 
       expect(renderResult.queryByTestId('SessionLeaderTable')).toBeTruthy();
       expect(renderResult.queryByTestId('SessionView')).toBeNull();

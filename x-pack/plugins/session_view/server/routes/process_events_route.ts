@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import type { Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
 import { IRouter } from '../../../../../src/core/server';
-import { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch';
 import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 

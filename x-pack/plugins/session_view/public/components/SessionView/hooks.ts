@@ -23,7 +23,8 @@ export const useFetchSessionViewProcessEvents = (
   const query = useInfiniteQuery(
     'sessionViewProcessEvents',
     async ({ pageParam = {} }) => {
-      let { cursor, forward } = pageParam;
+      let { cursor } = pageParam;
+      const { forward } = pageParam;
 
       if (!cursor && jumpToCursor) {
         cursor = jumpToCursor;
@@ -68,6 +69,7 @@ export const useFetchSessionViewProcessEvents = (
     if (jumpToEvent && query.data?.pages.length === 1) {
       query.fetchPreviousPage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.data]);
 
   return query;
