@@ -12,6 +12,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./fields_for_time_pattern_route'));
     loadTestFile(require.resolve('./fields_for_wildcard_route'));
     loadTestFile(require.resolve('./index_pattern_crud'));
+    loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./scripted_fields_crud'));
     loadTestFile(require.resolve('./fields_api'));
     loadTestFile(require.resolve('./default_index_pattern'));
@@ -19,6 +20,5 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./integration'));
     loadTestFile(require.resolve('./deprecations'));
     loadTestFile(require.resolve('./has_user_index_pattern'));
-    loadTestFile(require.resolve('./telemetry'));
   });
 }
