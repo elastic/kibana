@@ -115,7 +115,7 @@ const UserActionMarkdownComponent = forwardRef<
       />
     </Form>
   ) : (
-    <ContentWrapper data-test-subj="user-action-markdown">
+    <ContentWrapper className={'eui-xScroll'} data-test-subj="user-action-markdown">
       <MarkdownRenderer>{content}</MarkdownRenderer>
     </ContentWrapper>
   );

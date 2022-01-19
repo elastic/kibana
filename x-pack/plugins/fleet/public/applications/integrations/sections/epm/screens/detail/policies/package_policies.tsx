@@ -299,7 +299,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         render({ agentPolicy, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
           return (
             <PackagePolicyAgentsCell
-              agentPolicyId={agentPolicy.id}
+              agentPolicy={agentPolicy}
               agentCount={agentPolicy.agents}
               onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
