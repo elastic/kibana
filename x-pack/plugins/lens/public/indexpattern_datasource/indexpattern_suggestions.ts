@@ -185,7 +185,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
   if (splitMode === 'terms' && splitField) {
     return getSplitByTermsLayer(indexPattern, splitField, dateField, layer);
     // generate the layer for split by filters
-  } else if (splitMode === 'filters' && splitFilters && splitFilters.length) {
+  } else if (splitMode?.includes('filter') && splitFilters && splitFilters.length) {
     return getSplitByFiltersLayer(indexPattern, dateField, layer);
   } else {
     const copyMetricsArray = [...metrics];

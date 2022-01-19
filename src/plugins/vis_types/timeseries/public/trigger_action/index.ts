@@ -68,6 +68,13 @@ export const triggerVisualizeToLensOptions = async (
         },
       };
     });
+    const splitFilters: VisualizeEditorLayersContext['splitFilters'] = [];
+    if (layer.split_mode === 'filter' && layer.filter) {
+      splitFilters.push({ filter: layer.filter });
+    }
+    if (layer.split_filters) {
+      splitFilters.push(...layer.split_filters);
+    }
 
     const triggerOptions: VisualizeEditorLayersContext = {
       indexPatternId,
@@ -81,7 +88,7 @@ export const triggerVisualizeToLensOptions = async (
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
       splitField: layer.terms_field ?? undefined,
       splitMode: layer.split_mode !== 'everything' ? layer.split_mode : undefined,
-      splitFilters: layer.split_filters ?? undefined,
+      splitFilters: splitFilters.length > 0 ? splitFilters : undefined,
       palette: (layer.palette as PaletteOutput) ?? undefined,
       ...(layer.split_mode === 'terms' && {
         termsParams: {
