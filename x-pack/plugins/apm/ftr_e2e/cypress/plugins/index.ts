@@ -40,9 +40,11 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     ...(isCloud ? { tls: { ca: Fs.readFileSync(CA_CERT_PATH, 'utf-8') } } : {}),
   });
 
+  const forceDataStreams = false;
   const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
     client,
-    createLogger(LogLevel.info)
+    createLogger(LogLevel.info),
+    forceDataStreams
   );
 
   on('task', {
