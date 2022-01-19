@@ -5,8 +5,12 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { QueryObserverResult, useQuery } from 'react-query';
+import pMap from 'p-map';
+import {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { QueryObserverResult, useMutation, useQuery, useQueryClient } from 'react-query';
 import { ServerApiError } from '../../../../../common/types';
 import { useHttp } from '../../../../../common/lib/kibana';
 import { EventFiltersHttpService } from '../../../event_filters/service';
@@ -19,7 +23,8 @@ export function useGetEventFiltersService() {
 }
 
 export function useGetAllAssignedEventFilters(
-  policyId?: string
+  policyId: string,
+  enabled: boolean = true
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const service = useGetEventFiltersService();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
@@ -32,8 +37,9 @@ export function useGetAllAssignedEventFilters(
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
-      enabled: !!policyId,
       refetchOnMount: true,
+      enabled,
+      keepPreviousData: true,
     }
   );
 }
@@ -65,6 +71,78 @@ export function useSearchAssignedEventFilters(
     }
   );
 }
+export function useSearchNotAssignedEventFilters(
+  policyId: string,
+  options: { filter?: string; perPage?: number; enabled?: boolean }
+): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  const service = useGetEventFiltersService();
+  return useQuery<FoundExceptionListItemSchema, ServerApiError>(
+    ['eventFilters', 'notAssigned', policyId, options],
+    () => {
+      const { filter, perPage } = options;
+
+      return service.getList({
+        filter: parsePoliciesAndFilterToKql({
+          excludedPolicies: [policyId, 'all'],
+          kuery: parseQueryFilterToKQL(filter || '', SEARCHABLE_FIELDS),
+        }),
+        perPage,
+      });
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+      keepPreviousData: true,
+      enabled: options.enabled ?? true,
+    }
+  );
+}
+
+export function useBulkUpdateEventFilters(
+  callbacks: {
+    onUpdateSuccess?: (updatedExceptions: ExceptionListItemSchema[]) => void;
+    onUpdateError?: (error?: ServerApiError) => void;
+    onSettledCallback?: () => void;
+  } = {}
+) {
+  const service = useGetEventFiltersService();
+  const queryClient = useQueryClient();
+
+  const {
+    onUpdateSuccess = () => {},
+    onUpdateError = () => {},
+    onSettledCallback = () => {},
+  } = callbacks;
+
+  return useMutation<
+    ExceptionListItemSchema[],
+    ServerApiError,
+    ExceptionListItemSchema[],
+    () => void
+  >(
+    (eventFilters: ExceptionListItemSchema[]) => {
+      return pMap(
+        eventFilters,
+        (eventFilter) => {
+          return service.updateOne(eventFilter);
+        },
+        {
+          concurrency: 5,
+        }
+      );
+    },
+    {
+      onSuccess: onUpdateSuccess,
+      onError: onUpdateError,
+      onSettled: () => {
+        queryClient.invalidateQueries(['eventFilters', 'notAssigned']);
+        queryClient.invalidateQueries(['eventFilters', 'assigned']);
+        onSettledCallback();
+      },
+    }
+  );
+}
 
 export function useGetAllEventFilters(): QueryObserverResult<
   FoundExceptionListItemSchema,
@@ -80,6 +158,7 @@ export function useGetAllEventFilters(): QueryObserverResult<
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
+      keepPreviousData: true,
     }
   );
 }

@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '../../../../src/core/server';
-import { StartDeps } from './plugin';
+import { StartDeps } from './types';
 
 let coreStart: CoreStart;
 let pluginsStart: StartDeps;

@@ -91,7 +91,7 @@ export class EventFiltersHttpService implements EventFiltersService {
     exception: Immutable<UpdateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema> {
     return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(exception),
+      body: JSON.stringify(EventFiltersHttpService.cleanEventFilterToUpdate(exception)),
     });
   }
 
@@ -114,5 +114,31 @@ export class EventFiltersHttpService implements EventFiltersService {
         },
       }
     );
+  }
+
+  static cleanEventFilterToUpdate(
+    exception: Immutable<UpdateExceptionListItemSchema>
+  ): UpdateExceptionListItemSchema {
+    const exceptionToUpdateCleaned = { ...exception };
+    // Clean unnecessary fields for update action
+    [
+      'created_at',
+      'created_by',
+      'created_at',
+      'created_by',
+      'list_id',
+      'tie_breaker_id',
+      'updated_at',
+      'updated_by',
+    ].forEach((field) => {
+      delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
+    });
+
+    exceptionToUpdateCleaned.comments = exceptionToUpdateCleaned.comments?.map((comment) => ({
+      comment: comment.comment,
+      id: comment.id,
+    }));
+
+    return exceptionToUpdateCleaned as UpdateExceptionListItemSchema;
   }
 }

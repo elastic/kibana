@@ -57,6 +57,7 @@ export interface DataVisualizerGridInput {
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
