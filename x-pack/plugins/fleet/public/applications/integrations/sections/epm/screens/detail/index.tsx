@@ -35,8 +35,7 @@ import {
   useUIExtension,
   useBreadcrumbs,
   useStartServices,
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
+  useAuthz,
   usePermissionCheck,
 } from '../../../../hooks';
 import {
@@ -99,9 +98,11 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  // Update this component, needs more granular permissions
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasIntReadPermissions = useAuthz().integrations.readInstalledPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
@@ -388,8 +389,7 @@ export function Detail() {
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                // fix this message
-                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet. Contact your administrator."
+                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
                               />
                             ),
                           }
@@ -462,7 +462,7 @@ export function Detail() {
       },
     ];
 
-    if (userCanInstallIntegrations && packageInstallStatus === InstallStatus.installed) {
+    if (hasIntReadPermissions && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'policies',
         name: (
@@ -498,7 +498,7 @@ export function Detail() {
       });
     }
 
-    if (userCanInstallIntegrations) {
+    if (hasIntReadPermissions) {
       tabs.push({
         id: 'settings',
         name: (
@@ -540,7 +540,7 @@ export function Detail() {
     panel,
     getHref,
     integration,
-    userCanInstallIntegrations,
+    hasIntReadPermissions,
     packageInstallStatus,
     CustomAssets,
     showCustomTab,

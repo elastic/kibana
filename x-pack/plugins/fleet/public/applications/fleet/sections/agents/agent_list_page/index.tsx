@@ -25,7 +25,7 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
-  useFleetCapabilities,
+  useAuthz,
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
@@ -68,7 +68,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, agentPolicy, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasFleetWriteCapabilites = useFleetCapabilities().all;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
@@ -99,7 +99,7 @@ const RowActions = React.memo<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        disabled={!hasFleetWriteCapabilites || !agent.active}
+        disabled={!hasFleetWritePermissions || !agent.active}
         icon="trash"
         onClick={() => {
           onUnenrollClick();
@@ -152,7 +152,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasFleetWriteCapabilites = useFleetCapabilities().all;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
@@ -507,7 +507,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        hasFleetWriteCapabilites ? (
+        hasFleetWritePermissions ? (
           <EuiButton
             fill
             iconType="plusInCircle"

@@ -12,12 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
-import {
-  useAgentPolicyRefresh,
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
-  useLink,
-} from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -41,9 +36,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = (hasFleetWriteCapabilities && hasIntWriteCapabilities) as boolean;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 

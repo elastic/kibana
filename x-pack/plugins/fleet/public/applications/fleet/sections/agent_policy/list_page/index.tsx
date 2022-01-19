@@ -25,8 +25,7 @@ import { useHistory } from 'react-router-dom';
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
+  useAuthz,
   useGetAgentPolicies,
   usePagination,
   useSorting,
@@ -43,9 +42,9 @@ import { CreateAgentPolicyFlyout } from './components';
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = (hasFleetWriteCapabilities && hasIntWriteCapabilities) as boolean;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
 
   const {
     agents: { enabled: isFleetEnabled },

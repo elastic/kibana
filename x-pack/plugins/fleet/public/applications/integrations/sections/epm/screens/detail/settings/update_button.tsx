@@ -35,8 +35,7 @@ import {
   useGetPackageInstallStatus,
   sendUpgradePackagePolicy,
   useStartServices,
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
+  useAuthz,
   useLink,
 } from '../../../../../hooks';
 import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
@@ -83,9 +82,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const { getPath } = useLink();
 
   const { notifications } = useStartServices();
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
 
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -290,7 +289,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     </EuiConfirmModal>
   );
 
-  return hasAllWritePermissions ? (
+  return (
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
@@ -300,6 +299,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
             data-test-subj="updatePackageBtn"
+            isDisabled={!hasAllWritePermissions}
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
@@ -317,6 +317,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                 },
               }}
               id="upgradePoliciesCheckbox"
+              disabled={!hasAllWritePermissions}
               checked={upgradePackagePolicies}
               onChange={handleUpgradePackagePoliciesChange}
               label={i18n.translate(
@@ -332,5 +333,5 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
       {isUpdateModalVisible && updateModal}
     </>
-  ) : null;
+  );
 };

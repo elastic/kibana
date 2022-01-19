@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
-import { useFleetCapabilities, useIntegrationsCapabilities } from '../../../hooks';
+import { useAuthz } from '../../../hooks';
 import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
@@ -30,10 +30,9 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const hasFleetWriteCapabilities = useFleetCapabilities().all;
-    const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-    const hasAllWritePermissions = (hasFleetWriteCapabilities &&
-      hasIntWriteCapabilities) as boolean;
+    const hasFleetWritePermissions = useAuthz().fleet.all;
+    const hasIntWritePermissions = useAuthz().integrations.installPackages;
+    const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault

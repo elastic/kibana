@@ -9,18 +9,14 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import {
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
-  useStartServices,
-} from '../../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../../hooks';
 import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
 
   return (
     <EuiEmptyPrompt

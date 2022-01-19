@@ -231,12 +231,12 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: 'All Spaces is required for Fleet access.',
+        privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
+          defaultMessage: 'All Spaces is required for Fleet access.',
+        }),
         reserved: {
-          description: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
-            defaultMessage:
-              'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
-          }),
+          description:
+            'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
           privileges: [
             {
               id: 'fleet-setup',
@@ -300,7 +300,7 @@ export class FleetPlugin
           read: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`],
             app: [INTEGRATIONS_PLUGIN_ID],
-            catalogue: ['fleet'], // TODO: check if this is actually available to read user
+            catalogue: ['fleet'],
             savedObject: {
               all: [],
               read: allSavedObjectTypes,

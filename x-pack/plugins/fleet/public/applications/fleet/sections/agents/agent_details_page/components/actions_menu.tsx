@@ -10,7 +10,7 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../types';
-import { useFleetCapabilities, useKibanaVersion } from '../../../../hooks';
+import { useAuthz, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -27,7 +27,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   assignFlyoutOpenByDefault?: boolean;
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
-  const hasFleetWriteCapabilites = useFleetCapabilities().all;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
   const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
@@ -110,7 +110,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="cross"
-            disabled={!hasFleetWriteCapabilites || !agent.active}
+            disabled={!hasFleetWritePermissions || !agent.active}
             onClick={() => {
               setIsUnenrollModalOpen(true);
             }}

@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiLink, EuiSpacer, EuiIcon } from '@elastic/eui';
 import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
 
-import { useGetPackages, useLink, useFleetCapabilities } from '../../hooks';
+import { useGetPackages, useLink, useCapabilities } from '../../hooks';
 import { pkgKeyFromPackageInfo } from '../../services';
 import { FLEET_APM_PACKAGE } from '../../../common/constants';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();
-  const { show: hasIngestManager } = useFleetCapabilities();
+  const { read: hasIngestManager } = useCapabilities().fleetv2;
   const { data: packagesData, isLoading } = useGetPackages();
 
   const pkgInfo =

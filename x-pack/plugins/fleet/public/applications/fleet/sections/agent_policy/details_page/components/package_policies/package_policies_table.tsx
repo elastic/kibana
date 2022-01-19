@@ -25,13 +25,7 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
-import {
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
-  useLink,
-  usePackageInstallations,
-  useStartServices,
-} from '../../../../../hooks';
+import { useAuthz, useLink, usePackageInstallations, useStartServices } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 interface Props {
@@ -56,9 +50,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
 

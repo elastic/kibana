@@ -33,8 +33,7 @@ import {
   AgentPolicyRefreshContext,
   useUIExtension,
   usePackageInstallations,
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
+  useAuthz,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -105,9 +104,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   });
   const { updatableIntegrations } = usePackageInstallations();
   const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
 
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicy: GetAgentPoliciesResponseItem;

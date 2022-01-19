@@ -9,13 +9,14 @@ import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { SETTINGS_API_ROUTES } from '../../constants';
+import type { FleetRequestHandler } from '../../types';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
 import type { FleetAuthzRouter } from '../security';
 
-export const getSettingsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
+  const soClient = context.fleet.epm.internalSoClient;
 
   try {
     const settings = await settingsService.getSettings(soClient);

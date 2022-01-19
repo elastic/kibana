@@ -11,12 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import {
-  useFleetCapabilities,
-  useIntegrationsCapabilities,
-  useGetPackageInstallStatus,
-  useInstallPackage,
-} from '../../../../../hooks';
+import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 
@@ -31,9 +26,9 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> &
 };
 export function InstallButton(props: InstallationButtonProps) {
   const { name, numOfAssets, title, version } = props;
-  const hasFleetWriteCapabilities = useFleetCapabilities().all;
-  const hasIntWriteCapabilities = useIntegrationsCapabilities().all;
-  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntWritePermissions = useAuthz().integrations.installPackages;
+  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
