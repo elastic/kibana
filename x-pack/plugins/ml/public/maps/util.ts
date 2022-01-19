@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FeatureCollection, Feature } from 'geojson';
+import { FeatureCollection, Feature, Geometry } from 'geojson';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
-import type { SearchFilters } from './anomaly_source';
+import { VectorSourceRequestMeta } from '../../../maps/common';
 
 export type MlAnomalyLayers = 'typical' | 'actual' | 'connected';
 
@@ -18,7 +18,7 @@ export async function getResultsForJobId(
   mlResultsService: MlApiServices['results'],
   jobId: string,
   locationType: MlAnomalyLayers,
-  searchFilters: SearchFilters
+  searchFilters: VectorSourceRequestMeta
 ): Promise<FeatureCollection> {
   const { timeFilters } = searchFilters;
   // Query to look for the highest scoring anomaly.
@@ -98,9 +98,8 @@ export async function getResultsForJobId(
     });
   }
 
-  // @ts-ignore
-  const features: Feature[] = hits!.map((result) => {
-    let geometry;
+  const features: Feature[] = hits.map((result) => {
+    let geometry: Geometry;
     if (locationType === 'typical' || locationType === 'actual') {
       geometry = {
         type: 'Point',

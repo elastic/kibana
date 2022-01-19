@@ -306,13 +306,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response, context }) => {
       try {
-        const { getJobsWithGeo } = jobServiceProvider(
+        const { getJobIdsWithGeo } = jobServiceProvider(
           client,
           mlClient,
           context.alerting?.getRulesClient()
         );
 
-        const resp = await getJobsWithGeo();
+        const resp = await getJobIdsWithGeo();
 
         return response.ok({
           body: resp,

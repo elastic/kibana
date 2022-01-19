@@ -28,7 +28,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
   state: State = {};
 
   private async _loadJobs() {
-    const jobIdList = await this.props.mlJobsService.jobsWithGeo();
+    const jobIdList = await this.props.mlJobsService.jobIdsWithGeo();
     const options = jobIdList.map((jobId) => {
       return { label: jobId, value: jobId };
     });
@@ -39,7 +39,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
     this._loadJobs();
   }
 
@@ -68,7 +68,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.ml.maps.jobIdLabel', {
-          defaultMessage: 'JobId',
+          defaultMessage: 'Job ID',
         })}
         display="columnCompressed"
       >

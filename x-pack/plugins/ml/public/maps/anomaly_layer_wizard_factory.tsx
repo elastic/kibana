@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { htmlIdGenerator } from '@elastic/eui';
 import type { StartServicesAccessor } from 'kibana/public';
 import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../maps/common';
@@ -23,6 +23,17 @@ import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
+const CUSTOM_COLOR_RAMP = {
+  type: STYLE_TYPE.DYNAMIC,
+  options: {
+    customColorRamp: SEVERITY_COLOR_RAMP,
+    field: {
+      name: 'record_score',
+      origin: FIELD_ORIGIN.SOURCE,
+    },
+    useCustomColorRamp: true,
+  },
+};
 
 export class AnomalyLayerWizardFactory {
   public readonly type = ML_ANOMALY;
@@ -58,7 +69,7 @@ export class AnomalyLayerWizardFactory {
         }
 
         const anomalyLayerDescriptor: VectorLayerDescriptor = {
-          id: uuid(),
+          id: htmlIdGenerator()(),
           type: LAYER_TYPE.GEOJSON_VECTOR,
           sourceDescriptor: AnomalySource.createDescriptor({
             jobId: sourceConfig.jobId,
@@ -67,17 +78,8 @@ export class AnomalyLayerWizardFactory {
           style: {
             type: 'VECTOR',
             properties: {
-              fillColor: {
-                type: STYLE_TYPE.DYNAMIC,
-                options: {
-                  customColorRamp: SEVERITY_COLOR_RAMP,
-                  field: {
-                    name: 'record_score',
-                    origin: FIELD_ORIGIN.SOURCE,
-                  },
-                  useCustomColorRamp: true,
-                },
-              },
+              fillColor: CUSTOM_COLOR_RAMP,
+              lineColor: CUSTOM_COLOR_RAMP,
             } as unknown as VectorStylePropertiesDescriptor,
             isTimeAware: false,
           },

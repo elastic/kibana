@@ -10,7 +10,7 @@ import { LAYER_WIZARD_CATEGORY } from '../../../maps/common';
 import type { LayerWizard } from '../../../maps/public';
 
 export const anomalyLayerWizard: Partial<LayerWizard> = {
-  categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS],
+  categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS, LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.ml.maps.anomalyLayerDescription', {
     defaultMessage: 'Create anomalies layers',
   }),

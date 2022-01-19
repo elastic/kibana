@@ -273,20 +273,9 @@ export function jobsProvider(
     return jobs;
   }
 
-  async function getJobsWithGeo(): Promise<string[]> {
+  async function getJobIdsWithGeo(): Promise<string[]> {
     const { body } = await mlClient.getJobs<MlJobsResponse>();
-
-    const geoJobs: string[] = [];
-
-    if (body.count && body.count > 0) {
-      body.jobs.forEach((job) => {
-        if (isJobWithGeoData(job)) {
-          geoJobs.push(job.job_id);
-        }
-      });
-    }
-
-    return geoJobs;
+    return body.jobs.filter(isJobWithGeoData).map((job) => job.job_id);
   }
 
   async function jobsWithTimerange() {
@@ -686,6 +675,6 @@ export function jobsProvider(
     getAllJobAndGroupIds,
     getLookBackProgress,
     bulkCreate,
-    getJobsWithGeo,
+    getJobIdsWithGeo,
   };
 }

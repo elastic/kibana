@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import _ from 'lodash';
+import { escape } from 'lodash';
 import { IField, IVectorSource } from '../../../maps/public';
 import { FIELD_ORIGIN } from '../../../maps/common';
 import { TileMetaFeature } from '../../../maps/common/descriptor_types';
@@ -24,13 +24,7 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
 };
 
 export class AnomalySourceTooltipProperty implements ITooltipProperty {
-  private readonly _label: string;
-  private readonly _value: string;
-
-  constructor(label: string, value: string) {
-    this._label = label;
-    this._value = value;
-  }
+  constructor(private readonly _label: string, private readonly _value: string) {}
 
   async getESFilters(): Promise<Filter[]> {
     return [];
@@ -70,7 +64,7 @@ export class AnomalySourceField implements IField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     return new AnomalySourceTooltipProperty(
       await this.getLabel(),
-      _.escape(Array.isArray(value) ? value.join() : value ? value : '')
+      escape(Array.isArray(value) ? value.join() : value ? value : '')
     );
   }
 

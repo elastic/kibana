@@ -45,7 +45,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobsWithGeo() {
+  jobIdsWithGeo() {
     return httpService.http<string[]>({
       path: `${ML_BASE_PATH}/jobs/jobs_with_geo`,
       method: 'GET',

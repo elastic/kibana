@@ -7,7 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM, VECTOR_SHAPE_TYPE } from '../../../maps/common';
+import {
+  FieldFormatter,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  VECTOR_SHAPE_TYPE,
+  VectorSourceRequestMeta,
+} from '../../../maps/common';
 import { AbstractSourceDescriptor, MapExtent } from '../../../maps/common/descriptor_types';
 import { ITooltipProperty } from '../../../maps/public';
 import {
@@ -27,15 +33,6 @@ import { getResultsForJobId, MlAnomalyLayers } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
-export type SearchFilters = any & {
-  applyGlobalQuery: boolean;
-  applyGlobalTime: boolean;
-  fieldNames: string[];
-  geogridPrecision?: number;
-  sourceQuery?: object;
-  sourceMeta: object;
-};
-
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
   typicalActual: MlAnomalyLayers;
@@ -46,7 +43,7 @@ export class AnomalySource implements IVectorSource {
   static canGetJobs: boolean;
 
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
-    if (!(typeof descriptor.jobId === 'string')) {
+    if (typeof descriptor.jobId !== 'string') {
       throw new Error('Job id is required for anomaly layer creation');
     }
 
@@ -65,7 +62,7 @@ export class AnomalySource implements IVectorSource {
   // TODO: implement query awareness
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: SearchFilters,
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
@@ -213,7 +210,6 @@ export class AnomalySource implements IVectorSource {
   }
 
   async getLicensedFeatures(): Promise<[]> {
-    // return [{ name: 'layer from ML anomaly job', license: 'enterprise' }];
     return [];
   }
 
