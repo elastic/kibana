@@ -77,7 +77,7 @@ export class CustomEventsSystem {
         packageInfo: this.packageInfo,
       });
 
-      // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
+      // This needs to be called synchronously to be sure that we populate the user ID soon enough to make sessions merging
       // across domains work
       if (initSuccess) {
         const application = await applicationPromise;
