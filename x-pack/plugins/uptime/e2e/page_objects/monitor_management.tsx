@@ -16,11 +16,21 @@ export function monitorManagementPageProvider({
   page: Page;
   kibanaUrl: string;
 }) {
-  const monitorManagement = `${kibanaUrl}/app/uptime/manage-monitors`;
-  const addMonitor = `${kibanaUrl}/app/uptime/add-monitor`;
+  const remoteKibanaUrl = process.env.SYNTHETICS_KIBANA_URL;
+  const remoteUsername = process.env.SYNTHETICS_KIBANA_USERNAME;
+  const remotePassword = process.env.SYNTHETICS_KIBANA_PASSWORD;
+  const basePath = remoteKibanaUrl || kibanaUrl;
+  const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
+  const addMonitor = `${basePath}/app/uptime/add-monitor`;
+  const overview = `${basePath}/app/uptime`;
 
   return {
-    ...loginPageProvider({ page, kibanaUrl }),
+    ...loginPageProvider({
+      page,
+      isRemote: !!remoteKibanaUrl,
+      username: remoteUsername,
+      password: remotePassword,
+    }),
     ...utilsPageProvider({ page }),
 
     async navigateToMonitorManagement() {
@@ -31,6 +41,12 @@ export function monitorManagementPageProvider({
 
     async navigateToAddMonitor() {
       await page.goto(addMonitor, {
+        waitUntil: 'networkidle',
+      });
+    },
+
+    async navigateToOverviewPage() {
+      await page.goto(overview, {
         waitUntil: 'networkidle',
       });
     },

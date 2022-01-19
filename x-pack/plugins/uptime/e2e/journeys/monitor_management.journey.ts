@@ -10,6 +10,11 @@ import { monitorManagementPageProvider } from '../page_objects/monitor_managemen
 
 journey('Monitor Management', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const httpName = 'http monitor';
+  const icmpName = 'icmp monitor';
+  const tcpName = 'tcp monitor';
+  const browserName = 'browser monitor';
+
   const basicMonitorDetails = {
     name: 'Sample monitor',
     location: 'US Central',
@@ -37,6 +42,7 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
   step('create monitor http monitor', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: httpName,
       url: 'https://elastic.co',
       locations: [basicMonitorDetails.location],
     };
@@ -49,19 +55,27 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
   step('view HTTP details in monitor management UI', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: httpName,
       url: 'https://elastic.co',
     };
     await uptime.clickAddMonitor();
     await uptime.findMonitorConfiguration(monitorDetails);
   });
 
+  step('view results in overview page', async () => {
+    await uptime.navigateToOverviewPage();
+    await page.waitForSelector(`text=${httpName}`, { timeout: 60 * 1000 });
+  });
+
   step('delete http monitor', async () => {
+    await uptime.navigateToMonitorManagement();
     await deleteMonitor();
   });
 
   step('create monitor tcp monitor', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: tcpName,
       host: 'smtp.gmail.com:587',
       locations: [basicMonitorDetails.location],
     };
@@ -74,19 +88,27 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
   step('view TCP details in monitor management UI', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: tcpName,
       host: 'smtp.gmail.com:587',
     };
     await uptime.clickAddMonitor();
     await uptime.findMonitorConfiguration(monitorDetails);
   });
 
+  step('view results in overview page', async () => {
+    await uptime.navigateToOverviewPage();
+    await page.waitForSelector(`text=${tcpName}`, { timeout: 60 * 1000 });
+  });
+
   step('delete tcp monitor', async () => {
+    await uptime.navigateToMonitorManagement();
     await deleteMonitor();
   });
 
   step('create basic ICMP monitor', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: icmpName,
       host: '1.1.1.1',
       locations: [basicMonitorDetails.location],
     };
@@ -99,19 +121,27 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
   step('view ICMP details in monitor management UI', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: icmpName,
       host: '1.1.1.1',
     };
     await uptime.clickAddMonitor();
     await uptime.findMonitorConfiguration(monitorDetails);
   });
 
+  step('view results in overview page', async () => {
+    await uptime.navigateToOverviewPage();
+    await page.waitForSelector(`text=${icmpName}`, { timeout: 60 * 1000 });
+  });
+
   step('delete ICMP monitor', async () => {
+    await uptime.navigateToMonitorManagement();
     await deleteMonitor();
   });
 
   step('create basic Browser monitor', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: browserName,
       inlineScript: 'step("test step", () => {})',
       locations: [basicMonitorDetails.location],
     };
@@ -121,16 +151,23 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
     expect(isSuccessful).toBeTruthy();
   });
 
-  step('view ICMP details in monitor management UI', async () => {
+  step('view browser details in monitor management UI', async () => {
     const monitorDetails = {
       ...basicMonitorDetails,
+      name: browserName,
       host: '1.1.1.1',
     };
     await uptime.clickAddMonitor();
     await uptime.findMonitorConfiguration(monitorDetails);
   });
 
-  step('delete ICMP monitor', async () => {
+  step('view results in overview page', async () => {
+    await uptime.navigateToOverviewPage();
+    await page.waitForSelector(`text=${browserName} - inline`, { timeout: 60 * 1000 });
+  });
+
+  step('delete browser monitor', async () => {
+    await uptime.navigateToMonitorManagement();
     await deleteMonitor();
   });
 });
