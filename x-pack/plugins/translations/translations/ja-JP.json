@@ -10239,7 +10239,6 @@
     "xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText": "高度なオプション",
     "xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle": "統合の構成",
     "xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle": "エージェントポリシーに適用",
-    "xpack.fleet.createPackagePolicy.StepSelectPolicy.addButton": "エージェントポリシーを作成",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupDescription": "エージェントポリシーは、エージェントのセットで統合のグループを管理するために使用されます",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupTitle": "エージェントポリシー",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel": "エージェントポリシー",

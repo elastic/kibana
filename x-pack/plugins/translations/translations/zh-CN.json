@@ -10335,7 +10335,6 @@
     "xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText": "高级选项",
     "xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle": "配置集成",
     "xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle": "应用到代理策略",
-    "xpack.fleet.createPackagePolicy.StepSelectPolicy.addButton": "创建代理策略",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText": "{count, plural, other {# 个代理}}已注册到选定代理策略。",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupDescription": "代理策略用于管理一个代理集的一组集成",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupTitle": "代理策略",
