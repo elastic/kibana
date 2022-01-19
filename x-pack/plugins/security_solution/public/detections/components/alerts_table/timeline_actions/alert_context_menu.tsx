@@ -286,13 +286,29 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
     }
   }, [data?.hits.hits, isLoadingAlertData]);
 
+  /**
+   * This should be re-visited after UEBA work is merged
+   */
+  const useRuleIndices = useMemo(() => {
+    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
+      return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
+        ? enrichedAlert['kibana.alert.rule.parameters'].index
+        : [enrichedAlert['kibana.alert.rule.parameters'].index];
+    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
+      return Array.isArray(enrichedAlert.signal.rule.index)
+        ? enrichedAlert.signal.rule.index
+        : [enrichedAlert.signal.rule.index];
+    }
+    return ruleIndices;
+  }, [enrichedAlert, ruleIndices]);
+
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
   return (
     <AddExceptionModal
       ruleName={ruleName}
       ruleId={ruleId}
-      ruleIndices={ruleIndices}
+      ruleIndices={useRuleIndices}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading}

@@ -59,7 +59,8 @@ export const EventDetailsFooterComponent = React.memo(
     const ruleIndex = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
-        find({ category: 'kibana', field: 'kibana.alert.rule.index' }, detailsData)?.values,
+        find({ category: 'kibana', field: 'kibana.alert.rule.parameters.index' }, detailsData)
+          ?.values,
       [detailsData]
     );
 
