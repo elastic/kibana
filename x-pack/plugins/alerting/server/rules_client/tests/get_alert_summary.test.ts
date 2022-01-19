@@ -212,10 +212,10 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
-          "filter": "event.provider: alerting AND event.action:execute",
           "page": 1,
-          "per_page": 60,
+          "per_page": 10000,
           "sort_order": "desc",
+          "start": "2019-02-12T21:00:22.479Z",
         },
         undefined,
       ]
@@ -249,10 +249,10 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
-          "filter": "event.provider: alerting AND event.action:execute",
           "page": 1,
-          "per_page": 60,
+          "per_page": 10000,
           "sort_order": "desc",
+          "start": "2019-02-12T21:00:22.479Z",
         },
         Array [
           "99999",

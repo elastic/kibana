@@ -124,6 +124,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         })
       )
     );
+
     const inventoryItems = Object.keys(first(results)!);
     for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold

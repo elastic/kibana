@@ -556,34 +556,49 @@ export class RulesClient {
 
     this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
+    let executionEvents: IEvent[];
 
-    const eventLogPageOptions = numberOfExecutions
-      ? {
-          per_page: numberOfExecutions ?? 60,
-          filter: 'event.provider: alerting AND event.action:execute',
-        }
-      : {
-          per_page: 10000,
-          start: parsedDateStart.toISOString(),
-        };
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
-        'alert',
-        [id],
-        { ...eventLogPageOptions, page: 1, sort_order: 'desc', end: dateNow.toISOString() },
-        rule.legacyId !== null ? [rule.legacyId] : undefined
-      );
+      const [queryResults, executionResults] = await Promise.all([
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            page: 1,
+            per_page: 10000,
+            start: parsedDateStart.toISOString(),
+            sort_order: 'desc',
+            end: dateNow.toISOString(),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            page: 1,
+            per_page: numberOfExecutions ?? 60,
+            filter: 'event.provider: alerting AND event.action:execute',
+            sort_order: 'desc',
+            end: dateNow.toISOString(),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+      ]);
       events = queryResults.data;
+      executionEvents = executionResults.data;
     } catch (err) {
       this.logger.debug(
         `rulesClient.getAlertSummary(): error searching event log for rule ${id}: ${err.message}`
       );
       events = [];
+      executionEvents = [];
     }
 
     return alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
