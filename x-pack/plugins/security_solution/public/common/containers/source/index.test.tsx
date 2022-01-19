@@ -103,6 +103,7 @@ describe('source/index.tsx', () => {
           data: {
             search: {
               search: jest.fn().mockReturnValue({
+                toPromise: jest.fn().mockResolvedValue(null),
                 subscribe: ({ next }: { next: Function }) => {
                   next(mockSearchResponse);
                   return mock;
