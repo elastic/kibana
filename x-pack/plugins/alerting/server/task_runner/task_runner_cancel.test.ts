@@ -347,11 +347,7 @@ describe('Task Runner Cancel', () => {
 
     testActionsExecute();
 
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'alertsExecutedDespiteRuleExecutionTimeout',
-      incrementBy: 1,
-    });
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('actionsPlugin.execute is called if rule execution is cancelled but cancelAlertsOnRuleTimeout for ruleType is false', async () => {
@@ -389,11 +385,7 @@ describe('Task Runner Cancel', () => {
 
     testActionsExecute();
 
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'alertsExecutedDespiteRuleExecutionTimeout',
-      incrementBy: 1,
-    });
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('actionsPlugin.execute is skipped if rule execution is cancelled and cancelAlertsOnRuleTimeout for both config and ruleType are true', async () => {

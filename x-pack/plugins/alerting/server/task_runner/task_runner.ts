@@ -247,19 +247,13 @@ export class TaskRunner<
     return !this.context.cancelAlertsOnRuleTimeout || !this.ruleType.cancelAlertsOnRuleTimeout;
   }
 
-  private trackAlertsAfterRuleCancellation(numAlertsToExecute?: number) {
+  private countUsageOfActionExecutionAfterRuleCancellation() {
     if (this.cancelled && this.usageCounter) {
       if (this.context.cancelAlertsOnRuleTimeout && this.ruleType.cancelAlertsOnRuleTimeout) {
         // Increment usage counter for skipped actions
         this.usageCounter.incrementCounter({
           counterName: 'alertsSkippedDueToRuleExecutionTimeout',
           incrementBy: 1,
-        });
-      } else {
-        // Increment usage counter for actions that were executed after timeout
-        this.usageCounter.incrementCounter({
-          counterName: 'alertsExecutedDespiteRuleExecutionTimeout',
-          incrementBy: numAlertsToExecute ?? 1,
         });
       }
     }
@@ -386,6 +380,7 @@ export class TaskRunner<
       event.error.message = err.message;
       event.event = event.event || {};
       event.event.outcome = 'failure';
+
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, err);
     }
 
@@ -435,8 +430,6 @@ export class TaskRunner<
       });
     }
 
-    let numAlertsToExecute: number | undefined;
-
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
@@ -478,7 +471,6 @@ export class TaskRunner<
               }
             );
 
-      numAlertsToExecute = alertsToExecute.length;
       await Promise.all(
         alertsToExecute.map(
           ([alertId, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) =>
@@ -496,7 +488,12 @@ export class TaskRunner<
       }
     }
 
-    this.trackAlertsAfterRuleCancellation(numAlertsToExecute);
+    // Usage counter for telemetry
+    // This keeps track of how many times action executions were skipped after rule
+    // execution completed successfully after the execution timeout
+    // This can occur when rule executors do not short circuit execution in response
+    // to timeout
+    this.countUsageOfActionExecutionAfterRuleCancellation();
 
     return {
       alertTypeState: updatedRuleTypeState || undefined,
