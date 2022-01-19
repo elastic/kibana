@@ -7,35 +7,26 @@
 
 import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiIconTip,
-} from '@elastic/eui';
-import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
-import {
-  ASSOCIATED_HOSTS_METRIC,
-  ASSOCIATED_USERS_METRIC,
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,
   CASE_OPEN_DURATION,
   CASE_OPEN_TO_CLOSE_DURATION,
   CASE_REOPENED,
   CASE_REOPENED_ON,
-  ISOLATED_HOSTS_METRIC,
-  TOTAL_ALERTS_METRIC,
-  TOTAL_CONNECTORS_METRIC,
 } from './translations';
-import { getMaybeDate } from '../formatted_date/maybe_date';
-import { FormattedDate, FormattedRelativePreferenceDate } from '../formatted_date';
-import { getEmptyTagValue } from '../empty_value';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { getMaybeDate } from '../../formatted_date/maybe_date';
+import { FormattedDate, FormattedRelativePreferenceDate } from '../../formatted_date';
+import { getEmptyTagValue } from '../../empty_value';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { CaseViewMetricsProps } from './types';
 
-const CaseStatusMetrics: React.FC<{ lifespanMetrics?: CaseMetrics['lifespan'] }> = React.memo(
-  ({ lifespanMetrics }) => {
+export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
+  React.memo(({ metrics, features }) => {
+    const lifespanMetrics = useGetLifespanMetrics(metrics, features);
+
     if (!lifespanMetrics) {
       return null;
     }
@@ -46,7 +37,7 @@ const CaseStatusMetrics: React.FC<{ lifespanMetrics?: CaseMetrics['lifespan'] }>
         component: (
           <CaseStatusMetricsItem
             title={CASE_CREATED}
-            value={getCaseCreationDate(lifespanMetrics.creationDate)}
+            value={<CreationDate date={lifespanMetrics.creationDate} />}
           />
         ),
         dataTestSubject: 'case-metrics-lifespan-item-creation-date',
@@ -95,11 +86,29 @@ const CaseStatusMetrics: React.FC<{ lifespanMetrics?: CaseMetrics['lifespan'] }>
         </EuiFlexGrid>
       </EuiFlexItem>
     );
-  }
-);
+  });
 CaseStatusMetrics.displayName = 'CaseStatusMetrics';
 
-const getCaseCreationDate = (date: string) => {
+const useGetLifespanMetrics = (
+  metrics: CaseMetrics | null,
+  features: CaseMetricsFeature[]
+): CaseMetrics['lifespan'] | undefined => {
+  return useMemo<CaseMetrics['lifespan']>(() => {
+    const lifespan = metrics?.lifespan ?? {
+      closeDate: '',
+      creationDate: '',
+      statusInfo: { inProgressDuration: 0, reopenDates: [], openDuration: 0 },
+    };
+
+    if (!features.includes('lifespan')) {
+      return;
+    }
+
+    return lifespan;
+  }, [features, metrics]);
+};
+
+const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
   const creationDate = getMaybeDate(date);
   if (!creationDate.isValid()) {
     return getEmptyTagValue();
@@ -111,7 +120,8 @@ const getCaseCreationDate = (date: string) => {
       value={date}
     />
   );
-};
+});
+CreationDate.displayName = 'CreationDate';
 
 const getInProgressDuration = (duration: number) => {
   if (duration <= 0) {
@@ -220,128 +230,3 @@ const ValueWithExplanationIcon: React.FC<{
   );
 });
 ValueWithExplanationIcon.displayName = 'ValueWithExplanationIcon';
-
-const MetricValue = euiStyled(EuiFlexItem)`
-  font-size: ${({ theme }) => theme.eui.euiSizeL};
-  font-weight: bold;
-`;
-
-const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
-  ({ metricItems }) => (
-    <>
-      {metricItems.map(({ title, value }) => (
-        <EuiFlexItem key={title}>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem>{title}</EuiFlexItem>
-            <MetricValue>{value}</MetricValue>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
-    </>
-  )
-);
-CaseViewMetricItems.displayName = 'CaseViewMetricItems';
-
-export interface CaseViewMetricsProps {
-  metrics: CaseMetrics | null;
-  features: CaseMetricsFeature[];
-  isLoading: boolean;
-}
-
-export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
-  ({ metrics, features, isLoading }) => {
-    const metricItems = useGetTitleValueMetricItems(metrics, features);
-    const statusMetrics = useGetLifespanMetrics(metrics, features);
-
-    return (
-      <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
-        <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false} alignItems="center">
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
-            </EuiFlexItem>
-          ) : (
-            <>
-              <CaseViewMetricItems metricItems={metricItems} />
-              <CaseStatusMetrics lifespanMetrics={statusMetrics} />
-            </>
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
-  }
-);
-CaseViewMetrics.displayName = 'CaseViewMetrics';
-
-interface MetricItem {
-  title: string;
-  value: number;
-}
-type MetricItems = MetricItem[];
-
-const useGetTitleValueMetricItems = (
-  metrics: CaseMetrics | null,
-  features: CaseMetricsFeature[]
-): MetricItems => {
-  const { alerts, actions, connectors } = metrics ?? {};
-  const totalConnectors = connectors?.total ?? 0;
-  const alertsCount = alerts?.count ?? 0;
-  const totalAlertUsers = alerts?.users?.total ?? 0;
-  const totalAlertHosts = alerts?.hosts?.total ?? 0;
-  const totalIsolatedHosts = calculateTotalIsolatedHosts(actions);
-
-  const metricItems = useMemo<MetricItems>(() => {
-    const items: Array<[CaseMetricsFeature, MetricItem]> = [
-      ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
-      ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
-      ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
-      ['actions.isolateHost', { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts }],
-      ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
-    ];
-
-    return items.reduce(
-      (result: MetricItems, [feature, item]) => [
-        ...result,
-        ...(features.includes(feature) ? [item] : []),
-      ],
-      []
-    );
-  }, [
-    features,
-    alertsCount,
-    totalAlertUsers,
-    totalAlertHosts,
-    totalIsolatedHosts,
-    totalConnectors,
-  ]);
-
-  return metricItems;
-};
-
-const calculateTotalIsolatedHosts = (actions: CaseMetrics['actions']) => {
-  if (!actions?.isolateHost) {
-    return 0;
-  }
-
-  // prevent the metric from being negative
-  return Math.max(actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total, 0);
-};
-
-const useGetLifespanMetrics = (
-  metrics: CaseMetrics | null,
-  features: CaseMetricsFeature[]
-): CaseMetrics['lifespan'] | undefined => {
-  return useMemo<CaseMetrics['lifespan']>(() => {
-    const lifespan = metrics?.lifespan ?? {
-      closeDate: '',
-      creationDate: '',
-      statusInfo: { inProgressDuration: 0, reopenDates: [], openDuration: 0 },
-    };
-
-    if (!features.includes('lifespan')) {
-      return;
-    }
-
-    return lifespan;
-  }, [features, metrics]);
-};

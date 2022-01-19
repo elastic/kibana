@@ -43,21 +43,21 @@ export const CASE_CREATED = i18n.translate('xpack.cases.caseView.metrics.lifespa
 export const CASE_IN_PROGRESS_DURATION = i18n.translate(
   'xpack.cases.caseView.metrics.lifespan.inProgressDuration',
   {
-    defaultMessage: 'Case in progress duration',
+    defaultMessage: 'In progress duration',
   }
 );
 
 export const CASE_OPEN_DURATION = i18n.translate(
   'xpack.cases.caseView.metrics.lifespan.openDuration',
   {
-    defaultMessage: 'Case open duration',
+    defaultMessage: 'Open duration',
   }
 );
 
 export const CASE_OPEN_TO_CLOSE_DURATION = i18n.translate(
   'xpack.cases.caseView.metrics.lifespan.openToCloseDuration',
   {
-    defaultMessage: 'Duration from case creation to close',
+    defaultMessage: 'Duration from creation to close',
   }
 );
 
@@ -66,5 +66,5 @@ export const CASE_REOPENED = i18n.translate('xpack.cases.caseView.metrics.lifesp
 });
 
 export const CASE_REOPENED_ON = i18n.translate('xpack.cases.caseView.metrics.lifespan.reopenedOn', {
-  defaultMessage: 'Case was reopened on ',
+  defaultMessage: 'Reopened on ',
 });

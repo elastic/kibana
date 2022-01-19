@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { render } from '@testing-library/react';
 
 import { basicCase } from '../../containers/mock';
-import { CaseActionBar } from '.';
+import { CaseActionBar, CaseActionBarProps } from '.';
 import { TestProviders } from '../../common/mock';
 
 describe('CaseActionBar', () => {
@@ -28,6 +28,7 @@ describe('CaseActionBar', () => {
     onUpdateField,
     currentExternalIncident: null,
     userCanCrud: true,
+    metricsFeatures: [],
   };
 
   beforeEach(() => {
@@ -42,6 +43,7 @@ describe('CaseActionBar', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="case-view-status"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-refresh"]`).exists()).toBeTruthy();
@@ -57,6 +59,18 @@ describe('CaseActionBar', () => {
 
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
       'Open'
+    );
+  });
+
+  it('it should show the correct date', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).prop('value')).toBe(
+      basicCase.createdAt
     );
   });
 
@@ -121,5 +135,26 @@ describe('CaseActionBar', () => {
     );
 
     expect(queryByText('Sync alerts')).toBeInTheDocument();
+  });
+
+  it('should not show the Case open text when the lifespan feature is enabled', () => {
+    const props: CaseActionBarProps = { ...defaultProps, metricsFeatures: ['lifespan'] };
+    const { queryByText } = render(
+      <TestProviders>
+        <CaseActionBar {...props} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Case opened')).not.toBeInTheDocument();
+  });
+
+  it('should show the Case open text when the lifespan feature is disabled', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(getByText('Case opened')).toBeInTheDocument();
   });
 });

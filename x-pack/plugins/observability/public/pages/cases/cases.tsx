@@ -45,7 +45,7 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
         basePath: CASES_PATH,
         userCanCrud,
         owner: [CASES_OWNER],
-        features: { alerts: { sync: false }, metrics: ['alerts.count', 'connectors', 'lifespan'] },
+        features: { alerts: { sync: false } },
         useFetchAlertData,
         showAlertDetails: (alertId: string) => {
           setSelectedAlertId(alertId);

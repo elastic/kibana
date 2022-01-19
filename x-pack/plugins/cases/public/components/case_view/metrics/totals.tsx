@@ -6,33 +6,41 @@
  */
 
 import React, { useMemo } from 'react';
-import prettyMilliseconds from 'pretty-ms';
-import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
-  CASE_CREATED,
-  CASE_IN_PROGRESS_DURATION,
-  CASE_OPEN_DURATION,
-  CASE_OPEN_TO_CLOSE_DURATION,
-  CASE_REOPENED,
-  CASE_REOPENED_ON,
   ISOLATED_HOSTS_METRIC,
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
-import { getMaybeDate } from '../../formatted_date/maybe_date';
-import { FormattedDate, FormattedRelativePreferenceDate } from '../../formatted_date';
-import { getEmptyTagValue } from '../../empty_value';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { CaseViewMetricsProps } from './types';
+
+export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
+  React.memo(({ metrics, features }) => {
+    const metricItems = useGetTitleValueMetricItems(metrics, features);
+
+    return (
+      <>
+        {metricItems.map(({ title, value }) => (
+          <EuiFlexItem key={title}>
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              <EuiFlexItem>{title}</EuiFlexItem>
+              <MetricValue>{value}</MetricValue>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </>
+    );
+  });
+CaseViewMetricItems.displayName = 'CaseViewMetricItems';
+
+const MetricValue = euiStyled(EuiFlexItem)`
+  font-size: ${({ theme }) => theme.eui.euiSizeL};
+  font-weight: bold;
+`;
 
 interface MetricItem {
   title: string;

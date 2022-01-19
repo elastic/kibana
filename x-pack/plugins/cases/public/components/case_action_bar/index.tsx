@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { Case } from '../../../common/ui/types';
+import { Case, CaseMetricsFeature } from '../../../common/ui/types';
 import { CaseStatuses, CaseType } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
@@ -25,6 +25,8 @@ import { StatusContextMenu } from './status_context_menu';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { getStatusDate, getStatusTitle } from './helpers';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -39,11 +41,12 @@ const MyDescriptionList = styled(EuiDescriptionList)`
   `}
 `;
 
-interface CaseActionBarProps {
+export interface CaseActionBarProps {
   caseData: Case;
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
   isLoading: boolean;
+  metricsFeatures: CaseMetricsFeature[];
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
@@ -52,10 +55,13 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   currentExternalIncident,
   userCanCrud,
   isLoading,
+  metricsFeatures,
   onRefresh,
   onUpdateField,
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
+  const date = useMemo(() => getStatusDate(caseData), [caseData]);
+  const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(
     (status: CaseStatuses) =>
       onUpdateField({
@@ -91,6 +97,17 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             )}
+            {!metricsFeatures.includes('lifespan') ? (
+              <EuiFlexItem grow={false}>
+                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <FormattedRelativePreferenceDate
+                    data-test-subj={'case-action-bar-status-date'}
+                    value={date}
+                  />
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </MyDescriptionList>
       </EuiFlexItem>

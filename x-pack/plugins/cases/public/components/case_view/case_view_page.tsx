@@ -31,7 +31,7 @@ import { useCaseViewNavigation } from '../../common/navigation';
 import { HeaderPage } from '../header_page';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { CaseViewMetrics } from './case_view_metrics';
+import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps, OnUpdateFields } from './types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 
@@ -324,6 +324,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
+            metricsFeatures={metricsFeatures}
             onRefresh={handleRefresh}
             onUpdateField={onUpdateField}
           />
@@ -333,16 +334,14 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           <ContentWrapper>
             <EuiFlexGroup>
               <EuiFlexItem>
-                {!initLoadingData && metricsFeatures.length > 0 && (
-                  <>
-                    <CaseViewMetrics
-                      data-test-subj="case-view-metrics"
-                      isLoading={isLoadingMetrics}
-                      metrics={metrics}
-                      features={metricsFeatures}
-                    />
-                  </>
-                )}
+                {!initLoadingData && metricsFeatures.length > 0 ? (
+                  <CaseViewMetrics
+                    data-test-subj="case-view-metrics"
+                    isLoading={isLoadingMetrics}
+                    metrics={metrics}
+                    features={metricsFeatures}
+                  />
+                ) : null}
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />

@@ -11,10 +11,10 @@ import {
   basicCaseMetrics,
   basicCaseNumericValueFeatures,
   basicCaseStatusFeatures,
-} from '../../containers/mock';
-import { CaseViewMetrics } from './case_view_metrics';
-import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
-import { TestProviders } from '../../common/mock';
+} from '../../../containers/mock';
+import { CaseViewMetrics } from './index';
+import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { TestProviders } from '../../../common/mock';
 
 const renderCaseMetrics = ({
   metrics = basicCaseMetrics,
@@ -76,15 +76,15 @@ const metricsFeaturesTests: FeatureTest[] = [
         value: '2020-02-19T23:06:33Z',
       },
       {
-        title: 'Case in progress duration',
+        title: 'In progress duration',
         value: '20 milliseconds',
       },
       {
-        title: 'Case open duration',
+        title: 'Open duration',
         value: '10 milliseconds',
       },
       {
-        title: 'Duration from case creation to close',
+        title: 'Duration from creation to close',
         value: '1 day',
       },
     ],
