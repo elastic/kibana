@@ -19,6 +19,7 @@ import {
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
+import { createUpdateSuccessToaster } from './utils';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -212,6 +213,7 @@ export const useGetCases = (
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
+      const caseData = state.data.cases.find((el) => el.id === caseId);
       try {
         didCancelUpdateCases.current = false;
         abortCtrlUpdateCases.current.abort();
@@ -230,6 +232,15 @@ export const useGetCases = (
           dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
           fetchCases(state.filterOptions, state.queryParams);
           refetchCasesStatus();
+          if (caseData) {
+            toasts.addSuccess({
+              title: i18n.UPDATED_CASE(caseData.title),
+              text:
+                updateKey === 'status' && caseData.totalAlerts > 0
+                  ? i18n.STATUS_CHANGED_TOASTER_TEXT
+                  : undefined,
+            });
+          }
         }
       } catch (error) {
         if (!didCancelUpdateCases.current) {
@@ -240,8 +251,7 @@ export const useGetCases = (
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.filterOptions, state.queryParams]
+    [fetchCases, state.data, state.filterOptions, state.queryParams, toasts]
   );
 
   const refetchCases = useCallback(() => {
