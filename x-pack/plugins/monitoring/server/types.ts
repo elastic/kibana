@@ -57,6 +57,7 @@ export interface PluginsSetup {
   alerting?: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
   cloud?: CloudSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {

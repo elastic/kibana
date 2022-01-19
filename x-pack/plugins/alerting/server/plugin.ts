@@ -66,6 +66,8 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
+import { registerCollector } from './monitoring';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -125,6 +127,7 @@ export interface AlertingPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
+  monitoringCollection: MonitoringCollectionSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -252,6 +255,13 @@ export class AlertingPlugin {
       'alerting',
       this.createRouteHandlerContext(core)
     );
+
+    if (plugins.monitoringCollection) {
+      registerCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        core,
+      });
+    }
 
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();

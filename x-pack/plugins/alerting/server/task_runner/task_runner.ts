@@ -56,6 +56,7 @@ import {
   Event,
 } from '../lib/create_alert_event_log_record_object';
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
+import { incrementInMemoryMetric, IN_MEMORY_METRICS } from '../monitoring';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -675,6 +676,10 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
+      incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+      if (executionStatus.error) {
+        incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_FAILURES);
+      }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
           executionStatus
