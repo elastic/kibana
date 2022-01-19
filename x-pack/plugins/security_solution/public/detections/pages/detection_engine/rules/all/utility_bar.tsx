@@ -34,6 +34,7 @@ interface AllRulesUtilityBarProps {
   onToggleSelectAll?: () => void;
   paginationTotal: number;
   showBulkActions: boolean;
+  isBulkActionsInProgress: boolean;
   hasPagination?: boolean;
 }
 
@@ -50,6 +51,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     paginationTotal,
     showBulkActions = true,
     hasPagination,
+    isBulkActionsInProgress,
   }) => {
     const handleGetBatchItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -130,6 +132,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && (
                   <UtilityBarAction
+                    inProgress={isBulkActionsInProgress}
                     dataTestSubj="bulkActions"
                     iconSide="right"
                     iconType="arrowDown"

@@ -196,7 +196,8 @@ export const RulesTables = React.memo<RulesTableProps>(
       [actions]
     );
 
-    const { customRulesCount, fetchCustomRulesCount } = useCustomRulesCount();
+    const { customRulesCount, isCustomRulesCountLoading, fetchCustomRulesCount } =
+      useCustomRulesCount();
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
 
@@ -601,6 +602,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
+              isBulkActionsInProgress={isCustomRulesCountLoading}
               showBulkActions
             />
             <EuiBasicTable

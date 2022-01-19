@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPopover, PanelPaddingSize } from '@elastic/eui';
+import { EuiPopover, PanelPaddingSize, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -62,6 +62,7 @@ export interface UtilityBarActionProps extends LinkIconProps {
   popoverPanelPaddingSize?: PanelPaddingSize;
   dataTestSubj: string;
   ownFocus?: boolean;
+  inProgress?: boolean;
 }
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
@@ -78,38 +79,56 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     onClick,
     popoverContent,
     popoverPanelPaddingSize,
-  }) => (
-    <BarAction data-test-subj={dataTestSubj}>
-      {popoverContent ? (
-        <Popover
-          dataTestSubj={`${dataTestSubj}-popover`}
-          disabled={disabled}
-          color={color}
-          iconSide={iconSide}
-          iconSize={iconSize}
-          iconType={iconType}
-          ownFocus={ownFocus}
-          popoverPanelPaddingSize={popoverPanelPaddingSize}
-          popoverContent={popoverContent}
-        >
-          {children}
-        </Popover>
-      ) : (
-        <LinkIcon
-          color={color}
-          dataTestSubj={`${dataTestSubj}-linkIcon`}
-          disabled={disabled}
-          href={href}
-          iconSide={iconSide}
-          iconSize={iconSize}
-          iconType={iconType}
-          onClick={onClick}
-        >
-          {children}
-        </LinkIcon>
-      )}
-    </BarAction>
-  )
+    inProgress,
+  }) => {
+    if (inProgress) {
+      return (
+        <BarAction data-test-subj={dataTestSubj}>
+          <EuiButtonEmpty
+            size="xs"
+            style={{ height: '16px', verticalAlign: 'top' }}
+            isLoading
+            iconSide="right"
+          >
+            {children}
+          </EuiButtonEmpty>
+        </BarAction>
+      );
+    }
+
+    return (
+      <BarAction data-test-subj={dataTestSubj}>
+        {popoverContent ? (
+          <Popover
+            dataTestSubj={`${dataTestSubj}-popover`}
+            disabled={disabled}
+            color={color}
+            iconSide={iconSide}
+            iconSize={iconSize}
+            iconType={iconType}
+            ownFocus={ownFocus}
+            popoverPanelPaddingSize={popoverPanelPaddingSize}
+            popoverContent={popoverContent}
+          >
+            {children}
+          </Popover>
+        ) : (
+          <LinkIcon
+            color={color}
+            dataTestSubj={`${dataTestSubj}-linkIcon`}
+            disabled={disabled}
+            href={href}
+            iconSide={iconSide}
+            iconSize={iconSize}
+            iconType={iconType}
+            onClick={onClick}
+          >
+            {children}
+          </LinkIcon>
+        )}
+      </BarAction>
+    );
+  }
 );
 
 UtilityBarAction.displayName = 'UtilityBarAction';

@@ -13,14 +13,17 @@ import { fetchRules } from '../api';
 interface UseCustomRulesCount {
   fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   customRulesCount: number;
+  isCustomRulesCountLoading: boolean;
 }
 
 export const useCustomRulesCount = (): UseCustomRulesCount => {
   const [customRulesCount, setCustomRulesCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchCustomRulesCount = async (filterOptions: FilterOptions) => {
     const abortController = new AbortController();
     try {
+      setIsLoading(true);
       const res = await fetchRules({
         pagination: { perPage: 1, page: 1, total: 0 },
         filterOptions: { ...filterOptions, showCustomRules: true },
@@ -31,11 +34,14 @@ export const useCustomRulesCount = (): UseCustomRulesCount => {
     } catch (err) {
       setCustomRulesCount(0);
       return { customRulesCount: 0 };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     fetchCustomRulesCount,
     customRulesCount,
+    isCustomRulesCountLoading: isLoading,
   };
 };
