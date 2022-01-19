@@ -88,19 +88,19 @@ export const getValueForContinuity = (
   const { max, min } = getDataMinMax(rangeType, dataBounds);
   let value;
   if (isLast) {
-    if (['none', 'below'].includes(continuity)) {
+    if (checkIsMaxContinuity(continuity)) {
+      value = Number.POSITIVE_INFINITY;
+    } else {
       value =
         colorRanges[colorRanges.length - 1].start > max
           ? colorRanges[colorRanges.length - 1].start + 1
           : max;
-    } else {
-      value = Number.POSITIVE_INFINITY;
     }
   } else {
-    if (['none', 'above'].includes(continuity)) {
-      value = colorRanges[0].end < min ? colorRanges[0].end - 1 : min;
-    } else {
+    if (checkIsMinContinuity(continuity)) {
       value = Number.NEGATIVE_INFINITY;
+    } else {
+      value = colorRanges[0].end < min ? colorRanges[0].end - 1 : min;
     }
   }
 
