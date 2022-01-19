@@ -489,7 +489,6 @@ export async function installPackage(args: InstallPackageParams) {
     return response;
   } else if (args.installSource === 'upload') {
     const { archiveBuffer, contentType, spaceId } = args;
-    logger.debug(`kicking off install of uploaded package`);
     const response = installPackageByUpload({
       savedObjectsClient,
       esClient,

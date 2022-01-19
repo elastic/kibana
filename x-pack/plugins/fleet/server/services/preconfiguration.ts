@@ -184,10 +184,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   const packagesToInstall = [];
 
   for (const pkg of packages) {
-    // We don't support preconfiguring a bundled package. Preconfigured packages will be installed from the package
+    // We don't support preconfiguring bundled packages. Preconfigured packages will be installed from the package
     // registry if it is available while bundled packages will be installed from disk. In order to avoid version conflicts
     // we only support one or the other, preferring bundled packages if they are avaiable.
-    if (bundledInstallResults.some((x) => x.name === pkg.name)) {
+    if (bundledInstallResults.some((result) => result.name === pkgToPkgKey(pkg))) {
       logger.warn(
         `Preconfigured package ${pkg.name} will be skipped as a bundled version of this package is included with Kibana`
       );
@@ -500,48 +500,67 @@ async function installBundledPackages(
 
   const bundledPackages = await getBundledPackages();
 
-  const results: BundledPackageInstallResult[] = [];
+  const results = await Promise.allSettled(
+    bundledPackages.map(async (bundledPackage) => {
+      // TODO: Determine a better way to simply grab the package name/version from the archive
+      const { packageInfo } = await parseAndVerifyArchiveEntries(
+        bundledPackage.buffer,
+        'application/zip'
+      );
 
-  for (const bundledPackage of bundledPackages) {
-    // TODO: Determine a better way to simply grab the package name/version from the archive
-    const { packageInfo } = await parseAndVerifyArchiveEntries(
-      bundledPackage.buffer,
-      'application/zip'
-    );
+      const installedPkg = await getInstallationObject({
+        savedObjectsClient: soClient,
+        pkgName: packageInfo.name,
+      });
 
-    const installedPkg = await getInstallationObject({
-      savedObjectsClient: soClient,
-      pkgName: packageInfo.name,
-    });
+      const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
 
-    const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+      // If the package is already installed, don't attempt to reinstall it. Just add a result record indicating
+      // that the package is already installed.
+      if (installType !== 'install') {
+        return {
+          name: bundledPackage.name,
+          status: 'already_installed',
+          installType: 'reinstall',
+        } as BundledPackageInstallResult;
+      }
 
-    // If the package is already installed, don't attempt to reinstall it
-    if (installType !== 'install') {
-      logger.debug(`Bundled package ${bundledPackage.name} is already installed - skipping`);
-      continue;
+      logger.debug(`Installing bundled package ${bundledPackage.name}`);
+
+      const installResult = await installPackage({
+        savedObjectsClient: soClient,
+        esClient,
+        installSource: 'upload',
+        archiveBuffer: bundledPackage.buffer,
+        contentType: 'application/zip',
+        spaceId,
+      });
+
+      // Mark bundled packages with a unique status to prevent them from appearing as "installed" in the UI
+      await updateInstallStatus({
+        savedObjectsClient: soClient,
+        pkgName: packageInfo.name,
+        status: 'installed_bundled',
+      });
+
+      return {
+        name: bundledPackage.name,
+        ...installResult,
+      } as BundledPackageInstallResult;
+    })
+  );
+
+  return results.map((result, index) => {
+    if (result.status === 'fulfilled') {
+      return result.value;
     }
 
-    logger.debug(`Installing bundled package ${bundledPackage.name}`);
+    const name = bundledPackages[index].name;
 
-    const result = await installPackage({
-      savedObjectsClient: soClient,
-      esClient,
-      installSource: 'upload',
-      archiveBuffer: bundledPackage.buffer,
-      contentType: 'application/zip',
-      spaceId,
-    });
-
-    // Mark bundled packages with a unique status to prevent them from appearing as "installed" in the UI
-    await updateInstallStatus({
-      savedObjectsClient: soClient,
-      pkgName: packageInfo.name,
-      status: 'installed_bundled',
-    });
-
-    results.push({ name: bundledPackage.name, ...result });
-  }
-
-  return results;
+    return {
+      name,
+      error: result.reason,
+      installType: 'install',
+    };
+  });
 }
