@@ -126,7 +126,7 @@ export const HostIsolationExceptionsFormFlyout = memo(
           {isEditing ? (
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-              defaultMessage="Edit host isolation exception"
+              defaultMessage="Save"
             />
           ) : (
             <FormattedMessage

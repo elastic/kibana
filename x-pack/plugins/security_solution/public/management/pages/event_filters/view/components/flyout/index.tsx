@@ -190,7 +190,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           {id ? (
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
-              defaultMessage="Update event filter"
+              defaultMessage="Save"
             />
           ) : data ? (
             <FormattedMessage
