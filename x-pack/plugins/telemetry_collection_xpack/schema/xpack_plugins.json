@@ -6986,6 +6986,30 @@
                           "_meta": {
                             "description": "Number of cases attached to query detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7013,6 +7037,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to threshold detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7042,6 +7090,30 @@
                           "_meta": {
                             "description": "Number of cases attached to eql detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7069,6 +7141,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to machine_learning detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7098,15 +7194,29 @@
                           "_meta": {
                             "description": "Number of cases attached to threat_match detection rule alerts"
                           }
-                        }
-                      }
-                    },
-                    "legacy_notifications": {
-                      "properties": {
-                        "total": {
+                        },
+                        "legacy_notifications_enabled": {
                           "type": "long",
                           "_meta": {
-                            "description": "Number of legacy notifications still in use"
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7136,6 +7246,30 @@
                           "_meta": {
                             "description": "Number of cases attached to elastic detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7163,6 +7297,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to custom detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7231,6 +7389,18 @@
                         "type": "long",
                         "_meta": {
                           "description": "The number of total cases generated by a rule"
+                        }
+                      },
+                      "has_legacy_notification": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a legacy notification"
+                        }
+                      },
+                      "has_notification": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a notification"
                         }
                       }
                     }
