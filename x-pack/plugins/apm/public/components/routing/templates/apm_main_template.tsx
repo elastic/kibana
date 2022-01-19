@@ -36,14 +36,14 @@ export function ApmMainTemplate({
   pageHeader,
   children,
   environmentFilter = true,
-  shoudCreateServiceGroupsButton,
+  showCreateServiceGroupsButton,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
   environmentFilter?: boolean;
-  shoudCreateServiceGroupsButton?: boolean;
+  showCreateServiceGroupsButton?: boolean;
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
@@ -68,7 +68,7 @@ export function ApmMainTemplate({
   );
 
   const rightSideItems = [
-    shoudCreateServiceGroupsButton ? <CreateGroups /> : undefined,
+    showCreateServiceGroupsButton ? <CreateGroups /> : undefined,
     environmentFilter ? <ApmEnvironmentFilter /> : undefined,
   ];
 

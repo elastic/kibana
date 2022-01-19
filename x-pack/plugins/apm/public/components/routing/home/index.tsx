@@ -27,12 +27,12 @@ function page<TPath extends string>({
   path,
   element,
   title,
-  shoudCreateServiceGroupsButton,
+  showCreateServiceGroupsButton,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   title: string;
-  shoudCreateServiceGroupsButton?: boolean;
+  showCreateServiceGroupsButton?: boolean;
 }): { path: TPath; element: React.ReactElement<any, any> } {
   return {
     path,
@@ -40,7 +40,7 @@ function page<TPath extends string>({
       <Breadcrumb title={title} href={path}>
         <ApmMainTemplate
           pageTitle={title}
-          shoudCreateServiceGroupsButton={shoudCreateServiceGroupsButton}
+          showCreateServiceGroupsButton={showCreateServiceGroupsButton}
         >
           {element}
         </ApmMainTemplate>
@@ -90,11 +90,15 @@ export const home = {
   },
   children: [
     page({
+      path: '/service-groups',
+      title: ServiceInventoryTitle,
+      element: <ServiceGroups />,
+      showCreateServiceGroupsButton: true,
+    }),
+    page({
       path: '/services',
       title: ServiceInventoryTitle,
-      // element: <ServiceInventory />,
-      element: <ServiceGroups />,
-      shoudCreateServiceGroupsButton: true,
+      element: <ServiceInventory />,
     }),
     page({
       path: '/traces',
@@ -147,7 +151,7 @@ export const home = {
     },
     {
       path: '/',
-      element: <RedirectTo pathname="/services" />,
+      element: <RedirectTo pathname="/service-groups" />,
     },
   ],
 } as const;

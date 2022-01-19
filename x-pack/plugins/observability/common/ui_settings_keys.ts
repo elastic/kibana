@@ -8,3 +8,4 @@
 export const enableInspectEsQueries = 'observability:enableInspectEsQueries';
 export const maxSuggestions = 'observability:maxSuggestions';
 export const enableComparisonByDefault = 'observability:enableComparisonByDefault';
+export const enableServiceGroups = 'observability:enableServiceGroups';

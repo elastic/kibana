@@ -58,7 +58,9 @@ export function ServiceGroupsList({ orientation, items }: Props) {
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
-          onClick: () => {},
+          onClick: () => {
+            // TODO: navigate to services page
+          },
         };
 
         return (

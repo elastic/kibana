@@ -428,6 +428,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableServiceGroups': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },

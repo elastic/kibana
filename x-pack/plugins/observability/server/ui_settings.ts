@@ -13,6 +13,7 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
+  enableServiceGroups,
 } from '../common/ui_settings_keys';
 
 /**
@@ -49,6 +50,17 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
       defaultMessage: 'Enable the comparison feature on APM UI',
+    }),
+    schema: schema.boolean(),
+  },
+  [enableServiceGroups]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableServiceGroups', {
+      defaultMessage: 'Service groups feature',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
+      defaultMessage: 'Enable the Service groups feature on APM UI',
     }),
     schema: schema.boolean(),
   },
