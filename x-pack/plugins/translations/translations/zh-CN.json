@@ -6321,7 +6321,6 @@
     "xpack.apm.transactionsTable.cardinalityWarning.body": "唯一事务名称的数目超过 {bucketSize} 的已配置值。尝试重新配置您的代理以对类似的事务分组或增大 {codeBlock} 的值",
     "xpack.apm.transactionsTable.cardinalityWarning.docsLink": "在文档中了解详情",
     "xpack.apm.transactionsTable.cardinalityWarning.title": "此视图显示已报告事务的子集。",
-    "xpack.apm.transactionsTable.errorMessage": "无法提取",
     "xpack.apm.transactionsTable.linkText": "查看事务",
     "xpack.apm.transactionsTable.loading": "正在加载……",
     "xpack.apm.transactionsTable.noResults": "未找到事务组",
