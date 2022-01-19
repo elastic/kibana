@@ -12,3 +12,4 @@ export const BENCHMARKS_ROUTE_PATH = '/api/csp/benchmarks';
 export const AGENT_LOGS_INDEX = 'logs-k8s_cis*';
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
+export const CIS_VANILLA_PACKAGE_NAME = 'k8s_cis';
