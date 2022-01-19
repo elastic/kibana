@@ -6,6 +6,7 @@
  */
 
 import { Query } from '@elastic/eui';
+import { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
 import {
   BulkRuleResponse,
   RuleResponseBuckets,
@@ -71,16 +72,29 @@ export const getSearchFilters = ({
 
 /**
  * This function helps to parse NDJSON with exported rules
+ * and retrieve the metadata of exported rules.
+ *
+ * @param blob a Blob received from an _export endpoint
+ * @returns Export details
+ */
+export const getExportedRulesDetails = async (blob: Blob): Promise<ExportRulesDetails> => {
+  const blobContent = await blob.text();
+  // The Blob content is an NDJSON file, the last line of which contains export details.
+  const exportDetailsJson = blobContent.split('\n').filter(Boolean).slice(-1)[0];
+  const exportDetails = JSON.parse(exportDetailsJson);
+
+  return exportDetails;
+};
+
+/**
+ * This function helps to parse NDJSON with exported rules
  * and retrieve the number of successfully exported rules.
  *
  * @param blob a Blob received from an _export endpoint
  * @returns Number of exported rules
  */
 export const getExportedRulesCount = async (blob: Blob): Promise<number> => {
-  const blobContent = await blob.text();
-  // The Blob content is an NDJSON file, the last line of which contains export details.
-  const exportDetailsJson = blobContent.split('\n').filter(Boolean).slice(-1)[0];
-  const exportDetails = JSON.parse(exportDetailsJson);
+  const details = await getExportedRulesDetails(blob);
 
-  return exportDetails.exported_count;
+  return details.exported_rules_count;
 };

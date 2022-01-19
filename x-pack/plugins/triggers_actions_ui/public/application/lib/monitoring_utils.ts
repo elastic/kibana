@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import numeral from '@elastic/numeral';
 
-export interface FieldMap {
-  [key: string]: {
-    type: string;
-    required?: boolean;
-    array?: boolean;
-    path?: string;
-    scaling_factor?: number;
-  };
+export function getFormattedSuccessRatio(successRatio: number) {
+  const formatted = numeral(successRatio! * 100).format('0,0');
+  return `${formatted}%`;
 }
