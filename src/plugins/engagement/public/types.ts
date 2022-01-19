@@ -16,7 +16,7 @@ export interface EngagementPluginStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Engagement services.
    */
-  ServicesContext: FC<{}>;
+  ContextProvider: FC<{}>;
 }
 
 /** @internal */

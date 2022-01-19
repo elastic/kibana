@@ -74,7 +74,7 @@ export const IntegrationsAppContext: React.FC<{
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
                           <startServices.customIntegrations.ContextProvider>
-                            <startServices.engagement.ServicesContext>
+                            <startServices.engagement.ContextProvider>
                               <Router history={history}>
                                 <AgentPolicyContextProvider>
                                   <PackageInstallProvider
@@ -87,7 +87,7 @@ export const IntegrationsAppContext: React.FC<{
                                   </PackageInstallProvider>
                                 </AgentPolicyContextProvider>
                               </Router>
-                            </startServices.engagement.ServicesContext>
+                            </startServices.engagement.ContextProvider>
                           </startServices.customIntegrations.ContextProvider>
                         </FleetStatusProvider>
                       </UIExtensionsContext.Provider>

@@ -64,7 +64,7 @@ export class EngagementPlugin
     const drift = config?.drift || _config.drift || { enabled: false };
 
     return {
-      ServicesContext: ({ children }) => (
+      ContextProvider: ({ children }) => (
         <sharedUX.ServicesContext>
           <ServicesProvider drift={drift}>{children}</ServicesProvider>
         </sharedUX.ServicesContext>
