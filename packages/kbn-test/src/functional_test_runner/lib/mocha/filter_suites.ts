@@ -21,7 +21,7 @@ interface Options {
   mocha: any;
   include: string[];
   exclude: string[];
-  esVersion: EsVersion;
+  esVersion?: EsVersion;
 }
 
 /**
@@ -42,24 +42,28 @@ export function filterSuites({ log, mocha, include, exclude, esVersion }: Option
   const collectTests = (suite: SuiteInternal): Test[] =>
     suite.suites.reduce((acc, s) => acc.concat(collectTests(s)), suite.tests);
 
-  // traverse the test graph and exclude any tests which don't meet their esVersionRequirement
-  log.info('Only running suites which are compatible with ES version', esVersion.toString());
-  (function recurse(parentSuite: SuiteInternal) {
-    const children = parentSuite.suites;
-    parentSuite.suites = [];
+  if (esVersion) {
+    // traverse the test graph and exclude any tests which don't meet their esVersionRequirement
+    log.info('Only running suites which are compatible with ES version', esVersion.toString());
+    (function recurse(parentSuite: SuiteInternal) {
+      const children = parentSuite.suites;
+      parentSuite.suites = [];
 
-    const meetsEsVersionRequirement = (suite: SuiteInternal) =>
-      !suite._esVersionRequirement || esVersion.matchRange(suite._esVersionRequirement);
+      const meetsEsVersionRequirement = (suite: SuiteInternal) =>
+        !suite._esVersionRequirement || esVersion.matchRange(suite._esVersionRequirement);
 
-    for (const child of children) {
-      if (meetsEsVersionRequirement(child)) {
-        parentSuite.suites.push(child);
-        recurse(child);
-      } else {
-        mocha.testsExcludedByEsVersion = mocha.testsExcludedByEsVersion.concat(collectTests(child));
+      for (const child of children) {
+        if (meetsEsVersionRequirement(child)) {
+          parentSuite.suites.push(child);
+          recurse(child);
+        } else {
+          mocha.testsExcludedByEsVersion = mocha.testsExcludedByEsVersion.concat(
+            collectTests(child)
+          );
+        }
       }
-    }
-  })(mocha.suite);
+    })(mocha.suite);
+  }
 
   // if include tags were provided, filter the tree once to
   // only include branches that are included at some point

@@ -51,6 +51,14 @@ export async function setupMocha(lifecycle, log, config, providers, esVersion) {
   // valiate that there aren't any tests in multiple ciGroups
   validateCiGroupTags(log, mocha);
 
+  filterSuites({
+    log,
+    mocha,
+    include: [],
+    exclude: [],
+    esVersion,
+  });
+
   // Each suite has a tag that is the path relative to the root of the repo
   // So we just need to take input paths, make them relative to the root, and use them as tags
   // Also, this is a separate filterSuitesByTags() call so that the test suites will be filtered first by
@@ -60,7 +68,6 @@ export async function setupMocha(lifecycle, log, config, providers, esVersion) {
     mocha,
     include: config.get('suiteFiles.include').map((file) => relative(REPO_ROOT, file)),
     exclude: config.get('suiteFiles.exclude').map((file) => relative(REPO_ROOT, file)),
-    esVersion,
   });
 
   filterSuites({
@@ -68,7 +75,6 @@ export async function setupMocha(lifecycle, log, config, providers, esVersion) {
     mocha,
     include: config.get('suiteTags.include').map((tag) => tag.replace(/-\d+$/, '')),
     exclude: config.get('suiteTags.exclude').map((tag) => tag.replace(/-\d+$/, '')),
-    esVersion,
   });
 
   return mocha;

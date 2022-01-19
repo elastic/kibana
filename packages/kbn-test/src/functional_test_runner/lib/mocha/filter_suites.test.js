@@ -15,7 +15,7 @@ import Test from 'mocha/lib/test';
 import { filterSuites } from './filter_suites';
 import { EsVersion } from '../es_version';
 
-function setup({ include, exclude, esVersion = '8.0.0' }) {
+function setup({ include, exclude, esVersion }) {
   return new Promise((resolve) => {
     const history = [];
 
@@ -73,7 +73,7 @@ function setup({ include, exclude, esVersion = '8.0.0' }) {
       mocha,
       include,
       exclude,
-      esVersion: new EsVersion(esVersion),
+      esVersion,
     });
 
     mocha.run();
@@ -88,7 +88,6 @@ it('only runs hooks of parents and tests in level1a', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a' ]",
       "suite: ",
       "suite: level 1",
@@ -108,7 +107,6 @@ it('only runs hooks of parents and tests in level1b', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1b' ]",
       "suite: ",
       "suite: level 1",
@@ -128,7 +126,6 @@ it('only runs hooks of parents and tests in level1a and level1b', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a', 'level1b' ]",
       "suite: ",
       "suite: level 1",
@@ -152,7 +149,6 @@ it('only runs level1a if including level1 and excluding level1b', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
       "info: Filtering out any suites that include the tag(s): [ 'level1b' ]",
       "suite: ",
@@ -173,7 +169,6 @@ it('only runs level1b if including level1 and excluding level1a', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
       "info: Filtering out any suites that include the tag(s): [ 'level1a' ]",
       "suite: ",
@@ -194,7 +189,6 @@ it('only runs level2 if excluding level1', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Filtering out any suites that include the tag(s): [ 'level1' ]",
       "suite: ",
       "suite: level 2",
@@ -213,7 +207,6 @@ it('does nothing if everything excluded', async () => {
 
   expect(history).toMatchInlineSnapshot(`
     Array [
-      "info: Only running suites which are compatible with ES version 8.0.0",
       "info: Filtering out any suites that include the tag(s): [ 'level1', 'level2a' ]",
     ]
   `);
@@ -223,7 +216,7 @@ it(`excludes tests which don't meet the esVersionRequirement`, async () => {
   const { history } = await setup({
     include: [],
     exclude: [],
-    esVersion: '9.0.0',
+    esVersion: new EsVersion('9.0.0'),
   });
 
   expect(history).toMatchInlineSnapshot(`
