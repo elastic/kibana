@@ -85,7 +85,7 @@ export interface PersistableState<P extends SerializableRecord = SerializableRec
   migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 }
 
-type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
+export type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
 
 /**
  * Collection of migrations that a given type of persistable state object has
