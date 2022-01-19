@@ -118,6 +118,7 @@ export function ServiceOverview() {
                     isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
+                    hidePerPageOptions={true}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -164,6 +165,7 @@ export function ServiceOverview() {
                     <ServiceOverviewDependenciesTable
                       fixedHeight={true}
                       isSingleColumn={isSingleColumn}
+                      hidePerPageOptions={true}
                       link={
                         <EuiLink href={dependenciesLink}>
                           {i18n.translate(
