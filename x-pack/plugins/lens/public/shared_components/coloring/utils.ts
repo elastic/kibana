@@ -51,7 +51,7 @@ export function updateRangeType(
   palettes: PaletteRegistry,
   colorRanges: PaletteConfigurationState['colorRanges']
 ) {
-  const continuity = activePalette.params?.continuity;
+  const continuity = activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
   const params: CustomPaletteParams = { rangeType: newRangeType };
   const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
   const { min: oldMin, max: oldMax } = getDataMinMax(activePalette.params?.rangeType, dataBounds);
@@ -326,7 +326,7 @@ export function getPaletteStops(
     )
     .getCategoricalColors(steps, otherParams);
 
-  const newStopsMin = mapFromMinValue ? minValue : interval / steps;
+  const newStopsMin = mapFromMinValue || interval === 0 ? minValue : interval / steps;
 
   return remapStopsByNewInterval(
     colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),
