@@ -35,7 +35,7 @@ export function runFtrCli() {
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
-      const esVersion = flags['es-version'];
+      const esVersion = flags['es-version'] || undefined; // convert "" to undefined
       if (esVersion !== undefined && typeof esVersion !== 'string') {
         throw createFlagError('expected --es-version to be a string');
       }

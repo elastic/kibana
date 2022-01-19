@@ -6,10 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { createAbsolutePathSerializer, createRecursiveSerializer } from '@kbn/dev-utils';
+
+import { EsVersion } from '../../../functional_test_runner';
 import { displayHelp, processOptions } from './args';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
+
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (i) => i instanceof EsVersion,
+    (i, raw) => raw(`EsVersion<${i.toString()}>`)
+  )
+);
 
 const INITIAL_TEST_ES_FROM = process.env.TEST_ES_FROM;
 beforeEach(() => {
