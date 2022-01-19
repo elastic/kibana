@@ -54,7 +54,6 @@ export function getTemplate({
   type,
   templateIndexPattern,
   fields,
-  mappings,
   pipelineName,
   packageName,
   composedOfTemplates,
@@ -64,7 +63,6 @@ export function getTemplate({
   type: string;
   templateIndexPattern: string;
   fields: Fields;
-  mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
@@ -75,7 +73,6 @@ export function getTemplate({
     type,
     templateIndexPattern,
     fields,
-    mappings,
     packageName,
     composedOfTemplates,
     templatePriority,
@@ -383,7 +380,6 @@ function getBaseTemplate(
   type: string,
   templateIndexPattern: string,
   fields: Fields,
-  mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
   templatePriority: number,
@@ -400,27 +396,7 @@ function getBaseTemplate(
       settings: {
         index: {},
       },
-      mappings: {
-        // All the dynamic field mappings
-        dynamic_templates: [
-          // This makes sure all mappings are keywords by default
-          {
-            strings_as_keyword: {
-              mapping: {
-                ignore_above: 1024,
-                type: 'keyword',
-              },
-              match_mapping_type: 'string',
-            },
-          },
-        ],
-        // As we define fields ahead, we don't need any automatic field detection
-        // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
-        date_detection: false,
-        // All the properties we know from the fields.yml file
-        properties: mappings.properties,
-        _meta,
-      },
+      mappings: {},
     },
     data_stream: { hidden },
     composed_of: composedOfTemplates,
