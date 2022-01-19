@@ -35,6 +35,6 @@ describe('risk tab', () => {
 
   it('shows risk information overlay when button is clicked', () => {
     openRiskFlyout();
-    cy.get(RISK_FLYOUT).contains('How is host risk calculated?');
+    cy.get(RISK_FLYOUT).should('have.text', 'How is host risk calculated?');
   });
 });

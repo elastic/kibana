@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export const navigateToHostRiskDetailTab = () =>
-  cy.get('[data-test-subj="navigation-hostRisk"]').click();
+import { LOADING_TABLE, RISK_DETAILS_NAV, RISK_FLYOUT_TRIGGER } from '../screens/hosts/host_risk';
 
-export const openRiskFlyout = () =>
-  cy.get('[data-test-subj="open-risk-information-flyout-trigger"]').click();
+export const navigateToHostRiskDetailTab = () => cy.get(RISK_DETAILS_NAV).click();
+
+export const openRiskFlyout = () => cy.get(RISK_FLYOUT_TRIGGER).click();
 
 export const waitForTableToLoad = () => {
-  cy.get('.euiBasicTable-loading').should('exist');
-  cy.get('.euiBasicTable-loading').should('not.exist');
+  cy.get(LOADING_TABLE).should('exist');
+  cy.get(LOADING_TABLE).should('not.exist');
 };
