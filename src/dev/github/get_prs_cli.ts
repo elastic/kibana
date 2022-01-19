@@ -38,21 +38,14 @@ export async function getPullRequests() {
         throw createFlagError('please provide path to save csv --dest flag');
       }
 
-      let query;
-      let mergedSince;
-
-      if (flags.query) {
-        if (typeof flags.query !== 'string') {
-          throw createFlagError('please provide valid string in --query flag');
-        }
-        query = flags.query;
+      const query = flags.query;
+      if (typeof query !== 'string') {
+        throw createFlagError('please provide valid string in --query flag');
       }
-
-      if (flags['merged-since']) {
-        mergedSince = flags['merged-since'] as string;
-        if (!/\d{4}-\d{2}-\d{2}/.test(mergedSince)) {
-          throw createFlagError('please provide a valid date in --merged-since flag');
-        }
+      
+      const mergedSince = flags['merged-since'];
+      if (typeof mergedSince !== 'string' || !/\d{4}-\d{2}-\d{2}/.test(mergedSince)) {
+        throw createFlagError('please provide a valid date in --merged-since flag');
       }
 
       fs.mkdirSync(flags.dest, { recursive: true });
