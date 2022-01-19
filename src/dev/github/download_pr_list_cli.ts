@@ -9,7 +9,7 @@
 import { run, createFlagError, Flags } from '@kbn/dev-utils';
 import fs from 'fs';
 import Path from 'path';
-import { savePrsToCsv } from './find_and_save_prs';
+import { savePrsToCsv } from './search_and_save_pr_list';
 
 function getLabelsPath(flags: Flags) {
   if (typeof flags.path !== 'string') {
@@ -23,7 +23,7 @@ function getLabelsPath(flags: Flags) {
   return Path.resolve(flags.path);
 }
 
-export async function getPullRequests() {
+export async function downloadPullRequests() {
   run(
     async ({ log, flags }) => {
       const githubToken = process.env.GITHUB_TOKEN;
@@ -35,17 +35,22 @@ export async function getPullRequests() {
       const labelsPath = getLabelsPath(flags);
 
       if (typeof flags.dest !== 'string') {
-        throw createFlagError('please provide path to save csv --dest flag');
+        throw createFlagError('please provide csv path in --dest flag');
       }
 
       const query = flags.query;
-      if (typeof query !== 'string') {
+      if (query && typeof query !== 'string') {
         throw createFlagError('please provide valid string in --query flag');
       }
-      
+
       const mergedSince = flags['merged-since'];
-      if (typeof mergedSince !== 'string' || !/\d{4}-\d{2}-\d{2}/.test(mergedSince)) {
-        throw createFlagError('please provide a valid date in --merged-since flag');
+      if (
+        mergedSince &&
+        (typeof mergedSince !== 'string' || !/\d{4}-\d{2}-\d{2}/.test(mergedSince))
+      ) {
+        throw createFlagError(
+          `please provide a past date in 'yyyy-mm-dd' format in --merged-since flag`
+        );
       }
 
       fs.mkdirSync(flags.dest, { recursive: true });

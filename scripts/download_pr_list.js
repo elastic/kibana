@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/github/get_prs_cli').getPullRequests();
+require('../src/dev/github/download_pr_list_cli').downloadPullRequests();
