@@ -36,7 +36,7 @@ import {
   ReferenceBasedIndexPatternColumn,
   BaseIndexPatternColumn,
 } from './definitions/column_types';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { isColumnOfType } from './definitions/helpers';
 
@@ -55,6 +55,7 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
   shouldResetLabel?: boolean;
+  shouldCombineField?: boolean;
   incompleteParams?: ColumnAdvancedParams;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
@@ -374,7 +375,9 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
+  initialParams,
   shouldResetLabel,
+  shouldCombineField,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -533,14 +536,9 @@ export function replaceColumn({
 
       try {
         newLayer = newColumn.params.formula
-          ? regenerateLayerFromAst(
-              newColumn.params.formula,
-              basicLayer,
-              columnId,
-              newColumn,
+          ? insertOrReplaceFormulaColumn(columnId, newColumn, basicLayer, {
               indexPattern,
-              operationDefinitionMap
-            ).newLayer
+            }).layer
           : basicLayer;
       } catch (e) {
         newLayer = basicLayer;
@@ -646,10 +644,14 @@ export function replaceColumn({
     operationDefinition.input === 'field' &&
     field &&
     'sourceField' in previousColumn &&
-    previousColumn.sourceField !== field.name
+    (previousColumn.sourceField !== field.name || operationDefinition?.getParamsForMultipleFields)
   ) {
     // Same operation, new field
-    let newColumn = operationDefinition.onFieldChange(previousColumn, field);
+    let newColumn = operationDefinition.onFieldChange(
+      previousColumn,
+      field,
+      shouldCombineField ? initialParams?.params : undefined
+    );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }

@@ -857,11 +857,31 @@ describe('When on the Trusted Apps Page', () => {
       expect(button).toHaveAttribute('href', '/fleet');
     });
 
-    it('back button is not present', () => {
+    it('back button is present after push history', () => {
       reactTestingLibrary.act(() => {
         history.push('/administration/trusted_apps');
       });
-      expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).not.toBeNull();
+      expect(button).toHaveAttribute('href', '/fleet');
+    });
+  });
+
+  describe('and the back button is not present', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      reactTestingLibrary.act(() => {
+        history.push('/administration/trusted_apps');
+      });
+    });
+
+    it('back button is not present when missing history params', () => {
+      const button = renderResult.queryByTestId('backToOrigin');
+      expect(button).toBeNull();
     });
   });
 });
