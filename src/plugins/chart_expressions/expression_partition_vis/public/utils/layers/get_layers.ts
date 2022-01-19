@@ -8,32 +8,15 @@
 
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import type { FormatFactory } from '../../../../../field_formats/common';
 import { PaletteRegistry } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
+import { getNodeLabel } from './get_node_labels';
+import { generateFormatters } from './get_formatters';
 
 const EMPTY_SLICE = Symbol('empty_slice');
-
-const generateFormatters = (
-  visParams: PartitionVisParams,
-  visData: Datatable,
-  formatter: FieldFormatsStart
-) => {
-  if (!visParams.labels.show) {
-    return {};
-  }
-
-  return visData.columns.reduce<Record<string, ReturnType<FormatFactory>>>(
-    (newFormatters, column) => ({
-      ...newFormatters,
-      [column.id]: formatter.deserialize(column.meta.params),
-    }),
-    {}
-  );
-};
 
 export const getLayers = (
   chartType: ChartTypes,
@@ -56,7 +39,8 @@ export const getLayers = (
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';
   }
-  const formatters = generateFormatters(visParams, visData, formatter);
+
+  const formatters = generateFormatters(visParams, visData, formatter.deserialize);
 
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
@@ -72,12 +56,7 @@ export const getLayers = (
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
-      nodeLabel: (d: unknown) => {
-        if (col?.meta?.params) {
-          return col?.id ? formatters[col?.id].convert(d) ?? '' : '';
-        }
-        return String(d);
-      },
+      nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel,
       sortPredicate: sortPredicateByType(chartType, visParams, visData, columns, col),
       shape: {

@@ -59,7 +59,7 @@ const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
             // Cap the ratio to 1 and then rescale
             rescaleFactor * Math.min(MAX_SIZE / Math.min(dimensions?.width, dimensions?.height), 1),
         }
-      : null;
+      : { outerSizeRatio: undefined };
 
   const config: Config = { ...(usingOuterSizeRatio ?? {}) };
 
