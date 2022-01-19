@@ -20,7 +20,7 @@ describe('TestNowMode', function () {
     expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('PENDING')).toBeInTheDocument();
 
-    expect(await screen.findByText('0 step completed')).toBeInTheDocument();
+    expect(await screen.findByText('0 steps completed')).toBeInTheDocument();
 
     expect(kibanaService.core.http.post).toHaveBeenCalledTimes(1);
 

@@ -17,7 +17,7 @@ describe('BrowserTestRunResult', function () {
   it('should render properly', async function () {
     render(<BrowserTestRunResult monitorId={'test-id'} />);
     expect(await screen.findByText('Test result')).toBeInTheDocument();
-    expect(await screen.findByText('0 step completed')).toBeInTheDocument();
+    expect(await screen.findByText('0 steps completed')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
 
     expect(dataApi.search).toHaveBeenCalledTimes(1);
