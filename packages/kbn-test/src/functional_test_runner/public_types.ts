@@ -101,6 +101,7 @@ export class GenericFtrService<ProviderContext extends GenericFtrProviderContext
 
 export interface FtrConfigProviderContext {
   log: ToolingLog;
+  esVersion: EsVersion;
   readConfigFile(path: string): Promise<Config>;
 }
 

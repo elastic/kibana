@@ -35,7 +35,7 @@ export class FunctionalTestRunner {
     private readonly log: ToolingLog,
     private readonly configFile: string,
     private readonly configOverrides: any,
-    esVersion?: string
+    esVersion?: string | EsVersion
   ) {
     for (const [key, value] of Object.entries(this.lifecycle)) {
       if (value instanceof LifecyclePhase) {
@@ -43,7 +43,12 @@ export class FunctionalTestRunner {
         value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
       }
     }
-    this.esVersion = esVersion ? new EsVersion(esVersion) : EsVersion.getDefault();
+    this.esVersion =
+      esVersion === undefined
+        ? EsVersion.getDefault()
+        : esVersion instanceof EsVersion
+        ? esVersion
+        : new EsVersion(esVersion);
   }
 
   async run() {
@@ -151,7 +156,12 @@ export class FunctionalTestRunner {
     let runErrorOccurred = false;
 
     try {
-      const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
+      const config = await readConfigFile(
+        this.log,
+        this.esVersion,
+        this.configFile,
+        this.configOverrides
+      );
       this.log.info('Config loaded');
 
       if (
