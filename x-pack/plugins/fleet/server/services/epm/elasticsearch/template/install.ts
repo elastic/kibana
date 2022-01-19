@@ -257,13 +257,36 @@ function buildComponentTemplates(params: {
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
 
-  const packageMappings = registryElasticsearch && registryElasticsearch['index_template.mappings'];
-  templatesMap[mappingsTemplateName] = buildMappingComponentTemplate({
-    mappings,
-    packageMappings,
+  const baseMapping = {
+    // All the dynamic field mappings
+    dynamic_templates: [
+      // This makes sure all mappings are keywords by default
+      {
+        strings_as_keyword: {
+          mapping: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          match_mapping_type: 'string',
+        },
+      },
+    ],
+    // As we define fields ahead, we don't need any automatic field detection
+    // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
+    date_detection: false,
+    // All the properties we know from the fields.yml file
+    properties: mappings.properties,
     _meta,
-  });
+  };
 
+  const packageMappings = registryElasticsearch && registryElasticsearch['index_template.mappings'];
+  templatesMap[mappingsTemplateName] = {
+    template: {
+      // dynamic_templates arrays should be concatenated together not overlayed
+      mappings: mergeWithArrayConcat(baseMapping, packageMappings || {}),
+    },
+    _meta,
+  };
   templatesMap[settingsTemplateName] = {
     template: {
       settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
