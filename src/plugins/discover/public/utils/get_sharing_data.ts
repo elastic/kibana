@@ -63,7 +63,9 @@ export async function getSharingData(
 
       // remove timeFilter from existing filter
       if (Array.isArray(existingFilter)) {
-        existingFilter.filter((current) => isEqualFilters(current, absoluteFilter));
+        existingFilter = existingFilter.filter((current) =>
+          isEqualFilters(current, absoluteFilter)
+        );
       } else if (isEqualFilters(existingFilter, absoluteFilter)) {
         existingFilter = undefined;
       }
