@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
@@ -20,7 +20,6 @@ import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
-import { EmbeddableHeader } from './embeddable_header';
 import { createEmbeddable } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
@@ -33,6 +32,8 @@ import { sourcererSelectors } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
+
+export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -73,6 +74,17 @@ const EmbeddableMap = styled.div.attrs(() => ({
       }
     `}
 `;
+
+const StyledEuiText = styled(EuiText)`
+  margin-right: 16px;
+`;
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  & .euiAccordion__triggerWrapper {
+    padding: 16px;
+  }
+`;
+
 EmbeddableMap.displayName = 'EmbeddableMap';
 
 export interface EmbeddedMapProps {
@@ -116,6 +128,7 @@ export const EmbeddedMapComponent = ({
   const portalNode = React.useMemo(() => createPortalNode(), []);
 
   const { services } = useKibana();
+  const { storage } = services;
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
@@ -222,30 +235,46 @@ export const EmbeddedMapComponent = ({
     }
   }, [embeddable, startDate, endDate]);
 
+  const setDefaultMapVisibility = (isOpen: boolean) => {
+    storage.set(NETWORK_MAP_VISIBLE, isOpen);
+  };
+
   return isError ? null : (
-    <Embeddable>
-      <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
-        <EuiText size="xs">
+    <StyledEuiAccordion
+      onToggle={setDefaultMapVisibility}
+      id={i18n.EMBEDDABLE_HEADER_TITLE}
+      arrowDisplay="right"
+      arrowProps={{
+        color: 'primary',
+        'data-test-subj': 'toggle-network-map',
+      }}
+      buttonContent={<strong>{i18n.EMBEDDABLE_HEADER_TITLE}</strong>}
+      extraAction={
+        <StyledEuiText size="xs">
           <EuiLink href={`${services.docLinks.links.siem.networkMap}`} target="_blank">
             {i18n.EMBEDDABLE_HEADER_HELP}
           </EuiLink>
-        </EuiText>
-      </EmbeddableHeader>
+        </StyledEuiText>
+      }
+      paddingSize="none"
+      initialIsOpen={storage.get(NETWORK_MAP_VISIBLE) ?? true}
+    >
+      <Embeddable>
+        <InPortal node={portalNode}>
+          <MapToolTip />
+        </InPortal>
 
-      <InPortal node={portalNode}>
-        <MapToolTip />
-      </InPortal>
-
-      <EmbeddableMap maintainRatio={!isIndexError}>
-        {isIndexError ? (
-          <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
-        ) : embeddable != null ? (
-          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
-        ) : (
-          <Loader data-test-subj="loading-panel" overlay size="xl" />
-        )}
-      </EmbeddableMap>
-    </Embeddable>
+        <EmbeddableMap maintainRatio={!isIndexError}>
+          {isIndexError ? (
+            <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+          ) : embeddable != null ? (
+            <services.embeddable.EmbeddablePanel embeddable={embeddable} />
+          ) : (
+            <Loader data-test-subj="loading-panel" overlay size="xl" />
+          )}
+        </EmbeddableMap>
+      </Embeddable>
+    </StyledEuiAccordion>
   );
 };
 

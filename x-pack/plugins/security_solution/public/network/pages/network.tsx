@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -84,6 +84,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { globalFullScreen } = useGlobalFullScreen();
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
+
+    const canUseMaps = kibana.services.application.capabilities.maps.show;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
@@ -173,13 +175,21 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   border
                 />
 
-                <EmbeddedMap
-                  query={query}
-                  filters={filters}
-                  startDate={from}
-                  endDate={to}
-                  setQuery={setQuery}
-                />
+                {canUseMaps && (
+                  <EuiPanel
+                    hasBorder
+                    paddingSize="none"
+                    data-test-subj="conditional-embeddable-map"
+                  >
+                    <EmbeddedMap
+                      query={query}
+                      filters={filters}
+                      startDate={from}
+                      endDate={to}
+                      setQuery={setQuery}
+                    />
+                  </EuiPanel>
+                )}
 
                 <EuiSpacer />
 

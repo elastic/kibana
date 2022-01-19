@@ -25,6 +25,10 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('./embedded_map_helpers', () => ({
   createEmbeddable: jest.fn(),
 }));
+
+const mockGetStorage = jest.fn();
+const mockSetStorage = jest.fn();
+
 jest.mock('../../../common/lib/kibana', () => {
   return {
     useKibana: jest.fn().mockReturnValue({
@@ -37,6 +41,10 @@ jest.mock('../../../common/lib/kibana', () => {
           links: {
             siem: { networkMap: '' },
           },
+        },
+        storage: {
+          get: () => mockGetStorage.mockReturnValue(false)(),
+          set: () => mockSetStorage,
         },
       },
     }),
