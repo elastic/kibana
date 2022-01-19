@@ -8,7 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -43,6 +43,7 @@ import {
   calculateTotal,
   getTotalHitsValue,
   isRACAlert,
+  getField,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -57,6 +58,8 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
   sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
+  sampleAlertDocNoSortIdWithTimestamp,
+  sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
@@ -1568,6 +1571,68 @@ describe('utils', () => {
 
     test('alert with null value returns false', () => {
       expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
+    });
+  });
+
+  describe('getField', () => {
+    test('gets legacy field when legacy field name is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.reason');
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('gets AAD field when AAD field name is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, ALERT_REASON);
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('gets legacy field when AAD field name is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, ALERT_REASON);
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('gets AAD field when legacy field name is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.reason');
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('returns `undefined` when AAD field name does not exist', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, 'kibana.alert.does_not_exist');
+      expect(value).toEqual(undefined);
+    });
+
+    test('returns `undefined` when legacy field name does not exist', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.does_not_exist');
+      expect(value).toEqual(undefined);
+    });
+
+    test('returns legacy rule param when AAD rule param is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
+      expect(value).toEqual('Descriptive description');
+    });
+
+    test('returns AAD rule param when legacy rule param is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.rule.description');
+      expect(value).toEqual('Descriptive description');
+    });
+
+    test('gets legacy rule param when legacy rule param is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.rule.description');
+      expect(value).toEqual('Descriptive description');
+    });
+
+    test('gets AAD rule param when AAD rule param is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
+      expect(value).toEqual('Descriptive description');
     });
   });
 });
