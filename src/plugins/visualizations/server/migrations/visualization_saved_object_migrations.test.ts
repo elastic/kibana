@@ -2452,9 +2452,9 @@ describe('migration visualization', () => {
     } as SavedObjectUnsanitizedDoc;
 
     const versionToTest = '1.2.3';
-    const visMigrations = getAllMigrations(() => ({
+    const visMigrations = getAllMigrations({
       [versionToTest]: (state) => ({ ...state, migrated: true }),
-    }));
+    });
 
     expect(
       visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
