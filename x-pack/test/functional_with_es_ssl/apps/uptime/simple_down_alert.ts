@@ -107,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
             message:
-              '{{state.monitorName}} from {{state.observerLocation}} {{state.statusMessage}}.',
+              '{{state.monitorName}} from {{state.observerLocation}} {{{state.statusMessage}}}.',
           },
           id: 'my-slack1',
         },
