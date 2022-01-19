@@ -289,6 +289,22 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
+    it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
+      const dataNodePlugins = ['repository-hdfs'];
+      const masterNodePlugins = [''];
+      const mockEsResponse = {
+        nodes: {
+          dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
+          masterNode: { plugins: [...masterNodePlugins.map((key) => ({ name: key }))] },
+        },
+      };
+      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
+
+      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+
     it('should throw if ES error', async () => {
       nodesInfoFn.mockRejectedValueOnce(new Error('Error getting cluster stats'));
 
