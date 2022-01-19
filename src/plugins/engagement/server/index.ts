@@ -15,4 +15,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new EngagementPlugin(initializerContext);
 }
 
-export { EngagementPluginSetup, EngagementPluginStart } from './types';
+export type { EngagementPluginSetup, EngagementPluginStart } from './types';

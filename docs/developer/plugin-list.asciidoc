@@ -90,6 +90,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Embeddables are re-usable widgets that can be rendered on dashboard, but also in other apps. Developers can embed them directly in their plugin. End users can dynamically add them to embeddable _containers_.
 
 
+|{kib-repo}blob/{branch}/src/plugins/engagement/README.md[engagement]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
