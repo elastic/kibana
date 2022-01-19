@@ -13,11 +13,9 @@ import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {
-    const savedObjectMigrationVersions = Object.keys(getAllMigrations(() => ({}))).filter(
-      (version) => {
-        return semverGte(version, '7.13.1');
-      }
-    );
+    const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
+      return semverGte(version, '7.13.1');
+    });
     const embeddableMigrationVersions = makeVisualizeEmbeddableFactory(() => ({}))()?.migrations;
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(

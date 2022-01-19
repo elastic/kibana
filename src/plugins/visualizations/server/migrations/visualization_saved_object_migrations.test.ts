@@ -60,7 +60,7 @@ const testMigrateMatchAllQuery = (migrate: Function) => {
 };
 
 describe('migration visualization', () => {
-  const visualizationSavedObjectTypeMigrations = getAllMigrations(() => ({}));
+  const visualizationSavedObjectTypeMigrations = getAllMigrations({});
 
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
