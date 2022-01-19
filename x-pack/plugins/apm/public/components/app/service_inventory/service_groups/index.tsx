@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
 import React, { useState } from 'react';
@@ -91,7 +97,7 @@ export function ServiceGroups() {
                 <EuiText style={{ fontWeight: 'bold' }} size="s">
                   {i18n.translate('xpack.apm.serviceGroups.groupsCount', {
                     defaultMessage:
-                      '{servicesCount} {servicesCount, plural, one {group} other {groups}}',
+                      '{servicesCount} {servicesCount, plural, =0 {group} one {group} other {groups}}',
                     values: { servicesCount: filteredItems.length },
                   })}
                 </EuiText>
@@ -99,10 +105,33 @@ export function ServiceGroups() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <ServiceGroupsList
-              orientation={apmServiceGroupsOrientation}
-              items={items}
-            />
+            {items.length ? (
+              <ServiceGroupsList
+                orientation={apmServiceGroupsOrientation}
+                items={items}
+              />
+            ) : (
+              <EuiEmptyPrompt
+                iconType="layers"
+                iconColor="black"
+                title={
+                  <h2>
+                    {i18n.translate(
+                      'xpack.apm.serviceGroups.emptyPrompt.serviceGroups',
+                      { defaultMessage: 'Service groups' }
+                    )}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {i18n.translate(
+                      'xpack.apm.serviceGroups.emptyPrompt.message',
+                      { defaultMessage: 'No groups found for this filter' }
+                    )}
+                  </p>
+                }
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
