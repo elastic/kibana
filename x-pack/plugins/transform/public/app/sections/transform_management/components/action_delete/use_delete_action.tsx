@@ -7,9 +7,9 @@
 
 import React, { useContext, useMemo, useState } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
-
-import { TransformListAction, TransformListRow } from '../../../../common';
+import { TRANSFORM_STATE, TransformState } from '../../../../../../common/constants';
+import type { TransformWithoutConfig } from '../../../../common/transform_list';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useDeleteIndexAndTargetIndex, useDeleteTransforms } from '../../../../hooks';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
@@ -18,20 +18,27 @@ import {
   isDeleteActionDisabled,
   DeleteActionName,
 } from './delete_action_name';
+import { isPopulatedObject } from '../../../../../../common/shared_imports';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
-export const useDeleteAction = (forceDisable: boolean) => {
+
+export const isTransformListRow = (arg: unknown): arg is TransformListRow => {
+  return isPopulatedObject(arg, ['id', 'config', 'stats']);
+};
+export const useDeleteAction = (forceDisable: boolean, forceDelete = false) => {
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
 
   const deleteTransforms = useDeleteTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
-  const [items, setItems] = useState<TransformListRow[]>([]);
+  const [items, setItems] = useState<TransformWithoutConfig[]>([]);
 
   const isBulkAction = items.length > 1;
   const shouldForceDelete = useMemo(
-    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
-    [items]
+    () =>
+      forceDelete === true ??
+      items.some((i: TransformWithoutConfig) => i.stats?.state === TRANSFORM_STATE.FAILED),
+    [forceDelete, items]
   );
 
   const closeModal = () => setModalVisible(false);
@@ -54,22 +61,37 @@ export const useDeleteAction = (forceDisable: boolean) => {
       userCanDeleteIndex && userCanDeleteDataView && indexPatternExists && deleteIndexPattern;
     // if we are deleting multiple transforms, then force delete all if at least one item has failed
     // else, force delete only when the item user picks has failed
-    const forceDelete = isBulkAction
+    const needForceDelete = isBulkAction
       ? shouldForceDelete
-      : items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED;
+      : items[0] && items[0].stats?.state === TRANSFORM_STATE.FAILED;
 
-    deleteTransforms({
-      transformsInfo: items.map((i) => ({
-        id: i.config.id,
-        state: i.stats.state,
-      })),
-      deleteDestIndex: shouldDeleteDestIndex,
-      deleteDestIndexPattern: shouldDeleteDestIndexPattern,
-      forceDelete,
-    });
+    deleteTransforms(
+      // If transform task doesn't have any corresponding config
+      // we won't know what the destination index or data view would be
+      // and should be force deleted
+      forceDelete && items[0].config === undefined
+        ? {
+            transformsInfo: items.map((i) => ({
+              id: i.id,
+              state: TRANSFORM_STATE.FAILED,
+            })),
+            deleteDestIndex: false,
+            deleteDestIndexPattern: false,
+            forceDelete: true,
+          }
+        : {
+            transformsInfo: items.map((i) => ({
+              id: i.id ?? i.config?.id,
+              state: i.stats?.state as TransformState,
+            })),
+            deleteDestIndex: shouldDeleteDestIndex,
+            deleteDestIndexPattern: shouldDeleteDestIndexPattern,
+            forceDelete: needForceDelete,
+          }
+    );
   };
 
-  const openModal = (newItems: TransformListRow[]) => {
+  const openModal = (newItems: TransformWithoutConfig[]) => {
     if (Array.isArray(newItems)) {
       setItems(newItems);
       setModalVisible(true);

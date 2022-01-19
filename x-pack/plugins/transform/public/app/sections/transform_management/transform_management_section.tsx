@@ -20,8 +20,9 @@ import {
   EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
-
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 
 import { useRefreshTransformList, TransformListRow } from '../../common';
@@ -40,6 +41,7 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
+import { DeleteActionModal, useDeleteAction } from './components/action_delete';
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
@@ -50,11 +52,15 @@ export const TransformManagement: FC = () => {
   const [transforms, setTransforms] = useState<TransformListRow[]>([]);
   const [transformNodes, setTransformNodes] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [transformIdsWithoutConfig, setTransformIdsWithoutConfig] = useState<
+    string[] | undefined
+  >();
 
   const getTransforms = useGetTransforms(
     setTransforms,
     setTransformNodes,
     setErrorMessage,
+    setTransformIdsWithoutConfig,
     setIsInitialized,
     blockRefresh
   );
@@ -66,6 +72,8 @@ export const TransformManagement: FC = () => {
   });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
+
+  const deleteAction = useDeleteAction(true, true);
 
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
@@ -155,6 +163,48 @@ export const TransformManagement: FC = () => {
             )}
             {typeof errorMessage === 'undefined' && (
               <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
+                {transformIdsWithoutConfig ? (
+                  <>
+                    {deleteAction.isModalVisible && (
+                      <DeleteActionModal {...deleteAction} hasNoConfig={true} />
+                    )}
+
+                    <EuiCallOut color="warning">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.transform.danglingTasksError"
+                          defaultMessage="Found {count} {count, plural, one {transform} other {transforms}} [{transformIds}] with no corresponding  {count, plural, one {configuration} other {configurations}}."
+                          values={{
+                            count: transformIdsWithoutConfig.length,
+                            transformIds: transformIdsWithoutConfig.join(', '),
+                          }}
+                        />
+                      </p>
+                      <EuiButton
+                        color="warning"
+                        size="s"
+                        onClick={() =>
+                          deleteAction.openModal(
+                            transformIdsWithoutConfig.map((id) => ({
+                              id,
+                              config: undefined,
+                              stats: undefined,
+                            }))
+                          )
+                        }
+                      >
+                        <FormattedMessage
+                          id="xpack.transform.forceDeleteTransformMessage"
+                          defaultMessage="Force delete {count} {count, plural, one {transform} other {transforms}}"
+                          values={{
+                            count: transformIdsWithoutConfig.length,
+                          }}
+                        />
+                      </EuiButton>
+                    </EuiCallOut>
+                    <EuiSpacer />
+                  </>
+                ) : null}
                 <TransformList
                   onCreateTransform={onOpenModal}
                   transformNodes={transformNodes}
