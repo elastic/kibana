@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { createMockLayout } from '../../../../../screenshotting/server/layouts/mock';
-import { PdfMaker } from './';
+import { createMockLayout } from '../../../../../../screenshotting/server/layouts/mock';
+import { PdfMaker } from '../';
 
 const imageBase64 = Buffer.from(
   `iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAGFBMVEXy8vJpaWn7+/vY2Nj39/cAAACcnJzx8fFvt0oZAAAAi0lEQVR4nO3SSQoDIBBFwR7U3P/GQXKEIIJULXr9H3TMrHhX5Yysvj3jjM8+XRnVa9wec8QuHKv3h74Z+PNyGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xu3Bxy026rXu4ljdUVW395xUFfGzLo946DK+QW+bgCTFcecSAAAAABJRU5ErkJggg==`,
   'base64'
 );
 
-// FLAKY: https://github.com/elastic/kibana/issues/118484
-describe.skip('PdfMaker', () => {
+describe('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
 
