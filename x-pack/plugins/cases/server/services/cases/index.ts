@@ -1021,37 +1021,82 @@ export class CasesService {
   public async getReporters({
     unsecuredSavedObjectsClient,
     filter,
-  }: GetReportersArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
+  }: GetReportersArgs): Promise<User[]> {
     try {
       this.log.debug(`Attempting to GET all reporters`);
 
-      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
+      const results = await unsecuredSavedObjectsClient.find<
+        ESCaseAttributes,
+        {
+          reporters: {
+            buckets: Array<{
+              key: string;
+              top_docs: { hits: { hits: Array<{ _source: { cases: { created_by: User } } }> } };
+            }>;
+          };
+        }
+      >({
         type: CASE_SAVED_OBJECT,
-        fields: ['created_by', OWNER_FIELD],
         page: 1,
-        perPage: MAX_DOCS_PER_PAGE,
+        perPage: 1,
         filter,
+        aggs: {
+          reporters: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.created_by.username`,
+              size: MAX_DOCS_PER_PAGE,
+            },
+            aggs: {
+              top_docs: {
+                top_hits: {
+                  size: 1,
+                },
+              },
+            },
+          },
+        },
       });
+
+      return (
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        results?.aggregations?.reporters?.buckets.map(({ key, top_docs }) => {
+          const user = top_docs?.hits?.hits?.[0]?._source?.cases?.created_by ?? {};
+          return {
+            username: key,
+            full_name: user.full_name ?? null,
+            email: user.email ?? null,
+          };
+        }) ?? []
+      );
     } catch (error) {
       this.log.error(`Error on GET all reporters: ${error}`);
       throw error;
     }
   }
 
-  public async getTags({
-    unsecuredSavedObjectsClient,
-    filter,
-  }: GetTagsArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
+  public async getTags({ unsecuredSavedObjectsClient, filter }: GetTagsArgs): Promise<string[]> {
     try {
       this.log.debug(`Attempting to GET all cases`);
 
-      return await unsecuredSavedObjectsClient.find<ESCaseAttributes>({
+      const results = await unsecuredSavedObjectsClient.find<
+        ESCaseAttributes,
+        { tags: { buckets: Array<{ key: string }> } }
+      >({
         type: CASE_SAVED_OBJECT,
-        fields: ['tags', OWNER_FIELD],
         page: 1,
-        perPage: MAX_DOCS_PER_PAGE,
+        perPage: 1,
         filter,
+        aggs: {
+          tags: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.tags`,
+              size: MAX_DOCS_PER_PAGE,
+            },
+          },
+        },
       });
+
+      return results?.aggregations?.tags?.buckets.map(({ key }) => key) ?? [];
     } catch (error) {
       this.log.error(`Error on GET tags: ${error}`);
       throw error;
