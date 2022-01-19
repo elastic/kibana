@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { createAbsolutePathSerializer, createRecursiveSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import { EsVersion } from '../../../functional_test_runner';
 import { displayHelp, processOptions } from './args';
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
+jest.mock('../../../functional_test_runner/lib/es_version', () => {
+  return {
+    EsVersion: class {
+      static getDefault() {
+        return '999.999.999';
+      }
+    },
+  };
+});
 
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (i) => i instanceof EsVersion,
-    (i, raw) => raw(`EsVersion<${i.toString()}>`)
-  )
-);
+expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
 
 const INITIAL_TEST_ES_FROM = process.env.TEST_ES_FROM;
 beforeEach(() => {
