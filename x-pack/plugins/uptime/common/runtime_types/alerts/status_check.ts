@@ -89,12 +89,3 @@ export const MonitorAvailabilityType = t.intersection([
 ]);
 
 export type MonitorAvailability = t.Type<typeof MonitorAvailabilityType>;
-
-export const GetMonitorDownReasonParamsType = t.type({
-  info: PingType,
-  count: t.number,
-  numTimes: t.number,
-  interval: t.string,
-});
-
-export type GetMonitorDownReasonParams = t.Type<typeof GetMonitorDownReasonParamsType>;

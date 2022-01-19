@@ -31,6 +31,13 @@ export interface GetMonitorStatusResult {
   monitorInfo: Ping;
 }
 
+export interface GetMonitorDownStatusMessageParams {
+  info: Ping;
+  count: number;
+  interval?: string;
+  numTimes: number;
+}
+
 const getLocationClause = (locations: string[]) => ({
   bool: {
     should: [
