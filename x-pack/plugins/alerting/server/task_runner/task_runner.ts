@@ -248,6 +248,24 @@ export class TaskRunner<
     return !this.context.cancelAlertsOnRuleTimeout || !this.ruleType.cancelAlertsOnRuleTimeout;
   }
 
+  private trackAlertsAfterRuleCancellation(numAlertsToExecute?: number) {
+    if (this.cancelled && this.usageCounter) {
+      if (this.context.cancelAlertsOnRuleTimeout && this.ruleType.cancelAlertsOnRuleTimeout) {
+        // Increment usage counter for skipped actions
+        this.usageCounter.incrementCounter({
+          counterName: 'alertsSkippedDueToRuleExecutionTimeout',
+          incrementBy: 1,
+        });
+      } else {
+        // Increment usage counter for actions that were executed after timeout
+        this.usageCounter.incrementCounter({
+          counterName: 'alertsExecutedDespiteRuleExecutionTimeout',
+          incrementBy: numAlertsToExecute ?? 1,
+        });
+      }
+    }
+  }
+
   async executeAlert(
     alertId: string,
     alert: AlertInstance<InstanceState, InstanceContext>,
@@ -418,6 +436,8 @@ export class TaskRunner<
       });
     }
 
+    let numAlertsToExecute: number | undefined;
+
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
@@ -459,6 +479,7 @@ export class TaskRunner<
               }
             );
 
+      numAlertsToExecute = alertsToExecute.length;
       await Promise.all(
         alertsToExecute.map(
           ([alertId, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) =>
@@ -475,6 +496,8 @@ export class TaskRunner<
         );
       }
     }
+
+    this.trackAlertsAfterRuleCancellation(numAlertsToExecute);
 
     return {
       alertTypeState: updatedRuleTypeState || undefined,
