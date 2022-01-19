@@ -6,6 +6,8 @@
  */
 import { uniq, map } from 'lodash';
 import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { string } from 'io-ts';
 import {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
@@ -14,6 +16,9 @@ import {
 import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../../../fleet/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_VANILLA_PACKAGE_NAME } from '../../../common/constants';
 import { CspAppContext } from '../../lib/csp_app_context_services';
+
+export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
+  v !== null && v !== undefined;
 
 export interface Benchmark {
   package_policy: Pick<
@@ -72,51 +77,48 @@ const addRunningAgentToAgentPolicy = async (
     )
   );
 };
+const createBenchmarkEntry = (
+  agentPolicy: GetAgentPoliciesResponseItem,
+  packagePolicy: PackagePolicy
+): Benchmark => ({
+  package_policy: {
+    id: packagePolicy?.id,
+    name: packagePolicy?.name,
+    policy_id: packagePolicy?.policy_id,
+    namespace: packagePolicy?.namespace,
+    updated_at: packagePolicy?.updated_at,
+    updated_by: packagePolicy?.updated_by,
+    created_at: packagePolicy?.created_at,
+    created_by: packagePolicy?.created_by,
+    package: packagePolicy.package
+      ? {
+          name: packagePolicy.package.name,
+          title: packagePolicy.package.title,
+          version: packagePolicy.package.version,
+        }
+      : undefined,
+  },
+  agent_policy: {
+    id: agentPolicy.id,
+    name: agentPolicy.name,
+    agents: agentPolicy.agents,
+  },
+});
 
 const createBenchmarks = (
-  agentPolicies: GetAgentPoliciesResponseItem[] | undefined,
+  agentPolicies: GetAgentPoliciesResponseItem[],
   packagePolicies: PackagePolicy[]
-): Benchmark[] => {
-  const benchmarks: Benchmark[] = agentPolicies?.flatMap(
-    (agentPolicy: GetAgentPoliciesResponseItem) => {
-      const benchmark: Benchmark = agentPolicy.package_policies.map(
-        (packagePolicyId: string | PackagePolicy) => {
-          const packageDetails = packagePolicies.filter(
-            (packagePolicy) => packagePolicy.id === packagePolicyId
-          )[0];
-          if (packageDetails) {
-            return {
-              package_policy: {
-                id: packagePolicyId,
-                name: packageDetails?.name,
-                policy_id: packageDetails?.policy_id,
-                namespace: packageDetails?.namespace,
-                updated_at: packageDetails?.updated_at,
-                updated_by: packageDetails?.updated_by,
-                created_at: packageDetails?.created_at,
-                created_by: packageDetails?.created_by,
-                package: {
-                  name: packageDetails.package?.name,
-                  title: packageDetails.package?.title,
-                  version: packageDetails.package?.version,
-                },
-              },
-              agent_policy: {
-                id: agentPolicy.id,
-                name: agentPolicy.name,
-                agents: agentPolicy.agents,
-              },
-            };
-          }
-        }
-      );
-      if (benchmark) {
-        return benchmark;
-      }
-    }
-  );
-  return benchmarks;
-};
+): Benchmark[] =>
+  agentPolicies
+    .flatMap((agentPolicy) =>
+      agentPolicy.package_policies.map((agentPackagePolicy) => {
+        const id = string.is(agentPackagePolicy) ? agentPackagePolicy : agentPackagePolicy.id;
+        const packagePolicy = packagePolicies.find((pkgPolicy) => pkgPolicy.id === id);
+        if (!packagePolicy) return;
+        return createBenchmarkEntry(agentPolicy, packagePolicy);
+      })
+    )
+    .filter(isNonNullable);
 
 export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
@@ -146,8 +148,11 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
           body: benchmarks,
         });
       } catch (err) {
-        // TODO - validate err object and parse
-        return response.customError({ body: { message: err.message }, statusCode: 500 });
+        const error = transformError(err);
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
       }
     }
   );

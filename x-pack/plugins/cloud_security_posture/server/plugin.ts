@@ -9,12 +9,10 @@ import { TypeOf, schema } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'kibana/server';
 import { CspAppContextService, CspAppContext } from './lib/csp_app_context_services';
 import type {
-  // PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  IRouter,
   RequestHandlerContext,
 } from '../../../../src/core/server';
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
@@ -34,9 +32,6 @@ export const ConfigSchema = schema.object({
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
-interface HandlerContext extends RequestHandlerContext, CspServerPluginStartDeps {}
-
-// import { ConfigType } from './config';
 
 export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> =>
   context.config.get<ConfigType>();
@@ -61,13 +56,12 @@ export class CspPlugin
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
-    // const config = createConfig(this.initializerContext);
+
     const cspContext: CspAppContext = {
-      // logFactory: this.context.logger,
       // config: (): ConfigType => config,
+      logger: this.logger,
       getStartServices: core.getStartServices,
       service: this.CspAppContextService,
-      // security: plugins.security,
     };
     cspContext.service.getPackagePolicyService();
     const router = core.http.createRouter();
@@ -85,7 +79,7 @@ export class CspPlugin
       ...plugins.fleet,
       // @ts-expect-error update types
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      config: this.config!,
+      // config: this.config!,
       logger: this.logger,
       registerIngestCallback,
     });

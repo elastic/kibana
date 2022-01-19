@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, LoggerFactory } from '../../../../../src/core/server';
-// import { SecurityPluginStart } from '../../../security/server';
+import { CoreSetup, Logger } from '../../../../../src/core/server';
+
 import {
   AgentService,
   FleetStartContract,
@@ -14,7 +14,6 @@ import {
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
-// import { ConfigType } from '../config';
 
 export type CspAppContextServiceStartContract = Partial<
   Pick<
@@ -26,22 +25,6 @@ export type CspAppContextServiceStartContract = Partial<
   // config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
 };
-
-/**
- * A singleton that holds shared services that are initialized during the start up phase
- * of the plugin lifecycle. And stop during the stop phase, if needed.
- */
-// export interface CspAppContext {
-//   // logFactory: LoggerFactory;
-//   // config(): ConfigType;
-//   // security: SecurityPluginStart;
-//   getStartServices: CoreSetup['getStartServices'];
-//   /**
-//    * Object readiness is tied to plugin start method
-//    */
-//   service: CspAppContextService;
-// }
-import { ConfigType } from '../plugin';
 
 export class CspAppContextService {
   private agentService: AgentService | undefined;
@@ -82,12 +65,7 @@ export class CspAppContextService {
  * The context for Csp app.
  */
 export interface CspAppContext {
-  // logFactory: LoggerFactory;
-  // config(): ConfigType;
-  // security: SecurityPluginStart;
+  logger: Logger;
   getStartServices: CoreSetup['getStartServices'];
-  /**
-   * Object readiness is tied to plugin start method
-   */
   service: CspAppContextService;
 }
