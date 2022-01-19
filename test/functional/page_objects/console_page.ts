@@ -108,7 +108,7 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys(text);
   }
 
-  public async getEditorTextArea() {
+  private async getEditorTextArea() {
     // This focusses the cursor on the bottom of the text area
     const editor = await this.getEditor();
     const content = await editor.findByCssSelector('.ace_content');
@@ -133,5 +133,10 @@ export class ConsolePageObject extends FtrService {
   public async pressEnter() {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ENTER);
+  }
+
+  public async clearTextArea() {
+    const textArea = await this.getEditorTextArea();
+    await textArea.clearValueWithKeyboard();
   }
 }

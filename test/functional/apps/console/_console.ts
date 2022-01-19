@@ -20,8 +20,6 @@ GET _search
 
 `.trim();
 
-const LINE_NUMBER = 11;
-
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
@@ -95,8 +93,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add comma after previous non empty line on autocomplete', async () => {
+      const LINE_NUMBER = 2;
+
       await PageObjects.console.dismissTutorial();
-      await PageObjects.console.enterRequest();
+      await PageObjects.console.clearTextArea();
       await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.pressEnter();
