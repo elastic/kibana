@@ -44,6 +44,10 @@ export function monitorManagementPageProvider({
       return await this.findByTestSubj('uptimeDeleteMonitorSuccess');
     },
 
+    async editMonitor() {
+      await this.clickByTestSubj('monitorManagementEditMonitor');
+    },
+
     async findMonitorConfiguration(monitorConfig: Record<string, string>) {
       const values = Object.values(monitorConfig);
 

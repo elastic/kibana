@@ -13,12 +13,15 @@ import { SyntheticsProviders } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
+import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
   const { error, loading } = useLocations();
+
+  useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
   return (
     <Loader
