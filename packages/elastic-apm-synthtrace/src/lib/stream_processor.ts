@@ -44,7 +44,6 @@ export class StreamProcessor {
         yield StreamProcessor.enrich(event);
         sourceEventsYielded++;
         if (this.options.maxSourceEvents &&  sourceEventsYielded >= this.options.maxSourceEvents) {
-          console.log(`Yielded ${sourceEventsYielded} which exceeds ${this.options.maxSourceEvents}`)
           // yielded the maximum source events, we still want the local buffer to generate derivative documents
           break;
         }
@@ -61,7 +60,7 @@ export class StreamProcessor {
       }
       if (this.options.maxSourceEvents &&  sourceEventsYielded >= this.options.maxSourceEvents) {
         // yielded the maximum source events, we still want the local buffer to generate derivative documents
-        console.log(`Yielded ${sourceEventsYielded} which exceeds ${this.options.maxSourceEvents}`)
+        console.log(`Short circuiting data generation: ${sourceEventsYielded} yielded out of maximum: ${this.options.maxSourceEvents}`)
         break;
       }
     }
