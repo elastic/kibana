@@ -138,8 +138,7 @@ export const createHandler =
     for (let idx = 0; idx < hosts.length; ++idx) {
       const host = hosts[idx];
       try {
-        const encodedPath = encodeURI(path);
-        const uri = toURL(host, encodedPath);
+        const uri = toURL(host, path);
 
         // Because this can technically be provided by a settings-defined proxy config, we need to
         // preserve these property names to maintain BWC.
