@@ -111,7 +111,7 @@ export class CustomEvents {
   }
 
   private getCurrentMemoryState() {
-    // Get performance information from the browser (non standard property
+    // Get performance information from the browser (non standard property)
     // @ts-expect-error 2339
     const memory = window.performance.memory;
     let memInfo = {};
