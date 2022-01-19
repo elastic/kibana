@@ -46,14 +46,16 @@ type ConditionEntryFieldAllowedType =
   | TypeOf<typeof ProcessExecutablePath>
   | TypeOf<typeof ProcessCodeSigner>;
 
-export interface TrustedAppConditionEntry<
+type TrustedAppConditionEntry<
   T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
-> {
-  field: T;
-  type: TrustedAppEntryTypes;
-  operator: 'included';
-  value: string;
-}
+> =
+  | {
+      field: T;
+      type: TrustedAppEntryTypes;
+      operator: 'included';
+      value: string;
+    }
+  | TypeOf<typeof WindowsSignerEntrySchema>;
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
@@ -84,10 +86,37 @@ const CommonEntrySchema = {
   ),
 };
 
-const WindowsEntrySchema = schema.object({
-  ...CommonEntrySchema,
-  field: schema.oneOf([ProcessHashField, ProcessExecutablePath, ProcessCodeSigner]),
+// Windows Signer entries use a Nested field that checks to ensure
+// that the certificate is trusted
+const WindowsSignerEntrySchema = schema.object({
+  type: schema.literal('nested'),
+  field: ProcessCodeSigner,
+  entries: schema.arrayOf(
+    schema.oneOf([
+      schema.object({
+        field: schema.literal('trusted'),
+        value: schema.literal('true'),
+        type: schema.literal('match'),
+        operator: schema.literal('included'),
+      }),
+      schema.object({
+        field: schema.literal('subject_name'),
+        value: schema.string({ minLength: 1 }),
+        type: schema.literal('match'),
+        operator: schema.literal('included'),
+      }),
+    ]),
+    { minSize: 2, maxSize: 2 }
+  ),
 });
+
+const WindowsEntrySchema = schema.oneOf([
+  WindowsSignerEntrySchema,
+  schema.object({
+    ...CommonEntrySchema,
+    field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
+  }),
+]);
 
 const LinuxEntrySchema = schema.object({
   ...CommonEntrySchema,
@@ -104,28 +133,6 @@ const entriesSchemaOptions = {
     return dups.map((field) => `Duplicated entry: ${field}`).join(', ') || undefined;
   },
 };
-
-// FIXME:PT validation for signer needs to be improved to validate `nexted` field
-//  [
-//     {
-//         "field": "process.Ext.code_signature",
-//         "entries": [
-//             {
-//                 "field": "trusted",
-//                 "value": "true",
-//                 "type": "match",
-//                 "operator": "included"
-//             },
-//             {
-//                 "field": "subject_name",
-//                 "value": "dfdfd",
-//                 "type": "match",
-//                 "operator": "included"
-//             }
-//         ],
-//         "type": "nested"
-//     }
-//   ]
 
 /*
  * Entities array schema depending on Os type using schema.conditional.
