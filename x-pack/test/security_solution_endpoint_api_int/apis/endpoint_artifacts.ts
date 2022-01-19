@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
               .send(body)
               .expect(400)
               .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/\[entries\.0\.field\]\: types that failed validation/));
+              .expect(anErrorMessageWith(/types that failed validation:/));
           });
 
           it(`should error on [${trustedAppApiCall.method}] if a condition entry field is used more than once`, async () => {
