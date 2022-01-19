@@ -11,9 +11,10 @@ import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
+  getExecutionTimeoutsPerDayCount,
 } from './alerting_telemetry';
 
-describe('alerts telemetry', () => {
+describe('alerting telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockReturnValue(
@@ -196,6 +197,42 @@ Object {
       },
       countTotal: 4,
       countTotalFailures: 4,
+    });
+  });
+
+  test('getExecutionTimeoutsPerDayCount should return execution aggregations for total timeout count and count by rule type', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          byRuleTypeId: {
+            value: {
+              ruleTypes: {
+                '.index-threshold': 2,
+                'logs.alert.document.count': 1,
+                'document.test.': 1,
+              },
+            },
+          },
+        },
+        hits: {
+          hits: [],
+        },
+      })
+    );
+
+    const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toStrictEqual({
+      countTotal: 4,
+      countByType: {
+        '__index-threshold': 2,
+        'document.test__': 1,
+        'logs.alert.document.count': 1,
+      },
     });
   });
 });
