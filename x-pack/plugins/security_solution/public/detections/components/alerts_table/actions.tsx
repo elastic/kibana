@@ -310,8 +310,22 @@ export const buildTimelineDataProviderOrFilter = (
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
   if (!isEmpty(alertsIds)) {
     return {
-      dataProviders: [],
-      filters: buildAlertsKqlFilter('_id', alertsIds),
+      filters: [],
+      dataProviders: alertsIds.map((id) => {
+        return {
+          and: [],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${id}`,
+          name: id,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: '_id',
+            value: id,
+            operator: ':' as const,
+          },
+        };
+      }),
     };
   }
   return {
@@ -531,6 +545,7 @@ export const sendAlertToTimelineAction = async ({
       timeline: {
         ...timelineDefaults,
         dataProviders,
+        description: `_id: ${ecsData._id}`,
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
