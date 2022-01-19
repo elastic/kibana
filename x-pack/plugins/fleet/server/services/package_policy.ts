@@ -157,8 +157,10 @@ class PackagePolicyService {
           );
         }
       }
+      validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
         pkgInfo,
@@ -391,6 +393,8 @@ class PackagePolicyService {
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
+
+      validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
@@ -865,6 +869,31 @@ class PackagePolicyService {
   }
 }
 
+function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, safeLoad);
+  if (validationHasErrors(validationResults)) {
+    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
+      .map(([key, value]) => ({
+        key,
+        message: value,
+      }))
+      .filter(({ message }) => !!message);
+
+    if (responseFormattedValidationErrors.length) {
+      throw new PackagePolicyValidationError(
+        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+          defaultMessage: 'Package policy is invalid: {errors}',
+          values: {
+            errors: responseFormattedValidationErrors
+              .map(({ key, message }) => `${key}: ${message}`)
+              .join('\n'),
+          },
+        })
+      );
+    }
+  }
+}
+
 function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyInput) {
   return {
     ...input,
@@ -1314,29 +1343,7 @@ export function preconfigurePackageInputs(
     inputs,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
-
-  if (validationHasErrors(validationResults)) {
-    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
-      .map(([key, value]) => ({
-        key,
-        message: value,
-      }))
-      .filter(({ message }) => !!message);
-
-    if (responseFormattedValidationErrors.length) {
-      throw new PackagePolicyValidationError(
-        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
-          defaultMessage: 'Package policy is invalid: {errors}',
-          values: {
-            errors: responseFormattedValidationErrors
-              .map(({ key, message }) => `${key}: ${message}`)
-              .join('\n'),
-          },
-        })
-      );
-    }
-  }
+  validatePackagePolicyOrThrow(resultingPackagePolicy, packageInfo);
 
   return resultingPackagePolicy;
 }
