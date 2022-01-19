@@ -258,10 +258,19 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
   );
 };
 
+const getStringOrSingleArrayValue = (value: string | string[]) => {
+  if (Array.isArray(value)) return value[0];
+  else return value;
+};
+
 export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   const groupId = getField(ecsData, ALERT_GROUP_ID);
-  return ruleType?.length && ruleType[0] === 'eql' && groupId?.length;
+
+  const isEqlRuleType = ruleType === 'eql' || getStringOrSingleArrayValue(ruleType) === 'eql';
+  const hasGroupId = groupId.length > 0;
+
+  return isEqlRuleType && hasGroupId;
 };
 
 export const isThresholdRule = (ecsData: Ecs) => {
@@ -337,16 +346,23 @@ export const buildEqlDataProviderOrFilter = (
   alertsIds: string[],
   ecs: Ecs[] | Ecs
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
-  if (!isEmpty(alertsIds) && Array.isArray(ecs)) {
+  let ecsToUse;
+
+  // In the event there is only one Ecs value in the array, still use the data provider
+  const isArrayOfEcsValues = Array.isArray(ecs);
+  if (isArrayOfEcsValues && ecs.length === 1) ecsToUse = ecs[0];
+  else ecsToUse = ecs;
+
+  if (!isEmpty(alertsIds) && Array.isArray(ecsToUse)) {
     return {
       dataProviders: [],
       filters: buildAlertsKqlFilter(
         'signal.group.id',
-        ecs.reduce<string[]>((acc, ecsData) => {
+        ecsToUse.reduce<string[]>((acc, ecsData) => {
           const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
-          const alertGroupId = alertGroupIdField?.length
-            ? alertGroupIdField[0]
-            : 'unknown-group-id';
+          const alertGroupIdValue = getStringOrSingleArrayValue(alertGroupIdField);
+
+          const alertGroupId = alertGroupIdValue?.length ? alertGroupIdValue : 'unknown-group-id';
           if (!acc.includes(alertGroupId)) {
             return [...acc, alertGroupId];
           }
@@ -354,16 +370,18 @@ export const buildEqlDataProviderOrFilter = (
         }, [])
       ),
     };
-  } else if (!Array.isArray(ecs)) {
-    const alertGroupIdField: string[] = getField(ecs, ALERT_GROUP_ID);
-    const queryMatchField = getFieldKey(ecs, ALERT_GROUP_ID);
-    const alertGroupId = alertGroupIdField?.length ? alertGroupIdField[0] : 'unknown-group-id';
+  } else if (!Array.isArray(ecsToUse)) {
+    const alertGroupIdField: string[] = getField(ecsToUse, ALERT_GROUP_ID);
+    const queryMatchField = getFieldKey(ecsToUse, ALERT_GROUP_ID);
+
+    const alertGroupIdValue = getStringOrSingleArrayValue(alertGroupIdField);
+    const alertGroupId = alertGroupIdValue?.length ? alertGroupIdValue : 'unknown-group-id';
     return {
       dataProviders: [
         {
           and: [],
           id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${alertGroupId}`,
-          name: ecs._id,
+          name: ecsToUse._id,
           enabled: true,
           excluded: false,
           kqlQuery: '',
@@ -395,12 +413,10 @@ export const sendAlertToTimelineAction = async ({
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
-  const timelineId =
-    Array.isArray(ruleTimelineId) && ruleTimelineId.length > 0 ? ruleTimelineId[0] : '';
+  const timelineId = getStringOrSingleArrayValue(ruleTimelineId) ?? '';
   const { to, from } = determineToAndFrom({ ecs });
 
-  // For now we do not want to populate the template timeline if we have alertIds
-  if (!isEmpty(timelineId) && isEmpty(alertIds)) {
+  if (!isEmpty(timelineId)) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
@@ -522,7 +538,6 @@ export const sendAlertToTimelineAction = async ({
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;
     }
-
     return createTimeline({
       from,
       notes: null,
