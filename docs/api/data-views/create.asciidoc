@@ -102,7 +102,7 @@ The API returns the data view object:
 --------------------------------------------------
 
 [float]
-=== Create data view API (deprecated)
+=== Create data view API (deprecated z)
 
 [[data-views-api-create-request-deprecated]]
 ==== Request
