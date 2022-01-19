@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import { FILE_UPLOAD } from '../common';
+import { MAX_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
@@ -95,7 +95,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: FILE_UPLOAD.MAX_FILE_SIZE_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
         tags: ['access:fileUpload:analyzeFile'],
       },
@@ -134,7 +134,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: FILE_UPLOAD.MAX_FILE_SIZE_BYTES,
+          maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
     },

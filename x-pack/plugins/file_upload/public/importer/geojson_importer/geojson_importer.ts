@@ -14,10 +14,10 @@ import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { FILE_UPLOAD } from '../../../common';
+import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common';
 
-const BLOCK_SIZE_MB = 5 * FILE_UPLOAD.MB;
+const BLOCK_SIZE_MB = 5 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 export interface GeoJsonPreview {

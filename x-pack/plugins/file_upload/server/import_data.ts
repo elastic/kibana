@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { FILE_UPLOAD } from '../common';
+import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import {
   ImportResponse,
   ImportFailure,
@@ -93,7 +93,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     const body: { mappings: Mappings; settings?: Settings } = {
       mappings: {
         _meta: {
-          created_by: FILE_UPLOAD.INDEX_META_DATA_CREATED_BY,
+          created_by: INDEX_META_DATA_CREATED_BY,
         },
         properties: mappings.properties,
       },

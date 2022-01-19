@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FILE_UPLOAD } from '../../../common';
+import { MB } from '../../../common/constants';
 import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
 import { validateFile } from '../../importer';
 import {
@@ -73,7 +73,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
     try {
       validateFile(file, GEOJSON_FILE_TYPES);
       importer = new GeoJsonImporter(file);
-      preview = await importer.previewFile(10000, FILE_UPLOAD.MB * 3);
+      preview = await importer.previewFile(10000, MB * 3);
       if (preview.features.length === 0) {
         previewError = i18n.translate('xpack.fileUpload.geojsonFilePicker.noFeaturesDetected', {
           defaultMessage: 'No GeoJson features found in selected file.',

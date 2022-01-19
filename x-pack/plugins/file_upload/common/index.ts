@@ -8,11 +8,6 @@
 /**
  * @internal
  */
-export { FILE_UPLOAD } from './constants';
-
-/**
- * @internal
- */
 export type {
   AnalysisResult,
   FindFileStructureErrorResponse,

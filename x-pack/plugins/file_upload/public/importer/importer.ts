@@ -9,7 +9,7 @@ import { chunk, intersection } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getHttp } from '../kibana_services';
-import { FILE_UPLOAD } from '../../common';
+import { MB } from '../../common/constants';
 import type {
   ImportDoc,
   ImportFailure,
@@ -33,7 +33,7 @@ export abstract class Importer implements IImporter {
 
   public read(data: ArrayBuffer) {
     const decoder = new TextDecoder();
-    const size = STRING_CHUNKS_MB * FILE_UPLOAD.MB;
+    const size = STRING_CHUNKS_MB * MB;
 
     // chop the data up into 100MB chunks for processing.
     // if the chop produces a partial line at the end, a character "remainder" count

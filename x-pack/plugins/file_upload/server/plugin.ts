@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import { schema } from '@kbn/config-schema';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
-import { FILE_UPLOAD } from '../common';
+import { MAX_FILE_SIZE, UI_SETTING_MAX_FILE_SIZE } from '../common/constants';
 import { setupCapabilities } from './capabilities';
 import { StartDeps, SetupDeps } from './types';
 
@@ -27,11 +27,11 @@ export class FileUploadPlugin implements Plugin {
     setupCapabilities(coreSetup);
 
     coreSetup.uiSettings.register({
-      [FILE_UPLOAD.UI_SETTING_MAX_FILE_SIZE]: {
+      [UI_SETTING_MAX_FILE_SIZE]: {
         name: i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.name', {
           defaultMessage: 'Maximum file upload size',
         }),
-        value: FILE_UPLOAD.MAX_FILE_SIZE,
+        value: MAX_FILE_SIZE,
         description: i18n.translate('xpack.fileUpload.maxFileSizeUiSetting.description', {
           defaultMessage:
             'Sets the file size limit when importing files. The highest supported value for this setting is 1GB.',
