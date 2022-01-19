@@ -137,6 +137,7 @@
     "@kbn/crypto": "link:bazel-bin/packages/kbn-crypto",
     "@kbn/es-query": "link:bazel-bin/packages/kbn-es-query",
     "@kbn/field-types": "link:bazel-bin/packages/kbn-field-types",
+    "@kbn/flot-charts": "link:bazel-bin/packages/kbn-flot-charts",
     "@kbn/i18n": "link:bazel-bin/packages/kbn-i18n",
     "@kbn/i18n-react": "link:bazel-bin/packages/kbn-i18n-react",
     "@kbn/interpreter": "link:bazel-bin/packages/kbn-interpreter",

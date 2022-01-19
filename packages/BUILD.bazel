@@ -26,6 +26,7 @@ filegroup(
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",
       "//packages/kbn-field-types:build",
+      "//packages/kbn-flot-charts:build",
       "//packages/kbn-i18n:build",
       "//packages/kbn-i18n-react:build",
       "//packages/kbn-interpreter:build",

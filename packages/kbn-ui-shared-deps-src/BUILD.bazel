@@ -24,7 +24,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "flot_charts/package.json",
   "package.json",
   "README.md"
 ]
@@ -34,6 +33,7 @@ RUNTIME_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
   "//packages/kbn-babel-preset",
+  "//packages/kbn-flot-charts",
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
   "//packages/kbn-monaco",

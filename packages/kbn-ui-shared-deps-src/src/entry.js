@@ -11,7 +11,7 @@ require('./polyfills');
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
 // mutates window.jQuery and window.$
-require('./flot_charts');
+require('@kbn/flot-charts');
 
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
