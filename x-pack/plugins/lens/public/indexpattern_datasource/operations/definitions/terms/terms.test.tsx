@@ -89,6 +89,28 @@ describe('terms', () => {
     };
   });
 
+  function createMultiTermsColumn(terms: string | string[]): TermsIndexPatternColumn {
+    const termsArray = Array.isArray(terms) ? terms : [terms];
+
+    const [sourceField, ...secondaryFields] = termsArray;
+
+    return {
+      operationType: 'terms',
+      sourceField,
+      label: 'Top values of source',
+      isBucketed: true,
+      dataType: 'string',
+      params: {
+        size: 5,
+        orderBy: {
+          type: 'alphabetical',
+        },
+        orderDirection: 'asc',
+        secondaryFields,
+      },
+    };
+  }
+
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
@@ -235,6 +257,32 @@ describe('terms', () => {
 
       const column = termsOperation.onFieldChange(oldColumn, newStringField);
       expect(column.params.secondaryFields).toBeUndefined();
+    });
+
+    it('should merge secondaryFields when coming from partial column argument', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        label: 'Top values of bytes',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+          format: { id: 'number', params: { decimals: 0 } },
+          secondaryFields: ['dest'],
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const sanemStringField = indexPattern.fields.find((i) => i.name === 'bytes')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, sanemStringField, {
+        secondaryFields: ['dest', 'geo.src'],
+      });
+      expect(column.params.secondaryFields).toEqual(expect.arrayContaining(['dest', 'geo.src']));
     });
   });
 
@@ -1852,6 +1900,225 @@ describe('terms', () => {
           })
         );
       });
+    });
+  });
+
+  describe('canAddNewField', () => {
+    it("should reject if there's only sourceField but is not new", () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          sourceColumn: createMultiTermsColumn('source'),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it("should reject if there's no additional field to add", () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'bytes', 'dest']),
+          sourceColumn: createMultiTermsColumn(['source', 'dest']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should reject if the passed field is already present', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('source')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should be positive if only the sourceField can be added', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'dest']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(true);
+    });
+
+    it('should be positive if some field can be added', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(true);
+    });
+
+    it('should be positive if the entire column can be added', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(true);
+    });
+
+    it('should reject if all fields can be added but will overpass the terms limit', () => {
+      // limit is 5 terms
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'geo.src', 'dest', 'memory']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should be positive if the passed field is new', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('bytes')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual(true);
+    });
+
+    it('should reject if the passed field is new but it will overpass the terms limit', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('bytes')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['bytes', 'geo.src', 'dest', 'memory', 'source']),
+          field,
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should reject if the passed field is a scripted field', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('scripted')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['bytes', 'source', 'dest', 'memory']),
+          field,
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should reject if the entire column has scripted field', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['scripted', 'scripted']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should be positive if the entire column can be added (because ignoring scripted fields)', () => {
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'memory', 'dest', 'scripted']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual(true);
+    });
+  });
+
+  describe('getParamsForMultipleFields', () => {
+    it('should return existing multiterms with multiple fields from source column', () => {
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']) });
+    });
+
+    it('should return existing multiterms with only new fields from source column', () => {
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['bytes', 'dest']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes']) });
+    });
+
+    it('should return existing multiterms with only multiple new fields from source column', () => {
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['dest', 'bytes', 'memory']),
+          indexPattern: defaultProps.indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes', 'memory']) });
+    });
+
+    it('should append field to multiterms', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('bytes')!;
+
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['bytes']) });
+    });
+
+    it('should not append scripted field to multiterms', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('scripted')!;
+
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: [] });
+    });
+
+    it('should add both sourceColumn and field (as last term) to the targetColumn', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('bytes')!;
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['memory']),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'memory', 'bytes']) });
+    });
+
+    it('should not add sourceColumn field if it has only scripted field', () => {
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.getFieldByName('bytes')!;
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn(['source', 'dest']),
+          sourceColumn: createMultiTermsColumn(['scripted']),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: expect.arrayContaining(['dest', 'bytes']) });
     });
   });
 });
