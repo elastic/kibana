@@ -25,7 +25,7 @@ import type { UIExtensionsStorage } from '../types';
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
 import { createStartServices } from './fleet_start_services';
-import type { MockedFleetStart, MockedFleetStartServices, MockedCapabilities } from './types';
+import type { MockedFleetStart, MockedFleetStartServices } from './types';
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 /**
@@ -52,12 +52,10 @@ export interface TestRenderer {
   setHeaderActionMenu: Function;
 }
 
-export const createFleetTestRendererMock = (
-  customCapabilities?: MockedCapabilities
-): TestRenderer => {
+export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
-  const startServices = createStartServices(basePath, customCapabilities);
+  const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
 
   const HookWrapper = memo(({ children }) => {
@@ -113,12 +111,10 @@ export const createFleetTestRendererMock = (
   return testRendererMocks;
 };
 
-export const createIntegrationsTestRendererMock = (
-  customCapabilities?: MockedCapabilities
-): TestRenderer => {
+export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
-  const startServices = createStartServices(basePath, customCapabilities);
+  const startServices = createStartServices(basePath);
   const HookWrapper = memo(({ children }) => {
     return (
       <startServices.i18n.Context>

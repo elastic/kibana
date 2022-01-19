@@ -17,7 +17,7 @@ import { setHttpClient } from '../hooks/use_request';
 import type { FleetAuthz } from '../../common';
 
 import { createStartDepsMock } from './plugin_dependencies';
-import type { MockedFleetStartServices, MockedCapabilities } from './types';
+import type { MockedFleetStartServices } from './types';
 
 // Taken from core. See: src/plugins/kibana_utils/public/storage/storage.test.ts
 const createMockStore = (): MockedKeys<IStorage> => {
@@ -51,33 +51,23 @@ const fleetAuthzMock: FleetAuthz = {
   },
 };
 
-const configureStartServices = (
-  services: MockedFleetStartServices,
-  customCapabilities?: any
-): void => {
+const configureStartServices = (services: MockedFleetStartServices): void => {
   // Store the http for use by useRequest
   setHttpClient(services.http);
-
-  // Default if no custom capabilities are passed
-  // Gives access to everything
-  const defaultCapabilities = {
-    // Fleet - returned by useFleetCapabilities hook
-    fleetv2: {
-      read: true,
-      all: true,
-    },
-    // Integration - returned by useIntegrationsCapabilities hook
-    fleet: {
-      read: true,
-      all: true,
-    },
-  };
 
   // Set Fleet and Integrations capabilities
   services.application.capabilities = {
     ...services.application.capabilities,
-    fleetv2: customCapabilities ? customCapabilities.fleetv2 : defaultCapabilities.fleetv2,
-    fleet: customCapabilities ? customCapabilities.fleet : defaultCapabilities.fleet,
+    // Fleet
+    fleetv2: {
+      read: true,
+      all: true,
+    },
+    // Integration
+    fleet: {
+      read: true,
+      all: true,
+    },
   };
 
   // Setup the `i18n.Context` component
@@ -86,10 +76,7 @@ const configureStartServices = (
   ));
 };
 
-export const createStartServices = (
-  basePath: string = '/mock',
-  customCapabilities?: MockedCapabilities
-): MockedFleetStartServices => {
+export const createStartServices = (basePath: string = '/mock'): MockedFleetStartServices => {
   const startServices: MockedFleetStartServices = {
     ...coreMock.createStart({ basePath }),
     ...createStartDepsMock(),
@@ -97,7 +84,7 @@ export const createStartServices = (
     authz: fleetAuthzMock,
   };
 
-  configureStartServices(startServices, customCapabilities);
+  configureStartServices(startServices);
 
   return startServices;
 };

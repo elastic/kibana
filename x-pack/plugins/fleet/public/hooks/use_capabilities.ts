@@ -7,12 +7,6 @@
 
 import { useStartServices } from './use_core';
 
-// Expose capabilities object
-export function useCapabilities() {
-  const core = useStartServices();
-  return core.application.capabilities;
-}
-
 // Expose authz object, containing the privileges for Fleet and Integrations
 export function useAuthz() {
   const core = useStartServices();

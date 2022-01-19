@@ -29,11 +29,7 @@ import {
   fleetSetupRouteService,
   packagePolicyRouteService,
 } from '../../../../../../../common/services';
-import type {
-  MockedFleetStartServices,
-  TestRenderer,
-  MockedCapabilities,
-} from '../../../../../../mock';
+import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { Detail } from './index';
@@ -51,416 +47,201 @@ describe('when on integration detail', () => {
       </Route>
     ));
 
-  describe('with all capabilities enabled', () => {
-    beforeEach(async () => {
-      testRenderer = createIntegrationsTestRendererMock();
-      mockedApi = mockApiCalls(testRenderer.startServices.http);
-      act(() => testRenderer.mountHistory.push(detailPageUrlPath));
+  beforeEach(async () => {
+    testRenderer = createIntegrationsTestRendererMock();
+    mockedApi = mockApiCalls(testRenderer.startServices.http);
+    act(() => testRenderer.mountHistory.push(detailPageUrlPath));
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  describe('and the package is installed', () => {
+    beforeEach(() => render());
+
+    it('should display agent policy usage count', async () => {
+      await act(() => mockedApi.waitForApi());
+
+      expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
-    afterEach(() => {
-      cleanup();
-    });
-
-    describe('and the package is installed', () => {
-      beforeEach(() => render());
-
-      it('should display agent policy usage count', async () => {
-        await act(() => mockedApi.waitForApi());
-
-        expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
-      });
-
-      it('should show the Policies tab', async () => {
-        await mockedApi.waitForApi();
-        expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
-      });
-    });
-
-    describe('and the package is not installed', () => {
-      beforeEach(() => {
-        const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
-        unInstalledPackage.item.status = 'not_installed';
-        mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
-        render();
-      });
-
-      it('should NOT display agent policy usage count', async () => {
-        await mockedApi.waitForApi();
-        expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
-      });
-
-      it('should NOT display the Policies tab', async () => {
-        await mockedApi.waitForApi();
-        expect(renderResult.queryByTestId('tab-policies')).toBeNull();
-      });
-    });
-
-    describe('and a custom UI extension is NOT registered', () => {
-      beforeEach(() => render());
-
-      it('should show overview and settings tabs', () => {
-        const tabs: DetailViewPanelName[] = ['overview', 'settings'];
-        for (const tab of tabs) {
-          expect(renderResult.getByTestId(`tab-${tab}`));
-        }
-      });
-
-      it('should not show a custom tab', () => {
-        expect(renderResult.queryByTestId('tab-custom')).toBeNull();
-      });
-
-      it('should redirect if custom url is accessed', () => {
-        act(() => {
-          testRenderer.mountHistory.push(
-            pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
-          );
-        });
-        expect(testRenderer.mountHistory.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
-      });
-    });
-
-    describe('and a custom tab UI extension is registered', () => {
-      // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
-      // that is `resolved` once the lazy components actually renders.
-      let lazyComponentWasRendered: Promise<void>;
-
-      beforeEach(() => {
-        let setWasRendered: () => void;
-        lazyComponentWasRendered = new Promise((resolve) => {
-          setWasRendered = resolve;
-        });
-
-        const CustomComponent = lazy(async () => {
-          return {
-            default: memo(() => {
-              setWasRendered();
-              return <div data-test-subj="custom-hello">hello</div>;
-            }),
-          };
-        });
-
-        testRenderer.startInterface.registerExtension({
-          package: 'nginx',
-          view: 'package-detail-custom',
-          Component: CustomComponent,
-        });
-
-        render();
-      });
-
-      afterEach(() => {
-        // @ts-ignore
-        lazyComponentWasRendered = undefined;
-      });
-
-      it('should display "custom" tab in navigation', () => {
-        expect(renderResult.getByTestId('tab-custom'));
-      });
-
-      it('should display custom content when tab is clicked', async () => {
-        act(() => {
-          testRenderer.mountHistory.push(
-            pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
-          );
-        });
-        await lazyComponentWasRendered;
-        expect(renderResult.getByTestId('custom-hello'));
-      });
-    });
-
-    describe('and a custom assets UI extension is registered', () => {
-      let lazyComponentWasRendered: Promise<void>;
-
-      beforeEach(() => {
-        let setWasRendered: () => void;
-        lazyComponentWasRendered = new Promise((resolve) => {
-          setWasRendered = resolve;
-        });
-
-        const CustomComponent = lazy(async () => {
-          return {
-            default: memo(() => {
-              setWasRendered();
-              return <div data-test-subj="custom-hello">hello</div>;
-            }),
-          };
-        });
-
-        testRenderer.startInterface.registerExtension({
-          package: 'nginx',
-          view: 'package-detail-assets',
-          Component: CustomComponent,
-        });
-
-        render();
-      });
-
-      afterEach(() => {
-        // @ts-ignore
-        lazyComponentWasRendered = undefined;
-      });
-
-      it('should display "assets" tab in navigation', () => {
-        expect(renderResult.getByTestId('tab-assets'));
-      });
-
-      it('should display custom assets when tab is clicked', async () => {
-        act(() => {
-          testRenderer.mountHistory.push(
-            pagePathGetters.integration_details_assets({ pkgkey: 'nginx-0.3.7' })[1]
-          );
-        });
-        await lazyComponentWasRendered;
-        expect(renderResult.getByTestId('custom-hello'));
-      });
-    });
-
-    describe('and the Add integration button is clicked', () => {
-      beforeEach(() => render());
-
-      it('should link to the create page', () => {
-        const addButton = renderResult.getByTestId(
-          'addIntegrationPolicyButton'
-        ) as HTMLAnchorElement;
-        expect(addButton.href).toEqual(
-          'http://localhost/mock/app/fleet/integrations/nginx-0.3.7/add-integration'
-        );
-      });
-    });
-
-    describe('and on the Policies Tab', () => {
-      const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
-      beforeEach(() => {
-        testRenderer.mountHistory.push(policiesTabURLPath);
-        render();
-      });
-
-      it('should display policies list', () => {
-        const table = renderResult.getByTestId('integrationPolicyTable');
-        expect(table).not.toBeNull();
-      });
-
-      it('should link to integration policy detail when an integration policy is clicked', async () => {
-        await mockedApi.waitForApi();
-        const firstPolicy = renderResult.getAllByTestId(
-          'integrationNameLink'
-        )[0] as HTMLAnchorElement;
-        expect(firstPolicy.href).toEqual(
-          'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
-        );
-      });
+    it('should show the Policies tab', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
 
-  describe('when fleet has only read capabilities', () => {
-    const mockedCapabilities: MockedCapabilities = {
-      // Fleet
-      fleetv2: {
-        read: true,
-        write: false,
-      },
-      // Integration
-      fleet: {
-        read: true,
-        write: true,
-      },
-      navLinks: { test: false },
-      management: {},
-      catalogue: { test: false },
-    };
-    beforeEach(async () => {
-      testRenderer = createIntegrationsTestRendererMock(mockedCapabilities);
-      mockedApi = mockApiCalls(testRenderer.startServices.http);
-      act(() => testRenderer.mountHistory.push(detailPageUrlPath));
+  describe('and the package is not installed', () => {
+    beforeEach(() => {
+      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
+      unInstalledPackage.item.status = 'not_installed';
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
+      render();
+    });
+
+    it('should NOT display agent policy usage count', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    });
+
+    it('should NOT display the Policies tab', async () => {
+      await mockedApi.waitForApi();
+      expect(renderResult.queryByTestId('tab-policies')).toBeNull();
+    });
+  });
+
+  describe('and a custom UI extension is NOT registered', () => {
+    beforeEach(() => render());
+
+    it('should show overview and settings tabs', () => {
+      const tabs: DetailViewPanelName[] = ['overview', 'settings'];
+      for (const tab of tabs) {
+        expect(renderResult.getByTestId(`tab-${tab}`));
+      }
+    });
+
+    it('should not show a custom tab', () => {
+      expect(renderResult.queryByTestId('tab-custom')).toBeNull();
+    });
+
+    it('should redirect if custom url is accessed', () => {
+      act(() => {
+        testRenderer.mountHistory.push(
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
+        );
+      });
+      expect(testRenderer.mountHistory.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
+    });
+  });
+
+  describe('and a custom tab UI extension is registered', () => {
+    // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
+    // that is `resolved` once the lazy components actually renders.
+    let lazyComponentWasRendered: Promise<void>;
+
+    beforeEach(() => {
+      let setWasRendered: () => void;
+      lazyComponentWasRendered = new Promise((resolve) => {
+        setWasRendered = resolve;
+      });
+
+      const CustomComponent = lazy(async () => {
+        return {
+          default: memo(() => {
+            setWasRendered();
+            return <div data-test-subj="custom-hello">hello</div>;
+          }),
+        };
+      });
+
+      testRenderer.startInterface.registerExtension({
+        package: 'nginx',
+        view: 'package-detail-custom',
+        Component: CustomComponent,
+      });
+
+      render();
     });
 
     afterEach(() => {
-      cleanup();
+      // @ts-ignore
+      lazyComponentWasRendered = undefined;
     });
 
-    describe('and the package is installed', () => {
-      beforeEach(() => render());
-
-      it('should display agent policy usage count', async () => {
-        await act(() => mockedApi.waitForApi());
-
-        expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
-      });
-
-      it('should not show the Policies tab', async () => {
-        await mockedApi.waitForApi();
-        expect(renderResult.queryByTestId('tab-policies')).toBeNull();
-      });
+    it('should display "custom" tab in navigation', () => {
+      expect(renderResult.getByTestId('tab-custom'));
     });
 
-    describe('and the package is not installed', () => {
-      beforeEach(() => {
-        const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
-        unInstalledPackage.item.status = 'not_installed';
-        mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
-        render();
-      });
-
-      it('should NOT display agent policy usage count', async () => {
-        await mockedApi.waitForApi();
-        expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
-      });
-
-      it('should NOT display the Policies tab', async () => {
-        await mockedApi.waitForApi();
-        expect(renderResult.queryByTestId('tab-policies')).toBeNull();
-      });
-    });
-
-    describe('and a custom UI extension is NOT registered', () => {
-      beforeEach(() => render());
-
-      it('should not show custom and settings tabs', () => {
-        const tabs: DetailViewPanelName[] = ['custom', 'settings'];
-        for (const tab of tabs) {
-          expect(renderResult.queryByTestId(`tab-${tab}`)).toBeNull();
-        }
-      });
-
-      it('should redirect if custom url is accessed', () => {
-        act(() => {
-          testRenderer.mountHistory.push(
-            pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
-          );
-        });
-        expect(testRenderer.mountHistory.location.pathname).toEqual('/detail/nginx-0.3.7/overview');
-      });
-    });
-
-    describe('and a custom tab UI extension is registered', () => {
-      // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
-      // that is `resolved` once the lazy components actually renders.
-      let lazyComponentWasRendered: Promise<void>;
-
-      beforeEach(() => {
-        let setWasRendered: () => void;
-        lazyComponentWasRendered = new Promise((resolve) => {
-          setWasRendered = resolve;
-        });
-
-        const CustomComponent = lazy(async () => {
-          return {
-            default: memo(() => {
-              setWasRendered();
-              return <div data-test-subj="custom-hello">hello</div>;
-            }),
-          };
-        });
-
-        testRenderer.startInterface.registerExtension({
-          package: 'nginx',
-          view: 'package-detail-custom',
-          Component: CustomComponent,
-        });
-
-        render();
-      });
-
-      afterEach(() => {
-        // @ts-ignore
-        lazyComponentWasRendered = undefined;
-      });
-
-      it('should display "custom" tab in navigation', () => {
-        expect(renderResult.getByTestId('tab-custom'));
-      });
-
-      it('should display custom content when tab is clicked', async () => {
-        act(() => {
-          testRenderer.mountHistory.push(
-            pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
-          );
-        });
-        await lazyComponentWasRendered;
-        expect(renderResult.getByTestId('custom-hello'));
-      });
-    });
-
-    describe('and a custom assets UI extension is registered', () => {
-      let lazyComponentWasRendered: Promise<void>;
-
-      beforeEach(() => {
-        let setWasRendered: () => void;
-        lazyComponentWasRendered = new Promise((resolve) => {
-          setWasRendered = resolve;
-        });
-
-        const CustomComponent = lazy(async () => {
-          return {
-            default: memo(() => {
-              setWasRendered();
-              return <div data-test-subj="custom-hello">hello</div>;
-            }),
-          };
-        });
-
-        testRenderer.startInterface.registerExtension({
-          package: 'nginx',
-          view: 'package-detail-assets',
-          Component: CustomComponent,
-        });
-
-        render();
-      });
-
-      afterEach(() => {
-        // @ts-ignore
-        lazyComponentWasRendered = undefined;
-      });
-
-      it('should display "assets" tab in navigation', () => {
-        expect(renderResult.getByTestId('tab-assets'));
-      });
-
-      it('should display custom assets when tab is clicked', async () => {
-        act(() => {
-          testRenderer.mountHistory.push(
-            pagePathGetters.integration_details_assets({ pkgkey: 'nginx-0.3.7' })[1]
-          );
-        });
-        await lazyComponentWasRendered;
-        expect(renderResult.getByTestId('custom-hello'));
-      });
-    });
-
-    describe('and the Add integration button is clicked', () => {
-      beforeEach(() => render());
-
-      it('should not link to the create page', () => {
-        const addButton = renderResult.getByTestId(
-          'addIntegrationPolicyButton'
-        ) as HTMLAnchorElement;
-        expect(addButton.href).toBeUndefined();
-      });
-    });
-
-    describe('and on the Policies Tab', () => {
-      const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
-      beforeEach(() => {
-        testRenderer.mountHistory.push(policiesTabURLPath);
-        render();
-      });
-
-      it('should display policies list', () => {
-        const table = renderResult.getByTestId('integrationPolicyTable');
-        expect(table).not.toBeNull();
-      });
-
-      it('should link to integration policy detail when an integration policy is clicked', async () => {
-        await mockedApi.waitForApi();
-        const firstPolicy = renderResult.getAllByTestId(
-          'integrationNameLink'
-        )[0] as HTMLAnchorElement;
-        expect(firstPolicy.href).toEqual(
-          'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+    it('should display custom content when tab is clicked', async () => {
+      act(() => {
+        testRenderer.mountHistory.push(
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })[1]
         );
       });
+      await lazyComponentWasRendered;
+      expect(renderResult.getByTestId('custom-hello'));
+    });
+  });
+
+  describe('and a custom assets UI extension is registered', () => {
+    let lazyComponentWasRendered: Promise<void>;
+
+    beforeEach(() => {
+      let setWasRendered: () => void;
+      lazyComponentWasRendered = new Promise((resolve) => {
+        setWasRendered = resolve;
+      });
+
+      const CustomComponent = lazy(async () => {
+        return {
+          default: memo(() => {
+            setWasRendered();
+            return <div data-test-subj="custom-hello">hello</div>;
+          }),
+        };
+      });
+
+      testRenderer.startInterface.registerExtension({
+        package: 'nginx',
+        view: 'package-detail-assets',
+        Component: CustomComponent,
+      });
+
+      render();
+    });
+
+    afterEach(() => {
+      // @ts-ignore
+      lazyComponentWasRendered = undefined;
+    });
+
+    it('should display "assets" tab in navigation', () => {
+      expect(renderResult.getByTestId('tab-assets'));
+    });
+
+    it('should display custom assets when tab is clicked', async () => {
+      act(() => {
+        testRenderer.mountHistory.push(
+          pagePathGetters.integration_details_assets({ pkgkey: 'nginx-0.3.7' })[1]
+        );
+      });
+      await lazyComponentWasRendered;
+      expect(renderResult.getByTestId('custom-hello'));
+    });
+  });
+
+  describe('and the Add integration button is clicked', () => {
+    beforeEach(() => render());
+
+    it('should link to the create page', () => {
+      const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
+      expect(addButton.href).toEqual(
+        'http://localhost/mock/app/fleet/integrations/nginx-0.3.7/add-integration'
+      );
+    });
+  });
+
+  describe('and on the Policies Tab', () => {
+    const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
+    beforeEach(() => {
+      testRenderer.mountHistory.push(policiesTabURLPath);
+      render();
+    });
+
+    it('should display policies list', () => {
+      const table = renderResult.getByTestId('integrationPolicyTable');
+      expect(table).not.toBeNull();
+    });
+
+    it('should link to integration policy detail when an integration policy is clicked', async () => {
+      await mockedApi.waitForApi();
+      const firstPolicy = renderResult.getAllByTestId(
+        'integrationNameLink'
+      )[0] as HTMLAnchorElement;
+      expect(firstPolicy.href).toEqual(
+        'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+      );
     });
   });
 });
