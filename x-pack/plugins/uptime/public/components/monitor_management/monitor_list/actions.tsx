@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useFetcher, FETCH_STATUS } from '../../../../../observability/public';
-import { deleteMonitor } from '../../../state/api/monitor_management';
+import { deleteMonitor } from '../../../state/api';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
@@ -41,13 +41,13 @@ export const Actions = ({ id, setRefresh }: Props) => {
     }
     if (status === FETCH_STATUS.FAILURE) {
       notifications.toasts.danger({
-        title: <p data-test-subj="uptimeAddMonitorFailure">{MONITOR_DELETE_FAILURE_LABEL}</p>,
+        title: <p data-test-subj="uptimeDeleteMonitorFailure">{MONITOR_DELETE_FAILURE_LABEL}</p>,
         toastLifeTimeMs: 3000,
       });
     } else if (status === FETCH_STATUS.SUCCESS) {
       setRefresh(true);
       notifications.toasts.success({
-        title: <p data-test-subj="uptimeAddMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>,
+        title: <p data-test-subj="uptimeDeleteMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>,
         toastLifeTimeMs: 3000,
       });
     }
@@ -71,6 +71,7 @@ export const Actions = ({ id, setRefresh }: Props) => {
             iconType="trash"
             onClick={handleDelete}
             aria-label={DELETE_MONITOR_LABEL}
+            data-test-subj="monitorManagementDeleteMonitor"
           />
         )}
       </EuiFlexItem>

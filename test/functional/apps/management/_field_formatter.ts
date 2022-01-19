@@ -431,6 +431,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         index: indexTitle,
         body: {
           mappings: {
+            // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
             properties: specs.reduce((properties, spec, index) => {
               properties[`${index}`] = { type: spec.fieldType };
               return properties;

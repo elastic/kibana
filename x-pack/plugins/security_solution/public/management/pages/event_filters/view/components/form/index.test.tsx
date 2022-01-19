@@ -162,6 +162,22 @@ describe('Event filter form', () => {
     expect(getState().form.hasNameError).toBeTruthy();
   });
 
+  it('should change description', async () => {
+    component = await renderWithData();
+
+    const nameInput = component.getByTestId('eventFilters-form-description-input');
+
+    act(() => {
+      fireEvent.change(nameInput, {
+        target: {
+          value: 'Exception description',
+        },
+      });
+    });
+
+    expect(getState().form.entry?.description).toBe('Exception description');
+  });
+
   it('should change comments', async () => {
     component = await renderWithData();
 

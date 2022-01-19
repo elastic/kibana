@@ -39,6 +39,7 @@ import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
+  FormulaPublicApi,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -160,6 +161,13 @@ export interface LensPublicStart {
    * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
    */
   getXyVisTypes: () => Promise<VisualizationType[]>;
+
+  /**
+   * API which returns state helpers keeping this async as to not impact page load bundle
+   */
+  stateHelperApi: () => Promise<{
+    formula: FormulaPublicApi;
+  }>;
 }
 
 export class LensPlugin {
@@ -212,6 +220,7 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        injectFilterReferences: data.query.filterManager.inject,
         visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
@@ -385,6 +394,14 @@ export class LensPlugin {
       getXyVisTypes: async () => {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
+      },
+
+      stateHelperApi: async () => {
+        const { createFormulaPublicApi } = await import('./async_services');
+
+        return {
+          formula: createFormulaPublicApi(),
+        };
       },
     };
   }

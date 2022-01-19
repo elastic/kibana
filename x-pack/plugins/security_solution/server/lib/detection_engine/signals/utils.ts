@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
-import { chunk, get, isEmpty, partition } from 'lodash';
+import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -118,7 +118,7 @@ export const hasReadIndexPrivileges = async (args: {
     const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
       indexesWithNoReadPrivileges
     )}`;
-    logger.error(buildRuleMessage(errorString));
+    logger.warn(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
@@ -168,7 +168,7 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-    logger.error(buildRuleMessage(errorString.trimEnd()));
+    logger.warn(buildRuleMessage(errorString.trimEnd()));
     await ruleStatusClient.logStatusChange({
       message: errorString.trimEnd(),
       ruleId,
@@ -195,7 +195,7 @@ export const hasTimestampFields = async (args: {
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
-    logger.error(buildRuleMessage(errorString));
+    logger.warn(buildRuleMessage(errorString));
     await ruleStatusClient.logStatusChange({
       message: errorString,
       ruleId,
@@ -952,10 +952,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds estypes.SearchSortResults | undefined
+ * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
@@ -997,14 +997,49 @@ export const isRACAlert = (event: unknown): event is RACAlert => {
 
 export const racFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
+  'signal.rule.description': `${ALERT_RULE_PARAMETERS}.description`,
+  'signal.rule.filters': `${ALERT_RULE_PARAMETERS}.filters`,
+  'signal.rule.language': `${ALERT_RULE_PARAMETERS}.language`,
+  'signal.rule.query': `${ALERT_RULE_PARAMETERS}.query`,
+  'signal.rule.risk_score': `${ALERT_RULE_PARAMETERS}.riskScore`,
+  'signal.rule.severity': `${ALERT_RULE_PARAMETERS}.severity`,
+  'signal.rule.building_block_type': `${ALERT_RULE_PARAMETERS}.buildingBlockType`,
+  'signal.rule.namespace': `${ALERT_RULE_PARAMETERS}.namespace`,
+  'signal.rule.note': `${ALERT_RULE_PARAMETERS}.note`,
+  'signal.rule.license': `${ALERT_RULE_PARAMETERS}.license`,
+  'signal.rule.output_index': `${ALERT_RULE_PARAMETERS}.outputIndex`,
+  'signal.rule.timeline_id': `${ALERT_RULE_PARAMETERS}.timelineId`,
+  'signal.rule.timeline_title': `${ALERT_RULE_PARAMETERS}.timelineTitle`,
+  'signal.rule.meta': `${ALERT_RULE_PARAMETERS}.meta`,
+  'signal.rule.rule_name_override': `${ALERT_RULE_PARAMETERS}.ruleNameOverride`,
+  'signal.rule.timestamp_override': `${ALERT_RULE_PARAMETERS}.timestampOverride`,
+  'signal.rule.author': `${ALERT_RULE_PARAMETERS}.author`,
+  'signal.rule.false_positives': `${ALERT_RULE_PARAMETERS}.falsePositives`,
+  'signal.rule.from': `${ALERT_RULE_PARAMETERS}.from`,
+  'signal.rule.rule_id': `${ALERT_RULE_PARAMETERS}.ruleId`,
+  'signal.rule.max_signals': `${ALERT_RULE_PARAMETERS}.maxSignals`,
+  'signal.rule.risk_score_mapping': `${ALERT_RULE_PARAMETERS}.riskScoreMapping`,
+  'signal.rule.severity_mapping': `${ALERT_RULE_PARAMETERS}.severityMapping`,
+  'signal.rule.threat': `${ALERT_RULE_PARAMETERS}.threat`,
+  'signal.rule.to': `${ALERT_RULE_PARAMETERS}.to`,
+  'signal.rule.references': `${ALERT_RULE_PARAMETERS}.references`,
+  'signal.rule.version': `${ALERT_RULE_PARAMETERS}.version`,
+  'signal.rule.exceptions_list': `${ALERT_RULE_PARAMETERS}.exceptionsList`,
+  'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
 };
 
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
   if (isWrappedRACAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
+    const parts = mappedField.split('.');
+    if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {
+      const params = get(event._source, ALERT_RULE_PARAMETERS);
+      return get(params, parts[parts.length - 1]);
+    }
     return get(event._source, mappedField) as T;
   } else if (isWrappedSignalHit(event)) {
-    return get(event._source, field) as T;
+    const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
+    return get(event._source, mappedField) as T;
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }

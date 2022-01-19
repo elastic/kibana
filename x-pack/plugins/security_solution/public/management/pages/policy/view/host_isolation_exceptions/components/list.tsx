@@ -13,11 +13,17 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../../common/constants';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../../../common/constants';
-import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
+import {
+  getHostIsolationExceptionsListPath,
+  getPolicyHostIsolationExceptionsPath,
+} from '../../../../../common/routing';
 import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
@@ -38,6 +44,10 @@ export const PolicyHostIsolationExceptionsList = ({
   policyId: string;
 }) => {
   const history = useHistory();
+  const { getAppUrl } = useAppUrl();
+
+  const privileges = useUserPrivileges().endpointPrivileges;
+
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -85,32 +95,45 @@ export const PolicyHostIsolationExceptionsList = ({
   const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
     const item = artifact as ExceptionListItemSchema;
     const isGlobal = isGlobalPolicyEffected(item.tags);
+    const deleteAction = {
+      icon: 'trash',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeAction',
+        { defaultMessage: 'Remove from policy' }
+      ),
+      onClick: () => {
+        setExceptionItemToDelete(item);
+      },
+      disabled: isGlobal,
+      toolTipContent: isGlobal
+        ? i18n.translate(
+            'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeActionNotAllowed',
+            {
+              defaultMessage:
+                'Globally applied host isolation exceptions cannot be removed from policy.',
+            }
+          )
+        : undefined,
+      toolTipPosition: 'top' as const,
+      'data-test-subj': 'remove-from-policy-action',
+    };
+    const viewUrlPath = getHostIsolationExceptionsListPath({ filter: item.item_id });
+
+    const fullDetailsAction = {
+      icon: 'controlsHorizontal',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.fullDetailsAction',
+        { defaultMessage: 'View full details' }
+      ),
+      href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+      navigateAppId: APP_UI_ID,
+      navigateOptions: { path: viewUrlPath },
+      'data-test-subj': 'view-full-details-action',
+    };
+
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [
-        {
-          icon: 'trash',
-          children: i18n.translate(
-            'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeAction',
-            { defaultMessage: 'Remove from policy' }
-          ),
-          onClick: () => {
-            setExceptionItemToDelete(item);
-          },
-          disabled: isGlobal,
-          toolTipContent: isGlobal
-            ? i18n.translate(
-                'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeActionNotAllowed',
-                {
-                  defaultMessage:
-                    'Globally applied host isolation exceptions cannot be removed from policy.',
-                }
-              )
-            : undefined,
-          toolTipPosition: 'top',
-          'data-test-subj': 'remove-from-policy-action',
-        },
-      ],
+      actions: privileges.canIsolateHost ? [fullDetailsAction, deleteAction] : [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };
@@ -156,7 +179,7 @@ export const PolicyHostIsolationExceptionsList = ({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, description, value, ip',
+            defaultMessage: 'Search on the fields below: name, description, ip',
           }
         )}
         defaultValue={urlParams.filter}

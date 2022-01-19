@@ -7,7 +7,10 @@
 
 import type { IScopedClusterClient } from 'kibana/server';
 import { sumBy, pick } from 'lodash';
-import { NodesInfoNodeInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  MlTrainedModelStats,
+  NodesInfoNodeInfo,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   NodeDeploymentStatsResponse,
   PipelineDefinition,
@@ -18,7 +21,10 @@ import {
   MemoryOverviewService,
   NATIVE_EXECUTABLE_CODE_OVERHEAD,
 } from '../memory_overview/memory_overview_service';
-import { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
+import {
+  TrainedModelDeploymentStatsResponse,
+  TrainedModelModelSizeStats,
+} from '../../../common/types/trained_models';
 import { isDefined } from '../../../common/types/guards';
 import { isPopulatedObject } from '../../../common';
 
@@ -27,6 +33,11 @@ export type ModelService = ReturnType<typeof modelsProvider>;
 const NODE_FIELDS = ['attributes', 'name', 'roles', 'version'] as const;
 
 export type RequiredNodeFields = Pick<NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
+
+interface TrainedModelStatsResponse extends MlTrainedModelStats {
+  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
+}
 
 export function modelsProvider(
   client: IScopedClusterClient,
@@ -92,7 +103,7 @@ export function modelsProvider(
         body: { nodes: clusterNodes },
       } = await client.asInternalUser.nodes.stats();
 
-      const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles.includes('ml'));
+      const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles?.includes('ml'));
 
       const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
       const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
@@ -107,21 +118,30 @@ export function modelsProvider(
               )
             : nodeFields.attributes;
 
-          const allocatedModels = (
-            trainedModelStats
-              .map((v) => {
-                // @ts-ignore new prop
-                return v.deployment_stats;
-              })
-              .filter(isDefined) as TrainedModelDeploymentStatsResponse[]
-          )
-            .filter((v) => v.nodes.some((n) => Object.keys(n.node)[0] === nodeId))
-            .map(({ nodes, ...rest }) => {
+          const allocatedModels = (trainedModelStats as TrainedModelStatsResponse[])
+            .filter(
+              (d) =>
+                isDefined(d.deployment_stats) &&
+                isDefined(d.deployment_stats.nodes) &&
+                d.deployment_stats.nodes.some((n) => Object.keys(n.node)[0] === nodeId)
+            )
+            .map((d) => {
+              const modelSizeState = d.model_size_stats;
+              const deploymentStats = d.deployment_stats;
+
+              if (!deploymentStats || !modelSizeState) {
+                throw new Error('deploymentStats or modelSizeState not defined');
+              }
+
+              const { nodes, ...rest } = deploymentStats;
+
               const { node: tempNode, ...nodeRest } = nodes.find(
                 (v) => Object.keys(v.node)[0] === nodeId
               )!;
               return {
+                model_id: d.model_id,
                 ...rest,
+                ...modelSizeState,
                 node: nodeRest,
               };
             });
@@ -129,7 +149,7 @@ export function modelsProvider(
           const modelsMemoryUsage = allocatedModels.map((v) => {
             return {
               model_id: v.model_id,
-              model_size: v.model_size_bytes,
+              model_size: v.required_native_memory_bytes,
             };
           });
 
@@ -166,7 +186,7 @@ export function modelsProvider(
                 // TODO remove ts-ignore when elasticsearch client is updated
                 // @ts-ignore
                 total: Number(node.os?.mem.adjusted_total_in_bytes ?? node.os?.mem.total_in_bytes),
-                jvm: Number(node.attributes['ml.max_jvm_size']),
+                jvm: Number(node.attributes!['ml.max_jvm_size']),
               },
               anomaly_detection: {
                 total: memoryRes.adTotalMemory,

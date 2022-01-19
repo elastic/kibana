@@ -19,6 +19,7 @@ import type {
   KibanaRequest,
   ServiceStatus,
   ElasticsearchClient,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
@@ -80,19 +81,18 @@ import {
   agentPolicyService,
   packagePolicyService,
   AgentServiceImpl,
+  PackageServiceImpl,
 } from './services';
 import { registerFleetUsageCollector } from './collectors/register';
-import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
 import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
-import { fetchFindLatestPackage } from './services/epm/registry';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
@@ -104,7 +104,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
 }
 
@@ -113,8 +113,8 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  securitySetup?: SecurityPluginSetup;
-  securityStart?: SecurityPluginStart;
+  securitySetup: SecurityPluginSetup;
+  securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   configInitialValue: FleetConfigType;
   savedObjects: SavedObjectsServiceStart;
@@ -170,8 +170,6 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
-
-  fetchFindLatestPackage: typeof fetchFindLatestPackage;
 }
 
 export class FleetPlugin
@@ -187,12 +185,13 @@ export class FleetPlugin
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
   private httpSetup?: HttpServiceSetup;
-  private securitySetup?: SecurityPluginSetup;
+  private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
 
   private agentService?: AgentService;
+  private packageService?: PackageService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -325,21 +324,18 @@ export class FleetPlugin
     // The upload package route is only authorized for the superuser
     registerEPMRoutes(fleetAuthzRouter);
 
-    // Register rest of routes only if security is enabled
-    if (deps.security) {
-      registerSetupRoutes(fleetAuthzRouter, config);
-      registerAgentPolicyRoutes(fleetAuthzRouter);
-      registerPackagePolicyRoutes(fleetAuthzRouter);
-      registerOutputRoutes(fleetAuthzRouter);
-      registerSettingsRoutes(fleetAuthzRouter);
-      registerDataStreamRoutes(fleetAuthzRouter);
-      registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerSetupRoutes(fleetAuthzRouter, config);
+    registerAgentPolicyRoutes(fleetAuthzRouter);
+    registerPackagePolicyRoutes(fleetAuthzRouter);
+    registerOutputRoutes(fleetAuthzRouter);
+    registerSettingsRoutes(fleetAuthzRouter);
+    registerDataStreamRoutes(fleetAuthzRouter);
+    registerPreconfigurationRoutes(fleetAuthzRouter);
 
-      // Conditional config routes
-      if (config.agents.enabled) {
-        registerAgentAPIRoutes(fleetAuthzRouter, config);
-        registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-      }
+    // Conditional config routes
+    if (config.agents.enabled) {
+      registerAgentAPIRoutes(fleetAuthzRouter, config);
+      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
@@ -410,10 +406,10 @@ export class FleetPlugin
       },
       fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
-      packageService: {
-        getInstallation,
-        ensureInstalledPackage,
-      },
+      packageService: this.setupPackageService(
+        core.elasticsearch.client.asInternalUser,
+        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+      ),
       agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
       agentPolicyService: {
         get: agentPolicyService.get,
@@ -429,7 +425,6 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
-      fetchFindLatestPackage,
     };
   }
 
@@ -447,5 +442,29 @@ export class FleetPlugin
 
     this.agentService = new AgentServiceImpl(internalEsClient);
     return this.agentService;
+  }
+
+  private setupPackageService(
+    internalEsClient: ElasticsearchClient,
+    internalSoClient: SavedObjectsClientContract
+  ): PackageService {
+    if (this.packageService) {
+      return this.packageService;
+    }
+
+    this.packageService = new PackageServiceImpl(
+      internalEsClient,
+      internalSoClient,
+      this.getLogger()
+    );
+    return this.packageService;
+  }
+
+  private getLogger(): Logger {
+    if (!this.logger) {
+      this.logger = this.initializerContext.logger.get();
+    }
+
+    return this.logger;
   }
 }
