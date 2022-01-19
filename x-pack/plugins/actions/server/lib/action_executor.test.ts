@@ -308,7 +308,7 @@ test('throws an error when connector is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: `error validating action type connector: error`,
+    message: `error validating action type connector: config must be defined`,
   });
 });
 
