@@ -107,7 +107,7 @@ export function MLCallout({
         ),
         text: i18n.translate('xpack.apm.mlCallout.updateAvailableCalloutText', {
           defaultMessage:
-            'We have updated the anomaly detection jobs that provide insights into degraded performance and added detectors for throughput and failed transaction rate. If you choose to upgrade, we will create the new jobs and close the existing legacy jobs. The data shown in the APM app will automatically switch to the new.',
+            'We have updated the anomaly detection jobs that provide insights into degraded performance and added detectors for throughput and failed transaction rate. If you choose to upgrade, we will create the new jobs and close the existing legacy jobs. The data shown in the APM app will automatically switch to the new. Please note that the option to migrate all existing jobs will not be available if you choose to create a new job.',
         }),
         color: 'success',
         icon: 'wrench',
