@@ -545,7 +545,6 @@ export const sendAlertToTimelineAction = async ({
       timeline: {
         ...timelineDefaults,
         dataProviders,
-        description: `_id: ${ecsData._id}`,
         id: TimelineId.active,
         indexNames: [],
         dateRange: {
