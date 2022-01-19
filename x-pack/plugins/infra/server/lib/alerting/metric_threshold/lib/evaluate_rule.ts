@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
+import { difference, first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
 import moment from 'moment';
 import {
   Aggregators,
@@ -68,6 +68,7 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
   params: Params,
   config: InfraSource['configuration'],
   prevGroups: string[],
+  compositeSize: number,
   timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
@@ -80,6 +81,7 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
         config.metricAlias,
         groupBy,
         filterQuery,
+        compositeSize,
         timeframe,
         shouldDropPartialBuckets
       );
@@ -98,27 +100,22 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
       // If any previous groups are no longer being reported, backfill them with null values
       const currentGroups = Object.keys(currentValues);
 
-      const missingGroups = prevGroups.filter((g) => !currentGroups.includes(g));
+      const missingGroups = difference(prevGroups, currentGroups);
+
       if (currentGroups.length === 0 && missingGroups.length === 0) {
         missingGroups.push(UNGROUPED_FACTORY_KEY);
       }
       const backfillTimestamp =
         last(last(Object.values(currentValues)))?.key ?? new Date().toISOString();
-      const backfilledPrevGroups: Record<
-        string,
-        Array<{ key: string; value: number }>
-      > = missingGroups.reduce(
-        (result, group) => ({
-          ...result,
-          [group]: [
-            {
-              key: backfillTimestamp,
-              value: criterion.aggType === Aggregators.COUNT ? 0 : null,
-            },
-          ],
-        }),
-        {}
-      );
+      const backfilledPrevGroups: Record<string, Array<{ key: string; value: number | null }>> = {};
+      for (const group of missingGroups) {
+        backfilledPrevGroups[group] = [
+          {
+            key: backfillTimestamp,
+            value: criterion.aggType === Aggregators.COUNT ? 0 : null,
+          },
+        ];
+      }
       const currentValuesWithBackfilledPrevGroups = {
         ...currentValues,
         ...backfilledPrevGroups,
@@ -152,6 +149,7 @@ const getMetric: (
   index: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
+  compositeSize: number,
   timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
 ) => Promise<Record<string, Array<{ key: string; value: number }>>> = async function (
@@ -160,6 +158,7 @@ const getMetric: (
   index,
   groupBy,
   filterQuery,
+  compositeSize,
   timeframe,
   shouldDropPartialBuckets
 ) {
@@ -174,6 +173,7 @@ const getMetric: (
   const searchBody = getElasticsearchMetricQuery(
     params,
     calculatedTimerange,
+    compositeSize,
     hasGroupBy ? groupBy : undefined,
     filterQuery
   );
@@ -204,21 +204,18 @@ const getMetric: (
         bucketSelector,
         afterKeyHandler
       )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
-      const groupedResults = compositeBuckets.reduce(
-        (result, bucket) => ({
-          ...result,
-          [Object.values(bucket.key)
-            .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(
-            bucket,
-            aggType,
-            dropPartialBucketsOptions,
-            calculatedTimerange,
-            bucket.doc_count
-          ),
-        }),
-        {}
-      );
+      const groupedResults: Record<string, any> = {};
+      for (const bucket of compositeBuckets) {
+        const key = Object.values(bucket.key).join(', ');
+        const value = getValuesFromAggregations(
+          bucket,
+          aggType,
+          dropPartialBucketsOptions,
+          calculatedTimerange,
+          bucket.doc_count
+        );
+        groupedResults[key] = value;
+      }
       return groupedResults;
     }
     const { body: result } = await esClient.search({
