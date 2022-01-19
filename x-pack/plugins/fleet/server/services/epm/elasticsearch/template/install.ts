@@ -491,9 +491,7 @@ export async function installTemplate({
   });
 
   const template = getTemplate({
-    type: dataStream.type,
     templateIndexPattern,
-    fields: validFields,
     pipelineName,
     packageName,
     composedOfTemplates,

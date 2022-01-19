@@ -51,18 +51,14 @@ const META_PROP_KEYS = ['metric_type', 'unit'];
  * @param indexPattern String with the index pattern
  */
 export function getTemplate({
-  type,
   templateIndexPattern,
-  fields,
   pipelineName,
   packageName,
   composedOfTemplates,
   templatePriority,
   hidden,
 }: {
-  type: string;
   templateIndexPattern: string;
-  fields: Fields;
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
@@ -70,9 +66,7 @@ export function getTemplate({
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
-    type,
     templateIndexPattern,
-    fields,
     packageName,
     composedOfTemplates,
     templatePriority,
@@ -377,9 +371,7 @@ const flattenFieldsToNameAndType = (
 };
 
 function getBaseTemplate(
-  type: string,
   templateIndexPattern: string,
-  fields: Fields,
   packageName: string,
   composedOfTemplates: string[],
   templatePriority: number,
