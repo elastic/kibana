@@ -7,17 +7,22 @@
  */
 
 import type { EuiDataGridRowHeightOption, EuiDataGridRowHeightsOptions } from '@elastic/eui';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { IUiSettingsClient } from 'kibana/public';
 import { Storage } from '../../../kibana_utils/public';
 import { ROW_HEIGHT_OPTION } from '../../common';
-import { getDefaultRowHeight, updateStoredRowHeight } from './row_heights';
+import { isValidRowHeight } from './validate_row_height';
 
 interface UseRowHeightProps {
   rowHeightState?: number;
   onUpdateRowHeight?: (rowHeight: number) => void;
   storage: Storage;
   uiSettings: IUiSettingsClient;
+}
+
+interface DataGridOptionsRecord {
+  previousRowHeight: number;
+  previousConfigRowHeight: number;
 }
 
 /**
@@ -28,6 +33,7 @@ interface UseRowHeightProps {
  */
 const SINGLE_ROW_HEIGHT_OPTION = 0;
 const AUTO_ROW_HEIGHT_OPTION = -1;
+const ROW_HEIGHT_KEY = 'discover:dataGridRowHeight';
 
 /**
  * Converts rowHeight of EuiDataGrid to rowHeight number (-1 to 20)
@@ -55,24 +61,75 @@ const deserializeRowHeight = (number: number): EuiDataGridRowHeightOption | unde
   return { lineCount: number }; // custom
 };
 
+const getStoredRowHeight = (storage: Storage): DataGridOptionsRecord | null => {
+  const entry = storage.get(ROW_HEIGHT_KEY);
+  if (
+    typeof entry === 'object' &&
+    entry !== null &&
+    isValidRowHeight(entry.previousRowHeight) &&
+    isValidRowHeight(entry.previousConfigRowHeight)
+  ) {
+    return entry;
+  }
+  return null;
+};
+
+const updateStoredRowHeight = (newRowHeight: number, configRowHeight: number, storage: Storage) => {
+  storage.set(ROW_HEIGHT_KEY, {
+    previousRowHeight: newRowHeight,
+    previousConfigRowHeight: configRowHeight,
+  });
+};
+
 export const useRowHeightsOptions = ({
   rowHeightState,
   onUpdateRowHeight,
   storage,
   uiSettings,
-}: UseRowHeightProps) =>
-  useMemo(
-    (): EuiDataGridRowHeightsOptions => ({
-      defaultHeight: deserializeRowHeight(
-        typeof rowHeightState === 'number'
-          ? rowHeightState
-          : getDefaultRowHeight(uiSettings, storage)
-      ),
+}: UseRowHeightProps) => {
+  /**
+   * The following should be removed after EUI update
+   * with https://github.com/elastic/eui/issues/5524
+   */
+  useEffect(() => {
+    if (isValidRowHeight(rowHeightState)) {
+      onUpdateRowHeight?.(rowHeightState);
+      updateStoredRowHeight(rowHeightState, uiSettings.get(ROW_HEIGHT_OPTION), storage);
+    }
+  }, [rowHeightState, onUpdateRowHeight, storage, uiSettings]);
+
+  const defaultRowHeights = useMemo((): EuiDataGridRowHeightsOptions => {
+    const rowHeightFromLS = getStoredRowHeight(storage);
+    const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+
+    const configHasChanged = (
+      localStorageRecord: DataGridOptionsRecord | null
+    ): localStorageRecord is null =>
+      localStorageRecord !== null && configRowHeight !== localStorageRecord.previousConfigRowHeight;
+
+    let rowHeight;
+    if (isValidRowHeight(rowHeightState)) {
+      rowHeight = rowHeightState;
+    } else if (!configHasChanged(rowHeightFromLS)) {
+      rowHeight = rowHeightFromLS.previousRowHeight;
+    } else {
+      rowHeight = configRowHeight;
+    }
+
+    // update local storage value when config has changed
+    if (configHasChanged(rowHeightFromLS)) {
+      updateStoredRowHeight(configRowHeight, configRowHeight, storage);
+    }
+
+    return {
+      defaultHeight: deserializeRowHeight(rowHeight),
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
         const newSerializedRowHeight = serializeRowHeight(newRowHeight);
-        updateStoredRowHeight(newSerializedRowHeight, uiSettings.get(ROW_HEIGHT_OPTION), storage);
+        updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage);
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
-    }),
-    [rowHeightState, uiSettings, storage, onUpdateRowHeight]
-  );
+    };
+  }, [rowHeightState, uiSettings, storage, onUpdateRowHeight]);
+
+  return defaultRowHeights;
+};

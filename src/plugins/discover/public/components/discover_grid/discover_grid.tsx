@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
@@ -400,23 +400,6 @@ export const DiscoverGrid = ({
     uiSettings: services.uiSettings,
   });
 
-  /**
-   * The following should be removed after EUI update
-   * https://github.com/elastic/eui/issues/5524
-   */
-  const gridRef: React.RefObject<HTMLSpanElement> = useRef(null);
-  const [prevRowHeight, setPrevRowHeight] = useState(rowHeightState);
-
-  useEffect(() => {
-    if (gridRef.current === null) {
-      setPrevRowHeight(rowHeightState);
-    }
-  }, [rowHeightState]);
-
-  if (prevRowHeight !== rowHeightState) {
-    return null;
-  }
-
   if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
@@ -467,7 +450,6 @@ export const DiscoverGrid = ({
         data-description={searchDescription}
         data-document-number={displayedRows.length}
         className={className}
-        ref={gridRef}
       >
         <EuiDataGridMemoized
           aria-describedby={randomId}
