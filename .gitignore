@@ -90,6 +90,7 @@ report.asciidoc
 /bazel
 /bazel-*
 .bazelrc.user
+.bazelrc.cache
 
 # Exclude renovate config file (we only need it on master)
 renovate.json5
