@@ -114,8 +114,8 @@ export interface ProcessEvent {
 }
 
 export interface ProcessEventsPage {
-  events: ProcessEvent[],
-  cursor: string,
+  events: ProcessEvent[];
+  cursor: string;
 }
 
 export interface Process {

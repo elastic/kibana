@@ -30,7 +30,8 @@ describe('ProcessTree component', () => {
           hasNextPage={false}
           fetchPreviousPage={() => true}
           hasPreviousPage={false}
-        />);
+        />
+      );
       expect(renderResult.queryByTestId('sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryByTestId('processTreeNode')).toBeTruthy();
     });

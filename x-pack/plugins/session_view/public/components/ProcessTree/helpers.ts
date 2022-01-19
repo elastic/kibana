@@ -139,7 +139,13 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
-  const newOrphans = buildProcessTree(updatedProcessMap, events, orphans, sessionEntityId, backwardDirection);
+  const newOrphans = buildProcessTree(
+    updatedProcessMap,
+    events,
+    orphans,
+    sessionEntityId,
+    backwardDirection
+  );
 
   return [autoExpandProcessTree(updatedProcessMap), newOrphans];
 };

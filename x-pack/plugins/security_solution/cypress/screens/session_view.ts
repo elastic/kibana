@@ -23,7 +23,7 @@ export const SESSION_VIEW_CLOSE_BUTTON = '[data-test-subj="session-view-close-bu
 export const PROCESS_TREE = '[data-test-subj="sessionViewProcessTree"]';
 export const PROCESS_TREE_NODE_ALERT = '[data-test-subj="processTreeNodeAlertButton"]';
 export const SEARCH_BAR = '[data-test-subj="sessionViewProcessEventsSearch"]';
-export const SESSION_COMMANDS = '[data-test-subj="processTreeNode"'
+export const SESSION_COMMANDS = '[data-test-subj="processTreeNode"';
 
 // Details panel elements
 export const DETAILS_PANEL = '[data-test-subj="sessionViewDetailPanel"]';

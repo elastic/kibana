@@ -124,7 +124,8 @@ export const ProcessTree = ({
     if (searchResults.length > 0) {
       selectProcess(searchResults[0]);
     }
-  }, [searchResults])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchResults]);
 
   useEffect(() => {
     if (jumpToEvent && data.length === 2) {
@@ -134,7 +135,8 @@ export const ProcessTree = ({
         selectProcess(process);
       }
     }
-  }, [jumpToEvent, processMap])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jumpToEvent, processMap]);
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
     return (
