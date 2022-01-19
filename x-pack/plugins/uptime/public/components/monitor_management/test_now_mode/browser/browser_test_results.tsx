@@ -42,7 +42,6 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
                 '{stepCount, number} {stepCount, plural, one {step} other {steps}}  completed',
               values: {
                 stepCount: stepEnds.length,
-                stepLabel: stepEnds.length > 1 ? STEPS_LABEL : STEP_LABEL,
               },
             })}
           </EuiText>
