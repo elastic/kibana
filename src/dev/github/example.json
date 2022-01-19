@@ -1,6 +1,7 @@
 {
     "include": [
-        "v8.0.0"
+        "v8.0.0",
+        "\"Team:ResponseOps\",\"Feature:Canvas\""
     ],
     "exclude": [
         "failed-test",
