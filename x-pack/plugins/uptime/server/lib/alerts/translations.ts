@@ -339,8 +339,8 @@ export const statusCheckTranslations = {
       },
     }),
   availabilityBreachLabel: (
-    availabilityRatio: number,
-    expectedAvailability: number,
+    availabilityRatio: string,
+    expectedAvailability: string,
     interval: string
   ) =>
     i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage', {

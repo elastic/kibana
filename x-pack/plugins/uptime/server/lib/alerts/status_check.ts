@@ -182,7 +182,7 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
   [ALERT_REASON]: monitorSummary.reason,
 });
 
-interface DownMonitorStatus {
+interface DownMonitorParams {
   info: Ping;
   count: number | undefined;
   interval?: string;
@@ -190,35 +190,28 @@ interface DownMonitorStatus {
 }
 
 export const getStatusMessage = (
-  downMonStatus?: DownMonitorStatus,
+  downMonParams?: DownMonitorParams,
   availMonInfo?: GetMonitorAvailabilityResult,
   availability?: GetMonitorAvailabilityParams
 ) => {
   let statusMessage = '';
-  if (downMonStatus?.info) {
+  if (downMonParams) {
     statusMessage = statusCheckTranslations.downMonitorsLabel(
-      downMonStatus.count!,
-      downMonStatus.interval!,
-      downMonStatus.numTimes
+      downMonParams.count!,
+      downMonParams.interval!,
+      downMonParams.numTimes
     );
   }
   let availabilityMessage = '';
 
   if (availMonInfo) {
-    availabilityMessage = i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
-      {
-        defaultMessage:
-          '{interval} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
-        values: {
-          availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
-          expectedAvailability: availability?.threshold,
-          interval: getInterval(availability?.range!, availability?.rangeUnit!),
-        },
-      }
+    availabilityMessage = statusCheckTranslations.availabilityBreachLabel(
+      (availMonInfo.availabilityRatio! * 100).toFixed(2),
+      availability?.threshold!,
+      getInterval(availability?.range!, availability?.rangeUnit!)
     );
   }
-  if (availMonInfo && downMonStatus?.info) {
+  if (availMonInfo && downMonParams) {
     return statusCheckTranslations.downMonitorsAndAvailabilityBreachLabel(
       statusMessage,
       availabilityMessage
