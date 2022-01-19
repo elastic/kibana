@@ -162,6 +162,65 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Top values of @message.raw'
         );
       });
+
+      it('should combine breakdown dimension with the horizontal one', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldToWorkspace('clientip');
+        await PageObjects.lens.dragFieldToWorkspace('@message.raw');
+
+        await PageObjects.lens.dragDimensionToExtraDropType(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 1 other'
+        );
+      });
+
+      it('should combine field to existing horizontal dimension', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldToWorkspace('clientip');
+
+        await PageObjects.lens.dragFieldToExtraDropType(
+          '@message.raw',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 1 other'
+        );
+      });
+
+      it('should combine two multi terms dimensions', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldToWorkspace('clientip');
+
+        await PageObjects.lens.dragFieldToExtraDropType(
+          '@message.raw',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+
+        await PageObjects.lens.dragFieldToDimensionTrigger(
+          '@message.raw',
+          'lnsXY_splitDimensionPanel > lns-empty-dimension'
+        );
+        await PageObjects.lens.dragFieldToExtraDropType(
+          'geo.src',
+          'lnsXY_splitDimensionPanel',
+          'combine'
+        );
+        await PageObjects.lens.dragDimensionToExtraDropType(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_xDimensionPanel',
+          'combine'
+        );
+
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 2 others'
+        );
+      });
     });
 
     describe('keyboard drag and drop', () => {

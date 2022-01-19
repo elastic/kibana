@@ -95,6 +95,14 @@ const indexPattern1 = {
       esTypes: ['keyword'],
     },
     {
+      name: 'geo.src',
+      displayName: 'geo.src',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
       name: 'scripted',
       displayName: 'Scripted',
       type: 'string',
