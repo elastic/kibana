@@ -65,13 +65,7 @@ export const MonitorConfig = () => {
             <EuiResizableButton />
 
             <EuiResizablePanel initialSize={45} minSize="200px" mode="main">
-              {config && (
-                <TestNowMode
-                  monitor={config as MonitorFieldsType}
-                  isValid={isValid}
-                  testRun={testRun}
-                />
-              )}
+              {config && <TestNowMode testRun={testRun} />}
             </EuiResizablePanel>
           </>
         )}

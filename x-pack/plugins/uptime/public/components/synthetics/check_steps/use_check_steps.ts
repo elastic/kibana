@@ -10,7 +10,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { fetchJourneySteps } from '../../../state/api/journey';
 import { JourneyState } from '../../../state/reducers/journey';
 
-export const useCheckSteps = ({}): JourneyState => {
+export const useCheckSteps = (): JourneyState => {
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
 
   const { data, status, error } = useFetcher(() => {
