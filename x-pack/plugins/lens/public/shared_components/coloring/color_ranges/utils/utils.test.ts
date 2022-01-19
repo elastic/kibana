@@ -59,10 +59,10 @@ describe('utils', () => {
       colorStops,
     });
 
-    colorStops[0].stop = -Infinity;
+    colorStops[0].stop = Number.NEGATIVE_INFINITY;
     // if continuity is below then min should be -Infinity
     expect(toColorStops(colorRanges, 'below')).toEqual({
-      min: -Infinity,
+      min: Number.NEGATIVE_INFINITY,
       max: 80,
       colorStops,
     });
@@ -71,15 +71,15 @@ describe('utils', () => {
     // if continuity is above then max should be Infinity
     expect(toColorStops(colorRanges, 'above')).toEqual({
       min: 20,
-      max: Infinity,
+      max: Number.POSITIVE_INFINITY,
       colorStops,
     });
 
-    colorStops[0].stop = -Infinity;
+    colorStops[0].stop = Number.NEGATIVE_INFINITY;
     // if continuity is all then max should be Infinity and min should be -Infinity
     expect(toColorStops(colorRanges, 'all')).toEqual({
-      min: -Infinity,
-      max: Infinity,
+      min: Number.NEGATIVE_INFINITY,
+      max: Number.POSITIVE_INFINITY,
       colorStops,
     });
   });
@@ -93,11 +93,11 @@ describe('utils', () => {
       ];
       expect(
         getValueForContinuity(colorRanges, 'above', true, 'number', { min: 0, max: 100 })
-      ).toEqual(Infinity);
+      ).toEqual(Number.POSITIVE_INFINITY);
 
       expect(
         getValueForContinuity(colorRanges, 'all', true, 'number', { min: 0, max: 100 })
-      ).toEqual(Infinity);
+      ).toEqual(Number.POSITIVE_INFINITY);
     });
 
     it('should return -Infinity if continuity is all or below and that first range', () => {
@@ -108,11 +108,11 @@ describe('utils', () => {
       ];
       expect(
         getValueForContinuity(colorRanges, 'below', false, 'number', { min: 0, max: 100 })
-      ).toEqual(-Infinity);
+      ).toEqual(Number.NEGATIVE_INFINITY);
 
       expect(
         getValueForContinuity(colorRanges, 'all', false, 'number', { min: 0, max: 100 })
-      ).toEqual(-Infinity);
+      ).toEqual(Number.NEGATIVE_INFINITY);
     });
 
     it('should return new max if continuity is none or below and that last range', () => {

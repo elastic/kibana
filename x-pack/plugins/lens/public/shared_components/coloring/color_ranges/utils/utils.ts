@@ -94,13 +94,13 @@ export const getValueForContinuity = (
           ? colorRanges[colorRanges.length - 1].start + 1
           : max;
     } else {
-      value = Infinity;
+      value = Number.POSITIVE_INFINITY;
     }
   } else {
     if (['none', 'above'].includes(continuity)) {
       value = colorRanges[0].end < min ? colorRanges[0].end - 1 : min;
     } else {
-      value = -Infinity;
+      value = Number.NEGATIVE_INFINITY;
     }
   }
 

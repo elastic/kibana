@@ -273,8 +273,8 @@ export function getStopsFromColorRangesByNewInterval(
 
 function getOverallMinMax(params: CustomPaletteParams | undefined, dataBounds: DataBounds) {
   const { min: dataMin, max: dataMax } = getDataMinMax(params?.rangeType, dataBounds);
-  const minStopValue = params?.colorStops?.[0]?.stop ?? Infinity;
-  const maxStopValue = params?.colorStops?.[params.colorStops.length - 1]?.stop ?? -Infinity;
+  const minStopValue = params?.colorStops?.[0]?.stop ?? Number.POSITIVE_INFINITY;
+  const maxStopValue = params?.colorStops?.[params.colorStops.length - 1]?.stop ?? Number.NEGATIVE_INFINITY;
   const overallMin = Math.min(dataMin, minStopValue);
   const overallMax = Math.max(dataMax, maxStopValue);
   return { min: overallMin, max: overallMax };
@@ -564,7 +564,7 @@ export const findMinMaxByColumnId = (
   if (table != null) {
     for (const columnId of columnIds) {
       const originalId = getOriginalId(columnId);
-      minMax[originalId] = minMax[originalId] || { max: -Infinity, min: Infinity };
+      minMax[originalId] = minMax[originalId] || { max: Number.NEGATIVE_INFINITY, min: Number.POSITIVE_INFINITY };
       table.rows.forEach((row) => {
         const rowValue = row[columnId];
         const numericValue = getNumericValue(rowValue);
@@ -578,7 +578,7 @@ export const findMinMaxByColumnId = (
         }
       });
       // what happens when there's no data in the table? Fallback to a percent range
-      if (minMax[originalId].max === -Infinity) {
+      if (minMax[originalId].max === Number.NEGATIVE_INFINITY) {
         minMax[originalId] = getFallbackDataBounds();
       }
     }

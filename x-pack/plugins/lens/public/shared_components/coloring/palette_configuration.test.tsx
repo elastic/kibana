@@ -145,7 +145,7 @@ describe('palette panel', () => {
         name: 'custom',
         params: expect.objectContaining({
           rangeMin: 0,
-          rangeMax: Infinity,
+          rangeMax: Number.POSITIVE_INFINITY,
         }),
       });
     });

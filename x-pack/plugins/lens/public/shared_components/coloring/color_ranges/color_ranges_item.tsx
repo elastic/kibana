@@ -125,8 +125,8 @@ export function ColorRangeItem({
 
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
-      const prevStartValue = colorRanges[index - 1]?.start ?? -Infinity;
-      const nextStartValue = colorRanges[index + 1]?.start ?? Infinity;
+      const prevStartValue = colorRanges[index - 1]?.start ?? Number.NEGATIVE_INFINITY;
+      const nextStartValue = colorRanges[index + 1]?.start ?? Number.POSITIVE_INFINITY;
 
       const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
       const isFocusStillInContent =

@@ -586,8 +586,8 @@ describe('updateRangeType', () => {
     );
     expect(newPaletteParams).toEqual({
       rangeType: 'number',
-      rangeMin: -Infinity,
-      rangeMax: Infinity,
+      rangeMin: Number.NEGATIVE_INFINITY,
+      rangeMax: Number.POSITIVE_INFINITY,
       colorStops: [
         {
           color: 'green',
@@ -644,7 +644,7 @@ describe('updateRangeType', () => {
     );
     expect(newPaletteParams).toEqual({
       rangeType: 'number',
-      rangeMin: -Infinity,
+      rangeMin: Number.NEGATIVE_INFINITY,
       rangeMax: 200,
       colorStops: [
         {
@@ -703,7 +703,7 @@ describe('updateRangeType', () => {
     expect(newPaletteParams).toEqual({
       rangeType: 'number',
       rangeMin: 0,
-      rangeMax: Infinity,
+      rangeMax: Number.POSITIVE_INFINITY,
       colorStops: [
         {
           color: 'green',
@@ -773,7 +773,7 @@ describe('changeColorPalette', () => {
         name: 'default',
         continuity: 'above',
         rangeMin: 0,
-        rangeMax: Infinity,
+        rangeMax: Number.POSITIVE_INFINITY,
         reverse: false,
         colorStops: undefined,
         stops: [

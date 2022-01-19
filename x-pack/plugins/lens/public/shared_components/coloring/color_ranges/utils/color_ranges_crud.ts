@@ -50,7 +50,7 @@ export const addColorRange = (
 
   let insertEnd = roundValue(Math.min(lastStart + step, max));
 
-  if (insertEnd === -Infinity) {
+  if (insertEnd === Number.NEGATIVE_INFINITY) {
     insertEnd = 1;
   }
 
