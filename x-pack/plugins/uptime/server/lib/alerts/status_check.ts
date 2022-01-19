@@ -18,6 +18,7 @@ import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
+  GetMonitorDownReasonParams,
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
 import { updateState, generateAlertMessage } from './common';
@@ -190,7 +191,7 @@ interface DownMonitorParams {
 }
 
 export const getStatusMessage = (
-  downMonParams?: DownMonitorParams,
+  downMonParams?: GetMonitorDownReasonParams,
   availMonInfo?: GetMonitorAvailabilityResult,
   availability?: GetMonitorAvailabilityParams
 ) => {
