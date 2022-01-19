@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import type { IndexPatternState } from '../hooks/use_app_index_pattern';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -43,8 +43,8 @@ export function getExploratoryViewEmbeddable(
 
         setLoading(true);
         try {
-          const obsvIndexP = new ObservabilityIndexPatterns(plugins.data);
-          const indPattern = await obsvIndexP.getIndexPattern(
+          const obsvIndexP = new ObservabilityDataViews(plugins.data);
+          const indPattern = await obsvIndexP.getDataView(
             dataType,
             dataTypesIndexPatterns?.[dataType]
           );
