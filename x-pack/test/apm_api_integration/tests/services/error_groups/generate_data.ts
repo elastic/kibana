@@ -42,10 +42,10 @@ export async function generateData({
   } = config;
 
   await synthtraceEsClient.index([
-    ...timerange(start, end)
+    timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_RATE)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductList)
           .timestamp(timestamp)
@@ -53,10 +53,10 @@ export async function generateData({
           .success()
           .serialize()
       ),
-    ...timerange(start, end)
+    timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_ERROR_RATE)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductList)
           .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
@@ -65,10 +65,10 @@ export async function generateData({
           .failure()
           .serialize()
       ),
-    ...timerange(start, end)
+    timerange(start, end)
       .interval('1m')
       .rate(PROD_ID_RATE)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductId)
           .timestamp(timestamp)
@@ -76,10 +76,10 @@ export async function generateData({
           .success()
           .serialize()
       ),
-    ...timerange(start, end)
+    timerange(start, end)
       .interval('1m')
       .rate(PROD_ID_ERROR_RATE)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         serviceGoProdInstance
           .transaction(transactionNameProductId)
           .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))

@@ -40,8 +40,9 @@ export class SpanGenerator implements SpanIterable {
 }
 
 export class ConcatenatedSpanGenerators implements SpanIterable {
-  constructor(private readonly dataGenerators: SpanIterable[]) {
-  }
+  constructor(private readonly dataGenerators: SpanIterable[]) { }
+
+  static empty : ConcatenatedSpanGenerators = new ConcatenatedSpanGenerators([]);
 
   toArray(): ApmFields[] {
     return Array.from(this);

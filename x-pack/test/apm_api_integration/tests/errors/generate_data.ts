@@ -39,35 +39,32 @@ export async function generateData({
 
   const documents = [appleTransaction, bananaTransaction]
     .map((transaction, index) => {
-      return [
-        ...timerange(start, end)
+      return timerange(start, end)
           .interval(interval)
           .rate(transaction.successRate)
-          .flatMap((timestamp) =>
+          .spans((timestamp) =>
             serviceGoProdInstance
               .transaction(transaction.name)
               .timestamp(timestamp)
               .duration(1000)
               .success()
               .serialize()
-          ),
-        ...timerange(start, end)
-          .interval(interval)
-          .rate(transaction.failureRate)
-          .flatMap((timestamp) =>
-            serviceGoProdInstance
-              .transaction(transaction.name)
-              .errors(
-                serviceGoProdInstance.error(`Error ${index}`, transaction.name).timestamp(timestamp)
-              )
-              .duration(1000)
-              .timestamp(timestamp)
-              .failure()
-              .serialize()
-          ),
-      ];
-    })
-    .flatMap((_) => _);
+          )
+          .concat(timerange(start, end)
+            .interval(interval)
+            .rate(transaction.failureRate)
+            .spans((timestamp) =>
+              serviceGoProdInstance
+                .transaction(transaction.name)
+                .errors(
+                  serviceGoProdInstance.error(`Error ${index}`, transaction.name).timestamp(timestamp)
+                )
+                .duration(1000)
+                .timestamp(timestamp)
+                .failure()
+                .serialize()
+            ));
+    });
 
   await synthtraceEsClient.index(documents);
 }

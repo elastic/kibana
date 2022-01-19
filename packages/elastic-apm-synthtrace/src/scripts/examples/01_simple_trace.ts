@@ -12,11 +12,10 @@ import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions:RunOptions, scenarioOpts) => {
+const scenario: Scenario = async (runOptions:RunOptions) => {
   const { logger } = getCommonServices(runOptions);
-  // const writeTargets = await getApmWriteTargets({ client });
 
-  const { numServices = 3 } = scenarioOpts || {};
+  const { numServices = 3 } = runOptions.scenarioOpts || {};
 
   return {
     generate: ({ from, to }) => {

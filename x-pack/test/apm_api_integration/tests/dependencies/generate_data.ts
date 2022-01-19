@@ -37,7 +37,7 @@ export async function generateData({
     timerange(start, end)
       .interval('1m')
       .rate(rate)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         instance
           .transaction(transaction.name)
           .timestamp(timestamp)

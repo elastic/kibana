@@ -11,7 +11,7 @@ import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
 import { ApmFields } from '../apm_fields';
-import { SpanIterable } from '../../span_iterable';
+import { ConcatenatedSpanGenerators, SpanIterable } from '../../span_iterable';
 import { StreamProcessor } from '../../stream_processor';
 
 export class ApmSynthtraceEsClient {
@@ -62,7 +62,9 @@ export class ApmSynthtraceEsClient {
     }
   }
 
-  async index(events: SpanIterable, concurrency?: number, maxDocs?: number) {
+  async index(events: SpanIterable | SpanIterable[], concurrency?: number, maxDocs?: number) {
+    const dataStream = Array.isArray(events) ? new ConcatenatedSpanGenerators(events) : events;
+
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf
     await this.client.helpers.bulk<ApmFields>({
@@ -72,7 +74,7 @@ export class ApmSynthtraceEsClient {
       datasource: new StreamProcessor({processors: StreamProcessor.apmProcessors, maxSourceEvents: maxDocs})
         // TODO https://github.com/elastic/elasticsearch-js/issues/1610
         // having to map here is awkward, it'd be better to map just before serialization.
-        .streamToDocumentAsync(StreamProcessor.toDocument, events),
+        .streamToDocumentAsync(StreamProcessor.toDocument, dataStream),
       onDrop: (doc) => {
         this.logger.info(doc);
       },

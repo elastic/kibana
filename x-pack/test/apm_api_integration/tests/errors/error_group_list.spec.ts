@@ -77,10 +77,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .instance('instance-a');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.successRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .timestamp(timestamp)
@@ -88,10 +88,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.failureRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
@@ -100,10 +100,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .failure()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.successRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .timestamp(timestamp)
@@ -111,10 +111,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .success()
                   .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.failureRate)
-              .flatMap((timestamp) =>
+              .spans((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
