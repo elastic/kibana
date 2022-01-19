@@ -9,17 +9,20 @@ import { loginAndWaitForHostDetailsPage } from '../../tasks/login';
 
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { TABLE_CELL, TABLE_ROWS } from '../../screens/alerts_details';
 import {
   navigateToHostRiskDetailTab,
   openRiskFlyout,
   waitForTableToLoad,
 } from '../../tasks/host_risk';
+import { RULE_NAME, RISK_FLYOUT } from '../../screens/hosts/host_risk';
 
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risky_hosts');
+    loginAndWaitForHostDetailsPage('siem-kibana');
+    navigateToHostRiskDetailTab();
+    waitForTableToLoad();
   });
 
   after(() => {
@@ -27,25 +30,11 @@ describe('risk tab', () => {
   });
 
   it('renders risk tab', () => {
-    loginAndWaitForHostDetailsPage('siem-kibana');
-    navigateToHostRiskDetailTab();
-    waitForTableToLoad();
-
-    cy.get('[data-test-subj="topHostScoreContributors"]')
-      .find(TABLE_ROWS)
-      .within(() => {
-        cy.get(TABLE_CELL).contains('Unusual Linux Username');
-      });
+    cy.get(RULE_NAME).eq(3).should('have.text', 'Unusual Linux Username');
   });
 
   it('shows risk information overlay when button is clicked', () => {
-    loginAndWaitForHostDetailsPage('siem-kibana');
-    navigateToHostRiskDetailTab();
-    waitForTableToLoad();
     openRiskFlyout();
-
-    cy.get('[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader').contains(
-      'How is host risk calculated?'
-    );
+    cy.get(RISK_FLYOUT).contains('How is host risk calculated?');
   });
 });
