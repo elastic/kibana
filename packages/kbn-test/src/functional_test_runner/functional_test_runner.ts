@@ -65,6 +65,12 @@ export class FunctionalTestRunner {
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          resolve(void 0);
+        }, 60 * 1000)
+      );
+
       return await runTests(this.lifecycle, mocha);
     });
   }
