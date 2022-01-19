@@ -60,7 +60,3 @@ const ERROR_BODY_LABEL = i18n.translate(
     defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
   }
 );
-
-const ADD_MONITOR_CRUMB = i18n.translate('xpack.uptime.monitorManagement.monitorManagementCrumb', {
-  defaultMessage: 'Add monitor',
-});
