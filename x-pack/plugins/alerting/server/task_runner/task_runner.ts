@@ -33,6 +33,8 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
   RuleTypeRegistry,
+  RuleMonitoring,
+  RawRuleExecutionStatus,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -58,12 +60,23 @@ import {
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
+const MONITORING_HISTORY_LIMIT = 200;
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
+export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
+  execution: {
+    history: [],
+    calculated_metrics: {
+      success_ratio: 0,
+    },
+  },
+});
+
 interface RuleTaskRunResult {
   state: RuleTaskState;
+  monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
 
@@ -211,15 +224,12 @@ export class TaskRunner<
     });
   }
 
-  private async updateRuleExecutionStatus(
+  private async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    executionStatus: AlertExecutionStatus
+    attributes: { executionStatus?: RawRuleExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     const client = this.context.internalSavedObjectsRepository;
-    const attributes = {
-      executionStatus: ruleExecutionStatusToRaw(executionStatus),
-    };
 
     try {
       await partiallyUpdateAlert(client, ruleId, attributes, {
@@ -228,9 +238,7 @@ export class TaskRunner<
         refresh: false,
       });
     } catch (err) {
-      this.logger.error(
-        `error updating rule execution status for ${this.ruleType.id}:${ruleId} ${err.message}`
-      );
+      this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
   }
 
@@ -556,7 +564,15 @@ export class TaskRunner<
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
     }
+
+    if (rule.monitoring) {
+      if (rule.monitoring.execution.history.length >= MONITORING_HISTORY_LIMIT) {
+        // Remove the first (oldest) record
+        rule.monitoring.execution.history.shift();
+      }
+    }
     return {
+      monitoring: asOk(rule.monitoring),
       state: await promiseResult<RuleTaskState, Error>(
         this.validateAndExecuteRule(services, apiKey, rule, event)
       ),
@@ -622,10 +638,14 @@ export class TaskRunner<
     });
     eventLogger.logEvent(startEvent);
 
-    const { state, schedule } = await errorAsRuleTaskRunResult(
+    const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
       this.loadRuleAttributesAndRun(event)
     );
 
+    const ruleMonitoring =
+      resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
+        return getDefaultRuleMonitoring();
+      }) ?? getDefaultRuleMonitoring();
     const executionStatus: AlertExecutionStatus = map(
       state,
       (ruleTaskState: RuleTaskState) => executionStatusFromState(ruleTaskState),
@@ -659,6 +679,10 @@ export class TaskRunner<
       executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
     }
 
+    const monitoringHistory = {
+      success: true,
+      timestamp: +new Date(),
+    };
     // if executionStatus indicates an error, fill in fields in
     // event from it
     if (executionStatus.error) {
@@ -670,8 +694,13 @@ export class TaskRunner<
       if (!event.message) {
         event.message = `${this.ruleType.id}:${ruleId}: execution failed`;
       }
+      monitoringHistory.success = false;
     }
 
+    ruleMonitoring.execution.history.push(monitoringHistory);
+    ruleMonitoring.execution.calculated_metrics.success_ratio =
+      ruleMonitoring.execution.history.filter(({ success }) => success).length /
+      ruleMonitoring.execution.history.length;
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
@@ -680,7 +709,10 @@ export class TaskRunner<
           executionStatus
         )}`
       );
-      await this.updateRuleExecutionStatus(ruleId, namespace, executionStatus);
+      await this.updateRuleSavedObject(ruleId, namespace, {
+        executionStatus: ruleExecutionStatusToRaw(executionStatus),
+        monitoring: ruleMonitoring,
+      });
     }
 
     return {
@@ -714,6 +746,7 @@ export class TaskRunner<
         }
         return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
+      monitoring: ruleMonitoring,
     };
   }
 
@@ -784,7 +817,9 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
-    await this.updateRuleExecutionStatus(ruleId, namespace, executionStatus);
+    await this.updateRuleSavedObject(ruleId, namespace, {
+      executionStatus: ruleExecutionStatusToRaw(executionStatus),
+    });
   }
 }
 
@@ -1104,6 +1139,7 @@ async function errorAsRuleTaskRunResult(
     return {
       state: asErr(e),
       schedule: asErr(e),
+      monitoring: asErr(e),
     };
   }
 }

@@ -176,6 +176,14 @@ describe('alerts_list component with items', () => {
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
+      monitoring: {
+        execution: {
+          history: [{ success: true }, { success: true }, { success: false }],
+          calculated_metrics: {
+            success_ratio: 0.66,
+          },
+        },
+      },
     },
     {
       id: '2',
@@ -199,6 +207,14 @@ describe('alerts_list component with items', () => {
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
+      monitoring: {
+        execution: {
+          history: [{ success: true }, { success: true }],
+          calculated_metrics: {
+            success_ratio: 1,
+          },
+        },
+      },
     },
     {
       id: '3',
@@ -221,6 +237,14 @@ describe('alerts_list component with items', () => {
         lastDuration: 30234,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
+      },
+      monitoring: {
+        execution: {
+          history: [{ success: false }],
+          calculated_metrics: {
+            success_ratio: 0,
+          },
+        },
       },
     },
     {
@@ -432,6 +456,23 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').last().text()).toEqual(
       'License Error'
     );
+
+    // Monitoring column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-successRatio"]').length
+    ).toEqual(mockedAlertsData.length);
+    const ratios = wrapper.find(
+      'EuiTableRowCell[data-test-subj="alertsTableCell-successRatio"] span[data-test-subj="successRatio"]'
+    );
+    mockedAlertsData.forEach((rule, index) => {
+      if (rule.monitoring) {
+        expect(ratios.at(index).text()).toEqual(
+          `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
+        );
+      } else {
+        expect(ratios.at(index).text()).toEqual(`N/A`);
+      }
+    });
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();

@@ -77,6 +77,7 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { AlertInstance } from '../alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
+import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -362,6 +363,7 @@ export class RulesClient {
       mutedInstanceIds: [],
       notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
+      monitoring: getDefaultRuleMonitoring(),
     };
 
     this.auditLogger?.log(

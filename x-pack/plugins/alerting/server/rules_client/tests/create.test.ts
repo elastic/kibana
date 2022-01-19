@@ -20,6 +20,7 @@ import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -407,6 +408,14 @@ describe('create()', () => {
         "meta": Object {
           "versionApiKeyLastmodified": "v8.0.0",
         },
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+          },
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -599,6 +608,14 @@ describe('create()', () => {
         "legacyId": "123",
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
+        },
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [],
+          },
         },
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -1014,6 +1031,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
@@ -1210,6 +1228,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
@@ -1375,6 +1394,7 @@ describe('create()', () => {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
         },
+        monitoring: getDefaultRuleMonitoring(),
         meta: { versionApiKeyLastmodified: kibanaVersion },
         muteAll: false,
         mutedInstanceIds: [],
@@ -1548,6 +1568,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1676,6 +1697,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -1804,6 +1826,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -2155,6 +2178,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',
@@ -2254,6 +2278,7 @@ describe('create()', () => {
           status: 'pending',
           error: null,
         },
+        monitoring: getDefaultRuleMonitoring(),
       },
       {
         id: 'mock-saved-object-id',

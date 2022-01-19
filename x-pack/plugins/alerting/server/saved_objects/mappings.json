@@ -93,6 +93,31 @@
           }
         }
       },
+      "monitoring": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "history": {
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "timestamp": {
+                    "type": "date"
+                  }
+                }
+              },
+              "calculated_metrics": {
+                "properties": {
+                  "success_ratio": {
+                    "type": "float"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "executionStatus": {
         "properties": {
           "status": {

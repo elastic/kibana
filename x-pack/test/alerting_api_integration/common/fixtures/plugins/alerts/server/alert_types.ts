@@ -465,6 +465,45 @@ function getPatternFiringAlertType() {
   return result;
 }
 
+function getPatternSuccessOrFailureAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()])),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
+    id: 'test.patternSuccessOrFailure',
+    name: 'Test: Succeeding or failing on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(alertExecutorOptions) {
+      const { state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= pattern.length) {
+        return { patternIndex };
+      }
+
+      if (!pattern[patternIndex]) {
+        throw new Error('Failed to execute alert type');
+      }
+
+      return {
+        patternIndex: patternIndex + 1,
+      };
+    },
+  };
+  return result;
+}
+
 function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true) {
   let globalPatternIndex = 0;
   const paramsSchema = schema.object({
@@ -685,4 +724,5 @@ export function defineAlertTypes(
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());
+  alerting.registerType(getPatternSuccessOrFailureAlertType());
 }
