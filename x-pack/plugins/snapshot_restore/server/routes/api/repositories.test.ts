@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_REPOSITORY_TYPES,
-  REPOSITORY_PLUGINS_MAP,
-  REPOSITORY_TYPES,
-} from '../../../common';
+import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
