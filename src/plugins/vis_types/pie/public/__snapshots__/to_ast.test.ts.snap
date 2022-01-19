@@ -124,6 +124,9 @@ Object {
             "type": "expression",
           },
         ],
+        "startFromSecondLargestSlice": Array [
+          false,
+        ],
       },
       "function": "pieVis",
       "type": "function",
