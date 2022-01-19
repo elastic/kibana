@@ -33,11 +33,17 @@ async function generate() {
   const flatYaml = await yaml.safeLoad(await readFile(ecsYamlFilename));
 
   const fields = mapValues(flatYaml, (description) => {
-    return {
+    const field = {
       type: description.type,
       array: description.normalize.includes('array'),
       required: !!description.required,
     };
+
+    if (description.scaling_factor) {
+      field.scaling_factor = description.scaling_factor;
+    }
+
+    return field;
   });
 
   await Promise.all([
