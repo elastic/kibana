@@ -7,8 +7,6 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
-import turfCircle from '@turf/circle';
 import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';
 import {
