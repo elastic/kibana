@@ -19,7 +19,6 @@ import {
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
-import { createUpdateSuccessToaster } from './utils';
 
 export interface UseGetCasesState {
   data: AllCases;
