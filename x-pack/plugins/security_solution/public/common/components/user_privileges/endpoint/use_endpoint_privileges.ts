@@ -8,12 +8,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
-import { EndpointPrivileges, Immutable } from '../../../../../common/endpoint/types';
+import {
+  EndpointPrivileges,
+  Immutable,
+  MaybeImmutable,
+} from '../../../../../common/endpoint/types';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
 import { FleetAuthz } from '../../../../../../fleet/common';
+import { AuthenticatedUser } from '../../../../../../security/common';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -23,22 +28,24 @@ import { FleetAuthz } from '../../../../../../fleet/common';
  */
 export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const user = useCurrentUser();
-  const fleetServices = useKibana().services.fleet;
+  const { fleet: fleetServices, security: securityServices } = useKibana().services;
   const isMounted = useRef<boolean>(true);
   const licenseService = useLicense();
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
   const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
+  const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
+  const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
-      loading: !fleetCheckDone || !user,
+      loading: !fleetCheckDone || !userRolesCheckDone || !user,
       ...(fleetAuthz
-        ? calculateEndpointAuthz(licenseService, fleetAuthz)
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
         : getEndpointAuthzInitialState()),
     });
 
     return privilegeList;
-  }, [fleetCheckDone, user, fleetAuthz, licenseService]);
+  }, [fleetCheckDone, userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
 
   // Check if user can access fleet
   useEffect(() => {
@@ -63,6 +70,24 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       }
     })();
   }, [fleetServices]);
+
+  // get user roles
+  useEffect(() => {
+    (async () => {
+      try {
+        const currentUser: AuthenticatedUser = await securityServices.authc.getCurrentUser();
+
+        if (isMounted.current) {
+          setUserRoles(currentUser.roles);
+          setUserRolesCheckDone(true);
+        }
+      } finally {
+        if (isMounted.current) {
+          setUserRolesCheckDone(true);
+        }
+      }
+    })();
+  }, [securityServices.authc]);
 
   // Capture if component is unmounted
   useEffect(
