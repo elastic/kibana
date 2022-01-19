@@ -38,9 +38,10 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
         <p>
           <EuiText color="subdued">
             {i18n.translate('xpack.uptime.monitorManagement.stepCompleted', {
-              defaultMessage: '{noOfSteps} {stepLabel} completed',
+              defaultMessage:
+                '{stepCount, number} {stepCount, plural, one {step} other {steps}}  completed',
               values: {
-                noOfSteps: stepEnds.length,
+                stepCount: stepEnds.length,
                 stepLabel: stepEnds.length > 1 ? STEPS_LABEL : STEP_LABEL,
               },
             })}
