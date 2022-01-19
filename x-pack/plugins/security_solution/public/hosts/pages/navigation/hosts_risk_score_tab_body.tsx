@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';

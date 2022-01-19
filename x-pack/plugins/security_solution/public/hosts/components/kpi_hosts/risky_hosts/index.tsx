@@ -54,6 +54,12 @@ const RiskScoreContainer = styled(EuiFlexItem)`
   min-width: 80px;
 `;
 
+/**
+ * FUTURE ENGINEER: This is a host risk card for the host page.
+ * Due to not being able to apply KQL,
+ * we decided not to go forward with this for 8.1
+ * saving the code for future implementation
+ */
 const RiskyHostsComponent: React.FC<{
   error: unknown;
   loading: boolean;

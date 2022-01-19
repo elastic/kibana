@@ -12,7 +12,6 @@ import { HostsKpiAuthentications } from './authentications';
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
 import { HostsKpiProps } from './types';
-import { RiskyHosts } from './risky_hosts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useRiskyHosts } from '../../containers/kpi_hosts/risky_hosts';
 import { CallOutSwitcher } from '../../../common/components/callouts';
@@ -22,12 +21,7 @@ import * as i18n from './translations';
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
     const riskyHostsExperimentEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-    const {
-      error,
-      response,
-      loading,
-      isModuleDisabled: isRiskHostsModuleDisabled,
-    } = useRiskyHosts({
+    const { isModuleDisabled: isRiskHostsModuleDisabled } = useRiskyHosts({
       filterQuery,
       from,
       to,
@@ -61,7 +55,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
         )}
 
         <EuiFlexGroup wrap>
-          <EuiFlexItem grow={riskyHostsExperimentEnabled ? 1 : 2}>
+          <EuiFlexItem grow={1}>
             <HostsKpiHosts
               filterQuery={filterQuery}
               from={from}
@@ -72,15 +66,17 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
               skip={skip}
             />
           </EuiFlexItem>
-          {riskyHostsExperimentEnabled && (
-            <EuiFlexItem grow={1}>
-              <RiskyHosts
-                error={isRiskHostsModuleDisabled ? undefined : error}
-                data={response}
-                loading={loading}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={2}>
+            <HostsKpiAuthentications
+              filterQuery={filterQuery}
+              from={from}
+              indexNames={indexNames}
+              to={to}
+              narrowDateRange={narrowDateRange}
+              setQuery={setQuery}
+              skip={skip}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <HostsKpiUniqueIps
               filterQuery={filterQuery}
