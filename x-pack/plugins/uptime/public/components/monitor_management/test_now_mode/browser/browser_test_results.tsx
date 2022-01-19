@@ -25,7 +25,7 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
   const hits = data?.hits.hits;
   const doc = hits?.[0]?._source as JourneyStep;
 
-  const getButtonContent = (
+  const buttonContent = (
     <div>
       <TestResultHeader
         summaryDocs={summaryDoc ? [summaryDoc] : []}
@@ -52,7 +52,7 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
       element="fieldset"
       className="euiAccordionForm"
       buttonClassName="euiAccordionForm__button"
-      buttonContent={getButtonContent}
+      buttonContent={buttonContent}
       paddingSize="s"
     >
       {summaryDoc && stepEnds.length === 0 && <EuiText color="danger">{FAILED_TO_RUN}</EuiText>}
