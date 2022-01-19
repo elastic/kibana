@@ -185,5 +185,5 @@ export class CustomEvents {
         e
       );
     }
-  };
+  }
 }
