@@ -273,8 +273,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [visData.rows, metricColumn]);
 
   const config = useMemo(
-    () => getConfig(visType, visParams, visData, chartTheme, dimensions, rescaleFactor),
-    [visType, visParams, visData, chartTheme, dimensions, rescaleFactor]
+    () => getConfig(visType, visParams, chartTheme, dimensions, rescaleFactor),
+    [visType, visParams, chartTheme, dimensions, rescaleFactor]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');

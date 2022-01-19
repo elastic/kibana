@@ -15,14 +15,16 @@ import {
   SplitDimensionParams,
 } from '../../../common/types';
 
-type SortPredicateFn = (
-  visParams: PartitionVisParams,
-  visData: Datatable,
-  columns: Array<Partial<BucketColumns>>,
-  currentColumn: Partial<BucketColumns>
-) => (([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => number) | undefined;
+type SortFn = (([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => number) | undefined;
 
-type SortPredicateFnArgs = Parameters<SortPredicateFn>;
+type SortPredicateMosaicFn = (visData: Datatable, columns: Array<Partial<BucketColumns>>) => SortFn;
+
+type SortPredicatePieDonutFn = (
+  visParams: PartitionVisParams,
+  currentColumn: Partial<BucketColumns>
+) => SortFn;
+
+type SortPredicateWaffleFn = () => SortFn;
 
 export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
   [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce(
@@ -33,8 +35,8 @@ export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
     {}
   );
 
-const sortWithRespectToSourceOrder: SortPredicateFn =
-  (visParams, visData, columns, currentColumn) =>
+const sortWithRespectToSourceOrder =
+  (currentColumn: Partial<BucketColumns>) =>
   ([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => {
     const params = currentColumn.meta?.sourceParams?.params as SplitDimensionParams | undefined;
     const sort: string | undefined = params?.orderBy;
@@ -60,10 +62,10 @@ const sortWithRespectToSourceOrder: SortPredicateFn =
     return 0;
   };
 
-const sortPredicatePieDonut: SortPredicateFn = (visParams, ...args) =>
-  visParams.respectSourceOrder ? sortWithRespectToSourceOrder(visParams, ...args) : undefined;
+const sortPredicatePieDonut: SortPredicatePieDonutFn = (visParams, ...args) =>
+  visParams.respectSourceOrder ? sortWithRespectToSourceOrder(...args) : undefined;
 
-const sortPredicateMosaic: SortPredicateFn = (visParams, visData, columns) => {
+const sortPredicateMosaic: SortPredicateMosaicFn = (visData, columns) => {
   const sortingMap = columns[0]?.id ? extractUniqTermsMap(visData, columns[0].id) : {};
   return ([name1, node1], [, node2]) => {
     // Sorting for first group
@@ -75,18 +77,22 @@ const sortPredicateMosaic: SortPredicateFn = (visParams, visData, columns) => {
   };
 };
 
-const sortPredicateWaffle: SortPredicateFn =
+const sortPredicateWaffle: SortPredicateWaffleFn =
   () =>
   ([, node1], [, node2]) =>
     node2.value - node1.value;
 
-const sortPredicateEmpty: SortPredicateFn = () => undefined;
-
-export const sortPredicateByType = (chartType: ChartTypes, ...args: SortPredicateFnArgs) =>
+export const sortPredicateByType = (
+  chartType: ChartTypes,
+  visParams: PartitionVisParams,
+  visData: Datatable,
+  columns: Array<Partial<BucketColumns>>,
+  currentColumn: Partial<BucketColumns>
+) =>
   ({
-    [ChartTypes.PIE]: sortPredicatePieDonut,
-    [ChartTypes.DONUT]: sortPredicatePieDonut,
-    [ChartTypes.WAFFLE]: sortPredicateWaffle,
-    [ChartTypes.TREEMAP]: sortPredicateEmpty,
-    [ChartTypes.MOSAIC]: sortPredicateMosaic,
-  }[chartType](...args));
+    [ChartTypes.PIE]: () => sortPredicatePieDonut(visParams, currentColumn),
+    [ChartTypes.DONUT]: () => sortPredicatePieDonut(visParams, currentColumn),
+    [ChartTypes.WAFFLE]: () => sortPredicateWaffle(),
+    [ChartTypes.TREEMAP]: () => undefined,
+    [ChartTypes.MOSAIC]: () => sortPredicateMosaic(visData, columns),
+  }[chartType]());

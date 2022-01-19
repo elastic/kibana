@@ -7,7 +7,6 @@
  */
 
 import { PartitionConfig, PartitionLayout, RecursivePartial, Theme } from '@elastic/charts';
-import { Datatable } from '../../../../../../src/plugins/expressions';
 import {
   ChartTypes,
   LabelPositions,
@@ -20,26 +19,30 @@ type Config = RecursivePartial<PartitionConfig>;
 type GetConfigByTypeFn = (
   chartType: ChartTypes,
   visParams: PartitionVisParams,
-  visData: Datatable,
-  chartTheme: RecursivePartial<Theme>,
   dimensions?: PieContainerDimensions,
   rescaleFactor?: number
 ) => Config;
 
 type GetConfigFn = (
+  chartType: ChartTypes,
   visParams: PartitionVisParams,
-  visData: Datatable,
   chartTheme: RecursivePartial<Theme>,
   dimensions?: PieContainerDimensions,
   rescaleFactor?: number
 ) => Config;
 
+type GetPieDonutWaffleConfigFn = (
+  visParams: PartitionVisParams,
+  dimensions?: PieContainerDimensions,
+  rescaleFactor?: number
+) => Config;
+
+type GetTreemapMosaicConfigFn = (visParams: PartitionVisParams) => Config;
+
 const MAX_SIZE = 1000;
 
-const getPieDonutWaffleCommonConfig: GetConfigFn = (
+const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
   visParams,
-  visData,
-  chartTheme,
   dimensions,
   rescaleFactor = 1
 ) => {
@@ -82,7 +85,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
   return { ...config };
 };
 
-const getTreemapMosaicCommonConfig: GetConfigFn = (visParams) => {
+const getTreemapMosaicCommonConfig: GetTreemapMosaicConfigFn = (visParams) => {
   if (!visParams.labels.show) {
     return {
       fillLabel: { textColor: 'rgba(0,0,0,0)' },
@@ -91,14 +94,14 @@ const getTreemapMosaicCommonConfig: GetConfigFn = (visParams) => {
   return {};
 };
 
-const getPieSpecificConfig: GetConfigFn = (...args) => {
+const getPieSpecificConfig: GetPieDonutWaffleConfigFn = (...args) => {
   return {
     partitionLayout: PartitionLayout.sunburst,
     ...getPieDonutWaffleCommonConfig(...args),
   };
 };
 
-const getDonutSpecificConfig: GetConfigFn = (visParams, ...args) => {
+const getDonutSpecificConfig: GetPieDonutWaffleConfigFn = (visParams, ...args) => {
   return {
     partitionLayout: PartitionLayout.sunburst,
     emptySizeRatio: visParams.emptySizeRatio,
@@ -106,40 +109,39 @@ const getDonutSpecificConfig: GetConfigFn = (visParams, ...args) => {
   };
 };
 
-const getWaffleSpecificConfig: GetConfigFn = (...args) => {
+const getWaffleSpecificConfig: GetPieDonutWaffleConfigFn = (...args) => {
   return {
     partitionLayout: PartitionLayout.waffle,
     ...getPieDonutWaffleCommonConfig(...args),
   };
 };
 
-const getTreemapSpecificConfig: GetConfigFn = (...args) => {
+const getTreemapSpecificConfig: GetTreemapMosaicConfigFn = (...args) => {
   return {
     partitionLayout: PartitionLayout.treemap,
     ...getTreemapMosaicCommonConfig(...args),
   };
 };
 
-const getMosaicSpecificConfig: GetConfigFn = (...args) => {
+const getMosaicSpecificConfig: GetTreemapMosaicConfigFn = (...args) => {
   return {
     partitionLayout: PartitionLayout.mosaic,
     ...getTreemapMosaicCommonConfig(...args),
   };
 };
 
-const getSpecificConfig: GetConfigByTypeFn = (chartType, ...args) =>
+const getSpecificConfig: GetConfigByTypeFn = (chartType, visParams, dimensions, rescaleFactor) =>
   ({
-    [ChartTypes.PIE]: getPieSpecificConfig,
-    [ChartTypes.DONUT]: getDonutSpecificConfig,
-    [ChartTypes.TREEMAP]: getTreemapSpecificConfig,
-    [ChartTypes.MOSAIC]: getMosaicSpecificConfig,
-    [ChartTypes.WAFFLE]: getWaffleSpecificConfig,
-  }[chartType](...args));
+    [ChartTypes.PIE]: () => getPieSpecificConfig(visParams, dimensions, rescaleFactor),
+    [ChartTypes.DONUT]: () => getDonutSpecificConfig(visParams, dimensions, rescaleFactor),
+    [ChartTypes.TREEMAP]: () => getTreemapSpecificConfig(visParams),
+    [ChartTypes.MOSAIC]: () => getMosaicSpecificConfig(visParams),
+    [ChartTypes.WAFFLE]: () => getWaffleSpecificConfig(visParams, dimensions, rescaleFactor),
+  }[chartType]());
 
-export const getConfig: GetConfigByTypeFn = (
+export const getConfig: GetConfigFn = (
   chartType,
   visParams,
-  visData,
   chartTheme,
   dimensions,
   rescaleFactor = 1
@@ -175,6 +177,6 @@ export const getConfig: GetConfigByTypeFn = (
       ...(visParams.labels.truncate ? { maxTextLength: visParams.labels.truncate } : {}),
     },
     ...usingMargin,
-    ...getSpecificConfig(chartType, visParams, visData, chartTheme, dimensions, rescaleFactor),
+    ...getSpecificConfig(chartType, visParams, dimensions, rescaleFactor),
   };
 };
