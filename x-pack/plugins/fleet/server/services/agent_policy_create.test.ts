@@ -74,6 +74,34 @@ describe('createAgentPolicyWithPackages', () => {
       } as PackagePolicy)
     );
   });
+
+  it('should roll back agent policy if package policy creation failed', async () => {
+    mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementationOnce(
+      (soClient, packageToInstall) => Promise.reject(new Error('error'))
+    );
+    let error;
+    try {
+      await createAgentPolicyWithPackages({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        newPolicy: { name: 'Agent policy 1', namespace: 'default' },
+        withSysMonitoring: true,
+        spaceId: 'default',
+      });
+    } catch (err) {
+      error = err;
+    }
+
+    expect(error.message).toEqual('error');
+
+    expect(mockedAgentPolicyService.delete).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'new_id',
+      expect.anything()
+    );
+  });
+
   it('should create policy with fleet_server, system and elastic_agent package - first one', async () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,

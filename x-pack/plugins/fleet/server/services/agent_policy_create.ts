@@ -48,12 +48,15 @@ async function createPackagePolicy(
   packageToInstall: string,
   options: { spaceId: string; user: AuthenticatedUser | undefined }
 ) {
-  // If needed, retrieve package information and build a new package policy for the package
-  // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
-  // successfully
   const newPackagePolicy = await packagePolicyService
     .buildPackagePolicyFromPackage(soClient, packageToInstall)
-    .catch(() => undefined);
+    .catch(async (error) => {
+      // rollback agent policy on error
+      await agentPolicyService.delete(soClient, esClient, agentPolicy.id, {
+        force: true,
+      });
+      throw error;
+    });
 
   if (!newPackagePolicy) return;
 
