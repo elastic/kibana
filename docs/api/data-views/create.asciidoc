@@ -101,6 +101,7 @@ The API returns the data view object:
 }
 --------------------------------------------------
 
+[discrete]
 === Create data view API (deprecated)
 
 [[data-views-api-create-request-deprecated]]
