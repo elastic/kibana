@@ -4,7 +4,7 @@
 coming::[7.17.0]
 
 {kib} {minor-version} is a compatibility release for the {minor-version} Elastic Stack
-and contains no major enhancements.
+and contains no major features.
 For detailed information about this release, see the {kibana-ref}/release-notes.html[release notes].
 
 // tag::notable-highlights[]
