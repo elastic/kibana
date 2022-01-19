@@ -98,6 +98,15 @@ export const createCommentsMigrations = (
     ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
       return addOwnerToSO(doc);
     },
+    /*
+     * This is to fix the issue here: https://github.com/elastic/kibana/issues/123089
+     * Instead of migrating the rule information in the references array which was risky for 8.0
+     * we decided to remove the information since the UI will do the look up for the rule information if
+     * the backend returns it as null.
+     *
+     * The downside is it incurs extra query overhead.
+     **/
+    '8.0.0': removeRuleInformation,
   };
 
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
@@ -174,4 +183,30 @@ export const mergeMigrationFunctionMaps = (
   };
 
   return mergeWith({ ...obj1 }, obj2, customizer);
+};
+
+export const removeRuleInformation = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<unknown> => {
+  if (
+    doc.attributes.type === CommentType.alert ||
+    doc.attributes.type === CommentType.generatedAlert
+  ) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        rule: {
+          id: null,
+          name: null,
+        },
+      },
+      references: doc.references ?? [],
+    };
+  }
+
+  return {
+    ...doc,
+    references: doc.references ?? [],
+  };
 };

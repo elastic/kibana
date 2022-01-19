@@ -1,0 +1,202 @@
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [
+        {
+          "key": "issueType",
+          "value": "10002"
+        },
+        {
+          "key": "parent",
+          "value": null
+        },
+        {
+          "key": "priority",
+          "value": null
+        }
+      ],
+      "id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+      "name": "Test Jira",
+      "type": ".jira"
+    },
+    "created_at": "2021-06-17T18:57:41.682Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    },
+    "description": "asdf",
+    "external_service": {
+      "connector_id": "d68508f0-cf9d-11eb-a603-13e7747d215c",
+      "connector_name": "Test Jira",
+      "external_id": "10106",
+      "external_title": "TPN-99",
+      "external_url": "https://cases-testing.atlassian.net/browse/TPN-99",
+      "pushed_at": "2021-06-17T18:57:45.524Z",
+      "pushed_by": {
+        "email": null,
+        "full_name": "j@j.com",
+        "username": "711621466"
+      }
+    },
+    "settings": {
+      "syncAlerts": true
+    },
+    "status": "open",
+    "tags": [
+      "some tag"
+    ],
+    "title": "A case",
+    "type": "individual",
+    "updated_at": "2021-06-17T18:57:58.037Z",
+    "updated_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    }
+  },
+  "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+  "coreMigrationVersion": "7.13.2",
+  "migrationVersion": {
+    "cases": "7.12.0"
+  },
+  "references": [
+  ],
+  "type": "cases",
+  "updated_at": "2021-06-17T18:57:58.076Z"
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "alertId": "123",
+    "index": "index",
+    "rule": {"id": "id", "name": "name"},
+    "created_at": "2021-06-17T18:57:58.037Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    },
+    "pushed_at": null,
+    "pushed_by": null,
+    "type": "alert",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "7.13.2",
+  "migrationVersion": {
+    "cases-comments": "7.12.0"
+  },
+  "id": "ee59cdd0-cf9d-11eb-a603-13e7747d215c",
+  "references": [
+    {
+      "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-comments",
+  "updated_at": "2021-06-17T18:57:58.087Z"
+}
+
+{
+  "attributes": {
+    "associationType": "case",
+    "comment": "a comment",
+    "created_at": "2021-06-17T18:57:58.037Z",
+    "created_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    },
+    "pushed_at": null,
+    "pushed_by": null,
+    "type": "user",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "7.13.2",
+  "migrationVersion": {
+    "cases-comments": "7.12.0"
+  },
+  "id": "ae59cdd0-cf9d-11eb-a603-13e7747d215c",
+  "references": [
+    {
+      "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-comments",
+  "updated_at": "2021-06-17T18:57:58.087Z"
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-06-17T18:57:41.682Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    },
+    "action_field": [
+      "description",
+      "status",
+      "tags",
+      "title",
+      "connector",
+      "settings"
+    ],
+    "new_value": "{\"type\":\"individual\",\"title\":\"A case\",\"tags\":[\"some tag\"],\"description\":\"asdf\",\"connector\":{\"id\":\"d68508f0-cf9d-11eb-a603-13e7747d215c\",\"name\":\"Test Jira\",\"type\":\".jira\",\"fields\":{\"issueType\":\"10002\",\"parent\":null,\"priority\":null}},\"settings\":{\"syncAlerts\":true}}",
+    "old_value": null
+  },
+  "coreMigrationVersion": "7.13.2",
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "id": "e5509250-cf9d-11eb-a603-13e7747d215c",
+  "references": [
+    {
+      "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-06-17T18:57:42.925Z"
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "action_at": "2021-06-17T18:57:41.682Z",
+    "action_by": {
+      "email": null,
+      "full_name": "j@j.com",
+      "username": "711621466"
+    },
+    "action_field": [
+      "comment"
+    ],
+    "new_value": "{\"type\":\"alert\",\"alertId\":\"4eb4cd05b85bc65c7b9f22b776e0136f970f7538eb0d1b2e6e8c7d35b2e875cb\",\"index\":\".internal.alerts-security.alerts-default-000001\",\"rule\":{\"id\":\"43104810-7875-11ec-abc6-6f72e72f6004\",\"name\":\"A rule\"}}",
+    "old_value": null
+  },
+  "coreMigrationVersion": "7.13.2",
+  "migrationVersion": {
+    "cases-user-actions": "7.10.0"
+  },
+  "id": "a5509250-cf9d-11eb-a603-13e7747d215c",
+  "references": [
+    {
+      "id": "e49ad6e0-cf9d-11eb-a603-13e7747d215c",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2021-06-17T18:57:42.925Z"
+}
