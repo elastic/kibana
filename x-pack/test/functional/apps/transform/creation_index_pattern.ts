@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
