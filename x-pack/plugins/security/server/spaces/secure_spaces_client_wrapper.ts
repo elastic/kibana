@@ -279,6 +279,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
             action: isOnlySpace
               ? SavedObjectAction.DELETE
               : SavedObjectAction.UPDATE_OBJECTS_SPACES,
+            outcome: 'unknown',
             savedObject: { type: savedObject.type, id: savedObject.id },
           })
         );
