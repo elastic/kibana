@@ -33,9 +33,11 @@ export class ApmSynthtraceEsClient {
         for (const name of indices) {
           const dataStream = await this.client.indices.getDataStream({name: name}, { ignore: [404]})
           if (dataStream.data_streams && dataStream.data_streams.length > 0) {
-            return await this.client.indices.deleteDataStream({ name: name })
+            this.logger.debug(`Deleting datastream: ${name}`);
+            await this.client.indices.deleteDataStream({ name: name })
           }
         }
+        return
       }
 
       return cleanWriteTargets({
@@ -58,7 +60,7 @@ export class ApmSynthtraceEsClient {
       };
 
       const putTemplate = await this.client.cluster.putComponentTemplate({name: componentTemplate.name, ...componentTemplate.component_template})
-      console.log(`- updated component template ${componentTemplate.name}, acknowledged: ${putTemplate.acknowledged}`)
+      this.logger.info(`- updated component template ${componentTemplate.name}, acknowledged: ${putTemplate.acknowledged}`)
     }
   }
 
