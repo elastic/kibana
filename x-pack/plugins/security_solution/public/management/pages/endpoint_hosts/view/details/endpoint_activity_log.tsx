@@ -71,9 +71,16 @@ export const EndpointActivityLog = memo(
       [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
     );
 
+    const doesNotHaveDataAlsoOnRefetch = useMemo(
+      () => !activityLastLogData?.data.length && !activityLogData.length,
+      [activityLastLogData, activityLogData]
+    );
+
     const showCallout = useMemo(
-      () => !isPagingDisabled && activityLogLoaded && !activityLogData.length,
-      [isPagingDisabled, activityLogLoaded, activityLogData]
+      () =>
+        (!isPagingDisabled && activityLogLoaded && !activityLogData.length) ||
+        doesNotHaveDataAlsoOnRefetch,
+      [isPagingDisabled, activityLogLoaded, activityLogData, doesNotHaveDataAlsoOnRefetch]
     );
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
@@ -153,7 +160,7 @@ export const EndpointActivityLog = memo(
                     ref={loadMoreTrigger}
                   />
                 )}
-                {isPagingDisabled && !activityLogLoading && (
+                {isPagingDisabled && !activityLogLoading && !showCallout && (
                   <EuiText color="subdued" textAlign="center">
                     <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>
                   </EuiText>
