@@ -269,6 +269,8 @@ export {
   SavedObjectsUtils,
 } from './saved_objects';
 
+export const printLine = (line: string) => console.log(line);
+
 export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
