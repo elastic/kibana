@@ -17,28 +17,21 @@ const serviceConfig = schema.object({
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   syncInterval: schema.maybe(schema.string()),
   tls: schema.maybe(sslSchema),
+  devUrl: schema.maybe(schema.string()),
 });
 
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   ui: schema.maybe(
     schema.object({
-      unsafe: schema.maybe(
+      monitorManagement: schema.maybe(
         schema.object({
-          monitorManagement: schema.maybe(
-            schema.object({
-              enabled: schema.boolean(),
-            })
-          ),
+          enabled: schema.boolean(),
         })
       ),
     })
   ),
-  unsafe: schema.maybe(
-    schema.object({
-      service: serviceConfig,
-    })
-  ),
+  service: schema.maybe(serviceConfig),
 });
 
 export const config: PluginConfigDescriptor = {
