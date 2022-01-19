@@ -1684,12 +1684,12 @@ export function getSplitByTermsLayer(
           .map(([id]) => id)[0];
 
         paramValue = (
-          termsColumnParams && termsColumnParams.orderBy.type === 'column'
+          termsColumnParams.orderBy.type === 'column' && existingMetricColumn
             ? {
                 type: 'column',
                 columnId: existingMetricColumn,
               }
-            : termsColumnParams?.orderBy ?? undefined
+            : { type: 'alphabetical', fallback: true }
         ) as TermsIndexPatternColumn['params']['orderBy'];
       }
       termsLayer = updateColumnParam({
