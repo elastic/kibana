@@ -31,7 +31,7 @@ export function ServiceOverviewDependenciesTable({
   fixedHeight,
   isSingleColumn = true,
   link,
-  hidePerPageOptions = true,
+  hidePerPageOptions = false,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },

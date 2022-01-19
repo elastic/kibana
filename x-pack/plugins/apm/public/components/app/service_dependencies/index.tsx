@@ -32,7 +32,7 @@ export function ServiceDependencies() {
         </EuiPanel>
       </ChartPointerEventContextProvider>
       <EuiSpacer size="l" />
-      <ServiceOverviewDependenciesTable hidePerPageOptions={false} />
+      <ServiceOverviewDependenciesTable />
     </>
   );
 }

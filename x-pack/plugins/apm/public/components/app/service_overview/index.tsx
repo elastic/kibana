@@ -165,6 +165,7 @@ export function ServiceOverview() {
                     <ServiceOverviewDependenciesTable
                       fixedHeight={true}
                       isSingleColumn={isSingleColumn}
+                      hidePerPageOptions={true}
                       link={
                         <EuiLink href={dependenciesLink}>
                           {i18n.translate(
