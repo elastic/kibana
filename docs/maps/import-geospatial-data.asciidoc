@@ -64,6 +64,7 @@ On the {kib} home page, you can upload a file and import it into an {es} index w
 Upload features into Elasticsearch by drawing lines, polygons, circles, bounding boxes, and points in a map.
 
 To create a new index for drawing:
+
 . <<maps-create, Create a new map>>.
 . Click *Add layer*.
 . Select *Create index*.
@@ -93,7 +94,7 @@ To open an existing index for drawing:
 . Click layer name in legend and select *Edit features*.
 
 When feature editing is open, a feature editing toolbox is displayed on the left side of the map.
-+
+
 [role="screenshot"]
 image::maps/images/drawing_layer.png[]
 
