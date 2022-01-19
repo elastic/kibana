@@ -500,7 +500,7 @@ export class DocLinksService {
           gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
           s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
-          snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+          snapshotRestoreRepos: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html`,
           mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
         snapshotRestore: {
