@@ -275,7 +275,7 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
     indexName: signalIndexName,
   });
 
-  const enrichedAlert: AlertData | undefined = useMemo(() => {
+  const enrichedAlert = useMemo(() => {
     if (isLoadingAlertData === false) {
       const hit = data?.hits.hits[0];
       if (!hit) {
@@ -291,9 +291,13 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
    */
   const useRuleIndices = useMemo(() => {
     if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
-      return enrichedAlert['kibana.alert.rule.parameters'].index as unknown as string[];
+      return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
+        ? enrichedAlert['kibana.alert.rule.parameters'].index
+        : [enrichedAlert['kibana.alert.rule.parameters'].index];
     } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
-      return enrichedAlert.signal.rule.index as unknown as string[];
+      return Array.isArray(enrichedAlert.signal.rule.index)
+        ? enrichedAlert.signal.rule.index
+        : [enrichedAlert.signal.rule.index];
     }
     return ruleIndices;
   }, [enrichedAlert, ruleIndices]);
