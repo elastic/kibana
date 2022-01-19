@@ -35,6 +35,7 @@ storiesOf('Components/ExceptionItem', module)
 
     return (
       <ExceptionItem
+        disableActions={false}
         loadingItemIds={[]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
@@ -57,6 +58,7 @@ storiesOf('Components/ExceptionItem', module)
 
     return (
       <ExceptionItem
+        disableActions={false}
         loadingItemIds={[]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
@@ -80,6 +82,7 @@ storiesOf('Components/ExceptionItem', module)
 
     return (
       <ExceptionItem
+        disableActions={false}
         loadingItemIds={[]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
@@ -95,6 +98,7 @@ storiesOf('Components/ExceptionItem', module)
 
     return (
       <ExceptionItem
+        disableActions={false}
         loadingItemIds={[]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
@@ -108,6 +112,7 @@ storiesOf('Components/ExceptionItem', module)
     payload.comments = getCommentsArrayMock();
     return (
       <ExceptionItem
+        disableActions={false}
         loadingItemIds={[]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={payload}
@@ -122,9 +127,34 @@ storiesOf('Components/ExceptionItem', module)
 
     return (
       <ExceptionItem
+        disableActions={false}
         loadingItemIds={[{ id, namespaceType: namespace_type }]}
         commentsAccordionId={'accordion--comments'}
         exceptionItem={{ id, namespace_type, ...rest }}
+        onDeleteException={action('onClick')}
+        onEditException={action('onClick')}
+      />
+    );
+  })
+  .add('with actions disabled', () => {
+    const payload = getExceptionListItemSchemaMock();
+    payload.description = '';
+    payload.comments = getCommentsArrayMock();
+    payload.entries = [
+      {
+        field: 'actingProcess.file.signer',
+        type: 'match',
+        operator: 'included',
+        value: 'Elastic, N.V.',
+      },
+    ];
+
+    return (
+      <ExceptionItem
+        disableActions
+        loadingItemIds={[]}
+        commentsAccordionId={'accordion--comments'}
+        exceptionItem={payload}
         onDeleteException={action('onClick')}
         onEditException={action('onClick')}
       />
