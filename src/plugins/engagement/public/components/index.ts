@@ -9,6 +9,5 @@
 import React from 'react';
 import { withSuspense } from '../../../shared_ux/public';
 
-// This could be abstracted away, but defaulting to DriftChat for now.
-export const LazyEngagementChat = React.lazy(() => import('./drift_chat'));
+export const LazyEngagementChat = React.lazy(() => import('./iframe_chat'));
 export const EngagementChat = withSuspense(LazyEngagementChat);

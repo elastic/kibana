@@ -7,11 +7,10 @@
  */
 /* eslint-disable import/no-default-export */
 
-import { DriftChat } from './drift_chat';
-export { DriftChat } from './drift_chat';
+import { Chat } from './iframe_chat';
+export { Chat } from './iframe_chat';
 
 /**
- * Exporting the DriftChat component as a default export so it can be
- * loaded by React.lazy.
+ * Exporting the Chat component as a default export so it can be loaded by React.lazy.
  */
-export default DriftChat;
+export default Chat;

@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { DriftChat } from './drift_chat';
+import { Chat } from './iframe_chat';
 
 export default {
-  title: 'Drift Chat',
+  title: 'IFRAME Chat',
   description: '',
   parameters: {},
 };
@@ -19,7 +19,7 @@ export default {
 export const Component = () => {
   return (
     <div>
-      <DriftChat />
+      <Chat />
     </div>
   );
 };

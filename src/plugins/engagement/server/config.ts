@@ -9,7 +9,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 
-const driftConfigSchema = schema.object({
+const chatConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   chatURL: schema.conditional(
     schema.siblingRef('enabled'),
@@ -38,7 +38,7 @@ const driftConfigSchema = schema.object({
 });
 
 const configSchema = schema.object({
-  drift: driftConfigSchema,
+  chat: chatConfigSchema,
 });
 
 export type EngagementConfigType = TypeOf<typeof configSchema>;

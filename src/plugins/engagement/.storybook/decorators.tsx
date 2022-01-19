@@ -12,7 +12,7 @@ import { servicesDecorator as sharedUXServicesDecorator } from '../../shared_ux/
 import { ServicesProvider } from '../public/services';
 
 const config = {
-  drift: {
+  chat: {
     enabled: true,
     chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
     pocID: '53877975',

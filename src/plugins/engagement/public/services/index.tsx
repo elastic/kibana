@@ -8,11 +8,11 @@
 
 import React, { FC, createContext, useContext } from 'react';
 
-interface WithDrift {
+interface WithChat {
   enabled: false;
 }
 
-interface WithoutDrift {
+interface WithoutChat {
   enabled: true;
   chatURL: string;
 
@@ -23,13 +23,13 @@ interface WithoutDrift {
   pocEmail: string;
 }
 
-type DriftService = WithDrift | WithoutDrift;
+type ChatService = WithChat | WithoutChat;
 
 interface EngagementServices {
-  drift: DriftService;
+  chat: ChatService;
 }
 
-const ServicesContext = createContext<EngagementServices>({ drift: { enabled: false } });
+const ServicesContext = createContext<EngagementServices>({ chat: { enabled: false } });
 
 export const ServicesProvider: FC<EngagementServices> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
@@ -42,8 +42,7 @@ export function useServices() {
   return useContext(ServicesContext);
 }
 
-export function useDrift(): DriftService {
-  const { drift } = useServices();
-
-  return drift;
+export function useChat(): ChatService {
+  const { chat } = useServices();
+  return chat;
 }

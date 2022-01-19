@@ -8,14 +8,15 @@
 
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
 import { css } from '@emotion/react';
-import { useDrift } from '../../services';
+import { useChat } from '../../services';
 
-type UseDriftType =
+type UseChatType =
   | [false]
   | [true, string, React.MutableRefObject<HTMLIFrameElement | null>, CSSProperties];
 
 const MESSAGE_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
+const MESSAGE_SET_CONTEXT = 'driftSetContext';
 
 const iframeStyle = css`
   position: fixed;
@@ -54,9 +55,9 @@ const getContext = () => {
   };
 };
 
-const useDriftFrame = (): UseDriftType => {
+const useFrame = (): UseChatType => {
   const chatRef = useRef<HTMLIFrameElement>(null);
-  const drift = useDrift();
+  const chat = useChat();
   const [style, setStyle] = useState<CSSProperties>({});
 
   useEffect(() => {
@@ -64,7 +65,7 @@ const useDriftFrame = (): UseDriftType => {
       const { current: chatIframe } = chatRef;
 
       if (
-        !drift.enabled ||
+        !chat.enabled ||
         !chatIframe?.contentWindow ||
         event.source !== chatIframe?.contentWindow
       ) {
@@ -77,16 +78,16 @@ const useDriftFrame = (): UseDriftType => {
       switch (message.type) {
         case MESSAGE_READY: {
           const user = {
-            id: drift.pocID,
+            id: chat.pocID,
             attributes: {
-              email: drift.pocEmail,
+              email: chat.pocEmail,
             },
-            jwt: drift.pocJWT,
+            jwt: chat.pocJWT,
           };
 
           chatIframe.contentWindow.postMessage(
             {
-              type: 'driftSetContext',
+              type: MESSAGE_SET_CONTEXT,
               data: { context, user },
             },
             '*'
@@ -107,17 +108,17 @@ const useDriftFrame = (): UseDriftType => {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [drift, style]);
+  }, [chat, style]);
 
-  if (drift.enabled) {
-    return [true, drift.chatURL, chatRef, style];
+  if (chat.enabled) {
+    return [true, chat.chatURL, chatRef, style];
   }
 
   return [false];
 };
 
-export const DriftChat = () => {
-  const [enabled, chatUrl, chatRef, style] = useDriftFrame();
+export const Chat = () => {
+  const [enabled, chatUrl, chatRef, style] = useFrame();
 
   if (!enabled) {
     return null;
@@ -127,10 +128,10 @@ export const DriftChat = () => {
     <iframe
       css={iframeStyle}
       style={style}
-      data-test-id="drift-chat"
+      data-test-id="iframe-chat"
       ref={chatRef}
       src={chatUrl}
-      title="Engagment"
+      title="engagement"
     />
   );
 };

@@ -18,7 +18,7 @@ import { ServicesProvider } from './services';
 
 // TODO: remove when config starts working.
 const _config = {
-  drift: {
+  chat: {
     enabled: true,
     chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
     pocID: '53877975',
@@ -29,7 +29,7 @@ const _config = {
 };
 
 export interface EngagementConfigType {
-  drift: {
+  chat: {
     enabled: boolean;
     chatURL: string;
 
@@ -61,12 +61,12 @@ export class EngagementPlugin
 
     // TODO: For some reason this isn't working.
     const config = this.initializerContext.config.get<EngagementConfigType>();
-    const drift = config?.drift || _config.drift || { enabled: false };
+    const chat = config?.chat || _config.chat || { enabled: false };
 
     return {
       ContextProvider: ({ children }) => (
         <sharedUX.ServicesContext>
-          <ServicesProvider drift={drift}>{children}</ServicesProvider>
+          <ServicesProvider chat={chat}>{children}</ServicesProvider>
         </sharedUX.ServicesContext>
       ),
     };
