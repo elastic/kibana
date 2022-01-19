@@ -169,7 +169,7 @@ export class CustomEvents {
     });
   }
 
-  reportCustomEvent = (eventName: string, params: Record<string, FullstoryEventValue> = {}) => {
+  public reportCustomEvent(eventName: string, params: Record<string, FullstoryEventValue> = {}) {
     if (!this.fullStory || !eventName) return;
     try {
       const context = this.formatContext({
