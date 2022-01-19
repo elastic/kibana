@@ -1061,7 +1061,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricStyle() {
-      const el = await testSubjects.find('lns_metric_value');
+      const el = await testSubjects.find('lnsVisualizationContainer');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
