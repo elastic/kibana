@@ -127,12 +127,12 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-            await getActionsClientWithRequest(request, source),
-            encryptedSavedObjectsClient,
-            preconfiguredActions,
-            actionId,
-            namespace.namespace
-          );
+          await getActionsClientWithRequest(request, source),
+          encryptedSavedObjectsClient,
+          preconfiguredActions,
+          actionId,
+          namespace.namespace
+        );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
 
