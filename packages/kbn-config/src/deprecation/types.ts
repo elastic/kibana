@@ -31,7 +31,7 @@ export interface DeprecatedConfigDetails {
    * - warning: will not break deployment upon upgrade
    * - critical: needs to be addressed before upgrade.
    */
-  level?: 'warning' | 'critical';
+  level: 'warning' | 'critical';
   /** (optional) set to `true` to prevent the config service from logging the deprecation message. */
   silent?: boolean;
   /** (optional) link to the documentation for more details on the deprecation. */
@@ -118,6 +118,10 @@ export interface ConfigDeprecationCommand {
  */
 export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
 
+/** @public */
+export type FactoryConfigDeprecationDetails = Pick<DeprecatedConfigDetails, 'level'> &
+  Partial<Omit<DeprecatedConfigDetails, 'level'>>;
+
 /**
  * Provides helpers to generates the most commonly used {@link ConfigDeprecation}
  * when invoking a {@link ConfigDeprecationProvider}.
@@ -151,7 +155,7 @@ export interface ConfigDeprecationFactory {
   deprecate(
     deprecatedKey: string,
     removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -172,7 +176,7 @@ export interface ConfigDeprecationFactory {
   deprecateFromRoot(
     deprecatedKey: string,
     removeBy: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -209,7 +213,7 @@ export interface ConfigDeprecationFactory {
   rename(
     oldKey: string,
     newKey: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -249,7 +253,7 @@ export interface ConfigDeprecationFactory {
   renameFromRoot(
     oldKey: string,
     newKey: string,
-    details?: Partial<DeprecatedConfigDetails>
+    details: FactoryConfigDeprecationDetails
   ): ConfigDeprecation;
 
   /**
@@ -283,7 +287,7 @@ export interface ConfigDeprecationFactory {
    * }
    * ```
    */
-  unused(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
+  unused(unusedKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation;
 
   /**
    * Remove a configuration property from the root configuration.
@@ -319,7 +323,7 @@ export interface ConfigDeprecationFactory {
    * }
    * ```
    */
-  unusedFromRoot(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
+  unusedFromRoot(unusedKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation;
 }
 
 /** @internal */
