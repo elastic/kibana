@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
-  Form,
+  FormHook,
   Field,
   getUseField,
   useFormData,
@@ -28,11 +28,9 @@ import {
   ValidationFunc,
 } from '../../../../../../../shared_imports';
 
-import { useParentStateForm, FormState } from './use_parent_state_form';
-
 const CommonUseField = getUseField({ component: Field });
 
-interface TagsFormData {
+export interface TagsFormData {
   tags: string[];
   overwrite: boolean;
 }
@@ -74,30 +72,18 @@ const getFormConfig = (editAction: BulkActionEditType) =>
       };
 
 interface Props {
-  editAction: BulkActionEditType;
-  onChange: (form: FormState) => void;
+  form: FormHook;
   rulesCount: number;
+  editAction: BulkActionEditType;
 }
-const TagsFormComponent = ({ editAction, onChange, rulesCount }: Props) => {
+
+const TagsFormComponent = ({ editAction, form, rulesCount }: Props) => {
   const formConfig = getFormConfig(editAction);
 
-  const { form } = useParentStateForm({
-    data: initialFormData,
-    schema,
-    onChange,
-    config: {
-      formTitle: formConfig.formTitle,
-      prepareEditActionPayload: (formData: TagsFormData) =>
-        ({
-          value: formData.tags,
-          type: formData.overwrite ? BulkActionEditType.set_tags : editAction,
-        } as BulkActionEditPayloadTags),
-    },
-  });
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
 
   return (
-    <Form form={form}>
+    <>
       <CommonUseField
         path="tags"
         config={{ ...schema.tags, label: formConfig.tagsLabel }}
@@ -131,9 +117,25 @@ const TagsFormComponent = ({ editAction, onChange, rulesCount }: Props) => {
           </EuiCallOut>
         </EuiFormRow>
       )}
-    </Form>
+    </>
   );
 };
 
 export const TagsForm = React.memo(TagsFormComponent);
 TagsForm.displayName = 'TagsForm';
+
+export const tagsFormDataToEditActionPayload = (
+  formData: TagsFormData,
+  editAction: BulkActionEditType
+) =>
+  ({
+    value: formData.tags,
+    type: formData.overwrite ? BulkActionEditType.set_tags : editAction,
+  } as BulkActionEditPayloadTags);
+
+export const tagsFormConfiguration = (editAction: BulkActionEditType) => ({
+  Component: TagsFormComponent,
+  schema,
+  formTitle: getFormConfig(editAction).formTitle,
+  initialFormData,
+});

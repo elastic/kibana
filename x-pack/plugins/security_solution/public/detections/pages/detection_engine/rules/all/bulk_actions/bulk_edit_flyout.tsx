@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -17,6 +17,9 @@ import {
   EuiTitle,
   EuiFlyoutBody,
 } from '@elastic/eui';
+
+import { Form, useForm } from '../../../../../../shared_imports';
+
 import * as i18n from '../../translations';
 
 import {
@@ -24,10 +27,11 @@ import {
   BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
-import { IndexPatternsForm } from './forms/index_patterns_form';
-import { TagsForm } from './forms/tags_form';
-
-import { initialState, FormState } from './forms/use_parent_state_form';
+import {
+  indexPatternsFormConfiguration,
+  indexPatternsFormDataToEditActionPayload,
+} from './forms/index_patterns_form';
+import { tagsFormConfiguration, tagsFormDataToEditActionPayload } from './forms/tags_form';
 
 interface Props {
   onClose: () => void;
@@ -37,55 +41,66 @@ interface Props {
 }
 
 const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }: Props) => {
-  const [formState, setFormState] = useState<FormState>(initialState);
-
-  const handleSave = async () => {
-    const isValid = await formState.validate();
-    if (isValid) {
-      onConfirm(formState.getEditActionPayload());
-    }
-  };
-
-  const sendForm = useCallback(
-    async (updatedFormState: FormState) => {
-      setFormState(updatedFormState);
-    },
-    [setFormState]
-  );
-  const { isValid } = formState;
-
-  const formSwitch = useMemo(() => {
+  const {
+    schema,
+    Component: FormComponent,
+    initialFormData,
+    formTitle,
+  } = useMemo(() => {
     switch (editAction) {
       case BulkActionEditType.add_index_patterns:
       case BulkActionEditType.delete_index_patterns:
       case BulkActionEditType.set_index_patterns:
-        return (
-          <IndexPatternsForm onChange={sendForm} editAction={editAction} rulesCount={rulesCount} />
-        );
+        return indexPatternsFormConfiguration(editAction);
 
       case BulkActionEditType.add_tags:
       case BulkActionEditType.delete_tags:
       case BulkActionEditType.set_tags:
-        return <TagsForm onChange={sendForm} editAction={editAction} rulesCount={rulesCount} />;
+        return tagsFormConfiguration(editAction);
 
       default:
-        return null;
+        throw Error('No available action');
     }
-  }, [sendForm, editAction, rulesCount]);
+  }, [editAction]);
+
+  const { form } = useForm<typeof initialFormData>({
+    defaultValue: initialFormData,
+    schema,
+  });
+
+  const handleSave = async () => {
+    const isValid = await form.validate();
+    if (isValid) {
+      const data = form.getFormData();
+      let payload;
+      if ('tags' in data) {
+        payload = tagsFormDataToEditActionPayload(data, editAction);
+      }
+
+      if ('index' in data) {
+        payload = indexPatternsFormDataToEditActionPayload(data, editAction);
+      }
+
+      if (payload) {
+        onConfirm(payload);
+      }
+    }
+  };
+
+  const { isValid } = form;
 
   return (
-    <EuiFlyout
-      ownFocus
-      onClose={onClose}
-      aria-labelledby={formState.formTitle ?? undefined}
-      size="s"
-    >
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={formTitle} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{formState.formTitle}</h2>
+          <h2>{formTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{formSwitch}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <Form form={form}>
+          <FormComponent rulesCount={rulesCount} editAction={editAction} form={form} />
+        </Form>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

@@ -19,10 +19,8 @@ import {
   BulkActionEditPayloadIndexPatterns,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
-import { useParentStateForm, FormState } from './use_parent_state_form';
-
 import {
-  Form,
+  FormHook,
   Field,
   getUseField,
   useFormData,
@@ -35,12 +33,12 @@ import {
 
 const CommonUseField = getUseField({ component: Field });
 
-interface IndexPatternsFormData {
+export interface IndexPatternsFormData {
   index: string[];
   overwrite: boolean;
 }
 
-export const schema: FormSchema<IndexPatternsFormData> = {
+const schema: FormSchema<IndexPatternsFormData> = {
   index: {
     fieldsToValidateOnChange: ['index'],
     type: FIELD_TYPES.COMBO_BOX,
@@ -77,34 +75,20 @@ const getFormConfig = (editAction: BulkActionEditType) =>
       };
 
 interface Props {
+  form: FormHook;
   rulesCount: number;
   editAction: BulkActionEditType;
-  onChange: (form: FormState) => void;
 }
 
-const IndexPatternsFormComponent = ({ editAction, rulesCount, onChange }: Props) => {
+const IndexPatternsFormComponent = ({ editAction, rulesCount, form }: Props) => {
   const formConfig = getFormConfig(editAction);
-
-  const { form } = useParentStateForm({
-    data: initialFormData,
-    schema,
-    onChange,
-    config: {
-      formTitle: formConfig.formTitle,
-      prepareEditActionPayload: (formData: IndexPatternsFormData) =>
-        ({
-          value: formData.index,
-          type: formData.overwrite ? BulkActionEditType.set_index_patterns : editAction,
-        } as BulkActionEditPayloadIndexPatterns),
-    },
-  });
 
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
   return (
-    <Form form={form}>
+    <>
       <CommonUseField
         path="index"
         config={{ ...schema.index, label: formConfig.indexLabel }}
@@ -140,9 +124,25 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onChange }: Props)
           </EuiCallOut>
         </EuiFormRow>
       )}
-    </Form>
+    </>
   );
 };
 
 export const IndexPatternsForm = React.memo(IndexPatternsFormComponent);
 IndexPatternsForm.displayName = 'IndexPatternsForm';
+
+export const indexPatternsFormDataToEditActionPayload = (
+  formData: IndexPatternsFormData,
+  editAction: BulkActionEditType
+) =>
+  ({
+    value: formData.index,
+    type: formData.overwrite ? BulkActionEditType.set_index_patterns : editAction,
+  } as BulkActionEditPayloadIndexPatterns);
+
+export const indexPatternsFormConfiguration = (editAction: BulkActionEditType) => ({
+  Component: IndexPatternsForm,
+  schema,
+  formTitle: getFormConfig(editAction).formTitle,
+  initialFormData,
+});
