@@ -39,6 +39,7 @@ import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
+import { DataViewEditorStart } from '../../data_view_editor/target/types/public';
 
 export interface HistoryLocationState {
   referrer: string;
@@ -67,6 +68,7 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViewEditor: DataViewEditorStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -108,5 +110,6 @@ export function buildServices(
     dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
+    dataViewEditor: plugins.dataViewEditor,
   };
 }

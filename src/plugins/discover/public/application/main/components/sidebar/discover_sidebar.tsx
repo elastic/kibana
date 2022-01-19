@@ -68,6 +68,8 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
 
   editField: (fieldName?: string) => void;
 
+  createNewDataView: () => void;
+
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -104,6 +106,7 @@ export function DiscoverSidebarComponent({
   closeFlyout,
   editField,
   viewMode,
+  createNewDataView,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<DataViewField[] | null>(null);
 
@@ -303,6 +306,7 @@ export function DiscoverSidebarComponent({
               selectedIndexPattern={selectedIndexPattern}
               editField={editField}
               useNewFieldsApi={useNewFieldsApi}
+              createNewDataView={createNewDataView}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -341,6 +345,7 @@ export function DiscoverSidebarComponent({
                 selectedIndexPattern={selectedIndexPattern}
                 useNewFieldsApi={useNewFieldsApi}
                 editField={editField}
+                createNewDataView={createNewDataView}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

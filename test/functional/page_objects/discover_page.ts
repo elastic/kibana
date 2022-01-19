@@ -363,6 +363,13 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async clickCreateNewDataView() {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('dataview-create-new');
+      await this.find.byClassName('indexPatternEditor__form');
+    });
+  }
+
   public async hasNoResults() {
     return await this.testSubjects.exists('discoverNoResults');
   }
@@ -597,5 +604,11 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
+  }
+
+  public async getCurrentlySelectedDataView() {
+    await this.testSubjects.existOrFail('discover-sidebar');
+    const button = await this.testSubjects.find('indexPattern-switch-link');
+    return button.getAttribute('title');
   }
 }

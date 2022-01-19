@@ -53,6 +53,7 @@ describe('Discover DataView Management', () => {
   const indexPattern = stubLogstashIndexPattern;
 
   const editField = jest.fn();
+  const createNewDataView = jest.fn();
 
   const mountComponent = () => {
     return mountWithIntl(
@@ -61,6 +62,7 @@ describe('Discover DataView Management', () => {
         editField={editField}
         selectedIndexPattern={indexPattern}
         useNewFieldsApi={true}
+        createNewDataView={createNewDataView}
       />
     );
   };
@@ -79,7 +81,7 @@ describe('Discover DataView Management', () => {
     button.simulate('click');
 
     expect(component.find(EuiContextMenuPanel).length).toBe(1);
-    expect(component.find(EuiContextMenuItem).length).toBe(2);
+    expect(component.find(EuiContextMenuItem).length).toBe(3);
   });
 
   test('click on an add button executes editField callback', () => {

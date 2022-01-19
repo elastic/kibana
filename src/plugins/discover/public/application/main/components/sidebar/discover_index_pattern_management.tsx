@@ -30,11 +30,16 @@ export interface DiscoverIndexPatternManagementProps {
    * @param fieldName
    */
   editField: (fieldName?: string) => void;
+
+  /**
+   * Callback to execute on create new data action
+   */
+  createNewDataView: () => void;
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
   const { dataViewFieldEditor, core } = props.services;
-  const { useNewFieldsApi, selectedIndexPattern, editField } = props;
+  const { useNewFieldsApi, selectedIndexPattern, editField, createNewDataView } = props;
   const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
@@ -99,6 +104,19 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
               defaultMessage: 'Manage data view fields',
+            })}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="new"
+            icon="indexSettings"
+            data-test-subj="dataview-create-new"
+            onClick={() => {
+              setIsAddIndexPatternFieldPopoverOpen(false);
+              createNewDataView();
+            }}
+          >
+            {i18n.translate('discover.fieldChooser.dataViews.createNewDataView', {
+              defaultMessage: 'Create new data view',
             })}
           </EuiContextMenuItem>,
         ]}

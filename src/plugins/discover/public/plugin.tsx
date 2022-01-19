@@ -64,6 +64,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
+import { DataViewEditorStart } from '../../data_view_editor/target/types/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -177,6 +178,7 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;

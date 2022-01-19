@@ -67,6 +67,8 @@ function getCompProps(): DiscoverSidebarProps {
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    createNewDataView: jest.fn(),
+    onDataViewCreated: jest.fn(),
   };
 }
 
