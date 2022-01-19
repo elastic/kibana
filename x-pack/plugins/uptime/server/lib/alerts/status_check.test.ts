@@ -74,12 +74,6 @@ const mockStatusAlertDocument = (
   numTimes: number
 ) => {
   const { monitorInfo } = monitor;
-  const monitorStatus = {
-    info: monitorInfo,
-    count,
-    interval,
-    numTimes,
-  };
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
