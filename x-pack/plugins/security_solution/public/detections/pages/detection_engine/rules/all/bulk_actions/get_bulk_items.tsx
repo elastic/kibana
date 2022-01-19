@@ -259,6 +259,8 @@ export const getBatchItems = ({
           if (isNaN(failedRulesCount)) {
             toastsApi.addError(error, { title: i18n.BULK_ACTION_FAILED });
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            error.stack = JSON.stringify((error as any).body, null, 2);
             toastsApi.addError(error, {
               title: i18n.BULK_EDIT_ERROR_TOAST_TITLE(failedRulesCount),
               toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCIRPTION(failedRulesCount),
