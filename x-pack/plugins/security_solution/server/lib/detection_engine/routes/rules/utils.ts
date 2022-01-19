@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { countBy } from 'lodash/fp';
+import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
 import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -229,10 +229,10 @@ export const swapActionIds = async (
         `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details`
       );
     }
-  } catch (exc) {
     return action;
+  } catch (exc) {
+    return exc;
   }
-  return action;
 };
 
 /**
@@ -271,7 +271,7 @@ export const migrateLegacyActionsIds = async (
 ): Promise<PromiseFromStreams[]> => {
   const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
 
-  return pMap(
+  const toReturn = await pMap(
     rules,
     async (rule) => {
       if (isImportRule(rule)) {
@@ -284,33 +284,32 @@ export const migrateLegacyActionsIds = async (
         );
 
         // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const actionMigrationErrors = newActions.filter(
-          (action): action is Error => action instanceof Error
-        );
-
-        const newlyMigratedActions: Action[] = newActions.filter(
-          (action): action is Action => !(action instanceof Error)
-        );
+        const [actionMigrationErrors, newlyMigratedActions] = partition<Action | Error, Error>(
+          (item): item is Error => item instanceof Error
+        )(newActions);
 
         if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
           return { ...rule, actions: newlyMigratedActions };
         }
-        // return an Error object with the rule_id and the error messages
-        // for the actions associated with that rule.
-        return new Error(
-          JSON.stringify(
-            createBulkErrorObject({
-              ruleId: rule.rule_id,
-              statusCode: 409,
-              message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
-            })
-          )
-        );
+
+        return [
+          { ...rule, actions: newlyMigratedActions },
+          new Error(
+            JSON.stringify(
+              createBulkErrorObject({
+                ruleId: rule.rule_id,
+                statusCode: 409,
+                message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
+              })
+            )
+          ),
+        ];
       }
       return rule;
     },
     { concurrency: MAX_CONCURRENT_SEARCHES }
   );
+  return toReturn.flat();
 };
 
 /**
