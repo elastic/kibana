@@ -8,7 +8,11 @@
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 
-import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
+import type {
+  ISavedObjectsPointInTimeFinder,
+  ISavedObjectsRepository,
+  SavedObject,
+} from 'src/core/server';
 
 import type {
   GetAllSpacesOptions,
@@ -57,6 +61,13 @@ export interface ISpacesClient {
    * @param space the updated space.
    */
   update(id: string, space: Space): Promise<Space>;
+
+  /**
+   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
+   * saved objects within the defined space.
+   * @param id the id of the space to search.
+   */
+  createSavedObjectFinder(id: string): ISavedObjectsPointInTimeFinder<unknown, unknown>;
 
   /**
    * Deletes a space, and all saved objects belonging to that space.
@@ -134,6 +145,14 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.update('space', id, attributes);
     const updatedSavedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(updatedSavedObject);
+  }
+
+  public createSavedObjectFinder(id: string) {
+    return this.repository.createPointInTimeFinder({
+      type: 'visualization', // TODO: find all types
+      namespaces: [id],
+      perPage: 10_000,
+    });
   }
 
   public async delete(id: string) {

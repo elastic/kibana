@@ -28,6 +28,7 @@ const createSpacesClientMock = () =>
     }),
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
+    createSavedObjectFinder: jest.fn(), // TODO: import from point in time finder mock from core
     delete: jest.fn(),
     disableLegacyUrlAliases: jest.fn(),
   } as unknown as jest.Mocked<SpacesClient>);

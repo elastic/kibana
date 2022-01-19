@@ -637,7 +637,7 @@ describe('SecureSpacesClientWrapper', () => {
       });
     });
 
-    it('deletes the space when authorized', async () => {
+    it('deletes the space with all saved objects when authorized', async () => {
       const username = 'some_user';
 
       const { wrapper, baseClient, authorization, auditLogger, request } = setup({
@@ -669,6 +669,10 @@ describe('SecureSpacesClientWrapper', () => {
         type: 'space',
         id: space.id,
       });
+      // expectAuditEvent(auditLogger, SavedObjectAction.DELETE, 'unknown', {
+      //   type: 'space',
+      //   id: space.id,
+      // });
     });
   });
 

@@ -246,6 +246,10 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.update(id, space);
   }
 
+  public createSavedObjectFinder(id: string) {
+    return this.spacesClient.createSavedObjectFinder(id);
+  }
+
   public async delete(id: string) {
     if (this.useRbac) {
       try {
@@ -264,6 +268,23 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
         throw error;
       }
     }
+
+    // Fetch saved objects to be removed for audit logging
+    const finder = this.spacesClient.createSavedObjectFinder(id);
+    for await (const response of finder.find()) {
+      response.saved_objects.forEach((savedObject) => {
+        const isOnlySpace = !savedObject.namespaces || savedObject.namespaces.length === 1;
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: isOnlySpace
+              ? SavedObjectAction.DELETE
+              : SavedObjectAction.UPDATE_OBJECTS_SPACES,
+            savedObject: { type: savedObject.type, id: savedObject.id },
+          })
+        );
+      });
+    }
+    await finder.close();
 
     this.auditLogger.log(
       spaceAuditEvent({
