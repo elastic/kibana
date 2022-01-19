@@ -7,9 +7,21 @@
 
 import { EuiPopover, PanelPaddingSize, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { BarAction } from './styles';
+
+const LoadingButtonEmpty = styled(EuiButtonEmpty)`
+  ${({ theme }) => css`
+    &&& {
+      height: ${theme.eui.euiSize};
+      .euiButtonContent {
+        padding: 0;
+      }
+    }
+  `}
+`;
 
 const Popover = React.memo<UtilityBarActionProps>(
   ({
@@ -84,14 +96,9 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     if (inProgress) {
       return (
         <BarAction data-test-subj={dataTestSubj}>
-          <EuiButtonEmpty
-            size="xs"
-            style={{ height: '16px', verticalAlign: 'top' }}
-            isLoading
-            iconSide="right"
-          >
+          <LoadingButtonEmpty size="xs" className="eui-alignTop" isLoading iconSide="right">
             {children}
-          </EuiButtonEmpty>
+          </LoadingButtonEmpty>
         </BarAction>
       );
     }
