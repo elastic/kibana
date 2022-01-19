@@ -94,7 +94,7 @@ export type { AddInspectorRequest } from './context/inspector/inspector_context'
 export { InspectorContextProvider } from './context/inspector/inspector_context';
 export { useInspectorContext } from './context/inspector/use_inspector_context';
 
-export { enableComparisonByDefault } from '../common/ui_settings_keys';
+export { enableComparisonByDefault, enableInfrastructureView } from '../common/ui_settings_keys';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,

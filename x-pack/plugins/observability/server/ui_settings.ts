@@ -49,7 +49,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
-      defaultMessage: 'Enable the comparison feature on APM UI',
+      defaultMessage: 'Enable the comparison feature in APM app',
     }),
     schema: schema.boolean(),
   },
@@ -60,7 +60,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number>> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
-      defaultMessage: 'Enable the Infrastruture view feature on APM UI',
+      defaultMessage: 'Enable the Infrastruture view feature in APM app',
     }),
     schema: schema.boolean(),
   },

@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { enableInfrastructureView } from '../../../../../../observability/common';
 import {
   isIosAgentName,
   isJavaAgentName,
@@ -160,9 +161,7 @@ export function isJVMsTabHidden({
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
   const { config, core } = useApmPluginContext();
-  const showInfraTab = core.uiSettings.get<boolean>(
-    'observability:enableInfrastructureView'
-  );
+  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
 
