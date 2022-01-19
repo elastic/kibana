@@ -26455,7 +26455,6 @@
     "xpack.uptime.alerts.monitorStatus": "稼働状況の監視ステータス",
     "xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description": "アラートによって「ダウン」と検知された一部またはすべてのモニターを示す、生成された概要。",
     "xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description": "現在ダウンしているモニターを要約する生成されたメッセージ。",
-    "xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage": "{statusMessage}と{availabilityMessage}",
     "xpack.uptime.alerts.monitorStatus.actionVariables.state.currentTriggerStarted": "アラートがトリガーされた場合、現在のトリガー状態が開始するときを示すタイムスタンプ",
     "xpack.uptime.alerts.monitorStatus.actionVariables.state.firstCheckedAt": "このアラートが最初に確認されるときを示すタイムスタンプ",
     "xpack.uptime.alerts.monitorStatus.actionVariables.state.firstTriggeredAt": "このアラートが最初にトリガーされたときを示すタイムスタンプ",

@@ -21,7 +21,11 @@ import {
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
 import { updateState, generateAlertMessage } from './common';
-import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusCheckTranslations,
+} from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
@@ -192,7 +196,7 @@ export const getStatusMessage = (
 ) => {
   let statusMessage = '';
   if (downMonStatus?.info) {
-    statusMessage = DOWN_LABEL(
+    statusMessage = statusCheckTranslations.downMonitorsLabel(
       downMonStatus.count!,
       downMonStatus.interval!,
       downMonStatus.numTimes
@@ -215,15 +219,9 @@ export const getStatusMessage = (
     );
   }
   if (availMonInfo && downMonStatus?.info) {
-    return i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
-      {
-        defaultMessage: '{statusMessage} The {availabilityMessage}',
-        values: {
-          statusMessage,
-          availabilityMessage,
-        },
-      }
+    return statusCheckTranslations.downMonitorsAndAvailabilityBreachLabel(
+      statusMessage,
+      availabilityMessage
     );
   }
   return statusMessage + availabilityMessage;

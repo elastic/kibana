@@ -328,12 +328,39 @@ export const durationAnomalyTranslations = {
   ],
 };
 
-export const DOWN_LABEL = (count: number, interval: string, numTimes: number) =>
-  i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
-    defaultMessage: `failed {count} times in the last {interval}. Alert when > {numTimes}.`,
-    values: {
-      count,
-      interval,
-      numTimes,
-    },
-  });
+export const statusCheckTranslations = {
+  downMonitorsLabel: (count: number, interval: string, numTimes: number) =>
+    i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
+      defaultMessage: `failed {count} times in the last {interval}. Alert when > {numTimes}.`,
+      values: {
+        count,
+        interval,
+        numTimes,
+      },
+    }),
+  availabilityBreachLabel: (
+    availabilityRatio: number,
+    expectedAvailability: number,
+    interval: string
+  ) =>
+    i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage', {
+      defaultMessage:
+        '{interval} availability is {availabilityRatio}%. Alert when < {expectedAvailability}%.',
+      values: {
+        availabilityRatio,
+        expectedAvailability,
+        interval,
+      },
+    }),
+  downMonitorsAndAvailabilityBreachLabel: (
+    downMonitorsMessage: string,
+    availabilityBreachMessage: string
+  ) =>
+    i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage', {
+      defaultMessage: '{downMonitorsMessage} The {availabilityBreachMessage}',
+      values: {
+        downMonitorsMessage,
+        availabilityBreachMessage,
+      },
+    }),
+};

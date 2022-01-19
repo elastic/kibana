@@ -26910,7 +26910,6 @@
     "xpack.uptime.alerts.monitorStatus": "运行时间监测状态",
     "xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description": "生成的摘要，显示告警已检测为“关闭”的部分或所有监测",
     "xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description": "生成的消息，汇总当前关闭的监测",
-    "xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage": "{statusMessage} 以及 {availabilityMessage}",
     "xpack.uptime.alerts.monitorStatus.actionVariables.state.currentTriggerStarted": "表示告警触发时当前触发状况开始的时间戳",
     "xpack.uptime.alerts.monitorStatus.actionVariables.state.firstCheckedAt": "表示此告警首次检查的时间戳",
     "xpack.uptime.alerts.monitorStatus.actionVariables.state.firstTriggeredAt": "表示告警首次触发的时间戳",
