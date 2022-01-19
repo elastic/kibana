@@ -1,7 +1,7 @@
 {
   "id": "security_linux_v3",
   "title": "Security: Linux v3",
-  "description": "Contains all shipping ML jobs for Linux host-based threat hunting and detection. Any ECS-compatible Linux events can be used by the jobs.",
+  "description": "Security: Linux v3 (2022). This module is a replacement for the v2 Linux module. This module contains all shipping ML jobs for Linux host based threat hunting and detection..",
   "type": "linux data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*,logs-*",

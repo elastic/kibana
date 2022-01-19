@@ -1,7 +1,7 @@
 {
   "id": "security_windows_v3",
   "title": "Security: Windows v3",
-  "description": "Contains all shipping ML jobs for Windows host-based threat hunting and detection. Any ECS-compatible Windows events can be used by the jobs.",
+  "description": "Security: Windows v3 (2022). This module is a replacement for the v2 Windows module. This module contains all shipping ML jobs for Windows host based threat hunting and detection.",
   "type": "windows data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "winlogbeat-*,logs-*",
