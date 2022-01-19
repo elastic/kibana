@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
@@ -207,14 +207,17 @@ const ValueWithExplanationIcon: React.FC<{
   const content = (
     <>
       {CASE_REOPENED_ON}
-      {explanationValues.map((explanationValue, index) => (
-        <React.Fragment key={`explanation-value-${index}`}>
-          <FormattedDate
-            data-test-subj={`case-metrics-lifespan-reopen-${index}`}
-            value={explanationValue}
-          />{' '}
-        </React.Fragment>
-      ))}
+      {explanationValues.map((explanationValue, index) => {
+        return (
+          <React.Fragment key={`explanation-value-${index}`}>
+            <FormattedDate
+              data-test-subj={`case-metrics-lifespan-reopen-${index}`}
+              value={explanationValue}
+            />
+            {isNotLastItem(index, explanationValues.length) ? <EuiSpacer size="xs" /> : null}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 
@@ -230,3 +233,5 @@ const ValueWithExplanationIcon: React.FC<{
   );
 });
 ValueWithExplanationIcon.displayName = 'ValueWithExplanationIcon';
+
+const isNotLastItem = (index: number, arrayLength: number): boolean => index + 1 < arrayLength;
