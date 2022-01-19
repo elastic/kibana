@@ -30,6 +30,12 @@ describe('interpreter/functions#selectFilter', () => {
       },
       {
         meta: {
+          group: 'g3',
+        },
+        query: {},
+      },
+      {
+        meta: {
           group: 'g1',
           controlledBy: 'i1',
         },
@@ -70,6 +76,12 @@ describe('interpreter/functions#selectFilter', () => {
           },
           Object {
             "meta": Object {
+              "group": "g3",
+            },
+            "query": Object {},
+          },
+          Object {
+            "meta": Object {
               "controlledBy": "i1",
               "group": "g1",
             },
@@ -94,14 +106,20 @@ describe('interpreter/functions#selectFilter', () => {
     `);
   });
 
-  it('selects filters belonging to certain group', () => {
-    const actual = fn(kibanaContext, { group: 'g1' }, createMockContext());
+  it('selects filters belonging to certain groups', () => {
+    const actual = fn(kibanaContext, { group: ['g1', 'g3'] }, createMockContext());
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "filters": Array [
           Object {
             "meta": Object {
               "group": "g1",
+            },
+            "query": Object {},
+          },
+          Object {
+            "meta": Object {
+              "group": "g3",
             },
             "query": Object {},
           },
