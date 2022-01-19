@@ -99,6 +99,7 @@ When feature editing is open, a feature editing toolbox is displayed on the left
 image::maps/images/drawing_layer.png[]
 
 To draw features:
+
 . Click on the line, polygon, circle, bounding box, or point icon.
 . Move the mouse cursor over the map and follow the on screen instructions to draw a feature.
 . When a feature is complete, the feature is added to the index as a new document.
