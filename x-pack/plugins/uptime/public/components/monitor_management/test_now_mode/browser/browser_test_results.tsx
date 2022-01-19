@@ -87,11 +87,3 @@ const FAILED_TO_RUN = i18n.translate('xpack.uptime.monitorManagement.failedRun',
 const LOADING_STEPS = i18n.translate('xpack.uptime.monitorManagement.loadingSteps', {
   defaultMessage: 'Loading steps...',
 });
-
-const STEP_LABEL = i18n.translate('xpack.uptime.monitorManagement.step', {
-  defaultMessage: 'step',
-});
-
-const STEPS_LABEL = i18n.translate('xpack.uptime.monitorManagement.steps', {
-  defaultMessage: 'steps',
-});
