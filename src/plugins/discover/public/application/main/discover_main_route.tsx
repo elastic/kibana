@@ -21,10 +21,10 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
-import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { DiscoverRouteProps } from '../types';
+import { getUrlTracker } from '../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -54,15 +54,29 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
   >([]);
-
+  const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const { id } = useParams<DiscoverLandingParams>();
+
+  useEffect(() => {
+    const fetchIsNewKibanaInstance = async () => {
+      const hasUserIndexPattern = await data.indexPatterns.hasUserDataView().catch(() => true);
+
+      setNewKibanaInstance(!hasUserIndexPattern);
+    };
+
+    fetchIsNewKibanaInstance();
+  }, [data.indexPatterns]);
 
   useEffect(() => {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
       try {
-        await data.indexPatterns.ensureDefaultDataView();
+        const defaultIndexPattern = await data.dataViews.getDefaultDataView();
+        if (!defaultIndexPattern) {
+          setNewKibanaInstance(true);
+          return;
+        }
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
@@ -89,6 +103,10 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
           currentSavedSearch.searchSource
         );
+
+        if (!loadedIndexPattern) {
+          return;
+        }
 
         if (!currentSavedSearch.searchSource.getField('index')) {
           currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
@@ -141,6 +159,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     services,
     toastNotifications,
     core.theme,
+    data.dataViews,
   ]);
 
   useEffect(() => {
@@ -153,6 +172,10 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   if (error) {
     return <DiscoverError error={error} />;
+  }
+
+  if (isNewKibanaInstance) {
+    core.application.navigateToApp('kibanaOverview', { path: '#' });
   }
 
   if (!indexPattern || !savedSearch) {
