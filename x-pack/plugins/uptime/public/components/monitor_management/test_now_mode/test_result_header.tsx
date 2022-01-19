@@ -41,7 +41,7 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h3>{title ?? TEST_RUN}</h3>
+          <h3>{title ?? TEST_RESULT}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
@@ -90,8 +90,8 @@ const PENDING_LABEL = i18n.translate('xpack.uptime.monitorManagement.pending', {
   defaultMessage: 'PENDING',
 });
 
-const TEST_RUN = i18n.translate('xpack.uptime.monitorManagement.testRun', {
-  defaultMessage: 'Test run',
+const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', {
+  defaultMessage: 'Test result',
 });
 
 const COMPLETED_LABEL = i18n.translate('xpack.uptime.monitorManagement.completed', {

@@ -45,7 +45,7 @@ interface StepStatusCount {
   succeeded: number;
 }
 
-function isStepEnd(step: JourneyStep) {
+export function isStepEnd(step: JourneyStep) {
   return step.synthetics?.type === 'step/end';
 }
 

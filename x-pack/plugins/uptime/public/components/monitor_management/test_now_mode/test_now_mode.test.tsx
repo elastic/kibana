@@ -9,31 +9,21 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { TestNowMode } from './test_now_mode';
-import { fireEvent } from '@testing-library/dom';
 import { kibanaService } from '../../../state/kibana_service';
 import { MonitorFields } from '../../../../common/runtime_types';
 
 describe('TestNowMode', function () {
   it('should render properly', async function () {
-    render(<TestNowMode />);
-    expect(await screen.findByText('Test now')).toBeInTheDocument();
-    expect(
-      await screen.findByText('Test your monitor and verify the results before saving')
-    ).toBeInTheDocument();
-    expect(await screen.findByText('Start test run')).toBeInTheDocument();
-  });
-
-  it('should send run once request on click', async function () {
-    const {} = render(
-      <TestNowMode isValid={true} monitor={{ type: 'browser' } as MonitorFields} />
+    render(
+      <TestNowMode testRun={{ id: 'test-run', monitor: { type: 'browser' } as MonitorFields }} />
     );
-    const btn = await screen.findByText('Start test run');
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
+    expect(await screen.findByText('PENDING')).toBeInTheDocument();
 
-    fireEvent.click(btn);
-
-    expect(await screen.findByText('Update test run')).toBeInTheDocument();
+    expect(await screen.findByText('0 step completed')).toBeInTheDocument();
 
     expect(kibanaService.core.http.post).toHaveBeenCalledTimes(1);
+
     expect(kibanaService.core.http.post).toHaveBeenLastCalledWith(
       expect.stringContaining('/internal/uptime/service/monitors/run_once/'),
       { body: '{"type":"browser"}', method: 'POST' }

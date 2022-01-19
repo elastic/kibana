@@ -11,12 +11,13 @@ import { render } from '../../../../lib/helper/rtl_helpers';
 import { kibanaService } from '../../../../state/kibana_service';
 import * as runOnceHooks from './use_browser_run_once_monitors';
 import { BrowserTestRunResult } from './browser_test_results';
+import { fireEvent } from '@testing-library/dom';
 
 describe('BrowserTestRunResult', function () {
   it('should render properly', async function () {
     render(<BrowserTestRunResult monitorId={'test-id'} />);
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
-    expect(await screen.findByText('0 steps completed')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
+    expect(await screen.findByText('0 step completed')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
 
     expect(dataApi.search).toHaveBeenCalledTimes(1);
@@ -30,7 +31,7 @@ describe('BrowserTestRunResult', function () {
                   { term: { config_id: 'test-id' } },
                   {
                     terms: {
-                      'synthetics.type': ['heartbeat/summary', 'journey/start', 'step/end'],
+                      'synthetics.type': ['heartbeat/summary', 'journey/start'],
                     },
                   },
                 ],
@@ -49,6 +50,7 @@ describe('BrowserTestRunResult', function () {
   it('should displays results', async function () {
     jest.spyOn(runOnceHooks, 'useBrowserRunOnceMonitors').mockReturnValue({
       data,
+      stepListData: { steps: [stepEndDoc._source] } as any,
       loading: false,
       journeyStarted: true,
       summaryDoc: summaryDoc._source,
@@ -57,11 +59,14 @@ describe('BrowserTestRunResult', function () {
 
     render(<BrowserTestRunResult monitorId={'test-id'} />);
 
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
 
     expect(await screen.findByText('COMPLETED')).toBeInTheDocument();
     expect(await screen.findByText('Took 22 seconds')).toBeInTheDocument();
-    expect(await screen.findByText('1 steps completed')).toBeInTheDocument();
+    expect(await screen.findByText('1 step completed')).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByTestId('expandResults'));
+
     expect(await screen.findByText('Go to https://www.elastic.co/')).toBeInTheDocument();
     expect(await screen.findByText('21.8 seconds')).toBeInTheDocument();
   });

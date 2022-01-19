@@ -18,14 +18,15 @@ interface Props {
   monitorId: string;
 }
 export const BrowserTestRunResult = ({ monitorId }: Props) => {
-  const { data, loading, stepEnds, journeyStarted, summaryDoc } = useBrowserRunOnceMonitors({
-    monitorId,
-  });
+  const { data, loading, stepEnds, journeyStarted, summaryDoc, stepListData } =
+    useBrowserRunOnceMonitors({
+      monitorId,
+    });
 
   const hits = data?.hits.hits;
   const doc = hits?.[0]?._source as JourneyStep;
 
-  const getButtonContent = (
+  const buttonContent = (
     <div>
       <TestResultHeader
         summaryDocs={summaryDoc ? [summaryDoc] : []}
@@ -37,8 +38,11 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
         <p>
           <EuiText color="subdued">
             {i18n.translate('xpack.uptime.monitorManagement.stepCompleted', {
-              defaultMessage: '{noOfSteps} steps completed',
-              values: { noOfSteps: stepEnds.length },
+              defaultMessage: '{noOfSteps} {stepLabel} completed',
+              values: {
+                noOfSteps: stepEnds.length,
+                stepLabel: stepEnds.length > 1 ? STEPS_LABEL : STEP_LABEL,
+              },
             })}
           </EuiText>
         </p>
@@ -52,14 +56,15 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
       element="fieldset"
       className="euiAccordionForm"
       buttonClassName="euiAccordionForm__button"
-      buttonContent={getButtonContent}
+      buttonContent={buttonContent}
       paddingSize="s"
+      data-test-subj="expandResults"
     >
       {summaryDoc && stepEnds.length === 0 && <EuiText color="danger">{FAILED_TO_RUN}</EuiText>}
       {!summaryDoc && journeyStarted && stepEnds.length === 0 && <EuiText>{LOADING_STEPS}</EuiText>}
-      {stepEnds.length > 0 && (
+      {stepEnds.length > 0 && stepListData?.steps && (
         <StepsList
-          data={stepEnds}
+          data={stepListData.steps}
           compactView={true}
           loading={Boolean(loading)}
           error={undefined}
@@ -81,4 +86,12 @@ const FAILED_TO_RUN = i18n.translate('xpack.uptime.monitorManagement.failedRun',
 
 const LOADING_STEPS = i18n.translate('xpack.uptime.monitorManagement.loadingSteps', {
   defaultMessage: 'Loading steps...',
+});
+
+const STEP_LABEL = i18n.translate('xpack.uptime.monitorManagement.step', {
+  defaultMessage: 'step',
+});
+
+const STEPS_LABEL = i18n.translate('xpack.uptime.monitorManagement.steps', {
+  defaultMessage: 'steps',
 });

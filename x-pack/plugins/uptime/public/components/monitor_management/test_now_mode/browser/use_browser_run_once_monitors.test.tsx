@@ -35,7 +35,8 @@ describe('useBrowserRunOnceMonitors', function () {
       journeyStarted: false,
       loading: true,
       stepEnds: [],
-      summaryDoc: null,
+      stepListData: undefined,
+      summaryDoc: undefined,
     });
   });
 });

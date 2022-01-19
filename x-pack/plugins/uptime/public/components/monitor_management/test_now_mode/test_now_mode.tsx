@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiAccordion,
-  EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
-import { v4 as uuidv4 } from 'uuid';
 import { TestRunResult } from './test_run_results';
 import { MonitorFields } from '../../../../common/runtime_types';
 import { useFetcher } from '../../../../../observability/public';
@@ -30,15 +26,7 @@ export interface TestRun {
   monitor: MonitorFields;
 }
 
-export function TestNowMode({ monitor, isValid }: { monitor?: MonitorFields; isValid?: boolean }) {
-  const [testRun, setTestRun] = useState<TestRun>();
-
-  const startTestRun = () => {
-    if (monitor) {
-      setTestRun({ id: uuidv4(), monitor });
-    }
-  };
-
+export function TestNowMode({ testRun }: { testRun?: TestRun }) {
   const { data, loading: isPushing } = useFetcher(() => {
     if (testRun) {
       return runOnceMonitor({
@@ -59,18 +47,21 @@ export function TestNowMode({ monitor, isValid }: { monitor?: MonitorFields; isV
     }
   }, [data]);
 
-  const btnContent = <EuiButtonEmpty iconType="controlsHorizontal">{TestNowLabel}</EuiButtonEmpty>;
-
   const errors = (data as { errors?: Array<{ error: Error }> })?.errors;
 
   const hasErrors = errors && errors?.length > 0;
 
-  const content = (
-    <EuiPanel color="subdued" hasBorder={true}>
-      <EuiText>{DescriptionLabel}</EuiText>
-      <EuiSpacer />
+  if (!testRun) {
+    return null;
+  }
 
-      {isPushing && <EuiText>{PushingLabel}</EuiText>}
+  return (
+    <EuiPanel color="subdued" hasBorder={true}>
+      {isPushing && (
+        <EuiCallOut color="primary">
+          {PushingLabel} <EuiLoadingSpinner />
+        </EuiCallOut>
+      )}
 
       {hasErrors && !isPushing && <EuiCallOut title={PushError} color="danger" iconType="alert" />}
 
@@ -82,44 +73,9 @@ export function TestNowMode({ monitor, isValid }: { monitor?: MonitorFields; isV
         </EuiFlexGroup>
       )}
       <EuiSpacer size="xs" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={startTestRun}
-            isDisabled={!monitor}
-            size="s"
-            isLoading={isPushing}
-            disabled={!isValid}
-          >
-            {testRun ? UpdateTestRunLabel : StartTestRunLabel}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </EuiPanel>
   );
-
-  return (
-    <EuiAccordion id={'simpleAccordionId'} buttonContent={btnContent} arrowDisplay="right">
-      {content}
-    </EuiAccordion>
-  );
 }
-
-const TestNowLabel = i18n.translate('xpack.uptime.testNow.label', {
-  defaultMessage: 'Test now',
-});
-
-const StartTestRunLabel = i18n.translate('xpack.uptime.startTestRun.label', {
-  defaultMessage: 'Start test run',
-});
-
-const UpdateTestRunLabel = i18n.translate('xpack.uptime.updateTestRun.label', {
-  defaultMessage: 'Update test run',
-});
-
-const DescriptionLabel = i18n.translate('xpack.uptime.testRun.description', {
-  defaultMessage: 'Test your monitor and verify the results before saving',
-});
 
 const PushingLabel = i18n.translate('xpack.uptime.testRun.pushing.description', {
   defaultMessage: 'Pushing the monitor to service...',

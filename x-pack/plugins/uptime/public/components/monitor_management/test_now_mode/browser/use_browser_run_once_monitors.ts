@@ -6,10 +6,13 @@
  */
 
 import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import { JourneyStep } from '../../../../../common/runtime_types';
-import { createEsParams, useEsSearch } from '../../../../../../observability/public';
+import { createEsParams, useEsSearch, useFetcher } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
+import { fetchJourneySteps } from '../../../../state/api/journey';
+import { isStepEnd } from '../../../synthetics/check_steps/steps_list';
 
 export const useBrowserEsResults = ({
   monitorId,
@@ -39,7 +42,7 @@ export const useBrowserEsResults = ({
               },
               {
                 terms: {
-                  'synthetics.type': ['heartbeat/summary', 'journey/start', 'step/end'],
+                  'synthetics.type': ['heartbeat/summary', 'journey/start'],
                 },
               },
             ],
@@ -56,34 +59,50 @@ export const useBrowserEsResults = ({
 export const useBrowserRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
   const { refreshTimer, lastRefresh } = useTickTick();
 
+  const [checkGroupId, setCheckGroupId] = useState('');
+  const [stepEnds, setStepEnds] = useState<JourneyStep[]>([]);
+  const [summary, setSummary] = useState<JourneyStep>();
+
   const { data, loading } = useBrowserEsResults({ monitorId, lastRefresh });
 
-  const hits = data?.hits.hits;
+  const { data: stepListData } = useFetcher(() => {
+    if (checkGroupId) {
+      return fetchJourneySteps({
+        checkGroup: checkGroupId,
+      });
+    }
+    return Promise.resolve(null);
+  }, [lastRefresh]);
 
-  let journeyStarted = false;
-  let summaryDocument: JourneyStep | null = null;
+  useEffect(() => {
+    const hits = data?.hits.hits;
 
-  const stepEnds: JourneyStep[] = [];
-  if (hits && hits.length > 0) {
-    hits?.forEach((hit) => {
-      const doc = hit._source as JourneyStep;
-      if (doc.synthetics?.type === 'journey/start') {
-        journeyStarted = true;
-      }
-      if (doc.synthetics?.type === 'heartbeat/summary') {
-        summaryDocument = doc;
-        clearInterval(refreshTimer);
-      }
-      if (doc.synthetics?.type === 'step/end') {
-        stepEnds.push(doc);
-      }
-    });
-  }
+    if (hits && hits.length > 0) {
+      hits?.forEach((hit) => {
+        const doc = hit._source as JourneyStep;
+        if (doc.synthetics?.type === 'journey/start') {
+          setCheckGroupId(doc.monitor.check_group);
+        }
+        if (doc.synthetics?.type === 'heartbeat/summary') {
+          setSummary(doc);
+          clearInterval(refreshTimer);
+        }
+      });
+    }
+  }, [data, refreshTimer]);
+
+  useEffect(() => {
+    if (stepListData?.steps && stepListData?.steps.length > 0) {
+      setStepEnds(stepListData.steps.filter(isStepEnd));
+    }
+  }, [stepListData]);
+
   return {
     data,
+    stepEnds,
     loading,
-    journeyStarted,
-    summaryDoc: summaryDocument,
-    stepEnds: stepEnds.sort((stepA, stepB) => stepA.synthetics.index! - stepB.synthetics.index!),
+    stepListData,
+    summaryDoc: summary,
+    journeyStarted: Boolean(checkGroupId),
   };
 };

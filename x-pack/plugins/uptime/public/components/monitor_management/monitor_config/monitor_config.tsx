@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { EuiResizableContainer } from '@elastic/eui';
+import { v4 as uuidv4 } from 'uuid';
 import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
 
 import { usePolicy } from '../../fleet_package/hooks/use_policy';
@@ -15,7 +16,7 @@ import { validate } from '../validation';
 import { ActionBarPortal } from '../action_bar/action_bar_portal';
 import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
-import { TestNowMode } from '../test_now_mode/test_now_mode';
+import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
 
 export const MonitorConfig = () => {
@@ -35,25 +36,53 @@ export const MonitorConfig = () => {
     defaultConfig: defaultConfig[monitorType],
   });
 
+  const [testRun, setTestRun] = useState<TestRun>();
+
+  const onTestNow = () => {
+    if (config) {
+      setTestRun({ id: uuidv4(), monitor: config as MonitorFieldsType });
+    }
+  };
+
   return (
     <>
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
-            <EuiResizablePanel initialSize={55} minSize="30%" mode="collapsible">
+            <EuiResizablePanel
+              initialSize={55}
+              minSize="30%"
+              mode={[
+                'collapsible',
+                {
+                  position: 'top',
+                },
+              ]}
+            >
               <MonitorFields />
             </EuiResizablePanel>
 
             <EuiResizableButton />
 
             <EuiResizablePanel initialSize={45} minSize="200px" mode="main">
-              {config && <TestNowMode monitor={config as MonitorFieldsType} isValid={isValid} />}
+              {config && (
+                <TestNowMode
+                  monitor={config as MonitorFieldsType}
+                  isValid={isValid}
+                  testRun={testRun}
+                />
+              )}
             </EuiResizablePanel>
           </>
         )}
       </EuiResizableContainer>
 
-      <ActionBarPortal monitor={policyConfig[monitorType]} isValid={isValid} />
+      <ActionBarPortal
+        monitor={policyConfig[monitorType]}
+        isValid={isValid}
+        onTestNow={onTestNow}
+        testRun={testRun}
+      />
     </>
   );
 };
