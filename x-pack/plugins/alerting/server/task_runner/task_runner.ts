@@ -252,7 +252,7 @@ export class TaskRunner<
       if (this.context.cancelAlertsOnRuleTimeout && this.ruleType.cancelAlertsOnRuleTimeout) {
         // Increment usage counter for skipped actions
         this.usageCounter.incrementCounter({
-          counterName: 'alertsSkippedDueToRuleExecutionTimeout',
+          counterName: `alertsSkippedDueToRuleExecutionTimeout_${this.ruleType.id}`,
           incrementBy: 1,
         });
       }

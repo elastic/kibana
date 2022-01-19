@@ -315,7 +315,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'alertsSkippedDueToRuleExecutionTimeout',
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
       incrementBy: 1,
     });
   });
@@ -534,7 +534,7 @@ describe('Task Runner Cancel', () => {
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: 'alertsSkippedDueToRuleExecutionTimeout',
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
       incrementBy: 1,
     });
   });
