@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './findings';
-export * from './compliance_dashboard';
 export { Benchmarks } from './benchmarks';

@@ -7,3 +7,4 @@
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
+export const SECURITY_SOLUTION_APP_ID = 'securitySolution';

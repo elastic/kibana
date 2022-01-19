@@ -25,6 +25,7 @@ import type {
   CspServerPluginStartDeps,
 } from './types';
 import { defineRoutes } from './routes';
+import { initUiSettings } from './uiSettings';
 
 export const ConfigSchema = schema.object({
   actionEnabled: schema.boolean({ defaultValue: false }),
@@ -72,6 +73,7 @@ export class CspPlugin
     const router = core.http.createRouter();
 
     defineRoutes(router, cspContext);
+    initUiSettings(core.uiSettings);
 
     return {};
   }

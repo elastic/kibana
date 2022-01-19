@@ -7,13 +7,15 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Redirect, Switch, Route } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { allNavigationItems } from '../common/navigation/constants';
-import { routes } from './routes';
+import { CspNavigationItem } from '../common/navigation/types';
 import { UnknownRoute } from '../components/unknown_route';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import type { CspClientPluginStartDeps } from '../types';
+import { pageToComponentMapping } from './constants';
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,20 @@ export interface CspAppDeps {
   deps: CspClientPluginStartDeps;
   params: AppMountParameters;
 }
+
+// Converts the mapping of page -> component to be of type `RouteProps` while filtering out disabled navigation items
+export const getRoutesFromMapping = <T extends string>(
+  navigationItems: Record<T, CspNavigationItem>,
+  componentMapping: Record<T, RouteProps['component']>
+): readonly RouteProps[] =>
+  Object.entries(componentMapping)
+    .filter(([id, _]) => !navigationItems[id as T].disabled)
+    .map<RouteProps>(([id, component]) => ({
+      path: navigationItems[id as T].path,
+      component: component as RouteProps['component'],
+    }));
+
+const routes = getRoutesFromMapping(allNavigationItems, pageToComponentMapping);
 
 export const CspApp = ({ core, deps, params }: CspAppDeps) => (
   <KibanaContextProvider services={{ ...deps, ...core }}>

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { RouteProps } from 'react-router-dom';
-import { allNavigationItems } from '../common/navigation/constants';
+import { CspPage } from '../common/navigation/types';
 import * as pages from '../pages';
 
-export const routes: readonly RouteProps[] = [
-  { path: allNavigationItems.findings.path, component: pages.Findings },
-  { path: allNavigationItems.dashboard.path, component: pages.ComplianceDashboard },
-];
+export const pageToComponentMapping: Record<CspPage, RouteProps['component']> = {
+  findings: pages.Findings,
+  dashboard: pages.ComplianceDashboard,
+  benchmarks: pages.Benchmarks,
+};

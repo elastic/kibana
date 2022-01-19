@@ -45,15 +45,13 @@ describe('general cloud posture score', () => {
     });
   });
 
-  it('mocking without finding index - expect to undefined from getAllFindingsStats ', async () => {
-    const generalScore = await getAllFindingsStats(mockEsClient, 'randomCycleId');
-    expect(generalScore).toEqual({
-      name: 'general',
-      postureScore: undefined,
-      totalFailed: undefined,
-      totalFindings: undefined,
-      totalPassed: undefined,
-    });
+  it("getAllFindingsStats throws when cycleId doesn't exists", async () => {
+    try {
+      await getAllFindingsStats(mockEsClient, 'randomCycleId');
+    } catch (e) {
+      expect(e).toBeInstanceOf(Error);
+      expect(e.message).toEqual('missing stats');
+    }
   });
 });
 

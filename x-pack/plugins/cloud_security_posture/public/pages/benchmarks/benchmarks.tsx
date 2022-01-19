@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 
-export * from './findings';
-export * from './compliance_dashboard';
-export { Benchmarks } from './benchmarks';
+export const Benchmarks = () => <div>Hello world</div>;
