@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isValidNamespace } from '../../../../fleet/common';
 import {
   ConfigKey,
   DataStream,
@@ -15,7 +16,6 @@ import { Validation } from '../../../common/types';
 
 export const digitsOnly = /^[0-9]*$/g;
 export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
-export const namespaceInvalidChars = /[\*\\/\?"<>|\s,#:-]+/;
 
 // returns true if invalid
 function validateHeaders<T>(headers: T): boolean {
@@ -54,40 +54,6 @@ const validateTimeout = ({
   return parseFloat(timeout) > schedule;
 };
 
-// returns ErrorMsg instance if invalid
-export function validateNamespace(
-  namespace?: string
-): { id: string; defaultMessage: string } | false {
-  if (!namespace || typeof namespace !== 'string' || !namespace.trim()) {
-    return {
-      id: 'xpack.uptime.namespaceValidation.requiredErrorMessage',
-      defaultMessage: 'Namespace is required',
-    };
-  } else if (namespace !== namespace.toLowerCase()) {
-    return {
-      id: 'xpack.uptime.namespaceValidation.lowercaseErrorMessage',
-      defaultMessage: 'Namespace must be lowercase',
-    };
-  } else if (namespaceInvalidChars.test(namespace)) {
-    return {
-      id: 'xpack.uptime.namespaceValidation.invalidCharactersErrorMessage',
-      defaultMessage: 'Namespace contains invalid characters',
-    };
-  }
-  // Node.js doesn't have Blob, and browser doesn't have Buffer :)
-  else if (
-    (typeof Blob === 'function' && new Blob([namespace]).size > 100) ||
-    (typeof Buffer === 'function' && Buffer.from(namespace).length > 100)
-  ) {
-    return {
-      id: 'xpack.uptime.namespaceValidation.tooLongErrorMessage',
-      defaultMessage: 'Namespace cannot be more than 100 bytes',
-    };
-  }
-
-  return false;
-}
-
 // validation functions return true when invalid
 export const validateCommon: Validation = {
   [ConfigKey.NAME]: ({ [ConfigKey.NAME]: value }) => {
@@ -117,7 +83,8 @@ export const validateCommon: Validation = {
     );
   },
   [ConfigKey.NAMESPACE]: ({ [ConfigKey.NAMESPACE]: value }) => {
-    return validateNamespace(value);
+    const { error = '', valid } = isValidNamespace(value ?? '');
+    return valid ? false : error;
   },
 };
 

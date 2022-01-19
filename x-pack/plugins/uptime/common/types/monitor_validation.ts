@@ -7,13 +7,8 @@
 
 import { ConfigKey, MonitorFields } from '../runtime_types';
 
-interface ErrorMsg {
-  id: string;
-  defaultMessage: string;
-}
-
 export type Validator = (config: Partial<MonitorFields>) => boolean;
-export type NamespaceValidator = (config: Partial<MonitorFields>) => false | ErrorMsg;
+export type NamespaceValidator = (config: Partial<MonitorFields>) => false | string;
 
 export type ConfigValidation = Omit<Record<ConfigKey, Validator>, ConfigKey.NAMESPACE> &
   Record<ConfigKey.NAMESPACE, NamespaceValidator>;

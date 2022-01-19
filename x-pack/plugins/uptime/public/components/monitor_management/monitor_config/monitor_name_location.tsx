@@ -110,14 +110,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
             <EuiFlexItem>
               <EuiFormRow
                 isInvalid={isNamespaceInvalid}
-                error={
-                  namespaceErrorMsg && (
-                    <FormattedMessage
-                      id={namespaceErrorMsg.id}
-                      defaultMessage={namespaceErrorMsg.defaultMessage}
-                    />
-                  )
-                }
+                error={namespaceErrorMsg}
                 label={
                   <FormattedMessage
                     id="xpack.uptime.monitorManagement.monitorNamespaceFieldLabel"
