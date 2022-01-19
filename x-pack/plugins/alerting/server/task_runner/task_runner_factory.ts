@@ -47,6 +47,7 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
   cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
 }
 
 export class TaskRunnerFactory {
@@ -79,8 +80,7 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext,
-    usageCounter?: UsageCounter
+    { taskInstance }: RunContext
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -94,6 +94,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, usageCounter);
+    >(ruleType, taskInstance, this.taskRunnerContext!);
   }
 }

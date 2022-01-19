@@ -148,7 +148,6 @@ export function getAlertType(logger: Logger): RuleType<
     isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
-    ruleTaskTimeout: '10s',
   };
 
   async function executor(
@@ -221,13 +220,6 @@ export function getAlertType(logger: Logger): RuleType<
       searchAfterSortId: undefined,
       timeField: params.timeField,
       track_total_hits: true,
-      aggs: {
-        delay: {
-          shard_delay: {
-            value: '30s',
-          },
-        },
-      },
     });
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);

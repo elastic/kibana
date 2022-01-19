@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
@@ -163,8 +162,7 @@ export class RuleTypeRegistry {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >,
-    usageCounter?: UsageCounter
+    >
   ) {
     if (this.has(ruleType.id)) {
       throw new Error(
@@ -259,7 +257,7 @@ export class RuleTypeRegistry {
             InstanceContext,
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedRuleType, context, usageCounter),
+          >(normalizedRuleType, context),
       },
     });
     // No need to notify usage on basic alert types

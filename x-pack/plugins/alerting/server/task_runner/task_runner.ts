@@ -110,12 +110,11 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext,
-    usageCounter?: UsageCounter
+    context: TaskRunnerContext
   ) {
-    this.usageCounter = usageCounter;
     this.context = context;
     this.logger = context.logger;
+    this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);

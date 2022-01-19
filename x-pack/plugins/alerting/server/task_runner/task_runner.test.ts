@@ -7,6 +7,7 @@
 
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
   AlertExecutorOptions,
   AlertTypeParams,
@@ -54,6 +55,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -109,6 +113,7 @@ describe('Task Runner', () => {
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
+    usageCounter: mockUsageCounter,
   };
 
   function testAgainstEphemeralSupport(
@@ -357,6 +362,7 @@ describe('Task Runner', () => {
       },
       expect.any(Function)
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   testAgainstEphemeralSupport(
@@ -608,6 +614,7 @@ describe('Task Runner', () => {
             ruleset: 'alerts',
           },
         });
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -796,6 +803,7 @@ describe('Task Runner', () => {
         ruleset: 'alerts',
       },
     });
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   testAgainstEphemeralSupport(
@@ -862,6 +870,7 @@ describe('Task Runner', () => {
           4,
           'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
         );
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1033,6 +1042,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   testAgainstEphemeralSupport(
@@ -1094,6 +1104,7 @@ describe('Task Runner', () => {
         });
         await taskRunner.run();
         expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1163,6 +1174,7 @@ describe('Task Runner', () => {
         });
         await taskRunner.run();
         expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1448,6 +1460,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1812,6 +1825,7 @@ describe('Task Runner', () => {
         },
       ]
     `);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1911,6 +1925,7 @@ describe('Task Runner', () => {
         expect(enqueueFunction).toHaveBeenCalledTimes(2);
         expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
         expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -2045,6 +2060,7 @@ describe('Task Runner', () => {
         },
       ]
     `);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -2272,6 +2288,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('validates params before executing the alert type', async () => {
@@ -2314,6 +2331,7 @@ describe('Task Runner', () => {
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
       `Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('uses API key when provided', async () => {
@@ -2348,6 +2366,7 @@ describe('Task Runner', () => {
       request,
       '/'
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test(`doesn't use API key when not provided`, async () => {
@@ -2380,6 +2399,7 @@ describe('Task Runner', () => {
       request,
       '/'
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {
@@ -2416,6 +2436,7 @@ describe('Task Runner', () => {
         },
       }
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
@@ -2542,6 +2563,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
@@ -2649,6 +2671,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
@@ -2765,6 +2788,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
@@ -2881,6 +2905,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
@@ -2996,6 +3021,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Runner of a legacy Alert task which has no schedule throws an exception when fetching attributes', async () => {
@@ -3033,6 +3059,7 @@ describe('Task Runner', () => {
         "state": Object {},
       }
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test(`doesn't change previousStartedAt when it fails to run`, async () => {
@@ -3079,6 +3106,7 @@ describe('Task Runner', () => {
     expect(runnerResult.state.previousStartedAt).toEqual(
       new Date(originalAlertSate.previousStartedAt)
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
@@ -3120,6 +3148,7 @@ describe('Task Runner', () => {
         `Unable to execute rule "1" in the "foo" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
       );
       expect(isUnrecoverableError(ex)).toBeTruthy();
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -3161,6 +3190,7 @@ describe('Task Runner', () => {
         1,
         `Unable to execute rule "1" in the "test space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
       );
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -3430,6 +3460,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('duration is updated for active alerts when alert state contains start time', async () => {
@@ -3643,6 +3674,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('duration is not calculated for active alerts when alert state does not contain start time', async () => {
@@ -3844,6 +3876,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
@@ -4044,6 +4077,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('end calculation is skipped for active alerts when alert state does not contain start time and alert recovers', async () => {
@@ -4240,6 +4274,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('successfully executes the task with ephemeral tasks enabled', async () => {
@@ -4397,6 +4432,7 @@ describe('Task Runner', () => {
       },
       { refresh: false, namespace: undefined }
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('successfully bails on execution if the rule is disabled', async () => {
@@ -4477,5 +4513,6 @@ describe('Task Runner', () => {
       },
       message: 'test:1: execution failed',
     });
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 });
