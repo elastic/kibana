@@ -17,7 +17,7 @@ import type {
   Mappings,
   Settings,
   IngestPipeline,
-} from '../../common';
+} from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 import { isPopulatedObject } from '../../common/utils';
 

@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { MB } from '../../../common/constants';
-import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common';
+import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
 
 const BLOCK_SIZE_MB = 5 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
