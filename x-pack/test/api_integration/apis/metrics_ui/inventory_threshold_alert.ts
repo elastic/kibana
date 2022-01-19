@@ -80,8 +80,6 @@ export default function ({ getService }: FtrProviderContext) {
     startTime: DATES['8.0.0'].hosts_only.max,
   };
 
-  // TODO: Need a test for: host rx, pods rx, logRate
-
   describe('Inventory Threshold Rule Executor', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
