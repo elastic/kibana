@@ -1253,13 +1253,7 @@
             "text": "FieldFormatParams"
           },
           "> | undefined; source?: string | undefined; sourceParams?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: ",
           {
             "pluginId": "expressions",
@@ -1335,13 +1329,7 @@
             "text": "SavedVisState"
           },
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">"
         ],
         "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
@@ -2265,13 +2253,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }[]"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
@@ -2298,21 +2280,9 @@
                 "text": "EsQuerySortValue"
               },
               "[] | undefined; highlight?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
               "Fields",
               " | undefined; version?: boolean | undefined; fields?: ",
@@ -4288,13 +4258,7 @@
         "description": [],
         "signature": [
           "{ title: string; type: string; params: TVisParams; aggs: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; }[]; }"
         ],
         "path": "src/plugins/visualizations/common/types.ts",
@@ -4439,7 +4403,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; getDescription: () => string; destroy: () => void; readonly parent?: ",
+          "{ readonly id: string; readonly type: \"visualization\"; getDescription: () => string; destroy: () => void; readonly parent?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -4631,7 +4595,7 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; create: (input: ",
+          "{ create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -4691,7 +4655,7 @@
           "VisualizeEmbeddable",
           " | ",
           "DisabledLabEmbeddable",
-          " | undefined>; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
+          " | undefined>; readonly type: \"visualization\"; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5590,13 +5554,7 @@
             "text": "FieldFormatParams"
           },
           "> | undefined; source?: string | undefined; sourceParams?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: ",
           {
             "pluginId": "expressions",
@@ -5704,13 +5662,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/range.ts",
@@ -5776,13 +5728,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
@@ -6016,13 +5962,7 @@
         "description": [],
         "signature": [
           "{ title: string; type: string; params: TVisParams; aggs: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; }[]; }"
         ],
         "path": "src/plugins/visualizations/common/types.ts",

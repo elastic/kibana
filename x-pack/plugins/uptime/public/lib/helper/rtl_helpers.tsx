@@ -14,7 +14,7 @@ import {
   RenderOptions,
   Nullish,
 } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router, Route } from 'react-router-dom';
 import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
@@ -57,6 +57,7 @@ interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<Extra
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
   history?: History;
+  path?: string;
 }
 
 type Url =
@@ -71,6 +72,7 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
   renderOptions?: Omit<RenderOptions, 'queries'>;
   state?: Partial<AppState> | DeepPartial<AppState>;
   url?: Url;
+  path?: string;
 }
 
 function getSetting<T = any>(key: string): T {
@@ -121,6 +123,9 @@ const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    usageCollection: {
+      reportUiCounter: () => {},
+    },
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
@@ -163,13 +168,14 @@ export function MockKibanaProvider<ExtraCore>({
 export function MockRouter<ExtraCore>({
   children,
   core,
+  path,
   history = createMemoryHistory(),
   kibanaProps,
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
-        {children}
+        <Route path={path}>{children}</Route>
       </MockKibanaProvider>
     </Router>
   );
@@ -180,10 +186,13 @@ export const MockRedux = ({
   state,
   history = createMemoryHistory(),
   children,
+  path,
 }: {
   state: Partial<AppState>;
   history?: History;
   children: React.ReactNode;
+  path?: string;
+  useRealStore?: boolean;
 }) => {
   const testState: AppState = {
     ...mockState,
@@ -192,7 +201,9 @@ export const MockRedux = ({
 
   return (
     <MountWithReduxProvider state={testState}>
-      <MockRouter history={history}>{children}</MockRouter>
+      <MockRouter path={path} history={history}>
+        {children}
+      </MockRouter>
     </MountWithReduxProvider>
   );
 };
@@ -207,7 +218,9 @@ export function render<ExtraCore>(
     renderOptions,
     state,
     url,
-  }: RenderRouterOptions<ExtraCore> = {}
+    path,
+    useRealStore,
+  }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
 ) {
   const testState: AppState = merge({}, mockState, state);
 
@@ -217,8 +230,8 @@ export function render<ExtraCore>(
 
   return {
     ...reactTestLibRender(
-      <MountWithReduxProvider state={testState}>
-        <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+      <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
+        <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
           {ui}
         </MockRouter>
       </MountWithReduxProvider>,
@@ -277,3 +290,38 @@ export const makeUptimePermissionsCore = (
     },
   };
 };
+
+// This function filters out the queried elements which appear only
+// either on mobile or desktop.
+//
+// It does so by filtering those with the class passed as the `classWrapper`.
+// For mobile, we filter classes which tell elements to be hidden on desktop.
+// For desktop, we do the opposite.
+//
+// We have this function because EUI will manipulate the visibility of some
+// elements through pure CSS, which we can't assert on tests. Therefore,
+// we look for the corresponding class wrapper.
+const finderWithClassWrapper =
+  (classWrapper: string) =>
+  (
+    getterFn: (f: MatcherFunction) => HTMLElement | null,
+    customAttribute?: keyof Element | keyof HTMLElement
+  ) =>
+  (text: string): HTMLElement | null =>
+    getterFn((_content: string, node: Nullish<Element>) => {
+      if (!node) return false;
+      // There are actually properties that are not in Element but which
+      // appear on the `node`, so we must cast the customAttribute as a keyof Element
+      const content = node[(customAttribute as keyof Element) ?? 'innerHTML'];
+      if (content === text && wrappedInClass(node, classWrapper)) return true;
+      return false;
+    });
+
+const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): boolean => {
+  if (element.className.includes(classWrapper)) return true;
+  if (element.parentElement) return wrappedInClass(element.parentElement, classWrapper);
+  return false;
+};
+
+export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
+export const forDesktopOnly = finderWithClassWrapper('hideForMobile');
