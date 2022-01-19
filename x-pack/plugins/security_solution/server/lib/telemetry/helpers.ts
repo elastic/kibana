@@ -9,11 +9,7 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import type {
-  ExceptionListItem,
-  ListTemplate,
-  TelemetryEvent,
-} from './types';
+import type { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
