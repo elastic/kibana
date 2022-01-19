@@ -32,6 +32,7 @@ export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class AgentPolicyError extends IngestManagerError {}
+export class AgentPolicyNotFoundError extends IngestManagerError {}
 export class AgentNotFoundError extends IngestManagerError {}
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class PackageUnsupportedMediaTypeError extends IngestManagerError {}

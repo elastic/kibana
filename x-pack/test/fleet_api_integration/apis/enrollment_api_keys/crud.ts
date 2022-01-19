@@ -92,14 +92,16 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return a 400 if the fleet admin user is modifed outside of Fleet', async () => {
-        await supertest
+      it('should return a 400 if the policy_id is not a valid policy', async () => {
+        const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment_api_keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            raoul: 'raoul',
+            policy_id: 'idonotexists',
           })
           .expect(400);
+
+        expect(apiResponse.message).to.be('Agent policy "idonotexists" not found');
       });
 
       it('should allow to create an enrollment api key with only an agent policy', async () => {
