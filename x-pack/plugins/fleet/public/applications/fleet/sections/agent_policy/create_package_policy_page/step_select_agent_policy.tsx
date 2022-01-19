@@ -14,24 +14,16 @@ import { EuiSelect } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPortal,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiTitle,
   EuiText,
-  EuiLink,
 } from '@elastic/eui';
 
 import { Error } from '../../../components';
 import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
-import {
-  useGetAgentPolicies,
-  sendGetOneAgentPolicy,
-  useCapabilities,
-  useFleetStatus,
-} from '../../../hooks';
-import { CreateAgentPolicyFlyout } from '../list_page/components';
+import { useGetAgentPolicies, sendGetOneAgentPolicy, useFleetStatus } from '../../../hooks';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
@@ -56,17 +48,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
-  // Create new agent policy flyout state
-  const hasWriteCapabilites = useCapabilities().write;
-  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
-    useState<boolean>(false);
-
   // Fetch agent policies info
   const {
     data: agentPoliciesData,
     error: agentPoliciesError,
     isLoading: isAgentPoliciesLoading,
-    resendRequest: refreshAgentPolicies,
   } = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
@@ -172,20 +158,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   return (
     <>
-      {isCreateAgentPolicyFlyoutOpen ? (
-        <EuiPortal>
-          <CreateAgentPolicyFlyout
-            onClose={(newAgentPolicy?: AgentPolicy) => {
-              setIsCreateAgentPolicyFlyoutOpen(false);
-              if (newAgentPolicy) {
-                refreshAgentPolicies();
-                setSelectedPolicyId(newAgentPolicy.id);
-              }
-            }}
-            ownFocus={true}
-          />
-        </EuiPortal>
-      ) : null}
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiDescribedFormGroup
@@ -219,19 +191,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                       id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyLabel"
                       defaultMessage="Agent policy"
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <div>
-                      <EuiLink
-                        disabled={!hasWriteCapabilites}
-                        onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.StepSelectPolicy.addButton"
-                          defaultMessage="Create agent policy"
-                        />
-                      </EuiLink>
-                    </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
