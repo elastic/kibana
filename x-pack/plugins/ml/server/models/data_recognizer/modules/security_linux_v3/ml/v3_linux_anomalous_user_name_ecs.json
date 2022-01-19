@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "This is a new refactored job which works on ECS compatible events across multiple indices. Security: Linux - Rare and unusual users that are not normally active may indicate unauthorized changes or activity by an unauthorized user which may be credentialed access or lateral movement.",
+  "description": "Security: Linux - Rare and unusual users that are not normally active may indicate unauthorized changes or activity by an unauthorized user which may be credentialed access or lateral movement.",
   "groups": [
     "auditbeat",
     "endpoint",

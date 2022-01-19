@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "This is a new refactored job which works on ECS compatible events across multiple indices. Security: Windows - Detects unusually rare processes on Windows hosts.",
+  "description": "Security: Windows - Detects unusually rare processes on Windows hosts.",
   "groups": [
     "endpoint",
     "event-log",

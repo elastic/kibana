@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Linux - This is a new refactored job which works on ECS compatible events across multiple indices. Security: Linux v3 -  Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
+  "description": "Security: Linux v3 -  Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
   "groups": [
     "security",
     "auditbeat",

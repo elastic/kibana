@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "This is a new refactored job which works on ECS compatible events across multiple indices. Security: Linux - Looks for anomalous access to the metadata service by an unusual user. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
+  "description": "Security: Linux - Looks for anomalous access to the metadata service by an unusual user. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
   "groups": [
     "auditbeat",
     "endpoint",
