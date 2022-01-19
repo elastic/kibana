@@ -26,19 +26,15 @@ export async function savePrsToCsv(
   githubToken: string,
   labelsPath: string,
   filename: string,
-  query: string,
-  mergedSince: string
+  query: string | undefined,
+  mergedSince: string | undefined
 ) {
   const repo = `repo:"elastic/kibana"`;
   const defaultQuery = 'is:pull-request+is:merged+sort:updated-desc';
   const perPage = 100;
   const searchApiLimit = 1000;
 
-  let q =
-    repo +
-    '+' +
-    (query.length > 0 ? query : defaultQuery) +
-    (mergedSince.length > 0 ? `+merged:>=${mergedSince}` : '');
+  let q = repo + '+' + (query ?? defaultQuery) + (mergedSince ? `+merged:>=${mergedSince}` : '');
 
   const rawData = fs.readFileSync(labelsPath, 'utf8');
   const labels = JSON.parse(rawData) as Labels;
