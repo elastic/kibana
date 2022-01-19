@@ -102,22 +102,22 @@ export const useRowHeightsOptions = ({
     const rowHeightFromLS = getStoredRowHeight(storage);
     const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
 
-    const configHasChanged = (
+    const configHasNotChanged = (
       localStorageRecord: DataGridOptionsRecord | null
-    ): localStorageRecord is null =>
-      localStorageRecord !== null && configRowHeight !== localStorageRecord.previousConfigRowHeight;
+    ): localStorageRecord is DataGridOptionsRecord =>
+      localStorageRecord !== null && configRowHeight === localStorageRecord.previousConfigRowHeight;
 
     let rowHeight;
     if (isValidRowHeight(rowHeightState)) {
       rowHeight = rowHeightState;
-    } else if (!configHasChanged(rowHeightFromLS)) {
+    } else if (configHasNotChanged(rowHeightFromLS)) {
       rowHeight = rowHeightFromLS.previousRowHeight;
     } else {
       rowHeight = configRowHeight;
     }
 
     // update local storage value when config has changed
-    if (configHasChanged(rowHeightFromLS)) {
+    if (!configHasNotChanged(rowHeightFromLS)) {
       updateStoredRowHeight(configRowHeight, configRowHeight, storage);
     }
 
