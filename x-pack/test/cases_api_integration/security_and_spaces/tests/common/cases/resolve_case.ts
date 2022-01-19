@@ -88,16 +88,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should return a 400 when passing the includeSubCaseComments', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id/resolve?includeSubCaseComments=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
-    });
-
     it('unhappy path - 404s when case is not there', async () => {
       await supertest
         .get(`${CASES_URL}/fake-id/resolve`)

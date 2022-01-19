@@ -22,10 +22,9 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
+import { Case, DeleteCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
-  CaseType,
   CommentType,
   CommentRequestAlertType,
   ActionConnector,
@@ -35,7 +34,6 @@ import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
-import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
 import { UpdateCase } from '../../containers/use_get_cases';
@@ -111,13 +109,12 @@ export const useCasesColumns = ({
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
     title: '',
-    type: null,
   });
 
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
       handleToggleModal();
-      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title, type: deleteCase.type });
+      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title });
     },
     [handleToggleModal]
   );
@@ -175,16 +172,12 @@ export const useCasesColumns = ({
   return [
     {
       name: i18n.NAME,
-      render: (theCase: Case | SubCase) => {
+      render: (theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
             <TruncatedText text={theCase.title} />
           ) : (
-            <CaseDetailsLink
-              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-              title={theCase.title}
-            >
+            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
               <TruncatedText text={theCase.title} />
             </CaseDetailsLink>
           );
@@ -350,32 +343,20 @@ export const useCasesColumns = ({
           {
             name: i18n.STATUS,
             render: (theCase: Case) => {
-              if (theCase?.subCases == null || theCase.subCases.length === 0) {
-                if (theCase.status == null || theCase.type === CaseType.collection) {
-                  return getEmptyTagValue();
-                }
-                return (
-                  <StatusContextMenu
-                    currentStatus={theCase.status}
-                    disabled={!userCanCrud || isLoadingCases.length > 0}
-                    onStatusChanged={(status) =>
-                      handleDispatchUpdate({
-                        updateKey: 'status',
-                        updateValue: status,
-                        caseId: theCase.id,
-                        version: theCase.version,
-                      })
-                    }
-                  />
-                );
-              }
-
-              const badges = getSubCasesStatusCountsBadges(theCase.subCases);
-              return badges.map(({ color, count }, index) => (
-                <EuiBadge key={index} color={color}>
-                  {count}
-                </EuiBadge>
-              ));
+              return (
+                <StatusContextMenu
+                  currentStatus={theCase.status}
+                  disabled={!userCanCrud || isLoadingCases.length > 0}
+                  onStatusChanged={(status) =>
+                    handleDispatchUpdate({
+                      updateKey: 'status',
+                      updateValue: status,
+                      caseId: theCase.id,
+                      version: theCase.version,
+                    })
+                  }
+                />
+              );
             },
           },
         ]

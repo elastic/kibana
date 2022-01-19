@@ -52,7 +52,6 @@ export const find = async (
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
       status: queryParams.status,
-      caseType: queryParams.type,
       owner: queryParams.owner,
     };
 
@@ -70,7 +69,6 @@ export const find = async (
             : queryParams.searchFields,
         fields: includeFieldsRequiredForAuthentication(queryParams.fields),
       },
-      subCaseOptions: caseQueries.subCase,
     });
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
@@ -82,7 +80,6 @@ export const find = async (
         return caseService.findCaseStatusStats({
           unsecuredSavedObjectsClient,
           caseOptions: statusQuery.case,
-          subCaseOptions: statusQuery.subCase,
           ensureSavedObjectsAreAuthorized,
         });
       }),

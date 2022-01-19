@@ -8,9 +8,8 @@
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { useToasts } from '../common/lib/kibana';
-import { patchCase, patchSubCase } from './api';
+import { patchCase } from './api';
 import { UpdateKey, UpdateByKey } from '../../common/ui/types';
-import { CaseStatuses } from '../../common/api';
 import * as i18n from './translations';
 import { createUpdateSuccessToaster } from './utils';
 
@@ -57,13 +56,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 export interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
 }
-export const useUpdateCase = ({
-  caseId,
-  subCaseId,
-}: {
-  caseId: string;
-  subCaseId?: string;
-}): UseUpdateCase => {
+export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -89,24 +82,16 @@ export const useUpdateCase = ({
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
 
-        const response = await (updateKey === 'status' && subCaseId
-          ? patchSubCase(
-              caseId,
-              subCaseId,
-              { status: updateValue as CaseStatuses },
-              caseData.version,
-              abortCtrlRef.current.signal
-            )
-          : patchCase(
-              caseId,
-              { [updateKey]: updateValue },
-              caseData.version,
-              abortCtrlRef.current.signal
-            ));
+        const response = await patchCase(
+          caseId,
+          { [updateKey]: updateValue },
+          caseData.version,
+          abortCtrlRef.current.signal
+        );
 
         if (!isCancelledRef.current) {
           if (fetchCaseUserActions != null) {
-            fetchCaseUserActions(caseId, response[0].connector.id, subCaseId);
+            fetchCaseUserActions(caseId, response[0].connector.id);
           }
           if (updateCase != null) {
             updateCase(response[0]);
@@ -136,7 +121,7 @@ export const useUpdateCase = ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseId, subCaseId]
+    [caseId]
   );
 
   useEffect(

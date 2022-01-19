@@ -15,8 +15,9 @@ import {
   CaseResolveResponse,
   CasesFindResponse,
   CasesResponse,
-  CaseType,
+  CasesStatusResponse,
   CaseUserActionsResponse,
+  CommentRequest,
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
@@ -26,7 +27,12 @@ import {
   User,
   CaseMetricsResponse,
 } from '../../common/api';
-import { CASE_REPORTERS_URL, CASE_TAGS_URL, CASES_URL } from '../../common/constants';
+import {
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
+} from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -34,9 +40,11 @@ import { KibanaServices } from '../common/lib/kibana';
 import {
   ActionLicense,
   AllCases,
+  BulkUpdateStatus,
   Case,
   CaseMetrics,
   CaseMetricsFeature,
+  CasesStatus,
   FetchCasesProps,
   SortFieldCase,
   CaseUserActions,
@@ -49,6 +57,7 @@ import {
   decodeCaseResponse,
   decodeCasesResponse,
   decodeCasesFindResponse,
+  decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeCaseMetricsResponse,
@@ -85,6 +94,18 @@ export const resolveCase = async (
     }
   );
   return convertToCamelCase<CaseResolveResponse, ResolvedCase>(decodeCaseResolveResponse(response));
+};
+
+export const getCasesStatus = async (
+  signal: AbortSignal,
+  owner: string[]
+): Promise<CasesStatus> => {
+  const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
+    method: 'GET',
+    signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
+  });
+  return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };
 
 export const getTags = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
@@ -137,7 +158,6 @@ export const getCaseUserActions = async (
 
 export const getCases = async ({
   filterOptions = {
-    onlyCollectionType: false,
     search: '',
     reporters: [],
     status: StatusAll,
@@ -157,7 +177,6 @@ export const getCases = async ({
     tags: filterOptions.tags,
     status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
-    ...(filterOptions.onlyCollectionType ? { type: CaseType.collection } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
   };
@@ -195,6 +214,34 @@ export const patchCase = async (
   return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
 };
 
+export const patchCasesStatus = async (
+  cases: BulkUpdateStatus[],
+  signal: AbortSignal
+): Promise<Case[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
+    method: 'PATCH',
+    body: JSON.stringify({ cases }),
+    signal,
+  });
+  return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
+};
+
+export const postComment = async (
+  newComment: CommentRequest,
+  caseId: string,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+    `${CASES_URL}/${caseId}/comments`,
+    {
+      method: 'POST',
+      body: JSON.stringify(newComment),
+      signal,
+    }
+  );
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
 export const patchComment = async ({
   caseId,
   commentId,
@@ -202,7 +249,6 @@ export const patchComment = async ({
   version,
   signal,
   owner,
-  subCaseId,
 }: {
   caseId: string;
   commentId: string;
@@ -210,7 +256,6 @@ export const patchComment = async ({
   version: string;
   signal: AbortSignal;
   owner: string;
-  subCaseId?: string;
 }): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
@@ -221,7 +266,6 @@ export const patchComment = async ({
       version,
       owner,
     }),
-    ...(subCaseId ? { query: { subCaseId } } : {}),
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));

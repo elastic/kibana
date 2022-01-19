@@ -89,13 +89,12 @@ export const UserActions = React.memo(
     onRuleDetailsClick,
     onShowAlertDetails,
     onUpdateField,
-    renderInvestigateInTimelineActionComponent,
     statusActionButton,
     updateCase,
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, subCaseId, commentId } = useCaseViewParams();
+    const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
 
@@ -126,7 +125,6 @@ export const UserActions = React.memo(
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
           showLoading={false}
           statusActionButton={statusActionButton}
-          subCaseId={subCaseId}
         />
       ),
       [
@@ -135,7 +133,6 @@ export const UserActions = React.memo(
         handleUpdate,
         handleManageMarkdownEditId,
         statusActionButton,
-        subCaseId,
         commentRefs,
       ]
     );

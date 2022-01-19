@@ -7,7 +7,6 @@
 
 import { mapValues, trimEnd, mergeWith, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   MigrateFunction,
   MigrateFunctionsObject,
@@ -30,6 +29,7 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import { logError } from './utils';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 
 interface UnsanitizedComment {
   comment: string;
@@ -43,10 +43,9 @@ interface SanitizedComment {
 
 enum AssociationType {
   case = 'case',
-  subCase = 'sub_case',
 }
 
-interface SanitizedCommentForSubCases {
+interface SanitizedCommentWithAssociation {
   associationType: AssociationType;
   rule?: { id: string | null; name: string | null };
 }
@@ -81,8 +80,8 @@ export const createCommentsMigrations = (
     },
     '7.12.0': (
       doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-    ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
-      let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+    ): SavedObjectSanitizedDoc<unknown> => {
+      let attributes: SanitizedCommentWithAssociation & UnsanitizedComment = {
         ...doc.attributes,
         associationType: AssociationType.case,
       };
@@ -113,19 +112,7 @@ export const createCommentsMigrations = (
      * The downside is it incurs extra query overhead.
      **/
     '8.0.0': removeRuleInformation,
-    // TODO: move to its own function
-    '8.1.0': (
-      doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-    ): SavedObjectSanitizedDoc<Record<string, unknown>> => {
-      const docCopy = cloneDeep(doc);
-      unset(docCopy, 'attributes.associationType');
-
-      return {
-        ...docCopy,
-        references:
-          docCopy.references?.filter((reference) => reference.type !== SUB_CASE_SAVED_OBJECT) ?? [],
-      };
-    },
+    '8.1.0': removeAssociationType,
   };
 
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
@@ -207,7 +194,7 @@ export const mergeMigrationFunctionMaps = (
 export const removeRuleInformation = (
   doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
 ): SavedObjectSanitizedDoc<unknown> => {
-  if (doc.attributes.type === CommentType.alert || doc.attributes.type === 'generated_alert') {
+  if (doc.attributes.type === CommentType.alert || doc.attributes.type === GENERATED_ALERT) {
     return {
       ...doc,
       attributes: {
@@ -224,5 +211,18 @@ export const removeRuleInformation = (
   return {
     ...doc,
     references: doc.references ?? [],
+  };
+};
+
+export const removeAssociationType = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<Record<string, unknown>> => {
+  const docCopy = cloneDeep(doc);
+  unset(docCopy, 'attributes.associationType');
+
+  return {
+    ...docCopy,
+    references:
+      docCopy.references?.filter((reference) => reference.type !== SUB_CASE_SAVED_OBJECT) ?? [],
   };
 };

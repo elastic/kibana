@@ -127,7 +127,6 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses.closed },
           case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
         });
       });
@@ -164,7 +163,6 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses['in-progress'] },
           case_id: postedCase.id,
           comment_id: null,
-          sub_case_id: '',
           owner: 'securitySolutionFixture',
         });
       });

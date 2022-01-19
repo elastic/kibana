@@ -104,8 +104,8 @@ Arguments:
 | owner           | `string[];` owner ids of the cases                                                                |
 | alertData?      | `Omit<CommentRequestAlertType, 'type'>;` alert data to post to case                               |
 | hiddenStatuses? | `CaseStatuses[];` array of hidden statuses                                                        |
-| onRowClick      | <code>(theCase?: Case &vert; SubCase) => void;</code> callback for row click, passing case in row |
-| updateCase?     | <code>(theCase: Case &vert; SubCase) => void;</code> callback after case has been updated         |
+| onRowClick      | <code>(theCase?: Case) => void;</code> callback for row click, passing case in row |
+| updateCase?     | <code>(theCase: Case) => void;</code> callback after case has been updated         |
 | onClose?        | `() => void` called when the modal is closed without selecting a case                             |
 
 UI component:

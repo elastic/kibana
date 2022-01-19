@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUpdateComment, UseUpdateComment } from './use_update_comment';
-import { basicCase, basicCaseCommentPatch, basicSubCaseId } from './mock';
+import { basicCase, basicCaseCommentPatch } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -67,7 +67,6 @@ describe('useUpdateComment', () => {
         version: basicCase.comments[0].version,
         signal: abortCtrl.signal,
         owner: SECURITY_SOLUTION_OWNER,
-        subCaseId: undefined,
       });
     });
   });
@@ -79,7 +78,7 @@ describe('useUpdateComment', () => {
       const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
 
-      result.current.patchComment({ ...sampleUpdate, subCaseId: basicSubCaseId });
+      result.current.patchComment({ ...sampleUpdate });
       await waitForNextUpdate();
       expect(spyOnPatchComment).toBeCalledWith({
         caseId: basicCase.id,
@@ -88,7 +87,6 @@ describe('useUpdateComment', () => {
         version: basicCase.comments[0].version,
         signal: abortCtrl.signal,
         owner: SECURITY_SOLUTION_OWNER,
-        subCaseId: basicSubCaseId,
       });
     });
   });

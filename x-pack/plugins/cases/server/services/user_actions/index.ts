@@ -38,7 +38,6 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
-  SUB_CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
@@ -56,7 +55,6 @@ import { defaultSortField } from '../../common/utils';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
-  subCaseId?: string;
 }
 
 export interface UserActionItem {
@@ -76,7 +74,7 @@ interface CreateUserActionES<T> extends ClientArgs {
 type CommonUserActionArgs = ClientArgs & CommonArguments;
 
 interface BulkCreateCaseDeletionUserAction extends ClientArgs {
-  cases: Array<{ id: string; owner: string; subCaseId?: string; connectorId: string }>;
+  cases: Array<{ id: string; owner: string; connectorId: string }>;
   user: User;
 }
 
@@ -311,11 +309,10 @@ export class CaseUserActionService {
   public async getAll({
     unsecuredSavedObjectsClient,
     caseId,
-    subCaseId,
   }: GetCaseUserActionArgs): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
     try {
-      const id = subCaseId ?? caseId;
-      const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+      const id = caseId;
+      const type = CASE_SAVED_OBJECT;
 
       const userActions =
         await unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>({

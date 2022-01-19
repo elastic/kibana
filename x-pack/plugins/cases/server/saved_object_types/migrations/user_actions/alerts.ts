@@ -11,6 +11,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { CommentRequestAlertType, CommentType } from '../../../../common/api';
+import { GENERATED_ALERT } from '../constants';
 import { logError } from '../utils';
 import { UserActionVersion800 } from './types';
 
@@ -85,7 +86,9 @@ function isCreateComment(action?: string, actionFields?: string[]): boolean {
   );
 }
 
-type AlertCommentOptional = Partial<CommentRequestAlertType>;
+type AlertCommentOptional = Partial<Omit<CommentRequestAlertType, 'type'>> & {
+  type: CommentType.alert | typeof GENERATED_ALERT;
+};
 
 function isAlertObject(data?: unknown | null): boolean {
   const unsafeAlertData = data as AlertCommentOptional;
@@ -93,7 +96,6 @@ function isAlertObject(data?: unknown | null): boolean {
   return (
     unsafeAlertData !== undefined &&
     unsafeAlertData !== null &&
-    (unsafeAlertData.type === CommentType.generatedAlert ||
-      unsafeAlertData.type === CommentType.alert)
+    (unsafeAlertData.type === GENERATED_ALERT || unsafeAlertData.type === CommentType.alert)
   );
 }

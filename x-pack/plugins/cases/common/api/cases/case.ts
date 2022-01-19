@@ -35,11 +35,6 @@ export const CasesByAlertIdRt = rt.array(
   })
 );
 
-export enum CaseType {
-  collection = 'collection',
-  individual = 'individual',
-}
-
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });

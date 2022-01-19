@@ -81,16 +81,10 @@ interface BasicCase {
   version: string;
 }
 
-export interface SubCase extends BasicCase {
-  caseParentId: string;
-}
-
 export interface Case extends BasicCase {
   connector: CaseConnector;
   description: string;
   externalService: CaseExternalService | null;
-  subCases?: SubCase[] | null;
-  subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
 }
@@ -114,7 +108,6 @@ export interface FilterOptions {
   tags: string[];
   reporters: User[];
   owner: string[];
-  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
@@ -190,7 +183,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;

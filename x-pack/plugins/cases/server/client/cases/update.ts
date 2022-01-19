@@ -100,7 +100,6 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
       id: updateReq.id,
       options: {
         fields: [],
-        // there should never be generated alerts attached to an individual case but we'll check anyway
         filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
         page: 1,
         perPage: 1,

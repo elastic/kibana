@@ -17,7 +17,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { Case } from '../../../common/ui/types';
-import { CaseStatuses, CaseType } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';
@@ -83,18 +83,16 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem grow={false}>
         <MyDescriptionList compressed>
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-            {caseData.type !== CaseType.collection && (
-              <EuiFlexItem grow={false} data-test-subj="case-view-status">
-                <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <StatusContextMenu
-                    currentStatus={caseData.status}
-                    disabled={!userCanCrud || isLoading}
-                    onStatusChanged={onStatusChanged}
-                  />
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false} data-test-subj="case-view-status">
+              <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <StatusContextMenu
+                  currentStatus={caseData.status}
+                  disabled={!userCanCrud || isLoading}
+                  onStatusChanged={onStatusChanged}
+                />
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>

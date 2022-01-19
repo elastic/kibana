@@ -17,15 +17,7 @@ import { CasesDeepLinkId } from '../../common/navigation';
 export const CommonUseField = getUseField({ component: Field });
 
 export const CreateCase = React.memo<CreateCaseFormProps>(
-  ({
-    afterCaseCreated,
-    caseType,
-    hideConnectorServiceNowSir,
-    onCancel,
-    onSuccess,
-    timelineIntegration,
-    withSteps,
-  }) => {
+  ({ afterCaseCreated, onCancel, onSuccess, timelineIntegration, withSteps }) => {
     useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
 
     return (
@@ -37,8 +29,6 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
         />
         <CreateCaseForm
           afterCaseCreated={afterCaseCreated}
-          caseType={caseType}
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           onCancel={onCancel}
           onSuccess={onSuccess}
           timelineIntegration={timelineIntegration}

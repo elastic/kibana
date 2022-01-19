@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 
 import {
   AlertResponse,
   AllCommentsResponse,
   AllCommentsResponseRt,
   AttributesTypeAlerts,
-  CommentAttributes,
   CommentResponse,
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
   FindQueryParams,
 } from '../../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
   defaultSortField,
   transformComments,
@@ -112,7 +109,6 @@ export const getAllAlertsAttachToCase = async (
     const theCase = await casesClient.cases.get({
       id: caseId,
       includeComments: false,
-      includeSubCaseComments: false,
     });
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -246,8 +242,7 @@ export async function get(
 }
 
 /**
- * Retrieves all the attachments for a case. The `includeSubCaseComments` can be used to include the sub case comments for
- * collections. If the entity is a sub case, pass in the subCaseID.
+ * Retrieves all the attachments for a case.
  *
  * @ignore
  */
@@ -258,13 +253,11 @@ export async function getAll(
   const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
-    let comments: SavedObjectsFindResponse<CommentAttributes>;
-
     const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
       Operations.getAllComments
     );
 
-    comments = await caseService.getAllCaseComments({
+    const comments = await caseService.getAllCaseComments({
       unsecuredSavedObjectsClient,
       id: caseID,
       options: {
@@ -280,7 +273,7 @@ export async function getAll(
     return AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects));
   } catch (error) {
     throw createCaseError({
-      message: `Failed to get all comments case id: ${caseID} include sub case comments: ${includeSubCaseComments} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to get all comments case id: ${caseID}: ${error}`,
       error,
       logger,
     });

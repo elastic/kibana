@@ -56,7 +56,6 @@ interface UpdateComment {
   commentId: string;
   commentUpdate: string;
   fetchUserActions: () => void;
-  subCaseId?: string;
   updateCase: (newCase: Case) => void;
   version: string;
 }
@@ -83,7 +82,6 @@ export const useUpdateComment = (): UseUpdateComment => {
       commentId,
       commentUpdate,
       fetchUserActions,
-      subCaseId,
       updateCase,
       version,
     }: UpdateComment) => {
@@ -99,7 +97,6 @@ export const useUpdateComment = (): UseUpdateComment => {
           commentUpdate,
           version,
           signal: abortCtrlRef.current.signal,
-          subCaseId,
           owner,
         });
 

@@ -23,7 +23,6 @@ export const CommentAttributesBasicRt = rt.type({
 export enum CommentType {
   user = 'user',
   alert = 'alert',
-  // generatedAlert = 'generated_alert',
   actions = 'actions',
 }
 

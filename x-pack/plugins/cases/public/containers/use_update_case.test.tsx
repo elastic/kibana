@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUpdateCase, UseUpdateCase } from './use_update_case';
-import { basicCase, basicSubCaseId } from './mock';
+import { basicCase } from './mock';
 import * as api from './api';
 import { UpdateKey } from './types';
 
@@ -94,7 +94,7 @@ describe('useUpdateCase', () => {
   it('patch sub case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id, subCaseId: basicSubCaseId })
+        useUpdateCase({ caseId: basicCase.id })
       );
       await waitForNextUpdate();
       result.current.updateCaseProperty(sampleUpdate);
@@ -105,7 +105,7 @@ describe('useUpdateCase', () => {
         isError: false,
         updateCaseProperty: result.current.updateCaseProperty,
       });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, 'none', basicSubCaseId);
+      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, 'none');
       expect(updateCase).toBeCalledWith(basicCase);
       expect(onSuccess).toHaveBeenCalled();
     });

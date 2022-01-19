@@ -491,9 +491,6 @@ export class CasesService {
   /**
    * Default behavior is to retrieve all comments that adhere to a given filter (if one is included).
    * to override this pass in the either the page or perPage options.
-   *
-   * @param includeSubCaseComments is a flag to indicate that sub case comments should be included as well, by default
-   *  sub case comments are excluded. If the `filter` field is included in the options, it will override this behavior
    */
   public async getAllCaseComments({
     unsecuredSavedObjectsClient,

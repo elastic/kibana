@@ -48,7 +48,6 @@ import {
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 
 const createConnectorUserAction = (
-  subCaseId?: string,
   overrides?: Partial<CaseUserActionAttributes>
 ): SavedObject<CaseUserActionAttributes> => {
   const { id, ...restConnector } = createConnectorObject().connector;
@@ -57,7 +56,6 @@ const createConnectorUserAction = (
       action: Actions.create,
       payload: { connector: restConnector },
       type: 'connector',
-      subCaseId,
       connectorId: id,
     }),
     ...(overrides && { ...overrides }),
@@ -65,10 +63,8 @@ const createConnectorUserAction = (
 };
 
 const updateConnectorUserAction = ({
-  subCaseId,
   overrides,
 }: {
-  subCaseId?: string;
   overrides?: Partial<CaseUserActionAttributes>;
 } = {}): SavedObject<CaseUserActionAttributes> => {
   const { id, ...restConnector } = createJiraConnector();
@@ -77,7 +73,6 @@ const updateConnectorUserAction = ({
       action: Actions.update,
       payload: { connector: restConnector },
       type: 'connector',
-      subCaseId,
       connectorId: id,
     }),
     ...(overrides && { ...overrides }),
@@ -85,10 +80,8 @@ const updateConnectorUserAction = ({
 };
 
 const pushConnectorUserAction = ({
-  subCaseId,
   overrides,
 }: {
-  subCaseId?: string;
   overrides?: Partial<CaseUserActionAttributes>;
 } = {}): SavedObject<CaseUserActionAttributes> => {
   const { connector_id: connectorId, ...restExternalService } = createExternalService();
@@ -96,7 +89,6 @@ const pushConnectorUserAction = ({
     ...createUserActionSO({
       action: Actions.push_to_service,
       payload: { externalService: restExternalService },
-      subCaseId,
       pushedConnectorId: connectorId,
       type: 'pushed',
     }),
@@ -133,7 +125,6 @@ const createUserActionFindSO = (
 
 const createUserActionSO = ({
   action,
-  subCaseId,
   attributesOverrides,
   commentId,
   connectorId,
@@ -142,7 +133,6 @@ const createUserActionSO = ({
   type,
 }: {
   action: UserAction;
-  subCaseId?: string;
   type?: string;
   payload?: Record<string, unknown>;
   attributesOverrides?: Partial<CaseUserActionAttributes>;
@@ -376,18 +366,6 @@ describe('CaseUserActionService', () => {
         expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
       });
 
-      it('sets sub_case_id to an empty string when it cannot find the reference', () => {
-        const userAction = {
-          ...createUserActionSO({ action: Actions.create, subCaseId: '5' }),
-          references: [],
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
-      });
-
       it('sets case_id correctly when it finds the reference', () => {
         const userAction = createConnectorUserAction();
 
@@ -413,7 +391,7 @@ describe('CaseUserActionService', () => {
 
       it('sets action_id correctly to the saved object id', () => {
         const userAction = {
-          ...createUserActionSO({ action: Actions.create, subCaseId: '5' }),
+          ...createUserActionSO({ action: Actions.create, commentId: '5' }),
         };
 
         const transformed = transformFindResponseToExternalModel(

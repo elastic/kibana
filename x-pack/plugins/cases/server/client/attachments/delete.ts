@@ -23,10 +23,6 @@ export interface DeleteAllArgs {
    * The case ID to delete all attachments for
    */
   caseID: string;
-  /**
-   * If specified the caseID will be ignored and this value will be used to find a sub case for deleting all the attachments
-   */
-  subCaseID?: string;
 }
 
 /**
@@ -41,10 +37,6 @@ export interface DeleteArgs {
    * The attachment ID to delete
    */
   attachmentID: string;
-  /**
-   * If specified the caseID will be ignored and this value will be used to find a sub case for deleting the attachment
-   */
-  subCaseID?: string;
 }
 
 /**
@@ -53,7 +45,7 @@ export interface DeleteArgs {
  * @ignore
  */
 export async function deleteAll(
-  { caseID, subCaseID }: DeleteAllArgs,
+  { caseID }: DeleteAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> {
   const {
@@ -67,10 +59,9 @@ export async function deleteAll(
   } = clientArgs;
 
   try {
-    const id = subCaseID ?? caseID;
     const comments = await caseService.getAllCaseComments({
       unsecuredSavedObjectsClient,
-      id,
+      id: caseID,
     });
 
     if (comments.total <= 0) {
@@ -108,7 +99,7 @@ export async function deleteAll(
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete all comments case id: ${caseID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to delete all comments case id: ${caseID}: ${error}`,
       error,
       logger,
     });
@@ -121,7 +112,7 @@ export async function deleteAll(
  * @ignore
  */
 export async function deleteComment(
-  { caseID, attachmentID, subCaseID }: DeleteArgs,
+  { caseID, attachmentID }: DeleteArgs,
   clientArgs: CasesClientArgs
 ) {
   const {
@@ -173,7 +164,7 @@ export async function deleteComment(
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,
       error,
       logger,
     });

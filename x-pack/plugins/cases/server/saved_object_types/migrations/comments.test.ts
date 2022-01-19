@@ -9,6 +9,7 @@ import {
   createCommentsMigrations,
   mergeMigrationFunctionMaps,
   migrateByValueLensVisualizations,
+  removeAssociationType,
   removeRuleInformation,
   stringifyCommentWithoutTrailingNewline,
 } from './comments';
@@ -31,6 +32,7 @@ import {
   MigrateFunctionsObject,
 } from '../../../../../../src/plugins/kibana_utils/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { GENERATED_ALERT } from './constants';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
@@ -438,7 +440,7 @@ describe('comments migrations', () => {
         id: '123',
         type: 'abc',
         attributes: {
-          type: CommentType.generatedAlert,
+          type: GENERATED_ALERT,
           rule: {
             id: '123',
             name: 'hello',
@@ -470,6 +472,27 @@ describe('comments migrations', () => {
       expect(removeRuleInformation(doc)).toEqual({
         ...doc,
         attributes: { ...doc.attributes, rule: { id: null, name: null } },
+      });
+    });
+  });
+
+  describe('removeAssociationType', () => {
+    it('removes the associationType field from the document', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'user',
+          associationType: 'case',
+        },
+        type: 'abc',
+        references: [],
+      };
+
+      expect(removeAssociationType(doc)).toEqual({
+        ...doc,
+        attributes: {
+          type: doc.attributes.type,
+        },
       });
     });
   });

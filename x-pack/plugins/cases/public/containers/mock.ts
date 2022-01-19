@@ -34,7 +34,6 @@ import { covertToSnakeCase } from './utils';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
-export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
@@ -159,7 +158,6 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  subCaseIds: [],
 };
 
 export const basicResolvedCase: ResolvedCase = {
@@ -236,8 +234,6 @@ export const collectionCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  subCases: [],
-  subCaseIds: [],
 };
 
 export const basicCasePost: Case = {

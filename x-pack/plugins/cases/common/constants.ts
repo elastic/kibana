@@ -14,7 +14,6 @@ export const APP_ID = 'cases';
 
 export const CASE_SAVED_OBJECT = 'cases';
 export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
-export const SUB_CASE_SAVED_OBJECT = 'cases-sub-case';
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
@@ -39,11 +38,6 @@ export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}`;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure`;
 export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration_id}`;
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
-
-export const SUB_CASES_PATCH_DEL_URL = `${CASES_URL}/sub_cases`;
-export const SUB_CASES_URL = `${CASE_DETAILS_URL}/sub_cases`;
-export const SUB_CASE_DETAILS_URL = `${CASE_DETAILS_URL}/sub_cases/{sub_case_id}`;
-export const SUB_CASE_USER_ACTIONS_URL = `${SUB_CASE_DETAILS_URL}/user_actions`;
 
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments`;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}`;
@@ -77,8 +71,7 @@ export const SUPPORTED_CONNECTORS = [
 /**
  * Alerts
  */
-export const MAX_ALERTS_PER_SUB_CASE = 5000;
-export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
+export const MAX_ALERTS_PER_CASE = 5000;
 
 export const SECURITY_SOLUTION_OWNER = 'securitySolution';
 export const OBSERVABILITY_OWNER = 'observability';

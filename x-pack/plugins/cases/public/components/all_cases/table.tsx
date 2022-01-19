@@ -32,7 +32,6 @@ interface CasesTableProps {
   isCommentUpdating: boolean;
   isDataEmpty: boolean;
   isSelectorView?: boolean;
-  itemIdToExpandedRowMap: EuiBasicTableProps<Case>['itemIdToExpandedRowMap'];
   onChange: EuiBasicTableProps<Case>['onChange'];
   pagination: EuiBasicTableProps<Case>['pagination'];
   refreshCases: (a?: boolean) => void;
@@ -45,6 +44,7 @@ interface CasesTableProps {
   userCanCrud: boolean;
 }
 
+// TODO: what do I need to remove here?
 // @ts-expect-error TS2769
 const BasicTable = styled(EuiBasicTable)`
   ${({ theme }) => `
@@ -60,12 +60,6 @@ const BasicTable = styled(EuiBasicTable)`
     &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
     &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow:hover {
       background-color: transparent;
-    }
-
-    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow {
-      .subCase:hover {
-        background-color: ${theme.eui.euiTableHoverClickableColor};
-      }
     }
   `}
 `;
@@ -84,7 +78,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   isCommentUpdating,
   isDataEmpty,
   isSelectorView,
-  itemIdToExpandedRowMap,
   onChange,
   pagination,
   refreshCases,
@@ -130,7 +123,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         isSelectable={showActions}
         itemId="id"
         items={data.cases}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         loading={isCommentUpdating}
         noItemsMessage={
           <EuiEmptyPrompt

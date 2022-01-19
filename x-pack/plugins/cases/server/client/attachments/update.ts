@@ -30,10 +30,6 @@ export interface UpdateArgs {
    * The full attachment request with the fields updated with appropriate values
    */
   updateRequest: CommentPatchRequest;
-  /**
-   * The ID of a sub case, if specified a sub case will be searched for to perform the attachment update instead of on a case
-   */
-  subCaseID?: string;
 }
 
 interface CombinedCaseParams {
@@ -75,7 +71,7 @@ async function getCommentableCase({
  * @ignore
  */
 export async function update(
-  { caseID, subCaseID, updateRequest: queryParams }: UpdateArgs,
+  { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> {
   const {
@@ -164,7 +160,7 @@ export async function update(
     return await updatedCase.encode();
   } catch (error) {
     throw createCaseError({
-      message: `Failed to patch comment case id: ${caseID} sub case id: ${subCaseID}: ${error}`,
+      message: `Failed to patch comment case id: ${caseID}: ${error}`,
       error,
       logger,
     });

@@ -36,29 +36,27 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
 export interface CaseDetailsLinkProps {
   children?: React.ReactNode;
   detailName: string;
-  subCaseId?: string;
   title?: string;
 }
 
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
   children,
   detailName,
-  subCaseId,
   title,
 }) => {
   const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
   const navigateToCaseViewClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToCaseView({ detailName, subCaseId });
+      navigateToCaseView({ detailName });
     },
-    [navigateToCaseView, detailName, subCaseId]
+    [navigateToCaseView, detailName]
   );
 
   return (
     <LinkAnchor
       onClick={navigateToCaseViewClick}
-      href={getCaseViewUrl({ detailName, subCaseId })}
+      href={getCaseViewUrl({ detailName })}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >

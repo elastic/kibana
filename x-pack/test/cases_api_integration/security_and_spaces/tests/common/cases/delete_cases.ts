@@ -90,7 +90,6 @@ export default ({ getService }: FtrProviderContext): void => {
         created_by: defaultUser,
         case_id: postedCase.id,
         comment_id: null,
-        sub_case_id: '',
         payload: {},
         owner: 'securitySolutionFixture',
       });

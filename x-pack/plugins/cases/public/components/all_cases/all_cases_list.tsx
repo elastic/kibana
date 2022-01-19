@@ -16,16 +16,14 @@ import {
   CaseStatusWithAllStatus,
   FilterOptions,
   SortFieldCase,
-  SubCase,
 } from '../../../common/ui/types';
-import { CaseStatuses, CaseType, CommentRequestAlertType, caseStatuses } from '../../../common/api';
+import { CaseStatuses, CommentRequestAlertType, caseStatuses } from '../../../common/api';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
-import { getExpandedRowMap } from './expanded_row';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
@@ -53,7 +51,7 @@ export interface AllCasesListProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
-  onRowClick?: (theCase?: Case | SubCase) => void;
+  onRowClick?: (theCase?: Case) => void;
   updateCase?: (newCase: Case) => void;
   doRefresh?: () => void;
 }
@@ -190,16 +188,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
 
-    const itemIdToExpandedRowMap = useMemo(
-      () =>
-        getExpandedRowMap({
-          columns,
-          data: data.cases,
-          onSubCaseClick: onRowClick,
-        }),
-      [data.cases, columns, onRowClick]
-    );
-
     const pagination = useMemo(
       () => ({
         pageIndex: queryParams.page - 1,
@@ -224,7 +212,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const tableRowProps = useCallback(
       (theCase: Case) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
-        className: classnames({ isDisabled: theCase.type === CaseType.collection }),
+        // TODO: should we just remove this line?
+        className: classnames({ isDisabled: false }),
       }),
       []
     );
@@ -263,7 +252,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isCommentUpdating={isCommentUpdating}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           onChange={tableOnChangeCallback}
           pagination={pagination}
           refreshCases={refreshCases}
