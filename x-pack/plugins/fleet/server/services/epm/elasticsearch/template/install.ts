@@ -9,6 +9,8 @@ import { merge, mergeWith, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
   RegistryDataStream,
@@ -18,6 +20,7 @@ import type {
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
+
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
@@ -254,6 +257,40 @@ function buildComponentTemplates(params: {
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
 
+  const packageMappings = registryElasticsearch && registryElasticsearch['index_template.mappings'];
+  templatesMap[mappingsTemplateName] = buildMappingComponentTemplate({
+    mappings,
+    packageMappings,
+    _meta,
+  });
+
+  templatesMap[settingsTemplateName] = {
+    template: {
+      settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
+    },
+    _meta,
+  };
+
+  // return empty/stub template
+  templatesMap[userSettingsTemplateName] = {
+    template: {
+      settings: {},
+    },
+    _meta,
+  };
+
+  return templatesMap;
+}
+
+function buildMappingComponentTemplate({
+  mappings,
+  packageMappings = {},
+  _meta,
+}: {
+  mappings: IndexTemplateMappings;
+  packageMappings?: MappingTypeMapping;
+  _meta: ESAssetMetadata;
+}) {
   const baseMapping = {
     // All the dynamic field mappings
     dynamic_templates: [
@@ -276,32 +313,14 @@ function buildComponentTemplates(params: {
     _meta,
   };
 
-  const packageMappings = registryElasticsearch && registryElasticsearch['index_template.mappings'];
-  templatesMap[mappingsTemplateName] = {
+  return {
     template: {
-      // dynamic_templates arrays should be concatenated together not overlayed
-      mappings: mergeWithArrayConcat(baseMapping, packageMappings || {}),
+      // dynamic_templates arrays should be concatenated together not overwritten
+      mappings: mergeWithArrayConcat(baseMapping, packageMappings),
     },
     _meta,
   };
-  templatesMap[settingsTemplateName] = {
-    template: {
-      settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
-    },
-    _meta,
-  };
-
-  // return empty/stub template
-  templatesMap[userSettingsTemplateName] = {
-    template: {
-      settings: {},
-    },
-    _meta,
-  };
-
-  return templatesMap;
 }
-
 async function installDataStreamComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
