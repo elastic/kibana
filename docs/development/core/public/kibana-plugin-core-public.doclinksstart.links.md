@@ -189,7 +189,10 @@ readonly links: {
             readonly runtimeFields: string;
         };
         readonly addData: string;
-        readonly kibana: string;
+        readonly kibana: {
+            readonly guide: string;
+            readonly autocompleteSuggestions: string;
+        };
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
@@ -213,6 +216,7 @@ readonly links: {
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuery: string;
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
@@ -242,6 +246,7 @@ readonly links: {
             cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
+            multiSearch: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
@@ -250,8 +255,10 @@ readonly links: {
             putSnapshotLifecyclePolicy: string;
             putIndexTemplateV1: string;
             putWatch: string;
+            searchPreference: string;
             simulatePipeline: string;
             timeUnits: string;
+            unfreezeIndex: string;
             updateTransform: string;
         }>;
         readonly observability: Readonly<{

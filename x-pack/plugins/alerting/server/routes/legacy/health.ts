@@ -32,7 +32,7 @@ export function healthRoute(
       }
       trackLegacyRouteUsage('health', usageCounter);
       try {
-        const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
+        const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
 
         const securityHealth = await getSecurityHealth(
           async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
@@ -42,11 +42,18 @@ export function healthRoute(
 
         const frameworkHealth: AlertingFrameworkHealth = {
           ...securityHealth,
-          alertingFrameworkHeath,
+          alertingFrameworkHealth,
         };
 
         return res.ok({
-          body: frameworkHealth,
+          body: {
+            ...frameworkHealth,
+            alertingFrameworkHeath: {
+              // Legacy: pre-v8.0 typo
+              ...alertingFrameworkHealth,
+              _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+            },
+          },
         });
       } catch (error) {
         return res.badRequest({ body: error });

@@ -3135,10 +3135,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHeath",
+            "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHealth",
             "type": "Object",
             "tags": [],
-            "label": "alertingFrameworkHeath",
+            "label": "alertingFrameworkHealth",
             "description": [],
             "signature": [
               {

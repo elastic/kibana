@@ -11,4 +11,4 @@ export type {
   TaskPayloadDeprecatedCSV,
   SearchRequestDeprecatedCSV,
   SavedSearchGeneratorResultDeprecatedCSV,
-} from '../../../common/types';
+} from '../../../common/types/export_types/csv';

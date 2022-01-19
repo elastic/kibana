@@ -66,9 +66,6 @@ export const PARTICIPANTS = i18n.translate(
     defaultMessage: 'Participants',
   }
 );
-export const CREATE_TITLE = i18n.translate('xpack.securitySolution.cases.caseView.create', {
-  defaultMessage: 'Create new case',
-});
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.cases.caseView.description', {
   defaultMessage: 'Description',

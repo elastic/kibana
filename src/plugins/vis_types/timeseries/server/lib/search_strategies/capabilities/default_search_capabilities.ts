@@ -54,7 +54,10 @@ export class DefaultSearchCapabilities {
         ...aggs[AGG_TYPE.METRIC],
         ...aggs[AGG_TYPE.SIBLING_PIPELINE],
         TSVB_METRIC_TYPES.MATH,
+        TSVB_METRIC_TYPES.CALCULATION,
         BUCKET_TYPES.TERMS,
+        // SERIES_AGG should be blocked for table
+        ...(this.panel.type === PANEL_TYPES.TABLE ? [] : [TSVB_METRIC_TYPES.SERIES_AGG]),
       ].reduce(
         (availableAggs, aggType) => ({
           ...availableAggs,

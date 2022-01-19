@@ -20,7 +20,10 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
-import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  previewRulesSchema,
+  RulePreviewLogs,
+} from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
@@ -86,11 +89,15 @@ export const previewRulesRoute = async (
             RULE_PREVIEW_INVOCATION_COUNT.MONTH,
           ].includes(invocationCount)
         ) {
-          return response.ok({ body: { errors: ['Invalid invocation count'] } });
+          return response.ok({
+            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [] }] },
+          });
         }
 
         if (request.body.type === 'threat_match') {
-          return response.ok({ body: { errors: ['Preview for rule type not supported'] } });
+          return response.ok({
+            body: { logs: [{ errors: ['Preview for rule type not supported'], warnings: [] }] },
+          });
         }
 
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
@@ -110,6 +117,7 @@ export const previewRulesRoute = async (
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
         const runState: Record<string, unknown> = {};
+        const logs: RulePreviewLogs[] = [];
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
@@ -179,6 +187,24 @@ export const previewRulesRoute = async (
               tags: [],
               updatedBy: rule.updatedBy,
             })) as TState;
+
+            // Save and reset error and warning logs
+            const currentLogs = {
+              errors: warningsAndErrorsStore
+                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+                .map((item) => item.message ?? 'Unkown Error'),
+              warnings: warningsAndErrorsStore
+                .filter(
+                  (item) =>
+                    item.newStatus === RuleExecutionStatus['partial failure'] ||
+                    item.newStatus === RuleExecutionStatus.warning
+                )
+                .map((item) => item.message ?? 'Unknown Warning'),
+              startedAt: startedAt.toDate().toISOString(),
+            };
+            logs.push(currentLogs);
+            previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
+
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
@@ -242,18 +268,6 @@ export const previewRulesRoute = async (
             break;
         }
 
-        const errors = warningsAndErrorsStore
-          .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-          .map((item) => item.message);
-
-        const warnings = warningsAndErrorsStore
-          .filter(
-            (item) =>
-              item.newStatus === RuleExecutionStatus['partial failure'] ||
-              item.newStatus === RuleExecutionStatus.warning
-          )
-          .map((item) => item.message);
-
         // Refreshes alias to ensure index is able to be read before returning
         await context.core.elasticsearch.client.asInternalUser.indices.refresh(
           {
@@ -265,8 +279,7 @@ export const previewRulesRoute = async (
         return response.ok({
           body: {
             previewId,
-            errors,
-            warnings,
+            logs,
           },
         });
       } catch (err) {

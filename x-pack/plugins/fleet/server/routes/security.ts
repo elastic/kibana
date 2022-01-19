@@ -21,7 +21,7 @@ const SUPERUSER_AUTHZ_MESSAGE =
   'Access to Fleet API requires the superuser role and for stack security features to be enabled.';
 
 function checkSecurityEnabled() {
-  return appContextService.hasSecurity() && appContextService.getSecurityLicense().isEnabled();
+  return appContextService.getSecurityLicense().isEnabled();
 }
 
 export function checkSuperuser(req: KibanaRequest) {

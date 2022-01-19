@@ -520,7 +520,6 @@ function getEsPrincipalUsage({ username, serviceAccountToken }: ElasticsearchCon
   let value: CoreConfigUsageData['elasticsearch']['principal'] = 'unknown';
   if (isConfigured.string(username)) {
     switch (username) {
-      case 'elastic': // deprecated
       case 'kibana': // deprecated
       case 'kibana_system':
         value = `${username}_user` as const;

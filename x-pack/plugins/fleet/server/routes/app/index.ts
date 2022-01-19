@@ -18,7 +18,7 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
     error: 'MISSING_SECURITY',
   };
 
-  if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
+  if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
     const security = appContextService.getSecurity();

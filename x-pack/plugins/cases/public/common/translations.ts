@@ -42,7 +42,7 @@ export const PARTICIPANTS = i18n.translate('xpack.cases.caseView.particpantsLabe
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+  defaultMessage: 'Create case',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.caseView.description', {

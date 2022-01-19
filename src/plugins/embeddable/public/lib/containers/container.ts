@@ -7,6 +7,7 @@
  */
 
 import uuid from 'uuid';
+import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
 import { startWith, pairwise } from 'rxjs/operators';
 import {
@@ -16,6 +17,7 @@ import {
   ErrorEmbeddable,
   EmbeddableFactory,
   IEmbeddable,
+  isErrorEmbeddable,
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
@@ -193,6 +195,32 @@ export abstract class Container<
         }
       });
     });
+  }
+
+  public async getExplicitInputIsEqual(lastInput: TContainerInput) {
+    const { panels: lastPanels, ...restOfLastInput } = lastInput;
+    const { panels: currentPanels, ...restOfCurrentInput } = this.getInput();
+    const otherInputIsEqual = isEqual(restOfLastInput, restOfCurrentInput);
+    if (!otherInputIsEqual) return false;
+
+    const embeddableIdsA = Object.keys(lastPanels);
+    const embeddableIdsB = Object.keys(currentPanels);
+    if (
+      embeddableIdsA.length !== embeddableIdsB.length ||
+      xor(embeddableIdsA, embeddableIdsB).length > 0
+    ) {
+      return false;
+    }
+    // embeddable ids are equal so let's compare individual panels.
+    for (const id of embeddableIdsA) {
+      const currentEmbeddable = await this.untilEmbeddableLoaded(id);
+      const lastPanelInput = lastPanels[id].explicitInput;
+      if (isErrorEmbeddable(currentEmbeddable)) continue;
+      if (!(await currentEmbeddable.getExplicitInputIsEqual(lastPanelInput))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected createNewPanelState<

@@ -7,11 +7,16 @@
 
 import { encode } from 'rison-node';
 import React, { FunctionComponent, useState, useEffect } from 'react';
+import { buildPhrasesFilter, PhraseFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
+import {
+  APPS_WITH_DEPRECATION_LOGS,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
+} from '../../../../../common/constants';
 import { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import {
@@ -29,32 +34,32 @@ interface Props {
   checkpoint: string;
 }
 
-export const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
+export const getDeprecationDataView = async (dataService: DataPublicPluginStart) => {
   const results = await dataService.dataViews.find(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
   // index pattern that has an exact match with our title.
-  const deprecationIndexPattern = results.find(
+  const deprecationDataView = results.find(
     (result) => result.title === DEPRECATION_LOGS_INDEX_PATTERN
   );
 
-  if (deprecationIndexPattern) {
-    return deprecationIndexPattern.id;
+  if (deprecationDataView) {
+    return deprecationDataView;
   } else {
-    // When creating the index pattern, we need to be careful when creating an indexPattern
+    // When creating the data view, we need to be careful when creating a data view
     // for an index that doesnt exist. Since the deprecation logs data stream is only created
     // when a deprecation log is indexed it could be possible that it might not exist at the
     // time we need to render the DiscoveryAppLink.
-    // So in order to avoid those errors we need to make sure that the indexPattern is created
+    // So in order to avoid those errors we need to make sure that the data view is created
     // with allowNoIndex and that we skip fetching fields to from the source index.
     const override = false;
     const skipFetchFields = true;
     // prettier-ignore
-    const newIndexPattern = await dataService.dataViews.createAndSave({
+    const newDataView = await dataService.dataViews.createAndSave({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
       allowNoIndex: true,
     }, override, skipFetchFields);
 
-    return newIndexPattern.id;
+    return newDataView;
   }
 };
 
@@ -68,19 +73,29 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
 
   useEffect(() => {
     const getDiscoveryUrl = async () => {
-      const indexPatternId = await getDeprecationIndexPatternId(dataService);
       const locator = share.url.locators.get('DISCOVER_APP_LOCATOR');
-
       if (!locator) {
         return;
       }
 
-      const url = await locator.getUrl({
-        indexPatternId,
+      const dataView = await getDeprecationDataView(dataService);
+      const field = dataView.getFieldByName(DEPRECATION_LOGS_ORIGIN_FIELD);
+
+      let filters: PhraseFilter[] = [];
+
+      if (field !== undefined) {
+        const filter = buildPhrasesFilter(field!, [...APPS_WITH_DEPRECATION_LOGS], dataView);
+        filter.meta.negate = true;
+        filters = [filter];
+      }
+
+      const url = await locator?.getUrl({
+        indexPatternId: dataView.id,
         query: {
           language: 'kuery',
           query: `@timestamp > "${checkpoint}"`,
         },
+        filters,
       });
 
       setDiscoveryUrl(url);
@@ -88,6 +103,10 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
 
     getDiscoveryUrl();
   }, [dataService, checkpoint, share.url.locators]);
+
+  if (discoveryUrl === undefined) {
+    return null;
+  }
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
@@ -112,11 +131,21 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
       core: { http },
     },
   } = useAppContext();
-  const logStreamUrl = http?.basePath?.prepend(
-    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:${encode(
-      checkpoint
-    )})`
+
+  // Ideally we don't want to hardcode the path to the Log Stream app and use the UrlService.locator instead.
+  // Issue opened: https://github.com/elastic/kibana/issues/104855
+  const streamAppPath = '/app/logs/stream';
+
+  const sourceId = DEPRECATION_LOGS_SOURCE_ID;
+  const logPosition = `(end:now,start:${encode(checkpoint)})`;
+  const logFilter = encodeURI(
+    `(language:kuery,query:'not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
+      ' or '
+    )})')`
   );
+  const queryParams = `sourceId=${sourceId}&logPosition=${logPosition}&logFilter=${logFilter}`;
+
+  const logStreamUrl = http?.basePath?.prepend(`${streamAppPath}?${queryParams}`);
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click

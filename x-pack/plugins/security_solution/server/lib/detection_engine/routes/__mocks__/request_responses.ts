@@ -25,12 +25,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
-import {
-  RuleAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  HapiReadableStream,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
+import { RuleAlertType, HapiReadableStream, IRuleStatusSOAttributes } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
@@ -469,7 +464,7 @@ export const getMockPrivilegesResult = () => ({
 });
 
 export const getEmptySavedObjectsResponse =
-  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  (): SavedObjectsFindResponse<IRuleStatusSOAttributes> => ({
     page: 1,
     per_page: 1,
     total: 0,
