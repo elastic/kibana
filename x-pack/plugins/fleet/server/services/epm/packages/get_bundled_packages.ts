@@ -19,16 +19,16 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   const dirContents = await fs.readdir(BUNDLED_PACKAGE_DIRECTORY);
   const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
 
-  const result: BundledPackage[] = [];
+  const result = await Promise.all(
+    zipFiles.map(async (zipFile) => {
+      const file = await fs.readFile(path.join(BUNDLED_PACKAGE_DIRECTORY, zipFile));
 
-  for (const zipFile of zipFiles) {
-    const file = await fs.readFile(path.join(BUNDLED_PACKAGE_DIRECTORY, zipFile));
-
-    result.push({
-      name: zipFile.replace('.zip', ''),
-      buffer: file,
-    });
-  }
+      return {
+        name: zipFile.replace('.zip', ''),
+        buffer: file,
+      };
+    })
+  );
 
   return result;
 }

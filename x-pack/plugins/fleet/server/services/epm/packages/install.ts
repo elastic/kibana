@@ -463,7 +463,9 @@ async function installPackageByUpload({
   }
 }
 
-export type InstallPackageParams = { spaceId: string } & (
+export type InstallPackageParams = {
+  spaceId: string;
+} & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
 );

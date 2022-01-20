@@ -17,6 +17,7 @@ import type {
   PackagePolicy,
   PreconfiguredAgentPolicy,
   PreconfiguredOutput,
+  RegistrySearchResult,
 } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
@@ -33,9 +34,7 @@ import {
 import { outputService } from './output';
 import { packagePolicyService } from './package_policy';
 import { getBundledPackages } from './epm/packages/get_bundled_packages';
-import { getInstallType } from './epm/packages/install';
 import type { InstallPackageParams } from './epm/packages/install';
-import { parseAndVerifyArchiveEntries } from './epm/archive';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');
@@ -47,10 +46,6 @@ const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof pa
 const mockedGetBundledPackages = getBundledPackages as jest.MockedFunction<
   typeof getBundledPackages
 >;
-const mockedParseAndVerifyArchiveEntries = parseAndVerifyArchiveEntries as jest.MockedFunction<
-  typeof parseAndVerifyArchiveEntries
->;
-const mockedGetInstallType = getInstallType as jest.MockedFunction<typeof getInstallType>;
 
 const mockInstalledPackages = new Map();
 const mockInstallPackageErrors = new Map<string, string>();
@@ -123,6 +118,21 @@ function getPutPreconfiguredPackagesMock() {
 
   return soClient;
 }
+
+jest.mock('./epm/registry', () => ({
+  ...jest.requireActual('./epm/registry'),
+  async fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
+    return {
+      name: packageName,
+      version: '1.0.0',
+      description: '',
+      release: 'experimental',
+      title: '',
+      path: '',
+      download: '',
+    };
+  },
+}));
 
 jest.mock('./epm/packages/install', () => ({
   async installPackage(args: InstallPackageParams): Promise<InstallResult | undefined> {
@@ -651,39 +661,20 @@ describe('policy preconfiguration', () => {
   describe('with bundled packages', () => {
     beforeEach(() => {
       mockedGetBundledPackages.mockReset();
-      mockedParseAndVerifyArchiveEntries.mockReset();
-      mockedGetInstallType.mockReset();
     });
 
     it('should install each bundled package', async () => {
       mockedGetBundledPackages.mockResolvedValue([
         {
-          name: 'test-package',
-          buffer: Buffer.from('test-package'),
+          name: 'test_package',
+          buffer: Buffer.from('test_package'),
         },
 
         {
-          name: 'test-package-2',
-          buffer: Buffer.from('test-package-2'),
+          name: 'test_package_2',
+          buffer: Buffer.from('test_package_2'),
         },
       ]);
-
-      mockedParseAndVerifyArchiveEntries.mockImplementation((buffer, contentType) =>
-        Promise.resolve({
-          paths: [],
-          packageInfo: {
-            name: buffer.toString('utf8'),
-            format_version: '1.0.0',
-            title: buffer.toString('utf8'),
-            description: '',
-            version: '1.0.0',
-            release: 'experimental',
-            owner: { github: 'elastic' },
-          },
-        })
-      );
-
-      mockedGetInstallType.mockReturnValue('install');
 
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -692,13 +683,22 @@ describe('policy preconfiguration', () => {
         soClient,
         esClient,
         [],
-        [],
+        [
+          {
+            name: 'test_package',
+            version: 'latest',
+          },
+          {
+            name: 'test_package_2',
+            version: 'latest',
+          },
+        ],
         mockDefaultOutput,
         DEFAULT_SPACE_ID
       );
 
       expect(policies).toEqual([]);
-      expect(packages).toEqual(expect.arrayContaining(['test-package', 'test-package-2']));
+      expect(packages).toEqual(['test_package-1.0.0', 'test_package_2-1.0.0']);
       expect(nonFatalErrors).toEqual([]);
     });
   });

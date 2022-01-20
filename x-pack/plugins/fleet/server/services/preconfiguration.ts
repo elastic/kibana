@@ -20,7 +20,6 @@ import type {
   PreconfigurationError,
   PreconfiguredOutput,
   PackagePolicy,
-  InstallResult,
 } from '../../common';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
 import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
@@ -28,13 +27,8 @@ import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
-import { getInstallation, getInstallationObject, getPackageInfo } from './epm/packages';
-import {
-  ensurePackagesCompletedInstall,
-  getInstallType,
-  installPackage,
-  updateInstallStatus,
-} from './epm/packages/install';
+import { getInstallation, getPackageInfo } from './epm/packages';
+import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
@@ -43,8 +37,6 @@ import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
-import { getBundledPackages } from './epm/packages/get_bundled_packages';
-import { parseAndVerifyArchiveEntries } from './epm/archive';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -178,29 +170,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
-  // Install bundled packages first before we install any preconfigured packages
-  const bundledInstallResults = await installBundledPackages(soClient, esClient, spaceId);
-
-  const packagesToInstall = [];
-
-  for (const pkg of packages) {
-    // We don't support preconfiguring bundled packages. Preconfigured packages will be installed from the package
-    // registry if it is available while bundled packages will be installed from disk. In order to avoid version conflicts
-    // we only support one or the other, preferring bundled packages if they are avaiable.
-    if (bundledInstallResults.some((result) => result.name === pkg.name)) {
-      logger.warn(
-        `Preconfigured package ${pkg.name} will be skipped as a bundled version of this package is included with Kibana`
-      );
-
-      continue;
-    }
-
-    if (pkg.version === PRECONFIGURATION_LATEST_KEYWORD) {
-      packagesToInstall.push(pkg.name);
-    } else {
-      packagesToInstall.push(pkg);
-    }
-  }
+  const packagesToInstall = packages.map((pkg) =>
+    pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
+  );
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
@@ -209,25 +181,13 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
+    // During setup, we'll try to install preconfigured packages from the versions bundled with Kibana
+    // whenever possible
+    preferredSource: 'bundled',
   });
 
   const fulfilledPackages = [];
   const rejectedPackages: PreconfigurationError[] = [];
-
-  for (const bundledInstallResult of bundledInstallResults) {
-    if (bundledInstallResult.error) {
-      logger.warn(
-        `Failed to install bundled package ${bundledInstallResult.name} due to error [${bundledInstallResult.error}]`
-      );
-
-      rejectedPackages.push({
-        package: { name: bundledInstallResult.name, version: '' },
-        error: bundledInstallResult.error,
-      });
-    } else {
-      fulfilledPackages.push(bundledInstallResult);
-    }
-  }
 
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
@@ -481,88 +441,4 @@ async function addPreconfiguredPolicyPackages(
       bumpAgentPolicyRevison
     );
   }
-}
-
-interface BundledPackageInstallResult extends InstallResult {
-  name: string;
-}
-
-/**
- * Pulls bundled .zip archives of package from a directory and installs the packages. This facilitates
- * "stack-aligned" packages that are bundled with a given release of Kibana.
- */
-async function installBundledPackages(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  spaceId: string
-): Promise<BundledPackageInstallResult[]> {
-  const logger = appContextService.getLogger();
-
-  const bundledPackages = await getBundledPackages();
-
-  const results = await Promise.allSettled(
-    bundledPackages.map(async (bundledPackage) => {
-      // TODO: Determine a better way to simply grab the package name/version from the archive
-      const { packageInfo } = await parseAndVerifyArchiveEntries(
-        bundledPackage.buffer,
-        'application/zip'
-      );
-
-      const installedPkg = await getInstallationObject({
-        savedObjectsClient: soClient,
-        pkgName: packageInfo.name,
-      });
-
-      const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
-
-      // If the package is already installed, don't attempt to reinstall it. Just add a result record indicating
-      // that the package is already installed.
-      if (installType !== 'install') {
-        return {
-          name: installedPkg?.attributes.name,
-          status: 'already_installed',
-          installType: 'reinstall',
-        } as BundledPackageInstallResult;
-      }
-
-      logger.debug(`Installing bundled package ${bundledPackage.name}`);
-
-      const installResult = await installPackage({
-        savedObjectsClient: soClient,
-        esClient,
-        installSource: 'upload',
-        archiveBuffer: bundledPackage.buffer,
-        contentType: 'application/zip',
-        spaceId,
-      });
-
-      // Mark bundled packages with a unique status to prevent them from appearing as "installed" in the UI
-      await updateInstallStatus({
-        savedObjectsClient: soClient,
-        pkgName: packageInfo.name,
-        status: 'installed_bundled',
-      });
-
-      return {
-        // Strip semver strings from the package file name to make them consistent with the `name`
-        // field that comes through via preconfigured packages/policies
-        name: bundledPackage.name.substring(0, bundledPackage.name.indexOf('-')),
-        ...installResult,
-      } as BundledPackageInstallResult;
-    })
-  );
-
-  return results.map((result, index) => {
-    if (result.status === 'fulfilled') {
-      return result.value;
-    }
-
-    const name = bundledPackages[index].name;
-
-    return {
-      name,
-      error: result.reason,
-      installType: 'install',
-    };
-  });
 }
