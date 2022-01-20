@@ -79,7 +79,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comment).to.eql({
         type: postCommentUserReq.type,
         comment: postCommentUserReq.comment,
-        associationType: 'case',
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
@@ -158,7 +157,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(comment).to.eql({
           type: postCommentUserReq.type,
           comment: postCommentUserReq.comment,
-          associationType: 'case',
           created_by: getUserInfo(secOnly),
           pushed_at: null,
           pushed_by: null,

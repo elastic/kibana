@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -36,7 +35,6 @@ import {
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
@@ -62,54 +60,6 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to update an individual style cases' type field to a collection
- * when alerts are attached to the case.
- */
-async function throwIfInvalidUpdateOfTypeWithAlerts({
-  requests,
-  caseService,
-  unsecuredSavedObjectsClient,
-}: {
-  requests: UpdateRequestWithOriginalCase[];
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}) {
-  const getAlertsForID = async ({ updateReq }: UpdateRequestWithOriginalCase) => {
-    const alerts = await caseService.getAllCaseComments({
-      unsecuredSavedObjectsClient,
-      id: updateReq.id,
-      options: {
-        fields: [],
-        filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
-        page: 1,
-        perPage: 1,
-      },
-    });
-
-    return { id: updateReq.id, alerts };
-  };
-
-  const getAlertsMapper = async (caseToUpdate: UpdateRequestWithOriginalCase) =>
-    getAlertsForID(caseToUpdate);
-  // Ensuring we don't too many concurrent get running.
-  const casesAlertTotals = await pMap(requests, getAlertsMapper, {
-    concurrency: MAX_CONCURRENT_SEARCHES,
-  });
-
-  // grab the cases that have at least one alert comment attached to them
-  const typeUpdateWithAlerts = casesAlertTotals.filter((caseInfo) => caseInfo.alerts.total > 0);
-
-  if (typeUpdateWithAlerts.length > 0) {
-    const ids = typeUpdateWithAlerts.map((req) => req.id);
-    throw Boom.badRequest(
-      `Converting a case to a collection is not allowed when it has alert comments, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -368,11 +318,6 @@ export const update = async (
 
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
-    await throwIfInvalidUpdateOfTypeWithAlerts({
-      requests: updateCases,
-      caseService,
-      unsecuredSavedObjectsClient,
-    });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
