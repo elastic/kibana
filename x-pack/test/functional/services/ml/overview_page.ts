@@ -28,11 +28,11 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
     },
 
     async assertDFACreateJobButtonExists() {
-      await testSubjects.existOrFail('mlOverviewCreateDFAJobButton');
+      await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
     },
 
     async assertDFACreateJobButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlOverviewCreateDFAJobButton');
+      const isEnabled = await testSubjects.isEnabled('mlAnalyticsCreateFirstButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected AD "Create job" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

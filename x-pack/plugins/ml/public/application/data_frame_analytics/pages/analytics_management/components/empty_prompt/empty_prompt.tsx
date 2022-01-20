@@ -84,7 +84,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           color="primary"
           iconType="plusInCircle"
           fill
-          data-test-subj="mlAnalyticsCreateFirstButton OR mlOverviewCreateDFAJobButton"
+          data-test-subj="mlAnalyticsCreateFirstButton"
         >
           {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
             defaultMessage: 'Create job',

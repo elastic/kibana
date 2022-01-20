@@ -232,13 +232,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   if (analytics.length === 0 && !isManagementTable) {
     return (
       <div data-test-subj="mlAnalyticsJobList">
+        <EuiSpacer size="m" />
         <AnalyticsEmptyPrompt
           disabled={disabled}
-          onCreateFirstJobClick={() => setIsSourceIndexModalVisible(true)}
+          onCreateFirstJobClick={setIsSourceIndexModalVisible.bind(null, true)}
         />
-        {isSourceIndexModalVisible === true && (
-          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-        )}
+        {isSourceIndexModalVisible ? (
+          <SourceSelection onClose={setIsSourceIndexModalVisible.bind(null, false)} />
+        ) : null}
       </div>
     );
   }
