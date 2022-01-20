@@ -81,7 +81,7 @@ describe('esaggs expression function - server', () => {
   test('calls getStartDependencies with the KibanaRequest', async () => {
     await definition().fn(null, args, mockHandlers).toPromise();
 
-    expect(getStartDependencies).toHaveBeenCalledWith({ id: 'hi' });
+    expect(getStartDependencies).toHaveBeenCalledWith({ opaqueId: 'hi' });
   });
 
   test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
