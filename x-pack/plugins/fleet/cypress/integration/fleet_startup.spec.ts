@@ -13,7 +13,7 @@ describe('Fleet startup', () => {
     navigateTo(FLEET);
   });
 
-  it('should display Add agent button and Healthy agent once Fleet Agent page loaded #2', () => {
+  it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
     cy.getBySel(ADD_AGENT_BUTTON).contains('Add agent');
     cy.get('.euiBadge').contains('Healthy');
   });
