@@ -263,7 +263,7 @@ describe('CaseView', () => {
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2', undefined);
+      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
       expect(fetchCaseMetrics).toBeCalled();
       expect(fetchCase).toBeCalled();
     });
@@ -303,7 +303,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2', undefined);
+        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
         expect(fetchCaseMetrics).toBeCalledWith(true);
         expect(fetchCase).toBeCalledWith(true);
       });

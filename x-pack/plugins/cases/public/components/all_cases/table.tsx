@@ -44,7 +44,7 @@ interface CasesTableProps {
   userCanCrud: boolean;
 }
 
-// TODO: what do I need to remove here?
+// TODO: what do I need to remove here? the isSelectable maybe?
 // @ts-expect-error TS2769
 const BasicTable = styled(EuiBasicTable)`
   ${({ theme }) => `

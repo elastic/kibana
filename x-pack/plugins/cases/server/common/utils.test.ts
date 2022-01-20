@@ -115,7 +115,6 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -154,7 +153,6 @@ describe('common utils', () => {
               "title": "Damaging Data Destruction Detected",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T22:32:00.900Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -197,7 +195,6 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -244,7 +241,6 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -308,7 +304,6 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -363,7 +358,6 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -390,7 +384,6 @@ describe('common utils', () => {
           "closed_by": null,
           "comments": Array [
             Object {
-              "associationType": "case",
               "comment": "Wow, good luck catching that bad meanie!",
               "created_at": "2019-11-25T21:55:00.177Z",
               "created_by": Object {
@@ -442,7 +435,6 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -495,7 +487,6 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -576,7 +567,6 @@ describe('common utils', () => {
       const res = transformNewComment(comment);
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "associationType": "case",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -606,7 +596,6 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "associationType": "case",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -639,7 +628,6 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "associationType": "case",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {

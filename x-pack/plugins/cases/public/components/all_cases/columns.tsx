@@ -343,6 +343,10 @@ export const useCasesColumns = ({
           {
             name: i18n.STATUS,
             render: (theCase: Case) => {
+              if (theCase.status === null || theCase.status === undefined) {
+                return getEmptyTagValue();
+              }
+
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}

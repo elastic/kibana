@@ -97,7 +97,6 @@ describe('utils', () => {
             "case",
           ],
           "title": "My new case",
-          "type": "individual",
           "updated_at": null,
           "updated_by": null,
         }

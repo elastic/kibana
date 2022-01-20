@@ -58,7 +58,7 @@ describe('usePostComment', () => {
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal, undefined);
+      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
     });
   });
 

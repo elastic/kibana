@@ -656,7 +656,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 2',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);

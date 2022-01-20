@@ -19,8 +19,6 @@ import {
   SwimlaneFieldsType,
 } from '../../../common/api';
 
-export { getActionType as getCaseConnectorUi } from './case';
-
 export * from './types';
 
 interface GetCaseConnectorsReturn {

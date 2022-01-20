@@ -18,7 +18,6 @@ import {
   SortFieldCase,
 } from '../../../common/ui/types';
 import { CaseStatuses, CommentRequestAlertType, caseStatuses } from '../../../common/api';
-import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 
@@ -201,7 +200,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
         onSelectionChange: setSelectedCases,
-        selectableMessage: (selectable) => (!selectable ? SELECTABLE_MESSAGE_COLLECTIONS : ''),
         initialSelected: selectedCases,
       }),
       [selectedCases, setSelectedCases]

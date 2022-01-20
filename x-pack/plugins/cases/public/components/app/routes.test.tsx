@@ -29,12 +29,7 @@ jest.mock('../configure_cases', () => ({
   ConfigureCases: () => <div>{'Configure cases'}</div>,
 }));
 
-const getCaseViewPaths = () => [
-  '/cases/test-id',
-  '/cases/test-id/comment-id',
-  '/cases/test-id/sub-cases/sub-case-id',
-  '/cases/test-id/sub-cases/sub-case-id/comment-id',
-];
+const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
 
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/cases'],
