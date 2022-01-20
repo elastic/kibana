@@ -36,6 +36,6 @@ export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(BUILDER_MODAL_BODY).click();
 };
 
-export const closeExceptionBuilderModal = () => {
+export const closeExceptionBuilderFlyout = () => {
   cy.get(CANCEL_BTN).click();
 };
