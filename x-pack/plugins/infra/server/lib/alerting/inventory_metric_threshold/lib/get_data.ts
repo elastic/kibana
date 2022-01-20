@@ -63,7 +63,7 @@ export const getData = async (
         compositeSize,
         filterQuery,
         customMetric,
-        afterKey,
+        nextAfterKey,
         previous
       );
     }
