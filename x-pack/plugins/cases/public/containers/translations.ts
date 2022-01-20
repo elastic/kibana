@@ -81,6 +81,6 @@ export const SYNC_CASE = (caseTitle: string) =>
 export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
   'xpack.cases.containers.statusChangeToasterText',
   {
-    defaultMessage: 'Alerts in this case have been also had their status updated',
+    defaultMessage: 'Updated the statuses of attached alerts.',
   }
 );
