@@ -37,7 +37,7 @@ export class CspPlugin
   }
 
   public setup(
-    core: CoreSetup<CspServerPluginSetup>,
+    core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
