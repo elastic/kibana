@@ -42,6 +42,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./metrics/get_case_metrics'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_alerts'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
+    loadTestFile(require.resolve('./metrics/get_case_metrics_connectors'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
