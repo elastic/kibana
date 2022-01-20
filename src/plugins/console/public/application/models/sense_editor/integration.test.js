@@ -361,7 +361,7 @@ describe('Integration', () => {
         cursor: { lineNumber: 7, column: 1 },
         initialValue: '',
         addTemplate: true,
-        prefixToAdd: ', ',
+        prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
           start: { lineNumber: 7, column: 1 },
@@ -374,7 +374,7 @@ describe('Integration', () => {
         cursor: { lineNumber: 6, column: 15 },
         initialValue: '',
         addTemplate: true,
-        prefixToAdd: ', ',
+        prefixToAdd: '',
         suffixToAdd: '',
         rangeToReplace: {
           start: { lineNumber: 6, column: 15 },
