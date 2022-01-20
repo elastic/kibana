@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { orderBy } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { APIReturnType } from '../../../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';
-import {
-  ITableColumn,
-  ManagedTable,
-} from '../../../../../shared/managed_table';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 
 type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
@@ -25,8 +23,63 @@ interface Props {
   isLoading: boolean;
 }
 
+const DEFAULT_SORT_FIELD = 'serviceName';
+const DEFAULT_SORT_DIRECTION = 'asc';
+type DIRECTION = 'asc' | 'desc';
+type SORT_FIELD =
+  | 'serviceName'
+  | 'transactionType'
+  | 'environments'
+  | 'agentName'
+  | 'throughput'
+  | 'latency'
+  | 'transactionErrorRate'
+  | 'healthStatus';
+
 export function ServiceList({ items, isLoading }: Props) {
-  const columns: Array<ITableColumn<ServiceListItem>> = [
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
+  const [sortDirection, setSortDirection] = useState<DIRECTION>(
+    DEFAULT_SORT_DIRECTION
+  );
+
+  const onTableChange = useCallback(
+    (options: {
+      page: { index: number; size: number };
+      sort?: { field: SORT_FIELD; direction: DIRECTION };
+    }) => {
+      setPageIndex(options.page.index);
+      setPageSize(options.page.size);
+      setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
+      setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
+    },
+    []
+  );
+
+  const sort = useMemo(() => {
+    return {
+      sort: { field: sortField, direction: sortDirection },
+    };
+  }, [sortField, sortDirection]);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount: items.length,
+      hidePerPageOptions: true,
+    }),
+    [pageIndex, pageSize, items.length]
+  );
+
+  const renderedItems = useMemo(() => {
+    const sortedItems = orderBy(items, sortField, sortDirection);
+
+    return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+  }, [pageIndex, pageSize, sortField, sortDirection, items]);
+
+  const columns: Array<EuiBasicTableColumn<ServiceListItem>> = [
     {
       field: 'serviceName',
       name: i18n.translate(
@@ -58,8 +111,8 @@ export function ServiceList({ items, isLoading }: Props) {
   ];
 
   return (
-    <ManagedTable
-      isLoading={isLoading}
+    <EuiBasicTable
+      loading={isLoading}
       noItemsMessage={i18n.translate(
         'xpack.apm.serviceGroups.selectServicesList.notFoundLabel',
         {
@@ -67,9 +120,11 @@ export function ServiceList({ items, isLoading }: Props) {
             'No services available within the last 24 hours. You can still create the group and services that match your query will be added.',
         }
       )}
+      items={renderedItems}
       columns={columns}
-      items={items}
-      initialPageSize={5}
+      sorting={sort}
+      onChange={onTableChange}
+      pagination={pagination}
     />
   );
 }

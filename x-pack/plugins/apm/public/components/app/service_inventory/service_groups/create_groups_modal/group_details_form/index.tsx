@@ -35,14 +35,15 @@ export function GroupDetails({
   groupDetails,
 }: Props) {
   const [name, setName] = useState<string>(groupDetails?.name || '');
-  const [color, setColor] = useColorPickerState(
+  const [color, setColor, errors] = useColorPickerState(
     groupDetails?.color || '#5094C4'
   );
   const [description, setDescription] = useState<string>(
     groupDetails?.description || ''
   );
 
-  const isInvalid = !name;
+  const isInvalidColor = !!errors?.length;
+  const isInvalid = !name || isInvalidColor;
 
   return (
     <>
@@ -81,6 +82,8 @@ export function GroupDetails({
                     'xpack.apm.serviceGroups.groupDetailsForm.color',
                     { defaultMessage: 'Color' }
                   )}
+                  isInvalid={isInvalidColor}
+                  error={isInvalidColor ? errors[0] : undefined}
                 >
                   <EuiColorPicker onChange={setColor} color={color} />
                 </EuiFormRow>
