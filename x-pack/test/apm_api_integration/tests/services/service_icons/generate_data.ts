@@ -8,8 +8,12 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
 
 export const dataConfig = {
-  rate: 10,
   serviceName: 'synth-node',
+  rate: 10,
+  transaction: {
+    name: 'GET /apple 🍎',
+    duration: 1000,
+  },
   agentName: 'node',
   cloud: {
     provider: 'aws',
@@ -26,25 +30,27 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const { serviceName, agentName, rate, cloud } = dataConfig;
+  const { serviceName, agentName, rate, cloud, transaction } = dataConfig;
   const { provider, serviceName: cloudServiceName } = cloud;
 
   const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
 
-  const metricsets = timerange(start, end)
+  const traceEvents = timerange(start, end)
     .interval('30s')
     .rate(rate)
     .flatMap((timestamp) =>
       instance
-        .appMetrics({})
-        .timestamp(timestamp)
+        .transaction(transaction.name)
         .defaults({
           'kubernetes.pod.uid': 'test',
           'cloud.provider': provider,
           'cloud.service.name': cloudServiceName,
         })
+        .timestamp(timestamp)
+        .duration(transaction.duration)
+        .success()
         .serialize()
     );
 
-  await synthtraceEsClient.index(metricsets);
+  await synthtraceEsClient.index(traceEvents);
 }

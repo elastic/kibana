@@ -52,5 +52,5 @@ export async function generateData({
         .serialize(),
     ]);
 
-  await synthtraceEsClient.index(apm.getTransactionMetrics(traceEvents));
+  await synthtraceEsClient.index(traceEvents);
 }
