@@ -22,6 +22,7 @@ import { FILTERS } from '../../../common';
 import { existsOperator, isOneOfOperator } from './filter_editor/lib/filter_operators';
 import { IIndexPattern } from '../..';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
+import classNames from 'classnames';
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
@@ -390,11 +391,12 @@ export const FilterExpressionItem: FC<Props> = ({
         closeButtonProps={{
           tabIndex: -1,
         }}
-        className={
-          isDisabled(getValueLabel(groupedFilters[0]), groupedFilters[0])
-            ? 'globalFilterExpression-isDisabled'
-            : ''
-        }
+        className={classNames('globalFilterItem', {
+          'globalFilterExpression-isDisabled': isDisabled(
+            getValueLabel(groupedFilters[0]),
+            groupedFilters[0]
+          ),
+        })}
         iconOnClick={() => onRemove(groupId)}
         iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filteradgeIconAriaLabel', {
           defaultMessage: 'Remove {title}',

@@ -8,6 +8,7 @@
 
 import { EuiBadge, useInnerText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import React, { FC } from 'react';
 import type { SavedQuery } from '../../query';
 
@@ -26,6 +27,7 @@ export const SavedQueriesItem: FC<Props> = ({ savedQuery, onClick }: Props) => {
       iconType="cross"
       iconSide="right"
       style={{ cursor: 'pointer', padding: '5px' }}
+      className={classNames('globalFilterItem')}
       closeButtonProps={{
         // Removing tab focus on close button because the same option can be obtained through the context menu
         // Also, we may want to add a `DEL` keyboard press functionality
@@ -39,12 +41,9 @@ export const SavedQueriesItem: FC<Props> = ({ savedQuery, onClick }: Props) => {
       onClickAriaLabel={i18n.translate('data.filter.filterBar.savedQueryBadgeAriaLabel', {
         defaultMessage: 'Selected saved objects actions',
       })}
-      onClick={() => onClick(savedQuery)}
+      // onClick={() => onClick(savedQuery)}
     >
-      <div ref={ref}>
-        <EuiIcon type="save" className="globalFilterItem-isFromSavedQuery" />
-        <span>{savedQuery.attributes.title}</span>
-      </div>
+      <strong ref={ref}># {savedQuery.attributes.title}</strong>
     </EuiBadge>
   );
 };

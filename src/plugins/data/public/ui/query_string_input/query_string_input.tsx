@@ -683,10 +683,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const containerClassName = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
-      this.props.className
-    );
+    const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
     const inputClassName = classNames(
       'kbnQueryBar__textarea',
       this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
@@ -694,7 +691,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
     );
     const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
+      'kbnQueryBar__textareaWrap',
       this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
       !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
     );
@@ -736,7 +733,8 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
                 }
               /> */}
-              <EuiFieldSearch
+              <input
+                type="search"
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
@@ -744,15 +742,15 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   })
                 }
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
-                inputRef={(node: any) => {
+                ref={(node: any) => {
                   if (node) {
                     this.inputRef = node;
                   }
                 }}
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
-                isInvalid={this.props.isInvalid}
+                // invalid={this.props.isInvalid}
                 onChange={this.onInputChange}
-                fullWidth
+                // fullWidth
                 autoFocus={
                   this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
                 }

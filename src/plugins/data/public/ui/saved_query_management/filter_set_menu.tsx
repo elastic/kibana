@@ -264,6 +264,8 @@ export function FilterSetMenu({
 
   const button = (
     <EuiButtonIcon
+      size="m"
+      display="fill"
       onClick={onButtonClick}
       iconType="filter"
       aria-label={buttonLabel}

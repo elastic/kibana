@@ -1,6 +1,17 @@
 .kbnQueryBar__wrap {
   max-width: 100%;
   z-index: $euiZContentMenu;
+  display: flex;
+  gap: $euiSizeS;
+  flex: 1 1 auto;
+  margin-left: $euiSizeS;
+
+  input {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none !important;
+  }
 }
 
 // Uses the append style, but no bordering

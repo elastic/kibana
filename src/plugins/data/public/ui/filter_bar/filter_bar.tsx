@@ -281,12 +281,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const classes = classNames('globalFilterBar', props.className);
 
   return (
-    <EuiFlexGroup
-      className="globalFilterGroup"
-      gutterSize="none"
-      alignItems="flexStart"
-      responsive={false}
-    >
+    <>
+      {/* <EuiFlexGroup
+       className="globalFilterGroup"
+       gutterSize="none"
+       alignItems="flexStart"
+       responsive={false}
+     > */}
       {/* <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
         <FilterOptions
           onEnableAll={onEnableAll}
@@ -299,7 +300,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         />
       </EuiFlexItem> */}
 
-      <EuiFlexItem className="globalFilterGroup__filterFlexItem">
+      {/* <EuiFlexItem className="globalFilterGroup__filterFlexItem">
         <EuiFlexGroup
           ref={groupRef}
           className={classes}
@@ -308,14 +309,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           gutterSize="xs"
           alignItems="center"
           tabIndex={-1}
-        >
-          {renderMultipleFilters()}
-          {renderSelectedSavedQueries()}
-          {props.multipleFilters.length === 0 && renderItems()}
-          {/* {renderAddFilter()} */}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        > */}
+      {renderMultipleFilters()}
+      {renderSelectedSavedQueries()}
+      {props.multipleFilters.length === 0 && renderItems()}
+      {/* {renderAddFilter()} */}
+      {/* </EuiFlexGroup>
+      </EuiFlexItem> */}
+      {/* </EuiFlexGroup> */}
+    </>
   );
 });
 
