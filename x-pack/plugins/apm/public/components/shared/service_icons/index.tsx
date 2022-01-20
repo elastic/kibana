@@ -151,7 +151,12 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {
         defaultMessage: 'Cloud',
       }),
-      component: <CloudDetails cloud={details?.cloud} />,
+      component: (
+        <CloudDetails
+          cloud={details?.cloud}
+          isServerless={!!details?.serverless}
+        />
+      ),
     },
   ];
 
