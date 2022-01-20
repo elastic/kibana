@@ -1241,7 +1241,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
@@ -1296,7 +1296,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
@@ -1351,7 +1351,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
@@ -1405,7 +1405,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('should show "legacy_notifications_enabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
         // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
