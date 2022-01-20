@@ -189,6 +189,32 @@ export class SyntheticsService {
     }
   }
 
+  async runOnceConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { run_once: boolean; config_id: string };
+      }
+    >
+  ) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    try {
+      return await this.apiClient.runOnce(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
     const data = {
       monitors: this.formatConfigs(configs),
@@ -211,6 +237,8 @@ export class SyntheticsService {
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
+      fields_under_root: true,
+      fields: { config_id: id },
     })) as SyntheticsMonitorWithId[];
   }
 
