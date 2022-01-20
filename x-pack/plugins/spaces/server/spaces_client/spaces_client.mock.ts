@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+
 import type { Space } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import type { SpacesClient } from './spaces_client';
 
-const createSpacesClientMock = () =>
-  ({
+const createSpacesClientMock = () => {
+  const repositoryMock = savedObjectsRepositoryMock.create();
+  return {
     getAll: jest.fn().mockResolvedValue([
       {
         id: DEFAULT_SPACE_ID,
@@ -28,11 +31,11 @@ const createSpacesClientMock = () =>
     }),
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
-    createSavedObjectFinder: jest.fn(), // TODO: import from point in time finder mock from core
+    createSavedObjectFinder: repositoryMock.createPointInTimeFinder,
     delete: jest.fn(),
     disableLegacyUrlAliases: jest.fn(),
-  } as unknown as jest.Mocked<SpacesClient>);
-
+  } as unknown as jest.Mocked<SpacesClient>;
+};
 export const spacesClientMock = {
   create: createSpacesClientMock,
 };
