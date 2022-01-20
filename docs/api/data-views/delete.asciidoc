@@ -40,7 +40,7 @@ $ curl -X DELETE api/data_views/data_view/my-view
 --------------------------------------------------
 // KIBANA
 
-
+[discrete]
 === Delete data view API (deprecated)
 
 [[data-views-api-delete-request-deprecated]]

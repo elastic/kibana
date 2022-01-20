@@ -111,7 +111,7 @@ The API returns the updated data view object:
 }
 --------------------------------------------------
 
-
+[discrete]
 === Update data view API (deprecated)
 
 [[data-views-api-update-request-deprecated]]

@@ -99,9 +99,10 @@ The endpoint returns the updated data view object:
 }
 --------------------------------------------------
 
+[discrete]
 === Update data view fields API (deprecated)
 
-[[data-views-fields-api-update-request-deprecated]]
+[[data-views-fields-api-update-deprecated]]
 ==== Request
 
 `POST <kibana host>:<port>/api/index_patterns/index_pattern/<id>/fields`

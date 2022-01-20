@@ -60,7 +60,7 @@ The API returns created or updated runtime field object array and updated data v
 }
 --------------------------------------------------
 
-
+[discrete]
 === Upsert runtime field API (deprecated)
 
 [[data-views-runtime-field-upsert-request-deprecated]]

@@ -28,6 +28,7 @@ The API doesn't validate if given `data_view_id` is a valid id.
 `force`:: (Optional, boolean) Updates existing default data view id. The default is `false`.
 
 
+[discrete]
 [[data-views-api-default-set-codes]]
 ==== Response code
 

@@ -61,7 +61,7 @@ The API returns created runtime field object array and updated data view object:
 --------------------------------------------------
 
 
-
+[discrete]
 === Create runtime field API (deprecated)
 
 [[data-views-runtime-field-create-request-deprecated]]

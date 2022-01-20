@@ -36,6 +36,8 @@ $ curl -X DELETE api/data_views/data_view/<my-view>/runtime_field/<runtime-field
 --------------------------------------------------
 // KIBANA
 
+
+[discrete]
 [[data-views-runtime-field-api-delete-deprecated]]
 === Delete runtime field API (deprecated)
 

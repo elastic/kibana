@@ -55,6 +55,7 @@ In case there is no default data view, the API returns:
 --------------------------------------------------
 
 
+[discrete]
 === Get default data view API (deprecated)
 
 [[data-views-api-default-get-request-deprecated]]

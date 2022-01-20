@@ -52,7 +52,7 @@ The API returns a runtime `field` object array, and a `runtimeField` definition 
 --------------------------------------------------
 
 
-
+[discrete]
 [[data-views-runtime-field-api-get-deprecated]]
 === Get runtime field API (deprecated)
 
