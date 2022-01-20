@@ -10,8 +10,8 @@ import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { EditExceptionModal } from './';
-import { useCurrentUser } from '../../../../common/lib/kibana';
+import { EditExceptionModal } from '.';
+import { useCurrentUser } from '../../../lib/kibana';
 import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern, createStubIndexPattern } from 'src/plugins/data/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';

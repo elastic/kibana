@@ -26,7 +26,6 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import type {
   ExceptionListType,
@@ -68,7 +67,7 @@ import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
-export interface AddExceptionModalProps {
+export interface AddExceptionFlyoutProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
@@ -87,16 +86,10 @@ export interface AddExceptionModalProps {
   onRuleChange?: () => void;
 }
 
-const ExceptionFlyout = styled(EuiFlyout)`
+const FlyoutHeader = styled(EuiFlyoutHeader)`
   ${({ theme }) => css`
-    width: ${theme.eui.euiBreakpoints.l};
-    max-width: ${theme.eui.euiBreakpoints.l};
+    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
   `}
-`;
-
-const ModalHeader = styled(EuiFlyoutHeader)`
-  flex-direction: column;
-  align-items: flex-start;
 `;
 
 const FlyoutSubtitle = styled.div`
@@ -105,7 +98,7 @@ const FlyoutSubtitle = styled.div`
   `}
 `;
 
-const ModalBodySection = styled.section`
+const FlyoutBodySection = styled.section`
   ${({ theme }) => css`
     padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
 
@@ -115,13 +108,22 @@ const ModalBodySection = styled.section`
   `}
 `;
 
+const FlyoutCheckboxesSection = styled(EuiFlyoutBody)`
+  overflow-y: inherit;
+  height: auto;
+
+  .euiFlyoutBody__overflowContent {
+    padding-top: 0;
+  }
+`;
+
 const FlyoutFooterGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     padding: ${theme.eui.euiSizeS};
   `}
 `;
 
-export const AddExceptionModal = memo(function AddExceptionModal({
+export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
@@ -132,7 +134,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   onConfirm,
   onRuleChange,
   alertStatus,
-}: AddExceptionModalProps) {
+}: AddExceptionFlyoutProps) {
   const { http, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
@@ -420,8 +422,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [hasOsSelection, selectedOs]);
 
   return (
-    <EuiFlyout size="l" onClose={onCancel} data-test-subj="add-exception-modal">
-      <EuiFlyoutHeader>
+    <EuiFlyout size="l" onClose={onCancel} data-test-subj="add-exception-flyout">
+      <FlyoutHeader>
         <EuiTitle>
           <h2>{addExceptionMessage}</h2>
         </EuiTitle>
@@ -429,7 +431,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         <FlyoutSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </FlyoutSubtitle>
-      </EuiFlyoutHeader>
+        <EuiSpacer size="m" />
+      </FlyoutHeader>
 
       {fetchOrCreateListError != null && (
         <EuiFlyoutFooter>
@@ -440,7 +443,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             onCancel={onCancel}
             onSuccess={handleDissasociationSuccess}
             onError={handleDissasociationError}
-            data-test-subj="addExceptionModalErrorCallout"
+            data-test-subj="addExceptionFlyoutErrorCallout"
           />
         </EuiFlyoutFooter>
       )}
@@ -450,7 +453,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           isSignalIndexLoading ||
           isAlertDataLoading ||
           isSignalIndexPatternLoading) && (
-          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+          <Loader data-test-subj="loadingAddExceptionFlyout" size="xl" />
         )}
       {fetchOrCreateListError == null &&
         !isSignalIndexLoading &&
@@ -462,7 +465,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         !isAlertDataLoading &&
         ruleExceptionList && (
           <>
-            <EuiFlyoutBody className="builder-section">
+            <FlyoutBodySection className="builder-section">
               {isRuleEQLSequenceStatement && (
                 <>
                   <EuiCallOut
@@ -518,9 +521,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 newCommentValue={comment}
                 newCommentOnChange={onCommentChange}
               />
-            </EuiFlyoutBody>
+            </FlyoutBodySection>
             <EuiHorizontalRule />
-            <EuiFlyoutBody>
+            <FlyoutCheckboxesSection>
               {alertData != null && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
@@ -552,7 +555,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   </EuiText>
                 </>
               )}
-            </EuiFlyoutBody>
+            </FlyoutCheckboxesSection>
           </>
         )}
       {fetchOrCreateListError == null && (

@@ -29,8 +29,8 @@ import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
-import { EditExceptionModal } from '../edit_exception_modal';
-import { AddExceptionModal } from '../add_exception_modal';
+import { EditExceptionModal } from '../edit_exception_flyout';
+import { AddExceptionFlyout } from '../add_exception_flyout';
 
 const initialState: State = {
   filterOptions: { filter: '', tags: [] },
@@ -350,7 +350,7 @@ const ExceptionsViewerComponent = ({
         )}
 
       {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
-        <AddExceptionModal
+        <AddExceptionFlyout
           ruleName={ruleName}
           ruleIndices={ruleIndices}
           ruleId={ruleId}

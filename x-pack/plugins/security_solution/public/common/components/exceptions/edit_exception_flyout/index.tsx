@@ -305,7 +305,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   };
 
   return (
-    <Modal onClose={onCancel} data-test-subj="add-exception-modal">
+    <Modal onClose={onCancel} data-test-subj="edit-exception-flyout">
       <ModalHeader>
         <EuiModalHeaderTitle>
           {exceptionListType === 'endpoint'
