@@ -872,8 +872,6 @@ Disable metrics powered transactions with `xpack.apm.searchAggregatedTransaction
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.15.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-osquery]]
 .New scheduled query action ID format for Osquery Manager
@@ -903,8 +901,6 @@ If you have changed the default {kibana-ref}/advanced-options.html#kibana-visual
 
 . Deselect *Legacy charts library*.
 ====
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-7.15.0]]
