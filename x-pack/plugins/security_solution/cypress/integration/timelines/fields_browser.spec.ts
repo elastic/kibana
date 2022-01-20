@@ -109,7 +109,7 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '4');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '5');
     });
   });
 

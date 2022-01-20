@@ -174,3 +174,35 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId" : ".email",
+        "name" : "test email connector cant decrypt",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : true,
+          "from" : "me@test.com",
+          "host" : "some.non.existent.com",
+          "port" : 465,
+          "service" : "other",
+          "secure" : true
+        },
+        "secrets" : "V2EJEtTv3yTFi1kdglhNahasdfnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"
+      },
+      "migrationVersion": {
+        "action": "7.14.0"
+      },
+      "coreMigrationVersion" : "7.15.0",
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2021-08-31T12:43:37.117Z"
+    }
+  }
+}
