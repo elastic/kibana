@@ -119,7 +119,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
-|Expression Pie plugin adds a pie renderer and function to the expression plugin. The renderer will display the Pie chart.
+|Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_repeat_image/README.md[expressionRepeatImage]

@@ -1,6 +1,6 @@
 # expressionPartitionVis
 
-Expression Pie plugin adds a `pie` renderer and function to the expression plugin. The renderer will display the `Pie` chart.
+Expression Partition Visualization plugin adds a `partitionVis` renderer and `pieVis`, `mosaicVis`, `treemapVis`, `waffleVis` functions to the expression plugin. The renderer will display the `pie`, `waffle`, `treemap` and `mosaic` charts.
 
 ---
 
