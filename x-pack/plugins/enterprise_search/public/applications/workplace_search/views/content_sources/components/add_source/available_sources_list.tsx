@@ -95,7 +95,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     <>
       <EuiFlexGrid columns={2} direction="column" gutterSize="l">
         {sources.map((source, i) => (
-          <EuiFlexItem grow={false} key={i}>
+          <EuiFlexItem grow={false} key={i} data-test-subj="AvailableSourceListItem">
             <EuiFlexGroup
               justifyContent="center"
               alignItems="stretch"

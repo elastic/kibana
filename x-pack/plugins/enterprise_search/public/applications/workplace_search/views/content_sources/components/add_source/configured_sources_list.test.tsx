@@ -11,8 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPanel } from '@elastic/eui';
-
 import { ConfiguredSourcesList } from './configured_sources_list';
 
 describe('ConfiguredSourcesList', () => {
@@ -26,7 +24,7 @@ describe('ConfiguredSourcesList', () => {
 
     expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(5);
     expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(1);
-    expect(wrapper.find(EuiPanel)).toHaveLength(6);
+    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(6);
   });
 
   it('handles empty state', () => {

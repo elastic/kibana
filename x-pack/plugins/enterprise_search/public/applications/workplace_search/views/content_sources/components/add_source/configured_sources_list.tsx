@@ -70,7 +70,11 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
     <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
         <React.Fragment key={i}>
-          <EuiFlexItem grow className="organizational-content-source-item">
+          <EuiFlexItem
+            grow
+            className="organizational-content-source-item"
+            data-test-subj="ConfiguredSourcesListItem"
+          >
             <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
               <EuiSplitPanel.Inner>
                 <EuiFlexGroup
