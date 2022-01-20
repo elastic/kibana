@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('usageCollection', () => {
         it('returns correct number of calls', async () => {
           const counters = await getUsageCounters(supertest);
-          expect(counters[`GET ${config.path}/:id`]).to.equal(2);
+          expect(counters[`DELETE ${config.path}/:id`]).to.equal(2);
         });
       });
     });
