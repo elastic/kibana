@@ -40,7 +40,7 @@ export const ColumnChart: FC<Props> = ({
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
 
   return (
-    <div data-test-subj={dataTestSubj}>
+    <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <Chart size={size}>
           <Settings
