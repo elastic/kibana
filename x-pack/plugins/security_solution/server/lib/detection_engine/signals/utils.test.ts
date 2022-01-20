@@ -14,6 +14,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mo
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
@@ -62,7 +63,7 @@ import {
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -70,8 +71,6 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
-
-const ruleStatusClient = ruleExecutionLogClientMock.create();
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -664,27 +663,31 @@ describe('utils', () => {
           },
         },
       };
+      // TODO: Add executionId to mock
+      const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
-        ruleName: 'myfakerulename',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['myfa*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"]',
+      });
     });
 
     test('returns true when missing timestamp field', async () => {
@@ -711,27 +714,32 @@ describe('utils', () => {
           },
         },
       };
+
+      // TODO: Add executionId to mock '7a7065d7-b33f-4aae-8d20-c93613dec9fb'
+      const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
-        ruleName: 'myfakerulename',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['myfa*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
+      });
     });
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
@@ -743,27 +751,34 @@ describe('utils', () => {
           fields: {},
         },
       };
+
+      // TODO: Add executionId to mock '7a7065d7-b33f-4aae-8d20-c93613dec9fb'
+      const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
+        ruleName: 'Endpoint Security',
+      });
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
-        ruleName: 'Endpoint Security',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+      });
     });
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
@@ -775,27 +790,36 @@ describe('utils', () => {
           fields: {},
         },
       };
+
+      // SUT uses rule execution logger's context to check the rule name
+      // TODO: Add executionId to mock '7a7065d7-b33f-4aae-8d20-c93613dec9fb'
+      const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
+        ruleName: 'NOT Endpoint Security',
+      });
+
       mockLogger.warn.mockClear();
+
       const res = await hasTimestampFields({
         timestampField,
-        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
-        ruleName: 'NOT Endpoint Security',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Record<string, any>
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
-        ruleStatusClient,
-        ruleId: 'ruleId',
-        ruleType: 'ruleType',
-        spaceId: 'default',
+        ruleExecutionLogger,
         logger: mockLogger,
         buildRuleMessage,
       });
+
+      expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
-      expect(res).toBeTruthy();
+      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
+        newStatus: RuleExecutionStatus['partial failure'],
+        message:
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.',
+      });
     });
   });
 

@@ -21,7 +21,7 @@ import {
   TimestampOverrideOrUndefined,
   Privilege,
   RuleExecutionStatus,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../common/detection_engine/schemas/common';
 import {
   ElasticsearchClient,
   Logger,
@@ -60,7 +60,7 @@ import {
 } from '../schemas/rule_schemas';
 import { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import { IRuleExecutionLogger } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SortExceptionsReturn {
@@ -85,28 +85,14 @@ export const shorthandMap = {
   },
 };
 
+// TODO: Add executionId to IRuleExecutionLogger
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
-  executionId: string;
-  ruleStatusClient: IRuleExecutionLogClient;
-  ruleId: string;
-  ruleName: string;
-  ruleType: string;
-  spaceId: string;
+  ruleExecutionLogger: IRuleExecutionLogger;
 }): Promise<boolean> => {
-  const {
-    privileges,
-    logger,
-    buildRuleMessage,
-    executionId,
-    ruleStatusClient,
-    ruleId,
-    ruleName,
-    ruleType,
-    spaceId,
-  } = args;
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger } = args;
 
   const indexNames = Object.keys(privileges.index);
   const [, indexesWithNoReadPrivileges] = partition(
@@ -121,49 +107,38 @@ export const hasReadIndexPrivileges = async (args: {
       indexesWithNoReadPrivileges
     )}`;
     logger.warn(buildRuleMessage(errorString));
-    await ruleStatusClient.logStatusChange({
-      executionId,
-      message: errorString,
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
+    // TODO: Add executionId
+    await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
+      message: errorString,
     });
     return true;
   }
   return false;
 };
 
+// TODO: Add executionId to IRuleExecutionLogger
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  executionId: string;
-  ruleName: string;
   // any is derived from here
   // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
-  ruleStatusClient: IRuleExecutionLogClient;
-  ruleId: string;
-  spaceId: string;
-  ruleType: string;
+  ruleExecutionLogger: IRuleExecutionLogger;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<boolean> => {
   const {
     timestampField,
-    executionId,
-    ruleName,
     timestampFieldCapsResponse,
     inputIndices,
-    ruleStatusClient,
-    ruleId,
-    ruleType,
-    spaceId,
+    ruleExecutionLogger,
     logger,
     buildRuleMessage,
   } = args;
+
+  const { ruleName } = ruleExecutionLogger.context;
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
@@ -174,14 +149,10 @@ export const hasTimestampFields = async (args: {
         : ''
     }`;
     logger.warn(buildRuleMessage(errorString.trimEnd()));
-    await ruleStatusClient.logStatusChange({
-      executionId,
-      message: errorString.trimEnd(),
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
+    // TODO: Add executionId
+    await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
+      message: errorString.trimEnd(),
     });
     return true;
   } else if (
@@ -201,16 +172,14 @@ export const hasTimestampFields = async (args: {
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
+
     logger.warn(buildRuleMessage(errorString));
-    await ruleStatusClient.logStatusChange({
-      executionId,
-      message: errorString,
-      ruleId,
-      ruleName,
-      ruleType,
-      spaceId,
+    // TODO: Add executionId
+    await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
+      message: errorString,
     });
+
     return true;
   }
   return false;
