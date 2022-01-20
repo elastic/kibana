@@ -17,11 +17,18 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Checkout current branch into temp
+        if: github.event.pull_request.merged == false
         uses: actions/checkout@v2
         with:
           path: 'temp'
           fetch-depth: 2
           ref: refs/pull/${{ github.event.pull_request.number }}/merge
+
+      - name: Checkout current branch into temp
+        if: github.event.pull_request.merged == true
+        uses: actions/checkout@v2
+        with:
+          path: 'temp'
 
       - name: Checkout essential repos
         uses: actions/checkout@v2
