@@ -227,7 +227,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
     "del": "^5.1.0",
-    "elastic-apm-node": "^3.26.0",
+    "elastic-apm-node": "^3.27.0",
     "execa": "^4.0.2",
     "exit-hook": "^2.2.0",
     "expiry-js": "0.1.7",
@@ -411,7 +411,6 @@
     "venn.js": "0.2.20",
     "vinyl": "^2.2.0",
     "vt-pbf": "^3.1.1",
-    "wellknown": "^0.5.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
     "yauzl": "^2.10.0"
