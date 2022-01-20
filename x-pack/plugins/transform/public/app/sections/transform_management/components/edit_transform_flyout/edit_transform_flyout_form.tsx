@@ -181,6 +181,11 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                   onChange={(e) =>
                     dispatch({ field: 'retentionPolicyField', value: e.target.value })
                   }
+                  hasNoInitialSelection={
+                    !retentionDateFieldOptions
+                      .map((d) => d.text)
+                      .includes(formFields.retentionPolicyField.value)
+                  }
                 />
               </EuiFormRow>
             ) : (
