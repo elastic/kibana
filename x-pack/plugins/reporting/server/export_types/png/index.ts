@@ -17,10 +17,10 @@ import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPNG, TaskPayloadPNG } from './types';
+import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  CreateJobFn<JobParamsPNG>,
+  CreateJobFn<JobParamsPNGDeprecated>,
   RunTaskFn<TaskPayloadPNG>
 > => ({
   ...metadata,

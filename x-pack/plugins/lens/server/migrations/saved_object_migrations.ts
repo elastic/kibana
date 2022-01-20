@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter';
+import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
@@ -141,7 +141,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
   }
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
+    const newChain: AstFunction[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
@@ -202,7 +202,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
 
   try {
     const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
+    const newChain: AstFunction[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }
