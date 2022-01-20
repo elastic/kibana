@@ -11,7 +11,7 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '..';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, FLEET_ASSETS_TO_IGNORE, SavedObjectsClientCommon } from '..';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField } from '../types';
@@ -695,29 +695,40 @@ export class DataViewsService {
   }
 
   /**
-   * Returns the default data view as an object. If no default is found, or it is missing
+   * Returns the default data view as an object.
+   * If no default is found, or it is missing
    * another data view is selected as default and returned.
+   * If no possible data view found to become a default returns null
+   *
    * @returns default data view
    */
+  async getDefaultDataView(): Promise<DataView | null> {
+    const patterns = await this.getIdsWithTitle();
+    let defaultId: string | undefined = await this.config.get('defaultIndex');
+    const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
-  async getDefaultDataView() {
-    const patterns = await this.getIds();
-    let defaultId = await this.config.get('defaultIndex');
-    let defined = !!defaultId;
-    const exists = patterns.includes(defaultId);
-
-    if (defined && !exists) {
+    if (defaultId && !exists) {
       await this.config.remove('defaultIndex');
-      defaultId = defined = false;
+      defaultId = undefined;
     }
 
-    if (patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
-      defaultId = patterns[0];
+    if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
+      // try to set first user created data view as default,
+      // otherwise fallback to any data view
+      const userDataViews = patterns.filter(
+        (pattern) =>
+          pattern.title !== FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
+          pattern.title !== FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
+      );
+
+      defaultId = userDataViews[0]?.id ?? patterns[0].id;
       await this.config.set('defaultIndex', defaultId);
     }
 
     if (defaultId) {
       return this.get(defaultId);
+    } else {
+      return null;
     }
   }
 }
