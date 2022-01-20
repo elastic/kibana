@@ -201,7 +201,7 @@ export async function internalBulkResolve<T>(
     }
   );
 
-  await incrementCounterInternal(
+  incrementCounterInternal(
     CORE_USAGE_STATS_TYPE,
     CORE_USAGE_STATS_ID,
     resolveCounter.getCounterFields(),

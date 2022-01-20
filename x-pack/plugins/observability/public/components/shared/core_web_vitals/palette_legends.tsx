@@ -15,7 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
 import { useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public';

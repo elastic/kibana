@@ -16,7 +16,7 @@ import {
   HostsQueries,
   HostsRiskScoreRequestOptions,
   HostsRiskScoreStrategyResponse,
-} from '../../../../common';
+} from '../../../../common/search_strategy';
 
 type GetHostsRiskScoreProps = HostsRiskScoreRequestOptions & {
   data: DataPublicPluginStart;

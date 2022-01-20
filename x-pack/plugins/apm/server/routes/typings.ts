@@ -34,6 +34,7 @@ export interface APMRouteCreateOptions {
       | 'access:apm_write'
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
+      | 'access:ml:canCloseJob'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
@@ -69,4 +70,5 @@ export interface APMRouteHandlerResources {
   };
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
 }

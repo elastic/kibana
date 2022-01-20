@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, IBasePath } from 'src/core/public';
 
 import { parseNext } from '../../../common/parse_next';

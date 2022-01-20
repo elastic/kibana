@@ -9,6 +9,7 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
+import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders } from 'src/core/server';
 
 import type {
@@ -50,8 +51,11 @@ import {
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
-import { splitPkgKey } from '../../services/epm/registry';
+import {
+  defaultIngestErrorHandler,
+  ingestErrorToResponseOptions,
+  IngestManagerError,
+} from '../../errors';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
@@ -65,6 +69,7 @@ export const getCategoriesHandler: FleetRequestHandler<
   try {
     const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
+      items: res,
       response: res,
     };
     return response.ok({ body });
@@ -84,6 +89,7 @@ export const getListHandler: FleetRequestHandler<
       ...request.query,
     });
     const body: GetPackagesResponse = {
+      items: res,
       response: res,
     };
     return response.ok({
@@ -99,6 +105,7 @@ export const getLimitedListHandler: FleetRequestHandler = async (context, reques
     const savedObjectsClient = context.fleet.epm.internalSoClient;
     const res = await getLimitedPackages({ savedObjectsClient });
     const body: GetLimitedPackagesResponse = {
+      items: res,
       response: res,
     };
     return response.ok({
@@ -186,13 +193,18 @@ export const getFileHandler: FleetRequestHandler<TypeOf<typeof GetFileRequestSch
 export const getInfoHandler: FleetRequestHandler<TypeOf<typeof GetInfoRequestSchema.params>> =
   async (context, request, response) => {
     try {
-      const { pkgkey } = request.params;
       const savedObjectsClient = context.fleet.epm.internalSoClient;
-      // TODO: change epm API to /packageName/version so we don't need to do this
-      const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-      const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
+      const { pkgName, pkgVersion } = request.params;
+      if (pkgVersion && !semverValid(pkgVersion)) {
+        throw new IngestManagerError('Package version is not a valid semver');
+      }
+      const res = await getPackageInfo({
+        savedObjectsClient,
+        pkgName,
+        pkgVersion: pkgVersion || '',
+      });
       const body: GetInfoResponse = {
-        response: res,
+        item: res,
       };
       return response.ok({ body });
     } catch (error) {
@@ -206,14 +218,12 @@ export const updatePackageHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const { pkgkey } = request.params;
     const savedObjectsClient = context.fleet.epm.internalSoClient;
-
-    const { pkgName } = splitPkgKey(pkgkey);
+    const { pkgName } = request.params;
 
     const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
     const body: UpdatePackageResponse = {
-      response: res,
+      item: res,
     };
 
     return response.ok({ body });
@@ -243,18 +253,20 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
-  const { pkgkey } = request.params;
+  const { pkgName, pkgVersion } = request.params;
 
+  const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
-    pkgkey,
+    pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
+    spaceId,
     force: request.body?.force,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
-      response: res.assets || [],
+      items: res.assets || [],
     };
     return response.ok({ body });
   } else {
@@ -284,13 +296,16 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
+  const spaceId = context.fleet.spaceId;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
     packagesToInstall: request.body.packages,
+    spaceId,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
+    items: payload,
     response: payload,
   };
   return response.ok({ body });
@@ -311,16 +326,18 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
-
+  const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'upload',
     savedObjectsClient,
     esClient,
     archiveBuffer,
+    spaceId,
     contentType,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
+      items: res.assets || [],
       response: res.assets || [],
     };
     return response.ok({ body });
@@ -335,17 +352,18 @@ export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const { pkgkey } = request.params;
+    const { pkgName, pkgVersion } = request.params;
     const savedObjectsClient = context.fleet.epm.internalSoClient;
     const esClient = context.core.elasticsearch.client.asInternalUser;
     const res = await removeInstallation({
       savedObjectsClient,
-      pkgkey,
+      pkgName,
+      pkgVersion,
       esClient,
       force: request.body?.force,
     });
     const body: DeletePackageResponse = {
-      response: res,
+      items: res,
     };
     return response.ok({ body });
   } catch (error) {

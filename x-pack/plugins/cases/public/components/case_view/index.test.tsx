@@ -27,7 +27,7 @@ import { waitFor } from '@testing-library/react';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { CaseType, ConnectorTypes } from '../../../common';
+import { CaseType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 
 const mockId = basicCase.id;

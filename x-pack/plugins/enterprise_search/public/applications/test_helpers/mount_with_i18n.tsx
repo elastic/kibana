@@ -9,7 +9,7 @@ import React from 'react';
 
 import { mount } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 /**
  * This helper wraps a component with @kbn/i18n's <I18nProvider> which

@@ -26,7 +26,8 @@ import {
   useConnectorsResponse,
   useActionTypesResponse,
 } from './__mock__';
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { ConnectorTypes } from '../../../common/api';
 import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 jest.mock('../../common/lib/kibana');

@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
+
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
   createMapStream,
-  ToolingLog,
-} from '@kbn/dev-utils';
+} from '@kbn/utils';
 
 import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';

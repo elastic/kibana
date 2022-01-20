@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import { isEmpty } from 'lodash/fp';
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { AlertsStackByField } from '../common/types';
@@ -38,7 +39,8 @@ export const getAlertsHistogramQuery = (
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
-  }>
+  }>,
+  runtimeMappings?: MappingRuntimeFields
 ) => {
   return {
     aggs: {
@@ -80,6 +82,7 @@ export const getAlertsHistogramQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
   };
 };
 

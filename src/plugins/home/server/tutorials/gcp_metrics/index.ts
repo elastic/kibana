@@ -57,8 +57,8 @@ export function gcpMetricsSpecProvider(context: TutorialContext): TutorialSchema
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/gcp_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
   };
 }

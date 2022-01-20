@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
@@ -57,7 +57,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    ...(showAddAgent
+    ...(showAddAgent && !agentPolicy.is_managed
       ? [
           <EuiContextMenuItem
             icon="plusInCircle"

@@ -128,14 +128,16 @@ const getMigrationCheckRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/migration_check',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const { plugins, context, config, request } = resources;
+    const { core, plugins, context, config, request } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
     const savedObjectsClient = context.core.savedObjects.client;
-    const fleetPluginStart = await plugins.fleet.start();
-    const securityPluginStart = await plugins.security.start();
+    const [fleetPluginStart, securityPluginStart] = await Promise.all([
+      plugins.fleet.start(),
+      plugins.security.start(),
+    ]);
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
     const cloudAgentPolicy = hasRequiredRole
       ? await getCloudAgentPolicy({
@@ -144,12 +146,17 @@ const getMigrationCheckRoute = createApmServerRoute({
         })
       : undefined;
     const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
+    const packagePolicies = await getApmPackgePolicies({
+      core,
+      fleetPluginStart,
+    });
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
       has_cloud_apm_package_policy: !!apmPackagePolicy,
       cloud_apm_migration_enabled: cloudApmMigrationEnabled,
       has_required_role: hasRequiredRole,
       cloud_apm_package_policy: apmPackagePolicy,
+      has_apm_integrations: packagePolicies.total > 0,
     };
   },
 });
@@ -158,7 +165,8 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
-    const { plugins, context, config, request, logger } = resources;
+    const { plugins, context, config, request, logger, kibanaVersion } =
+      resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
@@ -185,6 +193,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       esClient,
       logger,
       setup,
+      kibanaVersion,
     });
 
     return { cloudApmPackagePolicy };

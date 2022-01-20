@@ -20,7 +20,7 @@ import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { ReportingConfig } from '../../../';
-import { CancellationToken } from '../../../../common';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -338,7 +338,7 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: true, scroll: '30s', size: 500 } },
+    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 
@@ -814,4 +814,31 @@ describe('formulas', () => {
     expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(true);
   });
+});
+
+it('can override ignoring frozen indices', async () => {
+  const originalGet = uiSettingsClient.get;
+  uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    if (key === 'search:includeFrozen') {
+      return true;
+    }
+    return originalGet(key);
+  });
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({}),
+    mockConfig,
+    { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
+    { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+
+  await generateCsv.generateData();
+
+  expect(mockDataClient.search).toBeCalledWith(
+    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
+    { strategy: 'es' }
+  );
 });

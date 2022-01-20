@@ -7,7 +7,7 @@
 import type { GetInfoResponse } from '../../../public/types';
 import { KibanaAssetType, ElasticsearchAssetType } from '../../../common/types';
 
-export const response: GetInfoResponse['response'] = {
+export const item: GetInfoResponse['item'] = {
   name: 'nginx',
   title: 'Nginx',
   version: '0.7.0',

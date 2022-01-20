@@ -132,6 +132,11 @@ export class CanvasPlugin
           })
         );
 
+        const { expressions, presentationUtil } = startPlugins;
+        await presentationUtil.registerExpressionsLanguage(
+          Object.values(expressions.getFunctions())
+        );
+
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 

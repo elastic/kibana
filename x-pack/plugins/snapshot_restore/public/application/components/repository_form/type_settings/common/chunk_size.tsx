@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiTitle, EuiCode } from '@elastic/eui';
 import { RepositorySettingsValidation } from '../../../../services/validation';
 

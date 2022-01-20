@@ -174,7 +174,7 @@ describe('Detection rules, threshold', () => {
     cy.get(ALERT_GRID_CELL).contains(rule.name);
   });
 
-  it('Preview results of keyword using "host.name"', () => {
+  it.skip('Preview results of keyword using "host.name"', () => {
     rule.index = [...rule.index, '.siem-signals*'];
 
     createCustomRuleActivated(getNewRule());
@@ -188,7 +188,7 @@ describe('Detection rules, threshold', () => {
     cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
   });
 
-  it('Preview results of "ip" using "source.ip"', () => {
+  it.skip('Preview results of "ip" using "source.ip"', () => {
     const previewRule: ThresholdRule = {
       ...rule,
       thresholdField: 'source.ip',

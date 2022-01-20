@@ -8,7 +8,7 @@
 import './source_viewer.scss';
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

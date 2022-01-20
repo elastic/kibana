@@ -44,6 +44,14 @@ interface SavedObjectBody {
   type?: string;
 }
 
+/**
+ * An interface representing a data view that is time based.
+ */
+export interface TimeBasedDataView extends DataView {
+  timeFieldName: NonNullable<DataView['timeFieldName']>;
+  getTimeField: () => DataViewField;
+}
+
 export class DataView implements IIndexPattern {
   public id?: string;
   public title: string = '';
@@ -290,11 +298,11 @@ export class DataView implements IIndexPattern {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
-  isTimeBased(): boolean {
+  isTimeBased(): this is TimeBasedDataView {
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
 
-  isTimeNanosBased(): boolean {
+  isTimeNanosBased(): this is TimeBasedDataView {
     const timeField = this.getTimeField();
     return !!(timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1);
   }

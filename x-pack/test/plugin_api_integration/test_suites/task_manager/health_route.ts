@@ -109,7 +109,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const monitoredAggregatedStatsRefreshRate = 5000;
 
-  describe('health', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/119258
+  describe.skip('health', () => {
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');

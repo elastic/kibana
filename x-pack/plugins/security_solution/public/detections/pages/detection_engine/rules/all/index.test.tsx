@@ -22,11 +22,7 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
 } from '../../../../../../common/constants';
 
-import {
-  useRulesTable,
-  useRulesStatuses,
-  RulesTableState,
-} from '../../../../containers/detection_engine/rules';
+import { useRulesTable, RulesTableState } from '../../../../containers/detection_engine/rules';
 
 import { AllRules } from './index';
 
@@ -145,31 +141,6 @@ describe('AllRules', () => {
         setAutoRefreshOn: jest.fn(),
         setIsRefreshing: jest.fn(),
       };
-    });
-
-    (useRulesStatuses as jest.Mock).mockReturnValue({
-      loading: false,
-      rulesStatuses: [
-        {
-          current_status: {
-            alert_id: 'alertId',
-            bulk_create_time_durations: ['2235.01'],
-            gap: null,
-            last_failure_at: null,
-            last_failure_message: null,
-            last_look_back_date: new Date().toISOString(), // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
-            last_success_at: new Date().toISOString(),
-            last_success_message: 'it is a success',
-            search_after_time_durations: ['616.97'],
-            status: 'succeeded',
-            status_date: new Date().toISOString(),
-          },
-          failures: [],
-          id: '12345678987654321',
-          activate: true,
-          name: 'Test rule',
-        },
-      ],
     });
 
     useKibanaMock().services.application.capabilities = {

@@ -188,9 +188,9 @@ locations for a Debian-based system:
   | path.data
 
 | logs
-    | Logs files location
-    |  /var/log/kibana
-    | path.logs
+  | Logs files location
+  | /var/log/kibana
+  | path.logs
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

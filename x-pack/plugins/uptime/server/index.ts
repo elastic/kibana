@@ -11,4 +11,4 @@ import { Plugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);
 
-export { config } from './config';
+export { config } from '../common/config';

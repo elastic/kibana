@@ -13,7 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../../types';
@@ -120,7 +120,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" tabIndex={-1} aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />

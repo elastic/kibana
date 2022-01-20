@@ -84,6 +84,7 @@ export class RuleRegistryPlugin
     this.ruleDataService = new RuleDataService({
       logger,
       kibanaVersion,
+      disabledRegistrationContexts: this.config.write.disabledRegistrationContexts,
       isWriteEnabled: this.config.write.enabled,
       isWriterCacheEnabled: this.config.write.cache.enabled,
       getClusterClient: async () => {

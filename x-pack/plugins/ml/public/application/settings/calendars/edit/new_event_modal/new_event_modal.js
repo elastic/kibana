@@ -29,7 +29,7 @@ import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 import { generateTempId } from '../utils';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const VALID_DATE_STRING_LENGTH = 19;
 

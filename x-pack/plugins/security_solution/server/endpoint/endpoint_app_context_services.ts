@@ -34,6 +34,11 @@ import {
   EndpointAppContentServicesNotSetUpError,
   EndpointAppContentServicesNotStartedError,
 } from './errors';
+import {
+  EndpointFleetServicesFactory,
+  EndpointInternalFleetServicesInterface,
+  EndpointScopedFleetServicesInterface,
+} from './services/endpoint_fleet_services';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -64,6 +69,7 @@ export type EndpointAppContextServiceStartContract = Partial<
 export class EndpointAppContextService {
   private setupDependencies: EndpointAppContextServiceSetupContract | null = null;
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
+  private fleetServicesFactory: EndpointFleetServicesFactory | null = null;
   public security: SecurityPluginStart | undefined;
 
   public setup(dependencies: EndpointAppContextServiceSetupContract) {
@@ -77,6 +83,17 @@ export class EndpointAppContextService {
 
     this.startDependencies = dependencies;
     this.security = dependencies.security;
+
+    // let's try to avoid turning off eslint's Forbidden non-null assertion rule
+    const { agentService, agentPolicyService, packagePolicyService, packageService } =
+      dependencies as Required<EndpointAppContextServiceStartContract>;
+
+    this.fleetServicesFactory = new EndpointFleetServicesFactory({
+      agentService,
+      agentPolicyService,
+      packagePolicyService,
+      packageService,
+    });
 
     if (dependencies.registerIngestCallback && dependencies.manifestManager) {
       dependencies.registerIngestCallback(
@@ -119,10 +136,28 @@ export class EndpointAppContextService {
     return this.startDependencies.endpointMetadataService;
   }
 
+  public getScopedFleetServices(req: KibanaRequest): EndpointScopedFleetServicesInterface {
+    if (this.fleetServicesFactory === null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.fleetServicesFactory.asScoped(req);
+  }
+
+  public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
+    if (this.fleetServicesFactory === null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.fleetServicesFactory.asInternalUser();
+  }
+
+  /** @deprecated use `getScopedFleetServices()` instead */
   public getAgentService(): AgentService | undefined {
     return this.startDependencies?.agentService;
   }
 
+  /** @deprecated use `getScopedFleetServices()` instead */
   public getPackagePolicyService(): PackagePolicyServiceInterface {
     if (!this.startDependencies?.packagePolicyService) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -130,6 +165,7 @@ export class EndpointAppContextService {
     return this.startDependencies?.packagePolicyService;
   }
 
+  /** @deprecated use `getScopedFleetServices()` instead */
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.startDependencies?.agentPolicyService;
   }

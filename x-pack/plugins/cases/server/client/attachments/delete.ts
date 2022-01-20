@@ -9,16 +9,16 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import { SavedObject } from 'kibana/public';
+import { AssociationType, CommentAttributes } from '../../../common/api';
 import {
-  AssociationType,
   CASE_SAVED_OBJECT,
-  CommentAttributes,
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
-} from '../../../common';
+} from '../../../common/constants';
 import { CasesClientArgs } from '../types';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Operations } from '../../authorization';
 
 /**

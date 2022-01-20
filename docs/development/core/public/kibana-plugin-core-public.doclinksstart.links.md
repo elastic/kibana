@@ -24,6 +24,9 @@ readonly links: {
         readonly canvas: {
             readonly guide: string;
         };
+        readonly cloud: {
+            readonly indexManagement: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -55,10 +58,61 @@ readonly links: {
             readonly install: string;
             readonly start: string;
         };
+        readonly appSearch: {
+            readonly apiRef: string;
+            readonly apiClients: string;
+            readonly apiKeys: string;
+            readonly authentication: string;
+            readonly crawlRules: string;
+            readonly curations: string;
+            readonly duplicateDocuments: string;
+            readonly entryPoints: string;
+            readonly guide: string;
+            readonly indexingDocuments: string;
+            readonly indexingDocumentsSchema: string;
+            readonly logSettings: string;
+            readonly metaEngines: string;
+            readonly precisionTuning: string;
+            readonly relevanceTuning: string;
+            readonly resultSettings: string;
+            readonly searchUI: string;
+            readonly security: string;
+            readonly synonyms: string;
+            readonly webCrawler: string;
+            readonly webCrawlerEventLogs: string;
+        };
         readonly enterpriseSearch: {
-            readonly base: string;
-            readonly appSearchBase: string;
-            readonly workplaceSearchBase: string;
+            readonly configuration: string;
+            readonly licenseManagement: string;
+            readonly mailService: string;
+            readonly usersAccess: string;
+        };
+        readonly workplaceSearch: {
+            readonly apiKeys: string;
+            readonly box: string;
+            readonly confluenceCloud: string;
+            readonly confluenceServer: string;
+            readonly customSources: string;
+            readonly customSourcePermissions: string;
+            readonly documentPermissions: string;
+            readonly dropbox: string;
+            readonly externalIdentities: string;
+            readonly gitHub: string;
+            readonly gettingStarted: string;
+            readonly gmail: string;
+            readonly googleDrive: string;
+            readonly indexingSchedule: string;
+            readonly jiraCloud: string;
+            readonly jiraServer: string;
+            readonly oneDrive: string;
+            readonly permissions: string;
+            readonly salesforce: string;
+            readonly security: string;
+            readonly serviceNow: string;
+            readonly sharePoint: string;
+            readonly slack: string;
+            readonly synch: string;
+            readonly zendesk: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -135,7 +189,10 @@ readonly links: {
             readonly runtimeFields: string;
         };
         readonly addData: string;
-        readonly kibana: string;
+        readonly kibana: {
+            readonly guide: string;
+            readonly autocompleteSuggestions: string;
+        };
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
@@ -159,6 +216,7 @@ readonly links: {
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuery: string;
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
@@ -188,6 +246,7 @@ readonly links: {
             cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
+            multiSearch: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
@@ -196,8 +255,10 @@ readonly links: {
             putSnapshotLifecyclePolicy: string;
             putIndexTemplateV1: string;
             putWatch: string;
+            searchPreference: string;
             simulatePipeline: string;
             timeUnits: string;
+            unfreezeIndex: string;
             updateTransform: string;
         }>;
         readonly observability: Readonly<{
@@ -232,11 +293,17 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
@@ -249,6 +316,7 @@ readonly links: {
             datastreams: string;
             datastreamsNamingScheme: string;
             installElasticAgent: string;
+            installElasticAgentStandalone: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;

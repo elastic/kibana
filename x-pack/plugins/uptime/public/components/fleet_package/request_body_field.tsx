@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { stringify, parse } from 'query-string';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent } from '@elastic/eui';
 import { Mode, MonacoEditorLangId } from './types';

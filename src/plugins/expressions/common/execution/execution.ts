@@ -196,8 +196,7 @@ export class Execution<
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
-  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters> =
-    new ExecutionContract<Input, Output, InspectorAdapters>(this);
+  public readonly contract: ExecutionContract<Input, Output, InspectorAdapters>;
 
   public readonly expression: string;
 
@@ -207,6 +206,8 @@ export class Execution<
 
   constructor(public readonly execution: ExecutionParams) {
     const { executor } = execution;
+
+    this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
     if (!execution.ast && !execution.expression) {
       throw new TypeError('Execution params should contain at least .ast or .expression key.');
@@ -558,10 +559,10 @@ export class Execution<
   interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
-        const execution = this.execution.executor.createExecution(
-          ast as ExpressionAstExpression,
-          this.execution.params
-        );
+        const execution = this.execution.executor.createExecution(ast as ExpressionAstExpression, {
+          ...this.execution.params,
+          variables: this.context.variables,
+        });
         this.childExecutions.push(execution);
 
         return execution.start(input, true);

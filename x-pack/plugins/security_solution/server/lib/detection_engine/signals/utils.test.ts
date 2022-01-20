@@ -8,7 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -43,6 +43,7 @@ import {
   calculateTotal,
   getTotalHitsValue,
   isRACAlert,
+  getField,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -57,6 +58,8 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
   sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
+  sampleAlertDocNoSortIdWithTimestamp,
+  sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
@@ -661,7 +664,7 @@ describe('utils', () => {
           },
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'myfakerulename',
@@ -677,11 +680,12 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
     });
+
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -706,7 +710,7 @@ describe('utils', () => {
           },
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'myfakerulename',
@@ -722,7 +726,7 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
@@ -737,7 +741,7 @@ describe('utils', () => {
           fields: {},
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'Endpoint Security',
@@ -753,7 +757,7 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
@@ -768,7 +772,7 @@ describe('utils', () => {
           fields: {},
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         ruleName: 'NOT Endpoint Security',
@@ -784,7 +788,7 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
@@ -1567,6 +1571,68 @@ describe('utils', () => {
 
     test('alert with null value returns false', () => {
       expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
+    });
+  });
+
+  describe('getField', () => {
+    test('gets legacy field when legacy field name is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.reason');
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('gets AAD field when AAD field name is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, ALERT_REASON);
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('gets legacy field when AAD field name is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, ALERT_REASON);
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('gets AAD field when legacy field name is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.reason');
+      expect(value).toEqual('reasonable reason');
+    });
+
+    test('returns `undefined` when AAD field name does not exist', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, 'kibana.alert.does_not_exist');
+      expect(value).toEqual(undefined);
+    });
+
+    test('returns `undefined` when legacy field name does not exist', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.does_not_exist');
+      expect(value).toEqual(undefined);
+    });
+
+    test('returns legacy rule param when AAD rule param is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
+      expect(value).toEqual('Descriptive description');
+    });
+
+    test('returns AAD rule param when legacy rule param is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.rule.description');
+      expect(value).toEqual('Descriptive description');
+    });
+
+    test('gets legacy rule param when legacy rule param is passed in', () => {
+      const doc = sampleAlertDocNoSortIdWithTimestamp();
+      const value = getField(doc, 'signal.rule.description');
+      expect(value).toEqual('Descriptive description');
+    });
+
+    test('gets AAD rule param when AAD rule param is passed in', () => {
+      const doc = sampleAlertDocAADNoSortIdWithTimestamp();
+      const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
+      expect(value).toEqual('Descriptive description');
     });
   });
 });

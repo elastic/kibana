@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType, useEffect, useState } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { text } from '@storybook/addon-knobs';

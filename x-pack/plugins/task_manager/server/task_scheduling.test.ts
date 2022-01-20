@@ -35,6 +35,9 @@ jest.mock('uuid', () => ({
 
 jest.mock('elastic-apm-node', () => ({
   currentTraceparent: 'parent',
+  currentTransaction: {
+    type: 'taskManager run',
+  },
 }));
 
 describe('TaskScheduling', () => {

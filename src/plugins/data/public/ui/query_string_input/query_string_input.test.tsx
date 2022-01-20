@@ -13,7 +13,7 @@ import {
 } from './query_string_input.test.mocks';
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';

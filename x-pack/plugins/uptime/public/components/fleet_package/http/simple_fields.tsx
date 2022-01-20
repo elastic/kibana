@@ -6,13 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { ConfigKeys, Validation } from '../types';
+import { ConfigKey, Validation } from '../types';
 import { useHTTPSimpleFieldsContext } from '../contexts';
 import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
-import { CommonFields } from '../common/common_fields';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
@@ -20,12 +20,12 @@ interface Props {
 
 export const HTTPSimpleFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useHTTPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
 
   return (
-    <>
+    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
       <EuiFormRow
         label={
           <FormattedMessage
@@ -33,7 +33,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="URL"
           />
         }
-        isInvalid={!!validate[ConfigKeys.URLS]?.(fields)}
+        isInvalid={!!validate[ConfigKey.URLS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
@@ -42,9 +42,9 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
         }
       >
         <EuiFieldText
-          value={fields[ConfigKeys.URLS]}
+          value={fields[ConfigKey.URLS]}
           onChange={(event) =>
-            handleInputChange({ value: event.target.value, configKey: ConfigKeys.URLS })
+            handleInputChange({ value: event.target.value, configKey: ConfigKey.URLS })
           }
           data-test-subj="syntheticsUrlField"
         />
@@ -57,7 +57,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Monitor interval"
           />
         }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
+        isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
@@ -69,11 +69,11 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
           onChange={(schedule) =>
             handleInputChange({
               value: schedule,
-              configKey: ConfigKeys.SCHEDULE,
+              configKey: ConfigKey.SCHEDULE,
             })
           }
-          number={fields[ConfigKeys.SCHEDULE].number}
-          unit={fields[ConfigKeys.SCHEDULE].unit}
+          number={fields[ConfigKey.SCHEDULE].number}
+          unit={fields[ConfigKey.SCHEDULE].unit}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -83,7 +83,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Max redirects"
           />
         }
-        isInvalid={!!validate[ConfigKeys.MAX_REDIRECTS]?.(fields)}
+        isInvalid={!!validate[ConfigKey.MAX_REDIRECTS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
@@ -100,16 +100,15 @@ export const HTTPSimpleFields = memo<Props>(({ validate }) => {
       >
         <EuiFieldNumber
           min={0}
-          value={fields[ConfigKeys.MAX_REDIRECTS]}
+          value={fields[ConfigKey.MAX_REDIRECTS]}
           onChange={(event) =>
             handleInputChange({
               value: event.target.value,
-              configKey: ConfigKeys.MAX_REDIRECTS,
+              configKey: ConfigKey.MAX_REDIRECTS,
             })
           }
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });

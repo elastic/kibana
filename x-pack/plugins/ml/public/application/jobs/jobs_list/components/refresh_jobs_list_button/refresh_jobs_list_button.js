@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const RefreshJobsListButton = ({ onRefreshClick, isRefreshing }) => (
   <EuiButtonEmpty

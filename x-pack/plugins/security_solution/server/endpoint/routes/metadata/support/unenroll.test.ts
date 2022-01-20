@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { findAllUnenrolledAgentIds } from './unenroll';
-import { elasticsearchServiceMock } from '../../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../../fleet/server/services';
+import { AgentClient } from '../../../../../../fleet/server/services';
 import {
-  createMockAgentService,
+  createMockAgentClient,
   createPackagePolicyServiceMock,
 } from '../../../../../../fleet/server/mocks';
 import { Agent, PackagePolicy } from '../../../../../../fleet/common/types/models';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 
 describe('test find all unenrolled Agent id', () => {
-  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
-  let mockAgentService: jest.Mocked<AgentService>;
+  let mockAgentClient: jest.Mocked<AgentClient>;
   let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
 
   beforeEach(() => {
-    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockAgentService = createMockAgentService();
+    mockAgentClient = createMockAgentClient();
     mockPackagePolicyService = createPackagePolicyServiceMock();
   });
 
@@ -46,7 +42,7 @@ describe('test find all unenrolled Agent id', () => {
         perPage: 10,
         page: 1,
       });
-    mockAgentService.listAgents
+    mockAgentClient.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
           agents: [
@@ -80,16 +76,12 @@ describe('test find all unenrolled Agent id', () => {
         })
       );
     const endpointPolicyIds = ['test-endpoint-policy-id'];
-    const agentIds = await findAllUnenrolledAgentIds(
-      mockAgentService,
-      mockElasticsearchClient,
-      endpointPolicyIds
-    );
+    const agentIds = await findAllUnenrolledAgentIds(mockAgentClient, endpointPolicyIds);
 
     expect(agentIds).toBeTruthy();
     expect(agentIds).toEqual(['id1', 'id2']);
 
-    expect(mockAgentService.listAgents).toHaveBeenNthCalledWith(1, mockElasticsearchClient, {
+    expect(mockAgentClient.listAgents).toHaveBeenNthCalledWith(1, {
       page: 1,
       perPage: 1000,
       showInactive: true,

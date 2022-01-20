@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { AlertService, AlertServiceContract } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ALERT_WORKFLOW_STATUS } from '../../../../rule_registry/common/technical_rule_data_field_names';

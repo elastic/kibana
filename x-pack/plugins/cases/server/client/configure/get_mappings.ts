@@ -6,9 +6,9 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ConnectorMappings } from '../../../common';
+import { ConnectorMappings } from '../../../common/api';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '..';
 import { MappingsArgs } from './types';
 

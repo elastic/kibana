@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { MVTField } from '../../fields/mvt_field';

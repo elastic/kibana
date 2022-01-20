@@ -6,45 +6,39 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import {
-  IHTTPAdvancedFields,
-  ConfigKeys,
-  Mode,
-  ResponseBodyIndexPolicy,
-  HTTPMethod,
-} from '../types';
+import { HTTPAdvancedFields, ConfigKey, Mode, ResponseBodyIndexPolicy, HTTPMethod } from '../types';
 
-interface IHTTPAdvancedFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<IHTTPAdvancedFields>>;
-  fields: IHTTPAdvancedFields;
-  defaultValues: IHTTPAdvancedFields;
+interface HTTPAdvancedFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<HTTPAdvancedFields>>;
+  fields: HTTPAdvancedFields;
+  defaultValues: HTTPAdvancedFields;
 }
 
-interface IHTTPAdvancedFieldsContextProvider {
+interface HTTPAdvancedFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: IHTTPAdvancedFields;
+  defaultValues?: HTTPAdvancedFields;
 }
 
-export const initialValues: IHTTPAdvancedFields = {
-  [ConfigKeys.PASSWORD]: '',
-  [ConfigKeys.PROXY_URL]: '',
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: {},
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: true,
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
-  [ConfigKeys.REQUEST_BODY_CHECK]: {
+export const initialValues: HTTPAdvancedFields = {
+  [ConfigKey.PASSWORD]: '',
+  [ConfigKey.PROXY_URL]: '',
+  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: [],
+  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: [],
+  [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
+  [ConfigKey.RESPONSE_HEADERS_CHECK]: {},
+  [ConfigKey.RESPONSE_HEADERS_INDEX]: true,
+  [ConfigKey.RESPONSE_STATUS_CHECK]: [],
+  [ConfigKey.REQUEST_BODY_CHECK]: {
     value: '',
     type: Mode.PLAINTEXT,
   },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
-  [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
-  [ConfigKeys.USERNAME]: '',
+  [ConfigKey.REQUEST_HEADERS_CHECK]: {},
+  [ConfigKey.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
+  [ConfigKey.USERNAME]: '',
 };
 
-export const defaultContext: IHTTPAdvancedFieldsContext = {
-  setFields: (_fields: React.SetStateAction<IHTTPAdvancedFields>) => {
+export const defaultContext: HTTPAdvancedFieldsContext = {
+  setFields: (_fields: React.SetStateAction<HTTPAdvancedFields>) => {
     throw new Error('setFields was not initialized, set it when you invoke the context');
   },
   fields: initialValues,
@@ -56,8 +50,8 @@ export const HTTPAdvancedFieldsContext = createContext(defaultContext);
 export const HTTPAdvancedFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: IHTTPAdvancedFieldsContextProvider) => {
-  const [fields, setFields] = useState<IHTTPAdvancedFields>(defaultValues);
+}: HTTPAdvancedFieldsContextProvider) => {
+  const [fields, setFields] = useState<HTTPAdvancedFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

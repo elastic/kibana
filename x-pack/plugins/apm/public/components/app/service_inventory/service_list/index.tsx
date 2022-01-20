@@ -66,9 +66,11 @@ export function getServiceColumns({
   showTransactionTypeColumn,
   comparisonData,
   breakpoints,
+  showHealthStatusColumn,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
+  showHealthStatusColumn: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
@@ -76,21 +78,25 @@ export function getServiceColumns({
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
   return [
-    {
-      field: 'healthStatus',
-      name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-        defaultMessage: 'Health',
-      }),
-      width: `${unit * 6}px`,
-      sortable: true,
-      render: (_, { healthStatus }) => {
-        return (
-          <HealthBadge
-            healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
-          />
-        );
-      },
-    },
+    ...(showHealthStatusColumn
+      ? [
+          {
+            field: 'healthStatus',
+            name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
+              defaultMessage: 'Health',
+            }),
+            width: `${unit * 6}px`,
+            sortable: true,
+            render: (_, { healthStatus }) => {
+              return (
+                <HealthBadge
+                  healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
+                />
+              );
+            },
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
     {
       field: 'serviceName',
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
@@ -248,13 +254,17 @@ export function ServiceList({
         showTransactionTypeColumn,
         comparisonData,
         breakpoints,
+        showHealthStatusColumn: displayHealthStatus,
       }),
-    [query, showTransactionTypeColumn, comparisonData, breakpoints]
+    [
+      query,
+      showTransactionTypeColumn,
+      comparisonData,
+      breakpoints,
+      displayHealthStatus,
+    ]
   );
 
-  const columns = displayHealthStatus
-    ? serviceColumns
-    : serviceColumns.filter((column) => column.field !== 'healthStatus');
   const initialSortField = displayHealthStatus
     ? 'healthStatus'
     : 'transactionsPerMinute';
@@ -300,12 +310,11 @@ export function ServiceList({
         <ManagedTable
           isLoading={isLoading}
           error={isFailure}
-          columns={columns}
+          columns={serviceColumns}
           items={items}
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection="desc"
-          initialPageSize={50}
           sortFn={(itemsToSort, sortField, sortDirection) => {
             // For healthStatus, sort items by healthStatus first, then by TPM
             return sortField === 'healthStatus'

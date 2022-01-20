@@ -14,7 +14,7 @@ import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 class FilterItemsUi extends Component {

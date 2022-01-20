@@ -17,6 +17,7 @@ import { getDefaultConfigs } from '../configurations/default_configs';
 import { ReportTypesSelect } from './columns/report_type_select';
 import { ViewActions } from '../views/view_actions';
 import { Series } from './series';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
 
 export interface ReportTypeItem {
   id: string;
@@ -30,23 +31,26 @@ export const getSeriesToEdit = ({
   indexPatterns,
   allSeries,
   reportType,
+  reportConfigMap,
 }: {
   allSeries: SeriesContextValue['allSeries'];
   indexPatterns: IndexPatternState;
   reportType: ReportViewType;
+  reportConfigMap: ReportConfigMap;
 }): BuilderItem[] => {
   const getDataViewSeries = (dataType: AppDataType) => {
     if (indexPatterns?.[dataType]) {
       return getDefaultConfigs({
         dataType,
         reportType,
+        reportConfigMap,
         indexPattern: indexPatterns[dataType],
       });
     }
   };
 
   return allSeries.map((series, seriesIndex) => {
-    const seriesConfig = getDataViewSeries(series.dataType)!;
+    const seriesConfig = getDataViewSeries(series.dataType);
 
     return { id: seriesIndex, series, seriesConfig };
   });
@@ -58,6 +62,8 @@ export const SeriesEditor = React.memo(function () {
   const { getSeries, allSeries, reportType } = useSeriesStorage();
 
   const { loading, indexPatterns } = useAppIndexPatternContext();
+
+  const { reportConfigMap } = useExploratoryView();
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, true>>({});
 
@@ -83,6 +89,7 @@ export const SeriesEditor = React.memo(function () {
         reportType,
         allSeries,
         indexPatterns,
+        reportConfigMap,
       });
 
       newEditorItems.forEach(({ series, id }) => {
@@ -101,7 +108,7 @@ export const SeriesEditor = React.memo(function () {
     setItemIdToExpandedRowMap((prevState) => {
       return { ...prevState, ...newExpandRows };
     });
-  }, [allSeries, getSeries, indexPatterns, loading, reportType]);
+  }, [allSeries, getSeries, indexPatterns, loading, reportConfigMap, reportType]);
 
   const toggleDetails = (item: BuilderItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import {
   PolicyConfig,
   DataStream,
-  ConfigKeys,
+  ConfigKey,
   HTTPFields,
   TCPFields,
   ICMPFields,
@@ -54,12 +54,12 @@ export const defaultConfig: PolicyConfig = {
   },
 };
 
-/**
- * Exports Synthetics-specific package policy instructions
- * for use in the Ingest app create / edit package policy
- */
-export const usePolicy = (name: string) => {
-  const { isTLSEnabled, isZipUrlTLSEnabled } = usePolicyConfigContext();
+export const usePolicy = (fleetPolicyName: string = '') => {
+  const {
+    isTLSEnabled,
+    isZipUrlTLSEnabled,
+    name: monitorName, // the monitor name can come from two different places, either from fleet or from uptime
+  } = usePolicyConfigContext();
   const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
   const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
   const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
@@ -77,40 +77,41 @@ export const usePolicy = (name: string) => {
     [isTLSEnabled, isZipUrlTLSEnabled]
   );
 
+  /* TODO add locations to policy config for synthetics service */
   const policyConfig: PolicyConfig = useMemo(
     () => ({
       [DataStream.HTTP]: {
         ...httpSimpleFields,
         ...httpAdvancedFields,
         ...tlsFields,
-        [ConfigKeys.METADATA]: {
-          ...httpSimpleFields[ConfigKeys.METADATA],
+        [ConfigKey.METADATA]: {
+          ...httpSimpleFields[ConfigKey.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: name,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as HTTPFields,
       [DataStream.TCP]: {
         ...tcpSimpleFields,
         ...tcpAdvancedFields,
         ...tlsFields,
-        [ConfigKeys.METADATA]: {
-          ...tcpSimpleFields[ConfigKeys.METADATA],
+        [ConfigKey.METADATA]: {
+          ...tcpSimpleFields[ConfigKey.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: name,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as TCPFields,
       [DataStream.ICMP]: {
         ...icmpSimpleFields,
-        [ConfigKeys.NAME]: name,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as ICMPFields,
       [DataStream.BROWSER]: {
         ...browserSimpleFields,
         ...browserAdvancedFields,
-        [ConfigKeys.METADATA]: {
-          ...browserSimpleFields[ConfigKeys.METADATA],
+        [ConfigKey.METADATA]: {
+          ...browserSimpleFields[ConfigKey.METADATA],
           ...metadata,
         },
-        [ConfigKeys.NAME]: name,
+        [ConfigKey.NAME]: fleetPolicyName || monitorName,
       } as BrowserFields,
     }),
     [
@@ -123,7 +124,8 @@ export const usePolicy = (name: string) => {
       browserSimpleFields,
       browserAdvancedFields,
       tlsFields,
-      name,
+      fleetPolicyName,
+      monitorName,
     ]
   );
 

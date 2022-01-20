@@ -15,7 +15,8 @@ import {
   sampleLogTestData,
 } from './index_test_data';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const headerPage = getPageObject('header');
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
@@ -42,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.clickUseFullDataButton(
         testData.expected.totalDocCountFormatted
       );
+      await headerPage.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`
@@ -166,8 +168,13 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/118472
-    describe.skip('with farequote', function () {
+    after(async () => {
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+    });
+
+    describe('with farequote', function () {
       // Run tests on full farequote index.
       it(`${farequoteDataViewTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Start navigation from the base of the ML app.

@@ -19,7 +19,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize, get } from 'lodash';
 // @ts-ignore
 import { ClusterStatus } from '../cluster_status';

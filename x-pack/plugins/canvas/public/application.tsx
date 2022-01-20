@@ -8,7 +8,7 @@
 import React from 'react';
 import { Store } from 'redux';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
@@ -22,7 +22,6 @@ import { PluginServices } from '../../../../src/plugins/presentation_util/public
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { HelpMenu } from './components/help_menu/help_menu';
@@ -120,8 +119,6 @@ export const initializeCanvas = async (
 
   // Create Store
   const canvasStore = await createStore(coreSetup);
-
-  registerLanguage(Object.values(expressions.getFunctions()));
 
   // Init Registries
   initRegistries();

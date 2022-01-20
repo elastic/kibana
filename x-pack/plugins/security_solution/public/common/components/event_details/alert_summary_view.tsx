@@ -14,7 +14,8 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineId } from '../../../../common/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 import { getSummaryRows } from './get_alert_summary_rows';
 
@@ -37,15 +38,17 @@ const getDescription = ({
       isDraggable={isDraggable}
       values={values}
     />
-    <ActionCell
-      contextId={timelineId}
-      data={data}
-      eventId={eventId}
-      fieldFromBrowserField={fieldFromBrowserField}
-      linkValue={linkValue}
-      timelineId={timelineId}
-      values={values}
-    />
+    {timelineId !== TimelineId.active && (
+      <ActionCell
+        contextId={timelineId}
+        data={data}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        timelineId={timelineId}
+        values={values}
+      />
+    )}
   </>
 );
 

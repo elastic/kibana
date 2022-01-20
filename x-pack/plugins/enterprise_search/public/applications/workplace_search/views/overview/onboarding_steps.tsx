@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';

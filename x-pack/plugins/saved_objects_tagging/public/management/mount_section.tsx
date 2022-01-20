@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CoreSetup, ApplicationStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { getTagsCapabilities } from '../../common';

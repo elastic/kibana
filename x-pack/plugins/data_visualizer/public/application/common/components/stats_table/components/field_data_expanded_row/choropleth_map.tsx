@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,

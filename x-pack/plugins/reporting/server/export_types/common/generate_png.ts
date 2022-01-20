@@ -8,69 +8,60 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
+import { LayoutTypes } from '../../../../screenshotting/common';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../';
-import { UrlOrUrlLocatorTuple } from '../../../common/types';
+import { ScreenshotOptions } from '../../types';
 import { LevelLogger } from '../../lib';
-import { LayoutParams, LayoutSelectorDictionary, PreserveLayout } from '../../lib/layouts';
-import { getScreenshots$, ScreenshotResults } from '../../lib/screenshots';
-import { ConditionalHeaders } from '../common';
 
-export async function generatePngObservableFactory(reporting: ReportingCore) {
-  const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
-  const { browserDriverFactory } = await reporting.getPluginStartDeps();
-
-  return function generatePngObservable(
-    logger: LevelLogger,
-    urlOrUrlLocatorTuple: UrlOrUrlLocatorTuple,
-    browserTimezone: string | undefined,
-    conditionalHeaders: ConditionalHeaders,
-    layoutParams: LayoutParams & { selectors?: Partial<LayoutSelectorDictionary> }
-  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
-    const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
-    const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
-    if (!layoutParams || !layoutParams.dimensions) {
-      throw new Error(`LayoutParams.Dimensions is undefined.`);
-    }
-    const layout = new PreserveLayout(layoutParams.dimensions, layoutParams.selectors);
-
-    if (apmLayout) apmLayout.end();
-
-    const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
-    let apmBuffer: typeof apm.currentSpan;
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
-      logger,
-      urlsOrUrlLocatorTuples: [urlOrUrlLocatorTuple],
-      conditionalHeaders,
-      layout,
-      browserTimezone,
-    }).pipe(
-      tap(() => {
-        apmScreenshots?.end();
-        apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
-      }),
-      map((results: ScreenshotResults[]) => ({
-        buffer: results[0].screenshots[0].data,
-        warnings: results.reduce((found, current) => {
-          if (current.error) {
-            found.push(current.error.message);
-          }
-          if (current.renderErrors) {
-            found.push(...current.renderErrors);
-          }
-          return found;
-        }, [] as string[]),
-      })),
-      tap(({ buffer }) => {
-        logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
-        apmTrans?.setLabel('byte_length', buffer.byteLength, false);
-      }),
-      finalize(() => {
-        apmBuffer?.end();
-        apmTrans?.end();
-      })
-    );
-
-    return screenshots$;
+export function generatePngObservable(
+  reporting: ReportingCore,
+  logger: LevelLogger,
+  options: ScreenshotOptions
+): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+  const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
+  const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
+  if (!options.layout.dimensions) {
+    throw new Error(`LayoutParams.Dimensions is undefined.`);
+  }
+  const layout = {
+    id: LayoutTypes.PRESERVE_LAYOUT,
+    ...options.layout,
   };
+
+  apmLayout?.end();
+
+  const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
+  let apmBuffer: typeof apm.currentSpan;
+
+  return reporting.getScreenshots({ ...options, layout }).pipe(
+    tap(({ metrics$ }) => {
+      metrics$.subscribe(({ cpu, memory }) => {
+        apmTrans?.setLabel('cpu', cpu, false);
+        apmTrans?.setLabel('memory', memory, false);
+      });
+      apmScreenshots?.end();
+      apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
+    }),
+    map(({ results }) => ({
+      buffer: results[0].screenshots[0].data,
+      warnings: results.reduce((found, current) => {
+        if (current.error) {
+          found.push(current.error.message);
+        }
+        if (current.renderErrors) {
+          found.push(...current.renderErrors);
+        }
+        return found;
+      }, [] as string[]),
+    })),
+    tap(({ buffer }) => {
+      logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
+      apmTrans?.setLabel('byte_length', buffer.byteLength, false);
+    }),
+    finalize(() => {
+      apmBuffer?.end();
+      apmTrans?.end();
+    })
+  );
 }

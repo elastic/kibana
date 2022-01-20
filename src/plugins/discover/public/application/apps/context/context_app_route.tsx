@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverServices } from '../../../build_services';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
@@ -33,6 +33,7 @@ export function ContextAppRoute(props: ContextAppProps) {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const anchorId = decodeURIComponent(id);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -73,5 +74,5 @@ export function ContextAppRoute(props: ContextAppProps) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
 }

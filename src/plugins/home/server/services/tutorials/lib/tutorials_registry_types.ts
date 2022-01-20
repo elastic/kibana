@@ -29,6 +29,7 @@ export enum TutorialsCategory {
 export type Platform = 'WINDOWS' | 'OSX' | 'DEB' | 'RPM';
 
 export interface TutorialContext {
+  kibanaBranch: string;
   [key: string]: unknown;
 }
 export type TutorialProvider = (context: TutorialContext) => TutorialSchema;

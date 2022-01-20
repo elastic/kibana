@@ -72,6 +72,11 @@ import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer'
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
 
+import { ExpressionInput } from '../../../../src/plugins/presentation_util/public/components/expression_input';
+jest.mock('../../../../src/plugins/presentation_util/public/components/expression_input');
+// @ts-expect-error
+ExpressionInput.mockImplementation(() => 'ExpressionInput');
+
 // @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';
 jest.mock('react-dropzone');

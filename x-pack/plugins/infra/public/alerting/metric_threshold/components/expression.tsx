@@ -21,7 +21,7 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
@@ -42,6 +42,7 @@ import { ExpressionChart } from './expression_chart';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
+export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 type Props = Omit<
   AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,
@@ -117,10 +118,14 @@ export const Expressions: React.FC<Props> = (props) => {
   const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQueryText', filter);
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      try {
+        setAlertParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setAlertParams('filterQuery', QUERY_INVALID);
+      }
     },
     [setAlertParams, derivedIndexPattern]
   );
@@ -281,15 +286,16 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [alertParams.groupBy]);
 
   const redundantFilterGroupBy = useMemo(() => {
-    if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
+    const { filterQuery } = alertParams;
+    if (typeof filterQuery !== 'string' || !groupByFilterTestPatterns) return [];
     return groupByFilterTestPatterns
       .map(({ groupName, pattern }) => {
-        if (pattern.test(alertParams.filterQuery!)) {
+        if (pattern.test(filterQuery)) {
           return groupName;
         }
       })
       .filter((g) => typeof g === 'string') as string[];
-  }, [alertParams.filterQuery, groupByFilterTestPatterns]);
+  }, [alertParams, groupByFilterTestPatterns]);
 
   return (
     <>

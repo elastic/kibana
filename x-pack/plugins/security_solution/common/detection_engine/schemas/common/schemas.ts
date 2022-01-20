@@ -344,6 +344,15 @@ export type LastFailureAt = t.TypeOf<typeof last_failure_at>;
 export const last_failure_message = t.string;
 export type LastFailureMessage = t.TypeOf<typeof last_failure_message>;
 
+export const last_gap = t.string;
+export type LastGap = t.TypeOf<typeof last_gap>;
+
+export const bulk_create_time_durations = t.array(t.string);
+export type BulkCreateTimeDurations = t.TypeOf<typeof bulk_create_time_durations>;
+
+export const search_after_time_durations = t.array(t.string);
+export type SearchAfterTimeDurations = t.TypeOf<typeof search_after_time_durations>;
+
 export const status_date = IsoDateString;
 export type StatusDate = t.TypeOf<typeof status_date>;
 

@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';

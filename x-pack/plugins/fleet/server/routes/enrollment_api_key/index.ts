@@ -61,4 +61,44 @@ export const registerRoutes = (routers: { superuser: FleetRouter; fleetSetup: Fl
     },
     postEnrollmentApiKeyHandler
   );
+
+  routers.fleetSetup.get(
+    {
+      path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN_DEPRECATED,
+      validate: GetOneEnrollmentAPIKeyRequestSchema,
+      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
+      // Required to allow elastic/fleet-server to access this API.
+      // options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getOneEnrollmentApiKeyHandler
+  );
+
+  routers.superuser.delete(
+    {
+      path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN_DEPRECATED,
+      validate: DeleteEnrollmentAPIKeyRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    deleteEnrollmentApiKeyHandler
+  );
+
+  routers.fleetSetup.get(
+    {
+      path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN_DEPRECATED,
+      validate: GetEnrollmentAPIKeysRequestSchema,
+      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
+      // Required to allow elastic/fleet-server to access this API.
+      // options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getEnrollmentApiKeysHandler
+  );
+
+  routers.superuser.post(
+    {
+      path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN_DEPRECATED,
+      validate: PostEnrollmentAPIKeyRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postEnrollmentApiKeyHandler
+  );
 };

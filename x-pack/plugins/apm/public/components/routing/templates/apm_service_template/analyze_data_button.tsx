@@ -79,7 +79,7 @@ export function AnalyzeDataButton() {
         position="top"
         content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
           defaultMessage:
-            'EXPERIMENTAL - Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
+            'Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
       >
         <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">

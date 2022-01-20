@@ -8,7 +8,7 @@
 import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFormRow,
   EuiSwitch,
@@ -46,7 +46,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     if (multi) {
       return (
         <MultiTextInput
-          value={value}
+          value={value ?? []}
           onChange={onChange}
           onBlur={() => setIsDirty(true)}
           isDisabled={frozen}

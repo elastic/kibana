@@ -19,7 +19,6 @@ import { KibanaTimerangeOutput } from './timerange';
 import { SavedObjectReference } from '../../../../../core/types';
 import { SavedObjectsClientCommon } from '../..';
 
-/** @internal */
 export interface KibanaContextStartDependencies {
   savedObjectsClient: SavedObjectsClientCommon;
 }

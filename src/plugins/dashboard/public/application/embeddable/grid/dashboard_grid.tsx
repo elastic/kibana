@@ -12,7 +12,7 @@ import 'react-resizable/css/styles.css';
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
@@ -154,7 +154,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           id: 'dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
         }),
-        body: error.message,
+        body: (error as { message: string }).message,
         toastLifeTimeMs: 5000,
       });
     }
@@ -253,6 +253,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         focusedPanelId={focusedPanelIndex}
       />
     ));
+
+    // in print mode, dashboard layout is not controlled by React Grid Layout
+    if (viewMode === ViewMode.PRINT) {
+      return <>{dashboardPanels}</>;
+    }
 
     return (
       <ResponsiveSizedGrid

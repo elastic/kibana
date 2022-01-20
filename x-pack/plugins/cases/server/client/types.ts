@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
-import { User } from '../../common';
+import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
   AlertServiceContract,

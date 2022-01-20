@@ -18,6 +18,7 @@ import {
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -26,6 +27,7 @@ describe('Lens Attribute', () => {
     reportType: 'data-distribution',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
+    reportConfigMap: obsvReportConfigMap,
   });
 
   reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
@@ -57,6 +59,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -81,6 +84,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -478,6 +482,11 @@ describe('Lens Attribute', () => {
     });
   });
 
+  it('should not use global filters when there is more than one series', function () {
+    const multiSeriesLensAttr = new LensAttributes([layerConfig, layerConfig]).getJSON();
+    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
+  });
+
   describe('Layer breakdowns', function () {
     it('should return breakdown column', function () {
       const layerConfig1: LayerConfig = {
@@ -517,8 +526,8 @@ describe('Lens Attribute', () => {
 
       expect(lnsAttr.layers.layer0).toEqual({
         columnOrder: [
-          'x-axis-column-layer0',
           'breakdown-column-layer0',
+          'x-axis-column-layer0',
           'y-axis-column-layer0',
           'y-axis-column-layer0X0',
           'y-axis-column-layer0X1',

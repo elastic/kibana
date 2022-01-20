@@ -24,7 +24,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getDocLinks } from '../../util/dependency_cache';
 

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';

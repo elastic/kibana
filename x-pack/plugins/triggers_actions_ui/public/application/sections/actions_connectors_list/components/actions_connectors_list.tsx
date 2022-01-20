@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {

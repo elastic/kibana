@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiBasicTable,
@@ -470,7 +470,22 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       field: 'executionStatus.lastExecutionDate',
-      name: 'Last run',
+      name: (
+        <EuiToolTip
+          data-test-subj="alertsTableCell-lastExecutionDateTooltip"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
+            {
+              defaultMessage: 'Start time of the last execution.',
+            }
+          )}
+        >
+          <span>
+            Last run{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       width: '15%',
       'data-test-subj': 'alertsTableCell-lastExecutionDate',
@@ -510,6 +525,7 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '12%',
       name: (
         <EuiToolTip
+          data-test-subj="alertsTableCell-durationTooltip"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
             {

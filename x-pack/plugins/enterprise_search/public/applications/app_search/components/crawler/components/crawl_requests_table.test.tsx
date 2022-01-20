@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -33,9 +33,32 @@ const values: { events: CrawlEvent[] } = {
       type: CrawlType.Full,
       crawlConfig: {
         domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: [],
+        sitemapUrls: [],
+        maxCrawlDepth: 10,
+      },
+    },
+    {
+      id: '54325423aef7890543',
+      status: CrawlerStatus.Success,
+      stage: 'process',
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: ['https://www.elastic.co'],
+        seedUrls: [],
+        sitemapUrls: [],
+        maxCrawlDepth: 10,
       },
     },
   ],
+};
+
+const actions = {
+  fetchCrawlRequest: jest.fn(),
+  openFlyout: jest.fn(),
 };
 
 describe('CrawlRequestsTable', () => {
@@ -48,6 +71,7 @@ describe('CrawlRequestsTable', () => {
 
   describe('columns', () => {
     beforeAll(() => {
+      setMockActions(actions);
       setMockValues(values);
       wrapper = shallow(<CrawlRequestsTable />);
       tableContent = mountWithIntl(<CrawlRequestsTable />)
@@ -55,8 +79,21 @@ describe('CrawlRequestsTable', () => {
         .text();
     });
 
-    it('renders an id column', () => {
-      expect(tableContent).toContain('618d0e66abe97bc688328900');
+    it('renders a id column ', () => {
+      expect(tableContent).toContain('Request ID');
+
+      const table = wrapper.find(EuiBasicTable);
+      const columns = table.prop('columns');
+
+      const crawlID = shallow(columns[0].render('618d0e66abe97bc688328900', { stage: 'crawl' }));
+      expect(crawlID.text()).toContain('618d0e66abe97bc688328900');
+
+      crawlID.simulate('click');
+      expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
+      expect(actions.openFlyout).toHaveBeenCalled();
+
+      const processCrawlID = shallow(columns[0].render('54325423aef7890543', { stage: 'process' }));
+      expect(processCrawlID.text()).toContain('54325423aef7890543');
     });
 
     it('renders a created at column', () => {

@@ -72,13 +72,13 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    const uninstallPackage = async (pkg: string) =>
-      supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    const uninstallPackage = async (pkg: string, version: string) =>
+      supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
     // Endpoint doesn't currently support uninstalls
     describe.skip('uninstall', () => {
       before(async () => {
-        await uninstallPackage(`${pkgName}-${pkgVersion}`);
+        await uninstallPackage(pkgName, pkgVersion);
       });
 
       transforms.forEach((transform) => {

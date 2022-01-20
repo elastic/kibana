@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -73,6 +73,7 @@ export function BackendContents({
       <EuiFlexItem>
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton

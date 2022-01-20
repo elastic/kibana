@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexItem, EuiToolTip, EuiFlexGroup, EuiBadge } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';

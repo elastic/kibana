@@ -16,24 +16,34 @@ import { EmptyStateLoading } from '../components/overview/empty_state/empty_stat
 import { EmptyStateError } from '../components/overview/empty_state/empty_state_error';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
 import { useInspectorContext } from '../../../observability/public';
+import { useBreakpoints } from '../hooks/use_breakpoints';
 
 interface Props {
   path: string;
   pageHeader?: EuiPageHeaderProps;
 }
 
+const mobileCenteredHeader = `
+  .euiPageHeaderContent > .euiFlexGroup > .euiFlexItem {
+    align-items: center;
+  }
+`;
+
 export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader, children }) => {
   const {
     services: { observability },
   } = useKibana<ClientPluginsStart>();
+  const { down } = useBreakpoints();
+  const isMobile = down('s');
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
-
   const StyledPageTemplateComponent = useMemo(() => {
-    return styled(PageTemplateComponent)`
+    return styled(PageTemplateComponent)<{ isMobile: boolean }>`
       .euiPageHeaderContent > .euiFlexGroup {
         flex-wrap: wrap;
       }
+
+      ${(props) => (props.isMobile ? mobileCenteredHeader : '')}
     `;
   }, [PageTemplateComponent]);
 
@@ -57,6 +67,7 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
   return (
     <>
       <StyledPageTemplateComponent
+        isMobile={isMobile}
         pageHeader={pageHeader}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}

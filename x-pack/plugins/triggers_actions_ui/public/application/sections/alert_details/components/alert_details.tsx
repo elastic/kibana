@@ -26,7 +26,7 @@ import {
   EuiEmptyPrompt,
   EuiPageTemplate,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';

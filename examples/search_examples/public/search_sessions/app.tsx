@@ -299,6 +299,7 @@ export const SearchSessionsExampleApp = ({
                       setIndexPattern(id);
                     }}
                     isClearable={false}
+                    data-test-subj="indexPatternSelector"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -313,6 +314,7 @@ export const SearchSessionsExampleApp = ({
                       setNumericFieldName(fld?.name);
                     }}
                     sortMatchesBy="startsWith"
+                    data-test-subj="searchMetricField"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

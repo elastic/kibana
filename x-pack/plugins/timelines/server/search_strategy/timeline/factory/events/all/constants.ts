@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
-// import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
+import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 
 // TODO: share with security_solution/common/cti/constants.ts
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
@@ -26,11 +25,13 @@ export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
 export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
+export const FEED_NAME = 'feed.name';
 
 export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
 export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
 export const INDICATOR_PROVIDER = `${ENRICHMENT_DESTINATION_PATH}.${PROVIDER}`;
 export const INDICATOR_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${REFERENCE}`;
+export const FEED_NAME_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${FEED_NAME}`;
 
 export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_ATOMIC,
@@ -38,6 +39,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_TYPE,
   INDICATOR_REFERENCE,
   INDICATOR_PROVIDER,
+  FEED_NAME_REFERENCE,
 ];
 
 export const TIMELINE_EVENTS_FIELDS = [
@@ -47,20 +49,16 @@ export const TIMELINE_EVENTS_FIELDS = [
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.reason',
-  'kibana.alert.rule.filters',
   'kibana.alert.rule.from',
-  'kibana.alert.rule.language',
-  'kibana.alert.rule.query',
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
-  'kibana.alert.rule.index',
   'kibana.alert.rule.type',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   'kibana.alert.rule.version',
-  'kibana.alert.rule.severity',
-  'kibana.alert.rule.risk_score',
+  ALERT_SEVERITY,
+  ALERT_RISK_SCORE,
   'kibana.alert.threshold_result',
   'kibana.alert.building_block_type',
   'event.code',
@@ -173,12 +171,9 @@ export const TIMELINE_EVENTS_FIELDS = [
   'endgame.target_domain_name',
   'endgame.target_logon_id',
   'endgame.target_user_name',
-  'kibana.alert.rule.saved_id',
   'kibana.alert.rule.timeline_id',
   'kibana.alert.rule.timeline_title',
-  'kibana.alert.rule.output_index',
   'kibana.alert.rule.note',
-  'kibana.alert.rule.threshold',
   'kibana.alert.rule.exceptions_list',
   'kibana.alert.rule.building_block_type',
   'suricata.eve.proto',

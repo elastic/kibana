@@ -54,9 +54,6 @@ export class JsonLayout implements Layout {
       process: {
         pid: record.pid,
       },
-      span: record.spanId ? { id: record.spanId } : undefined,
-      trace: record.traceId ? { id: record.traceId } : undefined,
-      transaction: record.transactionId ? { id: record.transactionId } : undefined,
     };
     const output = record.meta ? merge({ ...record.meta }, log) : log;
 

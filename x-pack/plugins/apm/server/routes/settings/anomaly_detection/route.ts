@@ -11,15 +11,15 @@ import { maxSuggestions } from '../../../../../observability/common';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../environments/get_all_environments';
-import { hasLegacyJobs } from '../../../lib/anomaly_detection/has_legacy_jobs';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { createApmServerRouteRepository } from '../../apm_routes/create_apm_server_route_repository';
+import { updateToV3 } from './update_to_v3';
+import { environmentStringRt } from '../../../../common/environment_rt';
+import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
@@ -29,22 +29,21 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
   },
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { context, logger } = resources;
+    const { context } = resources;
 
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    const [jobs, legacyJobs] = await withApmSpan('get_available_ml_jobs', () =>
-      Promise.all([
-        getAnomalyDetectionJobs(setup, logger),
-        hasLegacyJobs(setup),
-      ])
-    );
+    if (!setup.ml) {
+      throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE);
+    }
+
+    const jobs = await getMlJobsWithAPMGroup(setup.ml?.anomalyDetectors);
 
     return {
       jobs,
-      hasLegacyJobs: legacyJobs,
+      hasLegacyJobs: jobs.some((job) => job.version === 1),
     };
   },
 });
@@ -57,7 +56,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.type({
-      environments: t.array(t.string),
+      environments: t.array(environmentStringRt),
     }),
   }),
   handler: async (resources) => {
@@ -107,7 +106,35 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
   },
 });
 
+const anomalyDetectionUpdateToV3Route = createApmServerRoute({
+  endpoint: 'POST /internal/apm/settings/anomaly-detection/update_to_v3',
+  options: {
+    tags: [
+      'access:apm',
+      'access:apm_write',
+      'access:ml:canCreateJob',
+      'access:ml:canGetJobs',
+      'access:ml:canCloseJob',
+    ],
+  },
+  handler: async (resources) => {
+    const [setup, esClient] = await Promise.all([
+      setupRequest(resources),
+      resources.core
+        .start()
+        .then((start) => start.elasticsearch.client.asInternalUser),
+    ]);
+
+    const { logger } = resources;
+
+    return {
+      update: await updateToV3({ setup, logger, esClient }),
+    };
+  },
+});
+
 export const anomalyDetectionRouteRepository = createApmServerRouteRepository()
   .add(anomalyDetectionJobsRoute)
   .add(createAnomalyDetectionJobsRoute)
-  .add(anomalyDetectionEnvironmentsRoute);
+  .add(anomalyDetectionEnvironmentsRoute)
+  .add(anomalyDetectionUpdateToV3Route);

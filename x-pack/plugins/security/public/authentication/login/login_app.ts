@@ -19,7 +19,7 @@ interface CreateDeps {
   application: ApplicationSetup;
   http: HttpSetup;
   getStartServices: StartServicesAccessor;
-  config: Pick<ConfigType, 'loginAssistanceMessage'>;
+  config: Pick<ConfigType, 'loginAssistanceMessage' | 'sameSiteCookies'>;
 }
 
 export const loginApp = Object.freeze({
@@ -41,6 +41,7 @@ export const loginApp = Object.freeze({
           notifications: coreStart.notifications,
           fatalErrors: coreStart.fatalErrors,
           loginAssistanceMessage: config.loginAssistanceMessage,
+          sameSiteCookies: config.sameSiteCookies,
         });
       },
     });

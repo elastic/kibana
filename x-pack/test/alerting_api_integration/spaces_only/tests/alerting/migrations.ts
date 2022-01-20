@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import type { RawAlert, RawAlertAction } from '../../../../../plugins/alerting/server/types';
+import { FILEBEAT_7X_INDICATOR_PATH } from '../../../../../plugins/alerting/server/saved_objects/migrations';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -284,6 +285,93 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           type: 'alert',
         },
       ]);
+    });
+
+    it('8.0 migrates security_solution (Legacy) threat match rules to add default threatIndicatorPath value if missing', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            threatIndicatorPath: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:ece1ece2-9394-48df-a634-d5457c351ece',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).to.eql(
+        FILEBEAT_7X_INDICATOR_PATH
+      );
+    });
+
+    it('8.0 does not migrate security_solution (Legacy) threat match rules if threatIndicatorPath value is present', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            threatIndicatorPath: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:fce1ece2-9394-48df-a634-d5457c351fce',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).to.eql(
+        'custom.indicator.path'
+      );
+    });
+
+    it('8.0 does not migrate security_solution (Legacy) rules other than threat_match rules if threatIndicatorPath value is missing', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            threatIndicatorPath: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:1ce1ece2-9394-48df-a634-d5457c3511ce',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).not.to.eql(
+        FILEBEAT_7X_INDICATOR_PATH
+      );
+    });
+
+    it('8.0 migrates incorrect action group spellings on the Metrics Inventory Threshold rule type', async () => {
+      const response = await es.get<{ alert: RawAlert }>(
+        {
+          index: '.kibana',
+          id: 'alert:92237b30-4e03-11ec-9ab9-d980518a2d28',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.actions?.[0].group).to.be(
+        'metrics.inventory_threshold.fired'
+      );
+    });
+
+    it('8.0 migrates and disables pre-existing rules', async () => {
+      const response = await es.get<{ alert: RawAlert }>(
+        {
+          index: '.kibana',
+          id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.alertTypeId).to.be('siem.queryRule');
+      expect(response.body._source?.alert?.enabled).to.be(false);
     });
   });
 }

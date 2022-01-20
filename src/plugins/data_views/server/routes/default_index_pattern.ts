@@ -29,7 +29,8 @@ export const registerManageDefaultIndexPatternRoutes = (
       const [, , { indexPatternsServiceFactory }] = await getStartServices();
       const indexPatternsService = await indexPatternsServiceFactory(
         savedObjectsClient,
-        elasticsearchClient
+        elasticsearchClient,
+        req
       );
 
       const defaultIndexPatternId = await indexPatternsService.getDefaultId();
@@ -63,7 +64,8 @@ export const registerManageDefaultIndexPatternRoutes = (
       const [, , { indexPatternsServiceFactory }] = await getStartServices();
       const indexPatternsService = await indexPatternsServiceFactory(
         savedObjectsClient,
-        elasticsearchClient
+        elasticsearchClient,
+        req
       );
 
       const newDefaultId = req.body.index_pattern_id;

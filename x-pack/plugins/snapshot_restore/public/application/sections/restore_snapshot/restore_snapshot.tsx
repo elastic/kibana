@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -63,11 +63,9 @@ import { useUserData } from '../../../../components/user_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusFilter,
-  buildAlertStatusFilterRuleRegistry,
   buildShowBuildingBlockFilter,
-  buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
@@ -210,7 +208,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const loading = userInfoLoading || listsConfigLoading;
+
+  const {
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
+  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
     rule: maybeRule,
@@ -249,9 +254,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   // TODO: Steph/ueba remove when past experimental
   const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
@@ -416,39 +418,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(ruleId),
-      ...(ruleRegistryEnabled
-        ? [
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts), // TODO: Once we are past experimental phase this code should be removed
-            ...buildAlertStatusFilterRuleRegistry(filterGroup),
-          ]
-        : [
-            ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-            ...buildAlertStatusFilter(filterGroup),
-          ]),
+      ...buildAlertsFilter(rule?.rule_id ?? ''),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [
-      ruleId,
-      ruleRegistryEnabled,
-      showBuildingBlockAlerts,
-      showOnlyThreatIndicatorAlerts,
-      filterGroup,
-    ]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   const alertsTableDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(ruleId),
-      ...(ruleRegistryEnabled
-        ? [
-            // TODO: Once we are past experimental phase this code should be removed
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
-          ]
-        : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
+      ...buildAlertsFilter(rule?.rule_id ?? ''),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(
@@ -624,7 +608,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
     allowedExceptionListTypes: ExceptionListTypeEnum[];
@@ -842,6 +825,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   signalIndexName={signalIndexName}
                   defaultStackByOption={defaultRuleStackByOption}
                   updateDateRange={updateDateRangeCallback}
+                  runtimeMappings={runtimeMappings}
                 />
                 <EuiSpacer />
               </Display>

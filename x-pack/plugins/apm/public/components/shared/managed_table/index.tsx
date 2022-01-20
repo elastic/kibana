@@ -44,7 +44,11 @@ interface Props<T> {
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
+  tableLayout?: 'auto' | 'fixed';
 }
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const INITIAL_PAGE_SIZE = 25;
 
 function defaultSortFn<T extends any>(
   items: T[],
@@ -60,16 +64,17 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     items,
     columns,
     initialPageIndex = 0,
-    initialPageSize = 10,
+    initialPageSize = INITIAL_PAGE_SIZE,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
-    hidePerPageOptions = true,
+    hidePerPageOptions = false,
     noItemsMessage,
     sortItems = true,
     sortFn = defaultSortFn,
     pagination = true,
     isLoading = false,
     error = false,
+    tableLayout,
   } = props;
 
   const {
@@ -126,6 +131,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       totalItemCount: items.length,
       pageIndex: page,
       pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
   }, [hidePerPageOptions, items, page, pageSize, pagination]);
 
@@ -140,6 +146,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   return (
     <EuiBasicTable
       loading={isLoading}
+      tableLayout={tableLayout}
       error={
         error
           ? i18n.translate('xpack.apm.managedTable.errorMessage', {

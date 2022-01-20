@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { convertToCamelCase } from '../../../containers/utils';
 import { StartServices } from '../../../types';

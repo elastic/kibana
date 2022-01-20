@@ -202,7 +202,7 @@ describe('savedObjectsResultProvider', () => {
           type: 'typeA',
           url: '/type-a/resultA',
           score: 50,
-          meta: { tagIds: [] },
+          meta: { tagIds: [], displayName: 'typeA' },
         },
         {
           id: 'resultB',
@@ -210,7 +210,7 @@ describe('savedObjectsResultProvider', () => {
           type: 'typeB',
           url: '/type-b/resultB',
           score: 78,
-          meta: { tagIds: [] },
+          meta: { tagIds: [], displayName: 'typeB' },
         },
       ]);
     });

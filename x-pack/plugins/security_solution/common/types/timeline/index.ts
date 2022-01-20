@@ -633,7 +633,7 @@ export interface ColumnHeaderResult {
   category?: Maybe<string>;
   columnHeaderType?: Maybe<string>;
   description?: Maybe<string>;
-  example?: Maybe<string>;
+  example?: Maybe<string | number>;
   indexes?: Maybe<string[]>;
   id?: Maybe<string>;
   name?: Maybe<string>;

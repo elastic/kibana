@@ -19,8 +19,7 @@ import {
 } from './constants';
 import { SuggestionOnClick } from './types';
 
-// @internal
-export interface SuggestionsComponentProps {
+interface SuggestionsComponentProps {
   index: number | null;
   onClick: SuggestionOnClick;
   onMouseEnter: (index: number) => void;

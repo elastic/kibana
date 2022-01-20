@@ -22,16 +22,14 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
   CaseType,
   CommentType,
   CommentRequestAlertType,
-  DeleteCase,
-  Case,
-  SubCase,
   ActionConnector,
-} from '../../../common';
+} from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
@@ -219,7 +217,7 @@ export const useCasesColumns = ({
                 size="s"
               />
               <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
+                {createdBy.username ?? i18n.UNKNOWN}
               </Spacer>
             </>
           );

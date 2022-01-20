@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import type { CSSProperties } from 'react';
 import React, { Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart, Capabilities } from 'src/core/public';
 
 interface Props {

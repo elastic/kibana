@@ -11,7 +11,7 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../../../../../cases/common';
+import { Case } from '../../../../../../../cases/common/ui/types';
 import type { TimelinesStartServices } from '../../../../../types';
 
 export interface CreateCaseModalProps {

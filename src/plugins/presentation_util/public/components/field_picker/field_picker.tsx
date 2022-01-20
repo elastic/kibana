@@ -9,7 +9,7 @@
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 
 import { FieldSearch } from './field_search';

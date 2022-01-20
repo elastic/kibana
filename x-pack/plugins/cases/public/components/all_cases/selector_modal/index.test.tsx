@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { AllCasesSelectorModal } from '.';
 import { TestProviders } from '../../../common/mock';
 import { AllCasesGeneric } from '../all_cases_generic';
-import { SECURITY_SOLUTION_OWNER } from '../../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
 jest.mock('../../../methods');
 jest.mock('../all_cases_generic');

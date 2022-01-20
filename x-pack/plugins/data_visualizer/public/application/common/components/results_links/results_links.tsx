@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import {
   DISCOVER_APP_URL_GENERATOR,

@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
   return isVisible ? (

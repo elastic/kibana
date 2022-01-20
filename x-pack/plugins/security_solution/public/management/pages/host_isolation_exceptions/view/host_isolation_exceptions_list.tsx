@@ -7,10 +7,10 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useHistory } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import { getCurrentLocation } from '../store/selector';
 import {
@@ -18,8 +18,9 @@ import {
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
@@ -31,11 +32,11 @@ import {
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
 import { getEndpointListPath } from '../../../common/routing';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -44,7 +45,8 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
@@ -117,6 +119,13 @@ export const HostIsolationExceptionsList = () => {
       [navigateCallback]
     );
 
+  const backButton = useMemo(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...routeState} />;
+    }
+    return null;
+  }, [routeState]);
+
   const handleAddButtonClick = useCallback(
     () =>
       navigateCallback({
@@ -144,6 +153,7 @@ export const HostIsolationExceptionsList = () => {
 
   return (
     <AdministrationListPage
+      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"

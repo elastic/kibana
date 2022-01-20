@@ -9,7 +9,7 @@ import React, { useContext, FC } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiPageContent } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MissingPrivileges } from '../../../../../common/types/privileges';
 

@@ -746,6 +746,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             x1: endTimestamp,
           },
           details: annotation.annotation,
+          // Added for custom RectAnnotation tooltip with formatted timestamp
+          header: timestamp,
         });
       }
     });

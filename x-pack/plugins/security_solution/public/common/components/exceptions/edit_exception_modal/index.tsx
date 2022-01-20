@@ -37,7 +37,7 @@ import {
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { ExceptionBuilder } from '../../../../../public/shared_imports';
+import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -267,11 +267,16 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (addOrUpdateExceptionItems !== null) {
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), undefined, bulkCloseIndex);
+      addOrUpdateExceptionItems(
+        maybeRule?.rule_id ?? '',
+        enrichExceptionItems(),
+        undefined,
+        bulkCloseIndex
+      );
     }
   }, [
     addOrUpdateExceptionItems,
-    ruleId,
+    maybeRule,
     enrichExceptionItems,
     shouldBulkCloseAlert,
     signalIndexName,
@@ -344,7 +349,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                   <EuiSpacer />
                 </>
               )}
-              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+              {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
                 httpService: http,

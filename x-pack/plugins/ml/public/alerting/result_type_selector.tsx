@@ -6,7 +6,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, useMemo } from 'react';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { AnomalyResultType } from '../../common/types/anomalies';

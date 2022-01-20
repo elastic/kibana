@@ -14,7 +14,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
+import { CaseType } from '../../../common/api';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 import { useOwnerContext } from '../owner_context/use_owner_context';
 import { getConnectorById } from '../utils';

@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const SYNTHETICS_CALLOUT_LS_KEY = 'xpack.uptime.syntheticsCallout.display';
 const shouldShowSyntheticsCallout = () => {

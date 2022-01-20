@@ -9,9 +9,13 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mock';
+import { mockGlobalState } from '../../../../mock/global_state';
 import { tGridActions } from '../../../../store/t_grid';
 
 import { FieldsBrowser } from './field_browser';
+
+import { createStore, State } from '../../../../types';
+import { createSecuritySolutionStorageMock } from '../../../../mock/mock_local_storage';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -21,26 +25,30 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
+const timelineId = 'test';
+const onHide = jest.fn();
+const testProps = {
+  columnHeaders: [],
+  browserFields: mockBrowserFields,
+  filteredBrowserFields: mockBrowserFields,
+  searchInput: '',
+  isSearching: false,
+  onCategorySelected: jest.fn(),
+  onHide,
+  onSearchInputChange: jest.fn(),
+  restoreFocusTo: React.createRef<HTMLButtonElement>(),
+  selectedCategoryId: '',
+  timelineId,
+};
+const { storage } = createSecuritySolutionStorageMock();
 describe('FieldsBrowser', () => {
-  const timelineId = 'test';
-
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   test('it renders the Close button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -48,22 +56,9 @@ describe('FieldsBrowser', () => {
   });
 
   test('it invokes the Close button', () => {
-    const onHide = jest.fn();
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={onHide}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -74,19 +69,7 @@ describe('FieldsBrowser', () => {
   test('it renders the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -123,23 +106,9 @@ describe('FieldsBrowser', () => {
   });
 
   test('it invokes onHide when the user clicks the Reset Fields button', () => {
-    const onHide = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={onHide}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -151,19 +120,7 @@ describe('FieldsBrowser', () => {
   test('it renders the search', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -173,19 +130,7 @@ describe('FieldsBrowser', () => {
   test('it renders the categories pane', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -195,19 +140,7 @@ describe('FieldsBrowser', () => {
   test('it renders the fields pane', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -217,19 +150,7 @@ describe('FieldsBrowser', () => {
   test('focuses the search input when the component mounts', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
@@ -245,19 +166,7 @@ describe('FieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={onSearchInputChange}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} onSearchInputChange={onSearchInputChange} />
       </TestProviders>
     );
 
@@ -272,25 +181,36 @@ describe('FieldsBrowser', () => {
     expect(onSearchInputChange).toBeCalledWith(inputText);
   });
 
-  test('it renders the CreateField button when createFieldComponent is provided', () => {
+  test('does not render the CreateField button when createFieldComponent is provided without a dataViewId', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={[]}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-          createFieldComponent={MyTestComponent}
-        />
+        <FieldsBrowser {...testProps} createFieldComponent={MyTestComponent} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(MyTestComponent).exists()).toBeFalsy();
+  });
+
+  test('it renders the CreateField button when createFieldComponent is provided with a dataViewId', () => {
+    const state: State = {
+      ...mockGlobalState,
+      timelineById: {
+        ...mockGlobalState.timelineById,
+        test: {
+          ...mockGlobalState.timelineById.test,
+          dataViewId: 'security-solution-default',
+        },
+      },
+    };
+    const store = createStore(state, storage);
+
+    const MyTestComponent = () => <div>{'test'}</div>;
+
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <FieldsBrowser {...testProps} createFieldComponent={MyTestComponent} />
       </TestProviders>
     );
 

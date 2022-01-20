@@ -13,7 +13,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';

@@ -8,7 +8,7 @@
 
 import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
@@ -118,7 +118,7 @@ export const DocTableInfinite = (props: DocTableProps) => {
 
   const onBackToTop = useCallback(() => {
     const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
-    const focusElem = document.querySelector('.dscTable') as HTMLElement;
+    const focusElem = document.querySelector('.dscSkipButton') as HTMLElement;
     focusElem.focus();
 
     // Only the desktop one needs to target a specific container

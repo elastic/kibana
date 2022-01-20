@@ -139,7 +139,7 @@ Specifies the browser to use to capture screenshots. This setting exists for bac
 When <<xpack-reporting-browser, `xpack.reporting.capture.browser.type`>> is set to `chromium` (default) you can also specify the following settings.
 
 `xpack.reporting.capture.browser.chromium.disableSandbox`::
-It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except Debian, Red Hat Linux, and CentOS, which use `true`.
+It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except Debian and Red Hat Linux, which use `true`.
 
 `xpack.reporting.capture.browser.chromium.proxy.enabled`::
 Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.reporting.capture.browser.chromium.proxy.server` setting. Defaults to `false`.

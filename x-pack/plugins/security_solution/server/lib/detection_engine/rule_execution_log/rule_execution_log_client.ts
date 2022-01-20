@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { IEventLogClient, IEventLogService } from '../../../../../event_log/server';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { EventLogAdapter } from './event_log_adapter/event_log_adapter';
 import { SavedObjectsAdapter } from './saved_objects_adapter/saved_objects_adapter';
 import {
-  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
   IRuleExecutionLogClient,
@@ -21,6 +20,7 @@ import {
   GetCurrentStatusArgs,
   GetCurrentStatusBulkArgs,
   GetCurrentStatusBulkResult,
+  ExtMeta,
 } from './types';
 import { truncateMessage } from './utils/normalization';
 
@@ -29,13 +29,16 @@ interface ConstructorParams {
   savedObjectsClient: SavedObjectsClientContract;
   eventLogService: IEventLogService;
   eventLogClient?: IEventLogClient;
+  logger: Logger;
 }
 
 export class RuleExecutionLogClient implements IRuleExecutionLogClient {
-  private client: IRuleExecutionLogClient;
+  private readonly client: IRuleExecutionLogClient;
+  private readonly logger: Logger;
 
   constructor(params: ConstructorParams) {
-    const { underlyingClient, eventLogService, eventLogClient, savedObjectsClient } = params;
+    const { underlyingClient, eventLogService, eventLogClient, savedObjectsClient, logger } =
+      params;
 
     switch (underlyingClient) {
       case UnderlyingLogClient.savedObjects:
@@ -45,6 +48,10 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
         this.client = new EventLogAdapter(eventLogService, eventLogClient, savedObjectsClient);
         break;
     }
+
+    // We write rule execution logs via a child console logger with the context
+    // "plugins.securitySolution.ruleExecution"
+    this.logger = logger.get('ruleExecution');
   }
 
   /** @deprecated */
@@ -75,15 +82,34 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
     return this.client.deleteCurrentStatus(ruleId);
   }
 
-  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
-    return this.client.logExecutionMetrics(args);
-  }
+  public async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
+    const { newStatus, message, ruleId, ruleName, ruleType, spaceId } = args;
 
-  public async logStatusChange(args: LogStatusChangeArgs) {
-    const message = args.message ? truncateMessage(args.message) : args.message;
-    return this.client.logStatusChange({
-      ...args,
-      message,
-    });
+    try {
+      const truncatedMessage = message ? truncateMessage(message) : message;
+      await this.client.logStatusChange({
+        ...args,
+        message: truncatedMessage,
+      });
+    } catch (e) {
+      const logMessage = 'Error logging rule execution status change';
+      const logAttributes = `status: "${newStatus}", rule id: "${ruleId}", rule name: "${ruleName}"`;
+      const logReason = e instanceof Error ? `${e.stack}` : `${e}`;
+      const logMeta: ExtMeta = {
+        rule: {
+          id: ruleId,
+          name: ruleName,
+          type: ruleType,
+          execution: {
+            status: newStatus,
+          },
+        },
+        kibana: {
+          spaceId,
+        },
+      };
+
+      this.logger.error<ExtMeta>(`${logMessage}; ${logAttributes}; ${logReason}`, logMeta);
+    }
   }
 }

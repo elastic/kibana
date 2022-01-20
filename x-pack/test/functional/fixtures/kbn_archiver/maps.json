@@ -752,7 +752,7 @@
     "title":"MVT geotile grid (style meta from local - count)",
     "uiStateJSON":"{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"g1xkv\"]}"
   },
-  "coreMigrationVersion":"8.1.0",
+  "coreMigrationVersion":"8.0.0",
   "id":"943443a0-3b48-11ec-8a0d-af01166a5cc3",
   "migrationVersion": {
     "map":"8.0.0"
@@ -777,7 +777,7 @@
     "title":"MVT geotile grid (style meta from local - metric)",
     "uiStateJSON":"{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"g1xkv\"]}"
   },
-  "coreMigrationVersion":"8.1.0",
+  "coreMigrationVersion":"8.0.0",
   "id":"9ff6f170-3b56-11ec-9cfb-57b0ede90800",
   "migrationVersion": {
     "map":"8.0.0"
@@ -919,7 +919,7 @@
     "title": "MVT documents",
     "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
   },
-  "coreMigrationVersion": "8.1.0",
+  "coreMigrationVersion": "8.0.0",
   "id": "2aff3160-3d78-11ec-9b35-f52e723e8a71",
   "migrationVersion": {
     "map": "8.0.0"

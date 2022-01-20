@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   transformBulkError,
@@ -22,10 +20,11 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus } from '../signals/__mocks__/es_results';
-import { getAlertMock } from './__mocks__/request_responses';
+import { resolveAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
@@ -34,17 +33,17 @@ describe.each([
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
-    test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
-      const transformed = transformBulkError('rule-1', boom);
+    test('returns transformed object if it is a custom error object', () => {
+      const customError = new CustomHttpRequestError('some custom error message', 400);
+      const transformed = transformBulkError('rule-1', customError);
       const expected: BulkError = {
         rule_id: 'rule-1',
-        error: { message: 'some boom message', status_code: 400 },
+        error: { message: 'some custom error message', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
     });
 
-    test('returns a normal error if it is some non boom object that has a statusCode', () => {
+    test('returns a normal error if it is some non custom error that has a statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
@@ -71,7 +70,7 @@ describe.each([
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+    test('it detects a BadRequestError and returns an error status of 400', () => {
       const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
@@ -95,7 +94,7 @@ describe.each([
       // Array accessors can result in undefined but
       // this is not represented in typescript for some reason,
       // https://github.com/Microsoft/TypeScript/issues/11122
-      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+      const values: SavedObjectsFindResponse<IRuleStatusSOAttributes> = {
         page: 0,
         per_page: 5,
         total: 0,
@@ -224,12 +223,14 @@ describe.each([
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(
+        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const foundRule = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
@@ -238,12 +239,12 @@ describe.each([
           message: 'oops',
         },
       };
-      rulesClient.get.mockResolvedValue(foundRule);
+      rulesClient.resolve.mockResolvedValue(foundRule);
       const res = await getFailingRules([foundRule.id], rulesClient);
       expect(res).toEqual({ [foundRule.id]: foundRule });
     });
     it('getFailingRules throws an error', async () => {
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new Error('my test error');
       });
       let error;

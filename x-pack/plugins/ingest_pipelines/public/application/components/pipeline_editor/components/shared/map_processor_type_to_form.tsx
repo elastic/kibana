@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
 import {
@@ -446,8 +446,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Inference',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.inference', {
-      defaultMessage:
-        'Uses a pre-trained data frame analytics model to infer against incoming data.',
+      defaultMessage: 'Uses a trained model to infer against incoming data.',
     }),
     getDefaultDescription: ({
       model_id: modelId,

@@ -53,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
         name,
         type: monitorType,
+        enabled: true,
         processors: [
           {
             add_observer_metadata: {
@@ -152,7 +153,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ...config,
     });
 
-    describe('displays custom UI', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/109260
+    describe.skip('displays custom UI', () => {
       before(async () => {
         const version = await uptimeService.syntheticsPackage.getSyntheticsPackageVersion();
         await uptimePage.syntheticsIntegration.navigateToPackagePage(version!);
@@ -170,7 +172,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('create new policy', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/103390
+    describe.skip('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {
@@ -629,9 +632,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           username: 'username',
           password: 'password',
         });
+
         const advancedConfig = {
           screenshots: 'off',
           syntheticsArgs: '-ssBlocks',
+          isThrottlingEnabled: true,
+          downloadSpeed: '1337',
+          uploadSpeed: '1338',
+          latency: '1339',
         };
 
         await uptimePage.syntheticsIntegration.createBasicBrowserMonitorDetails(config);
@@ -664,6 +672,79 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'source.zip_url.password': config.password,
               params: JSON.parse(config.params),
               synthetics_args: [advancedConfig.syntheticsArgs],
+              'throttling.is_enabled': advancedConfig.isThrottlingEnabled,
+              'throttling.download_speed': advancedConfig.downloadSpeed,
+              'throttling.upload_speed': advancedConfig.uploadSpeed,
+              'throttling.latency': advancedConfig.latency,
+              'throttling.config': `${advancedConfig.downloadSpeed}d/${advancedConfig.uploadSpeed}u/${advancedConfig.latency}l`,
+              __ui: {
+                is_tls_enabled: false,
+                is_zip_url_tls_enabled: false,
+                script_source: {
+                  file_name: '',
+                  is_generated_script: false,
+                },
+              },
+            },
+          })
+        );
+      });
+
+      it('allows saving disabling throttling', async () => {
+        // This test ensures that updates made to the Synthetics Policy are carried all the way through
+        // to the generated Agent Policy that is dispatch down to the Elastic Agent.
+        const config = generateBrowserConfig({
+          zipUrl: 'http://test.zip',
+          params: JSON.stringify({ url: 'http://localhost:8080' }),
+          folder: 'folder',
+          username: 'username',
+          password: 'password',
+        });
+
+        const advancedConfig = {
+          screenshots: 'off',
+          syntheticsArgs: '-ssBlocks',
+          isThrottlingEnabled: false,
+          downloadSpeed: '1337',
+          uploadSpeed: '1338',
+          latency: '1339',
+        };
+
+        await uptimePage.syntheticsIntegration.createBasicBrowserMonitorDetails(config);
+        await uptimePage.syntheticsIntegration.configureBrowserAdvancedOptions(advancedConfig);
+        await uptimePage.syntheticsIntegration.confirmAndSave();
+
+        await uptimePage.syntheticsIntegration.isPolicyCreatedSuccessfully();
+
+        const [agentPolicy] = await uptimeService.syntheticsPackage.getAgentPolicyList();
+        const agentPolicyId = agentPolicy.id;
+        const agentFullPolicy = await uptimeService.syntheticsPackage.getFullAgentPolicy(
+          agentPolicyId
+        );
+
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
+          generatePolicy({
+            agentFullPolicy,
+            version,
+            name: monitorName,
+            monitorType: 'browser',
+            config: {
+              screenshots: advancedConfig.screenshots,
+              schedule: '@every 3m',
+              timeout: '16s',
+              tags: [config.tags],
+              'service.name': config.apmServiceName,
+              'source.zip_url.url': config.zipUrl,
+              'source.zip_url.folder': config.folder,
+              'source.zip_url.username': config.username,
+              'source.zip_url.password': config.password,
+              params: JSON.parse(config.params),
+              synthetics_args: [advancedConfig.syntheticsArgs],
+              'throttling.is_enabled': advancedConfig.isThrottlingEnabled,
+              'throttling.download_speed': advancedConfig.downloadSpeed,
+              'throttling.upload_speed': advancedConfig.uploadSpeed,
+              'throttling.latency': advancedConfig.latency,
+              'throttling.config': 'false',
               __ui: {
                 is_tls_enabled: false,
                 is_zip_url_tls_enabled: false,

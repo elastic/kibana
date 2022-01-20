@@ -7,15 +7,12 @@
 
 import { assign, omit } from 'lodash';
 
+import { StatusAll, ResolvedCase } from '../../common/ui/types';
 import {
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
   CaseResolveResponse,
-  CASES_URL,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
@@ -29,16 +26,19 @@ import {
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
   getSubCaseUserActionUrl,
-  StatusAll,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
   User,
-  ResolvedCase,
-} from '../../common';
-
+} from '../../common/api';
+import {
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
+} from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';

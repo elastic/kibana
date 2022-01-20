@@ -73,7 +73,7 @@ describe('Policy Form Layout', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/fleet/agent-status') {
+          if (path === '/api/fleet/agent_status') {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },

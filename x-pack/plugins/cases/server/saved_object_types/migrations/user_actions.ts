@@ -12,12 +12,18 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationContext,
-  LogMeta,
 } from '../../../../../../src/core/server';
-import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
+import {
+  isPush,
+  isUpdateConnector,
+  isCreateConnector,
+  isCreateComment,
+} from '../../../common/utils/user_actions';
+import { CommentRequestAlertType, CommentType, ConnectorTypes } from '../../../common/api';
 
 import { extractConnectorIdFromJson } from '../../services/user_actions/transform';
 import { UserActionFieldType } from '../../services/user_actions/types';
+import { logError } from './utils';
 
 interface UserActions {
   action_field: string[];
@@ -25,19 +31,19 @@ interface UserActions {
   old_value: string;
 }
 
-interface UserActionUnmigratedConnectorDocument {
+/**
+ * An interface for the values we need from a json blob style user action to determine what type of
+ * user action it is.
+ */
+interface TypedAndValueUserAction {
   action?: string;
   action_field?: string[];
   new_value?: string | null;
   old_value?: string | null;
 }
 
-interface UserActionLogMeta extends LogMeta {
-  migrations: { userAction: { id: string } };
-}
-
 export function userActionsConnectorIdMigration(
-  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>,
+  doc: SavedObjectUnsanitizedDoc<TypedAndValueUserAction>,
   context: SavedObjectMigrationContext
 ): SavedObjectSanitizedDoc<unknown> {
   const originalDocWithReferences = { ...doc, references: doc.references ?? [] };
@@ -49,7 +55,13 @@ export function userActionsConnectorIdMigration(
   try {
     return formatDocumentWithConnectorReferences(doc);
   } catch (error) {
-    logError(doc.id, context, error);
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'user action connector',
+      docKey: 'userAction',
+    });
 
     return originalDocWithReferences;
   }
@@ -64,7 +76,7 @@ function isConnectorUserAction(action?: string, actionFields?: string[]): boolea
 }
 
 function formatDocumentWithConnectorReferences(
-  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>
+  doc: SavedObjectUnsanitizedDoc<TypedAndValueUserAction>
 ): SavedObjectSanitizedDoc<unknown> {
   const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
   const { references = [] } = doc;
@@ -98,16 +110,76 @@ function formatDocumentWithConnectorReferences(
   };
 }
 
-function logError(id: string, context: SavedObjectMigrationContext, error: Error) {
-  context.log.error<UserActionLogMeta>(
-    `Failed to migrate user action connector doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
-    {
-      migrations: {
-        userAction: {
-          id,
-        },
-      },
+export function removeRuleInformation(
+  doc: SavedObjectUnsanitizedDoc<TypedAndValueUserAction>,
+  context: SavedObjectMigrationContext
+): SavedObjectSanitizedDoc<unknown> {
+  const originalDocWithReferences = { ...doc, references: doc.references ?? [] };
+
+  try {
+    const { new_value, action, action_field } = doc.attributes;
+
+    const decodedNewValueData = decodeNewValue(new_value);
+
+    if (!isAlertUserAction(action, action_field, decodedNewValueData)) {
+      return originalDocWithReferences;
     }
+
+    const encodedValue = JSON.stringify({
+      ...decodedNewValueData,
+      rule: {
+        id: null,
+        name: null,
+      },
+    });
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        new_value: encodedValue,
+      },
+      references: doc.references ?? [],
+    };
+  } catch (error) {
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'user action alerts',
+      docKey: 'userAction',
+    });
+
+    return originalDocWithReferences;
+  }
+}
+
+function decodeNewValue(data?: string | null): unknown | null {
+  if (data === undefined || data === null) {
+    return null;
+  }
+
+  return JSON.parse(data);
+}
+
+function isAlertUserAction(
+  action?: string,
+  actionFields?: string[],
+  newValue?: unknown | null
+): newValue is AlertCommentOptional {
+  return isCreateComment(action, actionFields) && isAlertObject(newValue);
+}
+
+type AlertCommentOptional = Partial<CommentRequestAlertType>;
+
+function isAlertObject(data?: unknown | null): boolean {
+  const unsafeAlertData = data as AlertCommentOptional;
+
+  return (
+    unsafeAlertData !== undefined &&
+    unsafeAlertData !== null &&
+    (unsafeAlertData.type === CommentType.generatedAlert ||
+      unsafeAlertData.type === CommentType.alert)
   );
 }
 
@@ -156,4 +228,13 @@ export const userActionsMigrations = {
     return addOwnerToSO(doc);
   },
   '7.16.0': userActionsConnectorIdMigration,
+  /*
+   * This is to fix the issue here: https://github.com/elastic/kibana/issues/123089
+   * Instead of migrating the rule information in the references array which was risky for 8.0
+   * we decided to remove the information since the UI will do the look up for the rule information if
+   * the backend returns it as null.
+   *
+   * The downside is it incurs extra query overhead.
+   **/
+  '8.0.0': removeRuleInformation,
 };

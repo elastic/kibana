@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AggListForm } from './list_form';
 import { DropDown } from '../aggregation_dropdown';
 import { PivotAggsConfig } from '../../../../common';

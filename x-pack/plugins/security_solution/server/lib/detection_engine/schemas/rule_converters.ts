@@ -318,6 +318,9 @@ export const internalRuleToAPIResponse = (
     last_success_at: mergedStatus?.lastSuccessAt ?? undefined,
     last_failure_message: mergedStatus?.lastFailureMessage ?? undefined,
     last_success_message: mergedStatus?.lastSuccessMessage ?? undefined,
+    last_gap: mergedStatus?.gap ?? undefined,
+    bulk_create_time_durations: mergedStatus?.bulkCreateTimeDurations ?? undefined,
+    search_after_time_durations: mergedStatus?.searchAfterTimeDurations ?? undefined,
   };
 };
 

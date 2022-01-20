@@ -20,14 +20,12 @@ import {
 } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import {
-  EndpointPrivileges,
-  useEndpointPrivileges,
-} from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { EndpointPrivileges } from '../../../../../../../common/endpoint/types';
 
-jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
+jest.mock('../../../../../../common/components/user_privileges');
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -82,11 +80,14 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   };
 
   afterAll(() => {
-    mockUseEndpointPrivileges.mockReset();
+    mockUseUserPrivileges.mockReset();
   });
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
-    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
+    mockUseUserPrivileges.mockReturnValue({
+      ...mockUseUserPrivileges(),
+      endpointPrivileges: loadedUserEndpointPrivilegesState(),
+    });
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
@@ -202,7 +203,7 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
       APP_UI_ID,
       expect.objectContaining({
-        path: '/administration/trusted_apps?filter=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
+        path: '/administration/trusted_apps?filter=6f12b025-fcb0-4db4-99e5-4927e3502bb8',
       })
     );
   });
@@ -324,12 +325,13 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...mockUseUserPrivileges(),
+      endpointPrivileges: loadedUserEndpointPrivilegesState({
+        canCreateArtifactsByPolicy: false,
+      }),
+    });
     await render();
-    mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({
-        isPlatinumPlus: false,
-      })
-    );
     await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
 
     expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();

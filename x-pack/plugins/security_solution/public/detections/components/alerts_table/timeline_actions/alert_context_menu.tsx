@@ -23,7 +23,7 @@ import {
 } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18n from '../translations';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { TimelineId } from '../../../../../common';
+import { TimelineId } from '../../../../../common/types';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
@@ -79,7 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
-  const alertStatus = get(0, ecsRowData?.['kibana.alert.workflow_status']) as Status;
+  const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
@@ -121,6 +121,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     }
   }, [timelineId, globalQuery, timelineQuery, routeProps]);
 
+  const ruleIndex =
+    ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
+
   const {
     exceptionModalType,
     onAddExceptionCancel,
@@ -128,7 +131,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     onAddExceptionTypeClick,
     ruleIndices,
   } = useExceptionModal({
-    ruleIndex: ecsRowData?.signal?.rule?.index,
+    ruleIndex,
     refetch: refetchAll,
     timelineId,
   });
@@ -164,6 +167,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
+    disabled: !isEvent,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
@@ -282,13 +286,29 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
     }
   }, [data?.hits.hits, isLoadingAlertData]);
 
+  /**
+   * This should be re-visited after UEBA work is merged
+   */
+  const useRuleIndices = useMemo(() => {
+    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters']?.index != null) {
+      return Array.isArray(enrichedAlert['kibana.alert.rule.parameters'].index)
+        ? enrichedAlert['kibana.alert.rule.parameters'].index
+        : [enrichedAlert['kibana.alert.rule.parameters'].index];
+    } else if (enrichedAlert != null && enrichedAlert?.signal?.rule?.index != null) {
+      return Array.isArray(enrichedAlert.signal.rule.index)
+        ? enrichedAlert.signal.rule.index
+        : [enrichedAlert.signal.rule.index];
+    }
+    return ruleIndices;
+  }, [enrichedAlert, ruleIndices]);
+
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
   return (
     <AddExceptionModal
       ruleName={ruleName}
       ruleId={ruleId}
-      ruleIndices={ruleIndices}
+      ruleIndices={useRuleIndices}
       exceptionListType={exceptionListType}
       alertData={enrichedAlert}
       isAlertDataLoading={isLoading}

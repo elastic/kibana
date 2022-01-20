@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getDisableStatusStep } from '../common_instructions';
 
 export function getLogstashInstructionsForDisablingInternalCollection(product, meta) {

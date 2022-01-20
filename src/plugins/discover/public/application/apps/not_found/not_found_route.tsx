@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { DiscoverServices } from '../../../build_services';

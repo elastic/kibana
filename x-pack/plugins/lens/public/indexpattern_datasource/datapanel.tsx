@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';

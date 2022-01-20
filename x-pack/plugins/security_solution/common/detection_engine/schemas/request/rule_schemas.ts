@@ -71,6 +71,9 @@ import {
   last_failure_at,
   last_failure_message,
   namespace,
+  last_gap,
+  bulk_create_time_durations,
+  search_after_time_durations,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -367,6 +370,7 @@ export const previewRulesSchema = t.intersection([
   createTypeSpecific,
   t.type({ invocationCount: t.number }),
 ]);
+export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
@@ -422,6 +426,9 @@ const responseOptionalFields = {
   last_success_message,
   last_failure_at,
   last_failure_message,
+  last_gap,
+  bulk_create_time_durations,
+  search_after_time_durations,
 };
 
 export const fullResponseSchema = t.intersection([
@@ -432,8 +439,13 @@ export const fullResponseSchema = t.intersection([
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
+export interface RulePreviewLogs {
+  errors: string[];
+  warnings: string[];
+  startedAt?: string;
+}
+
 export interface PreviewResponse {
   previewId: string | undefined;
-  errors: string[] | undefined;
-  warnings: string[] | undefined;
+  logs: RulePreviewLogs[] | undefined;
 }

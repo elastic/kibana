@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { App } from './app';

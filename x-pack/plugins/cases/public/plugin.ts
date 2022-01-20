@@ -17,7 +17,8 @@ import {
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
 } from './methods';
-import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
+import { CasesUiConfigType } from '../common/ui/types';
+import { ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 /**
  * @public

@@ -93,7 +93,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def corsTestServerPort = "64${parallelId}3"
   // needed for https://github.com/elastic/kibana/issues/107246
   def proxyTestServerPort = "64${parallelId}4"
-  def contextPropagationOnly = githubPr.isPr() ? "true" : "false"
+  def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -109,8 +109,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
-    "ELASTIC_APM_ACTIVE=true",
-    "ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=${contextPropagationOnly}",
+    "ELASTIC_APM_ACTIVE=${apmActive}",
     "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()

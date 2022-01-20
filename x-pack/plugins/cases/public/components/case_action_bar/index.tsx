@@ -16,7 +16,8 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { Case, CaseStatuses, CaseType } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { CaseStatuses, CaseType } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';

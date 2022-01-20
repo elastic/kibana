@@ -8,7 +8,7 @@
 import { castArray } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
@@ -45,7 +45,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   formType,
   enabled,
 }) => {
-  const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
+  const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
   const defaultValue = useMemo(() => {
     if (agentId || agentPolicyIds?.length || query?.length) {
@@ -70,7 +70,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     return undefined;
   }, [agentId, agentIds, agentPolicyIds, ecs_mapping, query, savedQueryId]);
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 

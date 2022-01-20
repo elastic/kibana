@@ -10,7 +10,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
-import { Table, renderFieldName } from './table';
+import { Table, renderFieldName, getConflictModalContent } from './table';
+import { overlayServiceMock } from 'src/core/public/mocks';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -43,6 +44,7 @@ const items: IndexedFieldItem[] = [
   {
     name: 'conflictingField',
     displayName: 'conflictingField',
+    conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
     type: 'text, long',
     kbnType: 'conflict',
     info: [],
@@ -81,7 +83,13 @@ const renderTable = (
   }
 ) =>
   shallow(
-    <Table indexPattern={indexPattern} items={items} editField={editField} deleteField={() => {}} />
+    <Table
+      indexPattern={indexPattern}
+      items={items}
+      editField={editField}
+      deleteField={() => {}}
+      openModal={overlayServiceMock.createStartContract().openModal}
+    />
   );
 
 describe('Table', () => {
@@ -116,7 +124,21 @@ describe('Table', () => {
 
   test('should render conflicting type', () => {
     const tableCell = shallow(
-      renderTable().prop('columns')[1].render('conflict', { kbnType: 'conflict' })
+      renderTable()
+        .prop('columns')[1]
+        .render('text, long', {
+          kbnType: 'conflict',
+          conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
+        })
+    );
+    expect(tableCell).toMatchSnapshot();
+  });
+
+  test('should render mixed, non-conflicting type', () => {
+    const tableCell = shallow(
+      renderTable().prop('columns')[1].render('keyword, constant_keyword', {
+        kbnType: 'string',
+      })
     );
     expect(tableCell).toMatchSnapshot();
   });
@@ -162,5 +184,15 @@ describe('Table', () => {
     };
 
     expect(renderFieldName(runtimeField)).toMatchSnapshot();
+  });
+
+  test('render conflict summary modal ', () => {
+    expect(
+      getConflictModalContent({
+        closeFn: () => {},
+        fieldName: 'message',
+        conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
+      })
+    ).toMatchSnapshot();
   });
 });

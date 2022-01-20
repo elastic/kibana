@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 

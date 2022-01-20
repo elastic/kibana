@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsRiskScoreRequestOptions } from '../../../../../../common';
+import { HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 
 export const buildHostsRiskScoreQuery = ({
   timerange,

@@ -16,7 +16,7 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const DETAILS_TAB_ID = 'details';
 const STYLE_TAB_ID = 'mapStyle';

@@ -89,8 +89,6 @@ export const performBulkActionRoute = (
                   await enableRule({
                     rule,
                     rulesClient,
-                    ruleStatusClient,
-                    spaceId: context.securitySolution.getSpaceId(),
                   });
                 }
               })

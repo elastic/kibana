@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -19,13 +18,14 @@ import { SetupPlugins } from '../../../../../plugin';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
+import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelinesQuerySchema } from '../../../schemas/timelines';
 
 export const getTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _config: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
@@ -39,11 +39,12 @@ export const getTimelinesRoute = (
       },
     },
     async (context, request, response) => {
+      const customHttpRequestError = (message: string) => new CustomHttpRequestError(message, 400);
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const queryParams = pipe(
           getTimelinesQuerySchema.decode(request.query),
-          fold(throwErrors(Boom.badRequest), identity)
+          fold(throwErrors(customHttpRequestError), identity)
         );
         const onlyUserFavorite = queryParams?.only_user_favorite === 'true' ? true : false;
         const pageSize = queryParams?.page_size ? parseInt(queryParams.page_size, 10) : null;

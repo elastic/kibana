@@ -122,7 +122,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         text: i18n.translate('xpack.savedObjectsTagging.management.breadcrumb.index', {
           defaultMessage: 'Tags',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);

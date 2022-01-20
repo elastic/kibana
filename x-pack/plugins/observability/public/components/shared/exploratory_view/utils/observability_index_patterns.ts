@@ -50,14 +50,14 @@ const appToPatternMap: Record<AppDataType, string> = {
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
-  return `${appToPatternMap[app]},${indices}`;
+  return `${appToPatternMap?.[app] ?? app},${indices}`;
 };
 
 const getAppIndexPatternId = (app: AppDataType, indices: string) => {
   // Replace characters / ? , " < > | * with _
   const postfix = indices.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
-  return `${indexPatternList[app]}_${postfix}`;
+  return `${indexPatternList?.[app] ?? app}_${postfix}`;
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {

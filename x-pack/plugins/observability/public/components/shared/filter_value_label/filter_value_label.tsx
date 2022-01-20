@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n-react';
 import { esFilters, Filter, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 

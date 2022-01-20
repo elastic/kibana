@@ -7,7 +7,6 @@
 
 import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-
 import { CoreStart, HttpStart } from 'kibana/public';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import {
@@ -19,6 +18,7 @@ import {
   HostResultList,
   Immutable,
   ImmutableObject,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
@@ -67,6 +67,7 @@ import {
   BASE_POLICY_RESPONSE_ROUTE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
 import {
   asStaleResourceState,
@@ -80,7 +81,6 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 import { EndpointPackageInfoStateChanged } from './action';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
-import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -246,10 +246,11 @@ const getAgentAndPoliciesForEndpointsList = async (
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      await http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-        }),
+      await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: 0,
+          pageSize: 1,
+        },
       })
     ).total;
   } catch (error) {
@@ -401,18 +402,18 @@ async function endpointDetailsListMiddleware({
   const { getState, dispatch } = store;
 
   const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-  let endpointResponse;
+  let endpointResponse: MetadataListResponse | undefined;
 
   try {
     const decodedQuery: Query = searchBarQuery(getState());
 
-    endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-        filters: { kql: decodedQuery.query },
-      }),
+    endpointResponse = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: pageIndex,
+        pageSize,
+        kuery: decodedQuery.query as string,
+      },
     });
-    endpointResponse.request_page_index = Number(pageIndex);
 
     dispatch({
       type: 'serverReturnedEndpointList',
@@ -447,7 +448,7 @@ async function endpointDetailsListMiddleware({
       });
     }
 
-    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.hosts, store });
+    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -474,7 +475,7 @@ async function endpointDetailsListMiddleware({
   }
 
   // No endpoints, so we should check to see if there are policies for onboarding
-  if (endpointResponse && endpointResponse.hosts.length === 0) {
+  if (endpointResponse && endpointResponse.data.length === 0) {
     const http = coreStart.http;
 
     // The original query to the list could have had an invalid param (ex. invalid page_size),
@@ -611,18 +612,19 @@ async function endpointDetailsMiddleware({
   if (listData(getState()).length === 0) {
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
     try {
-      const response = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-        }),
+      const response = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: pageIndex,
+          pageSize,
+        },
       });
-      response.request_page_index = Number(pageIndex);
+
       dispatch({
         type: 'serverReturnedEndpointList',
         payload: response,
       });
 
-      dispatchIngestPolicies({ http: coreStart.http, hosts: response.hosts, store });
+      dispatchIngestPolicies({ http: coreStart.http, hosts: response.data, store });
     } catch (error) {
       dispatch({
         type: 'serverFailedToReturnEndpointList',
@@ -781,7 +783,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORM_STATS_URL
+      METADATA_TRANSFORMS_STATUS_ROUTE
     );
 
     dispatch({

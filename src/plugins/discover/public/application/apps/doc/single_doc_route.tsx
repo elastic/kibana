@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverServices } from '../../../build_services';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { Doc } from './components/doc';

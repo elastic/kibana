@@ -31,7 +31,7 @@ import * as AgentService from '../../services/agents';
 export const getAgentHandler: RequestHandler<TypeOf<typeof GetOneAgentRequestSchema.params>> =
   async (context, request, response) => {
     const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
 
     try {
       const body: GetOneAgentResponse = {
@@ -52,7 +52,7 @@ export const getAgentHandler: RequestHandler<TypeOf<typeof GetOneAgentRequestSch
 
 export const deleteAgentHandler: RequestHandler<TypeOf<typeof DeleteAgentRequestSchema.params>> =
   async (context, request, response) => {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
 
     try {
       await AgentService.deleteAgent(esClient, request.params.agentId);
@@ -79,7 +79,7 @@ export const updateAgentHandler: RequestHandler<
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, {
@@ -105,7 +105,7 @@ export const getAgentsHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
@@ -122,7 +122,8 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents,
+      list: agents, // deprecated
+      items: agents,
       total,
       totalInactive,
       page,
@@ -200,7 +201,7 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
     // TODO change path

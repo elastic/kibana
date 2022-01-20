@@ -7,7 +7,12 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButton, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -89,6 +94,7 @@ export function ServiceContents({
         )}
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButton href={detailsUrl} fill={true}>
           {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {

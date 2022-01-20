@@ -8,8 +8,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { waitFor } from '@testing-library/react';
+import { waitFor, render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitForComponentToUpdate } from '../../common/test_utils';
+import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
@@ -20,7 +22,9 @@ import {
   connectorsMock,
 } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses, CaseType } from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -188,7 +192,7 @@ describe('AllCasesGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.fullName
+        useGetCasesMockState.data.cases[0].createdBy.username
       );
       expect(
         wrapper
@@ -944,5 +948,74 @@ describe('AllCasesGeneric', () => {
     });
 
     expect(wrapper.find('[data-test-subj="case-view-status-dropdown"]').exists()).toBeFalsy();
+  });
+
+  it('should deselect cases when refreshing', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    render(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByText('Refresh'));
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
+  });
+
+  it('should deselect cases when changing filters', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    const { rerender } = render(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} />
+      </TestProviders>
+    );
+
+    /** Something really weird is going on and we have to rerender
+     * to get the correct html output. Not sure why.
+     *
+     * If you run the test alone the rerender is not needed.
+     * If you run the test along with the above test
+     * then you need the rerender
+     */
+    rerender(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
   });
 });

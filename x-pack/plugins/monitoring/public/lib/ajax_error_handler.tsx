@@ -8,7 +8,7 @@
 import React from 'react';
 import { includes } from 'lodash';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../legacy_shims';
 import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';

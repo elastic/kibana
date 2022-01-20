@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function Beat({ summary, metrics, ...props }) {
   const metricsToShow = [

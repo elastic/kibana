@@ -7,7 +7,7 @@
 
 import { CaseConnector, CaseType, ConnectorTypes } from '../../common/api';
 import { newCase } from '../routes/api/__mocks__/request_responses';
-import { transformNewCase } from '../common';
+import { transformNewCase } from '../common/utils';
 import { sortToSnake } from './utils';
 
 describe('utils', () => {

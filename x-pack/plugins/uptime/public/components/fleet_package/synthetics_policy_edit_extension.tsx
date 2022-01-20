@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
 import { usePolicyConfigContext } from './contexts';
-import { ICustomFields, PolicyConfig } from './types';
+import { MonitorFields, PolicyConfig } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './hooks/use_update_policy';
 import { usePolicy } from './hooks/use_policy';
@@ -18,7 +18,7 @@ import { validate } from './validation';
 interface SyntheticsPolicyEditExtensionProps {
   newPolicy: PackagePolicyEditExtensionComponentProps['newPolicy'];
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-  defaultConfig: Partial<ICustomFields>;
+  defaultConfig: Partial<MonitorFields>;
 }
 
 /**

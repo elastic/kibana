@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 
 import { parseNext } from '../../../common/parse_next';

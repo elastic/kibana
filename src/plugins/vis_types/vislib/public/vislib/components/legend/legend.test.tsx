@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButtonGroup } from '@elastic/eui';
 
 import { VisLegend, VisLegendProps } from './legend';

@@ -24,7 +24,7 @@ import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from '../../../components/sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export class PipelineListing extends Component {

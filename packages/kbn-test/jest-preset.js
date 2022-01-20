@@ -28,6 +28,7 @@ module.exports = {
   moduleNameMapper: {
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
+    'elastic-apm-node': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/apm_agent_mock.js',
     '\\.module.(css|scss)$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/css_module_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/style_mock.js',

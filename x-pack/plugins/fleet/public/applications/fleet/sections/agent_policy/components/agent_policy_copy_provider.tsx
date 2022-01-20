@@ -8,7 +8,7 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../types';
 import { sendCopyAgentPolicy, useStartServices } from '../../../hooks';
@@ -58,33 +58,33 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
   const copyAgentPolicy = async () => {
     setIsLoading(true);
     try {
-      const { data } = await sendCopyAgentPolicy(agentPolicy!.id, newAgentPolicy!);
+      const { data, error } = await sendCopyAgentPolicy(agentPolicy!.id, newAgentPolicy!);
 
-      if (data) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.copyAgentPolicy.successNotificationTitle', {
-            defaultMessage: 'Agent policy duplicated',
-          })
-        );
-        if (onSuccessCallback.current) {
-          onSuccessCallback.current(data.item);
-        }
-      } else {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.copyAgentPolicy.failureNotificationTitle', {
-            defaultMessage: "Error duplicating agent policy '{id}'",
-            values: { id: agentPolicy!.id },
-          })
-        );
+      if (error) {
+        throw error;
       }
-    } catch (e) {
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error duplicating agent policy',
+
+      if (!data) {
+        throw new Error('Error duplicating agent policy: no data');
+      }
+
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.copyAgentPolicy.successNotificationTitle', {
+          defaultMessage: 'Agent policy duplicated',
         })
       );
+      closeModal();
+      if (onSuccessCallback.current) {
+        onSuccessCallback.current(data.item);
+      }
+    } catch (e) {
+      setIsLoading(false);
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle', {
+          defaultMessage: 'Error duplicating agent policy',
+        }),
+      });
     }
-    closeModal();
   };
 
   const renderModal = () => {

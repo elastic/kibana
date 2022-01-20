@@ -7,7 +7,6 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
-import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
 
 /**
  * as const
@@ -40,7 +39,7 @@ export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
-export const DEFAULT_PREVIEW_INDEX = '.siem-preview-signals' as const;
+export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
@@ -248,15 +247,11 @@ export const DETECTION_ENGINE_PREPACKAGED_URL =
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges` as const;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index` as const;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const;
-export const DETECTION_ENGINE_RULES_STATUS_URL =
-  `${DETECTION_ENGINE_RULES_URL}/_find_statuses` as const;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
   `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status` as const;
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_PREVIEW_INDEX_URL =
-  `${DETECTION_ENGINE_RULES_PREVIEW}/index` as const;
 
 /**
  * Internal detection engine routes
@@ -276,7 +271,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
-export const SOURCERER_API_URL = '/api/sourcerer' as const;
+export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -357,8 +352,6 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc' as const;
-
-export const METADATA_TRANSFORM_STATS_URL = `/api/transform/transforms/${METADATA_TRANSFORMS_PATTERN}/_stats`;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
 

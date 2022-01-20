@@ -10,7 +10,7 @@ import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 

@@ -14,11 +14,6 @@ const OVERRIDES: Record<string, Partial<FieldDescriptor>> = {
   _index: { type: 'string' },
   _type: { type: 'string' },
   _id: { type: 'string' },
-  _timestamp: {
-    type: 'date',
-    searchable: true,
-    aggregatable: true,
-  },
   _score: {
     type: 'number',
     searchable: false,

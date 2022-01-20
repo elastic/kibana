@@ -22,8 +22,8 @@ import { REPOSITORY_NAME } from './helpers/constant';
 const { setup } = pageHelpers.home;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
-jest.mock('@kbn/i18n/react', () => {
-  const original = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const original = jest.requireActual('@kbn/i18n-react');
 
   return {
     ...original,

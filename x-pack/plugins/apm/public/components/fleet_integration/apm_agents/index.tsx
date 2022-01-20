@@ -21,19 +21,28 @@ interface Props {
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
 }
 
-export function ApmAgents({ newPolicy }: Props) {
+export function ApmAgents({ policy, newPolicy, onChange }: Props) {
   return (
     <div>
       {ApmAgentInstructionsMappings.map(
-        ({ agentName, title, createAgentInstructions, variantId }) => (
+        ({
+          agentName,
+          title,
+          createAgentInstructions,
+          variantId,
+          AgentRuntimeAttachment,
+        }) => (
           <Fragment key={agentName}>
             <EuiPanel>
               <AgentInstructionsAccordion
                 agentName={agentName}
                 title={title}
-                newPolicy={newPolicy}
                 createAgentInstructions={createAgentInstructions}
                 variantId={variantId}
+                AgentRuntimeAttachment={AgentRuntimeAttachment}
+                policy={policy}
+                newPolicy={newPolicy}
+                onChange={onChange}
               />
             </EuiPanel>
             <EuiSpacer />

@@ -7,7 +7,7 @@
 
 import type { GetPackagesResponse } from '../../../public/types';
 
-export const response: GetPackagesResponse['response'] = [
+export const items: GetPackagesResponse['items'] = [
   {
     name: 'ga_not_installed',
     title: 'a. GA, Not Installed',
@@ -50,6 +50,7 @@ export const response: GetPackagesResponse['response'] = [
       id: 'ga_installed',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -86,6 +87,7 @@ export const response: GetPackagesResponse['response'] = [
       id: 'ga_installed_update',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -147,6 +149,7 @@ export const response: GetPackagesResponse['response'] = [
       id: 'beta_installed',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -183,6 +186,7 @@ export const response: GetPackagesResponse['response'] = [
       id: 'beta_installed_update',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -253,6 +257,7 @@ export const response: GetPackagesResponse['response'] = [
       id: 'exp_installed',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -289,6 +294,7 @@ export const response: GetPackagesResponse['response'] = [
       id: 'exp_installed_update',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},

@@ -63,8 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118584
-  describe.skip('anomaly explorer', function () {
+  describe('anomaly explorer', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -77,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {

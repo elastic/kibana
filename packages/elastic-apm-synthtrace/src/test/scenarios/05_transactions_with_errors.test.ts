@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 import { pick } from 'lodash';
-import { service } from '../../index';
-import { Instance } from '../../lib/instance';
+import { apm } from '../../lib/apm';
+import { Instance } from '../../lib/apm/instance';
 
 describe('transactions with errors', () => {
   let instance: Instance;
   const timestamp = new Date('2021-01-01T00:00:00.000Z').getTime();
 
   beforeEach(() => {
-    instance = service('opbeans-java', 'production', 'java').instance('instance');
+    instance = apm.service('opbeans-java', 'production', 'java').instance('instance');
   });
   it('generates error events', () => {
     const events = instance

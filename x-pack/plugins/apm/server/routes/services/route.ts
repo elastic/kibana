@@ -21,9 +21,6 @@ import { getServiceAgent } from './get_service_agent';
 import { getServiceAlerts } from './get_service_alerts';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
-import { getServiceErrorGroupPeriods } from './get_service_error_groups/get_service_error_group_detailed_statistics';
-import { getServiceErrorGroupMainStatistics } from './get_service_error_groups/get_service_error_group_main_statistics';
-import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
 import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
 import { getServiceMetadataDetails } from './get_service_metadata_details';
 import { getServiceMetadataIcons } from './get_service_metadata_icons';
@@ -47,6 +44,14 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
+import {
+  UnknownMLCapabilitiesError,
+  InsufficientMLCapabilities,
+  MLPrivilegesUninitialized,
+} from '../../../../ml/server';
+import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -61,6 +66,8 @@ const servicesRoute = createApmServerRoute({
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getServices({
@@ -371,98 +378,6 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
         tags: uniq(['apm'].concat(body.tags ?? [])),
       })
     );
-  },
-});
-
-const serviceErrorGroupsMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/error_groups/main_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        transactionType: t.string,
-      }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-    const {
-      path: { serviceName },
-      query: { kuery, transactionType, environment, start, end },
-    } = params;
-
-    return getServiceErrorGroupMainStatistics({
-      kuery,
-      serviceName,
-      setup,
-      transactionType,
-      environment,
-      start,
-      end,
-    });
-  },
-});
-
-const serviceErrorGroupsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/error_groups/detailed_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      comparisonRangeRt,
-      t.type({
-        numBuckets: toNumberRt,
-        transactionType: t.string,
-        groupIds: jsonRt.pipe(t.array(t.string)),
-      }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources) => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
-
-    const {
-      path: { serviceName },
-      query: {
-        environment,
-        kuery,
-        numBuckets,
-        transactionType,
-        groupIds,
-        comparisonStart,
-        comparisonEnd,
-        start,
-        end,
-      },
-    } = params;
-
-    return getServiceErrorGroupPeriods({
-      environment,
-      kuery,
-      serviceName,
-      setup,
-      numBuckets,
-      transactionType,
-      groupIds,
-      comparisonStart,
-      comparisonEnd,
-      start,
-      end,
-    });
   },
 });
 
@@ -942,6 +857,55 @@ const serviceInfrastructureRoute = createApmServerRoute({
   },
 });
 
+const serviceAnomalyChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, t.type({ transactionType: t.string })]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+
+    if (!setup.ml) {
+      throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
+    }
+
+    const {
+      path: { serviceName },
+      query: { start, end, transactionType },
+    } = resources.params;
+
+    try {
+      const allAnomalyTimeseries = await getAnomalyTimeseries({
+        serviceName,
+        transactionType,
+        start,
+        end,
+        mlSetup: setup.ml,
+        logger: resources.logger,
+      });
+
+      return {
+        allAnomalyTimeseries,
+      };
+    } catch (error) {
+      if (
+        error instanceof UnknownMLCapabilitiesError ||
+        error instanceof InsufficientMLCapabilities ||
+        error instanceof MLPrivilegesUninitialized
+      ) {
+        throw Boom.forbidden(error.message);
+      }
+      throw error;
+    }
+  },
+});
+
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(servicesDetailedStatisticsRoute)
@@ -952,8 +916,6 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceNodeMetadataRoute)
   .add(serviceAnnotationsRoute)
   .add(serviceAnnotationsCreateRoute)
-  .add(serviceErrorGroupsMainStatisticsRoute)
-  .add(serviceErrorGroupsDetailedStatisticsRoute)
   .add(serviceInstancesMetadataDetails)
   .add(serviceThroughputRoute)
   .add(serviceInstancesMainStatisticsRoute)
@@ -963,4 +925,5 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute)
   .add(serviceAlertsRoute)
-  .add(serviceInfrastructureRoute);
+  .add(serviceInfrastructureRoute)
+  .add(serviceAnomalyChartsRoute);

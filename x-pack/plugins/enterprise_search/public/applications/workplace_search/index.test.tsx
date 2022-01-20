@@ -15,6 +15,8 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
+import { VersionMismatchPage } from '../shared/version_mismatch';
+
 import { WorkplaceSearchHeaderActions } from './components/layout';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { ErrorState } from './views/error_state';
@@ -24,6 +26,14 @@ import { SetupGuide } from './views/setup_guide';
 import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured } from './';
 
 describe('WorkplaceSearch', () => {
+  it('renders VersionMismatchPage when there are mismatching versions', () => {
+    const wrapper = shallow(
+      <WorkplaceSearch enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />
+    );
+
+    expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
+  });
+
   it('renders WorkplaceSearchUnconfigured when config.host is not set', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<WorkplaceSearch />);
@@ -38,12 +48,24 @@ describe('WorkplaceSearch', () => {
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
   });
 
-  it('renders ErrorState', () => {
-    setMockValues({ errorConnecting: true });
+  it('renders ErrorState when not on SetupGuide', () => {
+    mockUseRouteMatch.mockReturnValue(false);
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
 
     const wrapper = shallow(<WorkplaceSearch />);
 
-    expect(wrapper.find(ErrorState)).toHaveLength(1);
+    const errorState = wrapper.find(ErrorState);
+    expect(errorState).toHaveLength(1);
+  });
+
+  it('does not render ErrorState when on SetupGuide', () => {
+    mockUseRouteMatch.mockReturnValue(true);
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
+
+    const wrapper = shallow(<WorkplaceSearch />);
+
+    const errorState = wrapper.find(ErrorState);
+    expect(errorState).toHaveLength(0);
   });
 });
 

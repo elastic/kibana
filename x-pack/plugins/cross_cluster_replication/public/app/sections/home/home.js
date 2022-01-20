@@ -7,7 +7,7 @@
 
 import React, { PureComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
 

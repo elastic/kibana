@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { NavigationMenu } from '../components/navigation_menu';

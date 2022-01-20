@@ -16,10 +16,12 @@ import { PresentationOverlaysService } from './overlays';
 import { PresentationControlsService } from './controls';
 import { PresentationDataViewsService } from './data_views';
 import { PresentationDataService } from './data';
+import { registerExpressionsLanguage } from '..';
 
 export type { PresentationCapabilitiesService } from './capabilities';
 export type { PresentationDashboardsService } from './dashboards';
 export type { PresentationLabsService } from './labs';
+
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   dataViews: PresentationDataViewsService;
@@ -38,5 +40,6 @@ export const getStubPluginServices = (): PresentationUtilPluginStart => {
     ContextProvider: pluginServices.getContextProvider(),
     labsService: pluginServices.getServices().labs,
     controlsService: pluginServices.getServices().controls,
+    registerExpressionsLanguage,
   };
 };

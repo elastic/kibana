@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import apmAgent from 'elastic-apm-node';
+
 import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@kbn/logging';
 
 function isError(x: any): x is Error {
@@ -73,7 +73,6 @@ export class BaseLogger implements Logger {
         meta,
         timestamp: new Date(),
         pid: process.pid,
-        ...this.getTraceIds(),
       };
     }
 
@@ -84,15 +83,6 @@ export class BaseLogger implements Logger {
       meta,
       timestamp: new Date(),
       pid: process.pid,
-      ...this.getTraceIds(),
-    };
-  }
-
-  private getTraceIds() {
-    return {
-      spanId: apmAgent.currentTraceIds['span.id'],
-      traceId: apmAgent.currentTraceIds['trace.id'],
-      transactionId: apmAgent.currentTraceIds['transaction.id'],
     };
   }
 }

@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useMlContext } from '../../../../contexts/ml';

@@ -125,7 +125,7 @@ important data later on.
 | home
   | Kibana home directory or `$KIBANA_HOME`
  d| Directory created by unpacking the archive
- d|
+  |
 
 | bin
   | Binary scripts including `kibana` to start the Kibana server
@@ -137,7 +137,6 @@ important data later on.
   | Configuration files including `kibana.yml`
   | $KIBANA_HOME\config
   | <<settings,KBN_PATH_CONF>>
- d|
 
 | data
   | The location of the data files written to disk by Kibana and its plugins

@@ -11,23 +11,21 @@ import * as rt from 'io-ts';
 import { isString } from 'lodash';
 
 import { SavedObjectReference } from '../../../../../../src/core/server';
+import { isCreateConnector, isPush, isUpdateConnector } from '../../../common/utils/user_actions';
 import {
   CaseAttributes,
   CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
   noneConnectorId,
-} from '../../../common';
+} from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
-  getNoneCaseConnector,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
   USER_ACTION_OLD_ID_REF_NAME,
   USER_ACTION_OLD_PUSH_ID_REF_NAME,
-} from '../../common';
+} from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { UserActionFieldType } from './types';
 

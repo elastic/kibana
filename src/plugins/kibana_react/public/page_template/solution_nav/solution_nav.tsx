@@ -8,7 +8,7 @@
 import './solution_nav.scss';
 
 import React, { FunctionComponent, useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiFlyout,

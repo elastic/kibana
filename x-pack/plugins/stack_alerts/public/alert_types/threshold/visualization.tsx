@@ -28,7 +28,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';

@@ -8,7 +8,11 @@
 import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
-import { waitForAlertsIndexToBeCreated, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
+import {
+  expandFirstAlertActions,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
+} from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -44,8 +48,8 @@ describe('Alerts timeline', () => {
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
+      // Disabled actions for read only users are hidden, so actions button should not show
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
   });
 
@@ -54,9 +58,8 @@ describe('Alerts timeline', () => {
       loadDetectionsPage(ROLES.platform_engineer);
     });
 
-    // Skipping due to alerts not refreshing for platform_engineer despite being returned from API?
-    it.skip('should allow a user with crud privileges to attach alerts to cases', () => {
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+    it('should allow a user with crud privileges to attach alerts to cases', () => {
+      expandFirstAlertActions();
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });
   });

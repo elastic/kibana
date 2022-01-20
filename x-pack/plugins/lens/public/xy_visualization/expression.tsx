@@ -34,7 +34,7 @@ import {
   AxisStyle,
   ScaleType,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type {
   ExpressionRenderDefinition,
   Datatable,
@@ -562,9 +562,8 @@ export function XYChart({
   } as LegendPositionConfig;
 
   const isHistogramModeEnabled = filteredLayers.some(
-    ({ isHistogram, seriesType, splitAccessor }) =>
+    ({ isHistogram, seriesType }) =>
       isHistogram &&
-      (seriesType.includes('stacked') || !splitAccessor) &&
       (seriesType.includes('stacked') ||
         !seriesType.includes('bar') ||
         !chartHasMoreThanOneBarSeries)

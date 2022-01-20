@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import {

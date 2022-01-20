@@ -75,7 +75,7 @@ describe('when on integration detail', () => {
   describe('and the package is not installed', () => {
     beforeEach(() => {
       const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
-      unInstalledPackage.response.status = 'not_installed';
+      unInstalledPackage.item.status = 'not_installed';
       mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
       render();
     });
@@ -283,7 +283,7 @@ const mockApiCalls = (
 
   // @ts-ignore
   const epmPackageResponse: GetInfoResponse = {
-    response: {
+    item: {
       name: 'nginx',
       title: 'Nginx',
       version: '0.3.7',
@@ -770,7 +770,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
 
   http.get.mockImplementation(async (path: any) => {
     if (typeof path === 'string') {
-      if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
+      if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.epmGetInfo();
       }

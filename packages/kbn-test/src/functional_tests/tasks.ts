@@ -9,7 +9,8 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
 import {
@@ -22,7 +23,7 @@ import {
   CreateFtrOptions,
 } from './lib';
 
-import { readConfigFile } from '../functional_test_runner/lib';
+import { readConfigFile, EsVersion } from '../functional_test_runner/lib';
 
 const makeSuccessMessage = (options: StartServerOptions) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
@@ -54,6 +55,7 @@ interface RunTestsParams extends CreateFtrOptions {
   configs: string[];
   /** run from source instead of snapshot */
   esFrom?: string;
+  esVersion: EsVersion;
   createLogger: () => ToolingLog;
   extraKbnOpts: string[];
   assertNoneExcluded: boolean;
@@ -104,7 +106,7 @@ export async function runTests(options: RunTestsParams) {
       log.write(`--- [${progress}] Running ${relative(REPO_ROOT, configPath)}`);
 
       await withProcRunner(log, async (procs) => {
-        const config = await readConfigFile(log, configPath);
+        const config = await readConfigFile(log, options.esVersion, configPath);
 
         let es;
         try {
@@ -142,6 +144,7 @@ interface StartServerOptions {
   createLogger: () => ToolingLog;
   extraKbnOpts: string[];
   useDefaultConfig?: boolean;
+  esVersion: EsVersion;
 }
 
 export async function startServers({ ...options }: StartServerOptions) {
@@ -159,7 +162,7 @@ export async function startServers({ ...options }: StartServerOptions) {
   };
 
   await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(log, options.config);
+    const config = await readConfigFile(log, options.esVersion, options.config);
 
     const es = await runElasticsearch({ config, options: opts });
     await runKibanaServer({

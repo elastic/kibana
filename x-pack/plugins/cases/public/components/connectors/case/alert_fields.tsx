@@ -12,7 +12,8 @@ import styled from 'styled-components';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../../triggers_actions_ui/public/types';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { CommentType } from '../../../../common/api';
 
 import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';

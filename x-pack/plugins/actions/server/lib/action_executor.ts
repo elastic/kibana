@@ -19,16 +19,17 @@ import {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  RawAction,
   PreConfiguredAction,
+  RawAction,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceStart } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
+import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -68,6 +69,7 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
+  private actionInfo: ActionInfo | undefined;
 
   constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
@@ -105,7 +107,7 @@ export class ActionExecutor {
         name: `execute_action`,
         type: 'actions',
         labels: {
-          actionId,
+          actions_connector_id: actionId,
         },
       },
       async (span) => {
@@ -124,7 +126,7 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const { actionTypeId, name, config, secrets } = await getActionInfo(
+        const actionInfo = await getActionInfoInternal(
           await getActionsClientWithRequest(request, source),
           encryptedSavedObjectsClient,
           preconfiguredActions,
@@ -132,10 +134,16 @@ export class ActionExecutor {
           namespace.namespace
         );
 
+        const { actionTypeId, name, config, secrets } = actionInfo;
+
+        if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+          this.actionInfo = actionInfo;
+        }
+
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
           span.addLabels({
-            actionTypeId,
+            actions_connector_type_id: actionTypeId,
           });
         }
 
@@ -169,26 +177,25 @@ export class ActionExecutor {
           ? {
               task: {
                 scheduled: taskInfo.scheduled.toISOString(),
-                schedule_delay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+                scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
               },
             }
           : {};
 
-        const event: IEvent = {
-          event: { action: EVENT_LOG_ACTIONS.execute },
-          kibana: {
-            ...task,
-            saved_objects: [
-              {
-                rel: SAVED_OBJECT_REL_PRIMARY,
-                type: 'action',
-                id: actionId,
-                type_id: actionTypeId,
-                ...namespace,
-              },
-            ],
-          },
-        };
+        const event = createActionEventLogRecordObject({
+          actionId,
+          action: EVENT_LOG_ACTIONS.execute,
+          ...namespace,
+          ...task,
+          savedObjects: [
+            {
+              type: 'action',
+              id: actionId,
+              typeId: actionTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
+        });
 
         for (const relatedSavedObject of relatedSavedObjects || []) {
           event.kibana?.saved_objects?.push({
@@ -210,6 +217,7 @@ export class ActionExecutor {
           },
           message: `action started: ${actionLabel}`,
         });
+
         eventLogger.logEvent(startEvent);
 
         let rawResult: ActionTypeExecutorResult<unknown>;
@@ -269,22 +277,77 @@ export class ActionExecutor {
       }
     );
   }
-}
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
-  let message = result.message || 'unknown error running action';
+  public async logCancellation<Source = unknown>({
+    actionId,
+    request,
+    relatedSavedObjects,
+    source,
+    taskInfo,
+  }: {
+    actionId: string;
+    request: KibanaRequest;
+    taskInfo?: TaskInfo;
+    relatedSavedObjects: RelatedSavedObjects;
+    source?: ActionExecutionSource<Source>;
+  }) {
+    const {
+      spaces,
+      encryptedSavedObjectsClient,
+      preconfiguredActions,
+      eventLogger,
+      getActionsClientWithRequest,
+    } = this.actionExecutorContext!;
 
-  if (result.serviceMessage) {
-    message = `${message}: ${result.serviceMessage}`;
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+    if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+      this.actionInfo = await getActionInfoInternal(
+        await getActionsClientWithRequest(request, source),
+        encryptedSavedObjectsClient,
+        preconfiguredActions,
+        actionId,
+        namespace.namespace
+      );
+    }
+    const task = taskInfo
+      ? {
+          task: {
+            scheduled: taskInfo.scheduled.toISOString(),
+            scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+          },
+        }
+      : {};
+    // Write event log entry
+    const event = createActionEventLogRecordObject({
+      actionId,
+      action: EVENT_LOG_ACTIONS.executeTimeout,
+      message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
+        this.actionInfo.name ?? ''
+      }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+      ...namespace,
+      ...task,
+      savedObjects: [
+        {
+          type: 'action',
+          id: actionId,
+          typeId: this.actionInfo.actionTypeId,
+          relation: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ],
+    });
+
+    for (const relatedSavedObject of (relatedSavedObjects || []) as RelatedSavedObjects) {
+      event.kibana?.saved_objects?.push({
+        rel: SAVED_OBJECT_REL_PRIMARY,
+        type: relatedSavedObject.type,
+        id: relatedSavedObject.id,
+        type_id: relatedSavedObject.typeId,
+        namespace: relatedSavedObject.namespace,
+      });
+    }
+    eventLogger.logEvent(event);
   }
-
-  if (result.retry instanceof Date) {
-    message = `${message}; retry at ${result.retry.toISOString()}`;
-  } else if (result.retry) {
-    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
-  }
-
-  return message;
 }
 
 interface ActionInfo {
@@ -292,9 +355,10 @@ interface ActionInfo {
   name: string;
   config: unknown;
   secrets: unknown;
+  actionId: string;
 }
 
-async function getActionInfo(
+async function getActionInfoInternal(
   actionsClient: PublicMethodsOf<ActionsClient>,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
@@ -311,6 +375,7 @@ async function getActionInfo(
       name: pcAction.name,
       config: pcAction.config,
       secrets: pcAction.secrets,
+      actionId,
     };
   }
 
@@ -329,5 +394,22 @@ async function getActionInfo(
     name,
     config,
     secrets,
+    actionId,
   };
+}
+
+function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+  let message = result.message || 'unknown error running action';
+
+  if (result.serviceMessage) {
+    message = `${message}: ${result.serviceMessage}`;
+  }
+
+  if (result.retry instanceof Date) {
+    message = `${message}; retry at ${result.retry.toISOString()}`;
+  } else if (result.retry) {
+    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
+  }
+
+  return message;
 }

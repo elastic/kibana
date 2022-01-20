@@ -108,8 +108,7 @@ import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 export type RuleAlertType = SanitizedAlert<RuleParams>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleStatusSOAttributes extends Record<string, any> {
+export interface IRuleStatusSOAttributes extends SavedObjectAttributes {
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
   lastFailureMessage: LastFailureMessage | null | undefined;
@@ -141,10 +140,6 @@ export interface RuleStatusResponse {
     failures: IRuleStatusResponseAttributes[] | null | undefined;
   };
 }
-
-export interface IRuleSavedAttributesSavedObjectAttributes
-  extends IRuleStatusSOAttributes,
-    SavedObjectAttributes {}
 
 export interface IRuleStatusSavedObject {
   type: string;
@@ -310,6 +305,7 @@ export interface PatchRulesOptions {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

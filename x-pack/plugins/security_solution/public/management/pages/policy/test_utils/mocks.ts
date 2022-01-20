@@ -23,9 +23,15 @@ import {
   fleetGetEndpointPackagePolicyListHttpMock,
   FleetGetEndpointPackagePolicyListHttpMockInterface,
   trustedAppsGetListHttpMocks,
-  PolicyDetailsGetTrustedAppsListHttpMocksInterface,
+  TrustedAppsGetListHttpMocksInterface,
   trustedAppPutHttpMocks,
   TrustedAppPutHttpMocksInterface,
+  trustedAppsGetOneHttpMocks,
+  TrustedAppsGetOneHttpMocksInterface,
+  fleetGetAgentPolicyListHttpMock,
+  FleetGetAgentPolicyListHttpMockInterface,
+  trustedAppsPostCreateListHttpMock,
+  TrustedAppsPostCreateListHttpMockInterface,
 } from '../../mocks';
 
 export const getMockListResponse: () => GetTrustedAppsListResponse = () => ({
@@ -71,13 +77,19 @@ export type PolicyDetailsPageAllApiHttpMocksInterface =
   FleetGetEndpointPackagePolicyHttpMockInterface &
     FleetGetAgentStatusHttpMockInterface &
     FleetGetEndpointPackagePolicyListHttpMockInterface &
-    PolicyDetailsGetTrustedAppsListHttpMocksInterface &
-    TrustedAppPutHttpMocksInterface;
+    FleetGetAgentPolicyListHttpMockInterface &
+    TrustedAppsGetListHttpMocksInterface &
+    TrustedAppPutHttpMocksInterface &
+    TrustedAppsGetOneHttpMocksInterface &
+    TrustedAppsPostCreateListHttpMockInterface;
 export const policyDetailsPageAllApiHttpMocks =
   composeHttpHandlerMocks<PolicyDetailsPageAllApiHttpMocksInterface>([
     fleetGetEndpointPackagePolicyHttpMock,
     fleetGetAgentStatusHttpMock,
     fleetGetEndpointPackagePolicyListHttpMock,
+    fleetGetAgentPolicyListHttpMock,
     trustedAppsGetListHttpMocks,
     trustedAppPutHttpMocks,
+    trustedAppsGetOneHttpMocks,
+    trustedAppsPostCreateListHttpMock,
   ]);

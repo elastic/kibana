@@ -6,12 +6,14 @@
  */
 
 import { EuiTextColor, EuiFlexItem, EuiSpacer, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { ALERT_REASON, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import React, { useMemo } from 'react';
 
 import styled from 'styled-components';
 import { getRuleDetailsUrl, useFormatUrl } from '../link_to';
 import * as i18n from './translations';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { LinkAnchor } from '../links';
 import { useKibana } from '../../lib/kibana';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
@@ -33,15 +35,20 @@ export const ReasonComponent: React.FC<Props> = ({ eventId, data }) => {
   const { navigateToApp } = useKibana().services.application;
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
-  const reason = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.reason' }, data),
-    [data]
-  );
+  const reason = useMemo(() => {
+    const siemSignalsReason = getFieldValue(
+      { category: 'signal', field: 'signal.alert.reason' },
+      data
+    );
+    const aadReason = getFieldValue({ category: 'kibana', field: ALERT_REASON }, data);
+    return aadReason.length > 0 ? aadReason : siemSignalsReason;
+  }, [data]);
 
-  const ruleId = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
-    [data]
-  );
+  const ruleId = useMemo(() => {
+    const siemSignalsRuleId = getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data);
+    const aadRuleId = getFieldValue({ category: 'kibana', field: ALERT_RULE_UUID }, data);
+    return aadRuleId.length > 0 ? aadRuleId : siemSignalsRuleId;
+  }, [data]);
 
   if (!eventId) {
     return <EuiTextColor color="subdued">{EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;

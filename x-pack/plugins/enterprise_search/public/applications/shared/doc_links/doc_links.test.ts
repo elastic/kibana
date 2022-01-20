@@ -5,27 +5,23 @@
  * 2.0.
  */
 
+import { docLinksServiceMock } from '../../../../../../../src/core/public/mocks';
+
 import { docLinks } from './';
 
 describe('DocLinks', () => {
   it('setDocLinks', () => {
     const links = {
-      DOC_LINK_VERSION: '',
-      ELASTIC_WEBSITE_URL: 'https://elastic.co/',
-      links: {
-        enterpriseSearch: {
-          base: 'http://elastic.enterprise.search',
-          appSearchBase: 'http://elastic.app.search',
-          workplaceSearchBase: 'http://elastic.workplace.search',
-        },
-      },
+      DOC_LINK_VERSION: docLinksServiceMock.createStartContract().DOC_LINK_VERSION,
+      ELASTIC_WEBSITE_URL: docLinksServiceMock.createStartContract().ELASTIC_WEBSITE_URL,
+      links: docLinksServiceMock.createStartContract().links,
     };
 
     docLinks.setDocLinks(links as any);
 
-    expect(docLinks.enterpriseSearchBase).toEqual('http://elastic.enterprise.search');
-    expect(docLinks.appSearchBase).toEqual('http://elastic.app.search');
-    expect(docLinks.workplaceSearchBase).toEqual('http://elastic.workplace.search');
-    expect(docLinks.cloudBase).toEqual('https://elastic.co/guide/en/cloud/current');
+    expect(docLinks.appSearchApis).toEqual(links.links.appSearch.apiRef);
+    expect(docLinks.cloudIndexManagement).toEqual(links.links.cloud.indexManagement);
+    expect(docLinks.enterpriseSearchConfig).toEqual(links.links.enterpriseSearch.configuration);
+    expect(docLinks.workplaceSearchZendesk).toEqual(links.links.workplaceSearch.zendesk);
   });
 });

@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Tag } from '../../../common';
 import { testSubjFriendly } from '../../utils';
 import { CreateModalOpener } from '../edition_modal';

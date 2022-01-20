@@ -11,7 +11,7 @@ import { useUpdateComment, UseUpdateComment } from './use_update_comment';
 import { basicCase, basicCaseCommentPatch, basicSubCaseId } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

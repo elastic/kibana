@@ -13,12 +13,8 @@
  * connector.id.
  */
 
-import {
-  CaseAttributes,
-  CaseConnector,
-  CaseFullExternalService,
-  CASE_SAVED_OBJECT,
-} from '../../../common';
+import { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import {
   SavedObject,
@@ -30,7 +26,8 @@ import {
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/mocks';
-import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
 import {
   createESJiraConnector,

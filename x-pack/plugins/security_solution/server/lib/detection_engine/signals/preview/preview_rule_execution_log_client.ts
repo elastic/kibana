@@ -9,7 +9,6 @@ import { SavedObjectsFindResult } from 'kibana/server';
 import {
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
-  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindBulkExecutionLogResponse,
   FindExecutionLogArgs,
@@ -20,10 +19,14 @@ import {
 } from '../../rule_execution_log';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 
+interface PreviewRuleExecutionLogClient extends IRuleExecutionLogClient {
+  clearWarningsAndErrorsStore: () => void;
+}
+
 export const createWarningsAndErrors = () => {
   const warningsAndErrorsStore: LogStatusChangeArgs[] = [];
 
-  const previewRuleExecutionLogClient: IRuleExecutionLogClient = {
+  const previewRuleExecutionLogClient: PreviewRuleExecutionLogClient = {
     find(
       args: FindExecutionLogArgs
     ): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>> {
@@ -66,8 +69,8 @@ export const createWarningsAndErrors = () => {
       return Promise.resolve();
     },
 
-    logExecutionMetrics(args: LogExecutionMetricsArgs): Promise<void> {
-      return Promise.resolve();
+    clearWarningsAndErrorsStore() {
+      warningsAndErrorsStore.length = 0;
     },
   };
 

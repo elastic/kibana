@@ -38,7 +38,7 @@ import { ContextMenuItemNavByRouterProps } from '../../../../../components/conte
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
@@ -52,7 +52,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
     const toasts = useToasts();
     const history = useHistory();
     const { getAppUrl } = useAppUrl();
-    const { isPlatinumPlus } = useEndpointPrivileges();
+    const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policyId = usePolicyDetailsSelector(policyIdFromParams);
     const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
     const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
@@ -158,7 +158,7 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
         ];
         const thisTrustedAppCardProps: ArtifactCardGridCardComponentProps = {
           expanded: Boolean(isCardExpanded[trustedApp.id]),
-          actions: isPlatinumPlus
+          actions: canCreateArtifactsByPolicy
             ? [
                 ...fullDetailsAction,
                 {
@@ -194,7 +194,14 @@ export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
       }
 
       return newCardProps;
-    }, [allPoliciesById, getAppUrl, getTestId, isCardExpanded, trustedAppItems, isPlatinumPlus]);
+    }, [
+      allPoliciesById,
+      getAppUrl,
+      getTestId,
+      isCardExpanded,
+      trustedAppItems,
+      canCreateArtifactsByPolicy,
+    ]);
 
     const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
       (item) => {

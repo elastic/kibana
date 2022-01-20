@@ -7,12 +7,8 @@
  */
 
 import { coreMock } from '../../../../core/server/mocks';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  FilterStateStore,
-  SavedObject,
-  SavedQueryAttributes,
-} from '../../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, FilterStateStore } from '../../common';
+import type { SavedObject, SavedQueryAttributes } from '../../common';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
 import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 

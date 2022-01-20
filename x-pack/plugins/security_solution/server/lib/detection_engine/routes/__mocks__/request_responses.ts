@@ -25,12 +25,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
-import {
-  RuleAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  HapiReadableStream,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
+import { RuleAlertType, HapiReadableStream, IRuleStatusSOAttributes } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
@@ -225,13 +220,6 @@ export const getFindResultWithMultiHits = ({
     data,
   };
 };
-
-export const ruleStatusRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
-  });
 
 export const internalRuleStatusRequest = () =>
   requestMock.create({
@@ -476,7 +464,7 @@ export const getMockPrivilegesResult = () => ({
 });
 
 export const getEmptySavedObjectsResponse =
-  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  (): SavedObjectsFindResponse<IRuleStatusSOAttributes> => ({
     page: 1,
     per_page: 1,
     total: 0,

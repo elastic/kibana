@@ -28,11 +28,18 @@ export const buildSignalsSearchQuery = ({
         filter: [
           {
             bool: {
-              should: {
-                match: {
-                  'signal.rule.rule_id': ruleId,
+              should: [
+                {
+                  match: {
+                    'signal.rule.rule_id': ruleId,
+                  },
                 },
-              },
+                {
+                  match: {
+                    'kibana.alert.rule.rule_id': ruleId,
+                  },
+                },
+              ],
               minimum_should_match: 1,
             },
           },

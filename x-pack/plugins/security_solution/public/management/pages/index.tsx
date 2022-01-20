@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,

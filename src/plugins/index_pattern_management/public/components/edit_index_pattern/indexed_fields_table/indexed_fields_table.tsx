@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
+import { OverlayStart } from 'src/core/public';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
@@ -26,6 +27,7 @@ interface IndexedFieldsTableProps {
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
   userEditPermission: boolean;
+  openModal: OverlayStart['openModal'];
 }
 
 interface IndexedFieldsTableState {
@@ -101,7 +103,14 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
       }
 
       if (indexedFieldTypeFilter) {
-        fields = fields.filter((field) => field.type === indexedFieldTypeFilter);
+        // match conflict fields
+        fields = fields.filter((field) => {
+          if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
+            return true;
+          }
+          // match one of multiple types on a field
+          return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
+        });
       }
 
       return fields;
@@ -119,6 +128,7 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
           items={fields}
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
+          openModal={this.props.openModal}
         />
       </div>
     );

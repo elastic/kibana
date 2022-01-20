@@ -10,6 +10,7 @@ import { chunk } from 'lodash';
 import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
+import { errorAggregator } from './utils';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -68,7 +69,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [] };
+                  return { createdAlerts: [], errors: {} };
                 }
 
                 const augmentedAlerts = filteredAlerts.map((alert) => {
@@ -93,22 +94,25 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   });
 
                 if (response == null) {
-                  return { createdAlerts: [] };
+                  return { createdAlerts: [], errors: {} };
                 }
 
                 return {
-                  createdAlerts: augmentedAlerts.map((alert, idx) => {
-                    const responseItem = response.body.items[idx].create;
-                    return {
-                      _id: responseItem?._id ?? '',
-                      _index: responseItem?._index ?? '',
-                      ...alert._source,
-                    };
-                  }),
+                  createdAlerts: augmentedAlerts
+                    .map((alert, idx) => {
+                      const responseItem = response.body.items[idx].create;
+                      return {
+                        _id: responseItem?._id ?? '',
+                        _index: responseItem?._index ?? '',
+                        ...alert._source,
+                      };
+                    })
+                    .filter((_, idx) => response.body.items[idx].create?.status === 201),
+                  errors: errorAggregator(response.body, [409]),
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [] };
+                return { createdAlerts: [], errors: {} };
               }
             },
           },

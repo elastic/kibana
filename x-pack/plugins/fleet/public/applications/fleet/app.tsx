@@ -11,7 +11,7 @@ import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';

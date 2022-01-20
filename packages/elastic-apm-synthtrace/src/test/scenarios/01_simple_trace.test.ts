@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { service } from '../../lib/service';
+import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
 
 describe('simple trace', () => {
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
-    const javaService = service('opbeans-java', 'production', 'java');
+    const javaService = apm.service('opbeans-java', 'production', 'java');
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(

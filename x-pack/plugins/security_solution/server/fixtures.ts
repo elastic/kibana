@@ -6,12 +6,14 @@
  */
 
 import { coreMock } from '../../../../src/core/server/mocks';
+import { createFleetRequestHandlerContextMock } from '../../fleet/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 
 function createCoreRequestHandlerContextMock() {
   return {
     core: coreMock.createRequestHandlerContext(),
     licensing: licensingMock.createRequestHandlerContext(),
+    fleet: createFleetRequestHandlerContextMock(),
   };
 }
 

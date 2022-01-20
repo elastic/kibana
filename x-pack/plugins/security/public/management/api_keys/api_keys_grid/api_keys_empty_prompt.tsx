@@ -9,7 +9,7 @@ import { EuiAccordion, EuiEmptyPrompt, EuiErrorBoundary, EuiSpacer, EuiText } fr
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DocLink } from '../../../components/doc_link';
 import { useHtmlId } from '../../../components/use_html_id';

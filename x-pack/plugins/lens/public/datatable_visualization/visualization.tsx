@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {

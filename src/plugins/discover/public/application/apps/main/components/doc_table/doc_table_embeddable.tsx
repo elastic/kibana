@@ -8,7 +8,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import './index.scss';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../../../../common';
 import { usePager } from './lib/use_pager';

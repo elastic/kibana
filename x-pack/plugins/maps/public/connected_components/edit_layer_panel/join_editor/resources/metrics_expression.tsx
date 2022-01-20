@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { IndexPatternField } from 'src/plugins/data/public';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descriptor_types';

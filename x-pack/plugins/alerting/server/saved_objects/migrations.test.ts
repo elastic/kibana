@@ -11,6 +11,7 @@ import { RawAlert } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
+import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -2010,6 +2011,137 @@ describe('successful migrations', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
       const alert = getMockData({}, true);
       expect(migration800(alert, migrationContext)).toEqual(alert);
+    });
+
+    test('add threatIndicatorPath default value to threat match rules if missing', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { type: 'threat_match' }, alertTypeId: 'siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        'threatintel.indicator'
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value in threat match rules if value is present', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        {
+          params: { type: 'threat_match', threatIndicatorPath: 'custom.indicator.path' },
+          alertTypeId: 'siem.signals',
+        },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        'custom.indicator.path'
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value in other rules', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData({ params: { type: 'eql' }, alertTypeId: 'siem.signals' }, true);
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        undefined
+      );
+    });
+
+    test('doesnt change threatIndicatorPath value if not a siem.signals rule', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { type: 'threat_match' }, alertTypeId: 'not.siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.params.threatIndicatorPath).toEqual(
+        undefined
+      );
+    });
+
+    test('doesnt change AAD rule params if not a siem.signals rule', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { outputIndex: 'output-index', type: 'query' }, alertTypeId: 'not.siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.alertTypeId).toEqual(
+        'not.siem.signals'
+      );
+      expect(migration800(alert, migrationContext).attributes.enabled).toEqual(true);
+      expect(migration800(alert, migrationContext).attributes.params.outputIndex).toEqual(
+        'output-index'
+      );
+    });
+
+    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
+      'Changes AAD rule params accordingly if rule is a siem.signals %p rule',
+      (ruleType) => {
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+        const alert = getMockData(
+          { params: { outputIndex: 'output-index', type: ruleType }, alertTypeId: 'siem.signals' },
+          true
+        );
+        expect(migration800(alert, migrationContext).attributes.alertTypeId).toEqual(
+          ruleTypeMappings[ruleType]
+        );
+        expect(migration800(alert, migrationContext).attributes.enabled).toEqual(false);
+        expect(migration800(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+      }
+    );
+
+    describe('Metrics Inventory Threshold rule', () => {
+      test('Migrates incorrect action group spelling', () => {
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+
+        const actions = [
+          {
+            group: 'metrics.invenotry_threshold.fired',
+            params: {
+              level: 'info',
+              message:
+                '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+            },
+            actionRef: 'action_0',
+            actionTypeId: '.server-log',
+          },
+        ];
+
+        const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+        expect(migration800(alert, migrationContext)).toMatchObject({
+          ...alert,
+          attributes: {
+            ...alert.attributes,
+            actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+          },
+        });
+      });
+
+      test('Works with the correct action group spelling', () => {
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+
+        const actions = [
+          {
+            group: 'metrics.inventory_threshold.fired',
+            params: {
+              level: 'info',
+              message:
+                '""{{alertName}} - {{context.group}} is in a state of {{context.alertState}} Reason: {{context.reason}}""',
+            },
+            actionRef: 'action_0',
+            actionTypeId: '.server-log',
+          },
+        ];
+
+        const alert = getMockData({ alertTypeId: 'metrics.alert.inventory.threshold', actions });
+
+        expect(migration800(alert, migrationContext)).toMatchObject({
+          ...alert,
+          attributes: {
+            ...alert.attributes,
+            actions: [{ ...actions[0], group: 'metrics.inventory_threshold.fired' }],
+          },
+        });
+      });
     });
   });
 });

@@ -101,7 +101,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IExternalUrlPolicy](./kibana-plugin-core-server.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IKibanaResponse](./kibana-plugin-core-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
-|  [IntervalHistogram](./kibana-plugin-core-server.intervalhistogram.md) | an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in nanoseconds. |
+|  [IntervalHistogram](./kibana-plugin-core-server.intervalhistogram.md) | an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in milliseconds. |
 |  [IRenderOptions](./kibana-plugin-core-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-core-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-core-server.routeconfig.md) and [RequestHandler](./kibana-plugin-core-server.requesthandler.md) for more information about arguments to route registrations. |
 |  [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) |  |
@@ -229,6 +229,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
+|  [UnauthorizedErrorHandlerNotHandledResult](./kibana-plugin-core-server.unauthorizederrorhandlernothandledresult.md) |  |
+|  [UnauthorizedErrorHandlerOptions](./kibana-plugin-core-server.unauthorizederrorhandleroptions.md) |  |
+|  [UnauthorizedErrorHandlerResultRetryParams](./kibana-plugin-core-server.unauthorizederrorhandlerresultretryparams.md) |  |
+|  [UnauthorizedErrorHandlerRetryResult](./kibana-plugin-core-server.unauthorizederrorhandlerretryresult.md) |  |
+|  [UnauthorizedErrorHandlerToolkit](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.md) | Toolkit passed to a [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) used to generate responses from the handler |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
@@ -327,4 +332,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
 |  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |
+|  [UnauthorizedError](./kibana-plugin-core-server.unauthorizederror.md) |  |
+|  [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) | A handler used to handle unauthorized error returned by elasticsearch |
+|  [UnauthorizedErrorHandlerResult](./kibana-plugin-core-server.unauthorizederrorhandlerresult.md) |  |
 

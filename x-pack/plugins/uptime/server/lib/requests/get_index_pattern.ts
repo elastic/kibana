@@ -7,7 +7,7 @@
 
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
 import { UptimeESClient } from '../lib';
-import { savedObjectsAdapter } from '../saved_objects';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 
 export interface IndexPatternTitleAndFields {
   title: string;

@@ -42,7 +42,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
-        '--server.requestId.allowFromAnyIp=true',
         '--execution_context.enabled=true',
         '--logging.appenders.file.type=file',
         `--logging.appenders.file.fileName=${logFilePath}`,

@@ -133,6 +133,10 @@ export class IndexPatternsFetcher {
     const result = await Promise.all(
       patternList
         .map(async (index) => {
+          // perserve negated patterns
+          if (index.startsWith('-')) {
+            return true;
+          }
           const searchResponse = await this.elasticsearchClient.fieldCaps({
             index,
             fields: '_id',

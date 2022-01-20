@@ -9,7 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { CompleteRule, eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
+import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -67,7 +67,7 @@ export const createEqlAlertType = (
         exceptionItems,
         experimentalFeatures,
         logger,
-        completeRule: completeRule as CompleteRule<EqlRuleParams>,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

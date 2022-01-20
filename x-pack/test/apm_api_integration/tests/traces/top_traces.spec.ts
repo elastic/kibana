@@ -63,6 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
+            "agentName": "java",
             "averageResponseTime": 1639,
             "impact": 0,
             "key": Object {
@@ -78,6 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
+            "agentName": "dotnet",
             "averageResponseTime": 5963775,
             "impact": 100,
             "key": Object {

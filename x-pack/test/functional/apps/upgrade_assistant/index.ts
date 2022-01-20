@@ -14,5 +14,6 @@ export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./deprecation_pages'));
     loadTestFile(require.resolve('./overview_page'));
+    loadTestFile(require.resolve('./es_deprecation_logs_page'));
   });
 }

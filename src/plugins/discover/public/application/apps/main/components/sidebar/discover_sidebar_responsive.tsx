@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiTitle,

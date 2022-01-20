@@ -12,6 +12,7 @@ import {
   useKibana,
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
@@ -33,11 +34,13 @@ export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
+  environmentFilter = true,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
+  environmentFilter?: boolean;
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
@@ -62,12 +65,14 @@ export function ApmMainTemplate({
     location.pathname.includes(path)
   );
 
-  return (
+  const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
+
+  const pageTemplate = (
     <ObservabilityPageTemplate
       noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
       pageHeader={{
         pageTitle,
-        rightSideItems: [<ApmEnvironmentFilter />],
+        rightSideItems,
         ...pageHeader,
       }}
       {...pageTemplateProps}
@@ -75,4 +80,12 @@ export function ApmMainTemplate({
       {children}
     </ObservabilityPageTemplate>
   );
+
+  if (environmentFilter) {
+    return (
+      <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
+    );
+  }
+
+  return pageTemplate;
 }

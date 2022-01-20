@@ -7,7 +7,7 @@
  */
 
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { IndexPattern } from '../../../../../data/common';

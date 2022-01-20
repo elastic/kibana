@@ -9,7 +9,7 @@ import './expandable_section.scss';
 
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 

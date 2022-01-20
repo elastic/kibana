@@ -8,7 +8,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { createSessionExpirationToast, SessionExpirationToast } from './session_expiration_toast';
 import type { SessionState } from './session_timeout';

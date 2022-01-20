@@ -17,7 +17,7 @@ import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { calculateThroughput } from '../../lib/helpers/calculate_throughput';
@@ -59,9 +59,7 @@ export async function getServiceTransactionGroups({
   const { apmEventClient, config } = setup;
   const bucketSize = config.ui.transactionGroupBucketSize;
 
-  const field = getTransactionDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
+  const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const response = await apmEventClient.search(
     'get_service_transaction_groups',

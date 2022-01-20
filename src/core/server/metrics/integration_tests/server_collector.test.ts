@@ -19,7 +19,8 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
 const requestWaitDelay = 25;
 
-describe('ServerMetricsCollector', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59234
+describe.skip('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
@@ -49,6 +50,7 @@ describe('ServerMetricsCollector', () => {
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });
     });
+
     await server.start();
 
     let metrics = await collector.collect();
@@ -90,8 +92,9 @@ describe('ServerMetricsCollector', () => {
     await server.start();
 
     await sendGet('/');
-    const discoReq1 = sendGet('/disconnect').end();
-    const discoReq2 = sendGet('/disconnect').end();
+    // superTest.get(path).end needs to be called with a callback to actually send the request.
+    const discoReq1 = sendGet('/disconnect').end(() => null);
+    const discoReq2 = sendGet('/disconnect').end(() => null);
 
     await hitSubject
       .pipe(
@@ -99,12 +102,14 @@ describe('ServerMetricsCollector', () => {
         take(1)
       )
       .toPromise();
+    await delay(requestWaitDelay); // wait for the requests to send
 
     let metrics = await collector.collect();
     expect(metrics.requests).toEqual(
       expect.objectContaining({
         total: 3,
         disconnects: 0,
+        statusCodes: expect.objectContaining({ '200': 1 }),
       })
     );
 
@@ -148,14 +153,14 @@ describe('ServerMetricsCollector', () => {
     await Promise.all([sendGet('/no-delay'), sendGet('/250-ms')]);
     let metrics = await collector.collect();
 
-    expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(125);
-    expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(250);
+    expect(metrics.response_times?.avg_in_millis).toBeGreaterThanOrEqual(125);
+    expect(metrics.response_times?.max_in_millis).toBeGreaterThanOrEqual(250);
 
     await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
     metrics = await collector.collect();
 
-    expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
-    expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+    expect(metrics.response_times?.avg_in_millis).toBeGreaterThanOrEqual(250);
+    expect(metrics.response_times?.max_in_millis).toBeGreaterThanOrEqual(500);
   });
 
   it('collect connection count', async () => {

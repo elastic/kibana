@@ -12,7 +12,7 @@ import { FilterItems } from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SplitByFilters = (props) => {
   const { onChange, model, uiRestrictions, indexPattern } = props;

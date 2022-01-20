@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerAlertTypes } from './register_alert_types';
+export { registerRuleTypes } from './register_rule_types';

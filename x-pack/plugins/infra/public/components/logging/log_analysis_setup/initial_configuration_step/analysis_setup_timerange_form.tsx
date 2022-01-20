@@ -14,7 +14,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import { FixedDatePicker } from '../../../fixed_datepicker';

@@ -110,11 +110,16 @@ const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, page
     }
   }, [element, setFormState, formState]);
 
+  const functionDefinitions = useMemo(
+    () => Object.values(expressions.getFunctions()),
+    [expressions]
+  );
+
   return (
     <Component
       done={done}
       isCompact={isCompact}
-      functionDefinitions={Object.values(expressions.getFunctions())}
+      functionDefinitions={functionDefinitions}
       formState={formState}
       setExpression={onSetExpression}
       toggleCompactView={toggleCompactView}

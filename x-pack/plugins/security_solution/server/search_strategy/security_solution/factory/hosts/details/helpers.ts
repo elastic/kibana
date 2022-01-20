@@ -9,6 +9,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
@@ -180,6 +181,7 @@ export const getHostEndpoint = async (
     esClient: IScopedClusterClient;
     savedObjectsClient: SavedObjectsClientContract;
     endpointContext: EndpointAppContext;
+    request: KibanaRequest;
   }
 ): Promise<EndpointFields | null> => {
   if (!id) {
@@ -190,25 +192,21 @@ export const getHostEndpoint = async (
   const logger = endpointContext.logFactory.get('metadata');
 
   try {
-    const agentService = endpointContext.service.getAgentService();
+    const fleetServices = endpointContext.service.getInternalFleetServices();
+    const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
-    if (!agentService) {
-      throw new Error('agentService not available');
-    }
-
-    const endpointData = await endpointContext.service
-      .getEndpointMetadataService()
+    const endpointData = await endpointMetadataService
       // Using `internalUser` ES client below due to the fact that Fleet data has been moved to
       // system indices (`.fleet*`). Because this is a readonly action, this should be ok to do
       // here until proper RBOC controls are implemented
-      .getEnrichedHostMetadata(esClient.asInternalUser, id);
+      .getEnrichedHostMetadata(esClient.asInternalUser, fleetServices, id);
 
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
       ? getPendingActionCounts(
           esClient.asInternalUser,
-          endpointContext.service.getEndpointMetadataService(),
+          endpointMetadataService,
           [fleetAgentId],
           endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )

@@ -79,6 +79,11 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
+      this.tags('ciGroup2'); // same group used in x-pack/test/reporting_functional
+      loadTestFile(require.resolve('./reports'));
+    });
+
+    describe('', function () {
       this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));

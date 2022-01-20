@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlParams, UpdateUrlParams } from '../../../hooks';
 
 interface PopoverButtonProps {

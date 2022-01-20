@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -222,7 +222,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel>
+      <EuiPanel data-test-subj="mlAnomaliesMapContainer">
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}

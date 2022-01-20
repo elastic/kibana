@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';

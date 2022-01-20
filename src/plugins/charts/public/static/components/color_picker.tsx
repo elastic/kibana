@@ -17,7 +17,7 @@ import {
   EuiScreenReaderOnly,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { lightenColor } from '../../services/palettes/lighten_color';
 import './color_picker.scss';
 

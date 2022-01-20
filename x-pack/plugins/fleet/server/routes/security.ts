@@ -12,16 +12,19 @@ import type {
   RequestHandlerContext,
 } from 'src/core/server';
 
+import type { FleetAuthz } from '../../common';
+import { calculateAuthz } from '../../common';
+
 import { appContextService } from '../services';
 
 const SUPERUSER_AUTHZ_MESSAGE =
   'Access to Fleet API requires the superuser role and for stack security features to be enabled.';
 
 function checkSecurityEnabled() {
-  return appContextService.hasSecurity() && appContextService.getSecurityLicense().isEnabled();
+  return appContextService.getSecurityLicense().isEnabled();
 }
 
-function checkSuperuser(req: KibanaRequest) {
+export function checkSuperuser(req: KibanaRequest) {
   if (!checkSecurityEnabled()) {
     return false;
   }
@@ -118,6 +121,46 @@ function makeRouterEnforcingFleetSetupPrivilege<TContext extends RequestHandlerC
     getRoutes: () => router.getRoutes(),
     routerPath: router.routerPath,
   };
+}
+
+export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
+  const security = appContextService.getSecurity();
+
+  if (security.authz.mode.useRbacForRequest(req)) {
+    if (checkSuperuser(req)) {
+      // Superusers get access to everything
+      // Once we implement Kibana RBAC, remove this and use `checkPrivileges` exclusively
+      return calculateAuthz({
+        fleet: { all: true, setup: true },
+        integrations: { all: true, read: true },
+      });
+    } else if (await checkFleetSetupPrivilege(req)) {
+      // fleet-setup privilege only gets access to setup actions
+      return calculateAuthz({
+        fleet: { all: false, setup: true },
+        integrations: { all: false, read: false },
+      });
+    } else {
+      // All other users only get access to read integrations if they have the read privilege
+      const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
+      const { privileges } = await checkPrivileges({
+        kibana: [security.authz.actions.api.get('integrations-read')],
+      });
+
+      const [intRead] = privileges.kibana;
+
+      // Once we implement Kibana RBAC, use `checkPrivileges` for all privileges instead of only integrations.read
+      return calculateAuthz({
+        fleet: { all: false, setup: false },
+        integrations: { all: false, read: intRead.authorized },
+      });
+    }
+  }
+
+  return calculateAuthz({
+    fleet: { all: false, setup: false },
+    integrations: { all: false, read: false },
+  });
 }
 
 export type RouterWrapper = <T extends RequestHandlerContext>(route: IRouter<T>) => IRouter<T>;

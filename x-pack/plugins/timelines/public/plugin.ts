@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Store } from 'redux';
+import { Store, Unsubscribe } from 'redux';
+import { throttle } from 'lodash';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { CoreSetup, Plugin, CoreStart } from '../../../../src/core/public';
@@ -29,6 +30,7 @@ import { getHoverActions } from './components/hover_actions';
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
   private _storage = new Storage(localStorage);
+  private _storeUnsubscribe: Unsubscribe | undefined;
 
   public setup(core: CoreSetup) {}
 
@@ -43,6 +45,13 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           const state = getState();
           if (state && state.app) {
             this._store = undefined;
+          } else {
+            if (props.onStateChange) {
+              this._storeUnsubscribe = this._store.subscribe(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                throttle(() => props.onStateChange!(getState()), 500)
+              );
+            }
           }
         }
         return getTGridLazy(props, {
@@ -118,5 +127,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
     this._store = store;
   }
 
-  public stop() {}
+  public stop() {
+    if (this._storeUnsubscribe) {
+      this._storeUnsubscribe();
+    }
+  }
 }

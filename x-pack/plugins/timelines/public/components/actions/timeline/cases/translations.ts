@@ -75,5 +75,5 @@ export const UNSUPPORTED_EVENTS_MSG = i18n.translate(
 );
 
 export const CREATE_TITLE = i18n.translate('xpack.timelines.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+  defaultMessage: 'Create case',
 });

@@ -13,7 +13,7 @@ import {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '../../actions/server';
-import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
+import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 import { initCaseApi } from './routes/api';
 import {

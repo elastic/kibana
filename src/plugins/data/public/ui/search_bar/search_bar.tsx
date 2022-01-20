@@ -7,7 +7,7 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
@@ -18,7 +18,7 @@ import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import type { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';

@@ -82,6 +82,7 @@ describe('<TemplateCreate />', () => {
     jest.useFakeTimers();
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
+    httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
 
     // disable all react-beautiful-dnd development warnings
     (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -296,7 +297,7 @@ describe('<TemplateCreate />', () => {
     });
 
     describe('mappings (step 4)', () => {
-      beforeEach(async () => {
+      const navigateToMappingsStep = async () => {
         const { actions } = testBed;
         // Logistics
         await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -304,6 +305,10 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepTwo();
         // Index settings
         await actions.completeStepThree('{}');
+      };
+
+      beforeEach(async () => {
+        await navigateToMappingsStep();
       });
 
       it('should set the correct page title', () => {
@@ -336,6 +341,43 @@ describe('<TemplateCreate />', () => {
         actions.deleteMappingsFieldAt(0);
 
         expect(find('fieldsListItem').length).toBe(1);
+      });
+
+      describe('plugin parameters', () => {
+        const selectMappingsEditorTab = async (
+          tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced'
+        ) => {
+          const tabIndex = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
+          const tabElement = testBed.find('mappingsEditor.formTab').at(tabIndex);
+          await act(async () => {
+            tabElement.simulate('click');
+          });
+          testBed.component.update();
+        };
+
+        test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
+          const { exists } = testBed;
+          // Navigate to the advanced configuration
+          await selectMappingsEditorTab('advanced');
+
+          expect(exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(false);
+        });
+
+        test('should render the _size parameter if the mapper size plugin is installed', async () => {
+          httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
+
+          await act(async () => {
+            testBed = await setup();
+          });
+          testBed.component.update();
+          await navigateToMappingsStep();
+
+          await selectMappingsEditorTab('advanced');
+
+          expect(testBed.exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(
+            true
+          );
+        });
       });
     });
 

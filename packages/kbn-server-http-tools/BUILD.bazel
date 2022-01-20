@@ -37,8 +37,8 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config-schema",
-  "//packages/kbn-crypto",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-crypto:npm_module_types",
   "@npm//@hapi/hapi",
   "@npm//@hapi/hoek",
   "@npm//joi",

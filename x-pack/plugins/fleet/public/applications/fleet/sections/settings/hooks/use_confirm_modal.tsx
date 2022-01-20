@@ -6,14 +6,20 @@
  */
 
 import { EuiConfirmModal, EuiPortal } from '@elastic/eui';
+import type { EuiConfirmModalProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useState } from 'react';
 
 interface ModalState {
   title?: React.ReactNode;
   description?: React.ReactNode;
+  buttonColor?: EuiConfirmModalProps['buttonColor'];
   onConfirm: () => void;
   onCancel: () => void;
+}
+
+interface ModalOptions {
+  buttonColor?: EuiConfirmModalProps['buttonColor'];
 }
 
 const ModalContext = React.createContext<null | {
@@ -24,7 +30,7 @@ export function useConfirmModal() {
   const context = useContext(ModalContext);
 
   const confirm = useCallback(
-    async (title: React.ReactNode, description: React.ReactNode) => {
+    async (title: React.ReactNode, description: React.ReactNode, options?: ModalOptions) => {
       if (context === null) {
         throw new Error('Context need to be provided to use useConfirmModal');
       }
@@ -34,6 +40,7 @@ export function useConfirmModal() {
           description,
           onConfirm: () => resolve(true),
           onCancel: () => resolve(false),
+          buttonColor: options?.buttonColor,
         });
       });
     },
@@ -43,6 +50,14 @@ export function useConfirmModal() {
   return {
     confirm,
   };
+}
+
+export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComponent<T>) {
+  return (props: T) => (
+    <ConfirmModalProvider>
+      <WrappedComponent {...props} />
+    </ConfirmModalProvider>
+  );
 }
 
 export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
@@ -74,6 +89,7 @@ export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
         <EuiPortal>
           <EuiConfirmModal
             title={modal.title}
+            buttonColor={modal.buttonColor}
             onCancel={modal.onCancel}
             onConfirm={modal.onConfirm}
             cancelButtonText={i18n.translate('xpack.fleet.settings.confirmModal.cancelButtonText', {

@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AuthenticatedUser } from '../../common/model';
 

@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { CaseStatuses, caseStatuses } from '../../../common';
+import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { statuses } from './config';
 
 interface Props {

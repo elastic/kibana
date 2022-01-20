@@ -19,6 +19,7 @@ import { ApmIndices } from '../../app/Settings/ApmIndices';
 import { CustomizeUI } from '../../app/Settings/customize_ui';
 import { Schema } from '../../app/Settings/schema';
 import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
+import { AgentKeys } from '../../app/Settings/agent_keys';
 
 function page<TPath extends string>({
   path,
@@ -94,8 +95,8 @@ export const settings = {
       }),
       params: t.partial({
         query: t.partial({
-          name: t.string,
           environment: t.string,
+          name: t.string,
           pageStep: agentConfigurationPageStepRt,
         }),
       }),
@@ -131,6 +132,14 @@ export const settings = {
       }),
       element: <AnomalyDetection />,
       tab: 'anomaly-detection',
+    }),
+    page({
+      path: '/settings/agent-keys',
+      title: i18n.translate('xpack.apm.views.settings.agentKeys.title', {
+        defaultMessage: 'Agent keys',
+      }),
+      element: <AgentKeys />,
+      tab: 'agent-keys',
     }),
     {
       path: '/settings',

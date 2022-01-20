@@ -34,7 +34,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "values": Array [],
+          "valuesWithTimestamp": Object {},
         },
         "id": "alert-123",
         "instances": Object {},
@@ -78,7 +78,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
         "errorMessages": Array [],
         "executionDuration": Object {
           "average": 0,
-          "values": Array [],
+          "valuesWithTimestamp": Object {},
         },
         "id": "alert-456",
         "instances": Object {},
@@ -572,12 +572,15 @@ describe('alertInstanceSummaryFromEventLog', () => {
   });
 
   const testExecutionDurations = (
-    actualDurations: number[],
-    executionDuration?: { average?: number; values?: number[] }
+    actualDurations: Record<string, number>,
+    executionDuration?: {
+      average?: number;
+      valuesWithTimestamp?: Record<string, number>;
+    }
   ) => {
     expect(executionDuration).toEqual({
-      average: Math.round(mean(actualDurations)),
-      values: actualDurations,
+      average: Math.round(mean(Object.values(actualDurations))),
+      valuesWithTimestamp: actualDurations,
     });
   };
 });
@@ -677,10 +680,13 @@ export class EventsFactory {
     return this;
   }
 
-  getExecutionDurations(): number[] {
+  getExecutionDurations(): Record<string, number> {
     return this.events
       .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
-      .map((ev) => ev?.event?.duration! / (1000 * 1000));
+      .reduce((res: Record<string, number>, ev) => {
+        res[ev?.['@timestamp']!] = ev?.event?.duration! / (1000 * 1000);
+        return res;
+      }, {});
   }
 }
 

@@ -98,12 +98,10 @@ export type { IMetricAggType } from './metrics/metric_agg_type';
 export type { IpRangeKey } from './buckets/lib/ip_range';
 export type { OptionedValueProp } from './param_types/optioned';
 
-/** @internal */
 export interface AggsCommonSetup {
   types: AggTypesRegistrySetup;
 }
 
-/** @internal */
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   datatableUtilities: {
@@ -127,14 +125,12 @@ export interface AggsCommonStart {
  */
 export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }>;
 
-/** @internal */
 export interface BaseAggParams {
   json?: string;
   customLabel?: string;
   timeShift?: string;
 }
 
-/** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
   value: AggConfigSerialized;

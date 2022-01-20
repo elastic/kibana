@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiLoadingSpinner } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const LoadingIndices = ({ ...rest }) => (
   <EuiFlexGroup

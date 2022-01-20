@@ -54,6 +54,8 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
+import type { SecurityPluginStart } from '../../security/public';
+
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
 export type ApmPluginStart = void;
@@ -81,6 +83,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
+  security?: SecurityPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -367,7 +370,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-edit',
-        useLatestPackageVersion: true,
+        useLatestPackageVersion: false,
         Component: getLazyAPMPolicyEditExtension(),
       });
 

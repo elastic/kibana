@@ -7,8 +7,6 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { buildSamplerAggregation } from '../../utils/field_stats_utils';
 import { FieldValuePair } from '../../../../../common/correlations/types';
 import {
   FieldStatsCommonRequestParams,
@@ -25,7 +23,7 @@ export const getBooleanFieldStatsRequest = (
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({ params, termFilters });
 
-  const { index, samplerShardSize } = params;
+  const { index } = params;
 
   const size = 0;
   const aggs: Aggs = {
@@ -42,14 +40,13 @@ export const getBooleanFieldStatsRequest = (
 
   const searchBody = {
     query,
-    aggs: {
-      sample: buildSamplerAggregation(aggs, samplerShardSize),
-    },
+    aggs,
   };
 
   return {
     index,
     size,
+    track_total_hits: false,
     body: searchBody,
   };
 };
@@ -67,19 +64,17 @@ export const fetchBooleanFieldStats = async (
   );
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as {
-    sample: {
-      sampled_value_count: estypes.AggregationsFiltersBucketItemKeys;
-      sampled_values: estypes.AggregationsTermsAggregate<TopValueBucket>;
-    };
+    sampled_value_count: estypes.AggregationsFiltersBucketItemKeys;
+    sampled_values: estypes.AggregationsTermsAggregate<TopValueBucket>;
   };
 
   const stats: BooleanFieldStats = {
     fieldName: field.fieldName,
-    count: aggregations?.sample.sampled_value_count.doc_count ?? 0,
+    count: aggregations?.sampled_value_count.doc_count ?? 0,
   };
 
   const valueBuckets: TopValueBucket[] =
-    aggregations?.sample.sampled_values?.buckets ?? [];
+    aggregations?.sampled_values?.buckets ?? [];
   valueBuckets.forEach((bucket) => {
     stats[`${bucket.key.toString()}Count`] = bucket.doc_count;
   });
