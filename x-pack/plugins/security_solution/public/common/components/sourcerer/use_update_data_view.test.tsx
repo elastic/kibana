@@ -38,6 +38,7 @@ describe('use_update_data_view', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockImplementation(() => ({
       services: {
+        theme: { theme$: {} },
         uiSettings: {
           get: () => mockPatterns,
           set: mockSet.mockResolvedValue(true),
