@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   getRulesImportExportToast,
   importRules,
@@ -25,8 +21,6 @@ describe('Import rules', () => {
     cleanKibana();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
   });
 

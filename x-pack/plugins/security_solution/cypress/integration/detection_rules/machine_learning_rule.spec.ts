@@ -40,11 +40,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
@@ -77,8 +73,6 @@ describe('Detection rules, machine learning', () => {
 
   it('Creates and activates a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();

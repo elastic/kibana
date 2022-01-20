@@ -17,7 +17,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
-import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   deleteFirstRule,
@@ -53,7 +53,6 @@ describe('Alerts rules, prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
@@ -75,7 +74,6 @@ describe('Actions with prebuilt rules', () => {
 
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();

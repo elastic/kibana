@@ -7,7 +7,7 @@
 
 import { getNewRule } from '../../objects/rule';
 import { RULES_MONIROTING_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
-import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana, reload } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -18,7 +18,6 @@ describe('Rules talbes links', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     goToManageAlertsDetectionRules();
-    waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getNewRule(), 'rule1');
 
     reload();

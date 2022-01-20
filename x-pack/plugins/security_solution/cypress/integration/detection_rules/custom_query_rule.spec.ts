@@ -73,11 +73,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   deleteFirstRule,
@@ -135,8 +131,6 @@ describe('Custom detection rules creation', () => {
 
   it('Creates and activates a new rule', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
     goToCreateNewRule();
@@ -225,7 +219,6 @@ describe('Custom detection rules deletion and edition', () => {
       cleanKibana();
       loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       goToManageAlertsDetectionRules();
-      waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(getNewRule(), 'rule1');
 
       createCustomRuleActivated(getNewOverrideRule(), 'rule2');
@@ -336,7 +329,6 @@ describe('Custom detection rules deletion and edition', () => {
       cleanKibana();
       loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       goToManageAlertsDetectionRules();
-      waitForAlertsIndexToBeCreated();
       createCustomRuleActivated(getExistingRule(), 'rule1');
       reload();
     });

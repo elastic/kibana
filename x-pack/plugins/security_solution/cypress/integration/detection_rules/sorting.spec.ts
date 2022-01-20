@@ -16,11 +16,7 @@ import {
   pageSelector,
 } from '../../screens/alerts_detection_rules';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsPanelToBeLoaded,
-  waitForAlertsIndexToBeCreated,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   activateRule,
   changeRowsPerPageTo,
@@ -51,8 +47,6 @@ describe('Alerts detection rules', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule(), '1');
     createCustomRule(getExistingRule(), '2');
     createCustomRule(getNewOverrideRule(), '3');

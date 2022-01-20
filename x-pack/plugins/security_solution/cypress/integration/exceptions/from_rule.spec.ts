@@ -15,7 +15,6 @@ import {
   goToClosedAlerts,
   goToManageAlertsDetectionRules,
   goToOpenedAlerts,
-  waitForAlertsIndexToBeCreated,
 } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
@@ -40,7 +39,6 @@ describe('From rule', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule(), 'rule_testing', '10s');
     goToManageAlertsDetectionRules();
     goToRuleDetails();

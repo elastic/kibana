@@ -6,11 +6,7 @@
  */
 
 import { expectedExportedRule, getNewRule } from '../../objects/rule';
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import { exportFirstRule, getRulesImportExportToast } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -26,8 +22,6 @@ describe('Export rules', () => {
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule()).as('ruleResponse');
   });
 
