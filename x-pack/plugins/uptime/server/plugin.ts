@@ -77,7 +77,8 @@ export class Plugin implements PluginType {
       this.syntheticService = new SyntheticsService(
         this.logger,
         this.server,
-        this.server.config.service
+        this.server.config.service,
+        this.initContext.env.packageInfo.version
       );
 
       this.syntheticService.registerSyncTask(plugins.taskManager);
