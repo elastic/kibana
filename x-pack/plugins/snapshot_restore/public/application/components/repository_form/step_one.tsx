@@ -233,24 +233,13 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText id="repositoryTypeDescription" size="s" color="subdued">
-          {repositoryTypes.includes(REPOSITORY_TYPES.fs) &&
-          repositoryTypes.includes(REPOSITORY_TYPES.url) ? (
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription"
-              defaultMessage="Storage location for your snapshots. Additional repository types are available as plugins. {docLink}"
-              values={{
-                docLink: snapshotRepoDocLink,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.cloudTypeDescription"
-              defaultMessage="Storage location for your snapshots. {docLink}"
-              values={{
-                docLink: snapshotRepoDocLink,
-              }}
-            />
-          )}
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription"
+            defaultMessage="Storage location for your snapshots. {docLink}"
+            values={{
+              docLink: snapshotRepoDocLink,
+            }}
+          />
         </EuiText>
         <EuiFormRow
           hasEmptyLabelSpace
