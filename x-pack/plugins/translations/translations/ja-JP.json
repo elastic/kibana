@@ -26073,7 +26073,6 @@
     "xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText": "「{connectorName}」を更新しました",
     "xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData": "このルールの実行がありません。",
     "xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTitle": "最近の実行時間",
-    "xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTooltip": "最近のルール実行には、前回の{numExecutions}実行までが含まれています。",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseCancelButtonText": "キャンセル",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseConfirmButtonText": "ライセンスの管理",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage": "ルールタイプ{alertTypeId}は無効です。{licenseRequired}ライセンスが必要です。アップグレードオプションを表示するには、［ライセンス管理］に移動してください。",
