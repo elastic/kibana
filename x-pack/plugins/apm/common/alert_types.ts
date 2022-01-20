@@ -88,14 +88,18 @@ export function formatTransactionDurationReason({
   windowSize: number;
   windowUnit: string;
 }) {
+  let aggregationTypeFormatted =
+    aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
+  if (aggregationTypeFormatted === 'Avg')
+    aggregationTypeFormatted = aggregationTypeFormatted + '.';
+
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
-    defaultMessage: `{aggregationType}. latency is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
       serviceName,
-      aggregationType:
-        aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1),
+      aggregationType: aggregationTypeFormatted,
       interval: getInterval(windowSize, windowUnit),
     },
   });
@@ -145,7 +149,7 @@ export function formatTransactionDurationAnomalyReason({
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}. Alert when {threshold}.`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}. Alert when > {threshold}.`,
       values: {
         threshold,
         serviceName,
