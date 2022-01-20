@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../../constants';
+import { getUsageCounters } from '../../telemetry';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -55,6 +56,12 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           expect(!!response2.body).to.be(false);
+        });
+      });
+      describe('usageCollection', () => {
+        it('returns correct number of calls', async () => {
+          const counters = await getUsageCounters(supertest);
+          expect(counters[`GET ${config.path}/:id`]).to.equal(2);
         });
       });
     });

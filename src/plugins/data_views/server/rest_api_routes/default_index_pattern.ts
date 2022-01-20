@@ -32,7 +32,7 @@ const manageDefaultIndexPatternRoutesFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: path });
+        usageCollection?.incrementCounter({ counterName: `GET ${path}` });
         const indexPatternsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,

@@ -292,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
         describe('usageCollection', () => {
           it('returns correct number of calls', async () => {
             const counters = await getUsageCounters(supertest);
-            expect(counters[config.path]).to.equal(14);
+            expect(counters[`POST ${config.path}`]).to.equal(14);
           });
         });
       });
