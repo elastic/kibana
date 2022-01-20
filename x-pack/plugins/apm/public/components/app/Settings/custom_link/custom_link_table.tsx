@@ -119,7 +119,6 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         }
         items={filteredItems}
         columns={columns}
-        initialPageSize={10}
         initialSortField="@timestamp"
         initialSortDirection="desc"
       />
