@@ -21,13 +21,14 @@ const HOST_RISK_SEVERITY_COLOUR = {
   Critical: euiLightVars.euiColorDanger,
 };
 
-const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity }>`
-  ${({ theme, $severity }) => css`
+const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundColor: boolean }>`
+  ${({ theme, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
     padding-right: ${theme.eui.paddingSizes.s};
     padding-left: ${theme.eui.paddingSizes.xs};
 
     ${($severity === 'Critical' || $severity === 'High') &&
+    !$hideBackgroundColor &&
     css`
       background-color: ${transparentize(theme.eui.euiColorDanger, 0.2)};
       border-radius: 999px; // pill shaped
@@ -35,8 +36,16 @@ const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity }>`
   `}
 `;
 
-export const HostRiskScore: React.FC<{ severity: HostRiskSeverity }> = ({ severity }) => (
-  <HostRiskBadge color={euiLightVars.euiColorDanger} $severity={severity}>
+export const HostRiskScore: React.FC<{
+  severity: HostRiskSeverity;
+  hideBackgroundColor?: boolean;
+}> = ({ severity, hideBackgroundColor = false }) => (
+  <HostRiskBadge
+    color={euiLightVars.euiColorDanger}
+    $severity={severity}
+    $hideBackgroundColor={hideBackgroundColor}
+    data-test-subj="host-risk-score"
+  >
     <EuiHealth className="eui-alignMiddle" color={HOST_RISK_SEVERITY_COLOUR[severity]}>
       {severity}
     </EuiHealth>

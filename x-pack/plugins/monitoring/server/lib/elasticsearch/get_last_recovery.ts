@@ -89,7 +89,7 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
 export async function getLastRecovery(
   req: LegacyRequest,
   esIndexPattern: string,
-  mbIndexPattern: string,
+  esIndexPatternEcs: string,
   size: number
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
@@ -109,8 +109,8 @@ export async function getLastRecovery(
       query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
     },
   };
-  const mbParams = {
-    index: mbIndexPattern,
+  const ecsParams = {
+    index: esIndexPatternEcs,
     size,
     ignore_unavailable: true,
     body: {
@@ -130,7 +130,7 @@ export async function getLastRecovery(
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const [legacyResp, mbResp] = await Promise.all([
     callWithRequest(req, 'search', legacyParams),
-    callWithRequest(req, 'search', mbParams),
+    callWithRequest(req, 'search', ecsParams),
   ]);
   const legacyResult = handleLegacyLastRecoveries(legacyResp, start);
   const mbResult = handleMbLastRecoveries(mbResp, start);

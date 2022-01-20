@@ -82,6 +82,7 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    emptySizeRatio,
     legendMaxLines,
     truncateLegend,
     hideLabels,
@@ -229,7 +230,7 @@ export function PieComponent(
       config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
   } else {
-    config.emptySizeRatio = shape === 'donut' ? 0.3 : 0;
+    config.emptySizeRatio = shape === 'donut' ? emptySizeRatio : 0;
 
     if (hideLabels || categoryDisplay === 'hide') {
       // Force all labels to be linked, then prevent links from showing

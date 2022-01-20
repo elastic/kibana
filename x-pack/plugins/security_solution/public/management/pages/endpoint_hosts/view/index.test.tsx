@@ -1028,6 +1028,57 @@ describe('when on the endpoint list page', () => {
         expect(activityLogCallout).not.toBeNull();
       });
 
+      it('should display a callout message if no log data also on refetch', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
+
+        // click refresh button
+        const refreshLogButton = await renderResult.findByTestId('superDatePickerApplyTimeButton');
+        userEvent.click(refreshLogButton);
+
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogNoDataCallout = await renderResult.findByTestId(
+          'activityLogNoDataCallout'
+        );
+        expect(activityLogNoDataCallout).not.toBeNull();
+      });
+
       it('should not display scroll trigger when showing callout message', async () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
@@ -1125,9 +1176,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display policy response sub-panel', async () => {
-        expect(
-          await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutHeader')
-        ).not.toBeNull();
+        expect(await renderResult.findByTestId('flyoutSubHeaderBackButton')).not.toBeNull();
         expect(
           await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutBody')
         ).not.toBeNull();
@@ -1214,7 +1263,7 @@ describe('when on the endpoint list page', () => {
 
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
-        expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
+        expect(subHeaderBackLink.textContent).toBe('Endpoint details');
         expect(subHeaderBackLink.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=details`
         );

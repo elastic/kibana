@@ -18,6 +18,8 @@ import type {
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
 
+import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
+
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   packageToPackagePolicy,
@@ -92,6 +94,7 @@ class PackagePolicyService {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
+      spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
@@ -134,6 +137,7 @@ class PackagePolicyService {
         const [, packageInfo] = await Promise.all([
           ensureInstalledPackage({
             esClient,
+            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
             pkgVersion: packagePolicy.package.version,
@@ -153,8 +157,10 @@ class PackagePolicyService {
           );
         }
       }
+      validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
         pkgInfo,
@@ -388,6 +394,8 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
+      validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+
       const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
       inputs = await this._compilePackagePolicyInputs(
         registryPkgInfo,
@@ -485,6 +493,7 @@ class PackagePolicyService {
             title: packagePolicy.package?.title || '',
             version: packagePolicy.package?.version || '',
           },
+          policy_id: packagePolicy.policy_id,
         });
       } catch (error) {
         result.push({
@@ -856,6 +865,31 @@ class PackagePolicyService {
           errorsThrown
         );
       }
+    }
+  }
+}
+
+function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, safeLoad);
+  if (validationHasErrors(validationResults)) {
+    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
+      .map(([key, value]) => ({
+        key,
+        message: value,
+      }))
+      .filter(({ message }) => !!message);
+
+    if (responseFormattedValidationErrors.length) {
+      throw new PackagePolicyValidationError(
+        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+          defaultMessage: 'Package policy is invalid: {errors}',
+          values: {
+            errors: responseFormattedValidationErrors
+              .map(({ key, message }) => `${key}: ${message}`)
+              .join('\n'),
+          },
+        })
+      );
     }
   }
 }
@@ -1309,29 +1343,7 @@ export function preconfigurePackageInputs(
     inputs,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, safeLoad);
-
-  if (validationHasErrors(validationResults)) {
-    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
-      .map(([key, value]) => ({
-        key,
-        message: value,
-      }))
-      .filter(({ message }) => !!message);
-
-    if (responseFormattedValidationErrors.length) {
-      throw new PackagePolicyValidationError(
-        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
-          defaultMessage: 'Package policy is invalid: {errors}',
-          values: {
-            errors: responseFormattedValidationErrors
-              .map(({ key, message }) => `${key}: ${message}`)
-              .join('\n'),
-          },
-        })
-      );
-    }
-  }
+  validatePackagePolicyOrThrow(resultingPackagePolicy, packageInfo);
 
   return resultingPackagePolicy;
 }
@@ -1382,7 +1394,7 @@ export async function incrementPackageName(
     ? packagePolicyData.items
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort()
+        .sort((a, b) => a - b)
     : [];
 
   return `${packageName}-${

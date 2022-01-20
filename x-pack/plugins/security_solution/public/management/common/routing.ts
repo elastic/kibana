@@ -167,9 +167,6 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.included_policies, '')
         ? { included_policies: location.included_policies }
         : ''),
-      ...(!isDefaultOrMissing(location.excluded_policies, '')
-        ? { excluded_policies: location.excluded_policies }
-        : ''),
     };
   } else {
     return {};
@@ -209,6 +206,9 @@ const normalizeEventFiltersPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -216,7 +216,7 @@ const normalizeEventFiltersPageLocation = (
 };
 
 const normalizeHostIsolationExceptionsPageLocation = (
-  location?: Partial<EventFiltersPageLocation>
+  location?: Partial<HostIsolationExceptionsPageLocation>
 ): Partial<EventFiltersPageLocation> => {
   if (location) {
     return {
@@ -229,6 +229,9 @@ const normalizeHostIsolationExceptionsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -269,10 +272,6 @@ const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'included_policies') || '';
 };
 
-const extractExcludedPolicies = (query: querystring.ParsedUrlQuery): string => {
-  return extractFirstParamValue(query, 'excluded_policies') || '';
-};
-
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
@@ -282,7 +281,11 @@ export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) =
 export const extractTrustedAppsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   ...extractListPaginationParams(query),
   included_policies: extractIncludedPolicies(query),
-  excluded_policies: extractExcludedPolicies(query),
+});
+
+export const extractArtifactsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
@@ -340,13 +343,13 @@ export const getPolicyDetailsArtifactsListPath = (
   )}`;
 };
 
-export const extractEventFiltetrsPageLocation = (
+export const extractEventFiltersPageLocation = (
   query: querystring.ParsedUrlQuery
 ): EventFiltersPageLocation => {
   const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractArtifactsListPaginationParams(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
@@ -373,6 +376,7 @@ export const extractHostIsolationExceptionsPageLocation = (
 
   return {
     ...extractListPaginationParams(query),
+    included_policies: extractIncludedPolicies(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),

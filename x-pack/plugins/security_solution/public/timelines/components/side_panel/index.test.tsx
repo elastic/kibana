@@ -1029,1128 +1029,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails')).toMatchInlineSnapshot(`
-        .c3 {
-          color: #535966;
-        }
-
-        .c2 dt {
-          font-size: 12px !important;
-        }
-
-        .c2 dd {
-          width: -webkit-fit-content;
-          width: -moz-fit-content;
-          width: fit-content;
-        }
-
-        .c2 dd > div {
-          width: -webkit-fit-content;
-          width: -moz-fit-content;
-          width: fit-content;
-        }
-
-        .c1 {
-          position: relative;
-        }
-
-        .c1 .euiButtonIcon {
-          position: absolute;
-          right: 12px;
-          top: 6px;
-          z-index: 2;
-        }
-
-        .c0 {
-          width: 100%;
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-box-flex: 1;
-          -webkit-flex-grow: 1;
-          -ms-flex-positive: 1;
-          flex-grow: 1;
-        }
-
-        .c0 > * {
-          max-width: 100%;
-        }
-
-        .c0 .inspectButtonComponent {
-          pointer-events: none;
-          opacity: 0;
-          -webkit-transition: opacity 250ms ease;
-          transition: opacity 250ms ease;
-        }
-
-        .c0:hover .inspectButtonComponent {
-          pointer-events: auto;
-          opacity: 1;
-        }
-
-        .c4 {
-          padding: 16px;
-          background: rgba(250,251,253,0.9);
-          bottom: 0;
-          left: 0;
-          position: absolute;
-          right: 0;
-          top: 0;
-          z-index: 1000;
-        }
-
-        .c5 {
-          height: 100%;
-        }
-
-        <ExpandableHostDetails
-          contextID="test-query"
-          hostName="woohoo!"
-          isDraggable={false}
-        >
-          <AnomalyTableProvider
-            criteriaFields={Array []}
-            endDate="2020-07-08T08:20:18.966Z"
-            skip={false}
-            startDate="2020-07-07T08:20:18.966Z"
-          >
-            <HostOverview
-              anomaliesData={null}
-              contextID="test-query"
-              data={Object {}}
-              docValueFields={
-                Array [
-                  Object {
-                    "field": "@timestamp",
-                    "format": "date_time",
-                  },
-                  Object {
-                    "field": "event.end",
-                    "format": "date_time",
-                  },
-                ]
-              }
-              endDate="2020-07-08T08:20:18.966Z"
-              id="hostsDetailsQuery"
-              indexNames={
-                Array [
-                  "-*elastic-cloud-logs-*",
-                  "apm-*-transaction*",
-                  "auditbeat-*",
-                  "endgame-*",
-                  "filebeat-*",
-                  "logs-*",
-                  "packetbeat-*",
-                  "traces-apm*",
-                  "winlogbeat-*",
-                ]
-              }
-              isDraggable={false}
-              isInDetailsSidePanel={true}
-              isLoadingAnomaliesData={false}
-              loading={true}
-              narrowDateRange={[Function]}
-              startDate="2020-07-07T08:20:18.966Z"
-            >
-              <InspectButtonContainer
-                show={true}
-              >
-                <div
-                  className="c0"
-                >
-                  <OverviewWrapper
-                    data-test-subj="host-overview"
-                    direction="column"
-                  >
-                    <EuiFlexGroup
-                      className="c1"
-                      data-test-subj="host-overview"
-                      direction="column"
-                    >
-                      <div
-                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
-                        data-test-subj="host-overview"
-                      >
-                        <OverviewDescriptionList
-                          descriptionList={
-                            Array [
-                              Object {
-                                "description": <EmptyWrapper>
-                                  —
-                                </EmptyWrapper>,
-                                "title": "Host ID",
-                              },
-                              Object {
-                                "description": <EmptyWrapper>
-                                  —
-                                </EmptyWrapper>,
-                                "title": "First seen",
-                              },
-                              Object {
-                                "description": <EmptyWrapper>
-                                  —
-                                </EmptyWrapper>,
-                                "title": "Last seen",
-                              },
-                            ]
-                          }
-                          key="0"
-                        >
-                          <EuiFlexItem
-                            grow={true}
-                          >
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <DescriptionListStyled
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Host ID",
-                                    },
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "First seen",
-                                    },
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Last seen",
-                                    },
-                                  ]
-                                }
-                              >
-                                <EuiDescriptionList
-                                  className="c2"
-                                  listItems={
-                                    Array [
-                                      Object {
-                                        "description": <EmptyWrapper>
-                                          —
-                                        </EmptyWrapper>,
-                                        "title": "Host ID",
-                                      },
-                                      Object {
-                                        "description": <EmptyWrapper>
-                                          —
-                                        </EmptyWrapper>,
-                                        "title": "First seen",
-                                      },
-                                      Object {
-                                        "description": <EmptyWrapper>
-                                          —
-                                        </EmptyWrapper>,
-                                        "title": "Last seen",
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <dl
-                                    className="euiDescriptionList euiDescriptionList--row c2"
-                                  >
-                                    <EuiDescriptionListTitle
-                                      key="title-0"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Host ID
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-0"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <EmptyWrapper>
-                                          <span
-                                            className="c3"
-                                          >
-                                            —
-                                          </span>
-                                        </EmptyWrapper>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-1"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        First seen
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-1"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <EmptyWrapper>
-                                          <span
-                                            className="c3"
-                                          >
-                                            —
-                                          </span>
-                                        </EmptyWrapper>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-2"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Last seen
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-2"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <EmptyWrapper>
-                                          <span
-                                            className="c3"
-                                          >
-                                            —
-                                          </span>
-                                        </EmptyWrapper>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                  </dl>
-                                </EuiDescriptionList>
-                              </DescriptionListStyled>
-                            </div>
-                          </EuiFlexItem>
-                        </OverviewDescriptionList>
-                        <OverviewDescriptionList
-                          descriptionList={
-                            Array [
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.ip"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  render={[Function]}
-                                  rowItems={Array []}
-                                />,
-                                "title": "IP addresses",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.mac"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "MAC addresses",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.os.platform"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Platform",
-                              },
-                            ]
-                          }
-                          key="1"
-                        >
-                          <EuiFlexItem
-                            grow={true}
-                          >
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <DescriptionListStyled
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.ip"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        render={[Function]}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "IP addresses",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.mac"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "MAC addresses",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.os.platform"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Platform",
-                                    },
-                                  ]
-                                }
-                              >
-                                <EuiDescriptionList
-                                  className="c2"
-                                  listItems={
-                                    Array [
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.ip"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          render={[Function]}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "IP addresses",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.mac"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "MAC addresses",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.os.platform"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Platform",
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <dl
-                                    className="euiDescriptionList euiDescriptionList--row c2"
-                                  >
-                                    <EuiDescriptionListTitle
-                                      key="title-0"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        IP addresses
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-0"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.ip"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          render={[Function]}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-1"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        MAC addresses
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-1"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.mac"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-2"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Platform
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-2"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.os.platform"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                  </dl>
-                                </EuiDescriptionList>
-                              </DescriptionListStyled>
-                            </div>
-                          </EuiFlexItem>
-                        </OverviewDescriptionList>
-                        <OverviewDescriptionList
-                          descriptionList={
-                            Array [
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.os.name"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Operating system",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.os.family"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Family",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.os.version"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Version",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="host.architecture"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Architecture",
-                              },
-                            ]
-                          }
-                          key="2"
-                        >
-                          <EuiFlexItem
-                            grow={true}
-                          >
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <DescriptionListStyled
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.os.name"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Operating system",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.os.family"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Family",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.os.version"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Version",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="host.architecture"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Architecture",
-                                    },
-                                  ]
-                                }
-                              >
-                                <EuiDescriptionList
-                                  className="c2"
-                                  listItems={
-                                    Array [
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.os.name"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Operating system",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.os.family"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Family",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.os.version"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Version",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="host.architecture"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Architecture",
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <dl
-                                    className="euiDescriptionList euiDescriptionList--row c2"
-                                  >
-                                    <EuiDescriptionListTitle
-                                      key="title-0"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Operating system
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-0"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.os.name"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-1"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Family
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-1"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.os.family"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-2"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Version
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-2"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.os.version"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-3"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Architecture
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-3"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="host.architecture"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                  </dl>
-                                </EuiDescriptionList>
-                              </DescriptionListStyled>
-                            </div>
-                          </EuiFlexItem>
-                        </OverviewDescriptionList>
-                        <OverviewDescriptionList
-                          descriptionList={
-                            Array [
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="cloud.provider"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Cloud provider",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="cloud.region"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Region",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="cloud.instance.id"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Instance ID",
-                              },
-                              Object {
-                                "description": <Memo(DefaultFieldRenderer)
-                                  attrName="cloud.machine.type"
-                                  idPrefix="host-overview-test-query"
-                                  isDraggable={false}
-                                  rowItems={Array []}
-                                />,
-                                "title": "Machine type",
-                              },
-                            ]
-                          }
-                          key="3"
-                        >
-                          <EuiFlexItem
-                            grow={true}
-                          >
-                            <div
-                              className="euiFlexItem"
-                            >
-                              <DescriptionListStyled
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="cloud.provider"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Cloud provider",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="cloud.region"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Region",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="cloud.instance.id"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Instance ID",
-                                    },
-                                    Object {
-                                      "description": <Memo(DefaultFieldRenderer)
-                                        attrName="cloud.machine.type"
-                                        idPrefix="host-overview-test-query"
-                                        isDraggable={false}
-                                        rowItems={Array []}
-                                      />,
-                                      "title": "Machine type",
-                                    },
-                                  ]
-                                }
-                              >
-                                <EuiDescriptionList
-                                  className="c2"
-                                  listItems={
-                                    Array [
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="cloud.provider"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Cloud provider",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="cloud.region"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Region",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="cloud.instance.id"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Instance ID",
-                                      },
-                                      Object {
-                                        "description": <Memo(DefaultFieldRenderer)
-                                          attrName="cloud.machine.type"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        />,
-                                        "title": "Machine type",
-                                      },
-                                    ]
-                                  }
-                                >
-                                  <dl
-                                    className="euiDescriptionList euiDescriptionList--row c2"
-                                  >
-                                    <EuiDescriptionListTitle
-                                      key="title-0"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Cloud provider
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-0"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="cloud.provider"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-1"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Region
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-1"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="cloud.region"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-2"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Instance ID
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-2"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="cloud.instance.id"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                    <EuiDescriptionListTitle
-                                      key="title-3"
-                                    >
-                                      <dt
-                                        className="euiDescriptionList__title"
-                                      >
-                                        Machine type
-                                      </dt>
-                                    </EuiDescriptionListTitle>
-                                    <EuiDescriptionListDescription
-                                      key="description-3"
-                                    >
-                                      <dd
-                                        className="euiDescriptionList__description"
-                                      >
-                                        <DefaultFieldRenderer
-                                          attrName="cloud.machine.type"
-                                          idPrefix="host-overview-test-query"
-                                          isDraggable={false}
-                                          rowItems={Array []}
-                                        >
-                                          <EmptyWrapper>
-                                            <span
-                                              className="c3"
-                                            >
-                                              —
-                                            </span>
-                                          </EmptyWrapper>
-                                        </DefaultFieldRenderer>
-                                      </dd>
-                                    </EuiDescriptionListDescription>
-                                  </dl>
-                                </EuiDescriptionList>
-                              </DescriptionListStyled>
-                            </div>
-                          </EuiFlexItem>
-                        </OverviewDescriptionList>
-                        <Loader
-                          overlay={true}
-                          overlayBackground="#fafbfd"
-                          size="xl"
-                        >
-                          <Aside
-                            overlay={true}
-                            overlayBackground="#fafbfd"
-                          >
-                            <aside
-                              className="c4"
-                            >
-                              <FlexGroup
-                                overlay={
-                                  Object {
-                                    "overlay": true,
-                                  }
-                                }
-                              >
-                                <EuiFlexGroup
-                                  alignItems="center"
-                                  className="c5"
-                                  direction="column"
-                                  gutterSize="s"
-                                  justifyContent="center"
-                                  overlay={
-                                    Object {
-                                      "overlay": true,
-                                    }
-                                  }
-                                >
-                                  <div
-                                    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
-                                    overlay={
-                                      Object {
-                                        "overlay": true,
-                                      }
-                                    }
-                                  >
-                                    <EuiFlexItem
-                                      grow={false}
-                                    >
-                                      <div
-                                        className="euiFlexItem euiFlexItem--flexGrowZero"
-                                      >
-                                        <EuiLoadingSpinner
-                                          data-test-subj="loading-spinner"
-                                          size="xl"
-                                        >
-                                          <span
-                                            className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                                            data-test-subj="loading-spinner"
-                                          />
-                                        </EuiLoadingSpinner>
-                                      </div>
-                                    </EuiFlexItem>
-                                  </div>
-                                </EuiFlexGroup>
-                              </FlexGroup>
-                            </aside>
-                          </Aside>
-                        </Loader>
-                      </div>
-                    </EuiFlexGroup>
-                  </OverviewWrapper>
-                </div>
-              </InspectButtonContainer>
-            </HostOverview>
-          </AnomalyTableProvider>
-        </ExpandableHostDetails>
-      `);
+      expect(wrapper.find('ExpandableHostDetails')).toMatchSnapshot();
     });
   });
 
@@ -2270,626 +1149,643 @@ describe('Details Panel Component', () => {
             startDate="2020-07-07T08:20:18.966Z"
             type="details"
           >
-            <InspectButtonContainer
-              show={true}
-            >
-              <div
-                className="c0"
+            <InspectButtonContainer>
+              <HoverVisibilityContainer
+                show={true}
+                targetClassNames={
+                  Array [
+                    "inspectButtonComponent",
+                  ]
+                }
               >
-                <OverviewWrapper
-                  direction="column"
+                <styled.div
+                  data-test-subj="hoverVisibilityContainer"
+                  targetClassNames={
+                    Array [
+                      "inspectButtonComponent",
+                    ]
+                  }
                 >
-                  <EuiFlexGroup
-                    className="c1"
-                    direction="column"
+                  <div
+                    className="c0"
+                    data-test-subj="hoverVisibilityContainer"
                   >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
+                    <OverviewWrapper
+                      direction="column"
                     >
-                      <OverviewDescriptionList
-                        descriptionList={
-                          Array [
-                            Object {
-                              "description": <EmptyWrapper>
-                                —
-                              </EmptyWrapper>,
-                              "title": "Location",
-                            },
-                            Object {
-                              "description": <EmptyWrapper>
-                                —
-                              </EmptyWrapper>,
-                              "title": "Autonomous system",
-                            },
-                          ]
-                        }
-                        key="0"
+                      <EuiFlexGroup
+                        className="c1"
+                        direction="column"
                       >
-                        <EuiFlexItem
-                          grow={true}
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c1"
                         >
-                          <div
-                            className="euiFlexItem"
-                          >
-                            <DescriptionListStyled
-                              listItems={
-                                Array [
-                                  Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
-                                    "title": "Location",
-                                  },
-                                  Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
-                                    "title": "Autonomous system",
-                                  },
-                                ]
-                              }
-                            >
-                              <EuiDescriptionList
-                                className="c2"
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Location",
-                                    },
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Autonomous system",
-                                    },
-                                  ]
-                                }
-                              >
-                                <dl
-                                  className="euiDescriptionList euiDescriptionList--row c2"
-                                >
-                                  <EuiDescriptionListTitle
-                                    key="title-0"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      Location
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-0"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <EmptyWrapper>
-                                        <span
-                                          className="c3"
-                                        >
-                                          —
-                                        </span>
-                                      </EmptyWrapper>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                  <EuiDescriptionListTitle
-                                    key="title-1"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      Autonomous system
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-1"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <EmptyWrapper>
-                                        <span
-                                          className="c3"
-                                        >
-                                          —
-                                        </span>
-                                      </EmptyWrapper>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                </dl>
-                              </EuiDescriptionList>
-                            </DescriptionListStyled>
-                          </div>
-                        </EuiFlexItem>
-                      </OverviewDescriptionList>
-                      <OverviewDescriptionList
-                        descriptionList={
-                          Array [
-                            Object {
-                              "description": <EmptyWrapper>
-                                —
-                              </EmptyWrapper>,
-                              "title": "First seen",
-                            },
-                            Object {
-                              "description": <EmptyWrapper>
-                                —
-                              </EmptyWrapper>,
-                              "title": "Last seen",
-                            },
-                          ]
-                        }
-                        key="1"
-                      >
-                        <EuiFlexItem
-                          grow={true}
-                        >
-                          <div
-                            className="euiFlexItem"
-                          >
-                            <DescriptionListStyled
-                              listItems={
-                                Array [
-                                  Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
-                                    "title": "First seen",
-                                  },
-                                  Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
-                                    "title": "Last seen",
-                                  },
-                                ]
-                              }
-                            >
-                              <EuiDescriptionList
-                                className="c2"
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "First seen",
-                                    },
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Last seen",
-                                    },
-                                  ]
-                                }
-                              >
-                                <dl
-                                  className="euiDescriptionList euiDescriptionList--row c2"
-                                >
-                                  <EuiDescriptionListTitle
-                                    key="title-0"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      First seen
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-0"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <EmptyWrapper>
-                                        <span
-                                          className="c3"
-                                        >
-                                          —
-                                        </span>
-                                      </EmptyWrapper>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                  <EuiDescriptionListTitle
-                                    key="title-1"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      Last seen
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-1"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <EmptyWrapper>
-                                        <span
-                                          className="c3"
-                                        >
-                                          —
-                                        </span>
-                                      </EmptyWrapper>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                </dl>
-                              </EuiDescriptionList>
-                            </DescriptionListStyled>
-                          </div>
-                        </EuiFlexItem>
-                      </OverviewDescriptionList>
-                      <OverviewDescriptionList
-                        descriptionList={
-                          Array [
-                            Object {
-                              "description": <EmptyWrapper>
-                                —
-                              </EmptyWrapper>,
-                              "title": "Host ID",
-                            },
-                            Object {
-                              "description": <EmptyWrapper>
-                                —
-                              </EmptyWrapper>,
-                              "title": "Host name",
-                            },
-                          ]
-                        }
-                        key="2"
-                      >
-                        <EuiFlexItem
-                          grow={true}
-                        >
-                          <div
-                            className="euiFlexItem"
-                          >
-                            <DescriptionListStyled
-                              listItems={
-                                Array [
-                                  Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
-                                    "title": "Host ID",
-                                  },
-                                  Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
-                                    "title": "Host name",
-                                  },
-                                ]
-                              }
-                            >
-                              <EuiDescriptionList
-                                className="c2"
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Host ID",
-                                    },
-                                    Object {
-                                      "description": <EmptyWrapper>
-                                        —
-                                      </EmptyWrapper>,
-                                      "title": "Host name",
-                                    },
-                                  ]
-                                }
-                              >
-                                <dl
-                                  className="euiDescriptionList euiDescriptionList--row c2"
-                                >
-                                  <EuiDescriptionListTitle
-                                    key="title-0"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      Host ID
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-0"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <EmptyWrapper>
-                                        <span
-                                          className="c3"
-                                        >
-                                          —
-                                        </span>
-                                      </EmptyWrapper>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                  <EuiDescriptionListTitle
-                                    key="title-1"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      Host name
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-1"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <EmptyWrapper>
-                                        <span
-                                          className="c3"
-                                        >
-                                          —
-                                        </span>
-                                      </EmptyWrapper>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                </dl>
-                              </EuiDescriptionList>
-                            </DescriptionListStyled>
-                          </div>
-                        </EuiFlexItem>
-                      </OverviewDescriptionList>
-                      <OverviewDescriptionList
-                        descriptionList={
-                          Array [
-                            Object {
-                              "description": <Memo(WhoIsLink)
-                                domain="woohoo!"
-                              >
-                                iana.org
-                              </Memo(WhoIsLink)>,
-                              "title": "WhoIs",
-                            },
-                            Object {
-                              "description": <Memo(ReputationLinkComponent)
-                                direction="column"
-                                domain="woohoo!"
-                              />,
-                              "title": "Reputation",
-                            },
-                          ]
-                        }
-                        key="3"
-                      >
-                        <EuiFlexItem
-                          grow={true}
-                        >
-                          <div
-                            className="euiFlexItem"
-                          >
-                            <DescriptionListStyled
-                              listItems={
-                                Array [
-                                  Object {
-                                    "description": <Memo(WhoIsLink)
-                                      domain="woohoo!"
-                                    >
-                                      iana.org
-                                    </Memo(WhoIsLink)>,
-                                    "title": "WhoIs",
-                                  },
-                                  Object {
-                                    "description": <Memo(ReputationLinkComponent)
-                                      direction="column"
-                                      domain="woohoo!"
-                                    />,
-                                    "title": "Reputation",
-                                  },
-                                ]
-                              }
-                            >
-                              <EuiDescriptionList
-                                className="c2"
-                                listItems={
-                                  Array [
-                                    Object {
-                                      "description": <Memo(WhoIsLink)
-                                        domain="woohoo!"
-                                      >
-                                        iana.org
-                                      </Memo(WhoIsLink)>,
-                                      "title": "WhoIs",
-                                    },
-                                    Object {
-                                      "description": <Memo(ReputationLinkComponent)
-                                        direction="column"
-                                        domain="woohoo!"
-                                      />,
-                                      "title": "Reputation",
-                                    },
-                                  ]
-                                }
-                              >
-                                <dl
-                                  className="euiDescriptionList euiDescriptionList--row c2"
-                                >
-                                  <EuiDescriptionListTitle
-                                    key="title-0"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      WhoIs
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-0"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <WhoIsLink
-                                        domain="woohoo!"
-                                      >
-                                        <ExternalLink
-                                          url="https://www.iana.org/whois?q=woohoo!"
-                                        >
-                                          <EuiToolTip
-                                            content="https://www.iana.org/whois?q=woohoo!"
-                                            data-test-subj="externalLinkTooltip"
-                                            delay="regular"
-                                            display="inlineBlock"
-                                            position="top"
-                                          >
-                                            <span
-                                              className="euiToolTipAnchor"
-                                              onMouseOut={[Function]}
-                                              onMouseOver={[Function]}
-                                            >
-                                              <EuiLink
-                                                data-test-subj="externalLink"
-                                                href="https://www.iana.org/whois?q=woohoo!"
-                                                rel="noopener"
-                                                target="_blank"
-                                              >
-                                                <a
-                                                  className="euiLink euiLink--primary"
-                                                  data-test-subj="externalLink"
-                                                  href="https://www.iana.org/whois?q=woohoo!"
-                                                  rel="noopener noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  iana.org
-                                                  <EuiIcon
-                                                    aria-label="External link"
-                                                    className="euiLink__externalIcon"
-                                                    size="s"
-                                                    type="popout"
-                                                  >
-                                                    <span
-                                                      aria-label="External link"
-                                                      className="euiLink__externalIcon"
-                                                      data-euiicon-type="popout"
-                                                      size="s"
-                                                    />
-                                                  </EuiIcon>
-                                                  <EuiScreenReaderOnly>
-                                                    <span
-                                                      className="euiScreenReaderOnly"
-                                                    >
-                                                      <EuiI18n
-                                                        default="(opens in a new tab or window)"
-                                                        token="euiLink.newTarget.screenReaderOnlyText"
-                                                      >
-                                                        (opens in a new tab or window)
-                                                      </EuiI18n>
-                                                    </span>
-                                                  </EuiScreenReaderOnly>
-                                                </a>
-                                              </EuiLink>
-                                            </span>
-                                          </EuiToolTip>
-                                        </ExternalLink>
-                                      </WhoIsLink>
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                  <EuiDescriptionListTitle
-                                    key="title-1"
-                                  >
-                                    <dt
-                                      className="euiDescriptionList__title"
-                                    >
-                                      Reputation
-                                    </dt>
-                                  </EuiDescriptionListTitle>
-                                  <EuiDescriptionListDescription
-                                    key="description-1"
-                                  >
-                                    <dd
-                                      className="euiDescriptionList__description"
-                                    >
-                                      <Memo(ReputationLinkComponent)
-                                        direction="column"
-                                        domain="woohoo!"
-                                      />
-                                    </dd>
-                                  </EuiDescriptionListDescription>
-                                </dl>
-                              </EuiDescriptionList>
-                            </DescriptionListStyled>
-                          </div>
-                        </EuiFlexItem>
-                      </OverviewDescriptionList>
-                      <Loader
-                        overlay={true}
-                        overlayBackground="#fafbfd"
-                        size="xl"
-                      >
-                        <Aside
-                          overlay={true}
-                          overlayBackground="#fafbfd"
-                        >
-                          <aside
-                            className="c4"
-                          >
-                            <FlexGroup
-                              overlay={
+                          <OverviewDescriptionList
+                            descriptionList={
+                              Array [
                                 Object {
-                                  "overlay": true,
-                                }
-                              }
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Location",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Autonomous system",
+                                },
+                              ]
+                            }
+                            key="0"
+                          >
+                            <EuiFlexItem
+                              grow={true}
                             >
-                              <EuiFlexGroup
-                                alignItems="center"
-                                className="c5"
-                                direction="column"
-                                gutterSize="s"
-                                justifyContent="center"
-                                overlay={
-                                  Object {
-                                    "overlay": true,
-                                  }
-                                }
+                              <div
+                                className="euiFlexItem"
                               >
-                                <div
-                                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+                                <DescriptionListStyled
+                                  listItems={
+                                    Array [
+                                      Object {
+                                        "description": <EmptyWrapper>
+                                          —
+                                        </EmptyWrapper>,
+                                        "title": "Location",
+                                      },
+                                      Object {
+                                        "description": <EmptyWrapper>
+                                          —
+                                        </EmptyWrapper>,
+                                        "title": "Autonomous system",
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <EuiDescriptionList
+                                    className="c2"
+                                    listItems={
+                                      Array [
+                                        Object {
+                                          "description": <EmptyWrapper>
+                                            —
+                                          </EmptyWrapper>,
+                                          "title": "Location",
+                                        },
+                                        Object {
+                                          "description": <EmptyWrapper>
+                                            —
+                                          </EmptyWrapper>,
+                                          "title": "Autonomous system",
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <dl
+                                      className="euiDescriptionList euiDescriptionList--row c2"
+                                    >
+                                      <EuiDescriptionListTitle
+                                        key="title-0"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          Location
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-0"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <EmptyWrapper>
+                                            <span
+                                              className="c3"
+                                            >
+                                              —
+                                            </span>
+                                          </EmptyWrapper>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                      <EuiDescriptionListTitle
+                                        key="title-1"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          Autonomous system
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-1"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <EmptyWrapper>
+                                            <span
+                                              className="c3"
+                                            >
+                                              —
+                                            </span>
+                                          </EmptyWrapper>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                    </dl>
+                                  </EuiDescriptionList>
+                                </DescriptionListStyled>
+                              </div>
+                            </EuiFlexItem>
+                          </OverviewDescriptionList>
+                          <OverviewDescriptionList
+                            descriptionList={
+                              Array [
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "First seen",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Last seen",
+                                },
+                              ]
+                            }
+                            key="1"
+                          >
+                            <EuiFlexItem
+                              grow={true}
+                            >
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <DescriptionListStyled
+                                  listItems={
+                                    Array [
+                                      Object {
+                                        "description": <EmptyWrapper>
+                                          —
+                                        </EmptyWrapper>,
+                                        "title": "First seen",
+                                      },
+                                      Object {
+                                        "description": <EmptyWrapper>
+                                          —
+                                        </EmptyWrapper>,
+                                        "title": "Last seen",
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <EuiDescriptionList
+                                    className="c2"
+                                    listItems={
+                                      Array [
+                                        Object {
+                                          "description": <EmptyWrapper>
+                                            —
+                                          </EmptyWrapper>,
+                                          "title": "First seen",
+                                        },
+                                        Object {
+                                          "description": <EmptyWrapper>
+                                            —
+                                          </EmptyWrapper>,
+                                          "title": "Last seen",
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <dl
+                                      className="euiDescriptionList euiDescriptionList--row c2"
+                                    >
+                                      <EuiDescriptionListTitle
+                                        key="title-0"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          First seen
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-0"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <EmptyWrapper>
+                                            <span
+                                              className="c3"
+                                            >
+                                              —
+                                            </span>
+                                          </EmptyWrapper>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                      <EuiDescriptionListTitle
+                                        key="title-1"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          Last seen
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-1"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <EmptyWrapper>
+                                            <span
+                                              className="c3"
+                                            >
+                                              —
+                                            </span>
+                                          </EmptyWrapper>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                    </dl>
+                                  </EuiDescriptionList>
+                                </DescriptionListStyled>
+                              </div>
+                            </EuiFlexItem>
+                          </OverviewDescriptionList>
+                          <OverviewDescriptionList
+                            descriptionList={
+                              Array [
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Host ID",
+                                },
+                                Object {
+                                  "description": <EmptyWrapper>
+                                    —
+                                  </EmptyWrapper>,
+                                  "title": "Host name",
+                                },
+                              ]
+                            }
+                            key="2"
+                          >
+                            <EuiFlexItem
+                              grow={true}
+                            >
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <DescriptionListStyled
+                                  listItems={
+                                    Array [
+                                      Object {
+                                        "description": <EmptyWrapper>
+                                          —
+                                        </EmptyWrapper>,
+                                        "title": "Host ID",
+                                      },
+                                      Object {
+                                        "description": <EmptyWrapper>
+                                          —
+                                        </EmptyWrapper>,
+                                        "title": "Host name",
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <EuiDescriptionList
+                                    className="c2"
+                                    listItems={
+                                      Array [
+                                        Object {
+                                          "description": <EmptyWrapper>
+                                            —
+                                          </EmptyWrapper>,
+                                          "title": "Host ID",
+                                        },
+                                        Object {
+                                          "description": <EmptyWrapper>
+                                            —
+                                          </EmptyWrapper>,
+                                          "title": "Host name",
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <dl
+                                      className="euiDescriptionList euiDescriptionList--row c2"
+                                    >
+                                      <EuiDescriptionListTitle
+                                        key="title-0"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          Host ID
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-0"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <EmptyWrapper>
+                                            <span
+                                              className="c3"
+                                            >
+                                              —
+                                            </span>
+                                          </EmptyWrapper>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                      <EuiDescriptionListTitle
+                                        key="title-1"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          Host name
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-1"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <EmptyWrapper>
+                                            <span
+                                              className="c3"
+                                            >
+                                              —
+                                            </span>
+                                          </EmptyWrapper>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                    </dl>
+                                  </EuiDescriptionList>
+                                </DescriptionListStyled>
+                              </div>
+                            </EuiFlexItem>
+                          </OverviewDescriptionList>
+                          <OverviewDescriptionList
+                            descriptionList={
+                              Array [
+                                Object {
+                                  "description": <Memo(WhoIsLink)
+                                    domain="woohoo!"
+                                  >
+                                    iana.org
+                                  </Memo(WhoIsLink)>,
+                                  "title": "WhoIs",
+                                },
+                                Object {
+                                  "description": <Memo(ReputationLinkComponent)
+                                    direction="column"
+                                    domain="woohoo!"
+                                  />,
+                                  "title": "Reputation",
+                                },
+                              ]
+                            }
+                            key="3"
+                          >
+                            <EuiFlexItem
+                              grow={true}
+                            >
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <DescriptionListStyled
+                                  listItems={
+                                    Array [
+                                      Object {
+                                        "description": <Memo(WhoIsLink)
+                                          domain="woohoo!"
+                                        >
+                                          iana.org
+                                        </Memo(WhoIsLink)>,
+                                        "title": "WhoIs",
+                                      },
+                                      Object {
+                                        "description": <Memo(ReputationLinkComponent)
+                                          direction="column"
+                                          domain="woohoo!"
+                                        />,
+                                        "title": "Reputation",
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <EuiDescriptionList
+                                    className="c2"
+                                    listItems={
+                                      Array [
+                                        Object {
+                                          "description": <Memo(WhoIsLink)
+                                            domain="woohoo!"
+                                          >
+                                            iana.org
+                                          </Memo(WhoIsLink)>,
+                                          "title": "WhoIs",
+                                        },
+                                        Object {
+                                          "description": <Memo(ReputationLinkComponent)
+                                            direction="column"
+                                            domain="woohoo!"
+                                          />,
+                                          "title": "Reputation",
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <dl
+                                      className="euiDescriptionList euiDescriptionList--row c2"
+                                    >
+                                      <EuiDescriptionListTitle
+                                        key="title-0"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          WhoIs
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-0"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <WhoIsLink
+                                            domain="woohoo!"
+                                          >
+                                            <ExternalLink
+                                              url="https://www.iana.org/whois?q=woohoo!"
+                                            >
+                                              <EuiToolTip
+                                                content="https://www.iana.org/whois?q=woohoo!"
+                                                data-test-subj="externalLinkTooltip"
+                                                delay="regular"
+                                                display="inlineBlock"
+                                                position="top"
+                                              >
+                                                <span
+                                                  className="euiToolTipAnchor"
+                                                  onMouseOut={[Function]}
+                                                  onMouseOver={[Function]}
+                                                >
+                                                  <EuiLink
+                                                    data-test-subj="externalLink"
+                                                    href="https://www.iana.org/whois?q=woohoo!"
+                                                    rel="noopener"
+                                                    target="_blank"
+                                                  >
+                                                    <a
+                                                      className="euiLink euiLink--primary"
+                                                      data-test-subj="externalLink"
+                                                      href="https://www.iana.org/whois?q=woohoo!"
+                                                      rel="noopener noreferrer"
+                                                      target="_blank"
+                                                    >
+                                                      iana.org
+                                                      <EuiIcon
+                                                        aria-label="External link"
+                                                        className="euiLink__externalIcon"
+                                                        size="s"
+                                                        type="popout"
+                                                      >
+                                                        <span
+                                                          aria-label="External link"
+                                                          className="euiLink__externalIcon"
+                                                          data-euiicon-type="popout"
+                                                          size="s"
+                                                        />
+                                                      </EuiIcon>
+                                                      <EuiScreenReaderOnly>
+                                                        <span
+                                                          className="euiScreenReaderOnly"
+                                                        >
+                                                          <EuiI18n
+                                                            default="(opens in a new tab or window)"
+                                                            token="euiLink.newTarget.screenReaderOnlyText"
+                                                          >
+                                                            (opens in a new tab or window)
+                                                          </EuiI18n>
+                                                        </span>
+                                                      </EuiScreenReaderOnly>
+                                                    </a>
+                                                  </EuiLink>
+                                                </span>
+                                              </EuiToolTip>
+                                            </ExternalLink>
+                                          </WhoIsLink>
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                      <EuiDescriptionListTitle
+                                        key="title-1"
+                                      >
+                                        <dt
+                                          className="euiDescriptionList__title"
+                                        >
+                                          Reputation
+                                        </dt>
+                                      </EuiDescriptionListTitle>
+                                      <EuiDescriptionListDescription
+                                        key="description-1"
+                                      >
+                                        <dd
+                                          className="euiDescriptionList__description"
+                                        >
+                                          <Memo(ReputationLinkComponent)
+                                            direction="column"
+                                            domain="woohoo!"
+                                          />
+                                        </dd>
+                                      </EuiDescriptionListDescription>
+                                    </dl>
+                                  </EuiDescriptionList>
+                                </DescriptionListStyled>
+                              </div>
+                            </EuiFlexItem>
+                          </OverviewDescriptionList>
+                          <Loader
+                            overlay={true}
+                            overlayBackground="#fafbfd"
+                            size="xl"
+                          >
+                            <Aside
+                              overlay={true}
+                              overlayBackground="#fafbfd"
+                            >
+                              <aside
+                                className="c4"
+                              >
+                                <FlexGroup
                                   overlay={
                                     Object {
                                       "overlay": true,
                                     }
                                   }
                                 >
-                                  <EuiFlexItem
-                                    grow={false}
+                                  <EuiFlexGroup
+                                    alignItems="center"
+                                    className="c5"
+                                    direction="column"
+                                    gutterSize="s"
+                                    justifyContent="center"
+                                    overlay={
+                                      Object {
+                                        "overlay": true,
+                                      }
+                                    }
                                   >
                                     <div
-                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c5"
+                                      overlay={
+                                        Object {
+                                          "overlay": true,
+                                        }
+                                      }
                                     >
-                                      <EuiLoadingSpinner
-                                        data-test-subj="loading-spinner"
-                                        size="xl"
+                                      <EuiFlexItem
+                                        grow={false}
                                       >
-                                        <span
-                                          className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                                          data-test-subj="loading-spinner"
-                                        />
-                                      </EuiLoadingSpinner>
+                                        <div
+                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <EuiLoadingSpinner
+                                            data-test-subj="loading-spinner"
+                                            size="xl"
+                                          >
+                                            <span
+                                              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                                              data-test-subj="loading-spinner"
+                                            />
+                                          </EuiLoadingSpinner>
+                                        </div>
+                                      </EuiFlexItem>
                                     </div>
-                                  </EuiFlexItem>
-                                </div>
-                              </EuiFlexGroup>
-                            </FlexGroup>
-                          </aside>
-                        </Aside>
-                      </Loader>
-                    </div>
-                  </EuiFlexGroup>
-                </OverviewWrapper>
-              </div>
+                                  </EuiFlexGroup>
+                                </FlexGroup>
+                              </aside>
+                            </Aside>
+                          </Loader>
+                        </div>
+                      </EuiFlexGroup>
+                    </OverviewWrapper>
+                  </div>
+                </styled.div>
+              </HoverVisibilityContainer>
             </InspectButtonContainer>
           </IpOverview>
         </ExpandableNetworkDetails>

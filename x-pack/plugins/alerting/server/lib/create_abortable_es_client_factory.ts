@@ -6,15 +6,18 @@
  */
 
 import { TransportRequestOptions, TransportResult } from '@elastic/elasticsearch';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchRequest as SearchRequestWithBody,
+  AggregationsAggregate,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'src/core/server';
-import type { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 export interface IAbortableEsClient {
-  search: (
-    query: ESSearchRequest,
+  search: <TDocument = unknown, TAggregations = Record<string, AggregationsAggregate>>(
+    query: SearchRequest | SearchRequestWithBody,
     options?: TransportRequestOptions
-  ) => Promise<TransportResult<SearchResponse<unknown>, unknown>>;
+  ) => Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
 }
 
 export interface IAbortableClusterClient {
@@ -30,10 +33,13 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
   const { scopedClusterClient, abortController } = opts;
   return {
     asInternalUser: {
-      search: async (query: ESSearchRequest, options?: TransportRequestOptions) => {
+      search: async <TDocument = unknown, TAggregations = Record<string, AggregationsAggregate>>(
+        query: SearchRequest | SearchRequestWithBody,
+        options?: TransportRequestOptions
+      ) => {
         try {
           const searchOptions = options ?? {};
-          return await scopedClusterClient.asInternalUser.search(query, {
+          return await scopedClusterClient.asInternalUser.search<TDocument, TAggregations>(query, {
             ...searchOptions,
             signal: abortController.signal,
           });
@@ -46,10 +52,13 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
       },
     },
     asCurrentUser: {
-      search: async (query: ESSearchRequest, options?: TransportRequestOptions) => {
+      search: async <TDocument = unknown, TAggregations = Record<string, AggregationsAggregate>>(
+        query: SearchRequest | SearchRequestWithBody,
+        options?: TransportRequestOptions
+      ) => {
         try {
           const searchOptions = options ?? {};
-          return await scopedClusterClient.asCurrentUser.search(query, {
+          return await scopedClusterClient.asCurrentUser.search<TDocument, TAggregations>(query, {
             ...searchOptions,
             signal: abortController.signal,
           });

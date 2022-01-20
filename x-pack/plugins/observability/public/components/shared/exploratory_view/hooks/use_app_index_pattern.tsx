@@ -11,9 +11,10 @@ import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { getDataHandler } from '../../../../data_handler';
-import { useExploratoryView } from '../contexts/exploatory_view_config';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
+import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -67,6 +68,11 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
               hasDataT = Boolean(resultUx?.hasData);
               indices = resultUx?.indices;
               break;
+            case 'infra_metrics':
+              const resultMetrics = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultMetrics?.hasData);
+              indices = resultMetrics?.indices;
+              break;
             case 'apm':
             case 'mobile':
               const resultApm = await getDataHandler('apm')?.hasData();
@@ -77,14 +83,17 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
 
           if (hasDataT && indices) {
-            const obsvIndexP = new ObservabilityIndexPatterns(data);
-            const indPattern = await obsvIndexP.getIndexPattern(dataType, indices);
+            const obsvIndexP = new ObservabilityDataViews(data);
+            const indPattern = await obsvIndexP.getDataView(dataType, indices);
 
             setIndexPatterns((prevState) => ({ ...prevState, [dataType]: indPattern }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));
         } catch (e) {
-          if ((e as HttpFetchError).body.error === 'Forbidden') {
+          if (
+            e instanceof DataViewInsufficientAccessError ||
+            (e as HttpFetchError).body === 'Forbidden'
+          ) {
             setIndexPatternErrors((prevState) => ({ ...prevState, [dataType]: e }));
           }
           setLoading((prevState) => ({ ...prevState, [dataType]: false }));

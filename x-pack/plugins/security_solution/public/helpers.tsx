@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
-import { get, isEmpty } from 'lodash/fp';
+import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { has, get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
 
@@ -209,10 +209,35 @@ RedirectRoute.displayName = 'RedirectRoute';
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
+  [ALERT_RULE_NAME]: 'signal.rule.name',
+  [`${ALERT_RULE_PARAMETERS}.filters`]: 'signal.rule.filters',
+  [`${ALERT_RULE_PARAMETERS}.language`]: 'signal.rule.language',
+  [`${ALERT_RULE_PARAMETERS}.query`]: 'signal.rule.query',
 };
 
 const alertFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
+  'signal.rule.name': ALERT_RULE_NAME,
+  'signal.rule.filters': `${ALERT_RULE_PARAMETERS}.filters`,
+  'signal.rule.language': `${ALERT_RULE_PARAMETERS}.language`,
+  'signal.rule.query': `${ALERT_RULE_PARAMETERS}.query`,
+};
+
+/*
+ * Deprecation notice: This functionality should be removed when support for signal.* is no longer
+ * supported.
+ *
+ * Selectively returns the AAD field key (kibana.alert.*) or the legacy field
+ * (signal.*), whichever is present. For backwards compatibility.
+ */
+export const getFieldKey = (ecsData: Ecs, field: string): string => {
+  const aadField = (alertFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
+  const siemSignalsField = (siemSignalsFieldMappings[field] ?? field).replace(
+    'kibana.alert',
+    'signal'
+  );
+  if (has(aadField, ecsData)) return aadField;
+  return siemSignalsField;
 };
 
 /*
@@ -228,5 +253,19 @@ export const getField = (ecsData: Ecs, field: string) => {
     'kibana.alert',
     'signal'
   );
-  return get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
+  const parts = aadField.split('.');
+  if (parts.includes('parameters') && parts[parts.length - 1] !== 'parameters') {
+    const paramsField = parts.slice(0, parts.length - 1).join('.');
+    const params = get(paramsField, ecsData);
+    const value = get(parts[parts.length - 1], params);
+    if (isEmpty(value)) {
+      return [];
+    }
+    return value;
+  }
+  const value = get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
+  if (isEmpty(value)) {
+    return [];
+  }
+  return value;
 };

@@ -87,6 +87,7 @@ describe('SecurityNavControlService', () => {
                       aria-label="some-user"
                       class="euiAvatar euiAvatar--s euiAvatar--user"
                       data-test-subj="userMenuAvatar"
+                      role="img"
                       style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
                       title="some-user"
                     >

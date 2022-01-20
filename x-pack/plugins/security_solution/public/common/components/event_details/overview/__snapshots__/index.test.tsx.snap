@@ -207,7 +207,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field kibana.alert.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -220,8 +220,8 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-kibana.alert.rule.risk_score"
-                    field="kibana.alert.rule.risk_score"
+                    data-test-subj="more-actions-kibana.alert.risk_score"
+                    field="kibana.alert.risk_score"
                     items="[object Object],[object Object],[object Object]"
                     value="47"
                   >

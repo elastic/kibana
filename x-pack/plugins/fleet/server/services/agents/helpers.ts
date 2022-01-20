@@ -12,7 +12,7 @@ import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { getAgentStatus } from '../../../common/services/agent_status';
 
 type FleetServerAgentESResponse =
-  | estypes.MgetHit<FleetServerAgent>
+  | estypes.GetGetResult<FleetServerAgent>
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 

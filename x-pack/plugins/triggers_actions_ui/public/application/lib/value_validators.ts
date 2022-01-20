@@ -6,7 +6,7 @@
  */
 
 import { constant, get, set } from 'lodash';
-import { UserConfiguredActionConnector, IErrorObject, Alert } from '../../types';
+import { UserConfiguredActionConnector, IErrorObject, Rule } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {
@@ -71,7 +71,7 @@ export function getConnectorWithInvalidatedFields(
 }
 
 export function getAlertWithInvalidatedFields(
-  alert: Alert,
+  alert: Rule,
   paramsErrors: IErrorObject,
   baseAlertErrors: IErrorObject,
   actionsErrors: IErrorObject[]

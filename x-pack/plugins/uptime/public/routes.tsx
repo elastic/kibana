@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { EuiPageTemplateProps } from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,7 @@ import {
   MONITOR_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITOR_MANAGEMENT,
+  MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
@@ -30,6 +31,7 @@ import {
   StepDetailPage,
   NotFoundPage,
   SettingsPage,
+  MonitorManagementBottomBar,
 } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
@@ -60,7 +62,7 @@ interface PageRouterProps {
   config: UptimeConfig;
 }
 
-interface RouteProps {
+type RouteProps = {
   path: string;
   component: React.FC;
   dataTestSubj: string;
@@ -71,7 +73,7 @@ interface RouteProps {
     children?: JSX.Element;
     rightSideItems?: JSX.Element[];
   };
-}
+} & EuiPageTemplateProps;
 
 const baseTitle = i18n.translate('xpack.uptime.routes.baseTitle', {
   defaultMessage: 'Uptime - Kibana',
@@ -184,7 +186,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
         rightSideItems: [],
       },
     },
-    ...(config.ui?.unsafe?.monitorManagement?.enabled
+    ...(config.ui?.monitorManagement?.enabled
       ? [
           {
             title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
@@ -203,6 +205,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
+            bottomBar: <MonitorManagementBottomBar />,
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -221,13 +224,14 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
+            bottomBar: <MonitorManagementBottomBar />,
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
               defaultMessage: 'Manage Monitors | {baseTitle}',
               values: { baseTitle },
             }),
-            path: MONITOR_MANAGEMENT,
+            path: MONITOR_MANAGEMENT_ROUTE,
             component: MonitorManagementPage,
             dataTestSubj: 'uptimeMonitorManagementListPage',
             telemetryId: UptimePage.MonitorManagement,
@@ -267,12 +271,24 @@ export const PageRouter: FC<PageRouterProps> = ({ config = {} }) => {
   return (
     <Switch>
       {routes.map(
-        ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
+        ({
+          title,
+          path,
+          component: RouteComponent,
+          dataTestSubj,
+          telemetryId,
+          pageHeader,
+          ...pageTemplateProps
+        }) => (
           <Route path={path} key={telemetryId} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <UptimePageTemplateComponent path={path} pageHeader={pageHeader}>
+              <UptimePageTemplateComponent
+                path={path}
+                pageHeader={pageHeader}
+                {...pageTemplateProps}
+              >
                 <RouteComponent />
               </UptimePageTemplateComponent>
             </div>

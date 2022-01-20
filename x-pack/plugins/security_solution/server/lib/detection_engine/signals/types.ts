@@ -115,12 +115,16 @@ export interface SignalSource {
     };
     rule: {
       id: string;
+      description?: string;
       false_positives?: string[];
       immutable?: boolean;
     };
     /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
     original_time?: string;
+    /** signal.reason was introduced in 7.15 and pre-7.15 signals do not have it. */
+    reason?: string;
+    status?: string;
     threshold_result?: ThresholdResult;
   };
   kibana?: SearchTypes;
@@ -180,6 +184,7 @@ export type WrappedEventHit = BaseHit<EventHit>;
 export type AlertSearchResponse = estypes.SearchResponse<RACAlert>;
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
+export type AlertSourceHit = estypes.SearchHit<RACAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
@@ -321,7 +326,7 @@ export interface SearchAfterAndBulkCreateParams {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

@@ -67,7 +67,7 @@ import {
 } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -160,4 +160,5 @@ export const initRoutes = (
 
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
+  getSourcererDataViewRoute(router, getStartServices);
 };

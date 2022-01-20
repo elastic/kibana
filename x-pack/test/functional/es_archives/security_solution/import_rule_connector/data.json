@@ -1,0 +1,93 @@
+{
+  "type" : "doc",
+  "value": {
+    "index" : ".kibana_1",
+    "id" : "space:714-space",
+    "source" : {
+      "space" : {
+        "name" : "714-space",
+        "initials" : "t",
+        "color" : "#B9A888",
+        "disabledFeatures" : [ ],
+        "imageUrl" : ""
+      },
+      "type" : "space",
+      "references" : [ ],
+      "migrationVersion" : {
+        "space" : "6.6.0"
+      },
+      "updated_at" : "2021-10-11T14:49:07.012Z"
+    }
+  }
+}
+
+{
+  "type" : "doc",
+  "value": {
+    "index" : ".kibana_1",
+    "id" : "space:4567-space",
+    "source" : {
+      "space" : {
+        "name" : "4567-space",
+        "initials" : "t",
+        "color" : "#B9A888",
+        "disabledFeatures" : [ ],
+        "imageUrl" : ""
+      },
+      "type" : "space",
+      "references" : [ ],
+      "migrationVersion" : {
+        "space" : "6.6.0"
+      },
+      "updated_at" : "2021-10-11T14:49:07.012Z"
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_1",
+    "id": "714-space:action:51b17790-544e-11ec-a349-11361cc441c4",
+    "source": {
+      "action": {
+        "actionTypeId": ".slack",
+        "name": "7.16 test connector",
+        "isMissingSecrets": false,
+        "config": {},
+        "secrets": "fEO5Lk2AxFWtXNpTyg2DZKaZCjeCfMh/DGch02neTGJ/Hzu+w4DXigUVuUtgynNyRbhe7TbnTzi44jVg39WB3VR3yoWSFtvV/W7NHa3B1Kr3za1S3V4XCIu/CMIk0k8vnQMiNGiMuolwws6UjvQk8fiVJygjznhEGc66TMuAmKdz7fM="
+      },
+      "type": "action",
+      "references": [],
+      "namespace": "714-space",
+      "migrationVersion": {
+        "action": "7.14.0"
+      },
+      "updated_at": "2021-12-03T15:33:09.651Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_1",
+    "id": "action:61b17790-544e-11ec-a349-11361cc441c4",
+    "source": {
+      "action": {
+        "actionTypeId": ".slack",
+        "name": "7.16 test connector",
+        "isMissingSecrets": false,
+        "config": {},
+        "secrets": "fEO5Lk2AxFWtXNpTyg2DZKaZCjeCfMh/DGch02neTGJ/Hzu+w4DXigUVuUtgynNyRbhe7TbnTzi44jVg39WB3VR3yoWSFtvV/W7NHa3B1Kr3za1S3V4XCIu/CMIk0k8vnQMiNGiMuolwws6UjvQk8fiVJygjznhEGc66TMuAmKdz7fM="
+      },
+      "type": "action",
+      "references": [],
+      "migrationVersion": {
+        "action": "7.14.0"
+      },
+      "updated_at": "2021-12-03T15:33:09.651Z"
+    }
+  }
+}

@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -356,18 +356,10 @@ export const getHeatmapVisualization = ({
                       strokeColor: state.gridConfig.strokeColor
                         ? [state.gridConfig.strokeColor]
                         : [],
-                      cellHeight: state.gridConfig.cellHeight ? [state.gridConfig.cellHeight] : [],
-                      cellWidth: state.gridConfig.cellWidth ? [state.gridConfig.cellWidth] : [],
                       // cells
                       isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
                       // Y-axis
                       isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
-                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
-                        ? [state.gridConfig.yAxisLabelWidth]
-                        : [],
-                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
-                        ? [state.gridConfig.yAxisLabelColor]
-                        : [],
                       // X-axis
                       isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
                         ? [state.gridConfig.isXAxisLabelVisible]

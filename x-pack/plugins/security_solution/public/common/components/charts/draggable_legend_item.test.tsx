@@ -68,4 +68,13 @@ describe('DraggableLegendItem', () => {
     );
     expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
   });
+
+  it('does not render the empty value label when the value is a number', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: 0 }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeFalsy();
+  });
 });

@@ -92,8 +92,8 @@ export interface PersistableState<P extends SerializableRecord = SerializableRec
  */
 export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
-  FromVersion extends SerializableRecord = SerializableRecord,
-  ToVersion extends SerializableRecord = SerializableRecord
+  FromVersion extends Serializable = SerializableRecord,
+  ToVersion extends Serializable = SerializableRecord
 > = (state: FromVersion) => ToVersion;
 
 /**
@@ -106,9 +106,6 @@ export type PersistableStateMigrateFn = (
   version: string
 ) => SerializableRecord;
 
-/**
- * @todo Shall we remove this?
- */
 export type PersistableStateDefinition<P extends SerializableRecord = SerializableRecord> = Partial<
   PersistableState<P>
 >;

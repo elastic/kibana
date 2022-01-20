@@ -6,13 +6,13 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { ALERT_RULE_SEVERITY, ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY, ALERT_REASON } from '@kbn/rule-data-utils';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
@@ -40,7 +40,7 @@ export const RenderCellValue: React.FC<
   timelineId,
 }) => {
   const value =
-    getMappedNonEcsValue({
+    useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
@@ -48,7 +48,7 @@ export const RenderCellValue: React.FC<
 
   switch (columnId) {
     case 'signal.rule.severity':
-    case ALERT_RULE_SEVERITY:
+    case ALERT_SEVERITY:
       return (
         <DefaultDraggable
           data-test-subj="custom-severity"

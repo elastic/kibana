@@ -16,7 +16,7 @@ If you are using a self-managed deployment, access {kib} through the web applica
 
 . Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 +
-To remotely connect to {kib}, set <server-host,server.host>> to a non-loopback address.
+To remotely connect to {kib}, set <<server-host,server.host>> to a non-loopback address.
 
 . Log on to your account.
 

@@ -26,6 +26,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const ml = getService('ml');
   const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
@@ -679,7 +680,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformId(transformId: string) {
-      await testSubjects.setValue('transformIdInput', transformId, { clearWithKeyboard: true });
+      await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
+        clearWithKeyboard: true,
+      });
       await this.assertTransformIdValue(transformId);
     },
 
@@ -699,7 +702,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformDescription(transformDescription: string) {
-      await testSubjects.setValue('transformDescriptionInput', transformDescription, {
+      await ml.commonUI.setValueWithChecks('transformDescriptionInput', transformDescription, {
         clearWithKeyboard: true,
       });
       await this.assertTransformDescriptionValue(transformDescription);
@@ -721,7 +724,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await testSubjects.setValue('transformDestinationIndexInput', destinationIndex, {
+      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
         clearWithKeyboard: true,
       });
       await this.assertDestinationIndexValue(destinationIndex);

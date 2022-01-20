@@ -15,13 +15,13 @@ import {
 import { ESConnectorFields } from '../../services';
 import { ConnectorTypes, CaseType } from '../../../common/api';
 import {
-  transformConnectorIdToReference,
-  transformPushConnectorIdToReference,
-} from '../../services/user_actions/transform';
-import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
+import {
+  transformConnectorIdToReference,
+  transformPushConnectorIdToReference,
+} from './user_actions/connector_id';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;

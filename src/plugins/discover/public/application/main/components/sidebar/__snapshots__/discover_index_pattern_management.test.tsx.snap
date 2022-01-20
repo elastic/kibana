@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Discover IndexPattern Management renders correctly 1`] = `
+exports[`Discover DataView Management renders correctly 1`] = `
 <DiscoverIndexPatternManagement
   editField={[MockFunction]}
   intl={
@@ -619,7 +619,6 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
       "getFieldAttrs": [Function],
       "getOriginalSavedObjectBody": [Function],
       "id": "logstash-*",
-      "intervalName": undefined,
       "metaFields": Array [
         "_id",
         "_type",

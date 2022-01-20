@@ -284,7 +284,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async setAnomaliesDate(date: string) {
       await testSubjects.click('superDatePickerShowDatesButton');
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();

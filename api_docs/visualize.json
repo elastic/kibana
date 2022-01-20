@@ -60,13 +60,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/visualize/public/application/types.ts",
@@ -93,13 +87,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "src/plugins/visualize/public/application/types.ts",

@@ -18,6 +18,8 @@ import * as i18n from './translations';
 import { OptionalFieldLabel } from './optional_field_label';
 const { emptyField, maxLengthField } = fieldValidators;
 
+const isEmptyString = (value: string) => value.trim() === '';
+
 export const schemaTags = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.TAGS,
@@ -25,7 +27,16 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
   validations: [
     {
-      validator: emptyField(i18n.TAGS_EMPTY_ERROR),
+      validator: ({ value }: { value: string | string[] }) => {
+        if (
+          (!Array.isArray(value) && isEmptyString(value)) ||
+          (Array.isArray(value) && value.length > 0 && value.find(isEmptyString))
+        ) {
+          return {
+            message: i18n.TAGS_EMPTY_ERROR,
+          };
+        }
+      },
       type: VALIDATION_TYPES.ARRAY_ITEM,
       isBlocking: false,
     },
@@ -36,6 +47,7 @@ export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
+  selectedOwner?: string | null;
 };
 
 export const schema: FormSchema<FormProps> = {
@@ -59,6 +71,15 @@ export const schema: FormSchema<FormProps> = {
     validations: [
       {
         validator: emptyField(i18n.DESCRIPTION_REQUIRED),
+      },
+    ],
+  },
+  selectedOwner: {
+    label: i18n.SOLUTION,
+    type: FIELD_TYPES.RADIO_GROUP,
+    validations: [
+      {
+        validator: emptyField(i18n.SOLUTION_REQUIRED),
       },
     ],
   },

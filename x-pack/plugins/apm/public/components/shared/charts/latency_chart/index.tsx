@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { AlertType } from '../../../../../common/alert_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -24,7 +24,7 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/Links/url_helpers';
+import * as urlHelpers from '../../../shared/links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';

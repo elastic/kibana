@@ -5,13 +5,23 @@
     "functions": [
       {
         "parentPluginId": "expressionImage",
-        "id": "def-public.imageRenderer",
+        "id": "def-public.getImageRenderer",
         "type": "Function",
         "tags": [],
-        "label": "imageRenderer",
+        "label": "getImageRenderer",
         "description": [],
         "signature": [
-          "() => ",
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -31,23 +41,51 @@
         ],
         "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "expressionImage",
+            "id": "def-public.getImageRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
-      }
-    ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+      },
       {
         "parentPluginId": "expressionImage",
-        "id": "def-public.renderers",
-        "type": "Array",
+        "id": "def-public.imageRendererFactory",
+        "type": "Function",
         "tags": [],
-        "label": "renderers",
+        "label": "imageRendererFactory",
         "description": [],
         "signature": [
-          "(() => ",
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -63,13 +101,40 @@
             "section": "def-common.ImageRendererConfig",
             "text": "ImageRendererConfig"
           },
-          ">)[]"
+          ">"
         ],
-        "path": "src/plugins/expression_image/public/expression_renderers/index.ts",
+        "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
         "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionImage",
+            "id": "def-public.imageRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "expressionImage",
@@ -323,13 +388,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_image/common/types/expression_functions.ts",
@@ -346,7 +405,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"left\" | \"bottom\" | \"right\""
+          "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
         "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,

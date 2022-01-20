@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { buildStatusesKuery, findAgentIdsByStatus } from './agent_status';
-import { elasticsearchServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { AgentClient } from '../../../../../../fleet/server/services';
 import { createMockAgentClient } from '../../../../../../fleet/server/mocks';
 import { Agent } from '../../../../../../fleet/common/types/models';
 import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
 
 describe('test filtering endpoint hosts by agent status', () => {
-  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
   let mockAgentClient: jest.Mocked<AgentClient>;
   beforeEach(() => {
-    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockAgentClient = createMockAgentClient();
   });
 
@@ -31,9 +27,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       })
     );
 
-    const result = await findAgentIdsByStatus(mockAgentClient, mockElasticsearchClient, [
-      'healthy',
-    ]);
+    const result = await findAgentIdsByStatus(mockAgentClient, ['healthy']);
     expect(result).toBeDefined();
   });
 
@@ -56,9 +50,7 @@ describe('test filtering endpoint hosts by agent status', () => {
         })
       );
 
-    const result = await findAgentIdsByStatus(mockAgentClient, mockElasticsearchClient, [
-      'offline',
-    ]);
+    const result = await findAgentIdsByStatus(mockAgentClient, ['offline']);
     const offlineKuery = AgentStatusKueryHelper.buildKueryForOfflineAgents();
     expect(mockAgentClient.listAgents.mock.calls[0][0].kuery).toEqual(
       expect.stringContaining(offlineKuery)
@@ -86,10 +78,7 @@ describe('test filtering endpoint hosts by agent status', () => {
         })
       );
 
-    const result = await findAgentIdsByStatus(mockAgentClient, mockElasticsearchClient, [
-      'updating',
-      'unhealthy',
-    ]);
+    const result = await findAgentIdsByStatus(mockAgentClient, ['updating', 'unhealthy']);
     const unenrollKuery = AgentStatusKueryHelper.buildKueryForUpdatingAgents();
     const errorKuery = AgentStatusKueryHelper.buildKueryForErrorAgents();
     expect(mockAgentClient.listAgents.mock.calls[0][0].kuery).toEqual(

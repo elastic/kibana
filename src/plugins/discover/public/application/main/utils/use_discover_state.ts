@@ -92,14 +92,20 @@ export function useDiscoverState({
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
     initialFetchStatus,
     searchSessionManager,
+    savedSearch,
     searchSource,
     services,
     stateContainer,
     useNewFieldsApi,
   });
 
+  /**
+   * Sync URL state with local app state on saved search load
+   * or dataView / savedSearch switch
+   */
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+    setState(stateContainer.appStateContainer.getState());
 
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
@@ -205,21 +211,6 @@ export function useDiscoverState({
     },
     [refetch$, searchSessionManager]
   );
-
-  useEffect(() => {
-    if (!savedSearch || !savedSearch.id) {
-      return;
-    }
-    // handling pushing to state of a persisted saved object
-    const newAppState = getStateDefaults({
-      config,
-      data,
-      savedSearch,
-      storage,
-    });
-    stateContainer.replaceUrlAppState(newAppState);
-    setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer, storage]);
 
   /**
    * Trigger data fetching on indexPattern or savedSearch changes

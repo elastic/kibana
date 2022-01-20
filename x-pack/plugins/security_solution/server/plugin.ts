@@ -37,8 +37,7 @@ import {
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
-import { isAlertExecutor } from './lib/detection_engine/signals/types';
-import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
+import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
@@ -52,7 +51,6 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -185,6 +183,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures,
       logger: this.logger,
       ml: plugins.ml,
+      eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
     };
 
@@ -280,23 +279,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
-    // Continue to register legacy rules against alerting client exposed through rule-registry
     if (plugins.alerting != null) {
-      const signalRuleType = signalRulesAlertType({
-        logger,
-        eventsTelemetry: this.telemetryEventsSender,
-        version: pluginContext.env.packageInfo.version,
-        ml: plugins.ml,
-        lists: plugins.lists,
-        config,
-        experimentalFeatures,
-        eventLogService,
-      });
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
-
-      if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
-      }
 
       if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
@@ -432,6 +416,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerIngestCallback,
       licenseService,
       exceptionListsClient: exceptionListClient,
+      registerListsServerExtension: this.lists?.registerExtension,
     });
 
     this.telemetryReceiver.start(
@@ -448,10 +433,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    this.checkMetadataTransformsTask?.start({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      taskManager: plugins.taskManager!,
-    });
+    if (plugins.taskManager) {
+      this.checkMetadataTransformsTask?.start({
+        taskManager: plugins.taskManager,
+      });
+    }
 
     return {};
   }

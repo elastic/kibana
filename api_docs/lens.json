@@ -432,9 +432,9 @@
             "label": "layers",
             "description": [],
             "signature": [
-              "{ [x: string]: Pick<",
+              "{ [x: string]: Omit<",
               "IndexPatternLayer",
-              ", \"columns\" | \"columnOrder\" | \"incompleteColumns\">; }"
+              ", \"indexPatternId\">; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
             "deprecated": false
@@ -530,7 +530,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"top\" | \"left\" | \"bottom\" | \"right\""
+              "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
             "deprecated": false
@@ -575,7 +575,8 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | \"near\" | \"far\" | undefined"
+              "HorizontalAlignment",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
             "deprecated": false
@@ -590,7 +591,8 @@
               "\nVertical Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"top\" | \"bottom\" | \"middle\" | \"near\" | \"far\" | undefined"
+              "VerticalAlignment",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
             "deprecated": false
@@ -698,11 +700,11 @@
               "\nReact component which can be used to embed a Lens Visualization Save Modal Component.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
             ],
             "signature": [
-              "React.ComponentClass<Pick<",
+              "React.ComponentClass<Omit<",
               "SaveModalContainerProps",
-              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">, any> | React.FunctionComponent<Pick<",
+              ", \"lensServices\">, any> | React.FunctionComponent<Omit<",
               "SaveModalContainerProps",
-              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">>"
+              ", \"lensServices\">>"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false
@@ -720,9 +722,13 @@
             ],
             "signature": [
               "(input: ",
-              "LensByValueInput",
-              " | ",
-              "LensByReferenceInput",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensEmbeddableInput",
+                "text": "LensEmbeddableInput"
+              },
               " | undefined, options?: { openInNewTab?: boolean | undefined; originatingApp?: string | undefined; originatingPath?: string | undefined; } | undefined) => void"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
@@ -736,9 +742,13 @@
                 "label": "input",
                 "description": [],
                 "signature": [
-                  "LensByValueInput",
-                  " | ",
-                  "LensByReferenceInput",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.LensEmbeddableInput",
+                    "text": "LensEmbeddableInput"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
@@ -880,12 +890,8 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ tinymathAst: string | number | ",
-              "TinymathVariable",
-              " | ",
-              "TinymathFunction",
-              " | ",
-              "TinymathNamedArgument",
+              "{ tinymathAst: string | ",
+              "TinymathAST",
               "; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
@@ -948,7 +954,14 @@
             "label": "colorMode",
             "description": [],
             "signature": [
-              "\"None\" | \"Background\" | \"Labels\" | undefined"
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.ColorMode",
+                "text": "ColorMode"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/metric_chart/types.ts",
             "deprecated": false
@@ -1002,7 +1015,8 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"histogram\" | \"document\""
+              "\"string\" | \"number\" | \"boolean\" | \"date\" | ",
+              "FieldOnlyDataType"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false
@@ -1028,6 +1042,19 @@
             ],
             "signature": [
               "\"interval\" | \"ordinal\" | \"ratio\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.OperationMetadata.isStaticValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isStaticValue",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false
@@ -1109,7 +1136,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\""
+              "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1255,7 +1282,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"hidden\" | \"value\" | \"percent\""
+              "\"percent\" | \"hidden\" | \"value\""
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1294,7 +1321,20 @@
             "label": "legendPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"left\" | \"bottom\" | \"right\" | undefined"
+              "\"top\" | \"bottom\" | \"left\" | \"right\" | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.showValuesInLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showValuesInLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
             "deprecated": false
@@ -1318,6 +1358,19 @@
             "type": "number",
             "tags": [],
             "label": "percentDecimals",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/expressions/pie_chart/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.emptySizeRatio",
+            "type": "number",
+            "tags": [],
+            "label": "emptySizeRatio",
             "description": [],
             "signature": [
               "number | undefined"
@@ -1378,7 +1431,7 @@
             "text": "FieldBasedIndexPatternColumn"
           }
         ],
-        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
+        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1391,7 +1444,7 @@
             "signature": [
               "\"terms\""
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
             "deprecated": false
           },
           {
@@ -1402,9 +1455,9 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+              "{ size: number; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; parentFormat?: { id: string; params?: { id?: string | undefined; template?: string | undefined; } | undefined; } | undefined; }"
             ],
-            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
             "deprecated": false
           }
         ],
@@ -1589,7 +1642,14 @@
             "label": "valueLabels",
             "description": [],
             "signature": [
-              "\"hide\" | \"inside\" | \"outside\" | undefined"
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueLabelConfig",
+                "text": "ValueLabelConfig"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -1752,7 +1812,8 @@
             "label": "curveType",
             "description": [],
             "signature": [
-              "\"LINEAR\" | \"CURVE_MONOTONE_X\" | undefined"
+              "XYCurveType",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -1827,7 +1888,8 @@
             "label": "axisMode",
             "description": [],
             "signature": [
-              "\"auto\" | \"left\" | \"bottom\" | \"right\" | undefined"
+              "YAxisMode",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1879,7 +1941,8 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
+              "LineStyle",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1892,7 +1955,8 @@
             "label": "fill",
             "description": [],
             "signature": [
-              "\"none\" | \"above\" | \"below\" | undefined"
+              "FillStyle",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -1905,7 +1969,8 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"auto\" | \"left\" | \"right\" | \"above\" | \"below\" | undefined"
+              "IconPosition",
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
             "deprecated": false
@@ -2017,7 +2082,8 @@
         "label": "DataType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"histogram\" | \"document\""
+          "\"string\" | \"number\" | \"boolean\" | \"date\" | ",
+          "FieldOnlyDataType"
         ],
         "path": "x-pack/plugins/lens/public/types.ts",
         "deprecated": false,
@@ -2048,37 +2114,17 @@
         "label": "EmbeddableComponentProps",
         "description": [],
         "signature": [
-          "(Pick<",
-          "LensByValueInput",
-          ", \"title\" | \"query\" | \"filters\" | \"viewMode\" | \"id\" | \"timeRange\" | \"className\" | \"style\" | \"onLoad\" | \"searchSessionId\" | \"executionContext\" | \"lastReloadRequestTime\" | \"hidePanelTitles\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"syncColors\" | \"palette\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          "(",
           {
             "pluginId": "lens",
             "scope": "public",
             "docId": "kibLensPluginApi",
-            "section": "def-public.XYState",
-            "text": "XYState"
+            "section": "def-public.TypedLensByValueInput",
+            "text": "TypedLensByValueInput"
           },
-          "> | LensAttributes<\"lnsPie\", ",
-          "PieVisualizationState",
-          "> | LensAttributes<\"lnsDatatable\", ",
-          {
-            "pluginId": "lens",
-            "scope": "public",
-            "docId": "kibLensPluginApi",
-            "section": "def-public.DatatableVisualizationState",
-            "text": "DatatableVisualizationState"
-          },
-          "> | LensAttributes<\"lnsMetric\", ",
-          "MetricState",
-          ">; } & { withActions?: boolean | undefined; }) | (",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          " & LensBaseEmbeddableInput & { withActions?: boolean | undefined; })"
+          " | ",
+          "LensByReferenceInput",
+          ") & { withActions?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
         "deprecated": false,
@@ -2343,9 +2389,9 @@
           "\nType-safe variant of by value embeddable input for Lens.\nThis can be used to hardcode certain Lens chart configurations within another app."
         ],
         "signature": [
-          "Pick<",
+          "Omit<",
           "LensByValueInput",
-          ", \"title\" | \"query\" | \"filters\" | \"viewMode\" | \"id\" | \"timeRange\" | \"className\" | \"style\" | \"onLoad\" | \"searchSessionId\" | \"executionContext\" | \"lastReloadRequestTime\" | \"hidePanelTitles\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"syncColors\" | \"palette\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"attributes\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -2407,7 +2453,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"auto\" | \"left\" | \"bottom\" | \"right\""
+          "\"bottom\" | \"left\" | \"right\" | \"auto\""
         ],
         "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
         "deprecated": false,
@@ -2754,21 +2800,9 @@
             "description": [],
             "signature": [
               "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columnOrder: string[]; columns: Record<string, Record<string, unknown>>; }>; }; }; visualization: VisualizationState; query: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -2841,22 +2875,18 @@
             "label": "state",
             "description": [],
             "signature": [
-              "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }; }; visualization: VisualizationState; query: ",
+              "{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
               {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
+                "pluginId": "lens",
+                "scope": "server",
+                "docId": "kibLensPluginApi",
+                "section": "def-server.OperationTypePost712",
+                "text": "OperationTypePost712"
               },
+              "; }>; }>; }; }; visualization: VisualizationState; query: ",
+              "Query",
               "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -2938,21 +2968,9 @@
                 "text": "OperationTypePre712"
               },
               "; }>; }>; }; }; query: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               "; visualization: VisualizationState; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]; }"
             ],
             "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -3134,7 +3152,7 @@
         "label": "LensDocShape713",
         "description": [],
         "signature": [
-          "Pick<",
+          "Omit<",
           {
             "pluginId": "lens",
             "scope": "server",
@@ -3142,23 +3160,43 @@
             "section": "def-server.LensDocShapePost712",
             "text": "LensDocShapePost712"
           },
-          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }; }; visualization: unknown; query: ",
+          "<unknown>, \"state\"> & { state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
           {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
           },
+          "; }>; }>; }; }; visualization: unknown; query: ",
+          "Query",
           "; filters: ",
+          "Filter",
+          "[]; }, \"datasourceStates\"> & { datasourceStates: { indexpattern: Omit<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
           {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
           },
-          "[]; }, \"query\" | \"filters\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }, never> & { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; } | { operationType: \"date_histogram\"; params: { interval: string; timeZone?: string | undefined; }; }>; }>; }; }; }; }"
+          "; }>; }>; }, \"layers\"> & { layers: Record<string, Omit<{ columns: Record<string, { operationType: ",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
+          },
+          "; }>; }, \"columns\"> & { columns: Record<string, { operationType: ",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
+          },
+          "; } | { operationType: \"date_histogram\"; params: { interval: string; timeZone?: string | undefined; }; }>; }>; }; }; }; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3172,7 +3210,7 @@
         "label": "LensDocShape714",
         "description": [],
         "signature": [
-          "Pick<",
+          "Omit<",
           {
             "pluginId": "lens",
             "scope": "server",
@@ -3180,23 +3218,43 @@
             "section": "def-server.LensDocShapePost712",
             "text": "LensDocShapePost712"
           },
-          "<unknown>, \"title\" | \"expression\" | \"visualizationType\"> & { state: Pick<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }; }; visualization: unknown; query: ",
+          "<unknown>, \"state\"> & { state: Omit<{ datasourceMetaData: { filterableIndexPatterns: { id: string; title: string; }[]; }; datasourceStates: { indexpattern: { currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
           {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
           },
+          "; }>; }>; }; }; visualization: unknown; query: ",
+          "Query",
           "; filters: ",
+          "Filter",
+          "[]; }, \"datasourceStates\"> & { datasourceStates: { indexpattern: Omit<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: ",
           {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
           },
-          "[]; }, \"query\" | \"filters\" | \"visualization\" | \"datasourceMetaData\"> & { datasourceStates: { indexpattern: Pick<{ currentIndexPatternId: string; layers: Record<string, { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }>; }, \"currentIndexPatternId\"> & { layers: Record<string, Pick<{ columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; }>; }, never> & { columns: Record<string, { operationType: \"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\"; } | { operationType: \"date_histogram\"; params: { interval: string; }; }>; }>; }; }; }; }"
+          "; }>; }>; }, \"layers\"> & { layers: Record<string, Omit<{ columns: Record<string, { operationType: ",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
+          },
+          "; }>; }, \"columns\"> & { columns: Record<string, { operationType: ",
+          {
+            "pluginId": "lens",
+            "scope": "server",
+            "docId": "kibLensPluginApi",
+            "section": "def-server.OperationTypePost712",
+            "text": "OperationTypePost712"
+          },
+          "; } | { operationType: \"date_histogram\"; params: { interval: string; }; }>; }>; }; }; }; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3210,7 +3268,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"median\" | \"date_histogram\" | \"average\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3224,7 +3282,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"date_histogram\" | \"sum\" | \"percentile\" | \"range\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"cardinality\" | \"last_value\" | \"counter_rate\""
+          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"avg\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"cardinality\" | \"last_value\" | \"counter_rate\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -3590,7 +3648,7 @@
             "label": "continuity",
             "description": [],
             "signature": [
-              "\"none\" | \"all\" | \"above\" | \"below\" | undefined"
+              "\"above\" | \"below\" | \"all\" | \"none\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -4000,13 +4058,7 @@
             "text": "PersistableFilter"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          }
+          "Filter"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -4049,13 +4101,7 @@
             "text": "PersistableFilterMeta"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.FilterMeta",
-            "text": "FilterMeta"
-          }
+          "FilterMeta"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

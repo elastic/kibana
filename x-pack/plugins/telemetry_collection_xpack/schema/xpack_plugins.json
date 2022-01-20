@@ -3763,6 +3763,72 @@
               }
             }
           }
+        },
+        "saved_multiterms_overall": {
+          "properties": {
+            "multiterms_docs": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
+              }
+            },
+            "multiterms_terms_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
+              }
+            },
+            "multiterms_operations_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of operations using multiterms of saved lens visualizations"
+              }
+            }
+          }
+        },
+        "saved_multiterms_30_days": {
+          "properties": {
+            "multiterms_docs": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
+              }
+            },
+            "multiterms_terms_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
+              }
+            },
+            "multiterms_operations_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of operations using multiterms of saved lens visualizations"
+              }
+            }
+          }
+        },
+        "saved_multiterms_90_days": {
+          "properties": {
+            "multiterms_docs": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
+              }
+            },
+            "multiterms_terms_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
+              }
+            },
+            "multiterms_operations_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Sum of operations using multiterms of saved lens visualizations"
+              }
+            }
+          }
         }
       }
     },
@@ -4859,73 +4925,6 @@
     },
     "reporting": {
       "properties": {
-        "csv": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "sizes": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
         "csv_searchsource": {
           "properties": {
             "available": {
@@ -5354,22 +5353,6 @@
           "properties": {
             "completed": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5470,22 +5453,6 @@
             },
             "completed_with_warnings": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5586,22 +5553,6 @@
             },
             "failed": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5702,22 +5653,6 @@
             },
             "pending": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5818,22 +5753,6 @@
             },
             "processing": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5967,73 +5886,6 @@
         },
         "last7Days": {
           "properties": {
-            "csv": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "sizes": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "csv_searchsource": {
               "properties": {
                 "available": {
@@ -6462,22 +6314,6 @@
               "properties": {
                 "completed": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6578,22 +6414,6 @@
                 },
                 "completed_with_warnings": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6694,22 +6514,6 @@
                 },
                 "failed": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6810,22 +6614,6 @@
                 },
                 "pending": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6926,22 +6714,6 @@
                 },
                 "processing": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -7214,6 +6986,30 @@
                           "_meta": {
                             "description": "Number of cases attached to query detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7241,6 +7037,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to threshold detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7270,6 +7090,30 @@
                           "_meta": {
                             "description": "Number of cases attached to eql detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7297,6 +7141,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to machine_learning detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7326,6 +7194,30 @@
                           "_meta": {
                             "description": "Number of cases attached to threat_match detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7354,6 +7246,30 @@
                           "_meta": {
                             "description": "Number of cases attached to elastic detection rule alerts"
                           }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
                         }
                       }
                     },
@@ -7381,6 +7297,30 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to custom detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
                           }
                         }
                       }
@@ -7449,6 +7389,18 @@
                         "type": "long",
                         "_meta": {
                           "description": "The number of total cases generated by a rule"
+                        }
+                      },
+                      "has_legacy_notification": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a legacy notification"
+                        }
+                      },
+                      "has_notification": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has a notification"
                         }
                       }
                     }

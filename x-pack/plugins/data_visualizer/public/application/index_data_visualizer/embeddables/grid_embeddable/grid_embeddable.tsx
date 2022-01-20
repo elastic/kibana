@@ -20,7 +20,10 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
@@ -54,6 +57,7 @@ export interface DataVisualizerGridInput {
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
@@ -204,16 +208,18 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
-          <Suspense fallback={<EmbeddableLoading />}>
-            <IndexDataVisualizerViewWrapper
-              id={this.input.id}
-              embeddableContext={this}
-              embeddableInput={this.getInput$()}
-              onOutputChange={(output) => this.updateOutput(output)}
-            />
-          </Suspense>
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
+          <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <IndexDataVisualizerViewWrapper
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput={this.getInput$()}
+                onOutputChange={(output) => this.updateOutput(output)}
+              />
+            </Suspense>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>,
       node
     );

@@ -658,7 +658,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

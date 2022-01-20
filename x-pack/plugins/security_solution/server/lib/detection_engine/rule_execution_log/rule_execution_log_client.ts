@@ -23,6 +23,7 @@ import {
   ExtMeta,
 } from './types';
 import { truncateMessage } from './utils/normalization';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface ConstructorParams {
   underlyingClient: UnderlyingLogClient;
@@ -56,30 +57,38 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
 
   /** @deprecated */
   public find(args: FindExecutionLogArgs) {
-    return this.client.find(args);
+    return withSecuritySpan('RuleExecutionLogClient.find', () => this.client.find(args));
   }
 
   /** @deprecated */
   public findBulk(args: FindBulkExecutionLogArgs) {
-    return this.client.findBulk(args);
+    return withSecuritySpan('RuleExecutionLogClient.findBulk', () => this.client.findBulk(args));
   }
 
   public getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]> {
-    return this.client.getLastFailures(args);
+    return withSecuritySpan('RuleExecutionLogClient.getLastFailures', () =>
+      this.client.getLastFailures(args)
+    );
   }
 
   public getCurrentStatus(
     args: GetCurrentStatusArgs
   ): Promise<IRuleStatusSOAttributes | undefined> {
-    return this.client.getCurrentStatus(args);
+    return withSecuritySpan('RuleExecutionLogClient.getCurrentStatus', () =>
+      this.client.getCurrentStatus(args)
+    );
   }
 
   public getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult> {
-    return this.client.getCurrentStatusBulk(args);
+    return withSecuritySpan('RuleExecutionLogClient.getCurrentStatusBulk', () =>
+      this.client.getCurrentStatusBulk(args)
+    );
   }
 
-  public deleteCurrentStatus(ruleId: string): Promise<void> {
-    return this.client.deleteCurrentStatus(ruleId);
+  public async deleteCurrentStatus(ruleId: string): Promise<void> {
+    await withSecuritySpan('RuleExecutionLogClient.deleteCurrentStatus', () =>
+      this.client.deleteCurrentStatus(ruleId)
+    );
   }
 
   public async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
@@ -87,10 +96,17 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
 
     try {
       const truncatedMessage = message ? truncateMessage(message) : message;
-      await this.client.logStatusChange({
-        ...args,
-        message: truncatedMessage,
-      });
+      await withSecuritySpan(
+        {
+          name: 'RuleExecutionLogClient.logStatusChange',
+          labels: { new_rule_execution_status: args.newStatus },
+        },
+        () =>
+          this.client.logStatusChange({
+            ...args,
+            message: truncatedMessage,
+          })
+      );
     } catch (e) {
       const logMessage = 'Error logging rule execution status change';
       const logAttributes = `status: "${newStatus}", rule id: "${ruleId}", rule name: "${ruleName}"`;

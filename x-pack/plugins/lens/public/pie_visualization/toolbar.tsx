@@ -14,6 +14,7 @@ import {
   EuiSuperSelect,
   EuiRange,
   EuiHorizontalRule,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -54,9 +55,19 @@ const legendOptions: Array<{
   },
 ];
 
+const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLabel', {
+  defaultMessage: 'Inner area size',
+});
+
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState, frame } = props;
   const layer = state.layers[0];
+  const {
+    categoryOptions,
+    numberOptions,
+    emptySizeRatioOptions,
+    isDisabled: isToolbarPopoverDisabled,
+  } = PartitionChartsMeta[state.shape].toolbarPopover;
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {
@@ -118,14 +129,17 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     });
   }, [layer, state.shape, onStateChange]);
 
+  const onEmptySizeRatioChange = useCallback(
+    (sizeId) => {
+      const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
+      onStateChange({ emptySizeRatio });
+    },
+    [emptySizeRatioOptions, onStateChange]
+  );
+
   if (!layer) {
     return null;
   }
-  const {
-    categoryOptions,
-    numberOptions,
-    isDisabled: isToolbarPopoverDisabled,
-  } = PartitionChartsMeta[state.shape].toolbarPopover;
 
   const defaultTruncationValue = getDefaultVisualValuesForLayer(
     state,
@@ -193,6 +207,32 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           />
         </EuiFormRow>
       </ToolbarPopover>
+      {emptySizeRatioOptions?.length ? (
+        <ToolbarPopover
+          title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
+            defaultMessage: 'Visual options',
+          })}
+          type="visualOptions"
+          groupPosition="center"
+          buttonDataTestSubj="lnsVisualOptionsButton"
+        >
+          <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
+            <EuiButtonGroup
+              isFullWidth
+              name="emptySizeRatio"
+              buttonSize="compressed"
+              legend={emptySizeRatioLabel}
+              options={emptySizeRatioOptions}
+              idSelected={
+                emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
+                'emptySizeRatioOption-small'
+              }
+              onChange={onEmptySizeRatioChange}
+              data-test-subj="lnsEmptySizeRatioButtonGroup"
+            />
+          </EuiFormRow>
+        </ToolbarPopover>
+      ) : null}
       <LegendSettingsPopover
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
@@ -204,8 +244,8 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch
-        nestedLegend={!!layer.nestedLegend}
+        renderNestedLegendSwitch={!PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch}
+        nestedLegend={Boolean(layer.nestedLegend)}
         onNestedLegendChange={onNestedLegendChange}
         shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
         onTruncateLegendChange={onTruncateLegendChange}
