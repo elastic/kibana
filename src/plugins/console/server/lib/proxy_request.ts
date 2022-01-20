@@ -11,8 +11,7 @@ import https from 'https';
 import net from 'net';
 import stream from 'stream';
 import Boom from '@hapi/boom';
-import { URL } from 'url';
-import { unescape } from 'querystring';
+import { URL, URLSearchParams } from 'url';
 import { trimStart } from 'lodash';
 
 interface Args {
@@ -38,7 +37,7 @@ const sanitizeHostname = (hostName: string): string =>
  */
 
 const encodePathname = (pathname: string) => {
-  const decodedPath = unescape(pathname);
+  const decodedPath = new URLSearchParams(`path=${pathname}`).get('path') ?? '';
   return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
 };
 
