@@ -33,6 +33,7 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
+  RuleMonitoring,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
@@ -239,6 +240,7 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: AlertMeta;
   executionStatus: RawRuleExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type AlertInfoParams = Pick<

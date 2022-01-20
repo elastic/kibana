@@ -21,7 +21,7 @@ import {
   TaskStatus,
 } from '../../../task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { TaskRunner } from './task_runner';
+import { TaskRunner, getDefaultRuleMonitoring } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import {
   loggingSystemMock,
@@ -180,6 +180,7 @@ describe('Task Runner', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    monitoring: getDefaultRuleMonitoring(),
   };
 
   beforeEach(() => {
@@ -196,6 +197,8 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
+    mockedRuleTypeSavedObject.monitoring!.execution.history = [];
+    mockedRuleTypeSavedObject.monitoring!.execution.calculated_metrics.success_ratio = 0;
   });
 
   test('successfully executes the task', async () => {
@@ -223,6 +226,19 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toMatchInlineSnapshot(`
                                   Object {
+                                    "monitoring": Object {
+                                      "execution": Object {
+                                        "calculated_metrics": Object {
+                                          "success_ratio": 1,
+                                        },
+                                        "history": Array [
+                                          Object {
+                                            "success": true,
+                                            "timestamp": 0,
+                                          },
+                                        ],
+                                      },
+                                    },
                                     "schedule": Object {
                                       "interval": "10s",
                                     },
@@ -348,6 +364,19 @@ describe('Task Runner', () => {
       'alert',
       '1',
       {
+        monitoring: {
+          execution: {
+            calculated_metrics: {
+              success_ratio: 1,
+            },
+            history: [
+              {
+                success: true,
+                timestamp: 0,
+              },
+            ],
+          },
+        },
         executionStatus: {
           error: null,
           lastDuration: 0,
@@ -2503,8 +2532,22 @@ describe('Task Runner', () => {
       },
       references: [],
     });
-    expect(await taskRunner.run()).toMatchInlineSnapshot(`
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "10s",
         },
@@ -2604,8 +2647,22 @@ describe('Task Runner', () => {
       references: [],
     });
 
-    expect(await taskRunner.run()).toMatchInlineSnapshot(`
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 1,
+            },
+            "history": Array [
+              Object {
+                "success": true,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "30s",
         },
@@ -2654,6 +2711,19 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "10s",
         },
@@ -2775,6 +2845,19 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "10s",
         },
@@ -2905,6 +2988,19 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "10s",
         },
@@ -3035,6 +3131,19 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "10s",
         },
@@ -3164,6 +3273,19 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "10s",
         },
@@ -3297,6 +3419,19 @@ describe('Task Runner', () => {
 
     expect(runnerResult).toMatchInlineSnapshot(`
       Object {
+        "monitoring": Object {
+          "execution": Object {
+            "calculated_metrics": Object {
+              "success_ratio": 0,
+            },
+            "history": Array [
+              Object {
+                "success": false,
+                "timestamp": 0,
+              },
+            ],
+          },
+        },
         "schedule": Object {
           "interval": "5m",
         },
@@ -4694,6 +4829,19 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toMatchInlineSnapshot(`
                                   Object {
+                                    "monitoring": Object {
+                                      "execution": Object {
+                                        "calculated_metrics": Object {
+                                          "success_ratio": 1,
+                                        },
+                                        "history": Array [
+                                          Object {
+                                            "success": true,
+                                            "timestamp": 0,
+                                          },
+                                        ],
+                                      },
+                                    },
                                     "schedule": Object {
                                       "interval": "10s",
                                     },
@@ -4819,6 +4967,19 @@ describe('Task Runner', () => {
       'alert',
       '1',
       {
+        monitoring: {
+          execution: {
+            calculated_metrics: {
+              success_ratio: 1,
+            },
+            history: [
+              {
+                success: true,
+                timestamp: 0,
+              },
+            ],
+          },
+        },
         executionStatus: {
           error: null,
           lastDuration: 0,
@@ -4922,5 +5083,197 @@ describe('Task Runner', () => {
       },
       message: 'test:1: execution failed',
     });
+  });
+
+  test('successfully stores successful runs', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult).toMatchInlineSnapshot(`
+                                    Object {
+                                      "monitoring": Object {
+                                        "execution": Object {
+                                          "calculated_metrics": Object {
+                                            "success_ratio": 1,
+                                          },
+                                          "history": Array [
+                                            Object {
+                                              "success": true,
+                                              "timestamp": 0,
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      "schedule": Object {
+                                        "interval": "10s",
+                                      },
+                                      "state": Object {
+                                        "alertInstances": Object {},
+                                        "alertTypeState": undefined,
+                                        "previousStartedAt": 1970-01-01T00:00:00.000Z,
+                                      },
+                                    }
+                    `);
+  });
+
+  test('successfully stores failure runs', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        throw new Error('OMG');
+      }
+    );
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult).toMatchInlineSnapshot(`
+                                    Object {
+                                      "monitoring": Object {
+                                        "execution": Object {
+                                          "calculated_metrics": Object {
+                                            "success_ratio": 0,
+                                          },
+                                          "history": Array [
+                                            Object {
+                                              "success": false,
+                                              "timestamp": 0,
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      "schedule": Object {
+                                        "interval": "10s",
+                                      },
+                                      "state": Object {},
+                                    }
+                    `);
+  });
+
+  test('successfully stores the success ratio', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    await taskRunner.run();
+    await taskRunner.run();
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        throw new Error('OMG');
+      }
+    );
+    const runnerResult = await taskRunner.run();
+    ruleType.executor.mockClear();
+    expect(runnerResult).toMatchInlineSnapshot(`
+                                    Object {
+                                      "monitoring": Object {
+                                        "execution": Object {
+                                          "calculated_metrics": Object {
+                                            "success_ratio": 0.75,
+                                          },
+                                          "history": Array [
+                                            Object {
+                                              "success": true,
+                                              "timestamp": 0,
+                                            },
+                                            Object {
+                                              "success": true,
+                                              "timestamp": 0,
+                                            },
+                                            Object {
+                                              "success": true,
+                                              "timestamp": 0,
+                                            },
+                                            Object {
+                                              "success": false,
+                                              "timestamp": 0,
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      "schedule": Object {
+                                        "interval": "10s",
+                                      },
+                                      "state": Object {},
+                                    }
+                    `);
+  });
+
+  test('caps monitoring history at 200', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    for (let i = 0; i < 300; i++) {
+      await taskRunner.run();
+    }
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.monitoring?.execution.history.length).toBe(200);
   });
 });

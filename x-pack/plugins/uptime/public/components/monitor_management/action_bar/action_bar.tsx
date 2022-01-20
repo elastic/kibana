@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-import { MONITOR_MANAGEMENT } from '../../../../common/constants';
+import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
@@ -81,7 +81,7 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   }, [data, status, notifications.toasts, isSaving, isValid, monitorId]);
 
   return status === FETCH_STATUS.SUCCESS ? (
-    <Redirect to={MONITOR_MANAGEMENT} />
+    <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
@@ -92,7 +92,7 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
               color="ghost"
               size="s"
               iconType="cross"
-              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT}`}
+              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>
