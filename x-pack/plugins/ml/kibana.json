@@ -28,7 +28,8 @@
     "management",
     "licenseManagement",
     "maps",
-    "usageCollection"
+    "usageCollection",
+    "dashboard"
   ],
   "server": true,
   "ui": true,
