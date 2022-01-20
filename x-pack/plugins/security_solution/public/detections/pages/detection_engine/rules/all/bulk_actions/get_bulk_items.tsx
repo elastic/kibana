@@ -252,6 +252,7 @@ export const getBatchItems = ({
         },
         onError: (error: Error) => {
           // if response doesn't have number of failed rules, it means the whole bulk action failed.
+          // and generel error toast will be shown
           // TODO: define correct typings
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const failedRulesCount = (error as any)?.body?.attributes?.rules?.failed;
@@ -259,6 +260,9 @@ export const getBatchItems = ({
           if (isNaN(failedRulesCount)) {
             toastsApi.addError(error, { title: i18n.BULK_ACTION_FAILED });
           } else {
+            // Passing body to stack here to display it's as formatted JSON to end users through error toast  modal
+            // Body passed instead of actual stack(it includes response body as well), because on large response(thousands of failed rules)
+            // browser tab hangs and sometimes crashes
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             error.stack = JSON.stringify((error as any).body, null, 2);
             toastsApi.addError(error, {
