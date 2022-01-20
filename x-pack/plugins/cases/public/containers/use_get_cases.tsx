@@ -212,7 +212,7 @@ export const useGetCases = (
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
-      const caseData = state.data.cases.find((el) => el.id === caseId);
+      const caseData = state.data.cases.find((caseInfo) => caseInfo.id === caseId);
       try {
         didCancelUpdateCases.current = false;
         abortCtrlUpdateCases.current.abort();
