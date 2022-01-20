@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { EditExceptionModal } from '.';
+import { EditExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../lib/kibana';
 import { useFetchIndex } from '../../../containers/source';
 import { stubIndexPattern, createStubIndexPattern } from 'src/plugins/data/common/stubs';
@@ -61,7 +61,7 @@ describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
   beforeEach(() => {
-    const emptyComp = <span data-test-subj="edit-exception-modal-builder" />;
+    const emptyComp = <span data-test-subj="edit-exception-builder" />;
     mockGetExceptionBuilderComponentLazy.mockReturnValue(emptyComp);
     mockUseSignalIndex.mockReturnValue({
       loading: false,
@@ -109,7 +109,7 @@ describe('When the edit exception modal is opened', () => {
       ]);
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <EditExceptionModal
+          <EditExceptionFlyout
             ruleIndices={[]}
             ruleId="123"
             ruleName={ruleName}
@@ -121,7 +121,7 @@ describe('When the edit exception modal is opened', () => {
         </ThemeProvider>
       );
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="loadingEditExceptionFlyout"]').exists()).toBeTruthy();
       });
     });
   });
@@ -138,7 +138,7 @@ describe('When the edit exception modal is opened', () => {
         };
         wrapper = mount(
           <ThemeProvider theme={mockTheme}>
-            <EditExceptionModal
+            <EditExceptionFlyout
               ruleIndices={['filebeat-*']}
               ruleId="123"
               ruleName={ruleName}
@@ -167,9 +167,7 @@ describe('When the edit exception modal is opened', () => {
         ).not.toBeDisabled();
       });
       it('renders the exceptions builder', () => {
-        expect(
-          wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()
-        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
       });
       it('should contain the endpoint specific documentation text', () => {
         expect(
@@ -183,7 +181,7 @@ describe('When the edit exception modal is opened', () => {
       beforeEach(async () => {
         wrapper = mount(
           <ThemeProvider theme={mockTheme}>
-            <EditExceptionModal
+            <EditExceptionFlyout
               ruleIndices={['filebeat-*']}
               ruleId="123"
               ruleName={ruleName}
@@ -212,9 +210,7 @@ describe('When the edit exception modal is opened', () => {
         ).toBeDisabled();
       });
       it('renders the exceptions builder', () => {
-        expect(
-          wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()
-        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
       });
       it('should contain the endpoint specific documentation text', () => {
         expect(
@@ -236,7 +232,7 @@ describe('When the edit exception modal is opened', () => {
       }));
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <EditExceptionModal
+          <EditExceptionFlyout
             ruleIndices={['filebeat-*']}
             ruleId="123"
             ruleName={ruleName}
@@ -258,7 +254,7 @@ describe('When the edit exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
     });
     it('should not contain the endpoint specific documentation text', () => {
       expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
@@ -280,7 +276,7 @@ describe('When the edit exception modal is opened', () => {
     beforeEach(async () => {
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <EditExceptionModal
+          <EditExceptionFlyout
             ruleIndices={['filebeat-*']}
             ruleId="123"
             ruleName={ruleName}
@@ -302,7 +298,7 @@ describe('When the edit exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
     });
     it('should not contain the endpoint specific documentation text', () => {
       expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
@@ -325,7 +321,7 @@ describe('When the edit exception modal is opened', () => {
       const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <EditExceptionModal
+          <EditExceptionFlyout
             ruleIndices={['filebeat-*']}
             ruleId="123"
             ruleName={ruleName}
@@ -347,7 +343,7 @@ describe('When the edit exception modal is opened', () => {
       ).toBeDisabled();
     });
     it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="edit-exception-builder"]').exists()).toBeTruthy();
     });
     it('should have the bulk close checkbox disabled', () => {
       expect(
@@ -361,7 +357,7 @@ describe('When the edit exception modal is opened', () => {
   test('when there are exception builder errors has the add exception button disabled', async () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
-        <EditExceptionModal
+        <EditExceptionFlyout
           ruleId="123"
           ruleIndices={['filebeat-*']}
           ruleName={ruleName}

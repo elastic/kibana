@@ -24,12 +24,12 @@ import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
-import { allExceptionItemsReducer, State, ViewerModalName } from './reducer';
+import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
-import { EditExceptionModal } from '../edit_exception_flyout';
+import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
 
 const initialState: State = {
@@ -154,7 +154,7 @@ const ExceptionsViewerComponent = ({
   });
 
   const setCurrentModal = useCallback(
-    (modalName: ViewerModalName): void => {
+    (modalName: ViewerFlyoutName): void => {
       dispatch({
         type: 'updateModalOpen',
         modalName,
@@ -246,7 +246,7 @@ const ExceptionsViewerComponent = ({
         type: 'updateExceptionListTypeToEdit',
         exceptionListType: type,
       });
-      setCurrentModal('addModal');
+      setCurrentModal('addException');
     },
     [setCurrentModal]
   );
@@ -259,7 +259,7 @@ const ExceptionsViewerComponent = ({
         exception,
       });
 
-      setCurrentModal('editModal');
+      setCurrentModal('editException');
     },
     [setCurrentModal, exceptionListsMeta]
   );
@@ -334,10 +334,10 @@ const ExceptionsViewerComponent = ({
 
   return (
     <>
-      {currentModal === 'editModal' &&
+      {currentModal === 'editException' &&
         exceptionToEdit != null &&
         exceptionListTypeToEdit != null && (
-          <EditExceptionModal
+          <EditExceptionFlyout
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
@@ -349,7 +349,7 @@ const ExceptionsViewerComponent = ({
           />
         )}
 
-      {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
+      {currentModal === 'addException' && exceptionListTypeToEdit != null && (
         <AddExceptionFlyout
           ruleName={ruleName}
           ruleIndices={ruleIndices}
