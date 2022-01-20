@@ -226,10 +226,6 @@ const RESTRICTED_IMPORTS = [
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
   },
-  {
-    name: '@kbn/io-ts-utils',
-    message: `Import directly from @kbn/io-ts-utils/{method} submodules`,
-  },
 ];
 
 module.exports = {

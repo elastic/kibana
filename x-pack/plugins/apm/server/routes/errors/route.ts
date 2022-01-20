@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils/json_rt';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getErrorDistribution } from './distribution/get_distribution';

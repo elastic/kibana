@@ -15,8 +15,7 @@ import {
 } from 'react-router-config';
 import qs from 'query-string';
 import { findLastIndex, merge, compact } from 'lodash';
-import { mergeRt } from '@kbn/io-ts-utils/merge_rt';
-import { deepExactRt } from '@kbn/io-ts-utils/deep_exact_rt';
+import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
 import { FlattenRoutesOf, Route, Router } from './types';
 
 function toReactRouterPath(path: string) {
