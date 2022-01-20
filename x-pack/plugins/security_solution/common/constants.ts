@@ -99,6 +99,7 @@ export enum SecurityPageName {
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
+  hostsRisk = 'hosts-risk',
   investigate = 'investigate',
   network = 'network',
   networkAnomalies = 'network-anomalies',
@@ -359,7 +360,7 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc' as const;
 
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

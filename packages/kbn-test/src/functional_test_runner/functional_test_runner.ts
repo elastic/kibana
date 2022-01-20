@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Suite, Test } from './fake_mocha_types';
@@ -21,6 +22,7 @@ import {
   DockerServersService,
   Config,
   SuiteTracker,
+  EsVersion,
 } from './lib';
 
 export class FunctionalTestRunner {
@@ -28,10 +30,12 @@ export class FunctionalTestRunner {
   public readonly failureMetadata = new FailureMetadata(this.lifecycle);
   private closed = false;
 
+  private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
     private readonly configFile: string,
-    private readonly configOverrides: any
+    private readonly configOverrides: any,
+    esVersion?: string | EsVersion
   ) {
     for (const [key, value] of Object.entries(this.lifecycle)) {
       if (value instanceof LifecyclePhase) {
@@ -39,6 +43,12 @@ export class FunctionalTestRunner {
         value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
       }
     }
+    this.esVersion =
+      esVersion === undefined
+        ? EsVersion.getDefault()
+        : esVersion instanceof EsVersion
+        ? esVersion
+        : new EsVersion(esVersion);
   }
 
   async run() {
@@ -51,6 +61,27 @@ export class FunctionalTestRunner {
         ...readProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
+      // validate es version
+      if (providers.hasService('es')) {
+        const es = (await providers.getService('es')) as unknown as EsClient;
+        let esInfo;
+        try {
+          esInfo = await es.info();
+        } catch (error) {
+          throw new Error(
+            `attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ${error.stack}`
+          );
+        }
+
+        if (!this.esVersion.eql(esInfo.version.number)) {
+          throw new Error(
+            `ES reports a version number "${
+              esInfo.version.number
+            }" which doesn't match supplied es version "${this.esVersion.toString()}"`
+          );
+        }
+      }
+
       await providers.loadAll();
 
       const customTestRunner = config.get('testRunner');
@@ -61,7 +92,7 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
@@ -113,14 +144,14 @@ export class FunctionalTestRunner {
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
       ]);
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
       const countTests = (suite: Suite): number =>
         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
 
       return {
         testCount: countTests(mocha.suite),
-        excludedTests: mocha.excludedTests.map((t: Test) => t.fullTitle()),
+        testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
     });
   }
@@ -131,7 +162,12 @@ export class FunctionalTestRunner {
     let runErrorOccurred = false;
 
     try {
-      const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
+      const config = await readConfigFile(
+        this.log,
+        this.esVersion,
+        this.configFile,
+        this.configOverrides
+      );
       this.log.info('Config loaded');
 
       if (
@@ -154,6 +190,7 @@ export class FunctionalTestRunner {
         failureMetadata: () => this.failureMetadata,
         config: () => config,
         dockerServers: () => dockerServers,
+        esVersion: () => this.esVersion,
       });
 
       return await handler(config, coreProviders);
