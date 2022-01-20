@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { addDecorator } from '@storybook/react';
-import { getSharedUXContextDecorator } from './decorators';
-
-addDecorator(getSharedUXContextDecorator());
+export { getEngagementContextDecorator, getEngagementContextProvider } from './decorator';

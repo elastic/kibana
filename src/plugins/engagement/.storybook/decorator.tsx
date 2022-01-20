@@ -8,9 +8,10 @@
 
 import React from 'react';
 import { DecoratorFn } from '@storybook/react';
-import { servicesDecorator as sharedUXServicesDecorator } from '../../shared_ux/.storybook/decorators';
+import { getSharedUXContextProvider } from '../../shared_ux/.storybook/decorators';
 import { ServicesProvider } from '../public/services';
 
+// TODO: move to a storybook implementation of the service using parameters.
 const config = {
   chat: {
     enabled: true,
@@ -22,6 +23,17 @@ const config = {
   },
 };
 
-export const servicesDecorator: DecoratorFn = (storyFn, context) => (
-  <ServicesProvider {...config}>{sharedUXServicesDecorator(storyFn, context)}</ServicesProvider>
-);
+export const getEngagementContextDecorator: DecoratorFn = (storyFn, context) => {
+  const SharedUXProvider = getSharedUXContextProvider();
+  const EngagementProvider = getEngagementContextProvider();
+  return (
+    <SharedUXProvider>
+      <EngagementProvider>{storyFn()}</EngagementProvider>
+    </SharedUXProvider>
+  );
+};
+
+export const getEngagementContextProvider: () => React.FC =
+  () =>
+  ({ children }) =>
+    <ServicesProvider {...config}>{children}</ServicesProvider>;

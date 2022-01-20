@@ -14,7 +14,8 @@ import { createBrowserHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { ScopedHistory } from '../../../../../src/core/public';
-import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
+import { getCustomIntegrationsContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
+import { getEngagementContextProvider } from '../../../../../src/plugins/engagement/.storybook';
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
 
@@ -55,9 +56,12 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
       chrome: getChrome(),
       cloud: getCloud({ isCloudEnabled }),
       customIntegrations: {
-        ContextProvider: getStorybookContextProvider(),
+        ContextProvider: getCustomIntegrationsContextProvider(),
       },
       docLinks: getDocLinks(),
+      engagement: {
+        ContextProvider: getEngagementContextProvider(),
+      },
       http: getHttp(),
       i18n: {
         Context: function I18nContext({ children }) {

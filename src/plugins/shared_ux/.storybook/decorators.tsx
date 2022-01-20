@@ -11,10 +11,12 @@ import { DecoratorFn } from '@storybook/react';
 import { ServicesProvider } from '../public/services';
 import { servicesFactory } from '../public/services/storybook';
 
-/**
- * A Storybook decorator that provides the Shared UX `ServicesProvider` with Storybook-specific
- * implementations to stories.
- */
-export const servicesDecorator: DecoratorFn = (storyFn) => (
-  <ServicesProvider {...servicesFactory({})}>{storyFn()}</ServicesProvider>
-);
+export const getSharedUXContextDecorator: () => DecoratorFn = () => (storyFn, context) => {
+  const Provider = getSharedUXContextProvider();
+  return <Provider>{storyFn()}</Provider>;
+};
+
+export const getSharedUXContextProvider: () => React.FC =
+  () =>
+  ({ children }) =>
+    <ServicesProvider {...servicesFactory({})}>{children}</ServicesProvider>;

@@ -7,6 +7,6 @@
  */
 
 export {
-  getCustomIntegrationsContextDecorator as getStorybookContextDecorator,
-  getCustomIntegrationsContextProvider as getStorybookContextProvider,
+  getCustomIntegrationsContextDecorator,
+  getCustomIntegrationsContextProvider,
 } from '../storybook/decorator';
