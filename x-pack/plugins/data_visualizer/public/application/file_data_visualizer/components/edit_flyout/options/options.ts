@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FILE_FORMATS } from '../../../../../../../file_upload/common';
+import { FILE_FORMATS } from '../../../../../../common/';
 
 import {
   TIMESTAMP_OPTIONS,

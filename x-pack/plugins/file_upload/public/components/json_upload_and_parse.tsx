@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoJsonImporter } from '../importer/geojson_importer';
-import { Settings } from '../../common';
+import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
 
 enum PHASE {
