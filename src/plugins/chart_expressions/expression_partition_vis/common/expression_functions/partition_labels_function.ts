@@ -31,7 +31,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
     show: {
       types: ['boolean'],
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.show.help', {
-        defaultMessage: 'Displays the pie labels',
+        defaultMessage: 'Displays the partition chart labels',
       }),
       default: true,
     },

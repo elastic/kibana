@@ -51,7 +51,6 @@ interface VisCommonParams {
   nestedLegend: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
-  distinctColors: boolean;
 }
 
 interface VisCommonConfig extends VisCommonParams {
@@ -71,6 +70,7 @@ export interface PartitionVisParams extends VisCommonParams {
   respectSourceOrder?: boolean;
   emptySizeRatio?: EmptySizeRatios;
   startFromSecondLargestSlice?: boolean;
+  distinctColors?: boolean;
 }
 
 export interface PieVisConfig extends VisCommonConfig {
@@ -79,6 +79,7 @@ export interface PieVisConfig extends VisCommonConfig {
   emptySizeRatio?: EmptySizeRatios;
   respectSourceOrder?: boolean;
   startFromSecondLargestSlice?: boolean;
+  distinctColors?: boolean;
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {

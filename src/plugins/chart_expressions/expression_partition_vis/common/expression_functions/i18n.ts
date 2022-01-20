@@ -58,7 +58,7 @@ export const strings = {
       defaultMessage: 'Defines the number of lines per legend item',
     }),
   getDistinctColorsArgHelp: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.args.distinctColorsHelpText', {
+    i18n.translate('expressionPartitionVis.pieVis.function.args.distinctColorsHelpText', {
       defaultMessage:
         'Maps different color per slice. Slices with the same value have the same color',
     }),

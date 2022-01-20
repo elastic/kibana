@@ -72,11 +72,6 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       types: ['number'],
       help: strings.getMaxLegendLinesArgHelp(),
     },
-    distinctColors: {
-      types: ['boolean'],
-      help: strings.getDistinctColorsArgHelp(),
-      default: false,
-    },
     palette: {
       types: ['palette', 'system_palette'],
       help: strings.getPaletteArgHelp(),

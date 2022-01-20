@@ -56,7 +56,7 @@ export const getColorPicker =
     palette: string,
     data: DatatableRow[],
     uiState: PersistedState,
-    distinctColors: boolean
+    distinctColors?: boolean
   ): LegendColorPicker =>
   ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
     const seriesName = seriesIdentifier.key;
