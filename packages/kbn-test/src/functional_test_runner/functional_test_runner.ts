@@ -89,18 +89,21 @@ export class FunctionalTestRunner {
         this.log.warning(
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
         );
+
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
-      await this.lifecycle.beforeTests.trigger(mocha.suite);
-      this.log.info('Starting tests');
 
+      this.log.info('Waiting 90s for cluster to stabilize...');
       await new Promise((resolve) =>
         setTimeout(() => {
           resolve(void 0);
-        }, 60 * 1000)
+        }, 90 * 1000)
       );
+
+      await this.lifecycle.beforeTests.trigger(mocha.suite);
+      this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
     });
