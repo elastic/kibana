@@ -21,25 +21,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { GroupDetails as GroupDetailsType } from '..';
+import type { ServiceGroup } from '..';
 
 interface Props {
   onCloseModal: () => void;
-  onClickNext: (groupDetails: GroupDetailsType) => void;
-  groupDetails?: GroupDetailsType;
+  onClickNext: (serviceGroup: ServiceGroup) => void;
+  serviceGroup?: ServiceGroup;
 }
 
 export function GroupDetails({
   onCloseModal,
   onClickNext,
-  groupDetails,
+  serviceGroup,
 }: Props) {
-  const [name, setName] = useState<string>(groupDetails?.name || '');
+  const [name, setName] = useState<string>(serviceGroup?.name || '');
   const [color, setColor, errors] = useColorPickerState(
-    groupDetails?.color || '#5094C4'
+    serviceGroup?.color || '#5094C4'
   );
   const [description, setDescription] = useState<string>(
-    groupDetails?.description || ''
+    serviceGroup?.description || ''
   );
 
   const isInvalidColor = !!errors?.length;
@@ -132,6 +132,7 @@ export function GroupDetails({
               name: name!, // name will always be defined at this point
               color,
               description,
+              kql: '',
             });
           }}
           isDisabled={isInvalid}

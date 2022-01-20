@@ -27,7 +27,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../../../hooks/use_time_range';
 import { KueryBar } from '../../../../../shared/kuery_bar';
 import { ServiceList } from './service_list';
-import type { SelectServices as SelectServicesType } from '../';
+import type { ServiceGroup } from '../';
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -42,8 +42,9 @@ const Container = styled.div`
 `;
 
 interface Props {
+  serviceGroup?: ServiceGroup;
   onCloseModal: () => void;
-  onSaveClick: (selectService: SelectServicesType) => void;
+  onSaveClick: (serviceGroup: ServiceGroup) => void;
   onEditGroupDetailsClick: () => void;
 }
 
@@ -51,11 +52,12 @@ export function SelectServices({
   onCloseModal,
   onSaveClick,
   onEditGroupDetailsClick,
+  serviceGroup,
 }: Props) {
   const {
     query: { environment },
   } = useAnyOfApmParams('/services');
-  const [kuery, setKuery] = useState('');
+  const [kuery, setKuery] = useState(serviceGroup?.kql || '');
 
   const { start, end, refreshTimeRange } = useTimeRange({
     rangeFrom: 'now-24h',
@@ -192,7 +194,7 @@ export function SelectServices({
               iconType="sortRight"
               iconSide="right"
               onClick={() => {
-                onSaveClick({ kql: kuery });
+                onSaveClick({ ...serviceGroup, kql: kuery });
               }}
               isDisabled={!kuery}
             >

@@ -17,13 +17,10 @@ interface Props {
 
 type ModalView = 'group_details' | 'select_service';
 
-export interface GroupDetails {
+export interface ServiceGroup {
   name: string;
   color: string;
   description?: string;
-}
-
-export interface SelectServices {
   kql: string;
 }
 
@@ -32,20 +29,14 @@ export function CreateGroupsModal({ onClose }: Props) {
     core: { notifications },
   } = useApmPluginContext();
   const [modalView, setModalView] = useState<ModalView>('group_details');
-  const [groupDetails, setGroupDetails] = useState<GroupDetails | undefined>();
+  const [serviceGroup, setServiceGroup] = useState<ServiceGroup | undefined>();
 
-  async function onSave(selectServices: SelectServices) {
-    // @ts-ignore
-    const serviceGroups = {
-      ...groupDetails,
-      ...selectServices,
-    };
-
+  async function onSave(newServiceGroup: ServiceGroup) {
     // TODO: call api to save it
     notifications.toasts.addSuccess({
       title: i18n.translate('xpack.apm.serviceGroups.toast.title', {
         defaultMessage: 'Created "{groupName}" group',
-        values: { groupName: groupDetails?.name },
+        values: { groupName: serviceGroup?.name },
       }),
       text: i18n.translate('xpack.apm.serviceGroups.toast.text', {
         defaultMessage:
@@ -59,16 +50,17 @@ export function CreateGroupsModal({ onClose }: Props) {
     <EuiModal onClose={onClose}>
       {modalView === 'group_details' && (
         <GroupDetails
-          groupDetails={groupDetails}
+          serviceGroup={serviceGroup}
           onCloseModal={onClose}
-          onClickNext={(_groupDetails) => {
-            setGroupDetails(_groupDetails);
+          onClickNext={(_serviceGroup) => {
+            setServiceGroup(_serviceGroup);
             setModalView('select_service');
           }}
         />
       )}
       {modalView === 'select_service' && (
         <SelectServices
+          serviceGroup={serviceGroup}
           onCloseModal={onClose}
           onSaveClick={onSave}
           onEditGroupDetailsClick={() => {
