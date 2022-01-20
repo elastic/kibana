@@ -5,7 +5,9 @@
  * 2.0.
  */
 import { EuiModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { GroupDetails } from './group_details_form';
 import { SelectServices } from './select_services_form';
 
@@ -26,6 +28,9 @@ export interface SelectServices {
 }
 
 export function CreateGroupsModal({ onClose }: Props) {
+  const {
+    core: { notifications },
+  } = useApmPluginContext();
   const [modalView, setModalView] = useState<ModalView>('group_details');
   const [groupDetails, setGroupDetails] = useState<GroupDetails | undefined>();
 
@@ -37,6 +42,16 @@ export function CreateGroupsModal({ onClose }: Props) {
     };
 
     // TODO: call api to save it
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.apm.serviceGroups.toast.title', {
+        defaultMessage: 'Created "{groupName}" group',
+        values: { groupName: groupDetails?.name },
+      }),
+      text: i18n.translate('xpack.apm.serviceGroups.toast.text', {
+        defaultMessage:
+          'Your group is now visible in the new Services view for groups.',
+      }),
+    });
     onClose();
   }
 
