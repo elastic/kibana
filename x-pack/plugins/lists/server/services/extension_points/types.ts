@@ -5,24 +5,51 @@
  * 2.0.
  */
 
-import { PromiseType } from 'utility-types';
 import { UnionToIntersection } from '@kbn/utility-types';
+import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 
-export type ServerExtensionCallback<A extends object | void = void, R = unknown> = (
-  args: A
-) => Promise<R>;
+/**
+ * The `this` context provided to extension point's callback function
+ * NOTE: in order to access this context, callbacks **MUST** be defined using `function()` instead of arrow functions.
+ */
+export interface ServerExtensionCallbackContext {
+  /**
+   * The Lists plugin HTTP Request. May be undefined if the callback is executed from a area of code that
+   * is not triggered via one of the HTTP handlers
+   */
+  request?: KibanaRequest;
+}
+
+export type ServerExtensionCallback<A extends object | void = void, R = A> = (args: {
+  context: ServerExtensionCallbackContext;
+  data: A;
+}) => Promise<R>;
 
 interface ServerExtensionPointDefinition<
   T extends string,
   Args extends object | void = void,
-  Response = void
+  Response = Args
 > {
   type: T;
+  /**
+   * The callback that will be executed at the given extension point. The Function will be provided a context (`this)`
+   * that includes supplemental data associated with its type. In order to access that data, the callback **MUST**
+   * be defined using `function()` and NOT an arrow function.
+   *
+   * @example
+   *
+   * {
+   *   type: 'some type',
+   *   callback: function() {
+   *     // this === context is available
+   *   }
+   * }
+   */
   callback: ServerExtensionCallback<Args, Response>;
 }
 
@@ -32,7 +59,6 @@ interface ServerExtensionPointDefinition<
  */
 export type ExceptionsListPreCreateItemServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreCreateItem',
-  CreateExceptionListItemOptions,
   CreateExceptionListItemOptions
 >;
 
@@ -40,15 +66,14 @@ export type ExceptionsListPreCreateItemServerExtension = ServerExtensionPointDef
  * Extension point is triggered prior to updating the Exception List Item. Throw'ing will cause the
  * update operation to fail
  */
-export type ExceptionListPreUpdateItemServerExtension = ServerExtensionPointDefinition<
+export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreUpdateItem',
-  UpdateExceptionListItemOptions,
   UpdateExceptionListItemOptions
 >;
 
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
-  | ExceptionListPreUpdateItemServerExtension;
+  | ExceptionsListPreUpdateItemServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks
@@ -57,6 +82,7 @@ export type ExtensionPoint =
  * Registration function for server-side extension points
  */
 export type ListsServerExtensionRegistrar = (extension: ExtensionPoint) => void;
+
 export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
   type: T;
 } & ExtensionPoint;
@@ -65,8 +91,8 @@ export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
  * An intersection of all callback arguments for use internally when
  * casting (ex. in `ExtensionPointStorageClient#pipeRun()`
  */
-export type ExtensionPointCallbackArgument = UnionToIntersection<
-  PromiseType<ReturnType<ExtensionPoint['callback']>>
+export type ExtensionPointCallbackDataArgument = UnionToIntersection<
+  Parameters<ExtensionPoint['callback']>[0]['data']
 >;
 
 export interface ExtensionPointStorageClientInterface {
@@ -80,9 +106,10 @@ export interface ExtensionPointStorageClientInterface {
     P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
-    initialCallbackInput: P[0],
-    callbackResponseValidator?: (data: P[0]) => Error | undefined
-  ): Promise<P[0]>;
+    initialCallbackInput: P[0]['data'],
+    callbackContext: ServerExtensionCallbackContext,
+    callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
+  ): Promise<P[0]['data']>;
 }
 
 export interface ExtensionPointStorageInterface {
