@@ -7,6 +7,7 @@
 
 import type {
   ExceptionListSummarySchema,
+  FilterOrUndefined,
   IdOrUndefined,
   ListIdOrUndefined,
   NamespaceType,
@@ -20,6 +21,7 @@ import {
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 interface GetExceptionListSummaryOptions {
+  filter: FilterOrUndefined;
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
@@ -37,6 +39,7 @@ interface ByOsAggType {
 }
 
 export const getExceptionListSummary = async ({
+  filter,
   id,
   listId,
   savedObjectsClient,
@@ -67,7 +70,7 @@ export const getExceptionListSummary = async ({
         },
       },
     },
-    filter: `${savedObjectType}.attributes.list_type: item`,
+    filter,
     perPage: 0,
     search: finalListId,
     searchFields: ['list_id'],

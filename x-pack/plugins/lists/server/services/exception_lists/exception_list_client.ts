@@ -124,18 +124,20 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
+   * @params filter {sting | undefined} kql "filter" expression
    * @params listId {string | undefined} the "list_id" of an exception list
    * @params id {string | undefined} the "id" of an exception list
    * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
    * @return {ExceptionListSummarySchema | null} summary of exception list item os types
    */
   public getExceptionListSummary = async ({
+    filter,
     listId,
     id,
     namespaceType,
   }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
     const { savedObjectsClient } = this;
-    return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
+    return getExceptionListSummary({ filter, id, listId, namespaceType, savedObjectsClient });
   };
 
   /**

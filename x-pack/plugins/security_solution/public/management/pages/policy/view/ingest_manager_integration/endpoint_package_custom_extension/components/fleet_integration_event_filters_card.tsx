@@ -86,11 +86,7 @@ export const FleetIntegrationEventFiltersCard = memo<{
     isMounted.current = true;
     const fetchStats = async () => {
       try {
-        const summary = await eventFiltersApi.getList({
-          perPage: 1,
-          page: 1,
-          filter: parsePoliciesToKQL([policyId, 'all']),
-        });
+        const summary = await eventFiltersApi.getSummary(parsePoliciesToKQL([policyId, 'all']));
         if (isMounted.current) {
           setStats({
             total: summary.total,
