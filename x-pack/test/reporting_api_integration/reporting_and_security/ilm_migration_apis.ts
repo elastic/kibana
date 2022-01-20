@@ -20,7 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const security = getService('security');
 
-  describe('ILM policy migration APIs', () => {
+  describe('ILM policy migration APIs', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');

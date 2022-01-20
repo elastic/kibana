@@ -52,7 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Upgrade Assistant', () => {
+  describe('Upgrade Assistant', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 
