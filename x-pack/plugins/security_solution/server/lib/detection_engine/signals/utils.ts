@@ -85,7 +85,6 @@ export const shorthandMap = {
   },
 };
 
-// TODO: Add executionId to IRuleExecutionLogger
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   logger: Logger;
@@ -107,7 +106,6 @@ export const hasReadIndexPrivileges = async (args: {
       indexesWithNoReadPrivileges
     )}`;
     logger.warn(buildRuleMessage(errorString));
-    // TODO: Add executionId
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString,
@@ -117,7 +115,6 @@ export const hasReadIndexPrivileges = async (args: {
   return false;
 };
 
-// TODO: Add executionId to IRuleExecutionLogger
 export const hasTimestampFields = async (args: {
   timestampField: string;
   // any is derived from here
@@ -149,7 +146,6 @@ export const hasTimestampFields = async (args: {
         : ''
     }`;
     logger.warn(buildRuleMessage(errorString.trimEnd()));
-    // TODO: Add executionId
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString.trimEnd(),
@@ -174,7 +170,6 @@ export const hasTimestampFields = async (args: {
     )}`;
 
     logger.warn(buildRuleMessage(errorString));
-    // TODO: Add executionId
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString,

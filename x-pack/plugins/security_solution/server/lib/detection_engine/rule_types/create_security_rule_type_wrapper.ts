@@ -77,12 +77,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const esClient = scopedClusterClient.asCurrentUser;
 
-          // TODO: Add executionId in place of `basicLogArguments`
           const ruleExecutionLogger = ruleExecutionLoggerFactory(
             savedObjectsClient,
             eventLogService,
             logger,
             {
+              executionId,
               ruleId: alertId,
               ruleName: rule.name,
               ruleType: rule.ruleTypeId,
@@ -117,7 +117,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let wroteWarningStatus = false;
 
-          // TODO: Add executionId in place of `basicLogArguments`
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatus['going to run'],
           });
@@ -151,7 +150,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
 
-              // TODO: Add executionId in place of `basicLogArguments`
               wroteWarningStatus = await hasReadIndexPrivileges({
                 privileges,
                 logger,
@@ -169,7 +167,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     include_unmapped: true,
                   })
                 );
-                // TODO: Add executionId in place of `basicLogArguments`
                 wroteWarningStatus = await hasTimestampFields({
                   timestampField: hasTimestampOverride
                     ? (timestampOverride as string)
@@ -185,7 +182,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } catch (exc) {
             const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
             logger.warn(errorMessage);
-            // TODO: Add executionId in place of `basicLogArguments`
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatus['partial failure'],
               message: errorMessage,
@@ -212,7 +208,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
             logger.warn(gapMessage);
             hasError = true;
-            // TODO: Add executionId in place of `basicLogArguments`
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatus.failed,
               message: gapMessage,
@@ -294,7 +289,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             if (result.warningMessages.length) {
               const warningMessage = buildRuleMessage(truncateList(result.warningMessages).join());
-              // TODO: Add executionId in place of `basicLogArguments`
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus['partial failure'],
                 message: warningMessage,
@@ -354,7 +348,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               );
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
-                // TODO: Add executionId in place of `basicLogArguments`
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatus.succeeded,
                   message: 'succeeded',
@@ -397,7 +390,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 truncateList(result.errors).join()
               );
               logger.error(errorMessage);
-              // TODO: Add executionId in place of `basicLogArguments`
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus.failed,
                 message: errorMessage,
@@ -433,7 +425,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
 
             logger.error(message);
-            // TODO: Add executionId in place of `basicLogArguments`
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatus.failed,
               message,

@@ -663,7 +663,6 @@ describe('utils', () => {
           },
         },
       };
-      // TODO: Add executionId to mock
       const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
       mockLogger.warn.mockClear();
 
@@ -715,7 +714,6 @@ describe('utils', () => {
         },
       };
 
-      // TODO: Add executionId to mock '7a7065d7-b33f-4aae-8d20-c93613dec9fb'
       const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
       mockLogger.warn.mockClear();
 
@@ -752,7 +750,6 @@ describe('utils', () => {
         },
       };
 
-      // TODO: Add executionId to mock '7a7065d7-b33f-4aae-8d20-c93613dec9fb'
       const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
         ruleName: 'Endpoint Security',
       });
@@ -792,7 +789,6 @@ describe('utils', () => {
       };
 
       // SUT uses rule execution logger's context to check the rule name
-      // TODO: Add executionId to mock '7a7065d7-b33f-4aae-8d20-c93613dec9fb'
       const ruleExecutionLogger = ruleExecutionLogMock.logger.create({
         ruleName: 'NOT Endpoint Security',
       });
