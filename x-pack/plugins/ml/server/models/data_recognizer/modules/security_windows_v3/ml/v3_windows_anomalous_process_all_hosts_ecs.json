@@ -28,7 +28,7 @@
   },
   "allow_lazy_open": true,
   "analysis_limits": {
-    "model_memory_limit": "11mb",
+    "model_memory_limit": "256mb",
     "categorization_examples_limit": 4
   },
   "data_description": {
