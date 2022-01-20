@@ -51,7 +51,7 @@ export interface AuditLogger {
   log: (event: AuditEvent | undefined) => void;
 
   /**
-   * Boolean to check whether audit logging is enabled or not.
+   * Indicates whether audit logging is enabled or not.
    *
    * Useful for skipping resource-intense operations that don't need to be performed when audit
    * logging is disabled.
