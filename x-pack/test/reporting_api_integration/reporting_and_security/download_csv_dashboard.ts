@@ -36,7 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
-  describe('CSV Generation from SearchSource', () => {
+  describe('CSV Generation from SearchSource', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': false,

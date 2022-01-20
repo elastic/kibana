@@ -17,6 +17,9 @@ import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
 
+jest.mock('../user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+}));
 jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
   useIsolationPrivileges: jest.fn().mockReturnValue({ isAllowed: true }),
 }));

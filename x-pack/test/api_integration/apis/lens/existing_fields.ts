@@ -161,6 +161,11 @@ const metricBeatData = [
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const esVersion = getService('esVersion');
+
+  function fieldFilter(fieldName: string) {
+    return esVersion.matchRange('>=8') ? fieldName !== '_type' : true;
+  }
 
   describe('existing_fields apis', () => {
     before(async () => {
@@ -189,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('logstash-*');
-        expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort());
+        expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort().filter(fieldFilter));
       });
 
       it('should succeed for thousands of fields', async () => {
@@ -204,7 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('metricbeat-*');
-        expect(body.existingFieldNames.sort()).to.eql(metricBeatData.sort());
+        expect(body.existingFieldNames.sort()).to.eql(metricBeatData.sort().filter(fieldFilter));
       });
 
       it('should return fields filtered by query and filters', async () => {
@@ -243,7 +248,7 @@ export default ({ getService }: FtrProviderContext) => {
           'utc_time',
           'xss',
           'xss.raw',
-        ];
+        ].filter(fieldFilter);
 
         const { body } = await supertest
           .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)

@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('scripted fields', function () {
     this.tags(['skipFirefox']);
+    this.onlyEsVersion('<=7');
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
