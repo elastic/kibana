@@ -26,8 +26,8 @@ export async function savePrsToCsv(
   githubToken: string,
   labelsPath: string,
   filename: string,
-  query: any,
-  mergedSince: any
+  query: string | undefined,
+  mergedSince: string | undefined
 ) {
   const repo = `repo:"elastic/kibana"`;
   const defaultQuery = 'is:pull-request+is:merged+sort:updated-desc';

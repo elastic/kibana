@@ -38,14 +38,14 @@ export async function downloadPullRequests() {
         throw createFlagError('please provide csv path in --dest flag');
       }
 
-      const query = flags.query;
-      if (query && typeof query !== 'string') {
+      const query = flags.query || undefined;
+      if (query !== undefined && typeof query !== 'string') {
         throw createFlagError('please provide valid string in --query flag');
       }
 
-      const mergedSince = flags['merged-since'];
+      const mergedSince = flags['merged-since'] || undefined;
       if (
-        mergedSince &&
+        mergedSince !== undefined &&
         (typeof mergedSince !== 'string' || !/\d{4}-\d{2}-\d{2}/.test(mergedSince))
       ) {
         throw createFlagError(
