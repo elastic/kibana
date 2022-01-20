@@ -29,7 +29,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
         .transaction(transaction.name)
         .defaults({
           'service.runtime.name': 'AWS_Lambda_python3.8',
-          'faas.coldstart': 'true',
+          'faas.coldstart': true,
         })
         .timestamp(timestamp)
         .duration(transaction.duration)

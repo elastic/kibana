@@ -6,7 +6,7 @@
  */
 
 export interface Faas {
-  coldstart?: string;
+  coldstart?: boolean;
   execution?: string;
   trigger?: {
     type?: string;

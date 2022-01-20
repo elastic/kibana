@@ -35,7 +35,7 @@ export async function generateData({
       ...instance
         .transaction(transaction.name)
         .defaults({
-          'faas.coldstart': 'true',
+          'faas.coldstart': true,
         })
         .timestamp(timestamp)
         .duration(transaction.duration)
@@ -44,7 +44,7 @@ export async function generateData({
       ...instance
         .transaction(transaction.name)
         .defaults({
-          'faas.coldstart': 'false',
+          'faas.coldstart': false,
         })
         .timestamp(timestamp)
         .duration(transaction.duration)

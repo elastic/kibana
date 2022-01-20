@@ -38,7 +38,7 @@ export function calculateTransactionColdstartRate(
 ) {
   const coldstartStates = Object.fromEntries(
     coldstartStatesResponse.buckets.map(({ key, doc_count: count }) => [
-      key,
+      key === 1 ? 'true' : 'false',
       count,
     ])
   );

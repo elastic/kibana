@@ -20,7 +20,7 @@ interface Props {
   transaction: Transaction;
   totalDuration: number | undefined;
   errorCount: number;
-  coldStartBadge?: string;
+  coldStartBadge?: boolean;
 }
 
 function getTransactionResultSummaryItem(transaction: Transaction) {
