@@ -17,6 +17,24 @@ import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+const getDeleteLabelTitle = () => `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+
+const getDeleteCommentUserAction = ({
+  userAction,
+  handleOutlineComment,
+}: {
+  userAction: UserActionResponse<CommentUserAction>;
+} & Pick<UserActionBuilderArgs, 'handleOutlineComment'>): EuiCommentProps[] => {
+  const label = getDeleteLabelTitle();
+  const commonBuilder = createCommonUpdateUserActionBuilder({
+    userAction,
+    handleOutlineComment,
+    label,
+    icon: 'cross',
+  });
+
+  return commonBuilder.build();
+};
 
 const getCreateCommentUserAction = ({
   userAction,
@@ -101,8 +119,12 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
-    const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
 
+    if (commentUserAction.action === Actions.delete) {
+      return getDeleteCommentUserAction({ userAction: commentUserAction, handleOutlineComment });
+    }
+
+    const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
     if (comment == null) {
       return [];
     }
