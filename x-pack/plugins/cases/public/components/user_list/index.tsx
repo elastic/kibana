@@ -17,9 +17,9 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiToolTip,
+  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
-
-import styled, { css } from 'styled-components';
 
 import { ElasticUser } from '../../containers/types';
 import * as i18n from './translations';
@@ -34,48 +34,51 @@ interface UserListProps {
   users: ElasticUser[];
 }
 
-const MyAvatar = styled(EuiAvatar)`
-  top: -4px;
-`;
-
-const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    margin-top: ${theme.eui.euiSizeM};
-  `}
-`;
-
 const renderUsers = (
   users: ElasticUser[],
   handleSendEmail: (emailAddress: string | undefined | null) => void
 ) =>
   users.map(({ fullName, username, email }, key) => (
-    <MyFlexGroup key={key} justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" responsive={false}>
+    <>
+      <EuiFlexGroup key={key} justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiAvatar name={fullName ? fullName : username ?? ''} size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {fullName ? (
+                <EuiToolTip position="top" content={<p>{fullName ? fullName : username ?? ''}</p>}>
+                  <EuiText size="xs">
+                    <p>
+                      <span data-test-subj="case-view-username">{username}</span>
+                    </p>
+                  </EuiText>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs">
+                  <p>
+                    <span data-test-subj="case-view-username">{username}</span>
+                  </p>
+                </EuiText>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {isEmpty(email) === false && (
           <EuiFlexItem grow={false}>
-            <MyAvatar name={fullName ? fullName : username ?? ''} />
+            <EuiButtonIcon
+              data-test-subj="user-list-email-button"
+              onClick={handleSendEmail.bind(null, email)}
+              iconType="email"
+              aria-label={i18n.SEND_EMAIL_ARIA(fullName ? fullName : username ?? '')}
+              isDisabled={isEmpty(email)}
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" content={<p>{fullName ? fullName : username ?? ''}</p>}>
-              <p>
-                <strong>
-                  <small data-test-subj="case-view-username">{username}</small>
-                </strong>
-              </p>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="user-list-email-button"
-          onClick={handleSendEmail.bind(null, email)}
-          iconType="email"
-          aria-label={i18n.SEND_EMAIL_ARIA(fullName ? fullName : username ?? '')}
-          isDisabled={isEmpty(email)}
-        />
-      </EuiFlexItem>
-    </MyFlexGroup>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
   ));
 
 export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
@@ -89,8 +92,10 @@ export const UserList = React.memo(({ email, headline, loading, users }: UserLis
     [email.subject]
   );
   return users.filter(({ username }) => username != null && username !== '').length > 0 ? (
-    <EuiText>
-      <h4>{headline}</h4>
+    <>
+      <EuiTitle size="xs">
+        <h4>{headline}</h4>
+      </EuiTitle>
       <EuiHorizontalRule margin="xs" />
       {loading && (
         <EuiFlexGroup>
@@ -103,7 +108,8 @@ export const UserList = React.memo(({ email, headline, loading, users }: UserLis
         users.filter(({ username }) => username != null && username !== ''),
         handleSendEmail
       )}
-    </EuiText>
+      <EuiSpacer />
+    </>
   ) : null;
 });
 
