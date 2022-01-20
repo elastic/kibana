@@ -9,6 +9,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormControlLayout,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -53,15 +54,24 @@ export function ServiceGroups() {
       <EuiFlexItem>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <EuiFieldText
-              icon="search"
+            <EuiFormControlLayout
               fullWidth
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder={i18n.translate('xpack.apm.servicesGroups.filter', {
-                defaultMessage: 'Filter groups',
-              })}
-            />
+              clear={{
+                onClick: () => {
+                  setFilter('');
+                },
+              }}
+            >
+              <EuiFieldText
+                icon="search"
+                fullWidth
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder={i18n.translate('xpack.apm.servicesGroups.filter', {
+                  defaultMessage: 'Filter groups',
+                })}
+              />
+            </EuiFormControlLayout>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <Sort
