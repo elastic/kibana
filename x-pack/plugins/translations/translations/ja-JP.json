@@ -7565,7 +7565,6 @@
     "xpack.cases.caseView.noReportersAvailable": "利用可能なレポートがありません。",
     "xpack.cases.caseView.noTags": "現在、このケースにタグは割り当てられていません。",
     "xpack.cases.caseView.openCase": "ケースを開く",
-    "xpack.cases.caseView.openedOn": "開始日",
     "xpack.cases.caseView.optional": "オプション",
     "xpack.cases.caseView.particpantsLabel": "参加者",
     "xpack.cases.caseView.pushNamedIncident": "{ thirdParty }インシデントとしてプッシュ",
