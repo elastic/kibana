@@ -13,10 +13,12 @@ import { EndpointAuthzKeyList } from '../../types/authz';
 describe('Endpoint Authz service', () => {
   let licenseService: ReturnType<typeof createLicenseServiceMock>;
   let fleetAuthz: FleetAuthz;
+  let userRoles: string[];
 
   beforeEach(() => {
     licenseService = createLicenseServiceMock();
     fleetAuthz = createFleetAuthzMock();
+    userRoles = ['superuser'];
   });
 
   describe('calculateEndpointAuthz()', () => {
@@ -27,24 +29,33 @@ describe('Endpoint Authz service', () => {
         ['canIsolateHost'],
         ['canUnIsolateHost'],
       ])('should set `%s` to `true`', (authProperty) => {
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz)[authProperty]).toBe(true);
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
+          true
+        );
       });
 
       it('should set `canIsolateHost` to false if not proper license', () => {
         licenseService.isPlatinumPlus.mockReturnValue(false);
 
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz).canIsolateHost).toBe(false);
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canIsolateHost).toBe(
+          false
+        );
       });
 
       it('should set `canUnIsolateHost` to true even if not proper license', () => {
         licenseService.isPlatinumPlus.mockReturnValue(false);
 
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz).canUnIsolateHost).toBe(true);
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canUnIsolateHost).toBe(
+          true
+        );
       });
     });
 
     describe('and `fleet.all` access is false', () => {
-      beforeEach(() => (fleetAuthz.fleet.all = false));
+      beforeEach(() => {
+        fleetAuthz.fleet.all = false;
+        userRoles = [];
+      });
 
       it.each<EndpointAuthzKeyList>([
         ['canAccessFleet'],
@@ -52,13 +63,17 @@ describe('Endpoint Authz service', () => {
         ['canIsolateHost'],
         ['canUnIsolateHost'],
       ])('should set `%s` to `false`', (authProperty) => {
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz)[authProperty]).toBe(false);
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
+          false
+        );
       });
 
       it('should set `canUnIsolateHost` to false when policy is also not platinum', () => {
         licenseService.isPlatinumPlus.mockReturnValue(false);
 
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz).canUnIsolateHost).toBe(false);
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canUnIsolateHost).toBe(
+          false
+        );
       });
     });
   });

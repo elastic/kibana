@@ -83,7 +83,8 @@ export class RequestContextFactory implements IRequestContextFactory {
           if (!startPlugins.fleet) {
             endpointAuthz = getEndpointAuthzInitialState();
           } else {
-            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz);
+            const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
+            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
           }
         }
 
