@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST, fromExpression } from '@kbn/interpreter';
+import { AstFunction, fromExpression } from '@kbn/interpreter';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
 import { getFiltersByFilterExpressions } from '../../../lib/filter';
@@ -14,7 +14,7 @@ import { useFiltersService } from '../../../services';
 
 const extractExpressionAST = (filters: string[]) => fromExpression(filters.join(' | '));
 
-export function useCanvasFilters(filterExprsToGroupBy: ExpressionFunctionAST[] = []) {
+export function useCanvasFilters(filterExprsToGroupBy: AstFunction[] = []) {
   const filtersService = useFiltersService();
   const filterExpressions = useSelector(
     (state: State) => filtersService.getFilters(state),
