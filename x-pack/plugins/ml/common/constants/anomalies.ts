@@ -31,6 +31,25 @@ export const SEVERITY_COLORS = {
   BLANK: '#ffffff',
 };
 
+export const SEVERITY_COLOR_RAMP = [
+  {
+    stop: ANOMALY_THRESHOLD.LOW,
+    color: SEVERITY_COLORS.WARNING,
+  },
+  {
+    stop: ANOMALY_THRESHOLD.MINOR,
+    color: SEVERITY_COLORS.MINOR,
+  },
+  {
+    stop: ANOMALY_THRESHOLD.MAJOR,
+    color: SEVERITY_COLORS.MAJOR,
+  },
+  {
+    stop: ANOMALY_THRESHOLD.CRITICAL,
+    color: SEVERITY_COLORS.CRITICAL,
+  },
+];
+
 export const ANOMALY_RESULT_TYPE = {
   BUCKET: 'bucket',
   RECORD: 'record',
