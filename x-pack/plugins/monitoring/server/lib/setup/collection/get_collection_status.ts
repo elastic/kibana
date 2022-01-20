@@ -291,16 +291,6 @@ function getUuidBucketName(productName: string) {
   }
 }
 
-function matchesMetricbeatIndex(metricbeatIndex: string, index: string) {
-  if (index.includes(metricbeatIndex)) {
-    return true;
-  }
-  if (metricbeatIndex.includes('*')) {
-    return new RegExp(metricbeatIndex).test(index);
-  }
-  return false;
-}
-
 function isBeatFromAPM(bucket: Bucket) {
   const beatType = get(bucket, 'single_type.beat_type');
   if (!beatType) {
