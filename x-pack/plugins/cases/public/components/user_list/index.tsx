@@ -39,7 +39,7 @@ const renderUsers = (
   handleSendEmail: (emailAddress: string | undefined | null) => void
 ) =>
   users.map(({ fullName, username, email }, key) => (
-    <>
+    <div key={key}>
       <EuiFlexGroup key={key} justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
@@ -78,7 +78,7 @@ const renderUsers = (
         )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-    </>
+    </div>
   ));
 
 export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
