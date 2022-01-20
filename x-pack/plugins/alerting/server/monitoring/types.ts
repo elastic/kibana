@@ -14,6 +14,6 @@ export interface RulesMetric extends MetricResult {
       p99: number;
     };
   };
-  failures: number;
-  executions: number;
+  failures: number | null;
+  executions: number | null;
 }

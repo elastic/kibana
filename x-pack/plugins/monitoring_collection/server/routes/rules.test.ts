@@ -48,13 +48,17 @@ describe('rules', () => {
     const router = httpServiceMock.createRouter();
 
     const getMetrics = async () => {
-      return [
-        {
-          name: 'myRule',
-          id: '0abc',
-          drift: 50,
+      return {
+        overdue: {
+          count: 5,
+          duration: {
+            p50: 1000,
+            p99: 20000,
+          },
         },
-      ];
+        failures: 0,
+        executions: 450,
+      };
     };
     registerRulesRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
 
@@ -78,11 +82,15 @@ describe('rules', () => {
         cluster_uuid: 'clusterA',
         kibana: { name: 'myKibana' },
         rules: {
-          '0abc': {
-            name: 'myRule',
-            id: '0abc',
-            drift: 50,
+          overdue: {
+            count: 5,
+            duration: {
+              p50: 1000,
+              p99: 20000,
+            },
           },
+          failures: 0,
+          executions: 450,
         },
       },
     });
@@ -92,7 +100,7 @@ describe('rules', () => {
     const router = httpServiceMock.createRouter();
 
     const getMetrics = async () => {
-      return [];
+      return {};
     };
     registerRulesRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
 

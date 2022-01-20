@@ -19,6 +19,7 @@ import { AlertsConfig } from './config';
 import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
+import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -54,6 +55,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
@@ -91,6 +93,7 @@ describe('Alerting Plugin', () => {
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
         usageCollection: usageCollectionSetup,
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
@@ -119,6 +122,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createSetup(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         };
         setup = plugin.setup(coreSetup, pluginsSetup);
       });
@@ -212,6 +216,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -257,6 +262,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
+          monitoringCollection: monitoringCollectionMock.createSetup(),
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -313,6 +319,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
+        monitoringCollection: monitoringCollectionMock.createSetup(),
       });
 
       const startContract = plugin.start(coreMock.createStart(), {

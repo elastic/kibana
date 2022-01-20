@@ -10,7 +10,7 @@ export enum IN_MEMORY_METRICS {
   RULE_FAILURES = 'ruleFailures',
 }
 
-const inMemoryMetrics: Record<IN_MEMORY_METRICS, number> = {
+const inMemoryMetrics: Record<IN_MEMORY_METRICS, number | null> = {
   [IN_MEMORY_METRICS.RULE_EXECUTIONS]: 0,
   [IN_MEMORY_METRICS.RULE_FAILURES]: 0,
 };
@@ -20,10 +20,15 @@ export function incrementInMemoryMetric(metric: IN_MEMORY_METRICS) {
     return;
   }
 
-  if (inMemoryMetrics[metric] === Number.MAX_SAFE_INTEGER) {
-    inMemoryMetrics[metric] = 0;
+  if (inMemoryMetrics[metric] === null) {
+    return;
   }
-  inMemoryMetrics[metric]++;
+
+  if ((inMemoryMetrics[metric] as number) >= Number.MAX_SAFE_INTEGER) {
+    inMemoryMetrics[metric] = null;
+  } else {
+    (inMemoryMetrics[metric] as number)++;
+  }
 }
 
 export function getInMemoryMetric(metric: IN_MEMORY_METRICS) {

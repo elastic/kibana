@@ -35,6 +35,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/
 import { CloudSetup } from '../../cloud/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
+import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
