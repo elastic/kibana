@@ -1,128 +1,19 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-Here are the highlights of what's new and improved in {minor-version}.
-For detailed information about this release,
-check out the {kibana-ref-all}/7.16/release-notes-7.16.0.html[release notes].
+coming::[7.17.0]
 
-Other versions: {kibana-ref-all}/7.15/whats-new.html[7.15] | {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] |
+{kib} {minor-version} is a compatibility release for the {minor-version} Elastic Stack
+and contains no major features.
+For detailed information about this release, refer to the {kibana-ref}/release-notes.html[release notes].
+
+// tag::notable-highlights[]
+
+// end::notable-highlights[]
+
+Previous versions: {kibana-ref-all}/7.16/whats-new.html[7.16] |
+{kibana-ref-all}/7.15/whats-new.html[7.15] | {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] |
 {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
 {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] | {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] |
 {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2] | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] |
 {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
-
-// tag::notable-highlights[]
-
-[float]
-=== Upgrade Assistant for 8.x
-
-*Upgrade Assistant* is your one-stop shop to help you prepare for upgrading to 8.x.
-Review and address {es} and {kib} deprecation issues, analyze {es} deprecation logs,
-migrate system indices, and back up your data before upgrading, all from this app.
-
-[role="screenshot"]
-image::images/upgrade-assistant-7.16.png[Upgrade Assistant to help you prepare for upgrading to 8.x]
-
-
-[float]
-=== Unified integrations view
-
-All ingest options for Elastic have been moved to a single *Integrations* view.
-This provides a more consistent experience for onboarding to Elastic and increases
-the discoverability of integrations.
-All entry points for adding integrations now route to this page.
-
-[role="screenshot"]
-image::images/integrations-view-7.16.png[View of all ingest options for Elastic]
-
-
-[float]
-=== Reference lines in Lens
-
-Reference lines are now available in *Lens* to help you easily identify
-important values in your visualizations. Create reference lines with static
-values, dynamic data using {es} *Quick Functions*, or define with a
-custom *Formula*. Reference lines can come from separate index patterns,
-such as a goal dataset that is independent of the source data.
-
-With reference lines, you can:
-
-* Track metrics against goals, warning zones, and more.
-* Add display options, such as color, icons, and labels.
-* Apply color to the area above or below the reference line.
-+
-[role="screenshot"]
-image::images/reference-line-7.16.png[View of all ingest options for Elastic]
-
-[float]
-=== Enhancements to visualization editors
-
-{kib} offers even more ways to work with your visualizations:
-
-* *Apply custom field formats in TSVB.*
-Take advantage of the field formatters from your index pattern in
-*TSVB*&mdash;or override the format for a specific visualization.
-* *Filter in TSVB.*
-You always had the ability to ignore global filters in *TSVB* layers,
-and now you can also change them. This makes it easier to explore your data
-in *TSVB* without having to edit the filters for each series.
-* *View data and requests in Lens.*
-View the data in visualizations and the requests that collected the data right in the *Lens* editor.
-* *View requests in Console.*
-View the requests that collect the data in visualizations in *Console*.
-* *Auto fit rows to content.*
-Automatically resize *Aggregation-based* data table rows so that text and images are fully visible.
-
-[float]
-=== New and updated connectors in Alerting
-
-Alerting has grown its collection of connectors with the addition of the ServiceNow ITOM
-connector, which allows for easy integration with ServiceNow event management. In addition,
-{kib} provides a more efficient integration for ServiceNow ITSM and SecOps connectors
-with certified applications on the ServiceNow store. Also added
-is the ability to authenticate the email connector with OAuth 2.0
-Client Credentials for the MS Exchange email service.
-
-[float]
-=== Rule duration on display
-
-In *Rules and Connectors*, the *Rules* view now includes the rule duration field, which shows how long a rule is taking to
-complete execution. This helps you identify rules that run longer than you anticipate.
-
-[role="screenshot"]
-image::images/rules-view-7.16.png[View of all ingest options for Elastic]
-
-You can observe the duration for the last 30 executions
-on the rules detail page.
-
-[role="screenshot"]
-image::images/rule-details-7.16.png[View of all ingest options for Elastic]
-
-[float]
-=== Osquery Manager now generally available
-
-With the GA release, *Osquery Manager* is now fully supported and available
-for use in production. In addition, the 7.16 release offers the following new capabilities:
-
-* Customize the osquery configuration.
-* Map saved query results to ECS.
-* Test out queries when editing saved queries.
-* Map static values to ECS.
-* Schedule query packs for one or more agent policies.
-* Set custom namespace values for the integration.
-* Query three new Kubernetes tables.
-
-For more information, refer to {kibana-ref}/osquery.html[Osquery].
-
-[float]
-=== Transform health alerting rules
-
-beta:[] A new rule type notifies you when continuous transforms
-experience operational issues. It enables you to detect when a transform stops
-indexing data or is in a failed state. For more details, refer to
-{ref}/transform-alerts.html[Generating alerts for transforms].
-
-// end::notable-highlights[]
