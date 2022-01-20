@@ -187,7 +187,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     // We don't support preconfiguring bundled packages. Preconfigured packages will be installed from the package
     // registry if it is available while bundled packages will be installed from disk. In order to avoid version conflicts
     // we only support one or the other, preferring bundled packages if they are avaiable.
-    if (bundledInstallResults.some((result) => result.name === pkgToPkgKey(pkg))) {
+    if (bundledInstallResults.some((result) => result.name === pkg.name)) {
       logger.warn(
         `Preconfigured package ${pkg.name} will be skipped as a bundled version of this package is included with Kibana`
       );
@@ -519,7 +519,7 @@ async function installBundledPackages(
       // that the package is already installed.
       if (installType !== 'install') {
         return {
-          name: bundledPackage.name,
+          name: installedPkg?.attributes.name,
           status: 'already_installed',
           installType: 'reinstall',
         } as BundledPackageInstallResult;
@@ -544,7 +544,9 @@ async function installBundledPackages(
       });
 
       return {
-        name: bundledPackage.name,
+        // Strip semver strings from the package file name to make them consistent with the `name`
+        // field that comes through via preconfigured packages/policies
+        name: bundledPackage.name.substring(0, bundledPackage.name.indexOf('-')),
         ...installResult,
       } as BundledPackageInstallResult;
     })
