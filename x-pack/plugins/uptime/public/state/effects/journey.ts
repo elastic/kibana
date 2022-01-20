@@ -6,7 +6,7 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, takeLatest } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 import {
   getJourneySteps,
   getJourneyStepsSuccess,
@@ -16,9 +16,14 @@ import {
 import { fetchJourneySteps } from '../api/journey';
 import type { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
+const inFlightStepRequests: Record<FetchJourneyStepsParams['checkGroup'], boolean> = {};
+
 export function* fetchJourneyStepsEffect(): Generator {
-  yield takeLatest(getJourneySteps, function* (action: Action<FetchJourneyStepsParams>) {
+  yield takeEvery(getJourneySteps, function* (action: Action<FetchJourneyStepsParams>) {
+    if (inFlightStepRequests[action.payload.checkGroup]) return;
+
     try {
+      inFlightStepRequests[action.payload.checkGroup] = true;
       const response = (yield call(
         fetchJourneySteps,
         action.payload
@@ -26,6 +31,8 @@ export function* fetchJourneyStepsEffect(): Generator {
       yield put(getJourneyStepsSuccess(response));
     } catch (e) {
       yield put(getJourneyStepsFail({ checkGroup: action.payload.checkGroup, error: e }));
+    } finally {
+      delete inFlightStepRequests[action.payload.checkGroup];
     }
   });
 }
