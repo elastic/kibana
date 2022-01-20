@@ -6,6 +6,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# DO NOT MERGE
+export KBN_ES_SNAPSHOT_USE_UNVERIFIED=true
+
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
 
