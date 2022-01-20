@@ -15,10 +15,3 @@ export {
   featureId,
   featureTitle,
 } from './constants';
-export type {
-  DataVisualizerTableState,
-  FieldRequestConfig,
-  JobFieldType,
-  SavedSearchSavedObject,
-} from './types';
-export { isSavedSearchSavedObject } from './types';
