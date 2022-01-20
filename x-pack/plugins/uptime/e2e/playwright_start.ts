@@ -19,6 +19,8 @@ const listOfJourneys = [
   'StepsDuration',
   'TlsFlyoutInAlertingApp',
   'StatusFlyoutInAlertingApp',
+  'Monitor Management',
+  'Monitor Management breadcrumbs',
 ] as const;
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {

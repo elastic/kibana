@@ -16,10 +16,11 @@ export function monitorManagementPageProvider({
   page: Page;
   kibanaUrl: string;
 }) {
-  const remoteKibanaUrl = process.env.SYNTHETICS_KIBANA_URL;
-  const remoteUsername = process.env.SYNTHETICS_KIBANA_USERNAME;
-  const remotePassword = process.env.SYNTHETICS_KIBANA_PASSWORD;
-  const basePath = remoteKibanaUrl || kibanaUrl;
+  const remoteKibanaUrl = process.env.SYNTHETICS_REMOTE_KIBANA_URL;
+  const remoteUsername = process.env.SYNTHETICS_REMOTE_KIBANA_USERNAME;
+  const remotePassword = process.env.SYNTHETICS_REMOTE_KIBANA_PASSWORD;
+  const isRemote = Boolean(process.env.SYNTHETICS_REMOTE_ENABLED);
+  const basePath = isRemote ? remoteKibanaUrl : kibanaUrl;
   const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
   const addMonitor = `${basePath}/app/uptime/add-monitor`;
   const overview = `${basePath}/app/uptime`;
@@ -27,7 +28,7 @@ export function monitorManagementPageProvider({
   return {
     ...loginPageProvider({
       page,
-      isRemote: !!remoteKibanaUrl,
+      isRemote,
       username: remoteUsername,
       password: remotePassword,
     }),
