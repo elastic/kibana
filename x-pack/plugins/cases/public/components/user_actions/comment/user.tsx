@@ -43,7 +43,7 @@ export const createUserAttachmentUserActionBuilder = ({
   handleSaveComment,
   handleManageQuote,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  build: Builder() => [
+  build: () => [
     {
       username: (
         <UserActionUsername
