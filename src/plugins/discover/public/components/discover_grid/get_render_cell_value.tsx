@@ -112,10 +112,6 @@ export const getRenderCellValueFn =
       );
     }
 
-    if (!field?.type && rowFlattened && typeof rowFlattened[columnId] === 'object') {
-      return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
-    }
-
     return (
       <span
         // formatFieldValue guarantees sanitized values
