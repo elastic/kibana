@@ -30,7 +30,9 @@ export interface RuleSearchResult {
     tags: string[];
     createdAt: string;
     updatedAt: string;
+    muteAll: boolean | undefined | null;
     params: DetectionRuleParms;
+    actions: unknown[];
   };
 }
 
@@ -55,8 +57,11 @@ interface FeatureTypeUsage {
   disabled: number;
   alerts: number;
   cases: number;
+  legacy_notifications_enabled: number;
+  legacy_notifications_disabled: number;
+  notifications_enabled: number;
+  notifications_disabled: number;
 }
-
 export interface DetectionRulesTypeUsage {
   query: FeatureTypeUsage;
   threshold: FeatureTypeUsage;
@@ -121,12 +126,15 @@ export interface DetectionRuleMetric {
   rule_name: string;
   rule_id: string;
   rule_type: string;
+  rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
   cases_count_total: number;
+  has_legacy_notification: boolean;
+  has_notification: boolean;
 }
 
 export interface AlertsAggregationResponse {

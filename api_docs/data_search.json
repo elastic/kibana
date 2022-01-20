@@ -211,13 +211,7 @@
                 "text": "ISearchOptions"
               },
               ", \"isStored\" | \"isRestore\" | \"sessionId\">> | null; enableStorage: <P extends ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">(searchSessionInfoProvider: ",
               {
                 "pluginId": "data",
@@ -603,13 +597,7 @@
                 "text": "ISearchOptions"
               },
               ", \"isStored\" | \"isRestore\" | \"sessionId\">> | null; enableStorage: <P extends ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">(searchSessionInfoProvider: ",
               {
                 "pluginId": "data",
@@ -768,13 +756,12 @@
           {
             "parentPluginId": "data",
             "id": "def-public.Reason.lang",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "ScriptLanguage",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data/public/search/errors/types.ts",
             "deprecated": false
@@ -1286,13 +1273,7 @@
             "text": "ISearchOptions"
           },
           ", \"isStored\" | \"isRestore\" | \"sessionId\">> | null; enableStorage: <P extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">(searchSessionInfoProvider: ",
           {
             "pluginId": "data",
@@ -1621,7 +1602,7 @@
                   "{ filter?: any; search?: string | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
                   "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
-                  "SearchSortOrder",
+                  "SortOrder",
                   " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   {
                     "pluginId": "core",
@@ -3214,13 +3195,7 @@
             "description": [],
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -3241,13 +3216,7 @@
             "description": [],
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -4889,13 +4858,7 @@
             "description": [],
             "signature": [
               "(agg: TAggConfig, state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined) => TAggConfig"
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/agg.ts",
@@ -4924,13 +4887,7 @@
                 "description": [],
                 "signature": [
                   "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "server",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
-                  },
+                  "SerializableRecord",
                   " | undefined; schema?: string | undefined; } | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/agg.ts",
@@ -5456,7 +5413,9 @@
             "signature": [
               "(resp: ",
               "SearchResponse",
-              "<any>, aggConfigs: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>, aggConfigs: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -5482,7 +5441,9 @@
               },
               " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined) => Promise<",
               "SearchResponse",
-              "<any>>"
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -5499,7 +5460,9 @@
                 ],
                 "signature": [
                   "SearchResponse",
-                  "<any>"
+                  "<any, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_type.ts",
                 "deprecated": false
@@ -5722,7 +5685,9 @@
                   },
                   "<",
                   "SearchResponse",
-                  "<any>>>; fetch: (options?: ",
+                  "<any, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>>>; fetch: (options?: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -5732,7 +5697,9 @@
                   },
                   ") => Promise<",
                   "SearchResponse",
-                  "<any>>; onRequestStart: (handler: (searchSource: ",
+                  "<any, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>>; onRequestStart: (handler: (searchSource: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7094,6 +7061,28 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.FieldParamType.filterField",
+            "type": "Function",
+            "tags": [],
+            "label": "filterField",
+            "description": [
+              "\nFilter available fields by passing filter fn on a {@link DataViewField}\nIf used, takes precedence over filterFieldTypes and other filter params"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.FilterFieldFn",
+                "text": "FilterFieldFn"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.FieldParamType.Unnamed",
             "type": "Function",
             "tags": [],
@@ -8439,7 +8428,9 @@
               },
               "<",
               "SearchResponse",
-              "<any>>>"
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>>"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false,
@@ -8489,7 +8480,9 @@
               },
               ") => Promise<",
               "SearchResponse",
-              "<any>>"
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": true,
@@ -9487,6 +9480,22 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggSignificantText",
+        "type": "Function",
+        "tags": [],
+        "label": "aggSignificantText",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/significant_text_fn.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggSinglePercentile",
         "type": "Function",
         "tags": [],
@@ -9684,13 +9693,7 @@
             "text": "DatatableColumn"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
-            "text": "Serializable"
-          }
+          "Serializable"
         ],
         "path": "src/plugins/data/common/search/tabify/utils.ts",
         "deprecated": false,
@@ -10343,13 +10346,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">) => any"
         ],
         "path": "src/plugins/data/common/search/expressions/utils/function_wrapper.ts",
@@ -11956,7 +11953,9 @@
         "signature": [
           "(resp: ",
           "SearchResponse",
-          "<unknown> | undefined, searchSource: ",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">> | undefined, searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -11985,7 +11984,9 @@
             "description": [],
             "signature": [
               "SearchResponse",
-              "<unknown> | undefined"
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">> | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/inspect/inspector_stats.ts",
             "deprecated": false,
@@ -12253,6 +12254,38 @@
           ">"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/significant_terms.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getSignificantTextBucketAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getSignificantTextBucketAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IBucketAggConfig",
+            "text": "IBucketAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -13723,7 +13756,9 @@
         "signature": [
           "(esResponse: ",
           "SearchResponse",
-          "<unknown>, index?: ",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>, index?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -13752,7 +13787,9 @@
             "description": [],
             "signature": [
               "SearchResponse",
-              "<unknown>"
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>"
             ],
             "path": "src/plugins/data/common/search/tabify/tabify_docs.ts",
             "deprecated": false,
@@ -14041,13 +14078,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14108,13 +14139,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14160,13 +14185,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14212,13 +14231,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14264,13 +14277,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14316,13 +14323,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14368,13 +14369,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14420,13 +14415,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14472,13 +14461,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14524,13 +14507,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14576,13 +14553,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14628,13 +14599,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14680,13 +14645,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14732,13 +14691,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14784,13 +14737,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14836,13 +14783,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14888,13 +14829,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14940,13 +14875,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -14992,13 +14921,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15044,13 +14967,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15096,13 +15013,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15148,13 +15059,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15200,13 +15105,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15252,13 +15151,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15304,13 +15197,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15356,13 +15243,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15408,13 +15289,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15460,13 +15335,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15512,13 +15381,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15564,13 +15427,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15616,13 +15473,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15668,13 +15519,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15720,13 +15565,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15772,13 +15611,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15824,13 +15657,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15876,13 +15703,7 @@
                 "text": "Adapters"
               },
               ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16044,13 +15865,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
@@ -16065,13 +15880,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
@@ -16116,13 +15925,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
@@ -16137,13 +15940,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
@@ -16188,13 +15985,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
@@ -16209,13 +16000,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
@@ -16260,13 +16045,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
@@ -16281,13 +16060,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
@@ -16385,13 +16158,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
@@ -16746,13 +16513,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
@@ -16952,13 +16713,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
@@ -16973,13 +16728,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
@@ -17719,13 +17468,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
@@ -17806,13 +17549,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
@@ -18146,13 +17883,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
@@ -18248,6 +17979,111 @@
               "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/significant_terms.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsSignificantText",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsSignificantText",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsSignificantText",
+            "text": "AggParamsSignificantText"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantText.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantText.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantText.min_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "min_doc_count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantText.filter_duplicate_text",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter_duplicate_text",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantText.exclude",
+            "type": "string",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSignificantText.include",
+            "type": "string",
+            "tags": [],
+            "label": "include",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/significant_text.ts",
             "deprecated": false
           }
         ],
@@ -18439,13 +18275,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
@@ -19973,10 +19803,49 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
-              "KBN_FIELD_TYPES",
-              " | \"*\" | ",
-              "KBN_FIELD_TYPES",
-              "[] | undefined"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.FieldTypes",
+                "text": "FieldTypes"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BucketAggParam.onlyAggregatable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "onlyAggregatable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BucketAggParam.filterField",
+            "type": "Function",
+            "tags": [],
+            "label": "filterField",
+            "description": [
+              "\nFilter available fields by passing filter fn on a {@link DataViewField}\nIf used, takes precedence over filterFieldTypes and other filter params"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.FilterFieldFn",
+                "text": "FilterFieldFn"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/bucket_agg_type.ts",
             "deprecated": false
@@ -20331,7 +20200,9 @@
             "description": [],
             "signature": [
               "SearchResponse",
-              "<T>"
+              "<T, Record<string, ",
+              "AggregationsAggregate",
+              ">>"
             ],
             "path": "src/plugins/data/common/search/expressions/es_raw_response.ts",
             "deprecated": false
@@ -22730,13 +22601,7 @@
               "\nThe application state that was used to create the session.\nShould be used, for example, to re-load an expired search session."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
@@ -22752,13 +22617,7 @@
               "\nApplication state that should be used to restore the session.\nFor example, relative dates are conveted to absolute ones."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               " | undefined"
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
@@ -23390,9 +23249,7 @@
             "label": "reason",
             "description": [],
             "signature": [
-              "{ caused_by: { reason: string; type: string; }; reason: string; lang?: ",
-              "ScriptLanguage",
-              " | undefined; script?: string | undefined; script_stack?: string[] | undefined; type: string; }"
+              "{ caused_by: { reason: string; type: string; }; reason: string; lang?: string | undefined; script?: string | undefined; script_stack?: string[] | undefined; type: string; }"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -23678,7 +23535,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
+          "{ id?: string | undefined; type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -23686,14 +23543,8 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "; enabled?: boolean | undefined; schema?: string | undefined; params?: {} | ",
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -23709,13 +23560,7 @@
         "description": [],
         "signature": [
           "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -24131,6 +23976,20 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggSignificantTextFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggSignificantTextFnName",
+        "description": [],
+        "signature": [
+          "\"aggSignificantText\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/significant_text_fn.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggSinglePercentileFnName",
         "type": "string",
         "tags": [],
@@ -24398,7 +24257,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ type: string | ",
+          "{ id?: string | undefined; type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -24406,14 +24265,8 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; schema?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "; enabled?: boolean | undefined; schema?: string | undefined; params?: {} | ",
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
@@ -24566,13 +24419,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esaggs/esaggs_fn.ts",
@@ -24611,13 +24458,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esdsl.ts",
@@ -24789,13 +24630,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/cidr.ts",
@@ -24850,13 +24685,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/date_range.ts",
@@ -24903,13 +24732,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
@@ -24964,13 +24787,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
@@ -25017,13 +24834,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/field.ts",
@@ -25070,13 +24881,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
@@ -25123,13 +24928,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_point.ts",
@@ -25184,13 +24983,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/ip_range.ts",
@@ -25359,13 +25152,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
@@ -25420,13 +25207,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -25473,13 +25254,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kql.ts",
@@ -25526,13 +25301,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/lucene.ts",
@@ -25587,13 +25356,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
@@ -25640,13 +25403,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
@@ -25693,13 +25450,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/query_filter.ts",
@@ -25746,13 +25497,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/range.ts",
@@ -25799,13 +25544,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/range_filter.ts",
@@ -25860,13 +25599,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
@@ -25921,13 +25654,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/select_filter.ts",
@@ -25995,14 +25722,58 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.FilterFieldFn",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterFieldFn",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ") => boolean"
+        ],
+        "path": "src/plugins/data/common/search/aggs/param_types/field.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FilterFieldFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.GenericBucket",
         "type": "Type",
         "tags": [],
         "label": "GenericBucket",
         "description": [],
         "signature": [
-          "AggregationsBucket",
-          " & { [property: string]: ",
+          "AggregationsBuckets",
+          "<any> & { [property: string]: ",
           "AggregationsAggregate",
           "; }"
         ],
@@ -26168,7 +25939,9 @@
           },
           "<",
           "SearchResponse",
-          "<Source>>"
+          "<Source, Record<string, ",
+          "AggregationsAggregate",
+          ">>>"
         ],
         "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
         "deprecated": false,
@@ -26751,7 +26524,9 @@
           },
           "<",
           "SearchResponse",
-          "<any>>>; fetch: (options?: ",
+          "<any, Record<string, ",
+          "AggregationsAggregate",
+          ">>>>; fetch: (options?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -26761,7 +26536,9 @@
           },
           ") => Promise<",
           "SearchResponse",
-          "<any>>; onRequestStart: (handler: (searchSource: ",
+          "<any, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -27060,21 +26837,9 @@
             "text": "EsQuerySortValue"
           },
           "[] | undefined; highlight?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
           "Fields",
           " | undefined; version?: boolean | undefined; fields?: ",
@@ -27267,9 +27032,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"cidr\""
-            ],
             "path": "src/plugins/data/common/search/expressions/cidr.ts",
             "deprecated": false
           },
@@ -27447,9 +27209,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"date_range\""
-            ],
             "path": "src/plugins/data/common/search/expressions/date_range.ts",
             "deprecated": false
           },
@@ -27732,9 +27491,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_filter\""
-            ],
             "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
             "deprecated": false
           },
@@ -27950,9 +27706,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"extended_bounds\""
-            ],
             "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
             "deprecated": false
           },
@@ -28152,9 +27905,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_field\""
-            ],
             "path": "src/plugins/data/common/search/expressions/field.ts",
             "deprecated": false
           },
@@ -28408,9 +28158,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"geo_bounding_box\""
-            ],
             "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
             "deprecated": false
           },
@@ -28848,9 +28595,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"geo_point\""
-            ],
             "path": "src/plugins/data/common/search/expressions/geo_point.ts",
             "deprecated": false
           },
@@ -29104,9 +28848,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"ip_range\""
-            ],
             "path": "src/plugins/data/common/search/expressions/ip_range.ts",
             "deprecated": false
           },
@@ -29332,9 +29073,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_context\""
-            ],
             "path": "src/plugins/data/common/search/expressions/kibana.ts",
             "deprecated": false
           },
@@ -29609,9 +29347,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_filter\""
-            ],
             "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
             "deprecated": false
           },
@@ -29884,9 +29619,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"timerange\""
-            ],
             "path": "src/plugins/data/common/search/expressions/timerange.ts",
             "deprecated": false
           },
@@ -30160,9 +29892,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_query\""
-            ],
             "path": "src/plugins/data/common/search/expressions/kql.ts",
             "deprecated": false
           },
@@ -30339,9 +30068,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_query\""
-            ],
             "path": "src/plugins/data/common/search/expressions/lucene.ts",
             "deprecated": false
           },
@@ -30497,10 +30223,22 @@
         "description": [],
         "signature": [
           "{ scriptable?: boolean | undefined; filterFieldTypes?: ",
-          "KBN_FIELD_TYPES",
-          " | \"*\" | ",
-          "KBN_FIELD_TYPES",
-          "[] | undefined; makeAgg?: ((agg: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.FieldTypes",
+            "text": "FieldTypes"
+          },
+          " | undefined; onlyAggregatable?: boolean | undefined; filterField?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.FilterFieldFn",
+            "text": "FilterFieldFn"
+          },
+          " | undefined; makeAgg?: ((agg: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -30509,13 +30247,7 @@
             "text": "IBucketAggConfig"
           },
           ", state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; } | undefined) => ",
           {
             "pluginId": "data",
@@ -30648,9 +30380,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"numerical_range\""
-            ],
             "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
             "deprecated": false
           },
@@ -30983,9 +30712,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_filter\""
-            ],
             "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
             "deprecated": false
           },
@@ -31088,7 +30814,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "\"string\"[]"
+                      "string[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
                     "deprecated": false
@@ -31262,9 +30988,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_query_filter\""
-            ],
             "path": "src/plugins/data/common/search/expressions/query_filter.ts",
             "deprecated": false
           },
@@ -31483,9 +31206,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_filter\""
-            ],
             "path": "src/plugins/data/common/search/expressions/range_filter.ts",
             "deprecated": false
           },
@@ -31749,9 +31469,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_range\""
-            ],
             "path": "src/plugins/data/common/search/expressions/range.ts",
             "deprecated": false
           },
@@ -32007,9 +31724,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_context\""
-            ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
             "deprecated": false
           },
@@ -32297,9 +32011,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"kibana_context\""
-            ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
             "deprecated": false
           },

@@ -9,8 +9,22 @@ export BUILDKITE_TOKEN
 
 echo '--- Install buildkite dependencies'
 cd '.buildkite'
-retry 5 15 yarn install --production --pure-lockfile
-cd -
+
+# If this yarn install is terminated early, e.g. if the build is cancelled in buildkite,
+# A node module could end up in a bad state that can cause all future builds to fail
+# So, let's cache clean and try again to make sure that's not what caused the error
+install_deps() {
+  yarn install --production --pure-lockfile
+  EXIT=$?
+  if [[ "$EXIT" != "0" ]]; then
+    yarn cache clean
+  fi
+  return $EXIT
+}
+
+retry 5 15 install_deps
+
+cd ..
 
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
@@ -80,6 +94,15 @@ export KIBANA_DOCKER_PASSWORD
 
 EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
 export EC_API_KEY
+
+SYNTHETICS_SERVICE_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
+export SYNTHETICS_SERVICE_USERNAME
+
+SYNTHETICS_SERVICE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
+export SYNTHETICS_SERVICE_PASSWORD
+
+SYNTHETICS_SERVICE_MANIFEST="$(retry 5 5 vault read -field=manifest secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
+export SYNTHETICS_SERVICE_MANIFEST
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {

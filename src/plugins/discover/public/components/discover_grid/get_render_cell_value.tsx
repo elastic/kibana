@@ -11,7 +11,7 @@ import {
   euiLightVars as themeLight,
   euiDarkVars as themeDark,
 } from '@kbn/ui-shared-deps-src/theme';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -29,7 +29,7 @@ import { ElasticSearchHit } from '../../types';
 
 export const getRenderCellValueFn =
   (
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     rows: ElasticSearchHit[] | undefined,
     rowsFlattened: Array<Record<string, unknown>>,
     useNewFieldsApi: boolean,
@@ -169,10 +169,15 @@ export const getRenderCellValueFn =
     if (!field?.type && rowFlattened && typeof rowFlattened[columnId] === 'object') {
       if (isDetails) {
         // nicely formatted JSON for the expanded view
-        return <span>{JSON.stringify(rowFlattened[columnId], null, 2)}</span>;
+        return (
+          <JsonCodeEditor
+            json={rowFlattened[columnId] as Record<string, unknown>}
+            width={defaultMonacoEditorWidth}
+          />
+        );
       }
 
-      return <span>{JSON.stringify(rowFlattened[columnId])}</span>;
+      return <>{formatFieldValue(rowFlattened[columnId], row, indexPattern, field)}</>;
     }
 
     return (

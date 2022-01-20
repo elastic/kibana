@@ -8,9 +8,10 @@
 
 import moment from 'moment';
 import { IAggConfig } from '../agg_config';
-import { GenericBucket, IAggConfigs, KBN_FIELD_TYPES } from '../../../../common';
+import { FilterFieldFn, GenericBucket, IAggConfigs } from '../../../../common';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
+import type { FieldTypes } from '../param_types/field';
 
 export interface IBucketAggConfig extends IAggConfig {
   type: InstanceType<typeof BucketAggType>;
@@ -19,7 +20,14 @@ export interface IBucketAggConfig extends IAggConfig {
 export interface BucketAggParam<TBucketAggConfig extends IAggConfig>
   extends AggParamType<TBucketAggConfig> {
   scriptable?: boolean;
-  filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+  filterFieldTypes?: FieldTypes;
+  onlyAggregatable?: boolean;
+
+  /**
+   * Filter available fields by passing filter fn on a {@link DataViewField}
+   * If used, takes precedence over filterFieldTypes and other filter params
+   */
+  filterField?: FilterFieldFn;
 }
 
 const bucketType = 'buckets';

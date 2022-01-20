@@ -37,21 +37,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_1', '21000', {
         clearWithKeyboard: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(32, 146, 128)');
     });
 
     it('should change the color when reverting the palette', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(204, 86, 66)');
     });
 
     it('should reset the color stops when changing palette to a predefined one', async () => {
       await PageObjects.lens.changePaletteTo('temperature');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(235, 239, 245)');
     });
