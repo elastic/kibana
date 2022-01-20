@@ -45,13 +45,9 @@ export const exportRulesRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = context.alerting.getRulesClient();
       const exceptionsClient = context.lists?.getExceptionListClient();
       const savedObjectsClient = context.core.savedObjects.client;
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
 
       try {
         const exportSizeLimit = config.maxRuleImportExportSize;

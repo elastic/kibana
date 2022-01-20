@@ -6,29 +6,29 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 import { deleteRules } from './delete_rules';
 import { DeleteRuleOptions } from './types';
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
+  let ruleExecutionLogClient: ReturnType<typeof ruleExecutionLogMock.client.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    ruleStatusClient = ruleExecutionLogClientMock.create();
+    ruleExecutionLogClient = ruleExecutionLogMock.client.create();
   });
 
   it('should delete the rule along with its actions, and statuses', async () => {
     const options: DeleteRuleOptions = {
       ruleId: 'ruleId',
       rulesClient,
-      ruleStatusClient,
+      ruleExecutionLogClient,
     };
 
     await deleteRules(options);
 
     expect(rulesClient.delete).toHaveBeenCalledWith({ id: options.ruleId });
-    expect(ruleStatusClient.deleteCurrentStatus).toHaveBeenCalledWith(options.ruleId);
+    expect(ruleExecutionLogClient.clearExecutionSummary).toHaveBeenCalledWith(options.ruleId);
   });
 });

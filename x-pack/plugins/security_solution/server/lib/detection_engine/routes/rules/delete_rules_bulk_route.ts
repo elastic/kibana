@@ -53,14 +53,8 @@ export const deleteRulesBulkRoute = (
   };
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
-
-    const rulesClient = context.alerting?.getRulesClient();
-
-    if (!rulesClient) {
-      return siemResponse.error({ statusCode: 404 });
-    }
-
-    const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+    const rulesClient = context.alerting.getRulesClient();
+    const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
     const savedObjectsClient = context.core.savedObjects.client;
 
     const rules = await Promise.all(
@@ -87,19 +81,20 @@ export const deleteRulesBulkRoute = (
             return getIdBulkError({ id, ruleId });
           }
 
-          const ruleStatus = await ruleStatusClient.getCurrentStatus({
-            ruleId: migratedRule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
+          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
+            migratedRule.id
+          );
+
           await deleteRules({
             ruleId: migratedRule.id,
             rulesClient,
-            ruleStatusClient,
+            ruleExecutionLogClient,
           });
+
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
             migratedRule,
-            ruleStatus,
+            ruleExecutionSummary,
             isRuleRegistryEnabled
           );
         } catch (err) {

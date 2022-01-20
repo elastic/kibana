@@ -1191,7 +1191,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .query({ id: ruleResponse.id });
-        const initialStatusDate = new Date(statusResponse.body.status_date);
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        const ruleStatusDate = statusResponse.body?.execution_summary?.last_execution.date;
+        const initialStatusDate = new Date(ruleStatusDate);
 
         const initialSignal = signals.hits.hits[0];
 

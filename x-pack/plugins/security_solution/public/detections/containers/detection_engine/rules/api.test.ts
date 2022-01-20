@@ -18,7 +18,7 @@ import {
   createPrepackagedRules,
   importRules,
   exportRules,
-  getRuleStatusById,
+  fetchRuleExecutionEvents,
   fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
@@ -655,39 +655,32 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('getRuleStatusById', () => {
-    const statusMock = {
-      myRule: {
-        current_status: {
-          alert_id: 'alertId',
-          status_date: 'mm/dd/yyyyTHH:MM:sssz',
-          status: 'succeeded',
-          last_failure_at: null,
-          last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-          last_failure_message: null,
-          last_success_message: 'it is a success',
-        },
-        failures: [],
-      },
+  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
+  describe('fetchRuleExecutionEvents', () => {
+    const responseMock = {
+      dummy: 'response',
     };
 
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(statusMock);
+      fetchMock.mockResolvedValue(responseMock);
     });
 
-    test('check parameter url, query', async () => {
-      await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/internal/detection_engine/rules/_find_status', {
-        body: '{"ruleId":"mySuperRuleId"}',
-        method: 'POST',
-        signal: abortCtrl.signal,
-      });
+    test('calls API with correct parameters', async () => {
+      await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/rules/42/execution/events',
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
-    test('happy path', async () => {
-      const ruleResp = await getRuleStatusById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(ruleResp).toEqual(statusMock);
+    test('returns API response as is', async () => {
+      const response = await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+      expect(response).toEqual(responseMock);
     });
   });
 

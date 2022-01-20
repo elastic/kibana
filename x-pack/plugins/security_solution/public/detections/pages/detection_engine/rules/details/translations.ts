@@ -42,20 +42,6 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
-export const ERROR_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.errorCalloutTitle',
-  {
-    defaultMessage: 'Rule failure at',
-  }
-);
-
-export const PARTIAL_FAILURE_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.partialErrorCalloutTitle',
-  {
-    defaultMessage: 'Warning at',
-  }
-);
-
 export const FAILURE_HISTORY_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.failureHistoryTab',
   {

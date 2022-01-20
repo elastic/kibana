@@ -20,7 +20,6 @@ import {
 import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
-import { useRuleStatus } from '../../../../containers/detection_engine/rules';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
@@ -131,15 +130,6 @@ describe('RuleDetailsPageComponent', () => {
       indicesExist: true,
       indexPattern: {},
     });
-    (useRuleStatus as jest.Mock).mockReturnValue([
-      false,
-      {
-        status: 'succeeded',
-        last_failure_at: new Date().toISOString(),
-        last_failure_message: 'my fake failure message',
-        failures: [],
-      },
-    ]);
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,

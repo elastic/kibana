@@ -6,11 +6,8 @@
  */
 
 import { camelCase } from 'lodash';
-import {
-  FullResponseSchema,
-  PreviewResponse,
-} from '../../../../../common/detection_engine/schemas/request';
-import { HttpStart } from '../../../../../../../../src/core/public';
+import { HttpStart } from 'src/core/public';
+
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -18,8 +15,18 @@ import {
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
-  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
+  detectionEngineRuleExecutionEventsUrl,
 } from '../../../../../common/constants';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import {
+  FullResponseSchema,
+  PreviewResponse,
+} from '../../../../../common/detection_engine/schemas/request';
+import {
+  RulesSchema,
+  GetRuleExecutionEventsResponse,
+} from '../../../../../common/detection_engine/schemas/response';
+
 import {
   UpdateRulesProps,
   CreateRulesProps,
@@ -33,7 +40,6 @@ import {
   BasicFetchProps,
   ImportDataProps,
   ExportDocumentsProps,
-  RuleStatusResponse,
   ImportDataResponse,
   PrePackagedRulesStatusResponse,
   BulkRuleResponse,
@@ -44,9 +50,7 @@ import {
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { convertRulesFilterToKQL } from './utils';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
  * Create provided Rule
@@ -241,15 +245,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         updated_by: undefined,
         enabled: false,
         immutable: undefined,
-        last_success_at: undefined,
-        last_success_message: undefined,
-        last_failure_at: undefined,
-        last_failure_message: undefined,
-        last_gap: undefined,
-        bulk_create_time_durations: undefined,
-        search_after_time_durations: undefined,
-        status: undefined,
-        status_date: undefined,
+        execution_summary: undefined,
       }))
     ),
   });
@@ -362,25 +358,26 @@ export const exportRules = async ({
 };
 
 /**
- * Get Rule Status provided Rule ID
+ * Fetch rule execution events (e.g. status changes) from Event Log.
  *
- * @param id string of Rule ID's (not rule_id)
- * @param signal AbortSignal for cancelling request
+ * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
  */
-export const getRuleStatusById = async ({
-  id,
+export const fetchRuleExecutionEvents = async ({
+  ruleId,
   signal,
 }: {
-  id: string;
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  KibanaServices.get().http.fetch<RuleStatusResponse>(INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL, {
-    method: 'POST',
-    body: JSON.stringify({ ruleId: id }),
+  ruleId: string;
+  signal?: AbortSignal;
+}): Promise<GetRuleExecutionEventsResponse> => {
+  const url = detectionEngineRuleExecutionEventsUrl(ruleId);
+  return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
+    method: 'GET',
     signal,
   });
+};
 
 /**
  * Fetch all unique Tags used by Rules

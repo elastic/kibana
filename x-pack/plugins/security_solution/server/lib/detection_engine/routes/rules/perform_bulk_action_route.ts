@@ -158,10 +158,10 @@ export const performBulkActionRoute = (
       request.events.completed$.subscribe(() => abortController.abort());
 
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
         const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -169,10 +169,6 @@ export const performBulkActionRoute = (
           request,
           savedObjectsClient,
         });
-
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
 
         const rules = await findRules({
           isRuleRegistryEnabled,
@@ -232,7 +228,7 @@ export const performBulkActionRoute = (
                 await deleteRules({
                   ruleId: rule.id,
                   rulesClient,
-                  ruleStatusClient,
+                  ruleExecutionLogClient,
                 });
               },
               abortController.signal
