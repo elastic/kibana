@@ -17,7 +17,7 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { jsonRt, mergeRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
