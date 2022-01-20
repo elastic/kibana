@@ -57,7 +57,7 @@ export interface ComponentOpts {
   }>;
   loadAlert: (id: Rule['id']) => Promise<Rule>;
   loadAlertState: (id: Rule['id']) => Promise<RuleTaskState>;
-  loadAlertSummary: (id: Rule['id']) => Promise<AlertSummary>;
+  loadAlertSummary: (id: Rule['id'], numberOfExecutions?: number) => Promise<AlertSummary>;
   loadAlertTypes: () => Promise<RuleType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
@@ -127,7 +127,9 @@ export function withBulkAlertOperations<T>(
         deleteAlert={async (alert: Rule) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Rule['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Rule['id']) => loadAlertState({ http, alertId })}
-        loadAlertSummary={async (ruleId: Rule['id']) => loadAlertSummary({ http, ruleId })}
+        loadAlertSummary={async (ruleId: Rule['id'], numberOfExecutions?: number) =>
+          loadAlertSummary({ http, ruleId, numberOfExecutions })
+        }
         loadAlertTypes={async () => loadAlertTypes({ http })}
         resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}

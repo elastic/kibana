@@ -49,7 +49,7 @@ describe('getAlertState useEffect handler', () => {
 
     await getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toastNotifications);
 
-    expect(loadAlertSummary).toHaveBeenCalledWith(rule.id);
+    expect(loadAlertSummary).toHaveBeenCalledWith(rule.id, undefined);
     expect(setAlertSummary).toHaveBeenCalledWith(alertSummary);
   });
 

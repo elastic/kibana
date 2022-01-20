@@ -26521,7 +26521,6 @@
     "xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText": "已更新“{connectorName}”",
     "xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData": "此规则没有可用执行。",
     "xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTitle": "最近执行持续时间",
-    "xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTooltip": "最近规则执行最多包括最后 {numExecutions} 个执行。",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseCancelButtonText": "取消",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseConfirmButtonText": "管理许可证",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage": "规则类型 {alertTypeId} 已禁用，因为它需要{licenseRequired}许可证。继续前往“许可证管理”查看升级选项。",
