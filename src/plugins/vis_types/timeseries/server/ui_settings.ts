@@ -36,4 +36,18 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     schema: schema.boolean(),
   },
+  [UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS]: {
+    name: i18n.translate('visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsTitle', {
+      defaultMessage: 'Allow checking for failed shards in TSVB',
+    }),
+    value: true,
+    requiresPageReload: true,
+    description: i18n.translate(
+      'visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsText',
+      {
+        defaultMessage: 'Allows you to switch the response check to failed shards in TSVB.',
+      }
+    ),
+    schema: schema.boolean(),
+  },
 });
