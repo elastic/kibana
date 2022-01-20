@@ -14,6 +14,7 @@ import { coreMock, elasticsearchServiceMock, statusServiceMock } from 'src/core/
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
+import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
 import { DeepPartial } from 'utility-types';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
@@ -34,12 +35,12 @@ export const createMockPluginSetup = (
   return {
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
-    router: setupMock.router,
+    router: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
     security: securityMock.createSetup(),
     taskManager: taskManagerMock.createSetup(),
     logger: createMockLevelLogger(),
     status: statusServiceMock.createSetupContract(),
-    eventLog: setupMock.eventLog || {
+    eventLog: {
       registerProviderActions: jest.fn(),
       getLogger: jest.fn(() => ({ logEvent: jest.fn() })),
     },
@@ -63,9 +64,10 @@ export const createMockPluginStart = async (
 ): Promise<ReportingInternalStart> => {
   return {
     esClient: elasticsearchServiceMock.createClusterClient(),
-    savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
-    uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
-    data: startMock.data || dataPluginMock.createStartContract(),
+    savedObjects: { getScopedClient: jest.fn() },
+    uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
+    data: dataPluginMock.createStartContract(),
+    fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
@@ -76,7 +78,7 @@ export const createMockPluginStart = async (
       license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
     },
     logger,
-    screenshotting: startMock.screenshotting || createMockScreenshottingStart(),
+    screenshotting: createMockScreenshottingStart(),
     ...startMock,
   };
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { createGetterSetter } from '../../../../src/plugins/kibana_utils/server';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 export const [getFieldFormats, setFieldFormats] =
-  createGetterSetter<DataPluginStart['fieldFormats']>('FieldFormats');
+  createGetterSetter<FieldFormatsStart>('FieldFormats');
