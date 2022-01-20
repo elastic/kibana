@@ -18,6 +18,7 @@ import { UserActionUsernameWithAvatar } from '../avatar_username';
 import { AlertCommentEvent } from './alert_event';
 import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
+import { Ecs } from '../../../containers/types';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -29,9 +30,6 @@ type BuilderArgs = Pick<
   | 'onShowAlertDetails'
 > & { comment: SnakeToCamelCase<CommentResponseAlertsType> };
 
-const getFirstItem = (items: string | string[]) =>
-  Array.isArray(items) ? (items.length > 0 ? items[0] : '') : items;
-
 export const createAlertAttachmentUserActionBuilder = ({
   userAction,
   comment,
@@ -42,24 +40,16 @@ export const createAlertAttachmentUserActionBuilder = ({
   onShowAlertDetails,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => {
-    const alertId = getFirstItem(comment.alertId);
-    const alertIndex = getFirstItem(comment.index);
+    const alertId = getNonEmptyField(comment.alertId);
+    const alertIndex = getNonEmptyField(comment.index);
 
-    if (isEmpty(alertId)) {
+    if (!alertId || !alertIndex) {
       return [];
     }
 
-    const ruleId =
-      comment?.rule?.id ??
-      alertData[alertId]?.signal?.rule?.id?.[0] ??
-      get(alertData[alertId], ALERT_RULE_UUID)[0] ??
-      null;
-
-    const ruleName =
-      comment?.rule?.name ??
-      alertData[alertId]?.signal?.rule?.name?.[0] ??
-      get(alertData[alertId], ALERT_RULE_NAME)[0] ??
-      null;
+    const alertField: Ecs | undefined = alertData[alertId];
+    const ruleId = getRuleId(comment, alertField);
+    const ruleName = getRuleName(comment, alertField);
 
     return [
       {
@@ -104,3 +94,51 @@ export const createAlertAttachmentUserActionBuilder = ({
     ];
   },
 });
+
+const getFirstItem = (items?: string | string[] | null): string | null => {
+  return Array.isArray(items) ? items[0] : items ?? null;
+};
+
+export const getRuleId = (comment: BuilderArgs['comment'], alertData?: Ecs): string | null =>
+  getRuleField({
+    commentRuleField: comment?.rule?.id,
+    alertData,
+    signalRuleFieldPath: 'signal.rule.id',
+    kibanaAlertFieldPath: ALERT_RULE_UUID,
+  });
+
+export const getRuleName = (comment: BuilderArgs['comment'], alertData?: Ecs): string | null =>
+  getRuleField({
+    commentRuleField: comment?.rule?.name,
+    alertData,
+    signalRuleFieldPath: 'signal.rule.name',
+    kibanaAlertFieldPath: ALERT_RULE_NAME,
+  });
+
+const getRuleField = ({
+  commentRuleField,
+  alertData,
+  signalRuleFieldPath,
+  kibanaAlertFieldPath,
+}: {
+  commentRuleField: string | string[] | null | undefined;
+  alertData: Ecs | undefined;
+  signalRuleFieldPath: string;
+  kibanaAlertFieldPath: string;
+}): string | null => {
+  const field =
+    getNonEmptyField(commentRuleField) ??
+    getNonEmptyField(get(alertData, signalRuleFieldPath)) ??
+    getNonEmptyField(get(alertData, kibanaAlertFieldPath));
+
+  return field;
+};
+
+function getNonEmptyField(field: string | string[] | undefined | null): string | null {
+  const firstItem = getFirstItem(field);
+  if (firstItem == null || isEmpty(firstItem)) {
+    return null;
+  }
+
+  return firstItem;
+}
