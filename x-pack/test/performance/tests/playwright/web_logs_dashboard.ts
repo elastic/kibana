@@ -11,6 +11,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
   describe('Web Logs Dashboard', () => {
     const config = getService('config');
     const playwright = getService('playwright');
+    const logger = getService('log');
     const { page } = playwright.makePage({ autoLogin: true, journeyName: 'weblogs_dashboard' });
 
     it('Go to Sample Data Page', async () => {
@@ -25,13 +26,17 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
     });
 
     it('Add Web Logs Sample Data', async () => {
-      const removeBtn = await page.locator('[data-test-subj=removeSampleDataSetlogs]');
-      if (removeBtn) {
-        await removeBtn.click();
+      const removeButton = page.locator('[data-test-subj=removeSampleDataSetlogs]');
+      try {
+        await removeButton.click({ timeout: 1_000 });
+      } catch (e) {
+        logger.info('Weblogs data does not exist');
       }
 
-      const addDataBtn = page.locator('[data-test-subj=addSampleDataSetlogs]');
-      await addDataBtn.click();
+      const addDataButton = page.locator('[data-test-subj=addSampleDataSetlogs]');
+      if (addDataButton) {
+        await addDataButton.click();
+      }
     });
 
     it('Go to Web Logs Dashboard', async () => {

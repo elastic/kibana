@@ -8,9 +8,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('Performance tests', () => {
-    loadTestFile(require.resolve('./login'));
-    loadTestFile(require.resolve('./ecommerce_dashboard'));
-    loadTestFile(require.resolve('./flight_dashboard'));
-    loadTestFile(require.resolve('./web_logs_dashboard'));
+    // loadTestFile(require.resolve('./login'));
+    // loadTestFile(require.resolve('./ecommerce_dashboard'));
+    // loadTestFile(require.resolve('./flight_dashboard'));
+    // loadTestFile(require.resolve('./web_logs_dashboard'));
+    loadTestFile(require.resolve('./ecommerce_saved_object_dashboard'));
   });
 }

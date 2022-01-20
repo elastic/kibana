@@ -11,6 +11,7 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
   describe('Ecommerce Dashboard', () => {
     const config = getService('config');
     const playwright = getService('playwright');
+    const logger = getService('log');
     const { page } = playwright.makePage({ autoLogin: true, journeyName: 'ecommerce_dashboard' });
 
     it('Go to Sample Data Page', async () => {
@@ -25,13 +26,17 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
     });
 
     it('Add Ecommerce Sample Data', async () => {
-      const removeBtn = await page.locator('[data-test-subj=removeSampleDataSetecommerce]');
-      if (removeBtn) {
-        await removeBtn.click();
+      const removeButton = page.locator('[data-test-subj=removeSampleDataSetecommerce]');
+      try {
+        await removeButton.click({ timeout: 1_000 });
+      } catch (e) {
+        logger.info('Ecommerce data does not exist');
       }
 
-      const addDataBtn = page.locator('[data-test-subj=addSampleDataSetecommerce]');
-      await addDataBtn.click();
+      const addDataButton = page.locator('[data-test-subj=addSampleDataSetecommerce]');
+      if (addDataButton) {
+        await addDataButton.click();
+      }
     });
 
     it('Go to Ecommerce Dashboard', async () => {

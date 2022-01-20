@@ -16,6 +16,7 @@ type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
 export class PlaywrightService extends FtrService {
   private readonly config = this.ctx.getService('config');
+  private readonly es = this.ctx.getService('es');
   private browser: ChromiumBrowser | undefined;
   private storageState: StorageState | undefined;
 
@@ -96,6 +97,11 @@ export class PlaywrightService extends FtrService {
     after(async () => {
       if (pageToCleanup) {
         await pageToCleanup.close();
+        await this.es.updateByQuery({
+          index: '.apm-*',
+          refresh: true,
+          body: { query: { match_all: {} } },
+        });
       }
     });
 

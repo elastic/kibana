@@ -11,6 +11,7 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
   describe('Flights Dashboard', () => {
     const config = getService('config');
     const playwright = getService('playwright');
+    const logger = getService('log');
     const { page } = playwright.makePage({ autoLogin: true, journeyName: 'flights_dashboard' });
 
     it('Go to Sample Data Page', async () => {
@@ -25,13 +26,17 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
     });
 
     it('Add Flights Sample Data', async () => {
-      const removeButton = await page.locator('[data-test-subj=removeSampleDataSetflights]');
-      if (removeButton) {
-        await removeButton.click();
+      const removeButton = page.locator('[data-test-subj=removeSampleDataSetflights]');
+      try {
+        await removeButton.click({ timeout: 1_000 });
+      } catch (e) {
+        logger.info('Flights data does not exist');
       }
 
-      const addDataBtn = page.locator('[data-test-subj=addSampleDataSetflights]');
-      await addDataBtn.click();
+      const addDataButton = page.locator('[data-test-subj=addSampleDataSetflights]');
+      if (addDataButton) {
+        await addDataButton.click();
+      }
     });
 
     it('Go to Flights Dashboard', async () => {
@@ -47,6 +52,24 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
           (e) => e.getAttribute('data-render-complete') === 'true'
         );
         return visualizationElementsLoaded && visualizationAnimationsFinished;
+      });
+    });
+
+    it('Go to Airport Connections Visualizations Edit', async () => {
+      const editButton = page.locator('[data-test-subj="dashboardEditMode"]');
+      await editButton.click();
+
+      const flightAirportConnectionsOptionsButton = page.locator(
+        '[aria-label="Panel options for [Flights] Airport Connections (Hover Over Airport)"]'
+      );
+      await flightAirportConnectionsOptionsButton.click();
+
+      const editVisualization = page.locator('text="Edit Visualization"');
+      await editVisualization.click();
+
+      await page.waitForFunction(() => {
+        const visualization = document.querySelector('[data-rendering-count]');
+        return visualization && visualization?.getAttribute('data-render-complete') === 'true';
       });
     });
   });
