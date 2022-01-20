@@ -878,5 +878,165 @@ describe('CaseUserActionService', () => {
         );
       });
     });
+
+    describe('getUniqueConnectors', () => {
+      const findResponse = createUserActionFindSO(createConnectorUserAction());
+      const aggregationResponse = {
+        aggregations: {
+          references: {
+            doc_count: 8,
+            connectors: {
+              doc_count: 4,
+              ids: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: '865b6040-7533-11ec-8bcc-a9fc6f9d63b2',
+                    doc_count: 2,
+                    docs: {},
+                  },
+                  {
+                    key: '915c2600-7533-11ec-8bcc-a9fc6f9d63b2',
+                    doc_count: 1,
+                    docs: {},
+                  },
+                  {
+                    key: 'b2635b10-63e1-11ec-90af-6fe7d490ff66',
+                    doc_count: 1,
+                    docs: {},
+                  },
+                ],
+              },
+            },
+          },
+        },
+      };
+
+      beforeAll(() => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          findResponse as unknown as Promise<SavedObjectsFindResponse>
+        );
+      });
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('it returns an empty array if the response is not valid', async () => {
+        const res = await service.getUniqueConnectors({
+          unsecuredSavedObjectsClient,
+          caseId: '123',
+        });
+
+        expect(res).toEqual([]);
+      });
+
+      it('it returns the connectors', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          ...findResponse,
+          ...aggregationResponse,
+        } as unknown as Promise<SavedObjectsFindResponse>);
+
+        const res = await service.getUniqueConnectors({
+          unsecuredSavedObjectsClient,
+          caseId: '123',
+        });
+
+        expect(res).toEqual([
+          { id: '865b6040-7533-11ec-8bcc-a9fc6f9d63b2' },
+          { id: '915c2600-7533-11ec-8bcc-a9fc6f9d63b2' },
+          { id: 'b2635b10-63e1-11ec-90af-6fe7d490ff66' },
+        ]);
+      });
+
+      it('it returns the unique connectors', async () => {
+        await service.getUniqueConnectors({
+          unsecuredSavedObjectsClient,
+          caseId: '123',
+        });
+
+        expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "aggs": Object {
+                "references": Object {
+                  "aggregations": Object {
+                    "connectors": Object {
+                      "aggregations": Object {
+                        "ids": Object {
+                          "terms": Object {
+                            "field": "cases-user-actions.references.id",
+                            "size": 100,
+                          },
+                        },
+                      },
+                      "filter": Object {
+                        "term": Object {
+                          "cases-user-actions.references.type": "action",
+                        },
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases-user-actions.references",
+                  },
+                },
+              },
+              "filter": Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "type": "literal",
+                        "value": "cases-user-actions.attributes.type",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": "connector",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": false,
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "type": "literal",
+                        "value": "cases-user-actions.attributes.type",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": "create_case",
+                      },
+                      Object {
+                        "type": "literal",
+                        "value": false,
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "or",
+                "type": "function",
+              },
+              "hasReference": Object {
+                "id": "123",
+                "type": "cases",
+              },
+              "page": 1,
+              "perPage": 1,
+              "sortField": "created_at",
+              "type": "cases-user-actions",
+            },
+          ]
+        `);
+      });
+    });
   });
 });
