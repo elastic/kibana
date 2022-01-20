@@ -210,8 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/123498
-      describe.skip('and user DOES NOT have authorization to manage endpoint security', () => {
+      describe('and user DOES NOT have authorization to manage endpoint security', () => {
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
