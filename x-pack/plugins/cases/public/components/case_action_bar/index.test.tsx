@@ -119,7 +119,7 @@ describe('CaseActionBar', () => {
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
     const { queryByText } = render(
-      <TestProviders features={{ alerts: { sync: false } }}>
+      <TestProviders features={{ alerts: { sync: false }, metrics: [] }}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
@@ -138,9 +138,9 @@ describe('CaseActionBar', () => {
   });
 
   it('should not show the Case open text when the lifespan feature is enabled', () => {
-    const props: CaseActionBarProps = { ...defaultProps, metricsFeatures: ['lifespan'] };
+    const props: CaseActionBarProps = { ...defaultProps };
     const { queryByText } = render(
-      <TestProviders>
+      <TestProviders features={{ metrics: ['lifespan'] }}>
         <CaseActionBar {...props} />
       </TestProviders>
     );

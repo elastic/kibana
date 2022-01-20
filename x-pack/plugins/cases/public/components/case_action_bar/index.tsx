@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { Case, CaseMetricsFeature } from '../../../common/ui/types';
+import { Case } from '../../../common/ui/types';
 import { CaseStatuses, CaseType } from '../../../common/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
@@ -46,7 +46,6 @@ export interface CaseActionBarProps {
   currentExternalIncident: CaseService | null;
   userCanCrud: boolean;
   isLoading: boolean;
-  metricsFeatures: CaseMetricsFeature[];
   onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
@@ -55,11 +54,10 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   currentExternalIncident,
   userCanCrud,
   isLoading,
-  metricsFeatures,
   onRefresh,
   onUpdateField,
 }) => {
-  const { isSyncAlertsEnabled } = useCasesFeatures();
+  const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(

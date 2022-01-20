@@ -33,7 +33,7 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
 
     const items = [
       {
-        key: CASE_CREATED,
+        key: 'case-created',
         component: (
           <CaseStatusMetricsItem
             title={CASE_CREATED}
@@ -43,7 +43,7 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
         dataTestSubject: 'case-metrics-lifespan-item-creation-date',
       },
       {
-        key: CASE_IN_PROGRESS_DURATION,
+        key: 'in-progress-duration',
         component: (
           <CaseStatusMetricsItem
             title={CASE_IN_PROGRESS_DURATION}
@@ -53,7 +53,7 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
         dataTestSubject: 'case-metrics-lifespan-item-inProgress-duration',
       },
       {
-        key: CASE_OPEN_DURATION,
+        key: 'open-duration',
         component: (
           <CaseStatusMetricsItem
             title={CASE_OPEN_DURATION}
@@ -63,7 +63,7 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
         dataTestSubject: 'case-metrics-lifespan-item-open-duration',
       },
       {
-        key: CASE_OPEN_TO_CLOSE_DURATION,
+        key: 'duration-from-creation-to-close',
         component: (
           <CaseStatusMetricsOpenCloseDuration
             title={CASE_OPEN_TO_CLOSE_DURATION}

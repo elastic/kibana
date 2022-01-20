@@ -324,7 +324,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            metricsFeatures={metricsFeatures}
             onRefresh={handleRefresh}
             onUpdateField={onUpdateField}
           />
