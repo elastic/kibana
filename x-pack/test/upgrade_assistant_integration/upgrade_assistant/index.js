@@ -8,6 +8,7 @@
 export default function ({ loadTestFile }) {
   describe('upgrade assistant', function () {
     this.tags('ciGroup7');
+    this.onlyEsVersion('<=7');
 
     loadTestFile(require.resolve('./reindexing'));
   });

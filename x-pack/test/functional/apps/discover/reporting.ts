@@ -36,7 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe('Discover CSV Export', () => {
+  describe('Discover CSV Export', function () {
+    this.onlyEsVersion('<=7');
+
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
