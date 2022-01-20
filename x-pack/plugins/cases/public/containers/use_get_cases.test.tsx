@@ -20,12 +20,15 @@ import { UpdateKey } from './types';
 import { allCases, basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -112,6 +115,9 @@ describe('useGetCases', () => {
         updateCase.version,
         abortCtrl.signal
       );
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: `Updated "${basicCase.title}"`,
     });
   });
 

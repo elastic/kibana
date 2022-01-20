@@ -7694,7 +7694,6 @@
     "xpack.cases.containers.markInProgressCases": "{totalCases, plural, =1 {\"{caseTitle}\"} other {{totalCases}件のケース}}を進行中に設定しました",
     "xpack.cases.containers.pushToExternalService": "{ serviceName }への送信が正常に完了しました",
     "xpack.cases.containers.reopenedCases": "{totalCases, plural, =1 {\"{caseTitle}\"} other {{totalCases}件のケース}}をオープンしました",
-    "xpack.cases.containers.statusChangeToasterText": "このケースのアラートはステータスが更新されました",
     "xpack.cases.containers.syncCase": "\"{caseTitle}\"のアラートが同期されました",
     "xpack.cases.containers.updatedCase": "\"{caseTitle}\"を更新しました",
     "xpack.cases.create.stepOneTitle": "ケースフィールド",
