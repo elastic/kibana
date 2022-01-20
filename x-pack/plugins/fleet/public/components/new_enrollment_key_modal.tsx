@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
 import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
+
+function validatePolicyId(value: string) {
+  if (value === '') {
+    return [
+      i18n.translate('xpack.fleet.newEnrollmentKeyForm.policyIdRequireErrorMessage', {
+        defaultMessage: 'Policy is required',
+      }),
+    ];
+  }
+}
 
 function useCreateApiKeyForm(
   policyIdDefaultValue: string | undefined,
@@ -19,10 +29,13 @@ function useCreateApiKeyForm(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
-  const policyIdInput = useInput(policyIdDefaultValue);
+  const policyIdInput = useInput(policyIdDefaultValue, validatePolicyId);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!policyIdInput.validate() || !apiKeyNameInput.validate()) {
+      return;
+    }
     setIsLoading(true);
     try {
       const res = await sendCreateEnrollmentAPIKey({
@@ -64,7 +77,9 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const form = useCreateApiKeyForm(
-    undefined,
+    agentPolicies.length > 0
+      ? agentPolicies[0].id
+      : undefined,
     (key: EnrollmentAPIKey) => {
       onClose(key);
       notifications.toasts.addSuccess(
@@ -79,6 +94,15 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
       });
     }
   );
+
+  const selectPolicyOptions = useMemo(() => {
+    return agentPolicies
+      .filter((agentPolicy) => !agentPolicy.is_managed)
+      .map((agentPolicy) => ({
+        value: agentPolicy.id,
+        text: agentPolicy.name,
+      }));
+  }, [agentPolicies]);
 
   const body = (
     <EuiForm>
@@ -105,17 +129,9 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           label={i18n.translate('xpack.fleet.newEnrollmentKey.policyLabel', {
             defaultMessage: 'Policy',
           })}
+          {...form.policyIdInput.formRowProps}
         >
-          <EuiSelect
-            required={true}
-            {...form.policyIdInput.props}
-            options={agentPolicies
-              .filter((agentPolicy) => !agentPolicy.is_managed)
-              .map((agentPolicy) => ({
-                value: agentPolicy.id,
-                text: agentPolicy.name,
-              }))}
-          />
+          <EuiSelect required={true} {...form.policyIdInput.props} options={selectPolicyOptions} />
         </EuiFormRow>
       </form>
     </EuiForm>
