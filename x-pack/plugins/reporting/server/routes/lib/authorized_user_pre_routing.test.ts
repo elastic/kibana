@@ -187,7 +187,7 @@ describe('authorized_user_pre_routing', function () {
         getMockRequest(),
         getMockResponseFactory()
       );
-      
+
       expect(handler).toHaveBeenCalled();
       const [[user]] = handler.mock.calls;
       expect(user).toMatchObject({ roles: ['superuser'], username: 'friendlyuser' });
