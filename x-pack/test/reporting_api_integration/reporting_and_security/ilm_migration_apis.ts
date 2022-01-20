@@ -6,49 +6,96 @@
  */
 
 import expect from '@kbn/expect';
-import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
   const security = getService('security');
 
-  describe('ILM policy migration APIs', function () {
-    this.onlyEsVersion('<=7');
+  const JOB_PARAMS_RISON_CSV =
+    `(columns:!(order_date,category,customer_full_name,taxful_total_price,currency)` +
+    `,objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
+    `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7` +
+    `,params:()),query:(range:(order_date:(format:strict_date_optional_time` +
+    `,gte:'2019-06-02T12:28:40.866Z',lte:'2019-07-18T20:59:57.136Z')))))` +
+    `,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,parent:(filter:!(),highlightAll:!t` +
+    `,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,query:(language:kuery,query:'')` +
+    `,version:!t),sort:!((order_date:desc)),trackTotalHits:!t),title:'EC SEARCH from DEFAULT')`;
 
+  const runMigrate = async () => {
+    await reportingAPI.migrateReportingIndices(
+      reportingAPI.REPORTING_USER_USERNAME,
+      reportingAPI.REPORTING_USER_PASSWORD
+    );
+  };
+  const checkMigrationStatus = async () => {
+    await reportingAPI.checkIlmMigrationStatus(
+      reportingAPI.REPORTING_USER_USERNAME,
+      reportingAPI.REPORTING_USER_PASSWORD
+    );
+  };
+
+  describe('ILM policy migration APIs', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await reportingAPI.migrateReportingIndices(); // ensure that the ILM policy exists for the first test
+      await security.role.create(reportingAPI.REPORTING_ROLE, {
+        metadata: {},
+        elasticsearch: {
+          cluster: ['manage_ilm'],
+          indices: [
+            { names: ['ecommerce'], privileges: ['read'], allow_restricted_indices: false },
+            { names: ['.reporting-*'], privileges: ['all'], allow_restricted_indices: true },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: {
+              dashboard: ['minimal_read', 'download_csv_report', 'generate_report'],
+              discover: ['minimal_read', 'generate_report'],
+              canvas: ['minimal_read', 'generate_report'],
+              visualize: ['minimal_read', 'generate_report'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      });
+      await reportingAPI.createTestReportingUser();
+
+      await reportingAPI.initLogs();
+      await runMigrate(); // ensure that the ILM policy exists for the first test
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.teardownLogs();
     });
 
     afterEach(async () => {
       await reportingAPI.deleteAllReports();
-      await reportingAPI.migrateReportingIndices(); // ensure that the ILM policy exists
+      await runMigrate(); // ensure that the ILM policy exists
     });
 
     it('detects when no migration is needed', async () => {
-      expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
+      expect(
+        await reportingAPI.checkIlmMigrationStatus(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD
+        )
+      ).to.eql('ok');
 
       // try creating a report
-      await supertest
-        .post(`/api/reporting/generate/csv`)
+      await supertestWithoutAuth
+        .post(`/api/reporting/generate/csv_searchsource`)
+        .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV });
 
-      expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
+      expect(await checkMigrationStatus()).to.eql('ok');
     });
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
@@ -56,28 +103,30 @@ export default function ({ getService }: FtrProviderContext) {
       // TODO: Remove "any" when no longer through type issue "policy_id" missing
       await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
 
-      await supertest
-        .post(`/api/reporting/generate/csv`)
+      await supertestWithoutAuth
+        .post(`/api/reporting/generate/csv_searchsource`)
+        .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV });
 
-      expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('policy-not-found');
+      expect(await checkMigrationStatus()).to.eql('policy-not-found');
       // assert that migration fixes this
-      await reportingAPI.migrateReportingIndices();
-      expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
+      await runMigrate();
+      expect(await checkMigrationStatus()).to.eql('ok');
     });
 
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
       await reportingAPI.makeAllReportingIndicesUnmanaged();
-      await supertest
-        .post(`/api/reporting/generate/csv`)
+      await supertestWithoutAuth
+        .post(`/api/reporting/generate/csv_searchsource`)
+        .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV });
 
-      expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('indices-not-managed-by-policy');
+      expect(await checkMigrationStatus()).to.eql('indices-not-managed-by-policy');
       // assert that migration fixes this
-      await reportingAPI.migrateReportingIndices();
-      expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
+      await runMigrate();
+      expect(await checkMigrationStatus()).to.eql('ok');
     });
 
     it('does not override an existing ILM policy', async () => {
@@ -106,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         body: customLifecycle,
       });
 
-      await reportingAPI.migrateReportingIndices();
+      await runMigrate();
 
       const {
         body: {

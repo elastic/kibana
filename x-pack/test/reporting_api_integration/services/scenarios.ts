@@ -30,11 +30,13 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
+  const REPORTING_ROLE = 'test_reporting_user';
 
   const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
@@ -60,6 +62,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await deleteAllReports();
   };
 
+  const initLogs = async () => {
+    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+    await kibanaServer.importExport.load(logsSOPath);
+  };
+  const teardownLogs = async () => {
+    await kibanaServer.importExport.unload(logsSOPath);
+    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+  };
+
   const createDataAnalystRole = async () => {
     await security.role.create('data_analyst', {
       metadata: {},
@@ -79,7 +90,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   const createTestReportingUserRole = async () => {
-    await security.role.create('test_reporting_user', {
+    await security.role.create(REPORTING_ROLE, {
       metadata: {},
       elasticsearch: {
         cluster: [],
@@ -116,9 +127,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   const createTestReportingUser = async () => {
-    await security.user.create('reporting_user', {
-      password: 'reporting_user-password',
-      roles: ['test_reporting_user'],
+    await security.user.create(REPORTING_USER_USERNAME, {
+      password: REPORTING_USER_PASSWORD,
+      roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
     });
   };
@@ -191,18 +202,29 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const checkIlmMigrationStatus = async () => {
+  const checkIlmMigrationStatus = async (username: string, password: string) => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
-    const { body } = await supertest
+    const { body } = await supertestWithoutAuth
       .get(API_GET_ILM_POLICY_STATUS)
+      .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return body.status;
   };
 
-  const migrateReportingIndices = async () => {
+  const migrateReportingIndices = async (username: string, password: string) => {
     log.debug('ReportingAPI.migrateReportingIndices');
-    await supertest.put(API_MIGRATE_ILM_POLICY_URL).set('kbn-xsrf', 'xxx').expect(200);
+    try {
+      await supertestWithoutAuth
+        .put(API_MIGRATE_ILM_POLICY_URL)
+        .auth(username, password)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+    } catch (err) {
+      log.error(`Could not migrate Reporting indices!`);
+      log.error(err);
+      throw err;
+    }
   };
 
   const makeAllReportingIndicesUnmanaged = async () => {
@@ -222,10 +244,13 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     logTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
+    initLogs,
+    teardownLogs,
     DATA_ANALYST_USERNAME,
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
+    REPORTING_ROLE,
     routes: {
       API_GET_ILM_POLICY_STATUS,
       API_MIGRATE_ILM_POLICY_URL,
