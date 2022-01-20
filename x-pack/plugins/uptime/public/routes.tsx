@@ -16,7 +16,7 @@ import {
   MONITOR_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITOR_MANAGEMENT,
+  MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
@@ -186,7 +186,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
         rightSideItems: [],
       },
     },
-    ...(config.ui?.unsafe?.monitorManagement?.enabled
+    ...(config.ui?.monitorManagement?.enabled
       ? [
           {
             title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
@@ -231,7 +231,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               defaultMessage: 'Manage Monitors | {baseTitle}',
               values: { baseTitle },
             }),
-            path: MONITOR_MANAGEMENT,
+            path: MONITOR_MANAGEMENT_ROUTE,
             component: MonitorManagementPage,
             dataTestSubj: 'uptimeMonitorManagementListPage',
             telemetryId: UptimePage.MonitorManagement,
