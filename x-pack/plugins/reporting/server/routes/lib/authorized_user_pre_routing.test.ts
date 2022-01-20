@@ -106,9 +106,9 @@ describe('authorized_user_pre_routing', function () {
     };
     const requestHandler = authorizedUserPreRouting(mockCore, mockHandler);
 
-    expect(
-      await requestHandler(getMockContext(), getMockRequest(), getMockResponseFactory())
-    ).toMatchObject({
+    await expect(
+      requestHandler(getMockContext(), getMockRequest(), getMockResponseFactory())
+    ).resolves.toMatchObject({
       body: `Sorry, you aren't authenticated`,
     });
   });
@@ -181,13 +181,16 @@ describe('authorized_user_pre_routing', function () {
       );
       mockCore = await createMockReportingCore(mockReportingConfig, mockSetupDeps, mockStartDeps);
 
-      let handlerCalled = false;
-      await authorizedUserPreRouting(mockCore, (user: unknown) => {
-        expect(user).toMatchObject({ roles: ['superuser'], username: 'friendlyuser' });
-        handlerCalled = true;
-        return Promise.resolve({ status: 200, options: {} });
-      })(getMockContext(), getMockRequest(), getMockResponseFactory());
-      expect(handlerCalled).toBe(true);
+      const handler = jest.fn().mockResolvedValue({ status: 200, options: {} });
+      await authorizedUserPreRouting(mockCore, handler)(
+        getMockContext(),
+        getMockRequest(),
+        getMockResponseFactory()
+      );
+      
+      expect(handler).toHaveBeenCalled();
+      const [[user]] = handler.mock.calls;
+      expect(user).toMatchObject({ roles: ['superuser'], username: 'friendlyuser' });
     });
   });
 });
