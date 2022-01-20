@@ -62,6 +62,19 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (action === undefined) continue;
 
     if (action === EVENT_LOG_ACTIONS.execute) {
+      alertSummary.lastRun = timeStamp;
+
+      const errorMessage = event?.error?.message;
+      if (errorMessage !== undefined) {
+        alertSummary.status = 'Error';
+        alertSummary.errorMessages.push({
+          date: timeStamp,
+          message: errorMessage,
+        });
+      } else {
+        alertSummary.status = 'OK';
+      }
+
       continue;
     }
 
@@ -96,25 +109,11 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (action !== EVENT_LOG_ACTIONS.execute) {
       continue;
     }
-    alertSummary.lastRun = timeStamp;
-
-    const errorMessage = event?.error?.message;
-    if (errorMessage !== undefined) {
-      alertSummary.status = 'Error';
-      alertSummary.errorMessages.push({
-        date: timeStamp,
-        message: errorMessage,
-      });
-    } else {
-      alertSummary.status = 'OK';
-    }
 
     if (event?.event?.duration) {
-      const eventDirationMillis = event?.event?.duration / Millis2Nanos;
+      const eventDirationMillis = event.event.duration / Millis2Nanos;
       eventDurations.push(eventDirationMillis);
-      if (event?.['@timestamp']) {
-        eventDurationsWithTimestamp[event?.['@timestamp']] = eventDirationMillis;
-      }
+      eventDurationsWithTimestamp[event['@timestamp']!] = eventDirationMillis;
     }
   }
 

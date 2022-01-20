@@ -144,7 +144,7 @@ describe('alertSummaryFromEventLog', () => {
     const rule = createRule({});
     const eventsFactory = new EventsFactory();
     const events = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -174,11 +174,7 @@ describe('alertSummaryFromEventLog', () => {
       .advanceTime(10000)
       .addExecute('rut roh!')
       .getEvents();
-    const executionEvents = eventsFactory
-      .addExecute('oof!')
-      .advanceTime(10000)
-      .addExecute('rut roh!')
-      .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -221,7 +217,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addRecoveredAlert('alert-1')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -262,7 +258,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addLegacyResolvedAlert('alert-1')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -302,7 +298,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addRecoveredAlert('alert-1')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -343,7 +339,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group A')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -384,7 +380,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', undefined)
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -425,7 +421,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group B')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -465,7 +461,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group A')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -508,7 +504,7 @@ describe('alertSummaryFromEventLog', () => {
       .addActiveAlert('alert-1', 'action group A')
       .addRecoveredAlert('alert-2')
       .getEvents();
-    const executionEvents = eventsFactory.addExecute().advanceTime(10000).addExecute().getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,
@@ -564,15 +560,7 @@ describe('alertSummaryFromEventLog', () => {
       .addExecute()
       .addActiveAlert('alert-1', 'action group B')
       .getEvents();
-    const executionEvents = eventsFactory
-      .addExecute()
-      .advanceTime(10000)
-      .addExecute()
-      .advanceTime(10000)
-      .addExecute()
-      .advanceTime(10000)
-      .addExecute()
-      .getEvents();
+    const executionEvents = eventsFactory.getEvents();
 
     const summary: AlertSummary = alertSummaryFromEventLog({
       rule,

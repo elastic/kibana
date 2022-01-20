@@ -135,6 +135,14 @@ describe('getAlertSummary()', () => {
     };
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(eventsResult);
 
+    const executionEvents = eventsFactory.getEvents();
+    const executionEventsResult = {
+      ...AlertSummaryFindEventsResult,
+      total: executionEvents.length,
+      data: executionEvents,
+    };
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(executionEventsResult);
+
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
     const durations: Record<string, number> = eventsFactory.getExecutionDurations();
@@ -203,7 +211,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
@@ -240,7 +248,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
@@ -269,7 +277,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
@@ -288,7 +296,7 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
     const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
@@ -307,8 +315,8 @@ describe('getAlertSummary()', () => {
     await rulesClient.getAlertSummary({ id: '1', numberOfExecutions });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
+    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[1][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
