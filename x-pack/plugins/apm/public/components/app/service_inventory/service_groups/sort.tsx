@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ServiceGroupsSortType } from '.';
 
@@ -27,6 +28,9 @@ export function Sort({ type, onChange }: Props) {
       options={options}
       value={type}
       onChange={(e) => onChange(e.target.value as ServiceGroupsSortType)}
+      prepend={i18n.translate('xpack.apm.serviceGroups.sortLabel', {
+        defaultMessage: 'Sort',
+      })}
     />
   );
 }

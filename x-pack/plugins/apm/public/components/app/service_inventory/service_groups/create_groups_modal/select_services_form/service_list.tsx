@@ -40,7 +40,6 @@ export function ServiceList({ items, isLoading }: Props) {
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
           text={serviceName}
-          content={agentName}
         />
       ),
     },

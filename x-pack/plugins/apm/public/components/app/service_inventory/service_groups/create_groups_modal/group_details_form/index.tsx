@@ -56,7 +56,7 @@ export function GroupDetails({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem>

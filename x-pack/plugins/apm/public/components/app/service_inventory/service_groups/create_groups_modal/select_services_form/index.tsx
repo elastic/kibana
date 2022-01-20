@@ -35,6 +35,11 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
+const Container = styled.div`
+  width: 600px;
+  height: 566px;
+`;
+
 interface Props {
   onCloseModal: () => void;
   onSaveClick: (selectService: SelectServicesType) => void;
@@ -70,7 +75,7 @@ export function SelectServices({
   );
 
   return (
-    <>
+    <Container>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>
@@ -193,6 +198,6 @@ export function SelectServices({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
-    </>
+    </Container>
   );
 }

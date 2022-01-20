@@ -41,7 +41,7 @@ export function CreateGroupsModal({ onClose }: Props) {
   }
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 600, height: 566 }}>
+    <EuiModal onClose={onClose}>
       {modalView === 'group_details' && (
         <GroupDetails
           groupDetails={groupDetails}
