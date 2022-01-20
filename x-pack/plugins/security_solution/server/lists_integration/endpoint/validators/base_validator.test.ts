@@ -21,8 +21,7 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts';
 
-// FLAKY: https://github.com/elastic/kibana/issues/123495
-describe.skip('When using Artifacts Exceptions BaseValidator', () => {
+describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
   let kibanaRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let exceptionLikeItem: ExceptionItemLikeOptions;
