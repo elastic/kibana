@@ -7,7 +7,7 @@
  */
 
 export { FunctionalTestRunner } from './functional_test_runner';
-export { readConfigFile, Config, createAsyncInstance } from './lib';
+export { readConfigFile, Config, createAsyncInstance, EsVersion } from './lib';
 export { runFtrCli } from './cli';
 export * from './lib/docker_servers';
 export * from './public_types';
