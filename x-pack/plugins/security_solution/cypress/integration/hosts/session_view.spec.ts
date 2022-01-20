@@ -39,6 +39,7 @@ const tableHeaders = {
 };
 
 const TEST_EVENT_ID = 'K6H1AX4BnCZfhnl7tkjN';
+const TEST_EVENT_ID_MANY_COMMANDS = 'MsOQb34B4qQiNuYq8lAp';
 const LS_TEST_COMMAND = 'ls --color=auto';
 const ALERT_TEST_COMMAND = 'vi cmd/config.ini';
 const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
@@ -53,7 +54,7 @@ const ALERT_COMMAND_COLOR = 'rgba(189, 39, 30, 0.48)'
 describe('Session view', () => {
   context('Rendering table empty state', () => {
     before(() => {
-      cleanKibana();
+      //cleanKibana();
     });
 
     it('shows the empty state', () => {
@@ -61,11 +62,11 @@ describe('Session view', () => {
       cy.get(SESSION_VIEW_EMPTY_STATE).should('be.visible');
     });
   });
-
+/*
   context('Rendering with data', () => {
     before(() => {
-      cleanKibana();
-      esArchiverLoad('session_view');
+      //cleanKibana();
+      esArchiverLoad('session_view_commands');
     });
 
     beforeEach(() => {
@@ -73,7 +74,7 @@ describe('Session view', () => {
     });
 
     after(() => {
-      esArchiverUnload('session_view');
+      //esArchiverUnload('session_view_commands');
     });
 
     it('renders the session table', () => {
@@ -205,7 +206,7 @@ describe('Session view', () => {
         })
       })
     });
-    */
+    
     
 
    it('selected command is highlighted properly', () => {
@@ -244,5 +245,68 @@ describe('Session view', () => {
         });
       });
     });
+  });
+*/
+  context('Rendering with lots of Data', () => {
+    before(() => {
+      cleanKibana();
+      esArchiverLoad('session_view_commands');
+    });
+
+    beforeEach(() => {
+      loginAndNavigateToHostSessions();
+    });
+
+    after(() => {
+      //esArchiverUnload('session_view_commands');
+    });
+
+    it('scrolling to hit load more', () => {
+      openSessionView(TEST_EVENT_ID_MANY_COMMANDS);
+      cy.wait(5000)
+      //Scroll down on main page to allow us to see Load More message
+      cy.scrollTo('bottom')
+
+      cy.get(SESSION_COMMANDS)
+
+      cy.get(PROCESS_TREE)
+      .scrollTo('bottom')
+      
+      //Once user hits the end, Load next bar would be visible while for the the next set of commands to load
+      cy.contains('Load next').should('be.visible')
+    });
+      
+      it('Scrolled to the end will load more events', () => {
+        openSessionView(TEST_EVENT_ID_MANY_COMMANDS);
+        cy.wait(5000)
+        //Scroll down on main page to allow us to see Load More message
+        cy.scrollTo('bottom')
+  
+        cy.get(SESSION_COMMANDS)
+  
+        cy.get(PROCESS_TREE)
+        .scrollTo('bottom')
+  
+        cy.contains('Load next').should('be.visible')
+  
+        cy.get(SESSION_COMMANDS)
+  
+        cy.get(SESSION_COMMANDS)
+          .its('length')
+          .then((elementsBefore) => {
+            const beforeLoadingMore = elementsBefore;
+
+            cy.get(PROCESS_TREE)
+              .scrollTo('bottom')
+            
+            cy.wait(5000)
+  
+            cy.get(SESSION_COMMANDS)
+              .its('length')
+              .then((elementsAfter) => {
+                  expect(elementsAfter).to.be.greaterThan(beforeLoadingMore);
+              })
+          })
+    })
   });
 });
