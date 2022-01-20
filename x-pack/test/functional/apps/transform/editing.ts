@@ -51,6 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
         transformDescription: 'updated description',
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
+        transformRetentionPolicyField: 'order_date',
+        transformRetentionPolicyMaxAge: '1d',
         expected: {
           messageText: 'updated transform.',
           retentionPolicy: {
@@ -71,6 +73,8 @@ export default function ({ getService }: FtrProviderContext) {
         transformDescription: 'updated description',
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
+        transformRetentionPolicyField: 'order_date',
+        transformRetentionPolicyMaxAge: '1d',
         expected: {
           messageText: 'updated transform.',
           retentionPolicy: {
@@ -154,6 +158,9 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(
             testData.expected.retentionPolicy.field
           );
+          await transform.editFlyout.setTransformEditFlyoutRetentionPolicyFieldSelectValue(
+            testData.transformRetentionPolicyField
+          );
 
           await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
             'RetentionPolicyMaxAge',
@@ -162,6 +169,10 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.editFlyout.assertTransformEditFlyoutInputValue(
             'RetentionPolicyMaxAge',
             testData.expected.retentionPolicy.maxAge
+          );
+          await transform.editFlyout.setTransformEditFlyoutInputValue(
+            'RetentionPolicyMaxAge',
+            testData.transformRetentionPolicyMaxAge
           );
         });
 

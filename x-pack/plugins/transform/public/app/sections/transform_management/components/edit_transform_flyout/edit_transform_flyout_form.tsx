@@ -55,7 +55,9 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   );
 
   const retentionDateFieldOptions = useMemo(() => {
-    return Array.isArray(dateFieldNames) ? dateFieldNames.map((text: string) => ({ text })) : [];
+    return Array.isArray(dateFieldNames)
+      ? dateFieldNames.map((text: string) => ({ text, value: text }))
+      : [];
   }, [dateFieldNames]);
 
   return (

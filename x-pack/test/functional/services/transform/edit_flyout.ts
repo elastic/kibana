@@ -62,7 +62,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
       expect(actualValue).to.eql(
         expectedValue,
-        `Detector input option value should be '${expectedValue}' (got '${actualValue}')`
+        `Retention policy field option value should be '${expectedValue}' (got '${actualValue}')`
       );
     },
 
