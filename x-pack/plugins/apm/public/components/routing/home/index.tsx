@@ -98,7 +98,9 @@ export const home = {
     page({
       path: '/services',
       title: ServiceInventoryTitle,
-      element: <ServiceInventory />,
+      element: <ServiceGroups />,
+      showCreateServiceGroupsButton: true,
+      // element: <ServiceInventory />,
     }),
     page({
       path: '/traces',
@@ -151,7 +153,7 @@ export const home = {
     },
     {
       path: '/',
-      element: <RedirectTo pathname="/service-groups" />,
+      element: <RedirectTo pathname="/services" />,
     },
   ],
 } as const;
