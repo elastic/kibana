@@ -132,7 +132,8 @@ export class KibanaRequest<
    * The (optional) opaqueId of this request.
    *
    * @remarks This value is sourced from the incoming request's `X-Opaque-Id` header
-   *          which is not guaranteed to be unique per request.
+   *          which is not guaranteed to be unique per request. When present, it should
+   *          contain a userId in any format.
    */
   public readonly opaqueId?: string;
   /**
