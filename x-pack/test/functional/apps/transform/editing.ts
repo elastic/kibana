@@ -5,33 +5,17 @@
  * 2.0.
  */
 
-import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig } from './index';
-
-function getTransformConfig(): TransformPivotConfig {
-  const date = Date.now();
-  return {
-    id: `ec_editing_${date}`,
-    source: { index: ['ft_ecommerce'] },
-    pivot: {
-      group_by: { category: { terms: { field: 'category.keyword' } } },
-      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
-    },
-    description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
-    dest: { index: `user-ec_2_${date}` },
-  };
-}
+import { getLatestTransformConfig, getPivotTransformConfig } from './index';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('editing', function () {
-    const transformConfigWithPivot = getTransformConfig();
+    const transformConfigWithPivot = getPivotTransformConfig('editing');
     const transformConfigWithLatest = getLatestTransformConfig('editing');
 
     before(async () => {
@@ -69,6 +53,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformFrequency: '10m',
         expected: {
           messageText: 'updated transform.',
+          retentionPolicy: {
+            field: '',
+            maxAge: '',
+          },
           row: {
             status: TRANSFORM_STATE.STOPPED,
             type: 'pivot',
@@ -85,6 +73,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformFrequency: '10m',
         expected: {
           messageText: 'updated transform.',
+          retentionPolicy: {
+            field: '',
+            maxAge: '',
+          },
           row: {
             status: TRANSFORM_STATE.STOPPED,
             type: 'latest',
@@ -152,10 +144,31 @@ export default function ({ getService }: FtrProviderContext) {
             'Frequency',
             testData.transformFrequency
           );
+
+          await transform.testExecution.logTestStep('should update the transform retention policy');
+          await transform.editFlyout.openTransformEditAccordionRetentionPolicySettings();
+
+          await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(
+            true
+          );
+          await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(
+            testData.expected.retentionPolicy.field
+          );
+
+          await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
+            'RetentionPolicyMaxAge',
+            true
+          );
+          await transform.editFlyout.assertTransformEditFlyoutInputValue(
+            'RetentionPolicyMaxAge',
+            testData.expected.retentionPolicy.maxAge
+          );
         });
 
         it('updates the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('should update the transform');
+          await transform.editFlyout.assertUpdateTransformButtonExists();
+          await transform.editFlyout.assertUpdateTransformButtonEnabled(true);
           await transform.editFlyout.updateTransform();
 
           await transform.testExecution.logTestStep('should display the transforms table');
