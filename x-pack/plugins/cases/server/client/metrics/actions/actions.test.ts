@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { CaseResponse } from '../../../../common/api';
 import { createCasesClientMock } from '../../mocks';
 import { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { Actions } from './actions';
-import { ICaseResponse } from '../../typedoc_interfaces';
 
 const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();
@@ -30,7 +30,7 @@ const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientA
 describe('Actions', () => {
   beforeAll(() => {
     getAuthorizationFilter.mockResolvedValue({});
-    clientMock.cases.get.mockResolvedValue({ id: '' } as unknown as ICaseResponse);
+    clientMock.cases.get.mockResolvedValue({ id: '' } as unknown as CaseResponse);
   });
 
   beforeEach(() => {
