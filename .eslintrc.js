@@ -1569,7 +1569,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },

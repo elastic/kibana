@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 /* @notice
  *
  * This product includes code that is based on flot-charts, which was available
@@ -26,15 +34,15 @@
  * THE SOFTWARE.
  */
 
-import './jquery_flot';
-import './jquery_flot_canvas';
-import './jquery_flot_time';
-import './jquery_flot_symbol';
-import './jquery_flot_crosshair';
-import './jquery_flot_selection';
-import './jquery_flot_pie';
-import './jquery_flot_stack';
-import './jquery_flot_threshold';
-import './jquery_flot_fillbetween';
-import './jquery_flot_log';
-import './jquery_flot_axislabels';
+import './lib/jquery_flot';
+import './lib/jquery_flot_canvas';
+import './lib/jquery_flot_time';
+import './lib/jquery_flot_symbol';
+import './lib/jquery_flot_crosshair';
+import './lib/jquery_flot_selection';
+import './lib/jquery_flot_pie';
+import './lib/jquery_flot_stack';
+import './lib/jquery_flot_threshold';
+import './lib/jquery_flot_fillbetween';
+import './lib/jquery_flot_log';
+import './lib/jquery_flot_axislabels';
