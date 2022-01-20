@@ -82,6 +82,13 @@ export default function (providerContext: FtrProviderContext) {
         .set('Authorization', `Bearer ${token.value}`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
+      const resp = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('Authorization', `Bearer ${token.value}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ name: 'Agent policy', namespace: 'default' })
+        .expect(200);
+      const agentPolicyId = resp.body.item.id;
       await supertestWithoutAuth
         .get('/api/fleet/enrollment_api_keys')
         .set('Authorization', `Bearer ${token.value}`)
@@ -91,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
         .post('/api/fleet/enrollment_api_keys')
         .set('Authorization', `Bearer ${token.value}`)
         .set('kbn-xsrf', 'xxx')
-        .send({ policy_id: '' })
+        .send({ policy_id: agentPolicyId })
         .expect(200);
       const enrollmentApiKeyId = response.body.item.id;
       await supertestWithoutAuth
