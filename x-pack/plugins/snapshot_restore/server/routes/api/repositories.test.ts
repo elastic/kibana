@@ -287,7 +287,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
       const dataNodePlugins = ['repository-hdfs'];
-     const masterNodePlugins = [];
+      const masterNodePlugins = [];
       const mockEsResponse = {
         nodes: {
           dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
