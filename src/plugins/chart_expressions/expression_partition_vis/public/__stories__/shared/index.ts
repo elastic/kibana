@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ThemeService } from '../../../../charts/public/services';
-import { uiSettings } from './ui_settings';
-
-const theme = new ThemeService();
-theme.init(uiSettings);
-
-export { theme };
+export { data } from './data';
+export { config } from './config';
+export { argTypes, pieDonutArgTypes } from './arg_types';

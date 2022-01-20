@@ -21,10 +21,15 @@ export const getPaletteRegistry = () => {
     '#AA6556',
     '#E7664C',
   ];
+  let counter = 0;
   const mockPalette: PaletteDefinition = {
     id: 'default',
     title: 'My Palette',
-    getCategoricalColor: (_: SeriesLayer[]) => colors[0],
+    getCategoricalColor: (_: SeriesLayer[]) => {
+      counter++;
+      if (counter > colors.length - 1) counter = 0;
+      return colors[counter];
+    },
     getCategoricalColors: (num: number) => colors,
     toExpression: () => ({
       type: 'expression',

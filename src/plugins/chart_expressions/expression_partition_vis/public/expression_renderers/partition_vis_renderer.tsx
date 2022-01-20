@@ -16,7 +16,7 @@ import type { PersistedState } from '../../../../visualizations/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
 
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
-import { RenderValue } from '../../common/types';
+import { ChartTypes, RenderValue } from '../../common/types';
 
 import { VisTypePieDependencies } from '../plugin';
 
@@ -66,7 +66,7 @@ export const getPartitionVisRenderer: (
               palettesRegistry={palettesRegistry}
               visParams={visConfig}
               visData={visData}
-              visType={visType}
+              visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
               renderComplete={handlers.done}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}

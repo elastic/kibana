@@ -66,7 +66,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.lastLevel.help', {
         defaultMessage: 'Show top level labels only',
       }),
-      default: true,
+      default: false,
     },
     truncate: {
       types: ['number'],
