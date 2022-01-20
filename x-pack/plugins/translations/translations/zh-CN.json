@@ -7753,7 +7753,6 @@
     "xpack.cases.containers.markInProgressCases": "已将{totalCases, plural, =1 {“{caseTitle}”} other { {totalCases} 个案例}}标记为进行中",
     "xpack.cases.containers.pushToExternalService": "已成功发送到 { serviceName }",
     "xpack.cases.containers.reopenedCases": "已打开{totalCases, plural, =1 {“{caseTitle}”} other { {totalCases} 个案例}}",
-    "xpack.cases.containers.statusChangeToasterText": "此案例中的告警也更新了状态",
     "xpack.cases.containers.syncCase": "“{caseTitle}”中的告警已同步",
     "xpack.cases.containers.updatedCase": "已更新“{caseTitle}”",
     "xpack.cases.create.stepOneTitle": "案例字段",
