@@ -30,12 +30,16 @@ describe('delete_list', () => {
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
-    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      index: '.items',
-      query: { term: { list_id: 'some-list-id' } },
-      refresh: false,
-    });
+    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(
+      {
+        body: {
+          query: { term: { list_id: 'some-list-id' } },
+        },
+        index: '.items',
+        refresh: false,
+      },
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('Delete returns a null if the list is also null', async () => {
@@ -59,12 +63,13 @@ describe('delete_list', () => {
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteByQuery = {
-      headers: { 'x-elastic-product-origin': 'security' },
+      body: { query: { term: { list_id: LIST_ID } } },
       index: LIST_ITEM_INDEX,
-      query: { term: { list_id: LIST_ID } },
       refresh: false,
     };
-    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery, {
+      headers: { 'x-elastic-product-origin': 'security' },
+    });
   });
 
   test('Delete calls "delete" second if a list is returned from getList', async () => {
@@ -73,12 +78,13 @@ describe('delete_list', () => {
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteQuery = {
-      headers: { 'x-elastic-product-origin': 'security' },
       id: LIST_ID,
       index: LIST_INDEX,
       refresh: 'wait_for',
     };
-    expect(options.esClient.delete).toHaveBeenNthCalledWith(1, deleteQuery);
+    expect(options.esClient.delete).toHaveBeenNthCalledWith(1, deleteQuery, {
+      headers: { 'x-elastic-product-origin': 'security' },
+    });
   });
 
   test('Delete does not call data client if the list returns null', async () => {

@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
+import type { DeleteByQueryRequest, DeleteRequest } from '@elastic/elasticsearch/api/types';
 
 import { getList } from './get_list';
 
@@ -28,31 +29,31 @@ export const deleteList = async ({
   if (list == null) {
     return null;
   } else {
-    await esClient.deleteByQuery(
-      createEsClientCallWithHeaders({
-        addOriginHeader: true,
-        request: {
-          index: listItemIndex,
+    const [request, options] = createEsClientCallWithHeaders<DeleteByQueryRequest>({
+      addOriginHeader: true,
+      request: {
+        body: {
           query: {
             term: {
               list_id: id,
             },
           },
-          refresh: false,
         },
-      })
-    );
+        index: listItemIndex,
+        refresh: false,
+      },
+    });
+    await esClient.deleteByQuery(request, options);
 
-    await esClient.delete(
-      createEsClientCallWithHeaders({
-        addOriginHeader: true,
-        request: {
-          id,
-          index: listIndex,
-          refresh: 'wait_for',
-        },
-      })
-    );
+    const [deleteRequest, deleteOptions] = createEsClientCallWithHeaders<DeleteRequest>({
+      addOriginHeader: true,
+      request: {
+        id,
+        index: listIndex,
+        refresh: 'wait_for',
+      },
+    });
+    await esClient.delete(deleteRequest, deleteOptions);
     return list;
   }
 };

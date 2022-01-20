@@ -38,20 +38,24 @@ describe('search_list_item_by_values', () => {
       value: [],
     });
 
-    expect(esClient.search).toHaveBeenCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      ignore_unavailable: true,
-      index: '.items',
-      query: {
-        bool: {
-          filter: [
-            { term: { list_id: 'some-list-id' } },
-            { bool: { minimum_should_match: 1, should: [{ match_none: { _name: 'empty' } }] } },
-          ],
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { list_id: 'some-list-id' } },
+                { bool: { minimum_should_match: 1, should: [{ match_none: { _name: 'empty' } }] } },
+              ],
+            },
+          },
         },
+        ignore_unavailable: true,
+        index: '.items',
+        size: 10000,
       },
-      size: 10000,
-    });
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('Returns a an empty array of items if the value is empty', async () => {

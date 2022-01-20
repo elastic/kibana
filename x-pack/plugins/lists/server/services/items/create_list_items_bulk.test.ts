@@ -26,20 +26,24 @@ describe('crete_list_item_bulk', () => {
     const firstRecord = getIndexESListItemMock();
     const secondRecord = getIndexESListItemMock(VALUE_2);
     [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
-    expect(options.esClient.bulk).toBeCalledWith({
-      // internal origin header used to suppress deprecation logs for users from system generated queries
-      headers: {
-        'x-elastic-product-origin': 'security',
+    expect(options.esClient.bulk).toBeCalledWith(
+      {
+        body: [
+          { create: { _index: LIST_ITEM_INDEX } },
+          firstRecord,
+          { create: { _index: LIST_ITEM_INDEX } },
+          secondRecord,
+        ],
+        index: LIST_ITEM_INDEX,
+        refresh: 'wait_for',
       },
-      index: LIST_ITEM_INDEX,
-      operations: [
-        { create: { _index: LIST_ITEM_INDEX } },
-        firstRecord,
-        { create: { _index: LIST_ITEM_INDEX } },
-        secondRecord,
-      ],
-      refresh: 'wait_for',
-    });
+      {
+        // internal origin header used to suppress deprecation logs for users from system generated queries
+        headers: {
+          'x-elastic-product-origin': 'security',
+        },
+      }
+    );
   });
 
   test('It should not call the dataClient when the values are empty', async () => {
@@ -56,30 +60,34 @@ describe('crete_list_item_bulk', () => {
       value: ['127.0.0.1', '127.0.0.2'],
     };
     await createListItemsBulk(options);
-    expect(options.esClient.bulk).toBeCalledWith({
-      headers: {
-        'x-elastic-product-origin': 'security',
-      },
-      index: '.items',
-      operations: [
-        { create: { _index: LIST_ITEM_INDEX } },
-        {
-          created_at: '2020-04-20T15:25:31.830Z',
-          created_by: 'some user',
-          deserializer: undefined,
-          ip_range: {
-            gte: '127.0.0.1',
-            lte: '127.0.0.1',
+    expect(options.esClient.bulk).toBeCalledWith(
+      {
+        body: [
+          { create: { _index: LIST_ITEM_INDEX } },
+          {
+            created_at: '2020-04-20T15:25:31.830Z',
+            created_by: 'some user',
+            deserializer: undefined,
+            ip_range: {
+              gte: '127.0.0.1',
+              lte: '127.0.0.1',
+            },
+            list_id: 'some-list-id',
+            meta: {},
+            serializer: '(?<value>127.0.0.1)',
+            tie_breaker_id: TIE_BREAKERS[0],
+            updated_at: '2020-04-20T15:25:31.830Z',
+            updated_by: 'some user',
           },
-          list_id: 'some-list-id',
-          meta: {},
-          serializer: '(?<value>127.0.0.1)',
-          tie_breaker_id: TIE_BREAKERS[0],
-          updated_at: '2020-04-20T15:25:31.830Z',
-          updated_by: 'some user',
+        ],
+        index: '.items',
+        refresh: 'wait_for',
+      },
+      {
+        headers: {
+          'x-elastic-product-origin': 'security',
         },
-      ],
-      refresh: 'wait_for',
-    });
+      }
+    );
   });
 });

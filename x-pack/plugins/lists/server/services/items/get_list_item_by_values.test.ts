@@ -47,28 +47,32 @@ describe('get_list_item_by_values', () => {
       type: TYPE,
       value: [VALUE, VALUE_2],
     });
-    expect(esClient.search).toBeCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      ignore_unavailable: true,
-      index: '.items',
-      query: {
-        bool: {
-          filter: [
-            { term: { list_id: 'some-list-id' } },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  { term: { ip: { _name: '0.0', value: '127.0.0.1' } } },
-                  { term: { ip: { _name: '1.0', value: '255.255.255' } } },
-                ],
-              },
+    expect(esClient.search).toBeCalledWith(
+      {
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { list_id: 'some-list-id' } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      { term: { ip: { _name: '0.0', value: '127.0.0.1' } } },
+                      { term: { ip: { _name: '1.0', value: '255.255.255' } } },
+                    ],
+                  },
+                },
+              ],
             },
-          ],
+          },
         },
+        ignore_unavailable: true,
+        index: '.items',
+        size: 10000,
       },
-      size: 10000,
-    });
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('Returns a an empty array if the ES query is also empty', async () => {

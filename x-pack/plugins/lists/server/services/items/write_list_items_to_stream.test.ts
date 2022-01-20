@@ -205,40 +205,48 @@ describe('write_list_items_to_stream', () => {
       const options = getResponseOptionsMock();
       options.searchAfter = ['string 1', 'string 2'];
       await getResponse(options);
-      const expected = {
-        body: {
-          query: { term: { list_id: LIST_ID } },
-          search_after: ['string 1', 'string 2'],
-          sort: [{ tie_breaker_id: 'asc' }],
+      const expected = [
+        {
+          body: {
+            query: { term: { list_id: LIST_ID } },
+            search_after: ['string 1', 'string 2'],
+            sort: [{ tie_breaker_id: 'asc' }],
+          },
+          ignore_unavailable: true,
+          index: LIST_ITEM_INDEX,
+          size: 100,
         },
-        headers: {
-          'x-elastic-product-origin': 'security',
+        {
+          headers: {
+            'x-elastic-product-origin': 'security',
+          },
         },
-        ignore_unavailable: true,
-        index: LIST_ITEM_INDEX,
-        size: 100,
-      };
-      expect(options.esClient.search).toBeCalledWith(expected);
+      ];
+      expect(options.esClient.search).toBeCalledWith(...expected);
     });
 
     test('It returns a simple response with the default size of 100', async () => {
       const options = getResponseOptionsMock();
       options.searchAfter = ['string 1', 'string 2'];
       await getResponse(options);
-      const expected = {
-        body: {
-          query: { term: { list_id: LIST_ID } },
-          search_after: ['string 1', 'string 2'],
-          sort: [{ tie_breaker_id: 'asc' }],
+      const expected = [
+        {
+          body: {
+            query: { term: { list_id: LIST_ID } },
+            search_after: ['string 1', 'string 2'],
+            sort: [{ tie_breaker_id: 'asc' }],
+          },
+          ignore_unavailable: true,
+          index: LIST_ITEM_INDEX,
+          size: 100,
         },
-        headers: {
-          'x-elastic-product-origin': 'security',
+        {
+          headers: {
+            'x-elastic-product-origin': 'security',
+          },
         },
-        ignore_unavailable: true,
-        index: LIST_ITEM_INDEX,
-        size: 100,
-      };
-      expect(options.esClient.search).toBeCalledWith(expected);
+      ];
+      expect(options.esClient.search).toBeCalledWith(...expected);
     });
 
     test('It returns a simple response with expected values and size changed', async () => {
@@ -246,20 +254,24 @@ describe('write_list_items_to_stream', () => {
       options.searchAfter = ['string 1', 'string 2'];
       options.size = 33;
       await getResponse(options);
-      const expected = {
-        body: {
-          query: { term: { list_id: LIST_ID } },
-          search_after: ['string 1', 'string 2'],
-          sort: [{ tie_breaker_id: 'asc' }],
+      const expected = [
+        {
+          body: {
+            query: { term: { list_id: LIST_ID } },
+            search_after: ['string 1', 'string 2'],
+            sort: [{ tie_breaker_id: 'asc' }],
+          },
+          ignore_unavailable: true,
+          index: LIST_ITEM_INDEX,
+          size: 33,
         },
-        headers: {
-          'x-elastic-product-origin': 'security',
+        {
+          headers: {
+            'x-elastic-product-origin': 'security',
+          },
         },
-        ignore_unavailable: true,
-        index: LIST_ITEM_INDEX,
-        size: 33,
-      };
-      expect(options.esClient.search).toBeCalledWith(expected);
+      ];
+      expect(options.esClient.search).toBeCalledWith(...expected);
     });
   });
 

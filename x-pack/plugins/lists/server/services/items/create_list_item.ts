@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
-import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexRequest } from '@elastic/elasticsearch/api/types';
 
 import { transformListItemToElasticQuery } from '../utils';
 import { IndexEsListItemSchema } from '../../schemas/elastic_query';
@@ -66,21 +66,21 @@ export const createListItem = async ({
   };
   const elasticQuery = transformListItemToElasticQuery({ serializer, type, value });
   if (elasticQuery != null) {
-    const document: IndexEsListItemSchema = {
+    const body: IndexEsListItemSchema = {
       ...baseBody,
       ...elasticQuery,
     };
-    const { body: response } = await esClient.index(
-      createEsClientCallWithHeaders<IndexRequest<IndexEsListItemSchema>>({
-        addOriginHeader: true,
-        request: {
-          document,
-          id,
-          index: listItemIndex,
-          refresh: 'wait_for',
-        },
-      })
-    );
+    const [request, options] = createEsClientCallWithHeaders<IndexRequest>({
+      addOriginHeader: true,
+      request: {
+        body,
+        id,
+        index: listItemIndex,
+        refresh: 'wait_for',
+      },
+    });
+
+    const { body: response } = await esClient.index(request, options);
 
     return {
       _version: encodeHitVersion(response),

@@ -6,26 +6,32 @@
  * Side Public License, v 1.
  */
 
-const ES_CLIENT_HEADERS = {
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+
+export const ES_CLIENT_HEADERS = {
+  // Elasticsearch uses this to identify when a request is coming from Kibana, to allow Kibana to
+  // access system indices using the standard ES APIs without logging a warning. After migrating to
+  // use the new system index APIs, this header can be removed.
   'x-elastic-product-origin': 'security',
-} as const;
+};
 
 export const createEsClientCallWithHeaders = <T>({
   addOriginHeader,
   request,
 }: {
   addOriginHeader: boolean;
-  request: T & { headers?: Record<string, unknown> };
-}): T => {
+  request: T;
+}): [T, TransportRequestOptions | undefined] => {
   if (addOriginHeader) {
-    return {
-      ...request,
-      headers: {
-        ...request.headers,
-        ...ES_CLIENT_HEADERS,
+    return [
+      request,
+      {
+        headers: {
+          ...ES_CLIENT_HEADERS,
+        },
       },
-    };
+    ];
   } else {
-    return request;
+    return [request, undefined];
   }
 };

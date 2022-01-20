@@ -31,13 +31,15 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//tslib",
   "@npm//uuid",
+  "@npm//@elastic/elasticsearch",
 ]
 
 TYPES_DEPS = [
   "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/uuid"
+  "@npm//@types/uuid",
+  "@npm//@elastic/elasticsearch",
 ]
 
 jsts_transpiler(

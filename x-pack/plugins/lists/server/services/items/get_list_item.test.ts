@@ -37,13 +37,17 @@ describe('get_list_item', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(data)
     );
     await getListItem({ esClient, id: LIST_ID, listItemIndex: LIST_INDEX });
-    expect(esClient.search).toHaveBeenCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      ignore_unavailable: true,
-      index: '.lists',
-      query: { term: { _id: 'some-list-id' } },
-      seq_no_primary_term: true,
-    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        body: {
+          query: { term: { _id: 'some-list-id' } },
+        },
+        ignore_unavailable: true,
+        index: '.lists',
+        seq_no_primary_term: true,
+      },
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('it returns a list item as expected if the list item is found', async () => {

@@ -12,6 +12,7 @@ import type {
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
+import type { SearchRequest } from '@elastic/elasticsearch/api/types';
 
 import { Scroll } from '../lists/types';
 
@@ -44,22 +45,21 @@ export const getSearchAfterScroll = async <T>({
   const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
-    const { body: response } = await esClient.search<TieBreaker<T>>(
-      createEsClientCallWithHeaders({
-        addOriginHeader: true,
-        request: {
-          body: {
-            _source: getSourceWithTieBreaker({ sortField }),
-            query,
-            search_after: newSearchAfter,
-            sort: getSortWithTieBreaker({ sortField, sortOrder }),
-          },
-          ignore_unavailable: true,
-          index,
-          size: hopSize,
+    const [request, options] = createEsClientCallWithHeaders<SearchRequest>({
+      addOriginHeader: true,
+      request: {
+        body: {
+          _source: getSourceWithTieBreaker({ sortField }),
+          query,
+          search_after: newSearchAfter,
+          sort: getSortWithTieBreaker({ sortField, sortOrder }),
         },
-      })
-    );
+        ignore_unavailable: true,
+        index,
+        size: hopSize,
+      },
+    });
+    const { body: response } = await esClient.search<TieBreaker<T>>(request, options);
     if (response.hits.hits.length > 0) {
       newSearchAfter = getSearchAfterWithTieBreaker({ response, sortField });
     } else {

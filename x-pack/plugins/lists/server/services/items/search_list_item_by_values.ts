@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import type { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
+import type { SearchRequest } from '@elastic/elasticsearch/api/types';
 
 import {
   TransformElasticMSearchToListItemOptions,
@@ -31,20 +32,24 @@ export const searchListItemByValues = async ({
   type,
   value,
 }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
-  const { body: response } = await esClient.search<SearchEsListItemSchema>(
-    createEsClientCallWithHeaders({
-      addOriginHeader: true,
-      request: {
-        ignore_unavailable: true,
-        index: listItemIndex,
+  const [request, options] = createEsClientCallWithHeaders<SearchRequest>({
+    addOriginHeader: true,
+    request: {
+      body: {
         query: {
           bool: {
             filter: getQueryFilterFromTypeValue({ listId, type, value }),
           },
         },
-        size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
       },
-    })
+      ignore_unavailable: true,
+      index: listItemIndex,
+      size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
+    },
+  })
+
+  const { body: response } = await esClient.search<SearchEsListItemSchema>(
+    request, options
   );
   return transformElasticNamedSearchToListItem({
     response,

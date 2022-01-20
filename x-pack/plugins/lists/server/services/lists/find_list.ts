@@ -15,6 +15,7 @@ import type {
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
+import type { CountRequest, SearchRequest } from '@elastic/elasticsearch/api/types';
 
 import { SearchEsListSchema } from '../../schemas/elastic_response';
 import {
@@ -63,37 +64,38 @@ export const findList = async ({
     sortField,
     sortOrder,
   });
-
-  const { body: totalCount } = await esClient.count(
-    createEsClientCallWithHeaders({
-      addOriginHeader: true,
-      request: {
-        ignore_unavailable: true,
-        index: listIndex,
-        query,
-      },
-    })
-  );
+  const [request, options] = createEsClientCallWithHeaders<CountRequest>({
+    addOriginHeader: true,
+    request: {
+      body: { query },
+      ignore_unavailable: true,
+      index: listIndex,
+    },
+  });
+  const { body: totalCount } = await esClient.count(request, options);
 
   if (scroll.validSearchAfterFound) {
+    const [searchRequest, searchOptions] = createEsClientCallWithHeaders<SearchRequest>({
+      addOriginHeader: true,
+      request: {
+        body: {
+          query,
+          search_after: scroll.searchAfter,
+          sort: getSortWithTieBreaker({ sortField, sortOrder }),
+        },
+        ignore_unavailable: true,
+        index: listIndex,
+        seq_no_primary_term: true,
+        size: perPage,
+      },
+    });
+
     // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
     // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
     // to explicitly define the type <T>.
     const { body: response } = await esClient.search<SearchEsListSchema>(
-      createEsClientCallWithHeaders({
-        addOriginHeader: true,
-        request: {
-          body: {
-            query,
-            search_after: scroll.searchAfter,
-            sort: getSortWithTieBreaker({ sortField, sortOrder }),
-          },
-          ignore_unavailable: true,
-          index: listIndex,
-          seq_no_primary_term: true,
-          size: perPage,
-        },
-      })
+      searchRequest,
+      searchOptions
     );
     return {
       cursor: encodeCursor({

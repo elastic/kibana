@@ -38,18 +38,22 @@ describe('update_list_item', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     await updateListItem({ ...options, esClient });
-    expect(esClient.update).toHaveBeenCalledWith({
-      doc: {
-        ip: '127.0.0.1',
-        meta: {},
-        updated_at: '2020-04-20T15:25:31.830Z',
-        updated_by: 'some user',
+    expect(esClient.update).toHaveBeenCalledWith(
+      {
+        body: {
+          doc: {
+            ip: '127.0.0.1',
+            meta: {},
+            updated_at: '2020-04-20T15:25:31.830Z',
+            updated_by: 'some user',
+          },
+        },
+        id: 'some-list-item-id',
+        index: '.items',
+        refresh: 'wait_for',
       },
-      headers: { 'x-elastic-product-origin': 'security' },
-      id: 'some-list-item-id',
-      index: '.items',
-      refresh: 'wait_for',
-    });
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('it returns a list item as expected with the id changed out for the elastic id when there is a list item to update', async () => {

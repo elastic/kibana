@@ -23,12 +23,15 @@ describe('find_list_item', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySearchListMock())
     );
     await findListItem({ ...options, esClient });
-    expect(esClient.search).toBeCalledWith({
-      body: { query: { term: { _id: 'some-list-id' } } },
-      ignore_unavailable: true,
-      index: '.lists',
-      seq_no_primary_term: true,
-    });
+    expect(esClient.search).toBeCalledWith(
+      {
+        body: { query: { term: { _id: 'some-list-id' } } },
+        ignore_unavailable: true,
+        index: '.lists',
+        seq_no_primary_term: true,
+      },
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('should find a simple single list item', async () => {

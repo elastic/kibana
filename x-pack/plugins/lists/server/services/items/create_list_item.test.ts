@@ -41,17 +41,21 @@ describe('crete_list_item', () => {
     const options = getCreateListItemOptionsMock();
     await createListItem(options);
     const body = getIndexESListItemMock();
-    const expected = {
-      document: body,
-      // internal origin header used to suppress deprecation logs for users from system generated queries
-      headers: {
-        'x-elastic-product-origin': 'security',
+    const expected = [
+      {
+        body,
+        id: LIST_ITEM_ID,
+        index: LIST_ITEM_INDEX,
+        refresh: 'wait_for',
       },
-      id: LIST_ITEM_ID,
-      index: LIST_ITEM_INDEX,
-      refresh: 'wait_for',
-    };
-    expect(options.esClient.index).toBeCalledWith(expected);
+      {
+        // internal origin header used to suppress deprecation logs for users from system generated queries
+        headers: {
+          'x-elastic-product-origin': 'security',
+        },
+      },
+    ];
+    expect(options.esClient.index).toBeCalledWith(...expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {

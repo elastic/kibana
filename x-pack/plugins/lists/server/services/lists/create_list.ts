@@ -21,6 +21,7 @@ import type {
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
+import type { IndexRequest } from '@elastic/elasticsearch/api/types';
 
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 
@@ -58,7 +59,7 @@ export const createList = async ({
   version,
 }: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
-  const document: IndexEsListSchema = {
+  const body: IndexEsListSchema = {
     created_at: createdAt,
     created_by: user,
     description,
@@ -73,20 +74,19 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const { body: response } = await esClient.index(
-    createEsClientCallWithHeaders({
-      addOriginHeader: true,
-      request: {
-        document,
-        id,
-        index: listIndex,
-        refresh: 'wait_for',
-      },
-    })
-  );
+  const [request, options] = createEsClientCallWithHeaders<IndexRequest>({
+    addOriginHeader: true,
+    request: {
+      body,
+      id,
+      index: listIndex,
+      refresh: 'wait_for',
+    },
+  });
+  const { body: response } = await esClient.index(request, options);
   return {
     _version: encodeHitVersion(response),
     id: response._id,
-    ...document,
+    ...body,
   };
 };

@@ -15,6 +15,8 @@ import type {
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
+import { UpdateRequest } from '@elastic/elasticsearch/api/types';
+
 import { transformListItemToElasticQuery } from '../utils';
 import { UpdateEsListItemSchema } from '../../schemas/elastic_query';
 
@@ -61,18 +63,20 @@ export const updateListItem = async ({
         ...elasticQuery,
       };
 
-      const { body: response } = await esClient.update(
-        createEsClientCallWithHeaders({
-          addOriginHeader: true,
-          request: {
-            ...decodeVersion(_version),
-            doc,
-            id: listItem.id,
-            index: listItemIndex,
-            refresh: 'wait_for',
-          },
-        })
-      );
+      const [updateRequest, headers] = createEsClientCallWithHeaders<
+        UpdateRequest<UpdateEsListItemSchema>
+      >({
+        addOriginHeader: true,
+        request: {
+          ...decodeVersion(_version),
+          body: { doc },
+          id: listItem.id,
+          index: listItemIndex,
+          refresh: 'wait_for',
+        },
+      });
+
+      const { body: response } = await esClient.update(updateRequest, headers);
       return {
         _version: encodeHitVersion(response),
         created_at: listItem.created_at,

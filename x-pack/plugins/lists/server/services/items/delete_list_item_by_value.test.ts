@@ -29,24 +29,28 @@ describe('delete_list_item_by_value', () => {
     (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce(listItems);
     const options = getDeleteListItemByValueOptionsMock();
     await deleteListItemByValue(options);
-    expect(options.esClient.deleteByQuery).toBeCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      index: '.items',
-      query: {
-        bool: {
-          filter: [
-            { term: { list_id: 'some-list-id' } },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
-              },
+    expect(options.esClient.deleteByQuery).toBeCalledWith(
+      {
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { list_id: 'some-list-id' } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
+                  },
+                },
+              ],
             },
-          ],
+          },
         },
+        index: '.items',
+        refresh: false,
       },
-      refresh: false,
-    });
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('Delete returns a an empty array if the list items are also empty', async () => {
@@ -70,23 +74,26 @@ describe('delete_list_item_by_value', () => {
     const options = getDeleteListItemByValueOptionsMock();
     await deleteListItemByValue(options);
     const deleteByQuery = {
-      headers: { 'x-elastic-product-origin': 'security' },
-      index: '.items',
-      query: {
-        bool: {
-          filter: [
-            { term: { list_id: 'some-list-id' } },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { list_id: 'some-list-id' } },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
+      index: '.items',
       refresh: false,
     };
-    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery, {
+      headers: { 'x-elastic-product-origin': 'security' },
+    });
   });
 });

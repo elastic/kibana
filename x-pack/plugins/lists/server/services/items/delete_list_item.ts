@@ -7,8 +7,9 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
 import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
+import type { DeleteRequest } from '@elastic/elasticsearch/api/types';
+
 import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
@@ -26,16 +27,16 @@ export const deleteListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    await esClient.delete(
-      createEsClientCallWithHeaders({
-        addOriginHeader: true,
-        request: {
-          id,
-          index: listItemIndex,
-          refresh: 'wait_for',
-        },
-      })
-    );
+    const [request, options] = createEsClientCallWithHeaders<DeleteRequest>({
+      addOriginHeader: true,
+      request: {
+        id,
+        index: listItemIndex,
+        refresh: 'wait_for',
+      },
+    });
+
+    await esClient.delete(request, options);
   }
   return listItem;
 };

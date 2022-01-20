@@ -31,13 +31,17 @@ describe('get_list', () => {
     );
     await getList({ esClient, id: LIST_ID, listIndex: LIST_INDEX });
 
-    expect(esClient.search).toHaveBeenCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      ignore_unavailable: true,
-      index: '.lists',
-      query: { term: { _id: 'some-list-id' } },
-      seq_no_primary_term: true,
-    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      {
+        body: { query: { term: { _id: 'some-list-id' } } },
+        ignore_unavailable: true,
+        index: '.lists',
+        seq_no_primary_term: true,
+      },
+      {
+        headers: { 'x-elastic-product-origin': 'security' },
+      }
+    );
   });
 
   test('it returns a list as expected if the list is found', async () => {

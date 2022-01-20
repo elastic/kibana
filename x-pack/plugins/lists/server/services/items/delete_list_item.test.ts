@@ -31,12 +31,14 @@ describe('delete_list_item', () => {
     const options = getDeleteListItemOptionsMock();
     await deleteListItem(options);
 
-    expect(options.esClient.delete).toBeCalledWith({
-      headers: { 'x-elastic-product-origin': 'security' },
-      id: 'some-list-item-id',
-      index: '.items',
-      refresh: 'wait_for',
-    });
+    expect(options.esClient.delete).toBeCalledWith(
+      {
+        id: 'some-list-item-id',
+        index: '.items',
+        refresh: 'wait_for',
+      },
+      { headers: { 'x-elastic-product-origin': 'security' } }
+    );
   });
 
   test('Delete returns a null if "getListItem" returns a null', async () => {
@@ -60,13 +62,14 @@ describe('delete_list_item', () => {
     const options = getDeleteListItemOptionsMock();
     await deleteListItem(options);
     const deleteQuery = {
-      headers: {
-        'x-elastic-product-origin': 'security',
-      },
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
       refresh: 'wait_for',
     };
-    expect(options.esClient.delete).toBeCalledWith(deleteQuery);
+    expect(options.esClient.delete).toBeCalledWith(deleteQuery, {
+      headers: {
+        'x-elastic-product-origin': 'security',
+      },
+    });
   });
 });
