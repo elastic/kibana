@@ -13,14 +13,14 @@ import { TestResultHeader } from './test_result_header';
 describe('TestResultHeader', function () {
   it('should render properly', async function () {
     render(<TestResultHeader isCompleted={false} />);
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('PENDING')).toBeInTheDocument();
   });
 
   it('should render in progress state', async function () {
     render(<TestResultHeader journeyStarted={true} isCompleted={false} />);
 
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('IN PROGRESS')).toBeInTheDocument();
   });
 
@@ -39,7 +39,7 @@ describe('TestResultHeader', function () {
         ]}
       />
     );
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('COMPLETED')).toBeInTheDocument();
     expect(await screen.findByText('Took 1 ms')).toBeInTheDocument();
   });

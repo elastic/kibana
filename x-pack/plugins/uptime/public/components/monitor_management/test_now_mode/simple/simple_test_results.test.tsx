@@ -16,7 +16,7 @@ import { Ping } from '../../../../../common/runtime_types';
 describe('SimpleTestResults', function () {
   it('should render properly', async function () {
     render(<SimpleTestResults monitorId={'test-id'} />);
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
 
     expect(dataApi.search).toHaveBeenCalledTimes(1);
@@ -53,7 +53,7 @@ describe('SimpleTestResults', function () {
 
     render(<SimpleTestResults monitorId={'test-id'} />);
 
-    expect(await screen.findByText('Test run')).toBeInTheDocument();
+    expect(await screen.findByText('Test result')).toBeInTheDocument();
 
     expect(await screen.findByText('COMPLETED')).toBeInTheDocument();
     expect(await screen.findByText('191 ms')).toBeInTheDocument();
