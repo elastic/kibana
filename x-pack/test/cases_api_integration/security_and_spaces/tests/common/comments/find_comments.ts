@@ -129,16 +129,6 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    it('should return a 400 when passing the subCaseId parameter', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id/comments/_find?search=unique&subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
-    });
-
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 

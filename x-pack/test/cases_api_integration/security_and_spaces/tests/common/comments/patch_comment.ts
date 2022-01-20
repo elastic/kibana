@@ -9,7 +9,6 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   AttributesTypeAlerts,
   AttributesTypeUser,
@@ -53,27 +52,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesByESQuery(es);
       await deleteComments(es);
       await deleteCasesUserActions(es);
-    });
-
-    it('should return a 400 when the subCaseId parameter is passed', async () => {
-      const { body } = await supertest
-        .patch(`${CASES_URL}/case-id}/comments?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send({
-          id: 'id',
-          version: 'version',
-          type: CommentType.alert,
-          alertId: 'test-id',
-          index: 'test-index',
-          rule: {
-            id: 'id',
-            name: 'name',
-          },
-          owner: 'securitySolutionFixture',
-        })
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
     });
 
     it('should patch a comment', async () => {

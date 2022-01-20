@@ -9,7 +9,7 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, MountPoint } from 'kibana/public';
 import { useKibana } from '../../../../utils/kibana_react';
-import { Case, SubCase } from '../../../../../../cases/common';
+import { Case } from '../../../../../../cases/common';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { AddToCaseProps } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
@@ -17,7 +17,7 @@ import { CasesDeepLinkId } from '../../../../../../cases/public';
 
 async function addToCase(
   http: HttpSetup,
-  theCase: Case | SubCase,
+  theCase: Case,
   attributes: TypedLensByValueInput['attributes'],
   timeRange?: { from: string; to: string }
 ) {
@@ -41,7 +41,7 @@ export const useAddToCase = ({
   lensAttributes,
   getToastText,
   timeRange,
-}: AddToCaseProps & { getToastText: (thaCase: Case | SubCase) => MountPoint<HTMLElement> }) => {
+}: AddToCaseProps & { getToastText: (thaCase: Case) => MountPoint<HTMLElement> }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isCasesOpen, setIsCasesOpen] = useState(false);
 
@@ -52,7 +52,7 @@ export const useAddToCase = ({
   } = useKibana().services;
 
   const onCaseClicked = useCallback(
-    (theCase?: Case | SubCase) => {
+    (theCase?: Case) => {
       if (theCase && lensAttributes) {
         setIsCasesOpen(false);
         setIsSaving(true);

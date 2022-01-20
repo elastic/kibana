@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -89,26 +88,6 @@ export default ({ getService }: FtrProviderContext): void => {
           commentId: 'fake-id',
           expectedHttpCode: 404,
         });
-      });
-
-      it('should return a 400 when attempting to delete all comments when passing the `subCaseId` parameter', async () => {
-        const { body } = await supertest
-          .delete(`${CASES_URL}/case-id/comments?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(400);
-        // make sure the failure is because of the subCaseId
-        expect(body.message).to.contain('disabled');
-      });
-
-      it('should return a 400 when attempting to delete a single comment when passing the `subCaseId` parameter', async () => {
-        const { body } = await supertest
-          .delete(`${CASES_URL}/case-id/comments/comment-id?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(400);
-        // make sure the failure is because of the subCaseId
-        expect(body.message).to.contain('disabled');
       });
     });
 

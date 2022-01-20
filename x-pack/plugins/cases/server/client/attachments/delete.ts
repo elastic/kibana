@@ -65,7 +65,7 @@ export async function deleteAll(
     });
 
     if (comments.total <= 0) {
-      throw Boom.notFound(`No comments found for ${id}.`);
+      throw Boom.notFound(`No comments found for ${caseID}.`);
     }
 
     await authorization.ensureAuthorized({

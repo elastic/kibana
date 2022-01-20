@@ -341,7 +341,6 @@ export const removeServerGeneratedPropertiesFromComments = (
 export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
     deleteCasesByESQuery(es),
-    deleteSubCases(es),
     deleteCasesUserActions(es),
     deleteComments(es),
     deleteConfiguration(es),
@@ -364,21 +363,6 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-    conflicts: 'proceed',
-  });
-};
-
-/**
- * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
- * not go through the case API.
- */
-export const deleteSubCases = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:cases-sub-case',
     wait_for_completion: true,
     refresh: true,
     body: {},

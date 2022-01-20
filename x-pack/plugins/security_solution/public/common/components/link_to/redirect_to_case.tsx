@@ -9,20 +9,7 @@ import { appendSearch } from './helpers';
 
 export const getCaseUrl = (search?: string | null) => `${appendSearch(search ?? undefined)}`;
 
-export const getCaseDetailsUrl = ({
-  id,
-  search,
-  subCaseId,
-}: {
-  id: string;
-  search?: string | null;
-  subCaseId?: string;
-}) => {
-  if (subCaseId) {
-    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(subCaseId)}${appendSearch(
-      search ?? undefined
-    )}`;
-  }
+export const getCaseDetailsUrl = ({ id, search }: { id: string; search?: string | null }) => {
   return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
 };
 
@@ -30,18 +17,11 @@ export const getCaseDetailsUrlWithCommentId = ({
   id,
   commentId,
   search,
-  subCaseId,
 }: {
   id: string;
   commentId: string;
   search?: string | null;
-  subCaseId?: string;
 }) => {
-  if (subCaseId) {
-    return `/${encodeURIComponent(id)}/sub-cases/${encodeURIComponent(
-      subCaseId
-    )}/${encodeURIComponent(commentId)}${appendSearch(search ?? undefined)}`;
-  }
   return `/${encodeURIComponent(id)}/${encodeURIComponent(commentId)}${appendSearch(
     search ?? undefined
   )}`;

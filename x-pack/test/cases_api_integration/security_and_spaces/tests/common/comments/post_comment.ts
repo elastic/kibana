@@ -302,15 +302,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
-
-      it('should return a 400 when passing the subCaseId', async () => {
-        const { body } = await supertest
-          .post(`${CASES_URL}/case-id/comments?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(400);
-        expect(body.message).to.contain('subCaseId');
-      });
     });
 
     describe('alerts', () => {

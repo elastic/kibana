@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { postCaseReq, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -54,26 +53,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const comments = await getAllComments({ supertest, caseId: postedCase.id });
 
       expect(comments.length).to.eql(2);
-    });
-
-    it('should return a 400 when passing the subCaseId parameter', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id/comments?subCaseId=value`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
-    });
-
-    it('should return a 400 when passing the includeSubCaseComments parameter', async () => {
-      const { body } = await supertest
-        .get(`${CASES_URL}/case-id/comments?includeSubCaseComments=true`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(400);
-
-      expect(body.message).to.contain('disabled');
     });
 
     describe('rbac', () => {
