@@ -6,6 +6,7 @@
  */
 
 import { FeatureCollection, Feature, Geometry } from 'geojson';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
@@ -31,11 +32,17 @@ export async function getResultsForJobId(
   searchFilters: VectorSourceRequestMeta
 ): Promise<FeatureCollection> {
   const { timeFilters } = searchFilters;
+
+  const must: estypes.QueryDslQueryContainer[] = [
+    { term: { job_id: jobId } },
+    { term: { result_type: 'record' } },
+  ];
+
   // Query to look for the highest scoring anomaly.
-  const body: any = {
+  const body: estypes.SearchRequest['body'] = {
     query: {
       bool: {
-        must: [{ term: { job_id: jobId } }, { term: { result_type: 'record' } }],
+        must,
       },
     },
     size: 1000,
@@ -53,7 +60,7 @@ export async function getResultsForJobId(
         },
       },
     };
-    body.query.bool.must.push(timerange);
+    must.push(timerange);
   }
 
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
