@@ -10,7 +10,7 @@ import { savedObjectClientsFactory } from '../util';
 import { syncSavedObjectsFactory } from '../sync';
 import { jobSavedObjectServiceFactory, JobObject } from '../service';
 import { mlLog } from '../../lib/log';
-import { ML_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { createJobSpaceOverrides } from './space_overrides';
 import type { SecurityPluginSetup } from '../../../../security/server';
 
@@ -52,6 +52,7 @@ export function jobSavedObjectsInitializationFactory(
         savedObjectsClient,
         spacesEnabled,
         security?.authz,
+        client,
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
 
@@ -88,7 +89,7 @@ export function jobSavedObjectsInitializationFactory(
 
   async function _jobSavedObjectsExist(savedObjectsClient: SavedObjectsClientContract) {
     const options = {
-      type: ML_SAVED_OBJECT_TYPE,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
       perPage: 0,
       namespaces: ['*'],
     };

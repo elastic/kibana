@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from './saved_objects';
 import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
@@ -94,7 +94,7 @@ export function getPluginPrivileges() {
     'dashboard',
     'search',
     'visualization',
-    ML_SAVED_OBJECT_TYPE,
+    ML_JOB_SAVED_OBJECT_TYPE,
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
@@ -149,7 +149,7 @@ export function getPluginPrivileges() {
       catalogue: [],
       savedObject: {
         all: [],
-        read: [ML_SAVED_OBJECT_TYPE],
+        read: [ML_JOB_SAVED_OBJECT_TYPE],
       },
       api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: apmUserMlCapabilitiesKeys,

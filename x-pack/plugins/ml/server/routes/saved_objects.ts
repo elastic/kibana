@@ -7,7 +7,7 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
-import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
+import { checksFactory, syncSavedObjectsFactory, JobSavedObjectStatus } from '../saved_objects';
 import {
   jobsAndSpaces,
   jobsAndCurrentSpace,
@@ -268,7 +268,12 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
-        const allStatuses = Object.values((await checkStatus()).savedObjects).flat();
+        const allStatuses = Object.entries((await checkStatus()).savedObjects)
+          .filter(([a, b]) => {
+            return a === 'anomaly-detector' || a === 'data-frame-analytics';
+          })
+          .map(([, b]) => b)
+          .flat() as JobSavedObjectStatus[];
 
         const body = allStatuses
           .filter((s) => s.checks.jobExists)

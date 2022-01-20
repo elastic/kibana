@@ -11,7 +11,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   JobType,
-  ML_SAVED_OBJECT_TYPE,
+  ML_JOB_SAVED_OBJECT_TYPE,
   SavedObjectResult,
 } from '../../../../common/types/saved_objects';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '../../../../../spaces/public';
@@ -80,7 +80,7 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
-      type: ML_SAVED_OBJECT_TYPE,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
       id: jobId,
       namespaces: spaceIds,
       title: jobId,

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
 import {
   JobType,
@@ -42,6 +42,8 @@ export function syncSavedObjectsFactory(
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
       datafeeds: Datafeed[];
     }>();
+
+    const { body: models } = await client.asInternalUser.ml.getTrainedModels();
 
     const tasks: Array<() => Promise<void>> = [];
 
@@ -103,6 +105,34 @@ export function syncSavedObjectsFactory(
       }
     }
 
+    for (const model of status.jobs.models) {
+      if (model.checks.savedObjectExits === false) {
+        const { modelId } = model;
+        const type = 'models';
+        if (simulate === true) {
+          results.savedObjectsCreated[modelId] = { success: true, type };
+        } else {
+          // create model saved objects for models which are missing them
+          tasks.push(async () => {
+            try {
+              const mod = models.trained_model_configs.find((m) => m.model_id === modelId);
+              await jobSavedObjectService.createModel(mod!);
+              results.savedObjectsCreated[modelId] = {
+                success: true,
+                type,
+              };
+            } catch (error) {
+              results.savedObjectsCreated[modelId] = {
+                success: false,
+                type,
+                error: getSavedObjectClientError(error),
+              };
+            }
+          });
+        }
+      }
+    }
+
     for (const job of status.savedObjects['anomaly-detector']) {
       if (job.checks.jobExists === false) {
         const type = 'anomaly-detector';
@@ -151,6 +181,37 @@ export function syncSavedObjectsFactory(
               };
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
+                success: false,
+                type,
+                error: getSavedObjectClientError(error),
+              };
+            }
+          });
+        }
+      }
+    }
+
+    for (const model of status.savedObjects.models) {
+      if (model.checks.modelExists === false) {
+        const { modelId, namespaces } = model;
+        const type = 'models';
+        if (simulate === true) {
+          results.savedObjectsDeleted[modelId] = { success: true, type };
+        } else {
+          // Delete model saved objects for models which no longer exist
+          tasks.push(async () => {
+            try {
+              if (namespaces !== undefined && namespaces.length) {
+                await jobSavedObjectService.forceDeleteModel(modelId, namespaces[0]);
+              } else {
+                await jobSavedObjectService.deleteModel(modelId);
+              }
+              results.savedObjectsDeleted[modelId] = {
+                success: true,
+                type,
+              };
+            } catch (error) {
+              results.savedObjectsDeleted[modelId] = {
                 success: false,
                 type,
                 error: getSavedObjectClientError(error),

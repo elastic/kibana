@@ -9,6 +9,7 @@ export { setupSavedObjects } from './saved_objects';
 export type { JobObject, JobSavedObjectService } from './service';
 export { jobSavedObjectServiceFactory } from './service';
 export { checksFactory } from './checks';
+export type { JobSavedObjectStatus } from './checks';
 export { syncSavedObjectsFactory } from './sync';
 export { jobSavedObjectsInitializationFactory } from './initialization';
 export { savedObjectClientsFactory } from './util';

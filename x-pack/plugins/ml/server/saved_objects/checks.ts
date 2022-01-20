@@ -6,14 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import type { JobSavedObjectService } from './service';
 import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import { ResolveMlCapabilities } from '../../common/types/capabilities';
+import { getJobDetailsFromModel } from './util';
 
-interface JobSavedObjectStatus {
+export interface JobSavedObjectStatus {
   jobId: string;
   type: JobType;
   datafeedId?: string | null;
@@ -21,6 +23,15 @@ interface JobSavedObjectStatus {
   checks: {
     jobExists: boolean;
     datafeedExists?: boolean;
+  };
+}
+
+export interface ModelSavedObjectStatus {
+  modelId: string;
+  namespaces: string[] | undefined;
+  checks: {
+    modelExists: boolean;
+    dfaJobExists: boolean | null;
   };
 }
 
@@ -32,12 +43,24 @@ export interface JobStatus {
   };
 }
 
+export interface ModelStatus {
+  modelId: string;
+  checks: {
+    savedObjectExits: boolean;
+    dfaJobReferenced: boolean | null;
+  };
+}
+
 export interface StatusResponse {
   savedObjects: {
-    [type in JobType]: JobSavedObjectStatus[];
+    'anomaly-detector': JobSavedObjectStatus[];
+    'data-frame-analytics': JobSavedObjectStatus[];
+    models: ModelSavedObjectStatus[];
   };
   jobs: {
-    [type in JobType]: JobStatus[];
+    'anomaly-detector': JobStatus[];
+    'data-frame-analytics': JobStatus[];
+    models: ModelStatus[];
   };
 }
 
@@ -47,6 +70,7 @@ export function checksFactory(
 ) {
   async function checkStatus(): Promise<StatusResponse> {
     const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
+    const modelObjects = await jobSavedObjectService.getAllModelObjects(false);
 
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs();
@@ -55,8 +79,9 @@ export function checksFactory(
       (await client.asInternalUser.ml.getDataFrameAnalytics()) as unknown as {
         body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
       };
+    const { body: models } = await client.asInternalUser.ml.getTrainedModels();
 
-    const savedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
+    const jobSavedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {
         const type: JobType = attributes.type;
         const jobId = attributes.job_id;
@@ -85,7 +110,46 @@ export function checksFactory(
       }
     );
 
+    const dfaJobsCreateTimeMap = dfaJobs.data_frame_analytics.reduce((acc, cur) => {
+      acc.set(cur.id, cur.create_time);
+      return acc;
+    }, new Map<string, number>());
+
+    const modelJobExits = models.trained_model_configs.reduce((acc, cur) => {
+      const job = getJobDetailsFromModel(cur);
+      if (job === null) {
+        return acc;
+      }
+
+      const { jobId, createTime } = job;
+      const exists = createTime === dfaJobsCreateTimeMap.get(jobId);
+
+      if (jobId && createTime) {
+        acc.set(cur.model_id, exists);
+      }
+      return acc;
+    }, new Map<string, boolean | null>());
+
+    const modelSavedObjectsStatus: ModelSavedObjectStatus[] = modelObjects.map(
+      ({ attributes, namespaces }) => {
+        const modelId = attributes.model_id;
+
+        const modelExists = models.trained_model_configs.some((m) => m.model_id === modelId);
+        const dfaJobExists = modelJobExits.get(modelId) ?? null;
+
+        return {
+          modelId,
+          namespaces,
+          checks: {
+            modelExists,
+            dfaJobExists,
+          },
+        };
+      }
+    );
+
     const allJobObjects = await jobSavedObjectService.getAllJobObjectsForAllSpaces();
+    const allModelObjects = await jobSavedObjectService.getAllModelObjectsForAllSpaces();
 
     const nonSpaceADObjectIds = new Set(
       allJobObjects
@@ -98,16 +162,23 @@ export function checksFactory(
         .map(({ attributes }) => attributes.job_id)
     );
 
+    const nonSpaceModelObjectIds = new Map(
+      allModelObjects.map((model) => [model.attributes.model_id, model])
+    );
+
     const adObjectIds = new Set(
-      savedObjectsStatus.filter(({ type }) => type === 'anomaly-detector').map(({ jobId }) => jobId)
+      jobSavedObjectsStatus
+        .filter(({ type }) => type === 'anomaly-detector')
+        .map(({ jobId }) => jobId)
     );
     const dfaObjectIds = new Set(
-      savedObjectsStatus
+      jobSavedObjectsStatus
         .filter(({ type }) => type === 'data-frame-analytics')
         .map(({ jobId }) => jobId)
     );
+    const modelObjectIds = new Set(modelSavedObjectsStatus.map(({ modelId }) => modelId));
 
-    const anomalyDetectors = adJobs.jobs
+    const anomalyDetectorsStatus = adJobs.jobs
       .filter(({ job_id: jobId }) => {
         // only list jobs which are in the current space (adObjectIds)
         // or are not in any spaces (nonSpaceADObjectIds)
@@ -124,7 +195,7 @@ export function checksFactory(
         };
       });
 
-    const dataFrameAnalytics = dfaJobs.data_frame_analytics
+    const dataFrameAnalyticsStatus = dfaJobs.data_frame_analytics
       .filter(({ id: jobId }) => {
         // only list jobs which are in the current space (dfaObjectIds)
         // or are not in any spaces (nonSpaceDFAObjectIds)
@@ -140,16 +211,52 @@ export function checksFactory(
         };
       });
 
+    const modelsStatus = models.trained_model_configs
+      .filter(({ model_id: modelId }) => {
+        // only list jobs which are in the current space (adObjectIds)
+        // or are not in any spaces (nonSpaceADObjectIds)
+        return (
+          modelObjectIds.has(modelId) === true || nonSpaceModelObjectIds.has(modelId) === false
+        );
+      })
+      .map((model: estypes.MlTrainedModelConfig) => {
+        const modelId = model.model_id;
+        // const jobId = metadata.
+        const job = getJobDetailsFromModel(model);
+
+        let savedObjectExits = false;
+        let dfaJobReferenced = null;
+        const modelObject = nonSpaceModelObjectIds.get(modelId);
+        if (modelObject !== undefined) {
+          savedObjectExits = true;
+          if (job !== null) {
+            dfaJobReferenced =
+              modelObject.attributes.job?.job_id === job.jobId &&
+              modelObject.attributes.job?.create_time === job.createTime;
+          }
+        }
+
+        return {
+          modelId,
+          checks: {
+            savedObjectExits,
+            dfaJobReferenced,
+          },
+        };
+      });
+
     return {
       savedObjects: {
-        'anomaly-detector': savedObjectsStatus.filter(({ type }) => type === 'anomaly-detector'),
-        'data-frame-analytics': savedObjectsStatus.filter(
+        'anomaly-detector': jobSavedObjectsStatus.filter(({ type }) => type === 'anomaly-detector'),
+        'data-frame-analytics': jobSavedObjectsStatus.filter(
           ({ type }) => type === 'data-frame-analytics'
         ),
+        models: modelSavedObjectsStatus,
       },
       jobs: {
-        'anomaly-detector': anomalyDetectors,
-        'data-frame-analytics': dataFrameAnalytics,
+        'anomaly-detector': anomalyDetectorsStatus,
+        'data-frame-analytics': dataFrameAnalyticsStatus,
+        models: modelsStatus,
       },
     };
   }

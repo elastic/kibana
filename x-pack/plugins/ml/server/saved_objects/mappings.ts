@@ -31,6 +31,34 @@ export const mlJob: SavedObjectsTypeMappingDefinition = {
   },
 };
 
+export const mlModel: SavedObjectsTypeMappingDefinition = {
+  properties: {
+    model_id: {
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
+    },
+    job: {
+      properties: {
+        job_id: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+            },
+          },
+        },
+        create_time: {
+          type: 'long',
+        },
+      },
+    },
+  },
+};
+
 export const mlModule: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {

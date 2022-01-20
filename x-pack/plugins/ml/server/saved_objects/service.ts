@@ -6,16 +6,23 @@
  */
 
 import RE2 from 're2';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
+  IScopedClusterClient,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
-import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import {
+  JobType,
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_MODEL_SAVED_OBJECT_TYPE,
+  MlSavedObjectType,
+} from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
-import { getSavedObjectClientError } from './util';
+import { getSavedObjectClientError, getJobDetailsFromModel } from './util';
 import { authorizationProvider } from './authorization';
 
 export interface JobObject {
@@ -25,13 +32,28 @@ export interface JobObject {
 }
 type JobObjectFilter = { [k in keyof JobObject]?: string };
 
+export interface ModelObject {
+  model_id: string;
+  job: null | {
+    job_id: string;
+    create_time: number;
+  };
+}
+type ModelObjectFilter = { [k in keyof ModelObject]?: string };
+
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
+
+type UpdateJobsSpacesResult = Record<
+  string,
+  { success: boolean; type: MlSavedObjectType; error?: any }
+>;
 
 export function jobSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
   spacesEnabled: boolean,
   authorization: SecurityPluginSetup['authz'] | undefined,
+  client: IScopedClusterClient,
   isMlReady: () => Promise<void>
 ) {
   async function _getJobObjects(
@@ -51,10 +73,13 @@ export function jobSavedObjectServiceFactory(
     } else if (datafeedId !== undefined) {
       filterObject.datafeed_id = datafeedId;
     }
-    const { filter, searchFields } = createSavedObjectFilter(filterObject);
+    const { filter, searchFields } = createSavedObjectFilter(
+      filterObject,
+      ML_JOB_SAVED_OBJECT_TYPE
+    );
 
     const options: SavedObjectsFindOptions = {
-      type: ML_SAVED_OBJECT_TYPE,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
       perPage: 10000,
       ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
       searchFields,
@@ -75,7 +100,7 @@ export function jobSavedObjectServiceFactory(
       type: jobType,
     };
 
-    const id = savedObjectId(job);
+    const id = _jobSavedObjectId(job);
 
     try {
       const [existingJobObject] = await getAllJobObjectsForAllSpaces(jobType, jobId);
@@ -86,7 +111,7 @@ export function jobSavedObjectServiceFactory(
           await _forceDeleteJob(jobType, jobId, existingJobObject.namespaces[0]);
         } else {
           // the saved object has no spaces, this is unexpected, attempt a normal delete
-          await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+          await savedObjectsClient.delete(ML_JOB_SAVED_OBJECT_TYPE, id, { force: true });
         }
       }
     } catch (error) {
@@ -94,7 +119,7 @@ export function jobSavedObjectServiceFactory(
       // if not, this error will be throw which we ignore.
     }
 
-    await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, job, {
+    await savedObjectsClient.create<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job, {
       id,
     });
   }
@@ -103,15 +128,15 @@ export function jobSavedObjectServiceFactory(
     await isMlReady();
     return await savedObjectsClient.bulkCreate<JobObject>(
       jobs.map((j) => ({
-        type: ML_SAVED_OBJECT_TYPE,
-        id: savedObjectId(j.job),
+        type: ML_JOB_SAVED_OBJECT_TYPE,
+        id: _jobSavedObjectId(j.job),
         attributes: j.job,
         initialNamespaces: j.namespaces,
       }))
     );
   }
 
-  function savedObjectId(job: JobObject) {
+  function _jobSavedObjectId(job: JobObject) {
     return `${job.type}-${job.job_id}`;
   }
 
@@ -122,11 +147,11 @@ export function jobSavedObjectServiceFactory(
       throw new MLJobNotFound('job not found');
     }
 
-    await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id, { force: true });
+    await savedObjectsClient.delete(ML_JOB_SAVED_OBJECT_TYPE, job.id, { force: true });
   }
 
   async function _forceDeleteJob(jobType: JobType, jobId: string, namespace: string) {
-    const id = savedObjectId({
+    const id = _jobSavedObjectId({
       job_id: jobId,
       datafeed_id: null,
       type: jobType,
@@ -134,7 +159,7 @@ export function jobSavedObjectServiceFactory(
 
     // * space cannot be used in a delete call, so use undefined which
     // is the same as specifying the default space
-    await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
+    await internalSavedObjectsClient.delete(ML_JOB_SAVED_OBJECT_TYPE, id, {
       namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
@@ -193,9 +218,12 @@ export function jobSavedObjectServiceFactory(
       filterObject.job_id = jobId;
     }
 
-    const { filter, searchFields } = createSavedObjectFilter(filterObject);
+    const { filter, searchFields } = createSavedObjectFilter(
+      filterObject,
+      ML_JOB_SAVED_OBJECT_TYPE
+    );
     const options: SavedObjectsFindOptions = {
-      type: ML_SAVED_OBJECT_TYPE,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
       perPage: 10000,
       ...(spacesEnabled === false ? {} : { namespaces: ['*'] }),
       searchFields,
@@ -214,7 +242,7 @@ export function jobSavedObjectServiceFactory(
 
     const jobObject = job.attributes;
     jobObject.datafeed_id = datafeedId;
-    await savedObjectsClient.update<JobObject>(ML_SAVED_OBJECT_TYPE, job.id, jobObject);
+    await savedObjectsClient.update<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job.id, jobObject);
   }
 
   async function deleteDatafeed(datafeedId: string) {
@@ -226,15 +254,15 @@ export function jobSavedObjectServiceFactory(
 
     const jobObject = job.attributes;
     jobObject.datafeed_id = null;
-    await savedObjectsClient.update<JobObject>(ML_SAVED_OBJECT_TYPE, job.id, jobObject);
+    await savedObjectsClient.update<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job.id, jobObject);
   }
 
-  async function getIds(jobType: JobType, idType: keyof JobObject) {
+  async function _getIds(jobType: JobType, idType: keyof JobObject) {
     const jobs = await _getJobObjects(jobType);
     return jobs.map((o) => o.attributes[idType]);
   }
 
-  async function filterJobObjectsForSpace<T>(
+  async function _filterJobObjectsForSpace<T>(
     jobType: JobType,
     list: T[],
     field: keyof T,
@@ -243,12 +271,12 @@ export function jobSavedObjectServiceFactory(
     if (list.length === 0) {
       return [];
     }
-    const jobIds = await getIds(jobType, key);
+    const jobIds = await _getIds(jobType, key);
     return list.filter((j) => jobIds.includes(j[field] as unknown as string));
   }
 
   async function filterJobsForSpace<T>(jobType: JobType, list: T[], field: keyof T): Promise<T[]> {
-    return filterJobObjectsForSpace<T>(jobType, list, field, 'job_id');
+    return _filterJobObjectsForSpace<T>(jobType, list, field, 'job_id');
   }
 
   async function filterDatafeedsForSpace<T>(
@@ -256,10 +284,10 @@ export function jobSavedObjectServiceFactory(
     list: T[],
     field: keyof T
   ): Promise<T[]> {
-    return filterJobObjectsForSpace<T>(jobType, list, field, 'datafeed_id');
+    return _filterJobObjectsForSpace<T>(jobType, list, field, 'datafeed_id');
   }
 
-  async function filterJobObjectIdsForSpace(
+  async function _filterJobObjectIdsForSpace(
     jobType: JobType,
     ids: string[],
     key: keyof JobObject,
@@ -269,7 +297,7 @@ export function jobSavedObjectServiceFactory(
       return [];
     }
 
-    const jobIds = await getIds(jobType, key);
+    const jobIds = await _getIds(jobType, key);
     // check to see if any of the ids supplied contain a wildcard
     if (allowWildcards === false || ids.join().match('\\*') === null) {
       // wildcards are not allowed or no wildcards could be found
@@ -291,14 +319,14 @@ export function jobSavedObjectServiceFactory(
     ids: string[],
     allowWildcards: boolean = false
   ): Promise<string[]> {
-    return filterJobObjectIdsForSpace(jobType, ids, 'job_id', allowWildcards);
+    return _filterJobObjectIdsForSpace(jobType, ids, 'job_id', allowWildcards);
   }
 
   async function filterDatafeedIdsForSpace(
     ids: string[],
     allowWildcards: boolean = false
   ): Promise<string[]> {
-    return filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id', allowWildcards);
+    return _filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id', allowWildcards);
   }
 
   async function updateJobsSpaces(
@@ -306,27 +334,33 @@ export function jobSavedObjectServiceFactory(
     jobIds: string[],
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ) {
-    const results: Record<string, { success: boolean; error?: any }> = {};
+  ): Promise<UpdateJobsSpacesResult> {
+    const results: UpdateJobsSpacesResult = {};
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
-    const objectsToUpdate: Array<{ type: string; id: string }> = [];
+    const jobObjectsToUpdate: Array<{ type: string; id: string }> = [];
+    const jobsIdsToUpdateModels: string[] = [];
     for (const jobId of jobIds) {
       const job = jobs.find((j) => j.attributes.job_id === jobId);
       if (job === undefined) {
         results[jobId] = {
           success: false,
-          error: createError(jobId, 'job_id'),
+          type: ML_JOB_SAVED_OBJECT_TYPE,
+          error: createJobError(jobId, 'job_id'),
         };
       } else {
         jobObjectIdMap.set(job.id, jobId);
-        objectsToUpdate.push({ type: ML_SAVED_OBJECT_TYPE, id: job.id });
+        jobObjectsToUpdate.push({ type: ML_JOB_SAVED_OBJECT_TYPE, id: job.id });
+
+        if (jobType === 'data-frame-analytics') {
+          jobsIdsToUpdateModels.push(jobId);
+        }
       }
     }
 
     try {
       const updateResult = await savedObjectsClient.updateObjectsSpaces(
-        objectsToUpdate,
+        jobObjectsToUpdate,
         spacesToAdd,
         spacesToRemove
       );
@@ -335,27 +369,31 @@ export function jobSavedObjectServiceFactory(
         if (error) {
           results[jobId] = {
             success: false,
+            type: ML_JOB_SAVED_OBJECT_TYPE,
             error: getSavedObjectClientError(error),
           };
         } else {
           results[jobId] = {
             success: true,
+            type: ML_JOB_SAVED_OBJECT_TYPE,
           };
         }
       });
     } catch (error) {
       // If the entire operation failed, return success: false for each job
       const clientError = getSavedObjectClientError(error);
-      objectsToUpdate.forEach(({ id: objectId }) => {
+      jobObjectsToUpdate.forEach(({ id: objectId }) => {
         const jobId = jobObjectIdMap.get(objectId)!;
         results[jobId] = {
           success: false,
+          type: ML_JOB_SAVED_OBJECT_TYPE,
           error: clientError,
         };
       });
     }
+    const modelResults = await updateModelsSpaces(jobsIdsToUpdateModels, spacesToAdd);
 
-    return results;
+    return { ...results, ...modelResults };
   }
 
   async function canCreateGlobalJobs(request: KibanaRequest) {
@@ -364,6 +402,298 @@ export function jobSavedObjectServiceFactory(
     }
     const { authorizationCheck } = authorizationProvider(authorization);
     return (await authorizationCheck(request)).canCreateGlobally;
+  }
+
+  async function getModelObject(
+    modelId: string,
+    currentSpaceOnly: boolean = true
+  ): Promise<SavedObjectsFindResult<ModelObject> | undefined> {
+    const [modelObject] = await _getModelObjects(modelId, currentSpaceOnly);
+    return modelObject;
+  }
+
+  async function createModel(model: estypes.MlTrainedModelConfig) {
+    await _createModel(model);
+  }
+
+  async function deleteModel(modelId: string) {
+    await _deleteModel(modelId);
+  }
+
+  async function forceDeleteModel(modelId: string, namespace: string) {
+    await _forceDeleteModel(modelId, namespace);
+  }
+
+  async function getAllModelObjects(currentSpaceOnly: boolean = true) {
+    return await _getModelObjects(undefined, currentSpaceOnly);
+  }
+
+  // async function bulkCreateModels(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
+  //   return await _bulkCreateJobs(jobs);
+  // }
+
+  async function _getModelObjects(modelId?: string, currentSpaceOnly: boolean = true) {
+    await isMlReady();
+    const filterObject: ModelObjectFilter = {};
+
+    if (modelId !== undefined) {
+      filterObject.model_id = modelId;
+    }
+
+    const { filter, searchFields } = createSavedObjectFilter(
+      filterObject,
+      ML_MODEL_SAVED_OBJECT_TYPE
+    );
+
+    const options: SavedObjectsFindOptions = {
+      type: ML_MODEL_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
+      searchFields,
+      filter,
+    };
+
+    const models = await savedObjectsClient.find<ModelObject>(options);
+
+    return models.saved_objects;
+  }
+
+  async function _createModel(model: estypes.MlTrainedModelConfig) {
+    await isMlReady();
+    const { model_id: modelId } = model;
+    const job = getJobDetailsFromModel(model);
+
+    const modelObject: ModelObject = {
+      model_id: modelId,
+      job: job === null ? null : { job_id: job.jobId, create_time: job.createTime },
+    };
+
+    try {
+      const [existingModelObject] = await getAllModelObjectsForAllSpaces(modelId);
+      if (existingModelObject !== undefined) {
+        // a saved object for this job already exists, this may be left over from a previously deleted job
+        if (existingModelObject.namespaces?.length) {
+          // use a force delete just in case the saved object exists only in another space.
+          await _forceDeleteModel(modelId, existingModelObject.namespaces[0]);
+        } else {
+          // the saved object has no spaces, this is unexpected, attempt a normal delete
+          await savedObjectsClient.delete(ML_MODEL_SAVED_OBJECT_TYPE, modelId, { force: true });
+        }
+      }
+    } catch (error) {
+      // the saved object may exist if a previous job with the same ID has been deleted.
+      // if not, this error will be throw which we ignore.
+    }
+    let initialNamespaces;
+    // if a job exists for this model, ensure the initial namespaces for the model
+    // are the same as the job
+    if (job !== null) {
+      const [existingJobObject] = await getAllJobObjectsForAllSpaces(
+        'data-frame-analytics',
+        job.jobId
+      );
+
+      initialNamespaces = existingJobObject?.namespaces ?? undefined;
+    }
+
+    await savedObjectsClient.create<ModelObject>(ML_MODEL_SAVED_OBJECT_TYPE, modelObject, {
+      id: modelId,
+      ...(initialNamespaces ? { initialNamespaces } : {}),
+    });
+  }
+
+  async function getAllModelObjectsForAllSpaces(modelId?: string) {
+    await isMlReady();
+    const filterObject: ModelObjectFilter = {};
+
+    if (modelId !== undefined) {
+      filterObject.model_id = modelId;
+    }
+
+    const { filter, searchFields } = createSavedObjectFilter(
+      filterObject,
+      ML_MODEL_SAVED_OBJECT_TYPE
+    );
+    const options: SavedObjectsFindOptions = {
+      type: ML_MODEL_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      ...(spacesEnabled === false ? {} : { namespaces: ['*'] }),
+      searchFields,
+      filter,
+    };
+
+    return (await internalSavedObjectsClient.find<ModelObject>(options)).saved_objects;
+  }
+
+  async function _deleteModel(modelId: string) {
+    const [model] = await _getModelObjects(modelId);
+    if (model === undefined) {
+      throw new MLJobNotFound('job not found');
+    }
+
+    await savedObjectsClient.delete(ML_MODEL_SAVED_OBJECT_TYPE, model.id, { force: true });
+  }
+
+  async function _forceDeleteModel(modelId: string, namespace: string) {
+    // const id = _jobSavedObjectId({
+    //   model_id: modelId,
+    // });
+
+    // * space cannot be used in a delete call, so use undefined which
+    // is the same as specifying the default space
+    await internalSavedObjectsClient.delete(ML_MODEL_SAVED_OBJECT_TYPE, modelId, {
+      namespace: namespace === '*' ? undefined : namespace,
+      force: true,
+    });
+  }
+
+  async function filterModelsForSpace<T>(list: T[], field: keyof T): Promise<T[]> {
+    return _filterModelObjectsForSpace<T>(list, field, 'model_id');
+  }
+
+  async function filterModelIdsForSpace(
+    ids: string[],
+    allowWildcards: boolean = false
+  ): Promise<string[]> {
+    return _filterModelObjectIdsForSpace(ids, 'model_id', allowWildcards);
+  }
+
+  async function _filterModelObjectIdsForSpace(
+    ids: string[],
+    key: keyof ModelObject,
+    allowWildcards: boolean = false
+  ): Promise<string[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const modelIds = await _getModelIds(key);
+    // check to see if any of the ids supplied contain a wildcard
+    if (allowWildcards === false || ids.join().match('\\*') === null) {
+      // wildcards are not allowed or no wildcards could be found
+      return ids.filter((id) => modelIds.includes(id));
+    }
+
+    // if any of the ids contain a wildcard, check each one.
+    return ids.filter((id) => {
+      if (id.match('\\*') === null) {
+        return modelIds.includes(id);
+      }
+      const regex = new RE2(id.replace('*', '.*'));
+      return modelIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
+    });
+  }
+
+  async function _filterModelObjectsForSpace<T>(
+    list: T[],
+    field: keyof T,
+    key: keyof ModelObject
+  ): Promise<T[]> {
+    if (list.length === 0) {
+      return [];
+    }
+    const modelIds = await _getModelIds(key);
+    return list.filter((j) => modelIds.includes(j[field] as unknown as string));
+  }
+
+  async function _getModelIds(idType: keyof ModelObject) {
+    const models = await _getModelObjects();
+    return models.map((o) => o.attributes[idType]);
+  }
+
+  async function findModelsObjectForJobs(jobIds: string[], currentSpaceOnly: boolean = true) {
+    await isMlReady();
+    const {
+      body: { data_frame_analytics: jobs },
+    } = await client.asInternalUser.ml.getDataFrameAnalytics({ id: jobIds.join(',') });
+
+    const searches = jobs.map((job) => {
+      const createTime = job.create_time!;
+
+      const filterObject = {
+        'job.job_id': job.id,
+        'job.create_time': createTime,
+      } as ModelObjectFilter;
+      const { filter, searchFields } = createSavedObjectFilter(
+        filterObject,
+        ML_MODEL_SAVED_OBJECT_TYPE
+      );
+
+      const options: SavedObjectsFindOptions = {
+        type: ML_MODEL_SAVED_OBJECT_TYPE,
+        perPage: 10000,
+        ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
+        searchFields,
+        filter,
+      };
+      return savedObjectsClient.find<ModelObject>(options);
+    });
+
+    const finedResult = await Promise.all(searches);
+    return finedResult.reduce((acc, cur) => {
+      const so = cur.saved_objects[0];
+      if (so) {
+        const jobId = so.attributes.job!.job_id;
+        acc[jobId] = so;
+      }
+      return acc;
+    }, {} as Record<string, SavedObjectsFindResult<ModelObject>>);
+  }
+
+  async function updateModelsSpaces(
+    jobIds: string[],
+    spacesToAdd: string[]
+  ): Promise<UpdateJobsSpacesResult> {
+    if (jobIds.length === 0 || spacesToAdd.length === 0) {
+      return {};
+    }
+    const results: UpdateJobsSpacesResult = {};
+    // const jobs = await _getJobObjects(jobType);
+    const modelObjectIdMap = new Map<string, string>();
+    const objectsToUpdate: Array<{ type: string; id: string }> = [];
+    const models = await findModelsObjectForJobs(jobIds);
+    Object.values(models).forEach((model) => {
+      if (model) {
+        modelObjectIdMap.set(model.id, model.attributes.model_id);
+        objectsToUpdate.push({ type: ML_MODEL_SAVED_OBJECT_TYPE, id: model.id });
+      }
+    });
+
+    try {
+      const updateResult = await savedObjectsClient.updateObjectsSpaces(
+        objectsToUpdate,
+        spacesToAdd,
+        []
+      );
+      updateResult.objects.forEach(({ id: objectId, error }) => {
+        const model = modelObjectIdMap.get(objectId)!;
+        if (error) {
+          results[model] = {
+            success: false,
+            type: ML_MODEL_SAVED_OBJECT_TYPE,
+            error: getSavedObjectClientError(error),
+          };
+        } else {
+          results[model] = {
+            success: true,
+            type: ML_MODEL_SAVED_OBJECT_TYPE,
+          };
+        }
+      });
+    } catch (error) {
+      // If the entire operation failed, return success: false for each job
+      const clientError = getSavedObjectClientError(error);
+      objectsToUpdate.forEach(({ id: objectId }) => {
+        const modelId = modelObjectIdMap.get(objectId)!;
+        results[modelId] = {
+          success: false,
+          type: ML_MODEL_SAVED_OBJECT_TYPE,
+          error: clientError,
+        };
+      });
+    }
+
+    return results;
   }
 
   return {
@@ -385,10 +715,18 @@ export function jobSavedObjectServiceFactory(
     bulkCreateJobs,
     getAllJobObjectsForAllSpaces,
     canCreateGlobalJobs,
+    getModelObject,
+    createModel,
+    deleteModel,
+    forceDeleteModel,
+    getAllModelObjects,
+    getAllModelObjectsForAllSpaces,
+    filterModelsForSpace,
+    filterModelIdsForSpace,
   };
 }
 
-export function createError(id: string, key: keyof JobObject) {
+export function createJobError(id: string, key: keyof JobObject) {
   let reason = `'${id}' not found`;
   if (key === 'job_id') {
     reason = `No known job with id '${id}'`;
@@ -404,12 +742,24 @@ export function createError(id: string, key: keyof JobObject) {
   };
 }
 
-function createSavedObjectFilter(filterObject: JobObjectFilter) {
+export function createModelError(id: string) {
+  return {
+    error: {
+      reason: `No known model with id '${id}'`,
+    },
+    status: 404,
+  };
+}
+
+function createSavedObjectFilter(
+  filterObject: JobObjectFilter | ModelObjectFilter,
+  savedObjectType: string
+) {
   const searchFields: string[] = [];
   const filter = Object.entries(filterObject)
     .map(([k, v]) => {
       searchFields.push(k);
-      return `${ML_SAVED_OBJECT_TYPE}.attributes.${k}: "${v}"`;
+      return `${savedObjectType}.attributes.${k}: "${v}"`;
     })
     .join(' AND ');
   return { filter, searchFields };

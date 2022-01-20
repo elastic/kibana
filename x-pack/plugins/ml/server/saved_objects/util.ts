@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsServiceStart, KibanaRequest } from 'kibana/server';
 import { SavedObjectsClient } from '../../../../../src/core/server';
-import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function savedObjectClientsFactory(
   getSavedObjectsStart: () => SavedObjectsServiceStart | null
@@ -21,7 +22,7 @@ export function savedObjectClientsFactory(
         return null;
       }
       return savedObjectsStart.getScopedClient(request, {
-        includedHiddenTypes: [ML_SAVED_OBJECT_TYPE],
+        includedHiddenTypes: [ML_JOB_SAVED_OBJECT_TYPE],
       });
     },
     // create a saved object client which has access to all saved objects
@@ -39,4 +40,18 @@ export function savedObjectClientsFactory(
 
 export function getSavedObjectClientError(error: any) {
   return error.isBoom && error.output?.payload ? error.output.payload : error.body ?? error;
+}
+
+export function getJobDetailsFromModel(model: estypes.MlTrainedModelConfig) {
+  // @ts-ignore types are wrong
+  if (model.metadata?.analytics_config === undefined) {
+    // acc.set(cur.model_id, null);
+    return null;
+  }
+
+  // @ts-ignore types are wrong
+  const jobId: string = model.metadata.analytics_config.id;
+  // @ts-ignore types are wrong
+  const createTime: number = model.metadata.analytics_config.create_time;
+  return { jobId, createTime };
 }

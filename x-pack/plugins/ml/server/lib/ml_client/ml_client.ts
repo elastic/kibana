@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'kibana/server';
 import { JobSavedObjectService } from '../../saved_objects';
 import { JobType } from '../../../common/types/saved_objects';
@@ -13,7 +14,7 @@ import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
-import { MLJobNotFound } from './errors';
+import { MLJobNotFound, MLModelNotFound } from './errors';
 import {
   MlClient,
   MlClientParams,
@@ -32,11 +33,11 @@ export function getMlClient(
     const jobIds =
       jobType === 'anomaly-detector' ? getADJobIdsFromRequest(p) : getDFAJobIdsFromRequest(p);
     if (jobIds.length) {
-      await checkIds(jobType, jobIds, allowWildcards);
+      await checkJobIds(jobType, jobIds, allowWildcards);
     }
   }
 
-  async function checkIds(jobType: JobType, jobIds: string[], allowWildcards: boolean = false) {
+  async function checkJobIds(jobType: JobType, jobIds: string[], allowWildcards: boolean = false) {
     const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
     let missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
     if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
@@ -90,7 +91,7 @@ export function getMlClient(
 
       // check the remaining jobs ids
       if (requestedJobIds.length) {
-        await checkIds('anomaly-detector', requestedJobIds, true);
+        await checkJobIds('anomaly-detector', requestedJobIds, true);
       }
     }
   }
@@ -121,6 +122,25 @@ export function getMlClient(
       if (missingIds.length) {
         throw new MLJobNotFound(`No known datafeed with id '${missingIds.join(',')}'`);
       }
+    }
+  }
+
+  async function modelIdsCheck(p: MlClientParams, allowWildcards: boolean = false) {
+    const modelIds = getModelIdsFromRequest(p);
+    if (modelIds.length) {
+      await checkModelIds(modelIds, allowWildcards);
+    }
+  }
+
+  async function checkModelIds(modelIds: string[], allowWildcards: boolean = false) {
+    const filteredModelIds = await jobSavedObjectService.filterModelIdsForSpace(modelIds);
+    let missingIds = modelIds.filter((j) => filteredModelIds.indexOf(j) === -1);
+    if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
+      // filter out wildcard ids from the error
+      missingIds = missingIds.filter((id) => id.match('\\*') === null);
+    }
+    if (missingIds.length) {
+      throw new MLModelNotFound(`No known model with id '${missingIds.join(',')}'`);
     }
   }
 
@@ -375,15 +395,45 @@ export function getMlClient(
       return mlClient.getRecords(...p);
     },
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
-      return mlClient.getTrainedModels(...p);
+      await modelIdsCheck(p);
+      try {
+        const { body } = await mlClient.getTrainedModels(...p);
+        const models =
+          await jobSavedObjectService.filterModelsForSpace<estypes.MlTrainedModelConfig>(
+            body.trained_model_configs,
+            'model_id'
+          );
+        return { body: { ...body, count: models.length, trained_model_configs: models } };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLModelNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      return mlClient.getTrainedModelsStats(...p);
+      await modelIdsCheck(p);
+      try {
+        const { body } = await mlClient.getTrainedModelsStats(...p);
+        const models =
+          await jobSavedObjectService.filterModelsForSpace<estypes.MlTrainedModelStats>(
+            body.trained_model_stats,
+            'model_id'
+          );
+        return { body: { ...body, count: models.length, trained_model_stats: models } };
+      } catch (error) {
+        if (error.statusCode === 404) {
+          throw new MLModelNotFound(error.body.error.reason);
+        }
+        throw error.body ?? error;
+      }
     },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
       return mlClient.startTrainedModelDeployment(...p);
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async info(...p: Parameters<MlClient['info']>) {
@@ -522,6 +572,11 @@ export function getMlClient(
 }
 
 function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
+  const ids = params?.id?.split(',');
+  return ids || [];
+}
+
+function getModelIdsFromRequest([params]: MlGetDFAParams): string[] {
   const ids = params?.id?.split(',');
   return ids || [];
 }
