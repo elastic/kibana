@@ -129,3 +129,15 @@ $ yarn storybook fleet
 ```
 
 Write stories by creating `.stories.tsx` files colocated with the components you're working on. Consult the [Storybook docs](https://storybook.js.org/docs/react/get-started/introduction) for more information. 
+
+## Dependent applications using Fleet
+
+The projects below are dependent on Fleet, most using Fleet API as well. In case of breaking changes in Fleet functionality/API, the project owners have to be notified to make sure they can plan for the necessary changes on their end to avoid unexpected break in functionality.
+
+ * [Elastic Agent](https://github.com/elastic/beats/blob/master/x-pack/elastic-agent): uses Fleet API to enroll agents. [See here](https://github.com/elastic/beats/blob/master/x-pack/elastic-agent/pkg/agent/cmd/container.go)
+ * [Fleet Server](https://github.com/elastic/fleet-server): uses Fleet API to enroll fleet server [See here](https://github.com/elastic/fleet-server/blob/master/cmd/fleet/router.go)
+ * [elastic-package](https://github.com/elastic/elastic-package): command line tool, uses Fleet with docker compose and Fleet API [See here](https://github.com/elastic/elastic-package/tree/master/internal/kibana)
+ * [Azure VM extension](https://github.com/elastic/azure-vm-extension): automation tool for Azure VMs, uses Fleet API to enroll agents [See here](https://github.com/elastic/azure-vm-extension/blob/main/src/handler/windows/scripts/enable.ps1)
+ * [e2e-testing](https://github.com/elastic/e2e-testing): internal project that runs Fleet and tests Fleet API [See here](https://github.com/elastic/e2e-testing/tree/main/internal/kibana)
+ * [observability-test-environments](https://github.com/elastic/observability-test-environments): internal project, uses Fleet API [See here](https://github.com/elastic/observability-test-environments/blob/master/ansible/tasks-fleet-config.yml)
+  * [ECK](https://github.com/elastic/cloud-on-k8s): Elastic Cloud on Kubernetes, orchestrates Elastic Stack applications, including Kibana with Fleet (no direct dependency, has examples that include Fleet config) [See here](https://github.com/elastic/cloud-on-k8s/blob/main/docs/orchestrating-elastic-stack-applications/agent-fleet.asciidoc)
