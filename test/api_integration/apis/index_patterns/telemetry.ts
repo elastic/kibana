@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { UsageCountersSavedObject } from '../../../../src/plugins/usage_collection/server/usage_counters';
+import { KibanaSupertestProvider } from '../../services/supertest';
 
-export default function ({ getService }: FtrProviderContext) {
-  describe('data view rest api telemetry', () => {
-    it('reports usageCollection', async () => {
-      const supertest = getService('supertest');
-      const result = await supertest.get('/api/stats?extended=true&legacy=true');
-      const events = result.body.usage.usage_counters.daily_events as Array<{ domainId: string }>;
-      const filteredEvents = events.filter(({ domainId }) => domainId === 'dataViewsRestApi');
-      expect(filteredEvents.length).to.equal(3);
+export const getUsageCounters = (supertest: ReturnType<typeof KibanaSupertestProvider>) =>
+  supertest
+    .get('/api/saved_objects/_find?type=usage-counters')
+    .set('kbn-xsrf', 'true')
+    .expect(200)
+    .then(({ body }) => {
+      return (body.saved_objects as UsageCountersSavedObject[]).reduce((acc, savedObj) => {
+        const { count, counterName, domainId } = savedObj.attributes;
+        if (domainId === 'dataViewsRestApi') {
+          acc[counterName] = count;
+        }
+
+        return acc;
+      }, {} as Record<string, number>);
     });
-  });
-}
