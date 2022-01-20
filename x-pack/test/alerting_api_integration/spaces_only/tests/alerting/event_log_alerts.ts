@@ -71,8 +71,12 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
       // Verify unique executionId generated per `action:execute` grouping
       const eventExecutionIdSet = new Set();
+      const totalUniqueExecutionIds = new Set();
+      let totalExecutionEventCount = 0;
       events.forEach((event) => {
+        totalUniqueExecutionIds.add(event?.kibana?.alert?.rule?.execution?.uuid);
         if (event?.event?.action === 'execute') {
+          totalExecutionEventCount += 1;
           eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
           expect(eventExecutionIdSet.size).to.equal(1);
           eventExecutionIdSet.clear();
@@ -80,6 +84,9 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
         }
       });
+
+      // Ensure every execution actually had a unique id from the others
+      expect(totalUniqueExecutionIds.size).to.equal(totalExecutionEventCount);
 
       const currentAlertSpan: {
         alertId?: string;
