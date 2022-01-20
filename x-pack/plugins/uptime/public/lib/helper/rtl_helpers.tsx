@@ -14,7 +14,7 @@ import {
   RenderOptions,
   Nullish,
 } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router, Route } from 'react-router-dom';
 import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
@@ -58,6 +58,7 @@ interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<Extra
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
   history?: History;
+  path?: string;
 }
 
 type Url =
@@ -72,6 +73,7 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
   renderOptions?: Omit<RenderOptions, 'queries'>;
   state?: Partial<AppState> | DeepPartial<AppState>;
   url?: Url;
+  path?: string;
 }
 
 function getSetting<T = any>(key: string): T {
@@ -122,6 +124,9 @@ const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    usageCollection: {
+      reportUiCounter: () => {},
+    },
     triggersActionsUi: triggersActionsUiMock.createStart(),
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
@@ -166,13 +171,14 @@ export function MockKibanaProvider<ExtraCore>({
 export function MockRouter<ExtraCore>({
   children,
   core,
+  path,
   history = createMemoryHistory(),
   kibanaProps,
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
-        {children}
+        <Route path={path}>{children}</Route>
       </MockKibanaProvider>
     </Router>
   );
@@ -183,10 +189,13 @@ export const MockRedux = ({
   state,
   history = createMemoryHistory(),
   children,
+  path,
 }: {
   state: Partial<AppState>;
   history?: History;
   children: React.ReactNode;
+  path?: string;
+  useRealStore?: boolean;
 }) => {
   const testState: AppState = {
     ...mockState,
@@ -195,7 +204,9 @@ export const MockRedux = ({
 
   return (
     <MountWithReduxProvider state={testState}>
-      <MockRouter history={history}>{children}</MockRouter>
+      <MockRouter path={path} history={history}>
+        {children}
+      </MockRouter>
     </MountWithReduxProvider>
   );
 };
@@ -206,13 +217,15 @@ export function WrappedHelper<ExtraCore>({
   kibanaProps,
   state,
   url,
+  useRealStore,
+  path,
   history = createMemoryHistory(),
-}: RenderRouterOptions<ExtraCore> & { children: ReactElement }) {
+}: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
   const testState: AppState = merge({}, mockState, state);
 
   return (
-    <MountWithReduxProvider state={testState}>
-      <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+    <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
+      <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
         {children}
       </MockRouter>
     </MountWithReduxProvider>
@@ -229,7 +242,9 @@ export function render<ExtraCore>(
     renderOptions,
     state,
     url,
-  }: RenderRouterOptions<ExtraCore> = {}
+    path,
+    useRealStore,
+  }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
 ) {
   if (url) {
     history = getHistoryFromUrl(url);
@@ -243,6 +258,8 @@ export function render<ExtraCore>(
         core={core}
         url={url}
         state={state}
+        path={path}
+        useRealStore={useRealStore}
       >
         {ui}
       </WrappedHelper>,
