@@ -86,3 +86,4 @@ export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesPr
     </>
   );
 };
+RecentCasesComp.displayName = 'RecentCasesComp';

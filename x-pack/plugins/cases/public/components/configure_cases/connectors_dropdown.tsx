@@ -132,5 +132,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     />
   );
 };
+ConnectorsDropdownComponent.displayName = 'ConnectorsDropdown';
 
 export const ConnectorsDropdown = React.memo(ConnectorsDropdownComponent);

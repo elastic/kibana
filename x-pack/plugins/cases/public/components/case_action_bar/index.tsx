@@ -162,5 +162,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     </EuiFlexGroup>
   );
 };
+CaseActionBarComponent.displayName = 'CaseActionBar';
 
 export const CaseActionBar = React.memo(CaseActionBarComponent);

@@ -88,5 +88,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
     </Switch>
   );
 };
+CasesRoutesComponent.displayName = 'CasesRoutes';
 
 export const CasesRoutes = React.memo(CasesRoutesComponent);

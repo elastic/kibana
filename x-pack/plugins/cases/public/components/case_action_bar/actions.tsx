@@ -62,5 +62,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     </>
   );
 };
+ActionsComponent.displayName = 'Actions';
 
 export const Actions = React.memo(ActionsComponent);

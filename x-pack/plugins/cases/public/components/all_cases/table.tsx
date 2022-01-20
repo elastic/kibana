@@ -156,3 +156,4 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     </Div>
   );
 };
+CasesTable.displayName = 'CasesTable';

@@ -73,3 +73,4 @@ export const ConnectorSelector = ({
     </EuiFormRowWrapper>
   ) : null;
 };
+ConnectorSelector.displayName = 'ConnectorSelector';
