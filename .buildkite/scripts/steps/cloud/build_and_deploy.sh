@@ -45,7 +45,7 @@ jq '
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
-  ecctl deployment create --track --output json --file /tmp/deploy.json > "$JSON_FILE"
+  ecctl deployment create --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
   CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
   CLOUD_DEPLOYMENT_ID=$(jq --slurp '.[0].id' "$JSON_FILE")
@@ -53,7 +53,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
 
   retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 else
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
 fi
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
