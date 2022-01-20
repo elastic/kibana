@@ -12,8 +12,8 @@ import {
 } from '../../../plugins/reporting/common/constants';
 import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNG } from '../../../plugins/reporting/server/export_types/png/types';
-import { JobParamsPDF } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
+import { JobParamsPNGDeprecated } from '../../../plugins/reporting/server/export_types/png/types';
+import { JobParamsPDFDeprecated } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -141,7 +141,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send(job);
   };
-  const generatePdf = async (username: string, password: string, job: JobParamsPDF) => {
+  const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
@@ -149,7 +149,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNG) => {
+  const generatePng = async (username: string, password: string, job: JobParamsPNGDeprecated) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
