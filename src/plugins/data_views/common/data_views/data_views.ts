@@ -59,7 +59,7 @@ export interface DataViewListItem {
 
 export type IndexPatternListItem = DataViewListItem;
 
-interface IndexPatternsServiceDeps {
+export interface DataViewsServiceDeps {
   uiSettings: UiSettingsCommon;
   savedObjectsClient: SavedObjectsClientCommon;
   apiClient: IDataViewsApiClient;
@@ -79,7 +79,7 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
-  private getCanSave: () => Promise<boolean>;
+  public getCanSave: () => Promise<boolean>;
 
   /**
    * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
@@ -96,7 +96,7 @@ export class DataViewsService {
     onError,
     onRedirectNoIndexPattern = () => {},
     getCanSave = () => Promise.resolve(false),
-  }: IndexPatternsServiceDeps) {
+  }: DataViewsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
     this.savedObjectsClient = savedObjectsClient;

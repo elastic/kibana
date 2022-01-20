@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from '../../../data/common';
+import { DataViewsContract } from '../../../data_views/public';
 import { indexPatternMock } from './index_pattern';
 
 export const indexPatternsMock = {
@@ -21,4 +21,4 @@ export const indexPatternsMock = {
     }
   },
   updateSavedObject: jest.fn(),
-} as unknown as jest.Mocked<DataViewsService>;
+} as unknown as jest.Mocked<DataViewsContract>;
