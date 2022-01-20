@@ -7,12 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
-import { PassThrough } from 'stream';
 import { ReportingCore } from '../../';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
-import { LevelLogger as Logger } from '../../lib';
+import { LevelLogger as Logger, PassThroughStream } from '../../lib';
 import { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
@@ -68,36 +67,12 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE]);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+        const stream = new PassThroughStream();
         const eventLog = reporting.getEventLogger({
           jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
           created_by: user && user.username,
           payload: { browserTimezone: (req.params as BaseParams).browserTimezone },
         });
-
-        const stream = new (class extends PassThrough {
-          private onFirstByte?(): void;
-
-          bytesWritten = 0;
-          firstBytePromise = new Promise<void>((resolve) => {
-            this.onFirstByte = resolve;
-          });
-
-          _write(
-            chunk: Buffer | string,
-            encoding: BufferEncoding,
-            callback: (error?: Error | null) => void
-          ) {
-            const size = Buffer.isBuffer(chunk) ? chunk.byteLength : chunk.length;
-
-            if (!this.bytesWritten && size) {
-              this.onFirstByte?.();
-            }
-            this.bytesWritten += size;
-
-            return super._write(chunk, encoding, callback);
-          }
-        })();
-
         const logError = (error: Error) => {
           logger.error(error);
           eventLog.logError(error);
