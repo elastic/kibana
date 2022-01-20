@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'index_pattern',
         indexPatternId: 'some-test-id',
       },
-      metricAlias: 'metricbeat-*',
+      metricAlias: 'metrics-*,metricbeat-*',
       inventoryDefaultView: 'default',
       metricsExplorerDefaultView: 'default',
       anomalyThreshold: 70,
@@ -81,9 +81,9 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Inventory Threshold Rule Executor', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
     describe('CPU per Host', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -157,6 +157,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Inbound network traffic per host', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -238,7 +240,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
     describe('Log rate per host', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -318,6 +323,95 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: [false],
             isError: false,
             currentValue: 0.3,
+          },
+        });
+      });
+    });
+
+    describe('Network rate per pod', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+      it('should work FOR LAST 1 minute', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          startTime: DATES['8.0.0'].pods_only.max,
+          nodeType: 'pod' as InventoryItemType,
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [1],
+          },
+          esClient: convertToKibanaClient(esClient),
+        });
+        expect(results).to.eql({
+          '7d6d7955-f853-42b1-8613-11f52d0d2725': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            shouldFire: [true],
+            shouldWarn: [false],
+            isNoData: [false],
+            isError: false,
+            currentValue: 43332.833333333336,
+          },
+          'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            shouldFire: [true],
+            shouldWarn: [false],
+            isNoData: [false],
+            isError: false,
+            currentValue: 42783.833333333336,
+          },
+        });
+      });
+      it('should work FOR LAST 5 minute', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          startTime: DATES['8.0.0'].pods_only.max,
+          logQueryFields: { indexPattern: 'metricbeat-*' },
+          nodeType: 'pod',
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [1],
+            timeSize: 5,
+          },
+          esClient: convertToKibanaClient(esClient),
+        });
+        expect(results).to.eql({
+          '7d6d7955-f853-42b1-8613-11f52d0d2725': {
+            metric: 'rx',
+            timeSize: 5,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            shouldFire: [true],
+            shouldWarn: [false],
+            isNoData: [false],
+            isError: false,
+            currentValue: 50197.666666666664,
+          },
+          'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
+            metric: 'rx',
+            timeSize: 5,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [1],
+            comparator: '>',
+            shouldFire: [true],
+            shouldWarn: [false],
+            isNoData: [false],
+            isError: false,
+            currentValue: 50622.066666666666,
           },
         });
       });
