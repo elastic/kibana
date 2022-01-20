@@ -16,6 +16,7 @@ import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
+  extractEndpointPolicyConfig,
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
 } from '../helpers';
@@ -129,11 +130,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             packagePolicies
               .map((pPolicy) => pPolicy as PolicyData)
               .forEach((pPolicy) => {
-                if (pPolicy.inputs[0].config !== undefined) {
+                if (pPolicy.inputs[0]?.config !== undefined && pPolicy.inputs[0]?.config !== null) {
                   pPolicy.inputs.forEach((input) => {
                     if (
                       input.type === FLEET_ENDPOINT_PACKAGE &&
-                      input.config !== undefined &&
+                      input?.config !== undefined &&
                       policyInfo !== undefined
                     ) {
                       endpointPolicyCache.set(policyInfo, pPolicy);
@@ -196,6 +197,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           }
 
           const { cpu, memory, uptime } = endpoint.endpoint_metrics.Endpoint.metrics;
+          const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
 
           return {
             '@timestamp': taskExecutionPeriod.current,
@@ -210,7 +212,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             endpoint_meta: {
               os: endpoint.endpoint_metrics.host.os,
             },
-            policy_config: policyConfig !== null ? policyConfig?.inputs[0].config.policy : {},
+            policy_config: endpointPolicyDetail !== null ? endpointPolicyDetail : {},
             policy_response:
               failedPolicy !== null && failedPolicy !== undefined
                 ? {

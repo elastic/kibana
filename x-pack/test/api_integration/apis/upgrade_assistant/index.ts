@@ -8,7 +8,9 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Upgrade Assistant', () => {
+  describe('Upgrade Assistant', function () {
+    this.onlyEsVersion('<=7');
+
     loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./cloud_backup_status'));
     loadTestFile(require.resolve('./privileges'));

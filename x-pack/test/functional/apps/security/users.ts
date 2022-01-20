@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('users', function () {
+    this.onlyEsVersion('<=7');
+
     const optionalUser: UserFormValues = {
       username: 'OptionalUser',
       password: 'OptionalUserPwd',
