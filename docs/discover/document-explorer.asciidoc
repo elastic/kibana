@@ -3,8 +3,8 @@
 
 beta::[]
 
-*Discover* has a new *Document Explorer* with better data sorting,
-resizable columns, and a full screen view.
+*Discover* has a new *Document Explorer* with resizable columns, better data sorting and comparison,
+and a full screen view.
 
 [role="screenshot"]
 image::images/document-explorer.png[Document Explorer with improved look over classic view]
@@ -14,6 +14,22 @@ To use the *Document Explorer* instead of the classic document table:
 . Open *Discover*.
 . In the toolbar, click *Options*, and then click *Try Document Explorer*.
 . Turn off the classic view and save the changes.
+
+[float]
+[[document-explorer-columns]]
+=== Reorder and resize columns
+
+Reorder and resize columns in the *Document Explorer* with drag and drop.
+
+To reorder columns, do one of the following:
+
+* Click *Columns*. In the pop-up, select the column you want to move and drag it to the new location.
+
+* Click the header of the column you want to move. In the dropdown menu, click *Move left* or *Move right*.
+
+To resize a column, drag the right edge of the column header until the column is the size that you want.
+
+Column widths are stored with a saved search.  When you reuse your saved search in a dashboard, it displays the same way as it does in Discover.
 
 [float]
 [[document-explorer-sort-data]]
@@ -65,22 +81,6 @@ image::images/document-explorer-expand.png[Multi field sort in Document Explorer
 click the actions icon for filters and other controls.
 . To view documents that occurred before or after the event you are looking at, click <<discover-view-surrounding-documents,Surrounding documents>>.
 . For direct access to a particular document, click <<discover-view-single-document,Single document>>.
-
-[float]
-[[document-explorer-columns]]
-=== Reorder and resize columns
-
-Reorder and resize columns in the *Document Explorer* with drag and drop.
-
-To reorder columns, do one of the following:
-
-* Click *Columns*. In the pop-up, select the column you want to move and drag it to the new location.
-
-* Click the header of the column you want to move. In the dropdown menu, click *Move left* or *Move right*.
-
-To resize a column, drag the right edge of the column header until the column is the size that you want.
-
-Column widths are stored with a saved search.  When you reuse your saved search in a dashboard, it displays the same way as it does in Discover.
 
 [float]
 [[document-explorer-full-screen]]
