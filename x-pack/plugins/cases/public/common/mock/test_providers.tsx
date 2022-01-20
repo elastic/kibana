@@ -43,6 +43,7 @@ const TestProvidersComponent: React.FC<Props> = ({
     </I18nProvider>
   );
 };
+TestProvidersComponent.displayName = 'TestProviders';
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
