@@ -7,16 +7,25 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   size: number,
   filterQuery?: string
 ): Promise<AlertVersions[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'cluster_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
       'hits.hits._index',
@@ -40,11 +49,7 @@ export async function fetchElasticsearchVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {

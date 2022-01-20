@@ -10,6 +10,18 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchClusterHealth', () => {
   it('should return the cluster health', async () => {
     const status = 'green';
@@ -34,9 +46,8 @@ describe('fetchClusterHealth', () => {
     );
 
     const clusters = [{ clusterUuid, clusterName: 'foo' }];
-    const index = '.monitoring-es-*';
 
-    const health = await fetchClusterHealth(esClient, clusters, index);
+    const health = await fetchClusterHealth(esClient, clusters);
     expect(health).toEqual([
       {
         health: status,

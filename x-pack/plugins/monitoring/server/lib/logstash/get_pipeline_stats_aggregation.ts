@@ -6,8 +6,10 @@
  */
 
 import { LegacyRequest, PipelineVersion } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
+import { Globals } from '../../static_globals';
 
 function scalarCounterAggregation(
   field: string,
@@ -111,16 +113,23 @@ function createScopedAgg(pipelineId: string, pipelineHash: string, maxBucketSize
 
 function fetchPipelineLatestStats(
   query: object,
-  logstashIndexPattern: string,
   pipelineId: string,
   version: PipelineVersion,
   maxBucketSize: string,
   callWithRequest: any,
   req: LegacyRequest
 ) {
+  const dataset = 'node_stats';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
   const pipelineAggregation = createScopedAgg(pipelineId, version.hash, maxBucketSize);
   const params = {
-    index: logstashIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     filter_path: [
@@ -149,14 +158,12 @@ function fetchPipelineLatestStats(
 
 export function getPipelineStatsAggregation({
   req,
-  logstashIndexPattern,
   timeseriesInterval,
   clusterUuid,
   pipelineId,
   version,
 }: {
   req: LegacyRequest;
-  logstashIndexPattern: string;
   timeseriesInterval: number;
   clusterUuid: string;
   pipelineId: string;
@@ -197,8 +204,14 @@ export function getPipelineStatsAggregation({
   const start = version.lastSeen - timeseriesInterval * 1000;
   const end = version.lastSeen;
 
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
+
   const query = createQuery({
-    types: ['node_stats', 'logstash_stats'],
+    type,
+    dsDataset: `${moduleType}.${dataset}`,
+    metricset: dataset,
     start,
     end,
     metric: LogstashMetric.getMetricFields(),
@@ -210,7 +223,6 @@ export function getPipelineStatsAggregation({
 
   return fetchPipelineLatestStats(
     query,
-    logstashIndexPattern,
     pipelineId,
     version,
     // @ts-ignore not undefined, need to get correct config

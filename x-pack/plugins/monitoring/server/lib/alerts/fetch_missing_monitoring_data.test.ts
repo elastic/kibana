@@ -9,6 +9,18 @@
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 function getResponse(
   index: string,
   products: Array<{
@@ -42,7 +54,6 @@ function getResponse(
 describe('fetchMissingMonitoringData', () => {
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
-  const index = '.monitoring-*';
   const startMs = 100;
   const size = 10;
 
@@ -87,7 +98,7 @@ describe('fetchMissingMonitoringData', () => {
         },
       })
     );
-    const result = await fetchMissingMonitoringData(esClient, clusters, index, size, now, startMs);
+    const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
       {
         nodeId: 'nodeUuid1',
@@ -137,7 +148,7 @@ describe('fetchMissingMonitoringData', () => {
         },
       })
     );
-    const result = await fetchMissingMonitoringData(esClient, clusters, index, size, now, startMs);
+    const result = await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(result).toEqual([
       {
         nodeId: 'nodeUuid1',

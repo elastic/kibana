@@ -10,6 +10,18 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchCpuUsageNodeStats', () => {
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
@@ -18,7 +30,6 @@ describe('fetchCpuUsageNodeStats', () => {
       clusterName: 'test',
     },
   ];
-  const index = '.monitoring-es-*';
   const startMs = 0;
   const endMs = 0;
   const size = 10;
@@ -62,7 +73,7 @@ describe('fetchCpuUsageNodeStats', () => {
         },
       })
     );
-    const result = await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
+    const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
@@ -129,7 +140,7 @@ describe('fetchCpuUsageNodeStats', () => {
         },
       })
     );
-    const result = await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
+    const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
@@ -189,7 +200,7 @@ describe('fetchCpuUsageNodeStats', () => {
         },
       })
     );
-    const result = await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
+    const result = await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result[0].ccs).toBe('foo');
   });
 
@@ -203,9 +214,10 @@ describe('fetchCpuUsageNodeStats', () => {
     });
     const filterQuery =
       '{"bool":{"should":[{"exists":{"field":"cluster_uuid"}}],"minimum_should_match":1}}';
-    await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size, filterQuery);
+    await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size, filterQuery);
     expect(params).toStrictEqual({
-      index: '.monitoring-es-*',
+      index:
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,
@@ -213,7 +225,15 @@ describe('fetchCpuUsageNodeStats', () => {
           bool: {
             filter: [
               { terms: { cluster_uuid: ['abc123'] } },
-              { term: { type: 'node_stats' } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'node_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
               { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
               {
                 bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },

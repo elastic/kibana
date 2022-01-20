@@ -10,6 +10,18 @@ import { fetchLogstashVersions } from './fetch_logstash_versions';
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchLogstashVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
@@ -66,7 +78,7 @@ describe('fetchLogstashVersions', () => {
       })
     );
 
-    const result = await fetchLogstashVersions(esClient, clusters, index, size);
+    const result = await fetchLogstashVersions(esClient, clusters, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
