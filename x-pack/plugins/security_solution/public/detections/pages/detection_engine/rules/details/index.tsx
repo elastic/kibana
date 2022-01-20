@@ -208,7 +208,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const loading = userInfoLoading || listsConfigLoading;
+
+  const {
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
+  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
     rule: maybeRule,
@@ -601,7 +608,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
     allowedExceptionListTypes: ExceptionListTypeEnum[];
@@ -819,6 +825,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   signalIndexName={signalIndexName}
                   defaultStackByOption={defaultRuleStackByOption}
                   updateDateRange={updateDateRangeCallback}
+                  runtimeMappings={runtimeMappings}
                 />
                 <EuiSpacer />
               </Display>
