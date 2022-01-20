@@ -42,4 +42,5 @@ const StatusActionButtonComponent: React.FC<Props> = ({ status, onStatusChanged,
     </EuiButton>
   );
 };
+StatusActionButtonComponent.displayName = 'StatusActionButton';
 export const StatusActionButton = memo(StatusActionButtonComponent);

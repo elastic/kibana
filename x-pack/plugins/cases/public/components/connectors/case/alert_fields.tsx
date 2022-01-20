@@ -103,6 +103,7 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
     </Container>
   );
 };
+CaseParamsFields.displayName = 'CaseParamsFields';
 
 // eslint-disable-next-line import/no-default-export
 export { CaseParamsFields as default };

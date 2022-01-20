@@ -34,5 +34,6 @@ const UserActionUsernameWithAvatarComponent = ({
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+UserActionUsernameWithAvatarComponent.displayName = 'UserActionUsernameWithAvatar';
 
 export const UserActionUsernameWithAvatar = memo(UserActionUsernameWithAvatarComponent);

@@ -142,6 +142,7 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
     </LocalizedDateTooltip>
   );
 };
+FormattedRelativePreferenceDate.displayName = 'FormattedRelativePreferenceDate';
 
 /**
  * Renders a preceding label according to under/over one hour

@@ -7,7 +7,7 @@ exports[`Title it renders 1`] = `
   <h1
     data-test-subj="header-page-title"
   >
-    <Memo(TruncatedTextComponent)
+    <Memo(TruncatedText)
       text="Test title"
     />
      

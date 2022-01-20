@@ -77,5 +77,6 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
     </>
   );
 };
+ExistingCaseComponent.displayName = 'ExistingCase';
 
 export const ExistingCase = memo(ExistingCaseComponent);

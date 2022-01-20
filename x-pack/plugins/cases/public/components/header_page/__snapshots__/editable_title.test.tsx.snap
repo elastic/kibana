@@ -9,7 +9,7 @@ exports[`EditableTitle it renders 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <Memo(TitleComponent)
+    <Memo(Title)
       title="Test title"
     />
   </EuiFlexItem>

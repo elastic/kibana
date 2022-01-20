@@ -61,6 +61,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     <CasesContext.Provider value={value}>{children}</CasesContext.Provider>
   ) : null;
 };
+CasesProvider.displayName = 'CasesProvider';
 
 function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
   return value.appId != null && value.appTitle != null && value.userCanCrud != null;

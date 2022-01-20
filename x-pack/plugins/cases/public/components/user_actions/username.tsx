@@ -28,5 +28,6 @@ const UserActionUsernameComponent = ({ username, fullName }: UserActionUsernameP
     </EuiToolTip>
   );
 };
+UserActionUsernameComponent.displayName = 'UserActionUsername';
 
 export const UserActionUsername = memo(UserActionUsernameComponent);

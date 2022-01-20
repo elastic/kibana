@@ -55,5 +55,6 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     </Container>
   );
 };
+LensMarkDownRendererComponent.displayName = 'LensMarkDownRenderer';
 
 export const LensMarkDownRenderer = React.memo(LensMarkDownRendererComponent);

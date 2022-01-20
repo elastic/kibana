@@ -40,6 +40,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
       </EuiModalBody>
     </EuiModal>
   ) : null;
+CreateModalComponent.displayName = 'CreateModal';
 
 export const CreateCaseModal = memo(CreateModalComponent);
 

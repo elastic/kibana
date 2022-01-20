@@ -69,5 +69,6 @@ const UserActionPropertyActionsComponent = ({
     </>
   );
 };
+UserActionPropertyActionsComponent.displayName = 'UserActionPropertyActions';
 
 export const UserActionPropertyActions = memo(UserActionPropertyActionsComponent);
