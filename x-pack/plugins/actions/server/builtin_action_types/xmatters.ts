@@ -12,6 +12,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
+import { nullableType } from './lib/nullable';
 import { isOk, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -30,8 +31,10 @@ export type XmattersActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionParamsType
 >;
 
+const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 const configSchemaProps = {
   url: schema.string(),
+  headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
@@ -60,7 +63,6 @@ const ParamsSchema = schema.object({
   alertActionGroup: schema.maybe(schema.string()),
   alertActionGroupName: schema.string(),
   alertId: schema.string(),
-  alertInstanceId: schema.maybe(schema.string()),
   alertName: schema.maybe(schema.string()),
   date: schema.maybe(schema.string()),
   severity: schema.maybe(schema.string()),
@@ -90,13 +92,8 @@ export function getActionType({
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    renderParameterTemplates,
     executor: curry(executor)({ logger, configurationUtilities }),
   };
-}
-
-function renderParameterTemplates(params: ActionParamsType): ActionParamsType {
-  return params;
 }
 
 function validateActionTypeConfig(
@@ -304,7 +301,6 @@ interface XmattersPayload {
   alertActionGroup?: string;
   alertActionGroupName: string;
   alertId: string;
-  alertInstanceId?: string;
   alertName?: string;
   date?: string;
   severity?: string;
@@ -317,7 +313,6 @@ function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
     alertActionGroup: params.alertActionGroup,
     alertActionGroupName: params.alertActionGroupName,
     alertId: params.alertId,
-    alertInstanceId: params.alertInstanceId,
     alertName: params.alertName,
     date: params.date,
     severity: params.severity || 'High',
