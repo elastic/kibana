@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       // if sampleTask is not in the metrics, wait a bit and retry
-      delay(500);
+      await delay(500);
       throw new Error('sampleTask has not yet run');
     });
   }
