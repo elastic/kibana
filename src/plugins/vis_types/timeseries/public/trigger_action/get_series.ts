@@ -60,8 +60,9 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
         const [_, meta] = variables[layerMetricIdx]?.field?.split('[') ?? [];
         const metaValue = Number(meta?.replace(']', ''));
         const script = getFormulaEquivalent(currentMetric, metaValue, layerMetricsArray);
-        if (!script) return null;
-        finalScript = finalScript?.replace(`params.${variables[layerMetricIdx].name}`, script);
+        const variable = variables.find((v) => v.field === currentMetric.id);
+        if (!script || !variable) return null;
+        finalScript = finalScript?.replace(`params.${variable.name}`, script);
       }
       metricsArray = getFormulaSeries(finalScript);
       break;

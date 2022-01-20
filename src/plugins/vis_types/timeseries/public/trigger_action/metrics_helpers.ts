@@ -178,12 +178,20 @@ export const getSiblingPipelineSeriesFormula = (
   return formula;
 };
 
+const escapeQuotes = (str: string) => {
+  return str?.replace(/'/g, "\\'");
+};
+
 export const getFilterRatioFormula = (currentMetric: Metric) => {
   const { numerator, denominator } = currentMetric;
   return `count(${numerator?.language === 'kuery' ? 'kql' : 'lucene'}='${
-    numerator?.query ?? '*'
+    numerator?.query && typeof numerator?.query === 'string'
+      ? escapeQuotes(numerator?.query)
+      : numerator?.query ?? '*'
   }') / count(${denominator?.language === 'kuery' ? 'kql' : 'lucene'}='${
-    denominator?.query ?? '*'
+    denominator?.query && typeof denominator?.query === 'string'
+      ? escapeQuotes(denominator?.query)
+      : denominator?.query ?? '*'
   }')`;
 };
 
