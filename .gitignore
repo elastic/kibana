@@ -66,6 +66,7 @@ npm-debug.log*
 .ci/bash_standard_lib.sh
 .gradle
 .vagrant
+.envrc
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
