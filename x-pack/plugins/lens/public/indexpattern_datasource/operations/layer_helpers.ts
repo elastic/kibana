@@ -58,6 +58,7 @@ interface ColumnChange {
   visualizationGroups: VisualizationDimensionGroupConfig[];
   targetGroup?: string;
   shouldResetLabel?: boolean;
+  shouldCombineField?: boolean;
   incompleteParams?: ColumnAdvancedParams;
   incompleteFieldName?: string;
   incompleteFieldOperation?: OperationType;
@@ -402,7 +403,9 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
+  initialParams,
   shouldResetLabel,
+  shouldCombineField,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -669,10 +672,14 @@ export function replaceColumn({
     operationDefinition.input === 'field' &&
     field &&
     'sourceField' in previousColumn &&
-    previousColumn.sourceField !== field.name
+    (previousColumn.sourceField !== field.name || operationDefinition?.getParamsForMultipleFields)
   ) {
     // Same operation, new field
-    let newColumn = operationDefinition.onFieldChange(previousColumn, field);
+    let newColumn = operationDefinition.onFieldChange(
+      previousColumn,
+      field,
+      shouldCombineField ? initialParams?.params : undefined
+    );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }
