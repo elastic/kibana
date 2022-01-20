@@ -6,4 +6,3 @@
  */
 
 export { registerRulesRoute } from './rules';
-export { registerTaskManagerRoute } from './task_manager';

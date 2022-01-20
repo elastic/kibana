@@ -28,7 +28,7 @@ export function registerRulesRoute({
     };
   };
   overallStatus$: Observable<ServiceStatus>;
-  getMetrics: () => Promise<MetricResult[] | undefined>;
+  getMetrics: () => Promise<MetricResult | undefined>;
 }) {
   router.get(
     {
@@ -46,15 +46,9 @@ export function registerRulesRoute({
         getKibanaStats({ config, overallStatus$ }),
       ]);
 
-      const rulesById =
-        rules?.reduce((accum: { [id: string]: MetricResult }, rule) => {
-          accum[rule.id as string] = rule;
-          return accum;
-        }, {}) ?? {};
-
       return res.ok({
         body: {
-          rules: rulesById,
+          rules,
           cluster_uuid: clusterUuid,
           kibana,
         },

@@ -20,6 +20,9 @@ export function incrementInMemoryMetric(metric: IN_MEMORY_METRICS) {
     return;
   }
 
+  if (inMemoryMetrics[metric] === Number.MAX_VALUE) {
+    inMemoryMetrics[metric] = 0;
+  }
   inMemoryMetrics[metric]++;
 }
 

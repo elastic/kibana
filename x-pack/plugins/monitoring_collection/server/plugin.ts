@@ -7,7 +7,7 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { registerRulesRoute, registerTaskManagerRoute } from './routes';
+import { registerRulesRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
   registerMetric: (metric: Metric) => void;
@@ -60,20 +60,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         uuid: this.initializerContext.env.instanceUuid,
       },
       overallStatus$: core.status.overall$,
-      getMetrics: async () => (await this.getMetrics('rule')) as MetricResult[],
-    });
-
-    registerTaskManagerRoute({
-      router,
-      config: {
-        allowAnonymous: core.status.isStatusPageAnonymous(),
-        kibanaIndex,
-        kibanaVersion: this.initializerContext.env.packageInfo.version,
-        server: core.http.getServerInfo(),
-        uuid: this.initializerContext.env.instanceUuid,
-      },
-      overallStatus$: core.status.overall$,
-      getMetrics: async () => (await this.getMetrics('task_manager')) as MetricResult,
+      getMetrics: async () => (await this.getMetrics('rules')) as MetricResult,
     });
 
     return {
