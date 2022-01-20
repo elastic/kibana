@@ -77,9 +77,6 @@ export class CspPlugin
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     this.CspAppContextService.start({
       ...plugins.fleet,
-      // @ts-expect-error update types
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      // config: this.config!,
       logger: this.logger,
       registerIngestCallback,
     });
