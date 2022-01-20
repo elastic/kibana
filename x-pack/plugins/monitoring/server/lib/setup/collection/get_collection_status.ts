@@ -443,7 +443,6 @@ export const getCollectionStatus = async (
 ) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
-  const metricbeatIndex = config.get('monitoring.ui.metricbeat.index')!;
   const size = config.get('monitoring.ui.max_bucket_size');
   const hasPermissions = await hasNecessaryPermissions(req);
 
@@ -484,11 +483,6 @@ export const getCollectionStatus = async (
       if (bucket.key.includes(token)) {
         return true;
       }
-      if (matchesMetricbeatIndex(metricbeatIndex, bucket.key)) {
-        if (get(bucket, `${uuidBucketName}.buckets`, []).length) {
-          return true;
-        }
-      }
       return false;
     });
 
@@ -512,9 +506,7 @@ export const getCollectionStatus = async (
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
       const singleIndexBucket = indexBuckets[0];
-      const isFullyMigrated =
-        singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
-        matchesMetricbeatIndex(metricbeatIndex, singleIndexBucket.key);
+      const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
 
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
@@ -594,8 +586,7 @@ export const getCollectionStatus = async (
       for (const indexBucket of indexBuckets) {
         const isFullyMigrated =
           considerAllInstancesMigrated ||
-          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
-          matchesMetricbeatIndex(metricbeatIndex, indexBucket.key);
+          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
