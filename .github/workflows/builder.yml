@@ -1,6 +1,6 @@
 name: Elastic Builder
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - '**.mdx'
       - '**.docnav.json'
