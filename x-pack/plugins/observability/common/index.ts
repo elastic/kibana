@@ -10,6 +10,7 @@ export {
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
+  enableInfrastructureView,
 } from './ui_settings_keys';
 
 export const casesFeatureId = 'observabilityCases';
