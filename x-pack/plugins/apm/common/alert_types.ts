@@ -149,7 +149,7 @@ export function formatTransactionDurationAnomalyReason({
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}. Alert when {threshold}.`,
       values: {
         threshold,
         serviceName,
