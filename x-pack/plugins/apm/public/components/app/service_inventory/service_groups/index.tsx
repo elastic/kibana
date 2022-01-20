@@ -19,7 +19,7 @@ import { useLocalStorage } from '../../../../hooks/useLocalStorage';
 import { data } from './mock';
 import { Orientation } from './orientation';
 import { ServiceGroupsList } from './service_groups_list';
-import { Sort } from './Sort';
+import { Sort } from './sort';
 
 export type ServiceGroupsOrientation = 'grid' | 'list';
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';

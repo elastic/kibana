@@ -21,7 +21,6 @@ import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
-import { ServiceGroups } from '../../app/service_inventory/service_groups';
 
 function page<TPath extends string>({
   path,
@@ -90,17 +89,10 @@ export const home = {
   },
   children: [
     page({
-      path: '/service-groups',
-      title: ServiceInventoryTitle,
-      element: <ServiceGroups />,
-      showCreateServiceGroupsButton: true,
-    }),
-    page({
       path: '/services',
       title: ServiceInventoryTitle,
-      element: <ServiceGroups />,
       showCreateServiceGroupsButton: true,
-      // element: <ServiceInventory />,
+      element: <ServiceInventory />,
     }),
     page({
       path: '/traces',
