@@ -39,13 +39,16 @@ export function KueryBar(props: {
   placeholder?: string;
   boolFilter?: QueryDslQueryContainer[];
   prepend?: React.ReactNode | string;
+  onSubmit?: (value: string) => void;
+  value?: string;
 }) {
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const groupId = 'groupId' in path ? path.groupId : undefined;
   const environment = 'environment' in query ? query.environment : undefined;
-  const kuery = 'kuery' in query ? query.kuery : undefined;
+  const _kuery = 'kuery' in query ? query.kuery : undefined;
+  const kuery = props.value || _kuery;
 
   const history = useHistory();
   const [state, setState] = useState<State>({
@@ -137,6 +140,11 @@ export function KueryBar(props: {
     try {
       const res = convertKueryToEsQuery(inputValue, dataView as DataView);
       if (!res) {
+        return;
+      }
+
+      if (typeof props.onSubmit === 'function') {
+        props.onSubmit(inputValue.trim());
         return;
       }
 

@@ -19,8 +19,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../../../hooks/use_time_range';
@@ -52,8 +53,9 @@ export function SelectServices({
   onEditGroupDetailsClick,
 }: Props) {
   const {
-    query: { environment, kuery },
+    query: { environment },
   } = useAnyOfApmParams('/services');
+  const [kuery, setKuery] = useState('');
 
   const { start, end, refreshTimeRange } = useTimeRange({
     rangeFrom: 'now-24h',
@@ -62,7 +64,7 @@ export function SelectServices({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && kuery) {
+      if (start && end && !isEmpty(kuery)) {
         return callApmApi({
           endpoint: 'GET /internal/apm/services',
           params: {
@@ -106,6 +108,10 @@ export function SelectServices({
                     'xpack.apm.serviceGroups.selectServicesForm.kql',
                     { defaultMessage: 'E.g. labels.team: "web"' }
                   )}
+                  onSubmit={(value) => {
+                    setKuery(value);
+                  }}
+                  value={kuery}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
