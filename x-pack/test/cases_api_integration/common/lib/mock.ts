@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CommentSchemaType } from '../../../../plugins/cases/server/connectors';
 import {
   CasePostRequest,
   CaseResponse,
@@ -112,7 +111,7 @@ export const postCaseResp = (
 
 interface CommentRequestWithID {
   id: string;
-  comment: CommentSchemaType | CommentRequest;
+  comment: CommentRequest;
 }
 
 export const commentsResp = ({

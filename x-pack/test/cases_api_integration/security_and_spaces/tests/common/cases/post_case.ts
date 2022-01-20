@@ -115,7 +115,6 @@ export default ({ getService }: FtrProviderContext): void => {
           comment_id: null,
           owner: 'securitySolutionFixture',
           payload: {
-            type: postedCase.type,
             description: postedCase.description,
             title: postedCase.title,
             tags: postedCase.tags,
