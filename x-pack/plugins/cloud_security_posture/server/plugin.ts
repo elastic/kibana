@@ -43,7 +43,8 @@ export class CspPlugin
     this.logger.debug('csp: Setup');
     const router = core.http.createRouter();
 
-    defineRoutes(router);
+    // Register server side APIs
+    defineRoutes(router, this.logger);
     initUiSettings(core.uiSettings);
 
     return {};
@@ -51,7 +52,9 @@ export class CspPlugin
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
     this.logger.debug('csp: Started');
-    createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser).catch(this.logger.error);
+    createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser, this.logger).catch(
+      this.logger.error
+    );
     return {};
   }
   public stop() {}

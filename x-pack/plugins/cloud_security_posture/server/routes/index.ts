@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { IRouter, Logger } from '../../../../../src/core/server';
 import { defineGetStatsRoute } from './stats/stats';
 import { defineFindingsIndexRoute as defineGetFindingsIndexRoute } from './findings/findings';
-import type { IRouter } from '../../../../../src/core/server';
 
-export function defineRoutes(router: IRouter) {
-  defineGetStatsRoute(router);
-  defineGetFindingsIndexRoute(router);
+export function defineRoutes(router: IRouter, logger: Logger) {
+  defineGetStatsRoute(router, logger);
+  defineGetFindingsIndexRoute(router, logger);
 }
