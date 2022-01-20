@@ -52,6 +52,42 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
+  partition_field_name: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerPartitionFieldNameLabel', {
+      defaultMessage: 'Partition field name',
+    }),
+    type: 'string',
+  },
+  partition_field_value: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerPartitionFieldValueLabel', {
+      defaultMessage: 'Partition field value',
+    }),
+    type: 'string',
+  },
+  by_field_name: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerByFieldNameLabel', {
+      defaultMessage: 'By field name',
+    }),
+    type: 'string',
+  },
+  by_field_value: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerByFieldValueLabel', {
+      defaultMessage: 'By field value',
+    }),
+    type: 'string',
+  },
+  over_field_name: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerOverFieldNameLabel', {
+      defaultMessage: 'Over field name',
+    }),
+    type: 'string',
+  },
+  over_field_value: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerOverFieldValueLabel', {
+      defaultMessage: 'Over field value',
+    }),
+    type: 'string',
+  },
 };
 
 export class AnomalySourceTooltipProperty implements ITooltipProperty {

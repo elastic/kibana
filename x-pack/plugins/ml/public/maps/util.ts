@@ -14,6 +14,17 @@ import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { VectorSourceRequestMeta } from '../../../maps/common';
 
 export type MlAnomalyLayers = 'typical' | 'actual' | 'connected';
+interface Hit {
+  [x: string]: any;
+  actual: number[];
+  actualDisplay: number[];
+  fieldName?: string;
+  functionDescription: string;
+  typical: number[];
+  typicalDisplay: number[];
+  record_score: number;
+  timestamp: string;
+}
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
@@ -64,16 +75,7 @@ export async function getResultsForJobId(
   }
 
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
-  let hits: Array<{
-    actual: number[];
-    actualDisplay: number[];
-    fieldName?: string;
-    functionDescription: string;
-    typical: number[];
-    typicalDisplay: number[];
-    record_score: number;
-    timestamp: string;
-  }> = [];
+  let hits: Hit[] = [];
 
   try {
     resp = await mlResultsService.anomalySearch(
@@ -113,6 +115,15 @@ export async function getResultsForJobId(
         actual,
         actualDisplay,
         record_score: Math.floor(_source.record_score),
+        ...(_source.partition_field_name
+          ? { partition_field_name: _source.partition_field_name }
+          : {}),
+        ...(_source.partition_field_value
+          ? { partition_field_value: _source.partition_field_value }
+          : {}),
+        ...(_source.by_field_name ? { by_field_name: _source.by_field_name } : {}),
+        ...(_source.by_field_value ? { by_field_value: _source.by_field_value } : {}),
+        ...(_source.over_field_value ? { over_field_value: _source.over_field_value } : {}),
       };
     });
   }
@@ -142,6 +153,15 @@ export async function getResultsForJobId(
         functionDescription: result.functionDescription,
         timestamp: result.timestamp,
         record_score: result.record_score,
+        ...(result.partition_field_name
+          ? { partition_field_name: result.partition_field_name }
+          : {}),
+        ...(result.partition_field_value
+          ? { partition_field_value: result.partition_field_value }
+          : {}),
+        ...(result.by_field_name ? { by_field_name: result.by_field_name } : {}),
+        ...(result.by_field_value ? { by_field_value: result.by_field_value } : {}),
+        ...(result.over_field_value ? { over_field_value: result.over_field_value } : {}),
       },
     };
   });
