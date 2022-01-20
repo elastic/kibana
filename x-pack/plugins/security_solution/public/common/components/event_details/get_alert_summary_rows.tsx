@@ -25,6 +25,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/ti
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { EventCode, EventCategory } from '../../../../common/ecs/event';
 
+/** Always show these fields */
 const defaultDisplayFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
@@ -32,8 +33,14 @@ const defaultDisplayFields: EventSummaryField[] = [
   { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
 ];
 
-function getFieldsByCategory(eventCategory?: string): EventSummaryField[] {
-  switch (eventCategory) {
+/**
+ * Get a list of fields to display based on the event's category
+ */
+function getFieldsByCategory({
+  primaryEventCategory,
+  allEventCategories,
+}: EventCategories): EventSummaryField[] {
+  switch (primaryEventCategory) {
     case EventCategory.PROCESS:
       return [{ id: 'process.name' }, { id: 'process.parent.name' }, { id: 'process.args' }];
     case EventCategory.FILE:
@@ -56,34 +63,59 @@ function getFieldsByCategory(eventCategory?: string): EventSummaryField[] {
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     default:
+      // If no primary category matches or hasn't been defined on purpose (e.g. in order to follow the source event)
+      // resolve more fields based on the other event categories.
+      if (allEventCategories?.includes(EventCategory.FILE)) {
+        return getFieldsByCategory({ primaryEventCategory: EventCategory.FILE });
+      } else if (allEventCategories?.includes(EventCategory.PROCESS)) {
+        return getFieldsByCategory({ primaryEventCategory: EventCategory.PROCESS });
+      }
       return [];
   }
 }
 
-function getFieldsByEventCode(eventCode?: string): EventSummaryField[] {
+/**
+ * Gets the fields to display based on the event's code.
+ * Contains some enhancements to resolve more fields based on the event's categories.
+ * @param eventCode The event's code
+ * @param eventCategories The events categories
+ * @returns A list of fields to include
+ */
+function getFieldsByEventCode(
+  eventCode: string | undefined,
+  eventCategories: EventCategories
+): EventSummaryField[] {
   switch (eventCode) {
     case EventCode.BEHAVIOR:
-      return [{ id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION }];
+      return [
+        { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
+        // Resolve more fields based on the source event
+        ...getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined }),
+      ];
     case EventCode.SHELLCODE_THREAD:
       return [
         { id: 'Target.process.executable' },
-        { id: 'Source.process.executable' },
         {
-          id: 'Target.process.thread.Ext.start_address_details.memory_pe.imphash',
+          id: 'Target.process.thread.Ext.start_address_detaiuls.memory_pe.imphash',
           label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
+        },
+        {
+          id: 'Memory_protection.unique_key_v1',
         },
       ];
     case EventCode.MEMORY_SIGNATURE:
       return [{ id: 'process.Ext.memory_region.malware_signature.all_names' }];
-    case EventCode.MALICIOUS_FILE:
-      return getFieldsByCategory(EventCategory.FILE);
     case EventCode.RANSOMWARE:
-      return getFieldsByCategory(EventCategory.PROCESS);
+      // Resolve more fields based on the source event
+      return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
     default:
       return [];
   }
 }
 
+/**
+ * Returns a list of fields based on the event's rule type
+ */
 function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
   switch (ruleType) {
     case 'threshold':
@@ -118,21 +150,56 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
   }
 }
 
+/**
+ * Assembles a list of fields to display based on the event
+ */
 function getEventFieldsToDisplay({
-  eventCategory,
+  eventCategories,
   eventCode,
   eventRuleType,
 }: {
-  eventCategory?: string;
+  eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
 }): EventSummaryField[] {
-  return uniqBy('id', [
+  const fields = [
     ...defaultDisplayFields,
-    ...getFieldsByCategory(eventCategory),
-    ...getFieldsByEventCode(eventCode),
+    ...getFieldsByCategory(eventCategories),
+    ...getFieldsByEventCode(eventCode, eventCategories),
     ...getFieldsByRuleType(eventRuleType),
-  ]);
+  ];
+
+  // Filter all fields by their id to make sure there are no duplicates
+  return uniqBy('id', fields);
+}
+
+interface EventCategories {
+  primaryEventCategory?: string;
+  allEventCategories?: string[];
+}
+
+/**
+ * Extract the event's categories
+ * @param data The event details
+ * @returns The event's primary category and all other categories in case there is more than one
+ */
+function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
+  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
+
+  let primaryEventCategory: string | undefined;
+  let allEventCategories: string[] | undefined;
+
+  if (Array.isArray(eventCategoryField?.originalValue)) {
+    primaryEventCategory = eventCategoryField?.originalValue[0];
+    allEventCategories = eventCategoryField?.originalValue;
+  } else {
+    primaryEventCategory = eventCategoryField?.originalValue;
+    if (primaryEventCategory) {
+      allEventCategories = [primaryEventCategory];
+    }
+  }
+
+  return { primaryEventCategory, allEventCategories };
 }
 
 export const getSummaryRows = ({
@@ -148,11 +215,7 @@ export const getSummaryRows = ({
   eventId: string;
   isDraggable?: boolean;
 }) => {
-  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
-
-  const eventCategory = Array.isArray(eventCategoryField?.originalValue)
-    ? eventCategoryField?.originalValue[0]
-    : eventCategoryField?.originalValue;
+  const eventCategories = getEventCategoriesFromData(data);
 
   const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
 
@@ -165,7 +228,11 @@ export const getSummaryRows = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
-  const tableFields = getEventFieldsToDisplay({ eventCategory, eventCode, eventRuleType });
+  const tableFields = getEventFieldsToDisplay({
+    eventCategories,
+    eventCode,
+    eventRuleType,
+  });
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, field) => {

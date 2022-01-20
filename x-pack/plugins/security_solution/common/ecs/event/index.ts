@@ -64,4 +64,5 @@ export enum EventCategory {
   NETWORK = 'network',
   DNS = 'dns',
   REGISTRY = 'registry',
+  MALWARE = 'malware',
 }
