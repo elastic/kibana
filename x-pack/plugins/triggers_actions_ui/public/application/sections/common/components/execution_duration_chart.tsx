@@ -17,7 +17,7 @@ import {
   EuiSelect,
   EuiLoadingChart,
 } from '@elastic/eui';
-import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightEuiTheme } from '@kbn/ui-theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { assign, fill } from 'lodash';
 import moment from 'moment';
