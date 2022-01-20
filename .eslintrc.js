@@ -939,18 +939,6 @@ module.exports = {
       },
     },
     {
-      // Cases plugin specific overrirites
-      // typescript and javascript for front and back end
-      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-node', 'react'],
-      env: {
-        jest: true,
-      },
-      rules: {
-        'react/display-name': ['error', { ignoreTranspilerName: true }],
-      },
-    },
-    {
       // typescript only for front and back end, but excludes the test files.
       // We use this section to add rules in which we do not want to apply to test files.
       // This should be a very small set as most linter rules are useful for tests as well.
