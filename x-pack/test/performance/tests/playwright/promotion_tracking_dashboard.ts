@@ -20,14 +20,14 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
 
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/performance/kbn_archives/promotion_tracking_dashboard.json'
+        'x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'
       );
       await esArchiver.loadIfNeeded('x-pack/test/performance/es_archives/ecommerce_sample_data');
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/performance/kbn_archives/promotion_tracking_dashboard.json'
+        'x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'
       );
       await esArchiver.unload('x-pack/test/performance/es_archives/ecommerce_sample_data');
     });
@@ -44,7 +44,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
     });
 
     it('Go to Promotion Tracking Dashboard', async () => {
-      const promotionDashboardButton = page.locator('text="Promotion Tracking"');
+      const promotionDashboardButton = page.locator('text="Promotion Dashboard"');
       await promotionDashboardButton.click();
     });
 

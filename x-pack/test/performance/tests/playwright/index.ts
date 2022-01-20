@@ -12,6 +12,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // loadTestFile(require.resolve('./ecommerce_dashboard'));
     // loadTestFile(require.resolve('./flight_dashboard'));
     // loadTestFile(require.resolve('./web_logs_dashboard'));
-    loadTestFile(require.resolve('./ecommerce_saved_object_dashboard'));
+    loadTestFile(require.resolve('./promotion_tracking_dashboard'));
   });
 }
