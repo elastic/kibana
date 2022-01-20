@@ -27,6 +27,7 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
+  [HostsTableType.risk]: i18n.NAVIGATION_HOST_RISK_TITLE,
 };
 
 export const getBreadcrumbs = (

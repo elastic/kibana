@@ -57,6 +57,7 @@ describe('RiskyHostsEnabledModule', () => {
                 isModuleEnabled: true,
                 result: [
                   {
+                    '@timestamp': '1641902481',
                     host: {
                       name: 'a',
                     },

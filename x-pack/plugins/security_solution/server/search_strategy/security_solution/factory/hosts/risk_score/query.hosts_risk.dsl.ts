@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+
+const QUERY_SIZE = 10;
 
 export const buildHostsRiskScoreQuery = ({
   timerange,
   hostNames,
   defaultIndex,
+  limit = QUERY_SIZE,
+  sortOrder = Direction.desc,
 }: HostsRiskScoreRequestOptions) => {
   const filter = [];
 
@@ -35,12 +39,20 @@ export const buildHostsRiskScoreQuery = ({
     allow_no_indices: false,
     ignore_unavailable: true,
     track_total_hits: false,
+    size: limit,
     body: {
       query: {
         bool: {
           filter,
         },
       },
+      sort: [
+        {
+          '@timestamp': {
+            order: sortOrder,
+          },
+        },
+      ],
     },
   };
 
