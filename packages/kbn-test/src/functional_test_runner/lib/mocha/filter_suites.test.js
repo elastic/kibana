@@ -12,9 +12,10 @@ import Mocha from 'mocha';
 import { create as createSuite } from 'mocha/lib/suite';
 import Test from 'mocha/lib/test';
 
-import { filterSuitesByTags } from './filter_suites_by_tags';
+import { filterSuites } from './filter_suites';
+import { EsVersion } from '../es_version';
 
-function setup({ include, exclude }) {
+function setup({ include, exclude, esVersion }) {
   return new Promise((resolve) => {
     const history = [];
 
@@ -55,6 +56,7 @@ function setup({ include, exclude }) {
 
     const level1b = createSuite(level1, 'level 1b');
     level1b._tags = ['level1b'];
+    level1b._esVersionRequirement = '<=8';
     level1b.addTest(new Test('test 1b', () => {}));
 
     const level2 = createSuite(mocha.suite, 'level 2');
@@ -62,7 +64,7 @@ function setup({ include, exclude }) {
     level2a._tags = ['level2a'];
     level2a.addTest(new Test('test 2a', () => {}));
 
-    filterSuitesByTags({
+    filterSuites({
       log: {
         info(...args) {
           history.push(`info: ${format(...args)}`);
@@ -71,6 +73,7 @@ function setup({ include, exclude }) {
       mocha,
       include,
       exclude,
+      esVersion,
     });
 
     mocha.run();
@@ -205,6 +208,30 @@ it('does nothing if everything excluded', async () => {
   expect(history).toMatchInlineSnapshot(`
     Array [
       "info: Filtering out any suites that include the tag(s): [ 'level1', 'level2a' ]",
+    ]
+  `);
+});
+
+it(`excludes tests which don't meet the esVersionRequirement`, async () => {
+  const { history } = await setup({
+    include: [],
+    exclude: [],
+    esVersion: new EsVersion('9.0.0'),
+  });
+
+  expect(history).toMatchInlineSnapshot(`
+    Array [
+      "info: Only running suites which are compatible with ES version 9.0.0",
+      "suite: ",
+      "suite: level 1",
+      "suite: level 1 level 1a",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 1a\\"",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach for \\"test 1a\\"",
+      "test:  level 1 level 1a test 1a",
+      "suite: level 2",
+      "suite: level 2 level 2a",
+      "hook:  \\"before each\\" hook: rootBeforeEach for \\"test 2a\\"",
+      "test:  level 2 level 2a test 2a",
     ]
   `);
 });
