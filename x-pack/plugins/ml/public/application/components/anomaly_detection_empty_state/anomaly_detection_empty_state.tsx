@@ -58,6 +58,7 @@ export const AnomalyDetectionEmptyState: FC = () => {
           color="primary"
           onClick={redirectToCreateJobSelectIndexPage}
           fill
+          iconType="plusInCircle"
           isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="mlOverviewCreateADJobButton"
         >
