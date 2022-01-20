@@ -23,12 +23,15 @@ export type {
   ListsServerExtensionRegistrar,
   ExtensionPoint,
   ExceptionsListPreCreateItemServerExtension,
-  ExceptionListPreUpdateItemServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
 } from './types';
 export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
 };
+
+export { ErrorWithStatusCode as ListsErrorWithStatusCode } from './error_with_status_code';
+
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
   new ListPlugin(initializerContext);

@@ -32,5 +32,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./package'));
     loadTestFile(require.resolve('./endpoint_authz'));
+    loadTestFile(require.resolve('./endpoint_artifacts'));
   });
 }

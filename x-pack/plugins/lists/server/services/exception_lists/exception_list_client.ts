@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -18,7 +18,10 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import type { ExtensionPointStorageClientInterface } from '../extension_points';
+import type {
+  ExtensionPointStorageClientInterface,
+  ServerExtensionCallbackContext,
+} from '../extension_points';
 
 import {
   ConstructorOptions,
@@ -81,17 +84,26 @@ export class ExceptionListClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly serverExtensionsClient: ExtensionPointStorageClientInterface;
   private readonly enableServerExtensionPoints: boolean;
+  private readonly request?: KibanaRequest;
 
   constructor({
     user,
     savedObjectsClient,
     serverExtensionsClient,
     enableServerExtensionPoints = true,
+    request,
   }: ConstructorOptions) {
     this.user = user;
     this.savedObjectsClient = savedObjectsClient;
     this.serverExtensionsClient = serverExtensionsClient;
     this.enableServerExtensionPoints = enableServerExtensionPoints;
+    this.request = request;
+  }
+
+  private getServerExtensionCallbackContext(): ServerExtensionCallbackContext {
+    return {
+      request: this.request,
+    };
   }
 
   /**
@@ -404,6 +416,7 @@ export class ExceptionListClient {
       itemData = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreCreateItem',
         itemData,
+        this.getServerExtensionCallbackContext(),
         (data) => {
           return validateData(
             createExceptionListItemSchema,
@@ -470,6 +483,7 @@ export class ExceptionListClient {
       updatedItem = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreUpdateItem',
         updatedItem,
+        this.getServerExtensionCallbackContext(),
         (data) => {
           return validateData(
             updateExceptionListItemSchema,

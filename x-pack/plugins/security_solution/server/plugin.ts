@@ -90,6 +90,7 @@ import type {
   PluginInitializerContext,
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
+import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -394,18 +395,30 @@ export class Plugin implements ISecuritySolutionPlugin {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
 
+    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      plugins.fleet!;
+
     this.endpointAppContextService.start({
-      agentService: plugins.fleet?.agentService,
-      packageService: plugins.fleet?.packageService,
-      packagePolicyService: plugins.fleet?.packagePolicyService,
-      agentPolicyService: plugins.fleet?.agentPolicyService,
+      fleetAuthzService: authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.agentPolicyService!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.packagePolicyService!,
+        agentPolicyService,
+        packagePolicyService,
         logger
+      ),
+      endpointFleetServicesFactory: new EndpointFleetServicesFactory(
+        {
+          agentService,
+          packageService,
+          packagePolicyService,
+          agentPolicyService,
+        },
+        core.savedObjects
       ),
       security: plugins.security,
       alerting: plugins.alerting,

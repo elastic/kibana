@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import type {
   CreateCommentsArray,
   Description,
@@ -58,6 +58,8 @@ export interface ConstructorOptions {
   serverExtensionsClient: ExtensionPointStorageClientInterface;
   /** Set to `false` if wanting to disable executing registered server extension points. Default is true. */
   enableServerExtensionPoints?: boolean;
+  /** Should be provided when creating an instance from an HTTP request handler */
+  request?: KibanaRequest;
 }
 
 export interface GetExceptionListOptions {

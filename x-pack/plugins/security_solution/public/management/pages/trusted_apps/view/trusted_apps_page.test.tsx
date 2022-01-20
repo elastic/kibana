@@ -301,7 +301,6 @@ describe('When on the Trusted Apps Page', () => {
               id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
               comments: [],
               item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
-              meta: {},
               namespace_type: 'agnostic',
               type: 'simple',
             });

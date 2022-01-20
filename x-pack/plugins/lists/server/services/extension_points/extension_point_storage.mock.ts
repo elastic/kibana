@@ -7,11 +7,14 @@
 
 import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
-  ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
   ExtensionPointStorageInterface,
+  ServerExtensionCallbackContext,
 } from './types';
 
 export interface ExtensionPointStorageContextMock {
@@ -21,7 +24,8 @@ export interface ExtensionPointStorageContextMock {
   /** An Exception List Item pre-create extension point added to the storage. Appends `-1` to the data's `name` attribute */
   exceptionPreCreate: jest.Mocked<ExceptionsListPreCreateItemServerExtension>;
   /** An Exception List Item pre-update extension point added to the storage. Appends `-2` to the data's `name` attribute */
-  exceptionPreUpdate: jest.Mocked<ExceptionListPreUpdateItemServerExtension>;
+  exceptionPreUpdate: jest.Mocked<ExceptionsListPreUpdateItemServerExtension>;
+  callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
 }
 
 export const createExtensionPointStorageMock = (
@@ -30,7 +34,7 @@ export const createExtensionPointStorageMock = (
   const extensionPointStorage = new ExtensionPointStorage(logger);
 
   const exceptionPreCreate: ExtensionPointStorageContextMock['exceptionPreCreate'] = {
-    callback: jest.fn(async (data) => {
+    callback: jest.fn(async ({ data }) => {
       return {
         ...data,
         name: `${data.name}-1`,
@@ -40,7 +44,7 @@ export const createExtensionPointStorageMock = (
   };
 
   const exceptionPreUpdate: ExtensionPointStorageContextMock['exceptionPreUpdate'] = {
-    callback: jest.fn(async (data) => {
+    callback: jest.fn(async ({ data }) => {
       return {
         ...data,
         name: `${data.name}-1`,
@@ -53,6 +57,9 @@ export const createExtensionPointStorageMock = (
   extensionPointStorage.add(exceptionPreUpdate);
 
   return {
+    callbackContext: {
+      request: httpServerMock.createKibanaRequest(),
+    },
     exceptionPreCreate,
     exceptionPreUpdate,
     extensionPointStorage,

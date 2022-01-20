@@ -114,6 +114,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
         return {
           getExceptionListClient: (): ExceptionListClient =>
             new ExceptionListClient({
+              request,
               savedObjectsClient,
               serverExtensionsClient: this.extensionPoints.getClient(),
               user,

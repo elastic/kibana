@@ -56,7 +56,7 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
-import { EndpointFleetServicesInterface } from '../endpoint_fleet_services';
+import { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];

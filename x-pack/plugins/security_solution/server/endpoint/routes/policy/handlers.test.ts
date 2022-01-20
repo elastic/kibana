@@ -11,11 +11,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import {
-  createMockAgentClient,
-  createMockAgentService,
-  createPackagePolicyServiceMock,
-} from '../../../../../fleet/server/mocks';
+import { createMockAgentClient, createMockAgentService } from '../../../../../fleet/server/mocks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
 import {
   getHostPolicyResponseHandler,
@@ -251,10 +247,20 @@ describe('test policy response handler', () => {
     let policyHandler: ReturnType<typeof getPolicyListHandler>;
 
     beforeEach(() => {
+      const endpointAppContextServiceStartContract =
+        createMockEndpointAppContextServiceStartContract();
+
       mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
-      mockPackagePolicyService = createPackagePolicyServiceMock();
+
+      if (endpointAppContextServiceStartContract.packagePolicyService) {
+        mockPackagePolicyService =
+          endpointAppContextServiceStartContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
+      } else {
+        expect(endpointAppContextServiceStartContract.packagePolicyService).toBeTruthy();
+      }
+
       mockPackagePolicyService.list.mockImplementation(() => {
         return Promise.resolve({
           items: [],
@@ -265,10 +271,7 @@ describe('test policy response handler', () => {
       });
       endpointAppContextService = new EndpointAppContextService();
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-      endpointAppContextService.start({
-        ...createMockEndpointAppContextServiceStartContract(),
-        ...{ packagePolicyService: mockPackagePolicyService },
-      });
+      endpointAppContextService.start(endpointAppContextServiceStartContract);
       policyHandler = getPolicyListHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
@@ -289,6 +292,7 @@ describe('test policy response handler', () => {
         mockRequest,
         mockResponse
       );
+      expect(mockPackagePolicyService.list).toHaveBeenCalled();
       expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         perPage: undefined,

@@ -5,10 +5,34 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
-import { POLICY_REFERENCE_PREFIX } from '../service/trusted_apps/mapping';
 import { ConditionEntryField } from '../types';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
+
+/** Utility that removes null and undefined from a Type's property value */
+type NonNullableTypeProperties<T> = {
+  [P in keyof T]-?: NonNullable<T[P]>;
+};
+
+/**
+ * Normalizes the create type to remove `undefined`/`null` from the returned type since the generator or sure to
+ * create a value for (almost) all properties
+ */
+type CreateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
+  Omit<CreateExceptionListItemSchema, 'meta'>
+> &
+  Pick<CreateExceptionListItemSchema, 'meta'>;
+
+type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
+  Omit<UpdateExceptionListItemSchema, 'meta'>
+> &
+  Pick<UpdateExceptionListItemSchema, 'meta'>;
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
@@ -38,16 +62,136 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       id: this.seededUUIDv4(),
       item_id: this.seededUUIDv4(),
       list_id: 'endpoint_list_id',
-      meta: {},
+      meta: undefined,
       name: `Generated Exception (${this.randomString(5)})`,
       namespace_type: 'agnostic',
       os_types: [this.randomOSFamily()] as ExceptionListItemSchema['os_types'],
-      tags: [`${POLICY_REFERENCE_PREFIX}all`],
+      tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}all`],
       tie_breaker_id: this.seededUUIDv4(),
       type: 'simple',
       updated_at: '2020-04-20T15:25:31.830Z',
       updated_by: this.randomUser(),
       ...(overrides || {}),
+    };
+  }
+
+  generateForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generate();
+
+    return {
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      ...overrides,
+    };
+  }
+
+  generateTrustedApp(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    const trustedApp = this.generate(overrides);
+
+    return {
+      ...trustedApp,
+      name: `Trusted app (${this.randomString(5)})`,
+      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      // Remove the hash field which the generator above currently still sets to a field that is not
+      // actually valid when used with the Exception List
+      entries: trustedApp.entries.filter((entry) => entry.field !== ConditionEntryField.HASH),
+    };
+  }
+
+  generateTrustedAppForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateTrustedApp();
+
+    return {
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      ...overrides,
+    };
+  }
+
+  generateTrustedAppForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateTrustedApp();
+
+    return {
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version: _version ?? 'some value',
+      ...overrides,
     };
   }
 }
