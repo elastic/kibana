@@ -21,7 +21,7 @@ import {
   BarSeriesSpec,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   TotalFeatureImportance,
   isClassificationTotalFeatureImportance,

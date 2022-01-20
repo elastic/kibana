@@ -6,7 +6,7 @@
  */
 
 import { sum, round } from 'lodash';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup } from '../../../../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';

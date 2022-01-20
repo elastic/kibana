@@ -8,28 +8,30 @@
 
 const Path = require('path');
 
+// extracted const vars
 /**
  * Absolute path to the distributable directory
  */
-exports.distDir = Path.resolve(__dirname, '../shared_built_assets');
+const distDir = Path.resolve(__dirname, '../shared_built_assets');
 
 /**
  * Filename of the main bundle file in the distributable directory
  */
-exports.jsFilename = 'kbn-ui-shared-deps-src.js';
+const jsFilename = 'kbn-ui-shared-deps-src.js';
 
 /**
  * Filename of the main bundle file in the distributable directory
  */
-exports.cssDistFilename = 'kbn-ui-shared-deps-src.css';
+const cssDistFilename = 'kbn-ui-shared-deps-src.css';
 
 /**
  * Externals mapping inteded to be used in a webpack config
  */
-exports.externals = {
+const externals = {
   /**
    * stateful deps
    */
+  '@kbn/ui-theme': '__kbnSharedDeps__.KbnUiTheme',
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
@@ -43,7 +45,6 @@ exports.externals = {
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
-  '@kbn/ui-shared-deps-src/theme': '__kbnSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
 
@@ -77,3 +78,5 @@ exports.externals = {
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
 };
+
+module.exports = { distDir, jsFilename, cssDistFilename, externals };

@@ -2950,6 +2950,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flot-charts@link:bazel-bin/packages/kbn-flot-charts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
@@ -3111,6 +3115,10 @@
   uid ""
 
 "@kbn/ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
   version "0.0.0"
   uid ""
 
@@ -5957,6 +5965,14 @@
   uid ""
 
 "@types/kbn__ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
   version "0.0.0"
   uid ""
 

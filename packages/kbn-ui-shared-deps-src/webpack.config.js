@@ -12,7 +12,7 @@ const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
-const UiSharedDepsSrc = require('./src');
+const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
@@ -33,7 +33,7 @@ module.exports = {
   context: __dirname,
   devtool: 'cheap-source-map',
   output: {
-    path: UiSharedDepsSrc.distDir,
+    path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
     chunkFilename: 'kbn-ui-shared-deps-src.chunk.[id].js',
     sourceMapFilename: '[file].map',
@@ -52,17 +52,6 @@ module.exports = {
             loader: UiSharedDepsNpm.publicPathLoader,
             options: {
               key: 'kbn-ui-shared-deps-src',
-            },
-          },
-        ],
-      },
-      {
-        include: [require.resolve('./src/theme.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
             },
           },
         ],

@@ -7,7 +7,7 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { isColorDark } from '@elastic/eui';
 import type { Datatable } from 'src/plugins/expressions/public';
 import {

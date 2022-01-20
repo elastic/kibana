@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  euiLightVars as lightTheme,
-  euiDarkVars as darkTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import {
   JobCreatorType,
   isMultiMetricJobCreator,
