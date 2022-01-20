@@ -18,6 +18,11 @@ describe('Fleet startup', () => {
     cy.get('.euiBadge').contains('Healthy');
   });
 
+  it('should display Add agent button and Healthy agent once Fleet Agent page loaded #2', () => {
+    cy.getBySel(ADD_AGENT_BUTTON).contains('Add agent');
+    cy.get('.euiBadge').contains('Healthy');
+  });
+
   it('should display default agent policies on agent policies tab', () => {
     cy.getBySel(AGENT_POLICIES_TAB).click();
     cy.get('.euiLink').contains('Default policy');
