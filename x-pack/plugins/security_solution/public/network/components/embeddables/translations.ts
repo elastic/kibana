@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const EMBEDDABLE_HEADER_TITLE = i18n.translate(
   'xpack.securitySolution.components.embeddables.embeddedMap.embeddableHeaderTitle',
   {
-    defaultMessage: 'Network Map',
+    defaultMessage: 'Network map',
   }
 );
 

@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
@@ -105,8 +105,13 @@ export const EmbeddedMapComponent = ({
   const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | undefined | ErrorEmbeddable>(
     undefined
   );
+
+  const { services } = useKibana();
+  const { storage } = services;
+
   const [isError, setIsError] = useState(false);
   const [isIndexError, setIsIndexError] = useState(false);
+  const [storageValue, setStorageValue] = useState(storage.get(NETWORK_MAP_VISIBLE) ?? true);
 
   const [, dispatchToaster] = useStateToaster();
 
@@ -126,9 +131,6 @@ export const EmbeddedMapComponent = ({
   // the Redux store, theme provider, etc, which is required to register and un-register the draggable
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createPortalNode(), []);
-
-  const { services } = useKibana();
-  const { storage } = services;
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
@@ -235,18 +237,22 @@ export const EmbeddedMapComponent = ({
     }
   }, [embeddable, startDate, endDate]);
 
-  const setDefaultMapVisibility = (isOpen: boolean) => {
-    storage.set(NETWORK_MAP_VISIBLE, isOpen);
-  };
+  const setDefaultMapVisibility = useCallback(
+    (isOpen: boolean) => {
+      storage.set(NETWORK_MAP_VISIBLE, isOpen);
+      setStorageValue(isOpen);
+    },
+    [storage]
+  );
 
   return isError ? null : (
     <StyledEuiAccordion
       onToggle={setDefaultMapVisibility}
-      id={i18n.EMBEDDABLE_HEADER_TITLE}
+      id={'network-map'}
       arrowDisplay="right"
       arrowProps={{
         color: 'primary',
-        'data-test-subj': 'toggle-network-map',
+        'data-test-subj': `${storageValue}-toggle-network-map`,
       }}
       buttonContent={<strong>{i18n.EMBEDDABLE_HEADER_TITLE}</strong>}
       extraAction={
@@ -257,7 +263,7 @@ export const EmbeddedMapComponent = ({
         </StyledEuiText>
       }
       paddingSize="none"
-      initialIsOpen={storage.get(NETWORK_MAP_VISIBLE) ?? true}
+      initialIsOpen={storageValue}
     >
       <Embeddable>
         <InPortal node={portalNode}>

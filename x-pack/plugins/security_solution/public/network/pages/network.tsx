@@ -176,22 +176,23 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 />
 
                 {canUseMaps && (
-                  <EuiPanel
-                    hasBorder
-                    paddingSize="none"
-                    data-test-subj="conditional-embeddable-map"
-                  >
-                    <EmbeddedMap
-                      query={query}
-                      filters={filters}
-                      startDate={from}
-                      endDate={to}
-                      setQuery={setQuery}
-                    />
-                  </EuiPanel>
+                  <>
+                    <EuiPanel
+                      hasBorder
+                      paddingSize="none"
+                      data-test-subj="conditional-embeddable-map"
+                    >
+                      <EmbeddedMap
+                        query={query}
+                        filters={filters}
+                        startDate={from}
+                        endDate={to}
+                        setQuery={setQuery}
+                      />
+                    </EuiPanel>
+                    <EuiSpacer />
+                  </>
                 )}
-
-                <EuiSpacer />
 
                 <NetworkKpiComponent
                   filterQuery={filterQuery}
