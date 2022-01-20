@@ -39,7 +39,7 @@ import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
-import { DataViewEditorStart } from '../../data_view_editor/target/types/public';
+import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 
 export interface HistoryLocationState {
   referrer: string;

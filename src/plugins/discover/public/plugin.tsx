@@ -64,7 +64,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { DataViewEditorStart } from '../../data_view_editor/target/types/public';
+import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
