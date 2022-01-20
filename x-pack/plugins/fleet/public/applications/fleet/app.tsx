@@ -29,6 +29,8 @@ import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/com
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
+import { useAuthz } from './hooks';
+
 import {
   ConfigContext,
   FleetStatusProvider,
@@ -80,7 +82,7 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
 
-  if (error === 'MISSING_PRIVILEGE') {
+  if (error === 'MISSING_PRIVILEGES') {
     return (
       <Panel>
         <EuiEmptyPrompt
@@ -128,10 +130,11 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
-  const { notifications, application } = core;
-  const { capabilities } = application;
-  const hasFleetWritePermissions = capabilities.fleetv2.all;
-  const hasIntegrationsPermissions = capabilities.fleet.all || capabilities.fleet.read;
+  const { notifications } = core;
+
+  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const integrations = useAuthz().integrations;
+  const hasIntegrationsPermissions = integrations.installPackages || integrations.readPackageInfo;
   const hasPrivileges = hasFleetWritePermissions && hasIntegrationsPermissions;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
@@ -165,7 +168,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
               });
             }
             if (!hasPrivileges) {
-              setPermissionsError('MISSING_PRIVILEGE');
+              setPermissionsError('MISSING_PRIVILEGES');
             }
           } catch (err) {
             setInitializationError(err);

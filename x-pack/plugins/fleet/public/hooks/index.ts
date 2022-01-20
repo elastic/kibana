@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { useAuthz } from './use_capabilities';
+export { useAuthz } from './use_authz';
 export { useStartServices } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useKibanaVersion, KibanaVersionContext } from './use_kibana_version';

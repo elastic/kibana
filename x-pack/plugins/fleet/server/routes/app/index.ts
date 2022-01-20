@@ -31,7 +31,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler = async (
       return response.ok({
         body: {
           success: false,
-          error: 'MISSING_PRIVILEGE',
+          error: 'MISSING_PRIVILEGES',
         } as CheckPermissionsResponse,
       });
     }
