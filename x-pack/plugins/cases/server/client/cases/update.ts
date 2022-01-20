@@ -54,22 +54,6 @@ import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
 
 /**
- * Throws an error if any of the requests attempt to update a collection style cases' status field.
- */
-function throwIfUpdateStatusOfCollection(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingStatusOfCollection = requests.filter(
-    ({ updateReq }) => updateReq.status !== undefined
-  );
-
-  if (requestsUpdatingStatusOfCollection.length > 0) {
-    const ids = requestsUpdatingStatusOfCollection.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `Updating the status of a collection is not allowed ids: [${ids.join(', ')}]`
-    );
-  }
-}
-
-/**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
 function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
@@ -384,7 +368,6 @@ export const update = async (
 
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
-    throwIfUpdateStatusOfCollection(updateCases);
     await throwIfInvalidUpdateOfTypeWithAlerts({
       requests: updateCases,
       caseService,

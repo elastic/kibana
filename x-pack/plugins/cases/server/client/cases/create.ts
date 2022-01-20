@@ -49,7 +49,7 @@ export const create = async (
   const query = pipe(
     // decode with the defaulted type field
     excess(CasesClientPostRequestRt).decode({
-      data,
+      ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)
   );
