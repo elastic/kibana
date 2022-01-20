@@ -8,17 +8,16 @@ import { i18n } from '@kbn/i18n';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { inputsActions } from '../../store/actions';
 import { isIndexNotFoundError } from '../../utils/exceptions';
-import { getHostRiskIndex, HostsRiskScore } from '../../../../common/search_strategy';
+import { Direction, getHostRiskIndex, HostsRiskScore } from '../../../../common/search_strategy';
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { HostRiskScoreQueryId } from './types';
 
-export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
 
 const isRecord = (item: unknown): item is Record<string, unknown> =>
@@ -37,12 +36,23 @@ export interface HostRisk {
   result?: HostsRiskScore[];
 }
 
+/**
+ * @param queryId Provide this parameter when using query inspector to identify the query.
+ */
 export const useHostsRiskScore = ({
   timerange,
   hostName,
+  onlyLatest = true,
+  queryId = HostRiskScoreQueryId.DEFAULT,
+  sortOrder,
+  limit,
 }: {
   timerange?: { to: string; from: string };
   hostName?: string;
+  onlyLatest?: boolean;
+  queryId?: HostRiskScoreQueryId;
+  limit?: number;
+  sortOrder?: Direction;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
@@ -56,8 +66,8 @@ export const useHostsRiskScore = ({
   const { error, result, start, loading: isHostsRiskScoreLoading } = useHostsRiskScoreComplete();
 
   const deleteQuery = useCallback(() => {
-    dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));
-  }, [dispatch]);
+    dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: queryId }));
+  }, [dispatch, queryId]);
 
   useEffect(() => {
     if (!isHostsRiskScoreLoading && result) {
@@ -66,7 +76,7 @@ export const useHostsRiskScore = ({
       dispatch(
         inputsActions.setQuery({
           inputId: 'global',
-          id: QUERY_ID,
+          id: queryId,
           inspect: {
             dsl: result.inspect?.dsl ?? [],
             response: [JSON.stringify(result.rawResponse, null, 2)],
@@ -77,7 +87,7 @@ export const useHostsRiskScore = ({
       );
     }
     return deleteQuery;
-  }, [deleteQuery, dispatch, isHostsRiskScoreLoading, result, setIsModuleEnabled]);
+  }, [deleteQuery, dispatch, isHostsRiskScoreLoading, result, setIsModuleEnabled, queryId]);
 
   useEffect(() => {
     if (error) {
@@ -105,11 +115,24 @@ export const useHostsRiskScore = ({
             ? { to: timerange.to, from: timerange.from, interval: '' }
             : undefined,
           hostNames: hostName ? [hostName] : undefined,
-          defaultIndex: [getHostRiskIndex(space.id)],
+          defaultIndex: [getHostRiskIndex(space.id, onlyLatest)],
+          onlyLatest,
+          sortOrder,
+          limit,
         });
       });
     }
-  }, [start, data, timerange, hostName, riskyHostsFeatureEnabled, spaces]);
+  }, [
+    start,
+    data,
+    timerange,
+    hostName,
+    onlyLatest,
+    riskyHostsFeatureEnabled,
+    spaces,
+    sortOrder,
+    limit,
+  ]);
 
   if ((!hostName && !timerange) || !riskyHostsFeatureEnabled) {
     return null;
