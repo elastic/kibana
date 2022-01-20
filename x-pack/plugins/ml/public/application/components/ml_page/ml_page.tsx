@@ -98,7 +98,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           {
             id: '',
             name: '',
-            items: useSideNavItems(activeRoute.id),
+            items: useSideNavItems(activeRoute),
           },
         ],
       }}
