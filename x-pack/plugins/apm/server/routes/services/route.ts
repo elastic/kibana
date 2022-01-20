@@ -64,6 +64,8 @@ const servicesRoute = createApmServerRoute({
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
+      start,
+      end,
     });
 
     return getServices({
