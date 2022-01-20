@@ -40,7 +40,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
     `;
 
     const children: CSSObject = {
-      position: 'relative',
       color: colors.ghost,
       marginLeft: '16px',
       paddingLeft: '8px',

@@ -105,6 +105,7 @@ export const getCurlScriptEnvVars = () => ({
 
 export const postRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
+console.log(env);
   const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
   const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
   const detectionsUserScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh`;

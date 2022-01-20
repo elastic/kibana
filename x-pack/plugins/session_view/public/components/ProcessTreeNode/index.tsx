@@ -12,7 +12,7 @@
  * 2.0.
  */
 import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
-import { EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
 import { sortProcesses } from '../../../common/utils/sort_processes';
@@ -44,6 +44,7 @@ export function ProcessTreeNode({
 
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
+  const [showGroupLeadersOnly, setShowGroupLeadersOnly] = useState(isSessionLeader);
   const { searchMatched } = process;
 
   useEffect(() => {
@@ -98,6 +99,16 @@ export function ProcessTreeNode({
       children = [...children, ...orphans].sort(sortProcesses);
     }
 
+    // this toggle helps to de-noise the session leader process groups
+    // typically caused by bashrc, shell startup, shell completions, builtins
+    if (showGroupLeadersOnly) {
+      children = children.filter(process => {
+        const details = process.getDetails();
+
+        return details.process.pgid === details.process.pid || process.searchMatched;
+      });
+    }
+
     if (!childrenExpanded || !children || children.length === 0) {
       return;
     }
@@ -127,21 +138,54 @@ export function ProcessTreeNode({
   const renderButtons = () => {
     const buttons = [];
 
-    if (!isSessionLeader && process.children.length > 0) {
-      buttons.push(
-        <EuiButton
-          key="child-processes-button"
-          css={styles.getButtonStyle(ButtonType.children)}
-          onClick={() => setChildrenExpanded(!childrenExpanded)}
-          data-test-subj="processTreeNodeChildProcessesButton"
-        >
-          <FormattedMessage
-            id="xpack.sessionView.childProcesses"
-            defaultMessage="Child processes"
-          />
-          <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
-        </EuiButton>
-      );
+    if (process.children.length > 0) {
+      if (isSessionLeader) {
+        buttons.push(
+          <EuiToolTip
+            position="top"
+            content={
+              <p>
+                <FormattedMessage
+                  id="xpack.sessionView.groupLeaderTooltip"
+                  defaultMessage="Hides or shows supplementary processes in the session leader process group. This typically includes noisy fork events, auto completions and other shell startup activity."
+                />
+              </p>
+            }
+          >
+            <EuiButton
+              key="child-processes-button"
+              css={styles.getButtonStyle(ButtonType.children)}
+              onClick={() => setShowGroupLeadersOnly(!showGroupLeadersOnly)}
+              data-test-subj="processTreeNodeChildProcessesButton"
+            >
+              <FormattedMessage
+                id="xpack.sessionView.plusCountMore"
+                defaultMessage="+{count} more"
+                values={{
+                  count: process.children.length - 1
+                }}
+              />
+              <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(showGroupLeadersOnly)} />
+            </EuiButton>
+          </EuiToolTip>
+        );
+
+      } else {
+        buttons.push(
+          <EuiButton
+            key="child-processes-button"
+            css={styles.getButtonStyle(ButtonType.children)}
+            onClick={() => setChildrenExpanded(!childrenExpanded)}
+            data-test-subj="processTreeNodeChildProcessesButton"
+          >
+            <FormattedMessage
+              id="xpack.sessionView.childProcesses"
+              defaultMessage="Child processes"
+            />
+            <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
+          </EuiButton>
+        );
+      }
     }
 
     if (alerts.length) {
