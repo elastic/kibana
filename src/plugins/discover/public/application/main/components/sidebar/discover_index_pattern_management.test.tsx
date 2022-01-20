@@ -103,4 +103,14 @@ describe('Discover DataView Management', () => {
     manageButton.simulate('click');
     expect(mockServices.core.application.navigateToApp).toHaveBeenCalled();
   });
+
+  test('click on add dataView button executes createNewDataView callback', () => {
+    const component = mountComponent();
+    const button = findTestSubject(component, 'discoverIndexPatternActions');
+    button.simulate('click');
+
+    const manageButton = findTestSubject(component, 'dataview-create-new');
+    manageButton.simulate('click');
+    expect(createNewDataView).toHaveBeenCalled();
+  });
 });
