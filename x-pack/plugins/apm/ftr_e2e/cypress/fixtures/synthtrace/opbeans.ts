@@ -40,7 +40,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             .timestamp(timestamp)
             .duration(50)
             .success()
-            .destination('postgresql'),
+            .destination('postgresql')
         )
         .serialize(),
       ...opbeansNode

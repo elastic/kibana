@@ -13,7 +13,7 @@ import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions:RunOptions) => {
+const scenario: Scenario = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   return {
@@ -34,6 +34,7 @@ const scenario: Scenario = async (runOptions:RunOptions) => {
             return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
           });
           return [...clusterEvents, ...kibanaEvents];
+          // TODO scenario needs to influence write
           // const clusterOutputs = smEventsToElasticsearchOutput(
           //   clusterEvents,
           //   '.monitoring-es-7-synthtrace'

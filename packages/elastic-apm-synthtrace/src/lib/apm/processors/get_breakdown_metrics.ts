@@ -43,7 +43,7 @@ export function getBreakdownMetrics(events: ApmFields[]) {
     const txEvents = txWithSpans[transactionId];
     const transaction = txEvents.find((event) => event['processor.event'] === 'transaction');
     if (transaction === undefined) {
-      return
+      return;
     }
 
     const eventsById: Record<string, ApmFields> = {};

@@ -17,14 +17,15 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
 
   const { generate } = await scenario(runOptions);
 
-  //if we want to generate a maximum number of documents reverse generation to descend.
-  [from, to] = (runOptions.maxDocs) ? [to, from] : [from, to]
+  // if we want to generate a maximum number of documents reverse generation to descend.
+  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
 
-  logger.info(`Generating data from ${from} to ${to}`)
+  logger.info(`Generating data from ${from} to ${to}`);
 
   const events = logger.perf('generate_scenario', () => generate({ from, to }));
 
   const clientWorkers = runOptions.clientWorkers;
-  await logger.perf('index_scenario', () => esClient.index(events, clientWorkers, runOptions.maxDocs));
-
+  await logger.perf('index_scenario', () =>
+    esClient.index(events, clientWorkers, runOptions.maxDocs)
+  );
 }

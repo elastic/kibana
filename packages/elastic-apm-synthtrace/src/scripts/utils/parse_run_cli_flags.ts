@@ -47,7 +47,20 @@ export function parseRunCliFlags(flags: RunCliFlags) {
   }
 
   return {
-    ...pick(flags, 'maxDocs', 'target', 'cloudId', 'username', 'password', 'workers', 'clientWorkers', 'batchSize', 'writeTarget', 'numShards', 'scenarioOpts'),
+    ...pick(
+      flags,
+      'maxDocs',
+      'target',
+      'cloudId',
+      'username',
+      'password',
+      'workers',
+      'clientWorkers',
+      'batchSize',
+      'writeTarget',
+      'numShards',
+      'scenarioOpts'
+    ),
     intervalInMs,
     bucketSizeInMs,
     logLevel: parsedLogLevel,

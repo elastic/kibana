@@ -11,7 +11,7 @@ import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions:RunOptions) => {
+const scenario: Scenario = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   if (!runOptions.writeTarget) {
@@ -31,16 +31,6 @@ const scenario: Scenario = async (runOptions:RunOptions) => {
             return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
           });
           return events;
-
-          // return logger.perf('sm_events_to_es_output', () => {
-          //   const smEvents = eventsToElasticsearchOutput({ events, writeTarget });
-          //   smEvents.forEach((event: any) => {
-          //     const ts = event._source['@timestamp'];
-          //     delete event._source['@timestamp'];
-          //     event._source.timestamp = ts;
-          //   });
-          //   return smEvents;
-          // });
         });
     },
   };

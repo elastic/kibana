@@ -29,27 +29,25 @@ describe('breakdown metrics', () => {
 
     const range = timerange(start, new Date(start.getTime() + INTERVALS * 30 * 1000));
 
-    const listSpans =
-        range
-          .interval('30s')
-          .rate(LIST_RATE)
-          .spans((timestamp) =>
+    const listSpans = range
+      .interval('30s')
+      .rate(LIST_RATE)
+      .spans((timestamp) =>
+        javaInstance
+          .transaction('GET /api/product/list')
+          .timestamp(timestamp)
+          .duration(1000)
+          .children(
             javaInstance
-              .transaction('GET /api/product/list')
-              .timestamp(timestamp)
-              .duration(1000)
-              .children(
-                javaInstance
-                  .span('GET apm-*/_search', 'db', 'elasticsearch')
-                  .timestamp(timestamp + 150)
-                  .duration(500),
-                javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
-              )
-              .serialize()
-          );
+              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .timestamp(timestamp + 150)
+              .duration(500),
+            javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
+          )
+          .serialize()
+      );
 
-    const productPageSpans =
-      range
+    const productPageSpans = range
       .interval('30s')
       .rate(ID_RATE)
       .spans((timestamp) =>
@@ -70,11 +68,14 @@ describe('breakdown metrics', () => {
               )
           )
           .serialize()
-      )
+      );
 
-    const processor = new StreamProcessor({processors: [getBreakdownMetrics], flushInterval: "15m"});
-    events =
-      processor.streamToArray(listSpans, productPageSpans)
+    const processor = new StreamProcessor({
+      processors: [getBreakdownMetrics],
+      flushInterval: '15m',
+    });
+    events = processor
+      .streamToArray(listSpans, productPageSpans)
       .filter((event) => event['processor.event'] === 'metric');
   });
 

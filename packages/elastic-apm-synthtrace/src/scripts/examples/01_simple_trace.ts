@@ -12,7 +12,7 @@ import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions:RunOptions) => {
+const scenario: Scenario = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   const { numServices = 3 } = runOptions.scenarioOpts || {};
@@ -27,8 +27,9 @@ const scenario: Scenario = async (runOptions:RunOptions) => {
 
       const failedTimestamps = range.interval('1s').rate(1);
 
-      const instances = [...Array(numServices).keys()]
-          .map(index => apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance'));
+      const instances = [...Array(numServices).keys()].map((index) =>
+        apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance')
+      );
       const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = successfulTimestamps.spans((timestamp) =>
           instance
@@ -59,9 +60,7 @@ const scenario: Scenario = async (runOptions:RunOptions) => {
             .duration(1000)
             .failure()
             .errors(
-              instance
-                .error('[ResponseError] index_not_found_exception')
-                .timestamp(timestamp + 50)
+              instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
             )
             .serialize()
         );
@@ -87,20 +86,6 @@ const scenario: Scenario = async (runOptions:RunOptions) => {
       return instances
         .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
         .reduce((p, c) => p.concat(c));
-      //
-      // return logger.perf('apm_events_to_es_output', () =>
-      //   apmEventsToElasticsearchOutput({
-      //     events: [
-      //       ...events,
-      //       ...logger.perf('get_transaction_metrics', () => apm.getTransactionMetrics(events)),
-      //       ...logger.perf('get_span_destination_metrics', () =>
-      //         apm.getSpanDestinationMetrics(events)
-      //       ),
-      //       ...logger.perf('get_breakdown_metrics', () => apm.getBreakdownMetrics(events)),
-      //     ],
-      //     writeTargets,
-      //   })
-      // );
     },
   };
 };

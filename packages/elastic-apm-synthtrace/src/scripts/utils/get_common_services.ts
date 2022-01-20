@@ -12,17 +12,15 @@ import { RunOptions } from './parse_run_cli_flags';
 
 export function getCommonServices({ target, cloudId, username, password, logLevel }: RunOptions) {
   if (!target && !cloudId) {
-    throw Error("target or cloudId needs to be specified");
+    throw Error('target or cloudId needs to be specified');
   }
-  const options: ClientOptions = (!!target)
-    ? { node: target }
-    : {cloud: {id: cloudId! }};
+  const options: ClientOptions = !!target ? { node: target } : { cloud: { id: cloudId! } };
   options.auth = {
-    username: username,
-    password: password,
-  }
+    username,
+    password,
+  };
 
-  const client = new Client(options)
+  const client = new Client(options);
 
   const logger = createLogger(logLevel);
 

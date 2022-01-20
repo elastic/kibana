@@ -31,7 +31,7 @@ export type ApmUserAgentFields = Partial<{
 export interface ApmException {
   message: string;
 }
-export type Observer = {
+export interface Observer {
   version: string;
   version_major: number;
 }
@@ -52,7 +52,7 @@ export type ApmFields = Fields &
     'host.name': string;
     'kubernetes.pod.uid': string;
     'metricset.name': string;
-    'observer': Observer;
+    observer: Observer;
     'parent.id': string;
     'processor.event': string;
     'processor.name': string;

@@ -39,7 +39,7 @@ describe('simple trace', () => {
           )
           .serialize()
       )
-      .toArray()
+      .toArray();
   });
 
   it('generates the same data every time', () => {

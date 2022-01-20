@@ -18,19 +18,19 @@ export interface ApmElasticsearchOutputWriteTargets {
 
 export async function getApmWriteTargets({
   client,
-  forceDataStreams
+  forceDataStreams,
 }: {
   client: Client;
-  forceDataStreams?: boolean
+  forceDataStreams?: boolean;
 }): Promise<ApmElasticsearchOutputWriteTargets> {
   if (forceDataStreams) {
     return {
-      transaction: "traces-apm-default",
-      span: "traces-apm-default",
-      metric: "metrics-apm.internal-default",
-      app_metric: "metrics-apm.app-default",
-      error: "logs-apm.error-default",
-    }
+      transaction: 'traces-apm-default',
+      span: 'traces-apm-default',
+      metric: 'metrics-apm.internal-default',
+      app_metric: 'metrics-apm.app-default',
+      error: 'logs-apm.error-default',
+    };
   }
 
   const [indicesResponse, datastreamsResponse] = await Promise.all([
@@ -66,7 +66,6 @@ export async function getApmWriteTargets({
     metric: metricsTarget,
     app_metric: metricsTarget,
     error: getDataStreamName('logs-apm') || getAlias('-error'),
-
   };
 
   if (!targets.transaction || !targets.span || !targets.metric || !targets.error) {

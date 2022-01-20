@@ -28,18 +28,19 @@ function options(y: Argv) {
       string: true,
     })
     .option('cloudId', {
-      describe: 'Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration',
+      describe:
+        'Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration',
       string: true,
     })
     .option('username', {
       describe: 'Basic authentication username',
       string: true,
-      demandOption: true
+      demandOption: true,
     })
     .option('password', {
       describe: 'Basic authentication password',
       string: true,
-      demandOption: true
+      demandOption: true,
     })
     .option('from', {
       description: 'The start of the time window',
@@ -52,11 +53,13 @@ function options(y: Argv) {
       boolean: true,
     })
     .option('maxDocs', {
-      description: 'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
+      description:
+        'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
       number: true,
     })
     .option('numShards', {
-      description: 'Updates the component templates to update the number of primary shards, requires cloudId to be provided',
+      description:
+        'Updates the component templates to update the number of primary shards, requires cloudId to be provided',
       number: true,
     })
     .option('clean', {
@@ -121,21 +124,24 @@ yargs(process.argv.slice(2))
 
     const live = argv.live;
 
-
     let forceDataStreams = false;
     if (runOptions.cloudId) {
       const kibanaClient = new ApmSynthtraceKibanaClient(logger);
-      await kibanaClient.migrateCloudToManagedApm(runOptions.cloudId, runOptions.username, runOptions.password);
+      await kibanaClient.migrateCloudToManagedApm(
+        runOptions.cloudId,
+        runOptions.username,
+        runOptions.password
+      );
       forceDataStreams = true;
     }
     const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
 
     if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
-      await esClient.updateComponentTemplates(runOptions.numShards)
+      await esClient.updateComponentTemplates(runOptions.numShards);
     }
 
     if (argv.clean) {
-      await esClient.clean()
+      await esClient.clean();
     }
 
     logger.info(

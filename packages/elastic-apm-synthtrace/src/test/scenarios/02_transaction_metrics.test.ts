@@ -24,31 +24,24 @@ describe('transaction metrics', () => {
     );
 
     const span = (timestamp: number) =>
-      javaInstance
-        .transaction('GET /api/product/list')
-        .duration(1000)
-        .timestamp(timestamp)
+      javaInstance.transaction('GET /api/product/list').duration(1000).timestamp(timestamp);
 
-    const processor = new StreamProcessor({processors: [getTransactionMetrics], flushInterval: "15m"});
-    events = processor.streamToArray(
-      range
-        .interval('1m')
-        .rate(25)
-        .spans((timestamp) =>
-          span(timestamp)
-            .success()
-            .serialize()
-        ),
-      range
-        .interval('1m')
-        .rate(50)
-        .spans((timestamp) =>
-          span(timestamp)
-            .failure()
-            .serialize()
-       )
-     )
-    .filter(fields => fields['metricset.name'] === 'transaction');
+    const processor = new StreamProcessor({
+      processors: [getTransactionMetrics],
+      flushInterval: '15m',
+    });
+    events = processor
+      .streamToArray(
+        range
+          .interval('1m')
+          .rate(25)
+          .spans((timestamp) => span(timestamp).success().serialize()),
+        range
+          .interval('1m')
+          .rate(50)
+          .spans((timestamp) => span(timestamp).failure().serialize())
+      )
+      .filter((fields) => fields['metricset.name'] === 'transaction');
   });
 
   it('generates the right amount of transaction metrics', () => {
