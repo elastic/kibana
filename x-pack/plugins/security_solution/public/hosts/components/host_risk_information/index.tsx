@@ -21,10 +21,11 @@ import {
   EuiButton,
   EuiSpacer,
   EuiBasicTableColumn,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { HostRiskScore } from '../common/host_risk_score';
@@ -61,16 +62,8 @@ const tableItems: TableItem[] = [
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 
-export const HostRiskInformation = () => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  const handleOnClose = useCallback(() => {
-    setIsFlyoutVisible(false);
-  }, []);
-
-  const handleOnOpen = useCallback(() => {
-    setIsFlyoutVisible(true);
-  }, []);
+export const HostRiskInformationButtonIcon = memo(() => {
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
     <>
@@ -81,11 +74,39 @@ export const HostRiskInformation = () => {
         aria-label={i18n.INFORMATION_ARIA_LABEL}
         onClick={handleOnOpen}
         className={HOST_RISK_INFO_BUTTON_CLASS}
-        data-test-subj="open-risk-information-flyout"
+        data-test-subj="open-risk-information-flyout-trigger"
       />
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
+});
+HostRiskInformationButtonIcon.displayName = 'HostRiskInformationButtonIcon';
+
+export const HostRiskInformationButtonEmpty = memo(() => {
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+
+  return (
+    <>
+      <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
+        {i18n.INFO_BUTTON_TEXT}
+      </EuiButtonEmpty>
+      {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
+    </>
+  );
+});
+HostRiskInformationButtonEmpty.displayName = 'HostRiskInformationButtonEmpty';
+
+const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOnClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const handleOnOpen = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+  return [isOpen, handleOnOpen, handleOnClose];
 };
 
 const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {
@@ -94,7 +115,13 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
   });
 
   return (
-    <EuiFlyout ownFocus onClose={handleOnClose} aria-labelledby={simpleFlyoutTitleId} size={450}>
+    <EuiFlyout
+      ownFocus
+      onClose={handleOnClose}
+      aria-labelledby={simpleFlyoutTitleId}
+      size={450}
+      data-test-subj="open-risk-information-flyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={simpleFlyoutTitleId}>{i18n.TITLE}</h2>
