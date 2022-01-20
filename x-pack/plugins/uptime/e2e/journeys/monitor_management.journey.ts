@@ -37,6 +37,8 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
 
   step('login to Kibana', async () => {
     await uptime.loginToKibana();
+    const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
+    expect(await invalid.isVisible()).toBeFalsy();
   });
 
   step('create monitor http monitor', async () => {
