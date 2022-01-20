@@ -35,7 +35,7 @@ export interface TagsFormData {
   overwrite: boolean;
 }
 
-export const schema: FormSchema<TagsFormData> = {
+const schema: FormSchema<TagsFormData> = {
   tags: {
     fieldsToValidateOnChange: ['tags'],
     type: FIELD_TYPES.COMBO_BOX,

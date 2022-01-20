@@ -33,6 +33,20 @@ import {
 } from './forms/index_patterns_form';
 import { tagsFormConfiguration, tagsFormDataToEditActionPayload } from './forms/tags_form';
 
+const isIndexPatternsForm = (editAction: BulkActionEditType) =>
+  [
+    BulkActionEditType.add_index_patterns,
+    BulkActionEditType.delete_index_patterns,
+    BulkActionEditType.set_index_patterns,
+  ].includes(editAction);
+
+const isTagsForm = (editAction: BulkActionEditType) =>
+  [
+    BulkActionEditType.add_tags,
+    BulkActionEditType.delete_tags,
+    BulkActionEditType.set_tags,
+  ].includes(editAction);
+
 interface Props {
   onClose: () => void;
   onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
@@ -43,24 +57,17 @@ interface Props {
 const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }: Props) => {
   const {
     schema,
-    Component: FormComponent,
+    Component: FormFieldsComponent,
     initialFormData,
     formTitle,
   } = useMemo(() => {
-    switch (editAction) {
-      case BulkActionEditType.add_index_patterns:
-      case BulkActionEditType.delete_index_patterns:
-      case BulkActionEditType.set_index_patterns:
-        return indexPatternsFormConfiguration(editAction);
-
-      case BulkActionEditType.add_tags:
-      case BulkActionEditType.delete_tags:
-      case BulkActionEditType.set_tags:
-        return tagsFormConfiguration(editAction);
-
-      default:
-        throw Error('No available action');
+    if (isIndexPatternsForm(editAction)) {
+      return indexPatternsFormConfiguration(editAction);
     }
+    if (isTagsForm(editAction)) {
+      return tagsFormConfiguration(editAction);
+    }
+    throw Error('Edit action is not valid');
   }, [editAction]);
 
   const { form } = useForm<typeof initialFormData>({
@@ -70,21 +77,22 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
 
   const handleSave = async () => {
     const isValid = await form.validate();
-    if (isValid) {
-      const data = form.getFormData();
-      let payload;
-      if ('tags' in data) {
-        payload = tagsFormDataToEditActionPayload(data, editAction);
-      }
-
-      if ('index' in data) {
-        payload = indexPatternsFormDataToEditActionPayload(data, editAction);
-      }
-
-      if (payload) {
-        onConfirm(payload);
-      }
+    if (!isValid) {
+      return;
     }
+
+    const data = form.getFormData();
+    let payload;
+
+    if ('tags' in data) {
+      payload = tagsFormDataToEditActionPayload(data, editAction);
+    } else if ('index' in data) {
+      payload = indexPatternsFormDataToEditActionPayload(data, editAction);
+    } else {
+      return;
+    }
+
+    onConfirm(payload);
   };
 
   const { isValid } = form;
@@ -98,7 +106,7 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Form form={form}>
-          <FormComponent rulesCount={rulesCount} editAction={editAction} form={form} />
+          <FormFieldsComponent rulesCount={rulesCount} editAction={editAction} form={form} />
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

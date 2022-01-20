@@ -33,7 +33,7 @@ import {
 
 const CommonUseField = getUseField({ component: Field });
 
-export interface IndexPatternsFormData {
+interface IndexPatternsFormData {
   index: string[];
   overwrite: boolean;
 }
