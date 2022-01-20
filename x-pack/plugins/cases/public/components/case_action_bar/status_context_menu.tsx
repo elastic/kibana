@@ -69,5 +69,6 @@ const StatusContextMenuComponent: React.FC<Props> = ({
     </EuiPopover>
   );
 };
+StatusContextMenuComponent.displayName = 'StatusContextMenu';
 
 export const StatusContextMenu = memo(StatusContextMenuComponent);
