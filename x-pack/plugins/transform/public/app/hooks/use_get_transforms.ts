@@ -18,6 +18,7 @@ import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE }
 
 import { useApi } from './use_api';
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
+import { isDefined } from '../../../common/types/common';
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
@@ -80,7 +81,7 @@ export const useGetTransforms = (
             const matches = /\[([^)]+)\]/.exec(e.reason);
             return Array.isArray(matches) && matches.length >= 1 ? matches[1] : undefined;
           })
-          .filter((id) => id !== undefined) as string[];
+          .filter(isDefined);
 
         setTransformIdsWithoutConfig(
           danglingTaskIdMatches.length > 0 ? danglingTaskIdMatches : undefined

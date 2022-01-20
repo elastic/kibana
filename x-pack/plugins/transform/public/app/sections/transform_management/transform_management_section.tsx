@@ -23,11 +23,14 @@ import {
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
-import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import {
+  APP_GET_TRANSFORM_CLUSTER_PRIVILEGES,
+  TRANSFORM_STATE,
+} from '../../../../common/constants';
 
 import { useRefreshTransformList, TransformListRow } from '../../common';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
-import { useGetTransforms } from '../../hooks';
+import { useDeleteTransforms, useGetTransforms } from '../../hooks';
 import { RedirectToCreateTransform } from '../../common/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
@@ -41,7 +44,6 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
-import { DeleteActionModal, useDeleteAction } from './components/action_delete';
 
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
@@ -55,6 +57,8 @@ export const TransformManagement: FC = () => {
   const [transformIdsWithoutConfig, setTransformIdsWithoutConfig] = useState<
     string[] | undefined
   >();
+
+  const deleteTransforms = useDeleteTransforms();
 
   const getTransforms = useGetTransforms(
     setTransforms,
@@ -72,8 +76,6 @@ export const TransformManagement: FC = () => {
   });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
-
-  const deleteAction = useDeleteAction(true, true);
 
   const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
   const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
@@ -165,15 +167,11 @@ export const TransformManagement: FC = () => {
               <AlertRulesManageContext.Provider value={getAlertRuleManageContext()}>
                 {transformIdsWithoutConfig ? (
                   <>
-                    {deleteAction.isModalVisible && (
-                      <DeleteActionModal {...deleteAction} hasNoConfig={true} />
-                    )}
-
                     <EuiCallOut color="warning">
                       <p>
                         <FormattedMessage
                           id="xpack.transform.danglingTasksError"
-                          defaultMessage="Found {count} {count, plural, one {transform} other {transforms}} [{transformIds}] with no corresponding  {count, plural, one {configuration} other {configurations}}."
+                          defaultMessage="{count} {count, plural, one {transform is} other {transforms are}} missing configuration details: [{transformIds}] {count, plural, one {It} other {They}} cannot be recovered and should be deleted."
                           values={{
                             count: transformIdsWithoutConfig.length,
                             transformIds: transformIdsWithoutConfig.join(', '),
@@ -183,19 +181,26 @@ export const TransformManagement: FC = () => {
                       <EuiButton
                         color="warning"
                         size="s"
-                        onClick={() =>
-                          deleteAction.openModal(
-                            transformIdsWithoutConfig.map((id) => ({
-                              id,
-                              config: undefined,
-                              stats: undefined,
-                            }))
-                          )
-                        }
+                        onClick={async () => {
+                          await deleteTransforms(
+                            // If transform task doesn't have any corresponding config
+                            // we won't know what the destination index or data view would be
+                            // and should be force deleted
+                            {
+                              transformsInfo: transformIdsWithoutConfig.map((id) => ({
+                                id,
+                                state: TRANSFORM_STATE.FAILED,
+                              })),
+                              deleteDestIndex: false,
+                              deleteDestIndexPattern: false,
+                              forceDelete: true,
+                            }
+                          );
+                        }}
                       >
                         <FormattedMessage
                           id="xpack.transform.forceDeleteTransformMessage"
-                          defaultMessage="Force delete {count} {count, plural, one {transform} other {transforms}}"
+                          defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
                           values={{
                             count: transformIdsWithoutConfig.length,
                           }}

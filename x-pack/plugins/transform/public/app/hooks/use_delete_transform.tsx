@@ -15,13 +15,12 @@ import type {
 import { isDeleteTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
 import { getErrorMessage } from '../../../common/utils/errors';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$ } from '../common';
+import { REFRESH_TRANSFORM_LIST_STATE, refreshTransformList$, TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
 import { indexService } from '../services/es_index_service';
-import { TransformWithoutConfig } from '../common/transform_list';
 
-export const useDeleteIndexAndTargetIndex = (items: TransformWithoutConfig[]) => {
+export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const {
     http,
     savedObjects,
@@ -98,7 +97,6 @@ export const useDeleteIndexAndTargetIndex = (items: TransformWithoutConfig[]) =>
     // if user only deleting one transform
     if (items.length === 1) {
       const config = items[0].config;
-      if (!config) return;
       const destinationIndex = Array.isArray(config.dest.index)
         ? config.dest.index[0]
         : config.dest.index;

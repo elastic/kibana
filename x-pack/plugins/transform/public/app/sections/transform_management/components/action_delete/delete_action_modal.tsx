@@ -19,17 +19,14 @@ import { DeleteAction } from './use_delete_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-interface DeleteActionModalProps extends DeleteAction {
-  hasNoConfig?: boolean;
-}
-export const DeleteActionModal: FC<DeleteActionModalProps> = ({
+export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
   deleteAndCloseModal,
   deleteDestIndex,
   deleteIndexPattern,
   indexPatternExists,
   items,
-  hasNoConfig,
+  shouldForceDelete,
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
   userCanDeleteIndex,
@@ -47,9 +44,9 @@ export const DeleteActionModal: FC<DeleteActionModalProps> = ({
   );
   const deleteModalTitle = i18n.translate('xpack.transform.transformList.deleteModalTitle', {
     defaultMessage: 'Delete {transformId}?',
-    values: { transformId: items[0] && (items[0].id ?? items[0].config?.id) },
+    values: { transformId: items[0] && items[0].config.id },
   });
-  const bulkDeleteModalContent = hasNoConfig ? null : (
+  const bulkDeleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
         {hasManagedTransforms ? (
@@ -118,7 +115,7 @@ export const DeleteActionModal: FC<DeleteActionModalProps> = ({
         ) : null}
 
         <EuiFlexItem>
-          {items[0].config && userCanDeleteIndex && (
+          {userCanDeleteIndex && (
             <EuiSwitch
               data-test-subj="transformDeleteIndexSwitch"
               label={i18n.translate(
@@ -133,7 +130,7 @@ export const DeleteActionModal: FC<DeleteActionModalProps> = ({
             />
           )}
         </EuiFlexItem>
-        {items[0].config && userCanDeleteIndex && indexPatternExists && (
+        {userCanDeleteIndex && indexPatternExists && (
           <EuiFlexItem>
             <EuiSpacer size="s" />
             <EuiSwitch

@@ -24,10 +24,6 @@ export interface TransformListRow {
   alerting_rules?: TransformHealthAlertRule[];
 }
 
-export type TransformWithoutConfig =
-  | TransformListRow
-  | { id: string; config: undefined; stats: undefined };
-
 // The single Action type is not exported as is
 // from EUI so we use that code to get the single
 // Action type from the array of actions.
