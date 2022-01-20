@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EmbeddableSetup } from 'src/plugins/embeddable/server';
 import { ExpressionsService } from 'src/plugins/expressions/public';
 
 export interface CanvasSavedObjectTypeMigrationsDeps {

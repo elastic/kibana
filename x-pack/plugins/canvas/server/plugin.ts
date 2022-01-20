@@ -58,10 +58,13 @@ export class CanvasPlugin implements Plugin {
       embeddablePersistableStateService: {
         extract: plugins.embeddable.extract,
         inject: plugins.embeddable.inject,
+        getAllMigrations: plugins.embeddable.getAllMigrations,
       },
     });
 
-    const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsFork };
+    const deps: CanvasSavedObjectTypeMigrationsDeps = {
+      expressions: expressionsFork,
+    };
     coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType(deps));
     coreSetup.savedObjects.registerType(workpadTypeFactory(deps));

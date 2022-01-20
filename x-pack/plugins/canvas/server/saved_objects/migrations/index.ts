@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   customElementExpressionsMigrationsFactory,
   templateWorkpadExpressionsMigrationsFactory,
   workpadExpressionsMigrationsFactory,
 } from './expressions';
+
 import { CanvasSavedObjectTypeMigrationsDeps } from './types';
 import { workpadMigrationsFactory as workpadMigrationsFactoryFn } from './workpad';
 import { mergeMigrationFunctionMaps } from '../../../../../../src/plugins/kibana_utils/common';
