@@ -42,7 +42,7 @@ const Container = styled.div`
 `;
 
 interface Props {
-  serviceGroup?: ServiceGroup;
+  serviceGroup: ServiceGroup;
   onCloseModal: () => void;
   onSaveClick: (serviceGroup: ServiceGroup) => void;
   onEditGroupDetailsClick: () => void;

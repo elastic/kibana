@@ -58,7 +58,7 @@ export function CreateGroupsModal({ onClose }: Props) {
           }}
         />
       )}
-      {modalView === 'select_service' && (
+      {modalView === 'select_service' && serviceGroup && (
         <SelectServices
           serviceGroup={serviceGroup}
           onCloseModal={onClose}
