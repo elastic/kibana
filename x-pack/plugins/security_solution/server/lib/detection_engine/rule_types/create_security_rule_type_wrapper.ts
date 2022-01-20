@@ -103,6 +103,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const buildRuleMessage = buildRuleMessageFactory({
             id: alertId,
+            executionId,
             ruleId,
             name,
             index: spaceId,
