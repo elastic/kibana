@@ -60,7 +60,7 @@ export const AnomalyDetectionEmptyState: FC = () => {
           fill
           iconType="plusInCircle"
           isDisabled={disableCreateAnomalyDetectionJob}
-          data-test-subj="mlOverviewCreateADJobButton"
+          data-test-subj="mlCreateNewJobButton"
         >
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.createJobButtonText"
