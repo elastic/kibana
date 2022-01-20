@@ -13,7 +13,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('search', () => {
+  describe('search', function () {
+    this.onlyEsVersion('<=7');
+
     // https://github.com/elastic/kibana/issues/113082
     describe.skip('post', () => {
       it('should return 200 with final response if wait_for_completion_timeout is long enough', async () => {

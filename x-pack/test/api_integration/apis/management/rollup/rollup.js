@@ -24,7 +24,9 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers(getService);
 
-  describe('jobs', () => {
+  describe('jobs', function () {
+    this.onlyEsVersion('<=7');
+
     after(() => cleanUp());
 
     describe('indices', () => {

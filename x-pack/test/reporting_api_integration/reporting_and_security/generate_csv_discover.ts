@@ -14,7 +14,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 
-  describe('Generate CSV from SearchSource', () => {
+  describe('Generate CSV from SearchSource', function () {
+    this.onlyEsVersion('<=7');
+
     it(`exported CSV file matches snapshot`, async () => {
       await reportingAPI.initEcommerce();
 

@@ -17,6 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   describe('Home page', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');

@@ -17,7 +17,9 @@ export default function ({ getService }) {
 
   const { getIndexSettings, updateIndexSettings } = registerHelpers({ supertest });
 
-  describe('settings', () => {
+  describe('settings', function () {
+    this.onlyEsVersion('<=7');
+
     after(() => Promise.all([cleanUpEsResources()]));
 
     it('should fetch an index settings', async () => {
