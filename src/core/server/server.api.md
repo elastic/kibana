@@ -1333,8 +1333,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal
     static from<P, Q, B>(req: Request_2, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers_2;
-    readonly id: string;
     readonly isSystemRequest: boolean;
+    readonly opaqueId?: string;
     // (undocumented)
     readonly params: Params;
     // (undocumented)

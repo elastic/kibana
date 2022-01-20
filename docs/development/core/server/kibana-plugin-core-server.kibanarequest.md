@@ -26,8 +26,8 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [body](./kibana-plugin-core-server.kibanarequest.body.md) |  | Body |  |
 |  [events](./kibana-plugin-core-server.kibanarequest.events.md) |  | KibanaRequestEvents | Request events [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) |
 |  [headers](./kibana-plugin-core-server.kibanarequest.headers.md) |  | Headers | Readonly copy of incoming request headers. |
-|  [id](./kibana-plugin-core-server.kibanarequest.id.md) |  | string | A identifier to identify this request. |
 |  [isSystemRequest](./kibana-plugin-core-server.kibanarequest.issystemrequest.md) |  | boolean | Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the <code>HttpFetchOptions#asSystemRequest</code> option. |
+|  [opaqueId?](./kibana-plugin-core-server.kibanarequest.opaqueid.md) |  | string | <i>(Optional)</i> The (optional) opaqueId of this request. |
 |  [params](./kibana-plugin-core-server.kibanarequest.params.md) |  | Params |  |
 |  [query](./kibana-plugin-core-server.kibanarequest.query.md) |  | Query |  |
 |  [rewrittenUrl?](./kibana-plugin-core-server.kibanarequest.rewrittenurl.md) |  | URL | <i>(Optional)</i> URL rewritten in onPreRouting request interceptor. |
