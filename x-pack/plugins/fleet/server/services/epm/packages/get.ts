@@ -117,13 +117,12 @@ export async function getPackageInfo(options: {
     responsePkgVersion = latestPackage.version;
   }
 
-  const getPackageRes = await getPackageFromSource({
-    pkgName,
-    pkgVersion: responsePkgVersion,
-    savedObjectsClient,
-    installedPkg: savedObject?.attributes,
-  });
-  const { paths, packageInfo } = getPackageRes;
+  const packageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+  // Fix the paths
+  const paths =
+    packageInfo?.assets?.map((path) =>
+      path.replace(`/package/${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`)
+    ) ?? [];
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
