@@ -598,4 +598,64 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
   });
+
+  it('renders unmapped fields correctly', () => {
+    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const rowsFieldsUnmapped: ElasticSearchHit[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { unmapped: ['.gz'] },
+        highlight: {
+          extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
+        },
+      },
+    ];
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsUnmapped,
+      rowsFieldsUnmapped.map(flatten),
+      true,
+      ['unmapped'],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="unmapped"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <Fragment>
+        .gz
+      </Fragment>
+    `);
+
+    const componentWithDetails = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="unmapped"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithDetails).toMatchInlineSnapshot(`
+      <JsonCodeEditor
+        json={
+          Array [
+            ".gz",
+          ]
+        }
+        width={370}
+      />
+    `);
+  });
 });
