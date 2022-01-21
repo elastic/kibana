@@ -55,14 +55,14 @@ export const VegaVisComponent = ({
     }
   }, [visData, renderComplete]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const updateChartSize = useCallback(
-    () =>
-      throttle(() => {
-        if (visController.current) {
-          visController.current.render(visData).then(renderComplete);
-        }
-      }, 300),
-    [renderComplete, visData]
+    throttle(() => {
+      if (visController.current) {
+        visController.current.render(visData).then(renderComplete);
+      }
+    }, 300),
+    []
   );
 
   return (
