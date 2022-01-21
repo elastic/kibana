@@ -22,7 +22,7 @@ function findColorSegment(
   // what about values in range
   const index = colors.findIndex((c, i) => comparison(value, rangeMin + (1 + i) * step) <= 0);
   return (
-    colors[index] ||
+    colors[index] ??
     (value > rangeMin + colors.length * step ? colors[colors.length - 1] : colors[0])
   );
 }
@@ -34,14 +34,13 @@ function findColorsByStops(
   stops: number[]
 ) {
   const index = stops.findIndex((s) => comparison(value, s) < 0);
-  return colors[index] || value > stops[stops.length - 1] ? colors[colors.length - 1] : colors[0];
+  return colors[index] ?? (value > stops[stops.length - 1] ? colors[colors.length - 1] : colors[0]);
 }
 
 function getNormalizedValueByRange(
   value: number,
-  { range, rangeMax, rangeMin }: CustomPaletteState,
-  minMax: { min: number; max: number },
-  isMaxContinuity: boolean
+  { range, rangeMin }: CustomPaletteState,
+  minMax: { min: number; max: number }
 ) {
   let result = value;
   if (range === 'percent') {
@@ -103,7 +102,7 @@ export function workoutColorForValue(
   const isMaxContinuity = checkIsMaxContinuity(continuity);
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
-  const normalizedValue = getNormalizedValueByRange(value, params, minMax, isMaxContinuity);
+  const normalizedValue = getNormalizedValueByRange(value, params, minMax);
 
   const [min, max]: [number, number] = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
 

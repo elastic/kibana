@@ -154,7 +154,7 @@ describe('palette panel', () => {
   describe('percentage / number modes', () => {
     beforeEach(() => {
       props = {
-        activePalette: { type: 'palette', name: 'positive' },
+        activePalette: { type: 'palette', name: 'custom' },
         palettes: paletteRegistry,
         setPalette: jest.fn(),
         dataBounds: { min: 5, max: 200 },
