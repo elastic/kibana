@@ -36,7 +36,7 @@ function findColorsByStops(
 
 function getNormalizedValueByRange(
   value: number,
-  { range, rangeMax }: CustomPaletteState,
+  { range, rangeMax, rangeMin }: CustomPaletteState,
   minMax: { min: number; max: number },
   isMaxContinuity: boolean
 ) {
@@ -46,7 +46,7 @@ function getNormalizedValueByRange(
 
     // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
     if (Number.isNaN(result)) {
-      return isMaxContinuity ? 100 : rangeMax;
+      return rangeMin;
     }
   }
 

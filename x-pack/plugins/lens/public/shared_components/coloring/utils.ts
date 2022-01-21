@@ -19,7 +19,7 @@ import {
   DEFAULT_CONTINUITY,
 } from './constants';
 import type { ColorRange } from './color_ranges';
-import { toColorStops } from './color_ranges/utils';
+import { toColorStops, sortColorRanges } from './color_ranges/utils';
 import type { PaletteConfigurationState, DataBounds } from './types';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
 import {
@@ -61,7 +61,7 @@ export function updateRangeType(
     newMin,
     oldMin,
   });
-  const lastStop = newColorStops[newColorStops.length - 1].stop;
+
   if (activePalette.name === CUSTOM_PALETTE) {
     const stops = getPaletteStops(
       palettes,
@@ -78,9 +78,16 @@ export function updateRangeType(
     );
   }
 
+  const lastStop =
+    activePalette.name === CUSTOM_PALETTE
+      ? newColorStops[newColorStops.length - 1].stop
+      : params.stops[params.stops.length - 1].stop;
+
   params.rangeMin = checkIsMinContinuity(continuity)
     ? Number.NEGATIVE_INFINITY
-    : newColorStops[0].stop;
+    : activePalette.name === CUSTOM_PALETTE
+    ? newColorStops[0].stop
+    : params.stops[0].stop;
 
   params.rangeMax = checkIsMaxContinuity(continuity)
     ? Number.POSITIVE_INFINITY
@@ -145,7 +152,16 @@ export function withUpdatingPalette(
   continuity?: CustomPaletteParams['continuity']
 ) {
   const currentContinuity = continuity ?? activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
-  const { max, colorStops } = toColorStops(colorRanges, currentContinuity);
+  let sortedColorRanges = colorRanges;
+  if (
+    colorRanges.some((value, index) =>
+      index !== colorRanges.length - 1 ? value.start > colorRanges[index + 1].start : false
+    )
+  ) {
+    sortedColorRanges = sortColorRanges(colorRanges);
+  }
+
+  const { max, colorStops } = toColorStops(sortedColorRanges, currentContinuity);
 
   const newPallete = getSwitchToCustomParams(
     palettes,

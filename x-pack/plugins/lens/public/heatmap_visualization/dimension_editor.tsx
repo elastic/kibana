@@ -92,7 +92,7 @@ export function HeatmapDimensionEditor(
             isOpen={isPaletteOpen}
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           >
-            {activePalette ? (
+            {activePalette && (
               <CustomizablePalette
                 palettes={props.paletteService}
                 activePalette={activePalette}
@@ -109,8 +109,6 @@ export function HeatmapDimensionEditor(
                   });
                 }}
               />
-            ) : (
-              <></>
             )}
           </PalettePanelContainer>
         </EuiFlexItem>
