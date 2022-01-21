@@ -86,16 +86,12 @@ function getColorStyling(
     if (!isFinite(rangeMax) && value > stops[stops.length - 1]) {
       rawIndex = stops.length - 1;
     }
-  
+
     // in this case first stop is -Infinity
-    if (
-      !isFinite(rangeMin) &&
-      value < (isFinite(stops[0]) ? stops[0] : stops[1])
-    ) {
+    if (!isFinite(rangeMin) && value < (isFinite(stops[0]) ? stops[0] : stops[1])) {
       rawIndex = 0;
     }
   }
-  
 
   const colorIndex = rawIndex;
 
