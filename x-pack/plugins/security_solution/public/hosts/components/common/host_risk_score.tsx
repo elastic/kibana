@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiHealth, transparentize } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 
 export const HOST_RISK_SEVERITY_COLOUR: { [k in HostRiskSeverity]: string } = {

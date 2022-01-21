@@ -45,6 +45,7 @@ export const mockHostsState: HostsModel = {
           direction: Direction.desc,
         },
       },
+      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -81,6 +82,7 @@ export const mockHostsState: HostsModel = {
           direction: Direction.desc,
         },
       },
+      [HostsTableType.risk]: null,
     },
   },
 };

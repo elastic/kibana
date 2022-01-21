@@ -61,6 +61,7 @@ export const initialHostsState: HostsState = {
           direction: Direction.desc,
         },
       },
+      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -97,6 +98,7 @@ export const initialHostsState: HostsState = {
           direction: Direction.desc,
         },
       },
+      [HostsTableType.risk]: null,
     },
   },
 };
