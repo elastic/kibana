@@ -35,7 +35,12 @@ import type {
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
-import type { DatasourceMap, EditorFrameInstance, VisualizationMap } from '../types';
+import type {
+  DatasourceMap,
+  EditorFrameInstance,
+  LensTopNavMenuEntryGenerator,
+  VisualizationMap,
+} from '../types';
 import type { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
 import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
 import type { LensInspector } from '../lens_inspector_service';
@@ -60,6 +65,8 @@ export interface LensAppProps {
   incomingState?: EmbeddableEditorState;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
+
+  topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
 }
 
 export type RunSave = (
@@ -89,6 +96,7 @@ export interface LensTopNavMenuProps {
   datasourceMap: DatasourceMap;
   title?: string;
   lensInspector: LensInspector;
+  topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
 }
 
 export interface HistoryLocationState {

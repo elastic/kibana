@@ -70,7 +70,12 @@ import {
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import type { Visualization, VisualizationType, EditorFrameSetup } from './types';
+import type {
+  Visualization,
+  VisualizationType,
+  EditorFrameSetup,
+  LensTopNavMenuEntryGenerator,
+} from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 
@@ -131,6 +136,17 @@ export interface LensPublicSetup {
    */
   registerVisualization: <T>(
     visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
+  /**
+   * Register a generic menu entry shown in the top nav
+   * See `x-pack/examples/3rd_party_lens_navigation_prompt` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerTopNavMenuEntryGenerator: (
+    navigationPromptGenerator: LensTopNavMenuEntryGenerator
   ) => void;
 }
 
@@ -198,6 +214,7 @@ export class LensPlugin {
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
   private gaugeVisualization: GaugeVisualizationType | undefined;
+  private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
 
   private stopReportManager?: () => void;
 
@@ -301,6 +318,7 @@ export class LensPlugin {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
           getPresentationUtilContext,
+          topNavMenuEntryGenerators: this.topNavMenuEntries,
         });
       },
     });
@@ -329,6 +347,9 @@ export class LensPlugin {
           // queue visualizations if editor frame is not yet ready as it's loaded async
           this.queuedVisualizations.push(vis);
         }
+      },
+      registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
+        this.topNavMenuEntries.push(menuEntryGenerator);
       },
     };
   }
