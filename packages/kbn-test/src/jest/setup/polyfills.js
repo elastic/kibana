@@ -18,3 +18,5 @@ if (!global.URL.hasOwnProperty('createObjectURL')) {
 // Will be replaced with a better solution in EUI
 // https://github.com/elastic/eui/issues/3713
 global._isJest = true;
+
+global.ResizeObserver = require('resize-observer-polyfill');
