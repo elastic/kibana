@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { addDecorator, storiesOf } from '@storybook/react';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import { EuiCheckbox, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
