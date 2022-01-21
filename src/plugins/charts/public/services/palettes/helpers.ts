@@ -21,7 +21,10 @@ function findColorSegment(
 
   // what about values in range
   const index = colors.findIndex((c, i) => comparison(value, rangeMin + (1 + i) * step) <= 0);
-  return colors[index] || colors[colors.length - 1];
+  return (
+    colors[index] ||
+    (value > rangeMin + colors.length * step ? colors[colors.length - 1] : colors[0])
+  );
 }
 
 function findColorsByStops(
@@ -31,7 +34,7 @@ function findColorsByStops(
   stops: number[]
 ) {
   const index = stops.findIndex((s) => comparison(value, s) < 0);
-  return colors[index] || colors[colors.length - 1];
+  return colors[index] || value > stops[stops.length - 1] ? colors[colors.length - 1] : colors[0];
 }
 
 function getNormalizedValueByRange(
