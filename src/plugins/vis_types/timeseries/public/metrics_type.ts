@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+import { DataViewsContract, IndexPattern } from 'src/plugins/data_views/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
@@ -22,6 +23,7 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
+import { IndexPatternValue, Series } from '../common/types';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -45,6 +47,46 @@ export const withReplacedIds = (
 
   return vis;
 };
+
+async function resolveIndexPattern(
+  indexPatternValue: IndexPatternValue,
+  indexPatterns: DataViewsContract
+) {
+  if (!indexPatternValue) return;
+  if (isStringTypeIndexPattern(indexPatternValue)) {
+    return await indexPatterns.find(indexPatternValue);
+  }
+
+  if (indexPatternValue.id) {
+    return [await indexPatterns.get(indexPatternValue.id)];
+  }
+}
+
+async function getUsedIndexPatterns(params: VisParams): Promise<IndexPattern[]> {
+  const { indexPatterns } = getDataStart();
+  const resolvedIndexPatterns: IndexPattern[] = [];
+  const baseIndexPattern = await resolveIndexPattern(params.index_pattern, indexPatterns);
+  if (baseIndexPattern) {
+    resolvedIndexPatterns.push(...baseIndexPattern);
+  }
+  await Promise.all(
+    (params.series as Series[]).map(async (series) => {
+      if (!series.override_index_pattern) return;
+      const indexPattern = await resolveIndexPattern(series.series_index_pattern, indexPatterns);
+      if (indexPattern) {
+        resolvedIndexPatterns.push(...indexPattern);
+      }
+    })
+  );
+
+  if (resolvedIndexPatterns.length === 0) {
+    const defaultIndex = await indexPatterns.getDefault();
+    if (defaultIndex) {
+      resolvedIndexPatterns.push(defaultIndex);
+    }
+  }
+  return resolvedIndexPatterns;
+}
 
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
@@ -120,22 +162,5 @@ export const metricsVisDefinition: VisTypeDefinition<
   },
   inspectorAdapters: {},
   requiresSearch: true,
-  getUsedIndexPattern: async (params: VisParams) => {
-    const { indexPatterns } = getDataStart();
-    const indexPatternValue = params.index_pattern;
-
-    if (indexPatternValue) {
-      if (isStringTypeIndexPattern(indexPatternValue)) {
-        return await indexPatterns.find(indexPatternValue);
-      }
-
-      if (indexPatternValue.id) {
-        return [await indexPatterns.get(indexPatternValue.id)];
-      }
-    }
-
-    const defaultIndex = await indexPatterns.getDefault();
-
-    return defaultIndex ? [defaultIndex] : [];
-  },
+  getUsedIndexPattern: getUsedIndexPatterns,
 };
