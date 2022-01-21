@@ -456,3 +456,4 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
     </p>
   );
 };
+ExternalServiceColumn.displayName = 'ExternalServiceColumn';
