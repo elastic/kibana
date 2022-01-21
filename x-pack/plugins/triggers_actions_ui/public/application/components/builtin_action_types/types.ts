@@ -132,6 +132,14 @@ export interface WebhookSecrets {
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
 
+export enum XmattersSeverityOptions {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  MINIMAL = 'minimal',
+}
+
 export interface XmattersActionParams {
   alertActionGroup: string;
   alertActionGroupName: string;
@@ -139,13 +147,12 @@ export interface XmattersActionParams {
   alertInstanceId: string;
   alertName: string;
   date: string;
-  severity: string;
+  severity: XmattersSeverityOptions;
   spaceId: string;
   tags: string;
 }
 
 export interface XmattersConfig {
-  method: string;
   url: string;
   headers: Record<string, string>;
   hasAuth: boolean;

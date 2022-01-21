@@ -12,7 +12,6 @@ import {
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -29,13 +28,11 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { XmattersActionConnector } from '../types';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
-const HTTP_VERBS = ['post', 'put'];
-
 const XmattersActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<XmattersActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { user, password } = action.secrets;
-  const { method, url, headers, hasAuth } = action.config;
+  const { url, headers, hasAuth } = action.config;
 
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
@@ -48,9 +45,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!method) {
-    editActionConfig('method', 'post'); // set method to POST by default
-  }
+  // editActionConfig('method', 'post'); // set method to POST by default
 
   const headerErrors = {
     keyHeader: new Array<string>(),
@@ -233,27 +228,6 @@ const XmattersActionConnectorFields: React.FunctionComponent<
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.methodTextFieldLabel',
-              {
-                defaultMessage: 'Method',
-              }
-            )}
-          >
-            <EuiSelect
-              name="method"
-              value={method || 'post'}
-              disabled={readOnly}
-              data-test-subj="xmattersMethodSelect"
-              options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={(e) => {
-                editActionConfig('method', e.target.value);
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id="url"

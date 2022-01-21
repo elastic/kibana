@@ -88,7 +88,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               messageVariables={messageVariables}
               paramsProperty={'alertActionGroup'}
               inputTargetValue={actionParams.alertActionGroup}
-              defaultValue={'{{alertActionGroup}}'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -110,7 +109,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               editAction={editAction}
               messageVariables={messageVariables}
               paramsProperty={'alertActionGroupName'}
-              inputTargetValue={actionParams.alertActionGroupName}
               defaultValue={'{{alertActionGroupName}}'}
             />
           </EuiFormRow>
@@ -133,31 +131,7 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               editAction={editAction}
               messageVariables={messageVariables}
               paramsProperty={'alertId'}
-              inputTargetValue={actionParams.alertId}
               defaultValue={'{{alertId}}'}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="xmattersAlertInstanceId"
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.alertInstanceId',
-              {
-                defaultMessage: 'Alert Instance ID',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editAction}
-              messageVariables={messageVariables}
-              paramsProperty={'alertInstanceId'}
-              inputTargetValue={actionParams.alertInstanceId}
-              defaultValue={'{{alertInstanceId}}'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -180,7 +154,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               messageVariables={messageVariables}
               paramsProperty={'alertName'}
               inputTargetValue={actionParams.alertName}
-              defaultValue={'{{alertName}}'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -203,7 +176,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               messageVariables={messageVariables}
               paramsProperty={'date'}
               inputTargetValue={actionParams.date}
-              defaultValue={'{{date}}'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -251,7 +223,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               messageVariables={messageVariables}
               paramsProperty={'spaceId'}
               inputTargetValue={actionParams.spaceId}
-              defaultValue={'{{spaceId}}'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -274,7 +245,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               messageVariables={messageVariables}
               paramsProperty={'tags'}
               inputTargetValue={actionParams.tags}
-              defaultValue={'{{tags}}'}
             />
           </EuiFormRow>
         </EuiFlexItem>

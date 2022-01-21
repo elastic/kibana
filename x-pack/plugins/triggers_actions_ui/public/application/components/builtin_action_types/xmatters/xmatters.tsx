@@ -46,7 +46,6 @@ export function getActionType(): ActionTypeModel<
       const translations = await import('./translations');
       const configErrors = {
         url: new Array<string>(),
-        method: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
