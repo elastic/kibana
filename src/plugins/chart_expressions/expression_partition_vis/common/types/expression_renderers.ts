@@ -50,7 +50,6 @@ interface VisCommonParams {
   addTooltip: boolean;
   legendDisplay: LegendDisplay;
   legendPosition: Position;
-  nestedLegend: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
 }
@@ -73,6 +72,7 @@ export interface PartitionVisParams extends VisCommonParams {
   emptySizeRatio?: EmptySizeRatios;
   startFromSecondLargestSlice?: boolean;
   distinctColors?: boolean;
+  nestedLegend?: boolean;
 }
 
 export interface PieVisConfig extends VisCommonConfig {
@@ -82,14 +82,17 @@ export interface PieVisConfig extends VisCommonConfig {
   respectSourceOrder?: boolean;
   startFromSecondLargestSlice?: boolean;
   distinctColors?: boolean;
+  nestedLegend: boolean;
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {
   buckets?: ExpressionValueVisDimension[];
+  nestedLegend: boolean;
 }
 
 export interface MosaicVisConfig extends VisCommonConfig {
   buckets?: ExpressionValueVisDimension[];
+  nestedLegend: boolean;
 }
 
 export interface WaffleVisConfig extends VisCommonConfig {

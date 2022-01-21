@@ -57,11 +57,6 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: strings.getLegendPositionArgHelp(),
     },
-    nestedLegend: {
-      types: ['boolean'],
-      help: strings.getNestedLegendArgHelp(),
-      default: false,
-    },
     truncateLegend: {
       types: ['boolean'],
       help: strings.getTruncateLegendArgHelp(),
