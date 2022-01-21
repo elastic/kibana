@@ -12,10 +12,7 @@ import { handleError } from '../../../../lib/errors';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-// @ts-ignore
 import { metricSet } from './metric_set_instance';
-import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 import { LegacyRequest, LegacyServer } from '../../../../types';
 
 /**
@@ -44,16 +41,13 @@ export function kibanaInstanceRoute(server: LegacyServer) {
       },
     },
     async handler(req: LegacyRequest) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const kibanaUuid = req.params.kibanaUuid;
-      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
         const [metrics, kibanaSummary] = await Promise.all([
-          getMetrics(req, kbnIndexPattern, metricSet),
-          getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }),
+          getMetrics(req, 'kibana', metricSet),
+          getKibanaInfo(req, { clusterUuid, kibanaUuid }),
         ]);
 
         return {

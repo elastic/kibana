@@ -17,7 +17,6 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   deleteFirstRule,
@@ -25,7 +24,6 @@ import {
   loadPrebuiltDetectionRules,
   reloadDeletedRules,
   selectNumberOfRules,
-  waitForRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
   selectAllRules,
   confirmRulesDelete,
@@ -36,7 +34,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
@@ -52,9 +50,7 @@ describe('Alerts rules, prebuilt rules', () => {
     const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
@@ -73,9 +69,7 @@ describe('Actions with prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 

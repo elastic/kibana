@@ -11,11 +11,7 @@ import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
-import {
-  goToClosedAlerts,
-  goToManageAlertsDetectionRules,
-  goToOpenedAlerts,
-} from '../../tasks/alerts';
+import { goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -31,16 +27,16 @@ import {
 } from '../../tasks/rule_details';
 import { refreshPage } from '../../tasks/security_header';
 
-import { ALERTS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { cleanKibana, reload } from '../../tasks/common';
 
 describe('From rule', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule(getNewRule(), 'rule_testing', '10s');
-    goToManageAlertsDetectionRules();
+    reload();
     goToRuleDetails();
 
     cy.get(RULE_STATUS).should('have.text', '—');

@@ -40,13 +40,10 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -58,7 +55,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, machine learning', () => {
   const expectedUrls = getMachineLearningRule().referenceUrls.join('');
@@ -72,10 +69,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   it('Creates and activates a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
     fillAboutRuleAndContinue(getMachineLearningRule());

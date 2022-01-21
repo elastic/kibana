@@ -54,13 +54,10 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -74,7 +71,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
   const expectedUrls = getNewOverrideRule().referenceUrls.join('');
@@ -96,10 +93,7 @@ describe('Detection rules, override', () => {
   });
 
   it('Creates and activates a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);

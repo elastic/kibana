@@ -43,13 +43,10 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -64,7 +61,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
@@ -88,10 +85,7 @@ describe('Detection rules, EQL', () => {
   });
 
   it('Creates and activates a new EQL rule', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);
@@ -183,10 +177,7 @@ describe('Detection rules, sequence EQL', () => {
   });
 
   it('Creates and activates a new EQL rule with a sequence', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
     fillAboutRuleAndContinue(this.rule);

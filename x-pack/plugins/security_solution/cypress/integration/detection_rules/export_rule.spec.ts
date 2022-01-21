@@ -6,13 +6,12 @@
  */
 
 import { expectedExportedRule, getNewRule } from '../../objects/rule';
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import { exportFirstRule, getRulesImportExportToast } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Export rules', () => {
   beforeEach(() => {
@@ -21,12 +20,11 @@ describe('Export rules', () => {
       'POST',
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule(getNewRule()).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
-    goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));

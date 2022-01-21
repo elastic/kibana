@@ -14,7 +14,7 @@ import {
   Settings,
   Mappings,
   IngestPipelineWrapper,
-} from '../common';
+} from '../common/types';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(

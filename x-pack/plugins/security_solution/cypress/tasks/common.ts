@@ -92,16 +92,6 @@ export const cleanKibana = () => {
               type: 'alert',
             },
           },
-          {
-            match: {
-              'alert.alertTypeId': 'siem.signals',
-            },
-          },
-          {
-            match: {
-              'alert.consumer': 'siem',
-            },
-          },
         ],
       },
     },
