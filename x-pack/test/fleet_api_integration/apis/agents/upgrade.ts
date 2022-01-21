@@ -57,7 +57,6 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             version: kibanaVersion,
-            source_uri: 'http://path/to/download',
           })
           .expect(200);
 
@@ -160,9 +159,23 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             version: higherVersion,
-            source_uri: 'http://path/to/download',
           })
           .expect(400);
+      });
+      it('should respond 400 if trying to upgrade with source_uri set', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+            source_uri: 'http://path/to/download',
+          })
+          .expect(400, (err, res) => {
+            expect(res.body).to.eql({
+              message: `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`,
+            });
+          });
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
         const kibanaVersion = await kibanaServer.version.get();
@@ -543,6 +556,44 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(400);
+      });
+
+      it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent1', 'agent2'],
+            version: kibanaVersion,
+            source_uri: 'http://path/to/download',
+            force: true,
+          })
+          .expect(400, (err, res) => {
+            expect(res.body).to.eql({
+              message: `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`,
+            });
+          });
       });
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
