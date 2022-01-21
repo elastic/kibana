@@ -37,7 +37,7 @@ export interface HostRiskScoreOverTimeProps {
 
 const RISKY_TRESHOULD = 70;
 const DEFAULT_CHART_HEIGH = 250;
-const QUERY_ID = 'HostRiskScoreOverTimeQuery';
+const QUERY_ID = HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME;
 
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;

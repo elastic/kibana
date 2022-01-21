@@ -25,11 +25,12 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback, memo } from 'react';
+import React from 'react';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { HostRiskScore } from '../common/host_risk_score';
 import * as i18n from './translations';
+import { useOnOpenCloseHandler } from '../../../helper_hooks';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -79,34 +80,6 @@ export const HostRiskInformationButtonIcon = () => {
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
-});
-HostRiskInformationButtonIcon.displayName = 'HostRiskInformationButtonIcon';
-
-export const HostRiskInformationButtonEmpty = memo(() => {
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
-
-  return (
-    <>
-      <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
-        {i18n.INFO_BUTTON_TEXT}
-      </EuiButtonEmpty>
-      {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
-    </>
-  );
-});
-HostRiskInformationButtonEmpty.displayName = 'HostRiskInformationButtonEmpty';
-
-const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleOnClose = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  const handleOnOpen = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-  return [isOpen, handleOnOpen, handleOnClose];
 };
 
 export const HostRiskInformationButtonEmpty = () => {
@@ -120,19 +93,6 @@ export const HostRiskInformationButtonEmpty = () => {
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
-};
-
-const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleOnClose = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  const handleOnOpen = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-  return [isOpen, handleOnOpen, handleOnClose];
 };
 
 const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {

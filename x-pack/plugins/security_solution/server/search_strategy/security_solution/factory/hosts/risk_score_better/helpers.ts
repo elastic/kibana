@@ -13,7 +13,7 @@ export const formatRiskScoreBetterData = (buckets: RiskScoreBetterHit[]): RiskSc
     node: {
       _id: bucket.key,
       host_name: bucket.key,
-      //
+      // TODO: Steph/host risk
       // rule_risks: getOr(0, 'rule_risks.value', bucket),
       risk_score: getOr(0, 'risk_score.value', bucket),
       risk: getOr('Unknown', 'risk.buckets[0].key', bucket),
