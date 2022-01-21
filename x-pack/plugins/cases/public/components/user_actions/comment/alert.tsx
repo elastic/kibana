@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { get, isEmpty } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiAvatar, useEuiTheme } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import { CommentType, CommentResponseAlertsType } from '../../../../common/api';
@@ -40,6 +40,8 @@ export const createAlertAttachmentUserActionBuilder = ({
   onShowAlertDetails,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => {
+    // eslint-disable-next-line
+    const { euiTheme } = useEuiTheme();
     const alertId = getNonEmptyField(comment.alertId);
     const alertIndex = getNonEmptyField(comment.index);
 
@@ -74,9 +76,9 @@ export const createAlertAttachmentUserActionBuilder = ({
         ),
         'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: 'bell',
+        timelineIcon: <EuiAvatar size="s" name="" iconType="bell" color={euiTheme.colors.danger} />,
         actions: (
-          <EuiFlexGroup responsive={false}>
+          <EuiFlexGroup responsive={false} gutterSize="xs">
             <EuiFlexItem grow={false}>
               <UserActionCopyLink id={userAction.actionId} />
             </EuiFlexItem>

@@ -16,8 +16,8 @@ import {
   EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiButtonIcon,
+  EuiTitle,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
@@ -53,25 +53,6 @@ export interface EditConnectorProps {
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
 }
-
-const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => `
-    margin-top: ${theme.eui.euiSizeM};
-    p {
-      font-size: ${theme.eui.euiSizeM};
-    }
-  `}
-`;
-const DisappearingFlexItem = styled(EuiFlexItem)`
-  ${({ $isHidden }: { $isHidden: boolean }) =>
-    $isHidden &&
-    `
-      margin: 0 !important;
-      & .euiFlexItem {
-        margin: 0 !important;
-      }
-    `}
-`;
 
 interface State {
   currentConnector: ActionConnector | null;
@@ -264,15 +245,17 @@ export const EditConnector = React.memo(
     });
 
     return (
-      <EuiText>
-        <MyFlexGroup
+      <div>
+        <EuiFlexGroup
           alignItems="center"
           gutterSize="xs"
           justifyContent="spaceBetween"
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <h4>{i18n.CONNECTORS}</h4>
+            <EuiTitle size="xxxs">
+              <h4>{i18n.CONNECTORS}</h4>
+            </EuiTitle>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
           {!isLoading && !editConnector && userCanCrud && (
@@ -285,36 +268,38 @@ export const EditConnector = React.memo(
               />
             </EuiFlexItem>
           )}
-        </MyFlexGroup>
+        </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup data-test-subj="edit-connectors" direction="column">
+        <EuiFlexGroup data-test-subj="edit-connectors" direction="column">
           {!isLoading && !editConnector && pushCallouts && permissionsError == null && (
             <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
           )}
-          <DisappearingFlexItem $isHidden={!editConnector}>
-            <Form form={form}>
-              <EuiFlexGroup gutterSize="none" direction="row">
-                <EuiFlexItem>
-                  <UseField
-                    path="connectorId"
-                    config={connectorIdConfig}
-                    component={ConnectorSelector}
-                    componentProps={{
-                      connectors,
-                      dataTestSubj: 'caseConnectors',
-                      defaultValue: selectedConnector,
-                      disabled: !userCanCrud,
-                      hideConnectorServiceNowSir,
-                      idAria: 'caseConnectors',
-                      isEdit: editConnector,
-                      isLoading,
-                    }}
-                    onChange={onChangeConnector}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Form>
-          </DisappearingFlexItem>
+          {editConnector && (
+            <EuiFlexItem>
+              <Form form={form}>
+                <EuiFlexGroup gutterSize="none" direction="row">
+                  <EuiFlexItem>
+                    <UseField
+                      path="connectorId"
+                      config={connectorIdConfig}
+                      component={ConnectorSelector}
+                      componentProps={{
+                        connectors,
+                        dataTestSubj: 'caseConnectors',
+                        defaultValue: selectedConnector,
+                        disabled: !userCanCrud,
+                        hideConnectorServiceNowSir,
+                        idAria: 'caseConnectors',
+                        isEdit: editConnector,
+                        isLoading,
+                      }}
+                      onChange={onChangeConnector}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </Form>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
             {!editConnector && permissionsError && (
               <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
@@ -365,8 +350,8 @@ export const EditConnector = React.memo(
                 <span>{pushButton}</span>
               </EuiFlexItem>
             )}
-        </MyFlexGroup>
-      </EuiText>
+        </EuiFlexGroup>
+      </div>
     );
   }
 );

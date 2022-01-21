@@ -9,19 +9,16 @@ import React, { memo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { CommentType } from '../../../../common/api';
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
 import { RuleDetailsNavigation } from '../types';
 
 interface Props {
   alertId: string;
-  commentType: CommentType;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   ruleId?: string | null;
   ruleName?: string | null;
-  alertsCount?: number;
   loadingAlertData?: boolean;
 }
 
@@ -32,8 +29,6 @@ const AlertCommentEventComponent: React.FC<Props> = ({
   onRuleDetailsClick,
   ruleId,
   ruleName,
-  alertsCount,
-  commentType,
 }) => {
   const onLinkClick = useCallback(
     (ev) => {

@@ -72,7 +72,6 @@ const renderUsers = (
               onClick={handleSendEmail.bind(null, email)}
               iconType="email"
               aria-label={i18n.SEND_EMAIL_ARIA(fullName ? fullName : username ?? '')}
-              isDisabled={isEmpty(email)}
             />
           </EuiFlexItem>
         )}
@@ -93,7 +92,7 @@ export const UserList = React.memo(({ email, headline, loading, users }: UserLis
   );
   return users.filter(({ username }) => username != null && username !== '').length > 0 ? (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxxs">
         <h4>{headline}</h4>
       </EuiTitle>
       <EuiHorizontalRule margin="xs" />

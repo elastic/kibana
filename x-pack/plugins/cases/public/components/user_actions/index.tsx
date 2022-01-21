@@ -28,54 +28,6 @@ import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: 8px;
-`;
-
-const MyEuiCommentList = styled(EuiCommentList)`
-  ${({ theme }) => `
-    & .userAction__comment.outlined .euiCommentEvent {
-      outline: solid 5px ${theme.eui.euiColorVis1_behindText};
-      margin: 0.5em;
-      transition: 0.8s;
-    }
-
-    & .euiComment.isEdit {
-      & .euiCommentEvent {
-        border: none;
-        box-shadow: none;
-      }
-
-      & .euiCommentEvent__body {
-        padding: 0;
-      }
-
-      & .euiCommentEvent__header {
-        display: none;
-      }
-    }
-
-    & .comment-alert .euiCommentEvent {
-      background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiFlyoutBorder};
-      padding: ${theme.eui.paddingSizes.s};
-      border-radius: ${theme.eui.paddingSizes.xs};
-    }
-
-    & .comment-alert .euiCommentEvent__headerData {
-      flex-grow: 1;
-    }
-
-    & .comment-action.empty-comment .euiCommentEvent--regular {
-      box-shadow: none;
-      .euiCommentEvent__header {
-        padding: ${theme.eui.euiSizeM} ${theme.eui.paddingSizes.s};
-        border-bottom: 0;
-      }
-    }
-  `}
-`;
-
 export const UserActions = React.memo(
   ({
     caseServices,
@@ -89,7 +41,6 @@ export const UserActions = React.memo(
     onRuleDetailsClick,
     onShowAlertDetails,
     onUpdateField,
-    renderInvestigateInTimelineActionComponent,
     statusActionButton,
     updateCase,
     useFetchAlertData,
@@ -259,13 +210,13 @@ export const UserActions = React.memo(
 
     return (
       <>
-        <MyEuiCommentList comments={comments} data-test-subj="user-actions" />
+        <EuiCommentList comments={comments} data-test-subj="user-actions" />
         {(isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)) && (
-          <MyEuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner data-test-subj="user-actions-loading" size="l" />
             </EuiFlexItem>
-          </MyEuiFlexGroup>
+          </EuiFlexGroup>
         )}
       </>
     );

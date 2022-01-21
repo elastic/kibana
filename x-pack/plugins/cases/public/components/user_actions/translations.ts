@@ -32,7 +32,7 @@ export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate('xpack.cases.caseView.mov
 export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.cases.caseView.alertCommentLabelTitle',
   {
-    defaultMessage: 'added an alert from',
+    defaultMessage: 'referenced an alert trigged from rule',
   }
 );
 
