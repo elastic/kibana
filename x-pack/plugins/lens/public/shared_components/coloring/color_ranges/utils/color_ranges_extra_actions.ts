@@ -34,13 +34,13 @@ export const distributeEqually = (
   const getValueForIndex = (index: number) => roundValue(min + step * index);
   const getStartValue = (index: number) => {
     if (index === 0) {
-      return checkIsMinContinuity(continuity) ? Number.NEGATIVE_INFINITY : min;
+      return checkIsMinContinuity(continuity) ? Number.NEGATIVE_INFINITY : roundValue(min);
     }
     return getValueForIndex(index);
   };
   const getEndValue = (index: number) => {
     if (index === lastIndex) {
-      return checkIsMaxContinuity(continuity) ? Number.POSITIVE_INFINITY : max;
+      return checkIsMaxContinuity(continuity) ? Number.POSITIVE_INFINITY : roundValue(max);
     }
     return getValueForIndex(index + 1);
   };

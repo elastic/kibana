@@ -118,7 +118,13 @@ export function changeColorPalette(
     reverse: false, // restore the reverse flag
   };
 
-  const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
+  // we should pass colorStops so that correct calculate new color stops (if there was before) for custom palette
+  const newColorStops = getColorStops(
+    palettes,
+    activePalette.params?.colorStops || [],
+    activePalette,
+    dataBounds
+  );
 
   if (isNewPaletteCustom) {
     newParams.colorStops = newColorStops;
