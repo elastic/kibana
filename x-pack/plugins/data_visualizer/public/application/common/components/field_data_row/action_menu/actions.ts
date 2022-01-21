@@ -87,6 +87,7 @@ export function getActions(
             indexPatternId: indexPattern.id,
             fieldName: item.fieldName,
             contextualFields: [],
+            originatingApp: 'data_visualizer:exploreInMapsTitle',
           };
           const testActions = await services?.uiActions.getTriggerCompatibleActions(
             VISUALIZE_GEO_FIELD_TRIGGER,

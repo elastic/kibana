@@ -50,6 +50,7 @@ export function VisualizeGeoFieldButton(props: Props) {
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
       indexPatternId: props.indexPatternId,
       fieldName: props.fieldName,
+      originatingApp: 'lens:geo_field_button',
     });
   }
 

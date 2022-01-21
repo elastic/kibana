@@ -52,6 +52,7 @@ export function triggerVisualizeActions(
     indexPatternId,
     fieldName: field.name,
     contextualFields,
+    originatingApp: 'discover:sidebar',
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
