@@ -8,10 +8,10 @@
 
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { getConfig } from './get_config';
-import { createMockPieParams, createMockDonutParams } from '../mocks';
+import { createMockPieParams, createMockDonutParams, createMockPartitionVisParams } from '../mocks';
 import { ChartTypes, LabelPositions, PartitionVisParams } from '../../common/types';
 import { RecursivePartial } from '@elastic/eui';
-import { Chart, PartitionLayout, Theme } from '@elastic/charts';
+import { PartitionLayout, Theme } from '@elastic/charts';
 
 const column: ExpressionValueVisDimension = {
   type: 'vis_dimension',
@@ -290,6 +290,80 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
   });
 };
 
+const runTreemapMosaicTestSuites = (chartType: ChartTypes, visParams: PartitionVisParams) => {
+  const vParamsSplitRows = {
+    ...visParams,
+    dimensions: { ...visParams.dimensions, splitRow: splitRows },
+  };
+  const vParamsSplitColumns = {
+    ...visParams,
+    dimensions: { ...visParams.dimensions, splitColumn: splitColumns },
+  };
+
+  it('should return correct config options', () => {
+    const config = getConfig(chartType, visParams, chartTheme, dimensions);
+    expect(config).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, visParams),
+      linkLabel: getDefaultLinkLabel(visParams, chartTheme),
+    });
+  });
+
+  it('should return empty margin configuration if dimensions are not specified', () => {
+    const config = getConfig(chartType, visParams, chartTheme, dimensions);
+
+    expect(config).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, visParams),
+      linkLabel: getDefaultLinkLabel(visParams, chartTheme),
+    });
+  });
+
+  it('should return margin configuration if split column or row are specified', () => {
+    const configForSplitColumns = getConfig(chartType, vParamsSplitColumns, chartTheme, dimensions);
+
+    expect(configForSplitColumns).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, vParamsSplitColumns),
+      linkLabel: getDefaultLinkLabel(vParamsSplitColumns, chartTheme),
+    });
+
+    const configForSplitRows = getConfig(chartType, vParamsSplitRows, chartTheme, dimensions);
+
+    expect(configForSplitRows).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, vParamsSplitRows),
+      linkLabel: getDefaultLinkLabel(vParamsSplitRows, chartTheme),
+    });
+  });
+
+  it('should return fullfilled margin configuration if dimensions are specified', () => {
+    const specifiedDimensions = { width: 2000, height: 2000 };
+    const config = getConfig(chartType, visParams, chartTheme, specifiedDimensions);
+
+    expect(config).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, visParams),
+      linkLabel: getDefaultLinkLabel(visParams, chartTheme),
+      margin: { top: 0.25, bottom: 0.25, left: 0.25, right: 0.25 },
+    });
+  });
+
+  it('should return configuration for the theme related fields', () => {
+    const config = getConfig(chartType, visParams, chartTheme, dimensions);
+    expect(config).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, visParams),
+      linkLabel: getDefaultLinkLabel(visParams, chartTheme),
+    });
+  });
+
+  it('should make color transparent if labels are hidden', () => {
+    const vParams = { ...visParams, labels: { ...visParams.labels, show: false } };
+    const config = getConfig(chartType, vParams, chartTheme, dimensions);
+
+    expect(config).toEqual({
+      ...getStaticConfigOptions(chartType, chartTheme, vParams),
+      linkLabel: getDefaultLinkLabel(visParams, chartTheme),
+      fillLabel: { textColor: 'rgba(0,0,0,0)' },
+    });
+  });
+};
+
 describe('Pie getConfig', () => {
   const visParams = createMockPieParams();
   const chartType = ChartTypes.PIE;
@@ -344,13 +418,13 @@ describe('Donut getConfig', () => {
 });
 
 describe('Waffle getConfig', () => {
-  runPieDonutWaffleTestSuites(ChartTypes.WAFFLE, createMockPieParams());
+  runPieDonutWaffleTestSuites(ChartTypes.WAFFLE, createMockPartitionVisParams());
 });
 
 describe('Mosaic getConfig', () => {
-  it('', () => {});
+  runTreemapMosaicTestSuites(ChartTypes.MOSAIC, createMockPartitionVisParams());
 });
 
 describe('Treemap getConfig', () => {
-  it('', () => {});
+  runTreemapMosaicTestSuites(ChartTypes.TREEMAP, createMockPartitionVisParams());
 });

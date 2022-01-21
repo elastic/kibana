@@ -337,14 +337,6 @@ export const createMockPieParams = (): PartitionVisParams => {
   return {
     ...createMockPartitionVisParams(),
     isDonut: false,
-    labels: {
-      position: LabelPositions.DEFAULT,
-      show: true,
-      truncate: 100,
-      values: true,
-      valuesFormat: ValueFormats.PERCENT,
-      percentDecimals: 2,
-    },
     distinctColors: false,
   };
 };
