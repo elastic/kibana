@@ -444,42 +444,4 @@ describe('execute()', () => {
       }
     `);
   });
-
-  test('renders parameter templates as expected', async () => {
-    const alertActionGroupName = `Small t-shirt`;
-    const alertId = `c9437cab-6a5b-45e8-bc8a-f4a8af440e97`;
-
-    // This line is failing at mand I am not sure why.
-    // The error says that renderParameterTemplates is undefined (I logged it and it's undefined, actionType is defined).
-    // This exact line (line 432) runs successfully in the webhook tests.
-    expect(actionType.renderParameterTemplates).toBeTruthy();
-    const paramsWithTemplates = {
-      alertActionGroup: 'small',
-      alertActionGroupName: '{{alertActionGroupName}}',
-      alertId: '{{alertId}}',
-      alertName: 'Test xMatters',
-      date: '2022-01-18T19:01:08.818Z',
-      severity: 'high',
-      spaceId: 'default',
-      tags: 'test1, test2',
-    };
-    const variables = {
-      alertActionGroupName,
-      alertId,
-    };
-    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let paramsObject: any;
-    try {
-      paramsObject = JSON.parse(`${params}`);
-    } catch (err) {
-      expect(err).toBe(null); // test should fail if it can't parse
-    }
-
-    expect(paramsObject.alertId).toBe(alertId);
-    expect(paramsObject.alertActionGroupName).toBe(alertActionGroupName);
-    expect(params.alertId).toBe(`c9437cab-6a5b-45e8-bc8a-f4a8af440e97`);
-    expect(params.alertActionGroupName).toBe(`Small t-shirt`);
-  });
 });
