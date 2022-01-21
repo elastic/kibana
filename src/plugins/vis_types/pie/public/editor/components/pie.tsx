@@ -281,8 +281,8 @@ const PieOptions = (props: PieOptionsProps) => {
             (props.showElasticChartsOptions &&
               stateParams.labels.position === LabelPositions.INSIDE)
           }
-          paramName="last_level"
-          value={stateParams.labels.last_level}
+          paramName="lastLevel"
+          value={stateParams.labels.lastLevel}
           setValue={setLabels}
           data-test-subj="visTypePieTopLevelSwitch"
         />

@@ -45,7 +45,7 @@ describe('interpreter/functions#pie', () => {
     labels: {
       show: false,
       values: true,
-      last_level: true,
+      lastLevel: true,
       truncate: 100,
     },
     dimensions: {

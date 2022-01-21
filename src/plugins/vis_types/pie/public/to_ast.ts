@@ -39,7 +39,7 @@ const preparePalette = (palette?: PaletteOutput) => {
 const prepareLabels = (params: LabelsParams) => {
   const pieLabels = buildExpressionFunction(PARTITION_LABELS_FUNCTION, {
     show: params.show,
-    lastLevel: params.last_level,
+    lastLevel: params.lastLevel,
     values: params.values,
     truncate: params.truncate,
   });

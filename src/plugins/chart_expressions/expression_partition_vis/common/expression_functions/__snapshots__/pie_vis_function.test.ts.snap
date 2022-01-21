@@ -49,7 +49,7 @@ Object {
       "emptySizeRatio": 0.3,
       "isDonut": true,
       "labels": Object {
-        "last_level": false,
+        "lastLevel": false,
         "percentDecimals": 2,
         "position": "default",
         "show": false,

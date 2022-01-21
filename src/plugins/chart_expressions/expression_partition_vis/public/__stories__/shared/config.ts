@@ -30,7 +30,7 @@ export const config: RenderValue['visConfig'] = {
     values: true,
     truncate: 0,
     valuesFormat: ValueFormats.PERCENT,
-    last_level: false,
+    lastLevel: false,
   },
   startFromSecondLargestSlice: true,
   dimensions: {

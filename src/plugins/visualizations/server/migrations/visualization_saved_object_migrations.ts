@@ -21,7 +21,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel,
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
-  commonReplaceAddLegendWithLegendDisplayAtPieVis,
+  commonUpdatePieVisApi,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -1127,9 +1127,7 @@ export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc
   return doc;
 };
 
-export const replaceAddLegendWithLegendDisplayAtPieVis: SavedObjectMigrationFn<any, any> = (
-  doc
-) => {
+export const updatePieVisApi: SavedObjectMigrationFn<any, any> = (doc) => {
   const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
@@ -1140,7 +1138,7 @@ export const replaceAddLegendWithLegendDisplayAtPieVis: SavedObjectMigrationFn<a
       // Let it go, the data is invalid and we'll leave it as is
     }
 
-    const newVisState = commonReplaceAddLegendWithLegendDisplayAtPieVis(visState);
+    const newVisState = commonUpdatePieVisApi(visState);
     return {
       ...doc,
       attributes: {
@@ -1208,5 +1206,5 @@ export const visualizationSavedObjectTypeMigrations = {
   ),
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
-  '8.1.0': flow(replaceAddLegendWithLegendDisplayAtPieVis),
+  '8.1.0': flow(updatePieVisApi),
 };

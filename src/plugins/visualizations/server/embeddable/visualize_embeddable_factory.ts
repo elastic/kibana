@@ -19,7 +19,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel,
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
-  commonReplaceAddLegendWithLegendDisplayAtPieVis,
+  commonUpdatePieVisApi,
 } from '../migrations/visualization_common_migrations';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
@@ -85,9 +85,9 @@ const byValueRemoveMarkdownLessFromTSVB = (state: SerializableRecord) => {
   };
 };
 
-const byValueReplaceAddLegendWithLegendDisplayAtPieVis = (state: SerializableRecord) => ({
+const byValueUpdatePieVisApi = (state: SerializableRecord) => ({
   ...state,
-  savedVis: commonReplaceAddLegendWithLegendDisplayAtPieVis(state.savedVis),
+  savedVis: commonUpdatePieVisApi(state.savedVis),
 });
 
 export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
@@ -110,7 +110,7 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
         )(state),
       '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
       '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
-      '8.1.0': (state) => flow(byValueReplaceAddLegendWithLegendDisplayAtPieVis)(state),
+      '8.1.0': (state) => flow(byValueUpdatePieVisApi)(state),
     },
   };
 };

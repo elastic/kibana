@@ -48,7 +48,7 @@ describe('interpreter/functions#pie', () => {
       valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
       truncate: 100,
-      last_level: false,
+      lastLevel: false,
     },
     metric: {
       type: 'vis_dimension',

@@ -61,17 +61,20 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       ),
       default: 2,
     },
+    // Deprecated
     lastLevel: {
       types: ['boolean'],
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.lastLevel.help', {
-        defaultMessage: 'Show top level labels only',
+        defaultMessage: 'Show top level labels only for multilayer pie/donut charts',
       }),
       default: false,
     },
+    // Deprecated
     truncate: {
       types: ['number'],
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.truncate.help', {
-        defaultMessage: 'Defines the number of characters that the slice value will display',
+        defaultMessage:
+          'Defines the number of characters that the slice value will display only for multilayer pie/donut charts',
       }),
       default: null,
     },
@@ -96,7 +99,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       values: args.values,
       truncate: args.truncate,
       valuesFormat: args.valuesFormat,
-      last_level: args.lastLevel,
+      lastLevel: args.lastLevel,
     };
   },
 });

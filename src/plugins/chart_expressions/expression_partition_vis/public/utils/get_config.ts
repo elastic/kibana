@@ -70,7 +70,7 @@ const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
   if (
     visParams.labels.show &&
     visParams.labels.position === LabelPositions.DEFAULT &&
-    visParams.labels.last_level
+    visParams.labels.lastLevel
   ) {
     config.linkLabel = {
       maxCount: Number.POSITIVE_INFINITY,

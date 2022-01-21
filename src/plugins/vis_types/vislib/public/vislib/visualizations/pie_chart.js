@@ -122,7 +122,7 @@ export class PieChart extends Chart {
     const showLabels = self._attr.labels.show;
     const showValues = self._attr.labels.values;
     const truncateLabelLength = self._attr.labels.truncate;
-    const showOnlyOnLastLevel = self._attr.labels.last_level;
+    const showOnlyOnLastLevel = self._attr.labels.lastLevel;
 
     const partition = d3.layout
       .partition()

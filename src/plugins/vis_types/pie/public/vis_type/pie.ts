@@ -53,7 +53,7 @@ export const getPieVisTypeDefinition = ({
       },
       labels: {
         show: true,
-        last_level: !showElasticChartsOptions,
+        lastLevel: !showElasticChartsOptions,
         values: true,
         valuesFormat: ValueFormats.PERCENT,
         percentDecimals: DEFAULT_PERCENT_DECIMALS,

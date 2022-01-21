@@ -33,10 +33,12 @@ export interface PartitionLabelsArguments {
   show: boolean;
   position: LabelPositions;
   values: boolean;
-  truncate: number | null;
   valuesFormat: ValueFormats;
-  lastLevel: boolean;
   percentDecimals: number;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  truncate?: number | null;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  lastLevel?: boolean;
 }
 
 export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
@@ -45,10 +47,12 @@ export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
     show: boolean;
     position: LabelPositions;
     values: boolean;
-    truncate: number | null;
     valuesFormat: ValueFormats;
-    last_level: boolean;
     percentDecimals: number;
+    /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+    truncate?: number | null;
+    /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+    lastLevel?: boolean;
   }
 >;
 

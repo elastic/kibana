@@ -36,12 +36,14 @@ export interface Dimensions {
 
 export interface LabelsParams {
   show: boolean;
-  last_level: boolean;
   position: LabelPositions;
   values: boolean;
-  truncate: number | null;
   valuesFormat: ValueFormats;
   percentDecimals: number;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  truncate?: number | null;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  lastLevel?: boolean;
 }
 
 interface VisCommonParams {

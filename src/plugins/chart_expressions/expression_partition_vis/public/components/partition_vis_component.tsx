@@ -62,6 +62,7 @@ import {
   partitionVisContainerStyleFactory,
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
+import { filterOutConfig } from '../utils/filter_out_config';
 
 declare global {
   interface Window {
@@ -85,7 +86,8 @@ export interface PartitionVisComponentProps {
 }
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
-  const { visData, visParams, visType, services, syncColors } = props;
+  const { visData, visParams: preVisParams, visType, services, syncColors } = props;
+  const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
 
   const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
