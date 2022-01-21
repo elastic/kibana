@@ -6,7 +6,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.1.0/archives/20220118-151627_25dd4a31/manifest.json"
+export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.1.0/archives/20220121-002819_8892b770/manifest.json"
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
