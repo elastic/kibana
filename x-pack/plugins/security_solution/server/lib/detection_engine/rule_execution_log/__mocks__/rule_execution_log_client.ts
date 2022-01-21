@@ -5,23 +5,36 @@
  * 2.0.
  */
 
-import { IRuleExecutionLogClient } from '../types';
+import { IRuleExecutionLogClient } from '../rule_execution_log_client/client_interface';
+import {
+  IRuleExecutionLogger,
+  RuleExecutionContext,
+} from '../rule_execution_logger/logger_interface';
 
-export const ruleExecutionLogClientMock = {
+const ruleExecutionLogClientMock = {
   create: (): jest.Mocked<IRuleExecutionLogClient> => ({
-    find: jest.fn(),
-    findBulk: jest.fn(),
-
+    getExecutionSummariesBulk: jest.fn(),
+    getExecutionSummary: jest.fn(),
+    clearExecutionSummary: jest.fn(),
     getLastFailures: jest.fn(),
-    getCurrentStatus: jest.fn(),
-    getCurrentStatusBulk: jest.fn(),
+  }),
+};
 
-    deleteCurrentStatus: jest.fn(),
+const ruleExecutionLoggerMock = {
+  create: (context: Partial<RuleExecutionContext> = {}): jest.Mocked<IRuleExecutionLogger> => ({
+    context: {
+      executionId: context.executionId ?? 'some execution id',
+      ruleId: context.ruleId ?? 'some rule id',
+      ruleName: context.ruleName ?? 'Some rule',
+      ruleType: context.ruleType ?? 'some rule type',
+      spaceId: context.spaceId ?? 'some space id',
+    },
 
     logStatusChange: jest.fn(),
   }),
 };
 
-export const RuleExecutionLogClient = jest
-  .fn<jest.Mocked<IRuleExecutionLogClient>, []>()
-  .mockImplementation(ruleExecutionLogClientMock.create);
+export const ruleExecutionLogMock = {
+  client: ruleExecutionLogClientMock,
+  logger: ruleExecutionLoggerMock,
+};
