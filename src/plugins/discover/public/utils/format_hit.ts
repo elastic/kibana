@@ -8,6 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { FieldFormatsStart } from '../../../field_formats/public';
 import { DataView, flattenHit } from '../../../data/common';
 import { formatFieldValue } from './format_value';
 

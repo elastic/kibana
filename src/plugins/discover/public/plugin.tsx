@@ -196,8 +196,7 @@ export interface DiscoverStartPlugins {
  * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
-  implements
-    Plugin<Promise<DiscoverSetup>, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
+  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -211,7 +210,7 @@ export class DiscoverPlugin
   private urlGenerator?: DiscoverStart['urlGenerator'];
   private locator?: DiscoverAppLocator;
 
-  async setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -393,8 +392,6 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
-    // const [coreStart, discoverStartPlugins] = await core.getStartServices();
-    // const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
     this.registerEmbeddable(core, plugins);
 
     return {
@@ -418,7 +415,6 @@ export class DiscoverPlugin
     setUiActions(plugins.uiActions);
 
     const services = buildServices(core, plugins, this.initializerContext);
-
     injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {

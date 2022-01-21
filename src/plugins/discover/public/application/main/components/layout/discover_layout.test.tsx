@@ -32,20 +32,9 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-
-jest.mock('../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../kibana_services'),
-  getServices: () => ({
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    uiSettings: {
-      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-    },
-  }),
-}));
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { FieldFormatsStart } from '../../../../../../field_formats/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -60,6 +49,14 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
       return prevSidebarClosed;
     }
   };
+  services.fieldFormats = {
+    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  } as unknown as FieldFormatsStart;
+  services.uiSettings = {
+    ...services.uiSettings,
+    get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
+  } as unknown as IUiSettingsClient;
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };

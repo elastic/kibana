@@ -56,7 +56,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
       indexPattern,
       appState,
       useNewFieldsApi,
-      services,
     });
   /**
    * Reset state when anchor changes

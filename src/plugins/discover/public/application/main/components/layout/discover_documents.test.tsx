@@ -21,11 +21,6 @@ import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from 'src/plugins/discover/public/types';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
-jest.mock('../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../kibana_services'),
-  getServices: () => jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
-}));
-
 setHeaderActionMenuMounter(jest.fn());
 
 function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {

@@ -8,24 +8,41 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { OpenSearchPanel } from './open_search_panel';
 
-const mockCapabilities = jest.fn().mockReturnValue({
-  savedObjectsManagement: {
-    edit: true,
-  },
-});
-
-jest.mock('../../../../kibana_services', () => {
+jest.mock('../../../../utils/use_discover_services', () => {
+  const defaults = {
+    core: { uiSettings: {}, savedObjects: {} },
+    addBasePath: (path: string) => path,
+  };
+  let testNumber = 0;
   return {
-    getServices: () => ({
-      core: { uiSettings: {}, savedObjects: {} },
-      addBasePath: (path: string) => path,
-      capabilities: mockCapabilities(),
-    }),
+    useDiscoverServices: () => {
+      testNumber++;
+
+      if (testNumber === 2) {
+        return {
+          ...defaults,
+          capabilities: {
+            savedObjectsManagement: {
+              edit: false,
+              delete: false,
+            },
+          },
+        };
+      }
+
+      return {
+        ...defaults,
+        capabilities: {
+          savedObjectsManagement: {
+            edit: true,
+          },
+        },
+      };
+    },
   };
 });
-
-import { OpenSearchPanel } from './open_search_panel';
 
 describe('OpenSearchPanel', () => {
   test('render', () => {
@@ -36,12 +53,6 @@ describe('OpenSearchPanel', () => {
   });
 
   test('should not render manage searches button without permissions', () => {
-    mockCapabilities.mockReturnValue({
-      savedObjectsManagement: {
-        edit: false,
-        delete: false,
-      },
-    });
     const component = shallow(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );

@@ -14,20 +14,10 @@ import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { DiscoverServices } from '../../build_services';
 import { getDocId } from './discover_grid_document_selection';
 import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-
-jest.mock('../../kibana_services', () => ({
-  ...jest.requireActual('../../kibana_services'),
-  getServices: () => jest.requireActual('../../__mocks__/services').discoverServiceMock,
-}));
-
-const servicesMock = {
-  uiSettings: uiSettingsMock,
-} as DiscoverServices;
+import { discoverServiceMock } from '../../__mocks__/services';
 
 function getProps() {
   return {
@@ -56,7 +46,7 @@ function getProps() {
 
 function getComponent() {
   const Proxy = (props: DiscoverGridProps) => (
-    <KibanaContextProvider services={servicesMock}>
+    <KibanaContextProvider services={discoverServiceMock}>
       <DiscoverGrid {...props} />
     </KibanaContextProvider>
   );

@@ -21,11 +21,6 @@ import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { EsHitRecordList } from '../types';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 
-jest.mock('../../kibana_services', () => ({
-  ...jest.requireActual('../../kibana_services'),
-  getServices: () => jest.requireActual('../../__mocks__/services').discoverServiceMock,
-}));
-
 describe('ContextAppContent test', () => {
   const mountComponent = ({
     anchorStatus,

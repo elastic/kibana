@@ -37,6 +37,7 @@ describe('Discover flyout', function () {
     const services = {
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
+      history: () => ({ location: {} }),
     } as unknown as DiscoverServices;
 
     const props = {
