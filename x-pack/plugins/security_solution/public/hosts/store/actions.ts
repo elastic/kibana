@@ -6,7 +6,10 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
+import {
+  HostsSortField,
+  RiskScoreBetterSortField,
+} from '../../../common/search_strategy/security_solution/hosts';
 
 import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/hosts');
@@ -33,3 +36,8 @@ export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
+
+export const updateRiskScoreBetterSort = actionCreator<{
+  sort: RiskScoreBetterSortField;
+  hostsType: HostsType;
+}>('UPDATE_RISK_SCORE_BETTER_SORT');

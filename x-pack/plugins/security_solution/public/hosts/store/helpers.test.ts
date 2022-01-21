@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 import { HostsModel, HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
-import { Direction, HostsFields } from '../../../common/search_strategy';
+import { Direction, HostsFields, RiskScoreBetterFields } from '../../../common/search_strategy';
 
 export const mockHostsState: HostsModel = {
   page: {
@@ -37,6 +37,14 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.risk]: null,
+      [HostsTableType.riskScoreBetter]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreBetterFields.riskScore,
+          direction: Direction.desc,
+        },
+      },
     },
   },
   details: {
@@ -65,6 +73,14 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.risk]: null,
+      [HostsTableType.riskScoreBetter]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreBetterFields.riskScore,
+          direction: Direction.desc,
+        },
+      },
     },
   },
 };

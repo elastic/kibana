@@ -21,6 +21,9 @@ export const authenticationsSelector = () =>
 export const hostsSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.hosts]);
 
+export const riskScoreBetterSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.riskScoreBetter]);
+
 export const eventsSelector = () => createSelector(selectHosts, (hosts) => hosts.queries.events);
 
 export const uncommonProcessesSelector = () =>

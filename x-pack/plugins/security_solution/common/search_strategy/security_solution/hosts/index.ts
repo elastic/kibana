@@ -12,6 +12,7 @@ export * from './details';
 export * from './first_last_seen';
 export * from './kpi';
 export * from './risk_score';
+export * from './risk_score_better';
 export * from './overview';
 export * from './uncommon_processes';
 
@@ -24,5 +25,6 @@ export enum HostsQueries {
   hostsEntities = 'hostsEntities',
   overview = 'overviewHost',
   hostsRiskScore = 'hostsRiskScore',
+  riskScoreBetter = 'riskScoreBetter',
   uncommonProcesses = 'uncommonProcesses',
 }

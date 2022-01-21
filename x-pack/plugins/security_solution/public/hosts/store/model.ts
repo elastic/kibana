@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../../common/search_strategy';
+import { Direction, RiskScoreBetterSortField } from '../../../common/search_strategy';
 import { HostsFields } from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
@@ -21,6 +21,7 @@ export enum HostsTableType {
   anomalies = 'anomalies',
   alerts = 'externalAlerts',
   risk = 'hostRisk',
+  riskScoreBetter = 'riskScoreBetter',
 }
 
 export interface BasicQueryPaginated {
@@ -33,6 +34,10 @@ export interface HostsQuery extends BasicQueryPaginated {
   sortField: HostsFields;
 }
 
+export interface RiskScoreBetterQuery extends BasicQueryPaginated {
+  sort: RiskScoreBetterSortField;
+}
+
 export interface Queries {
   [HostsTableType.authentications]: BasicQueryPaginated;
   [HostsTableType.hosts]: HostsQuery;
@@ -41,6 +46,7 @@ export interface Queries {
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
   [HostsTableType.risk]: null | undefined;
+  [HostsTableType.riskScoreBetter]: RiskScoreBetterQuery;
 }
 
 export interface GenericHostsModel {
