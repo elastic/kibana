@@ -11,7 +11,7 @@ import { logger } from '@storybook/node-logger';
 import buildStandalone from '@storybook/react/standalone';
 import { Flags, run } from '@kbn/dev-utils';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
