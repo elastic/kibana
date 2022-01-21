@@ -53,7 +53,7 @@ export const StatusBadge: FC<StatusBadgeProps> = ({ status, stepNo, isMobile }) 
     <EuiFlexGroup alignItems="center" gutterSize="s">
       {!isMobile && (
         <EuiFlexItem grow={false}>
-          <EuiText>
+          <EuiText className="eui-textNoWrap">
             <strong>{stepNo}.</strong>
           </EuiText>
         </EuiFlexItem>

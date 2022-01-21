@@ -94,7 +94,7 @@ module.exports = {
         ].map(from => ({
           from,
           to: false,
-          disallowedMessage: `Use "@kbn/ui-shared-deps-src/theme" to access theme vars.`
+          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`
         })),
       ],
     ],
