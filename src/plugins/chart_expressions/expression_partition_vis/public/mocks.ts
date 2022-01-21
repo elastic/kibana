@@ -348,3 +348,11 @@ export const createMockPieParams = (): PartitionVisParams => {
     distinctColors: false,
   };
 };
+
+export const createMockDonutParams = (): PartitionVisParams => {
+  return {
+    ...createMockPartitionVisParams(),
+    isDonut: true,
+    emptySizeRatio: 0.3,
+  };
+};
