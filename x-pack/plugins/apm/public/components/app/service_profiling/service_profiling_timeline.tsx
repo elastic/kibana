@@ -94,7 +94,6 @@ export function ServiceProfilingTimeline({
           {specs.map((spec) => (
             <BarSeries
               {...spec}
-              timeZone="local"
               key={spec.id}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}

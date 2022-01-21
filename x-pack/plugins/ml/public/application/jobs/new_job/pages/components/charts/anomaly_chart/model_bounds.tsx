@@ -44,7 +44,6 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       curve={CurveType.CURVE_MONOTONE_X}
       areaSeriesStyle={areaSeriesStyle}
       color={MODEL_COLOR}
-      timeZone="local"
     />
   );
 };

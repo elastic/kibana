@@ -99,7 +99,6 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 yAccessors={yAccessors}
                 splitSeriesAccessors={splitSeriesAccessors}
                 data={data}
-                timeZone={'local'}
               />
             </Chart>
           </EuiFlexItem>

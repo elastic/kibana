@@ -138,7 +138,6 @@ export const DocumentCountChart: FC<Props> = ({
           xAccessor="time"
           yAccessors={['value']}
           data={adjustedChartPoints}
-          timeZone="local"
         />
       </Chart>
     </div>

@@ -106,7 +106,6 @@ export function SparkPlot({
               xAccessor={'x'}
               yAccessors={['y']}
               data={series}
-              timeZone="local"
               color={colorValue}
               curve={CurveType.CURVE_MONOTONE_X}
             />
@@ -118,7 +117,6 @@ export function SparkPlot({
                 xAccessor={'x'}
                 yAccessors={['y']}
                 data={comparisonSeries}
-                timeZone="local"
                 color={theme.eui.euiColorLightestShade}
                 curve={CurveType.CURVE_MONOTONE_X}
               />

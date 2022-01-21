@@ -53,7 +53,6 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
             xAccessor={'timestamp'}
             yAccessors={[id]}
             color={colors[color] || '#006BB4'}
-            timeZone="local"
           />
         </Chart>
       </EuiFlexItem>

@@ -442,7 +442,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                           yAccessors={[1]}
                           data={sourceData}
                           curve={CurveType.LINEAR}
-                          timeZone="local"
                         />
                         <LineSeries
                           key={'job-results'}
@@ -456,7 +455,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                           yAccessors={[1]}
                           data={bucketData}
                           curve={CurveType.LINEAR}
-                          timeZone="local"
                         />
                       </Chart>
                     </div>
