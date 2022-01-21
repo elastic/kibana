@@ -68,3 +68,10 @@ export const CLOSE_BUTTON_LTEXT = i18n.translate(
     defaultMessage: 'Close',
   }
 );
+
+export const INFO_BUTTON_TEXT = i18n.translate(
+  'xpack.securitySolution.hosts.hostRiskInformation.buttonLabel',
+  {
+    defaultMessage: 'How is risk score calculated?',
+  }
+);
