@@ -28,6 +28,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 
 export interface HostRiskScoreOverTimeProps {
   hostName: string;

@@ -26,7 +26,6 @@ const isRecord = (item: unknown): item is Record<string, unknown> =>
 const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
   isRecord(item) &&
   isRecord(item.host) &&
-  typeof item.host.name === 'string' &&
   typeof item.risk_stats?.risk_score === 'number' &&
   typeof item.risk === 'string';
 
@@ -36,21 +35,19 @@ export interface HostRisk {
   result?: HostsRiskScore[];
 }
 
-/**
- * @param queryId Provide this parameter when using query inspector to identify the query.
- */
 export const useHostsRiskScore = ({
   timerange,
   hostName,
   onlyLatest = true,
-  queryId = QUERY_ID,
+  // Provide this parameter when using query inspector to identify the query.
+  queryId = HostRiskScoreQueryId.DEFAULT,
   sortOrder,
   limit,
 }: {
   timerange?: { to: string; from: string };
   hostName?: string;
   onlyLatest?: boolean;
-  queryId?: string;
+  queryId?: HostRiskScoreQueryId;
   limit?: number;
   sortOrder?: Direction;
 }): HostRisk | null => {

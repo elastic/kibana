@@ -24,7 +24,7 @@ type GetHostsRiskScoreProps = HostsRiskScoreRequestOptions & {
   signal: AbortSignal;
 };
 
-export const getHostsRiskScore = ({
+const getHostsRiskScore = ({
   data,
   defaultIndex,
   timerange,
@@ -48,7 +48,7 @@ export const getHostsRiskScore = ({
     }
   );
 
-export const getHostsRiskScoreComplete = (
+const getHostsRiskScoreComplete = (
   props: GetHostsRiskScoreProps
 ): Observable<HostsRiskScoreStrategyResponse> => {
   return getHostsRiskScore(props).pipe(

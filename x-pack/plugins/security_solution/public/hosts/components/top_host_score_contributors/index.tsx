@@ -20,6 +20,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { Direction } from '../../../../../timelines/common';
+import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 
 export interface TopHostScoreContributorsProps {
   hostName: string;
@@ -48,7 +49,7 @@ const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
 ];
 
 const PAGE_SIZE = 5;
-const QUERY_ID = 'TopHostScoreContributorsQuery';
+const QUERY_ID = HostRiskScoreQueryId.TOP_HOST_SCORE_CONTRIBUTORS;
 
 const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps> = ({
   hostName,

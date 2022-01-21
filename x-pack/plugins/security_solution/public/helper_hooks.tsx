@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
   const [isOpen, setIsOpen] = useState(false);
