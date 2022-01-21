@@ -185,7 +185,7 @@ export const getConfig: GetConfigFn = (
       textColor: chartTheme.axes?.axisTitle?.fill,
       maxTextLength: visParams.labels.truncate ?? undefined,
     },
-    ...usingMargin,
+    ...(usingMargin ?? {}),
     ...getSpecificConfig(chartType, visParams, dimensions, rescaleFactor),
   };
 };

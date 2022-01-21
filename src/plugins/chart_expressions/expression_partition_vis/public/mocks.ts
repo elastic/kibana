@@ -270,7 +270,7 @@ export const createMockVisData = (): Datatable => {
   };
 };
 
-export const createMockPieParams = (): PartitionVisParams => {
+export const createMockPartitionVisParams = (): PartitionVisParams => {
   return {
     legendDisplay: LegendDisplay.SHOW,
     addTooltip: true,
@@ -292,19 +292,20 @@ export const createMockPieParams = (): PartitionVisParams => {
       name: 'default',
       type: 'palette',
     },
-    type: 'pie',
     dimensions: {
       metric: {
+        type: 'vis_dimension',
         accessor: 1,
         format: {
           id: 'number',
+          params: {
+            id: 'number',
+          },
         },
-        params: {},
-        label: 'Count',
-        aggType: 'count',
       },
       buckets: [
         {
+          type: 'vis_dimension',
           accessor: 0,
           format: {
             id: 'terms',
@@ -314,10 +315,9 @@ export const createMockPieParams = (): PartitionVisParams => {
               missingBucketLabel: 'Missing',
             },
           },
-          label: 'Carrier: Descending',
-          aggType: 'terms',
         },
         {
+          type: 'vis_dimension',
           accessor: 2,
           format: {
             id: 'terms',
@@ -327,10 +327,24 @@ export const createMockPieParams = (): PartitionVisParams => {
               missingBucketLabel: 'Missing',
             },
           },
-          label: 'Cancelled: Descending',
-          aggType: 'terms',
         },
       ],
     },
-  } as unknown as PartitionVisParams;
+  };
+};
+
+export const createMockPieParams = (): PartitionVisParams => {
+  return {
+    ...createMockPartitionVisParams(),
+    isDonut: false,
+    labels: {
+      position: LabelPositions.DEFAULT,
+      show: true,
+      truncate: 100,
+      values: true,
+      valuesFormat: ValueFormats.PERCENT,
+      percentDecimals: 2,
+    },
+    distinctColors: false,
+  };
 };
