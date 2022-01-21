@@ -75,6 +75,7 @@ const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
     config.linkLabel = {
       maxCount: Number.POSITIVE_INFINITY,
       maximumSection: Number.POSITIVE_INFINITY,
+      maxTextLength: visParams.labels.truncate ?? undefined,
     };
   }
 
@@ -182,7 +183,7 @@ export const getConfig: GetConfigFn = (
       maxCount: 5,
       fontSize: 11,
       textColor: chartTheme.axes?.axisTitle?.fill,
-      ...(visParams.labels.truncate ? { maxTextLength: visParams.labels.truncate } : {}),
+      maxTextLength: visParams.labels.truncate ?? undefined,
     },
     ...usingMargin,
     ...getSpecificConfig(chartType, visParams, dimensions, rescaleFactor),
