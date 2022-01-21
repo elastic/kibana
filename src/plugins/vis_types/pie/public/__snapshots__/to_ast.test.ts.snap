@@ -112,6 +112,9 @@ Object {
             "type": "expression",
           },
         ],
+        "nestedLegend": Array [
+          false,
+        ],
         "palette": Array [
           Object {
             "chain": Array [
