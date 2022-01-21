@@ -663,7 +663,6 @@ describe('utils', () => {
           },
         },
       };
-
       const ruleExecutionLogger = ruleExecutionLogMock.logger.create();
       mockLogger.warn.mockClear();
 

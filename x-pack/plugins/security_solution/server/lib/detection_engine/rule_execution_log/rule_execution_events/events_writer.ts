@@ -24,6 +24,7 @@ export interface IRuleExecutionEventsWriter {
 }
 
 export interface BaseArgs {
+  executionId: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;
@@ -49,7 +50,7 @@ export const createRuleExecutionEventsWriter = (
   let sequence = 0;
 
   return {
-    logStatusChange({ ruleId, ruleName, ruleType, spaceId, newStatus, message }) {
+    logStatusChange({ executionId, ruleId, ruleName, ruleType, spaceId, newStatus, message }) {
       eventLogger.logEvent({
         '@timestamp': nowISO(),
         message,
@@ -69,6 +70,7 @@ export const createRuleExecutionEventsWriter = (
               execution: {
                 status: newStatus,
                 status_order: ruleExecutionStatusOrderByStatus[newStatus],
+                uuid: executionId,
               },
             },
           },
@@ -85,7 +87,7 @@ export const createRuleExecutionEventsWriter = (
       });
     },
 
-    logExecutionMetrics({ ruleId, ruleName, ruleType, spaceId, metrics }) {
+    logExecutionMetrics({ executionId, ruleId, ruleName, ruleType, spaceId, metrics }) {
       eventLogger.logEvent({
         '@timestamp': nowISO(),
         rule: {
@@ -103,6 +105,7 @@ export const createRuleExecutionEventsWriter = (
             rule: {
               execution: {
                 metrics,
+                uuid: executionId,
               },
             },
           },

@@ -4164,6 +4164,13 @@ Object {
                 "enabled": Object {
                   "type": "keyword",
                 },
+                "execution": Object {
+                  "properties": Object {
+                    "uuid": Object {
+                      "type": "keyword",
+                    },
+                  },
+                },
                 "false_positives": Object {
                   "type": "keyword",
                 },

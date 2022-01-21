@@ -8,6 +8,7 @@ import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import uuid from 'uuid';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -106,6 +107,7 @@ export class TaskRunner<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
+  private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -131,6 +133,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
+    this.executionId = uuid.v4();
   }
 
   async getDecryptedAttributes(
@@ -209,6 +212,7 @@ export class TaskRunner<
       ruleId,
       ruleName,
       tags,
+      executionId: this.executionId,
       logger: this.logger,
       actionsPlugin: this.context.actionsPlugin,
       apiKey,
@@ -324,6 +328,7 @@ export class TaskRunner<
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
+          executionId: this.executionId,
           services: {
             ...services,
             alertInstanceFactory: createAlertInstanceFactory<
@@ -411,6 +416,7 @@ export class TaskRunner<
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       generateNewAndRecoveredAlertEvents({
         eventLogger,
+        executionId: this.executionId,
         originalAlerts,
         currentAlerts: alertsWithScheduledActions,
         recoveredAlerts,
@@ -612,6 +618,7 @@ export class TaskRunner<
       ruleType: this.ruleType as UntypedNormalizedRuleType,
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
+      executionId: this.executionId,
       task: {
         scheduled: this.taskInstance.runAt.toISOString(),
         scheduleDelay: Millis2Nanos * scheduleDelay,
@@ -785,6 +792,13 @@ export class TaskRunner<
         this.ruleType.ruleTaskTimeout
       }`,
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: this.executionId,
+            },
+          },
+        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
@@ -883,6 +897,7 @@ interface GenerateNewAndRecoveredAlertEventsParams<
   InstanceContext extends AlertInstanceContext
 > {
   eventLogger: IEventLogger;
+  executionId: string;
   originalAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
   currentAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
   recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
@@ -911,6 +926,7 @@ function generateNewAndRecoveredAlertEvents<
 >(params: GenerateNewAndRecoveredAlertEventsParams<InstanceState, InstanceContext>) {
   const {
     eventLogger,
+    executionId,
     ruleId,
     namespace,
     currentAlerts,
@@ -990,6 +1006,13 @@ function generateNewAndRecoveredAlertEvents<
         ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: executionId,
+            },
+          },
+        },
         alerting: {
           instance_id: alertId,
           ...(group ? { action_group_id: group } : {}),

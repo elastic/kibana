@@ -36,6 +36,7 @@ export interface CreateExecutionHandlerOptions<
 > {
   ruleId: string;
   ruleName: string;
+  executionId: string;
   tags?: string[];
   actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
@@ -83,6 +84,7 @@ export function createExecutionHandler<
   logger,
   ruleId,
   ruleName,
+  executionId,
   tags,
   actionsPlugin,
   actions: ruleActions,
@@ -206,6 +208,7 @@ export function createExecutionHandler<
         ruleId,
         ruleType: ruleType as UntypedNormalizedRuleType,
         action: EVENT_LOG_ACTIONS.executeAction,
+        executionId,
         instanceId: alertId,
         group: actionGroup,
         subgroup: actionSubgroup,
