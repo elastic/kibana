@@ -23,7 +23,11 @@ import {
   UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/common';
 import { FieldVisConfig } from '../../common/components/stats_table/types';
-import { JOB_FIELD_TYPES, NON_AGGREGATABLE_FIELD_TYPES, OMIT_FIELDS } from '../../../../common';
+import {
+  JOB_FIELD_TYPES,
+  NON_AGGREGATABLE_FIELD_TYPES,
+  OMIT_FIELDS,
+} from '../../../../common/constants';
 import type { FieldRequestConfig, JobFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
