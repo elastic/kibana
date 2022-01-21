@@ -578,6 +578,7 @@
     "@types/kbn__i18n": "link:bazel-bin/packages/kbn-i18n/npm_module_types",
     "@types/kbn__i18n-react": "link:bazel-bin/packages/kbn-i18n-react/npm_module_types",
     "@types/kbn__interpreter": "link:bazel-bin/packages/kbn-interpreter/npm_module_types",
+    "@types/kbn__io-ts-utils": "link:bazel-bin/packages/kbn-io-ts-utils/npm_module_types",
     "@types/kbn__mapbox-gl": "link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types",
     "@types/kbn__monaco": "link:bazel-bin/packages/kbn-monaco/npm_module_types",
     "@types/kbn__optimizer": "link:bazel-bin/packages/kbn-optimizer/npm_module_types",
