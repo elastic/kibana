@@ -6,7 +6,12 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { AnalysisResult, FormattedOverrides, InputData, InputOverrides } from '../common';
+import type {
+  AnalysisResult,
+  FormattedOverrides,
+  InputData,
+  InputOverrides,
+} from '../common/types';
 
 export async function analyzeFile(
   client: IScopedClusterClient,

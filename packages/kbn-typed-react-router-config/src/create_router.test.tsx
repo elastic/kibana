@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
 import { route } from './route';
