@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt } from '@kbn/io-ts-utils';
 import { createServerRouteRepository } from '@kbn/server-route-repository';
 import { ServerRoute } from '@kbn/server-route-repository';
 import * as t from 'io-ts';

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { RedirectTo } from '../redirect_to';
 import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';

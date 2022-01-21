@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/merge_rt",
-  "types": "../target_types/merge_rt"
-}

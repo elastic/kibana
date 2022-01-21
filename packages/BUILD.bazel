@@ -97,6 +97,7 @@ filegroup(
       "//packages/kbn-i18n:build_types",
       "//packages/kbn-i18n-react:build_types",
       "//packages/kbn-interpreter:build_types",
+      "//packages/kbn-io-ts-utils:build_types",
       "//packages/kbn-mapbox-gl:build_types",
       "//packages/kbn-monaco:build_types",
       "//packages/kbn-optimizer:build_types",
