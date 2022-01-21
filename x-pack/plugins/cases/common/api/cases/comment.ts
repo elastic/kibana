@@ -42,6 +42,11 @@ export enum CommentType {
   actions = 'actions',
 }
 
+export enum IsolateHostActionType {
+  isolate = 'isolate',
+  unisolate = 'unisolate',
+}
+
 export const ContextTypeUserRt = rt.type({
   comment: rt.string,
   type: rt.literal(CommentType.user),
@@ -99,6 +104,14 @@ export const CommentRequestRt = rt.union([
 
 export const CommentResponseRt = rt.intersection([
   CommentAttributesRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export const CommentResponseTypeUserRt = rt.intersection([
+  AttributesTypeUserRt,
   rt.type({
     id: rt.string,
     version: rt.string,
@@ -167,6 +180,7 @@ export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
+export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;

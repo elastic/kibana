@@ -106,13 +106,9 @@ export const patchRulesRoute = (
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
-        const rulesClient = context.alerting?.getRulesClient();
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
         const savedObjectsClient = context.core.savedObjects.client;
-
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -144,7 +140,6 @@ export const patchRulesRoute = (
 
         const rule = await patchRules({
           rulesClient,
-          savedObjectsClient,
           author,
           buildingBlockType,
           description,
@@ -157,8 +152,6 @@ export const patchRulesRoute = (
           license,
           outputIndex,
           savedId,
-          spaceId: context.securitySolution.getSpaceId(),
-          ruleStatusClient,
           timelineId,
           timelineTitle,
           meta,
@@ -197,12 +190,13 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleStatus = await ruleStatusClient.getCurrentStatus({
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
+          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleExecutionSummary,
+            isRuleRegistryEnabled
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

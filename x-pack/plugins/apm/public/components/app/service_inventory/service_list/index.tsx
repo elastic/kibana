@@ -36,7 +36,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
@@ -315,7 +315,6 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection="desc"
-          initialPageSize={50}
           sortFn={(itemsToSort, sortField, sortDirection) => {
             // For healthStatus, sort items by healthStatus first, then by TPM
             return sortField === 'healthStatus'

@@ -102,6 +102,7 @@ export class LensAttributes {
   visualization: XYState;
   layerConfigs: LayerConfig[];
   isMultiSeries: boolean;
+  globalFilter?: { query: string; language: string };
 
   constructor(layerConfigs: LayerConfig[]) {
     this.layers = {};
@@ -119,8 +120,25 @@ export class LensAttributes {
 
     this.layerConfigs = layerConfigs;
     this.isMultiSeries = layerConfigs.length > 1;
+    this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
     this.layers = this.getLayers();
     this.visualization = this.getXyState();
+  }
+
+  getGlobalFilter(isMultiSeries: boolean) {
+    if (isMultiSeries) {
+      return undefined;
+    }
+    const defaultLayerFilter = this.layerConfigs[0].seriesConfig.query
+      ? ` and ${this.layerConfigs[0].seriesConfig.query.query}`
+      : '';
+    return {
+      query: `${this.getLayerFilters(
+        this.layerConfigs[0],
+        this.layerConfigs.length
+      )}${defaultLayerFilter}`,
+      language: 'kuery',
+    };
   }
 
   getBreakdownColumn({
@@ -635,11 +653,17 @@ export class LensAttributes {
       time: { from },
     } = layerConfig;
 
-    const inDays = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'days'));
+    const parsedMainFrom = parseRelativeDate(mainFrom);
+    const parsedFrom = parseRelativeDate(from);
+
+    const inDays =
+      parsedMainFrom && parsedFrom ? Math.abs(parsedMainFrom.diff(parsedFrom, 'days')) : 0;
     if (inDays > 1) {
       return inDays + 'd';
     }
-    const inHours = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'hours'));
+
+    const inHours =
+      parsedMainFrom && parsedFrom ? Math.abs(parsedMainFrom?.diff(parsedFrom, 'hours')) : 0;
     if (inHours === 0) {
       return null;
     }
@@ -670,10 +694,10 @@ export class LensAttributes {
 
       layers[layerId] = {
         columnOrder: [
-          `x-axis-column-${layerId}`,
           ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== PERCENTILE
             ? [`breakdown-column-${layerId}`]
             : []),
+          `x-axis-column-${layerId}`,
           `y-axis-column-${layerId}`,
           ...Object.keys(this.getChildYAxises(layerConfig, layerId, columnFilter)),
         ],
@@ -764,7 +788,7 @@ export class LensAttributes {
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
 
-    const query = this.layerConfigs[0].seriesConfig.query;
+    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
     return {
       title: 'Prefilled from exploratory view app',

@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -27,6 +27,7 @@ import { TransactionDetails } from '../../app/transaction_details';
 import { ServiceProfiling } from '../../app/service_profiling';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
+import { InfraOverview } from '../../app/infra_overview';
 
 function page<TPath extends string>({
   path,
@@ -264,6 +265,17 @@ export const serviceDetail = {
         defaultMessage: 'Profiling',
       }),
       element: <ServiceProfiling />,
+    }),
+    page({
+      path: '/services/{serviceName}/infra',
+      tab: 'infra',
+      title: i18n.translate('xpack.apm.views.infra.title', {
+        defaultMessage: 'Infrastructure',
+      }),
+      element: <InfraOverview />,
+      searchBarOptions: {
+        hidden: true,
+      },
     }),
     {
       path: '/services/{serviceName}/',

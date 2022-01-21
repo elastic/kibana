@@ -127,7 +127,7 @@ export const getRulesFromObjects = async (
     ) {
       return {
         statusCode: 200,
-        rule: transformAlertToRule(matchingRule, undefined, legacyActions[matchingRule.id]),
+        rule: transformAlertToRule(matchingRule, null, legacyActions[matchingRule.id]),
       };
     } else {
       return {

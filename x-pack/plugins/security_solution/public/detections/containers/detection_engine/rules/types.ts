@@ -30,9 +30,8 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
-  ruleExecutionStatus,
-  RuleExecutionStatus,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+  ruleExecutionSummary,
+} from '../../../../../common/detection_engine/schemas/common';
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -122,21 +121,12 @@ export const RuleSchema = t.intersection([
     index: t.array(t.string),
     language: t.string,
     license,
-    last_failure_at: t.string,
-    last_failure_message: t.string,
-    last_success_message: t.string,
-    last_success_at: t.string,
-    last_gap: t.string,
-    bulk_create_time_durations: t.array(t.string),
-    search_after_time_durations: t.array(t.string),
     meta: MetaRule,
     machine_learning_job_id: t.array(t.string),
     output_index: t.string,
     query: t.string,
     rule_name_override,
     saved_id: t.string,
-    status: ruleExecutionStatus,
-    status_date: t.string,
     threshold,
     threat_query,
     threat_filters,
@@ -151,6 +141,8 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
+    // TODO: https://github.com/elastic/kibana/pull/121644 clean up
+    execution_summary: ruleExecutionSummary,
   }),
 ]);
 
@@ -235,6 +227,7 @@ export type BulkActionResponse<Action extends BulkAction> = {
   [BulkAction.enable]: BulkActionResult;
   [BulkAction.duplicate]: BulkActionResult;
   [BulkAction.export]: Blob;
+  [BulkAction.edit]: BulkActionResult;
 }[Action];
 
 export interface BasicFetchProps {
@@ -289,26 +282,6 @@ export interface ExportDocumentsProps {
   excludeExportDetails?: boolean;
   signal?: AbortSignal;
 }
-
-export interface RuleStatus {
-  current_status: RuleInfoStatus;
-  failures: RuleInfoStatus[];
-}
-export interface RuleInfoStatus {
-  alert_id: string;
-  status_date: string;
-  status: RuleExecutionStatus | null;
-  last_failure_at: string | null;
-  last_success_at: string | null;
-  last_failure_message: string | null;
-  last_success_message: string | null;
-  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
-  gap: string | null | undefined;
-  bulk_create_time_durations: string[] | null | undefined;
-  search_after_time_durations: string[] | null | undefined;
-}
-
-export type RuleStatusResponse = Record<string, RuleStatus>;
 
 export interface PrePackagedRulesStatusResponse {
   rules_custom_installed: number;

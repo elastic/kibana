@@ -9,7 +9,8 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ExpressionRenderDefinition } from '../../../../expressions/public';
+import { i18n } from '@kbn/i18n';
+import { Datatable, ExpressionRenderDefinition } from '../../../../expressions/public';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
@@ -19,11 +20,22 @@ import { RenderValue } from '../../common/types';
 
 import { VisTypePieDependencies } from '../plugin';
 
+export const strings = {
+  getDisplayName: () =>
+    i18n.translate('expressionPie.renderer.pieVis.displayName', {
+      defaultMessage: 'Pie visualization',
+    }),
+  getHelpDescription: () =>
+    i18n.translate('expressionPie.renderer.pieVis.helpDescription', {
+      defaultMessage: 'Render a pie',
+    }),
+};
+
 const PieComponent = lazy(() => import('../components/pie_vis_component'));
 
-function shouldShowNoResultsMessage(visData: any): boolean {
+function shouldShowNoResultsMessage(visData: Datatable | undefined): boolean {
   const rows: object[] | undefined = visData?.rows;
-  const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
+  const isZeroHits = !rows || !rows.length;
 
   return Boolean(isZeroHits);
 }
@@ -32,7 +44,8 @@ export const getPieVisRenderer: (
   deps: VisTypePieDependencies
 ) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
   name: PIE_VIS_EXPRESSION_NAME,
-  displayName: 'Pie visualization',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (domNode, { visConfig, visData, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData);
@@ -56,7 +69,7 @@ export const getPieVisRenderer: (
               renderComplete={handlers.done}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
-              services={services.data}
+              services={{ data: services.data, fieldFormats: services.fieldFormats }}
               syncColors={syncColors}
             />
           </VisualizationContainer>
