@@ -23,6 +23,7 @@ import {
   HostsQueries,
   RiskScoreBetterRequestOptions,
   RiskScoreBetterStrategyResponse,
+  getHostRiskIndex,
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
@@ -53,7 +54,6 @@ interface UseRiskScoreBetter {
   docValueFields?: DocValueFields[];
   endDate: string;
   filterQuery?: ESTermQuery | string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -63,7 +63,6 @@ export const useRiskScoreBetter = ({
   docValueFields,
   endDate,
   filterQuery,
-  indexNames,
   skip = false,
   startDate,
 }: UseRiskScoreBetter): [boolean, RiskScoreBetterState] => {
@@ -71,7 +70,7 @@ export const useRiskScoreBetter = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getRiskScoreBetterSelector(state, hostsModel.HostsType.page)
   );
-  const { data } = useKibana().services;
+  const { data, spaces } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
@@ -165,40 +164,49 @@ export const useRiskScoreBetter = ({
     },
     [data.search, addError, addWarning, skip]
   );
+  const [spaceId, setSpaceId] = useState<string>();
 
   useEffect(() => {
-    setRiskScoreBetterRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-        factoryQueryType: HostsQueries.riskScoreBetter,
-        indices: indexNames,
-        filterQuery,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+
+  useEffect(() => {
+    if (spaceId) {
+      setRiskScoreBetterRequest((prevRequest) => {
+        const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+          factoryQueryType: HostsQueries.riskScoreBetter,
+          indices: [getHostRiskIndex(spaceId)],
+          filterQuery,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        });
+        const myRequest = {
+          ...(prevRequest ?? {}),
+          defaultIndex: indices,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType,
+          filterQuery: createFilter(filterQuery),
+          pagination: generateTablePaginationOptions(activePage, limit),
+          timerange,
+          sort,
+        };
+        if (!deepEqual(prevRequest, myRequest)) {
+          return myRequest;
+        }
+        return prevRequest;
       });
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        docValueFields: docValueFields ?? [],
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        timerange,
-        sort,
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
+    }
   }, [
     activePage,
     docValueFields,
     endDate,
     filterQuery,
-    indexNames,
+    spaceId,
     limit,
     startDate,
     sort,

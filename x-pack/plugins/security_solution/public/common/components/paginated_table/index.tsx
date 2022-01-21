@@ -39,7 +39,6 @@ import {
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
-import { HostRiskScoreColumns } from '../../../hosts/pages/navigation/hosts_risk_score_tab_body';
 import { RiskScoreBetterColumns } from '../../../hosts/components/risk_score_better_table';
 
 import { UsersColumns } from '../../../network/components/users_table/columns';
@@ -95,8 +94,7 @@ declare type BasicTableColumns =
   | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
-  | UsersColumns
-  | HostRiskScoreColumns;
+  | UsersColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
@@ -122,6 +120,8 @@ export interface BasicTableProps<T> {
   pageOfItems: any[];
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
+  split?: boolean;
+  stackHeader?: boolean;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
@@ -159,6 +159,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   pageOfItems,
   showMorePagesIndicator,
   sorting = null,
+  split,
+  stackHeader,
   totalCount,
   updateActivePage,
   updateLimitPagination,
@@ -260,6 +262,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
           id={id}
+          split={split}
+          stackHeader={stackHeader}
           subtitle={
             !loadingInitial && headerSubtitle
               ? `${i18n.SHOWING}: ${headerSubtitle}`

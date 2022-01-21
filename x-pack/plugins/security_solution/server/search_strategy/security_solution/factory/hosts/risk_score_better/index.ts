@@ -31,7 +31,6 @@ export const riskScoreBetter: SecuritySolutionFactory<HostsQueries.riskScoreBett
     options: RiskScoreBetterRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<RiskScoreBetterStrategyResponse> => {
-    console.log('RES!!!!', JSON.stringify(response));
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;

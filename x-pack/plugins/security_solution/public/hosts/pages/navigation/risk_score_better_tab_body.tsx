@@ -11,6 +11,7 @@ import { useRiskScoreBetter } from '../../containers/risk_score_better';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { RiskScoreBetterTable } from '../../components/risk_score_better_table';
+import { useRiskyHosts } from '../../containers/kpi_hosts/risky_hosts';
 
 const RiskScoreBetterTableManage = manageQuery(RiskScoreBetterTable);
 
@@ -29,12 +30,16 @@ export const RiskScoreBetterQueryTabBody = ({
       docValueFields,
       endDate,
       filterQuery,
-      // TODO: Steph/host risk
-      indexNames: ['ml_host_risk_score_latest_default'],
       skip,
       startDate,
       type,
     });
+
+  const { response } = useRiskyHosts({
+    filterQuery,
+    from: startDate,
+    to: endDate,
+  });
 
   return (
     <RiskScoreBetterTableManage
@@ -48,6 +53,7 @@ export const RiskScoreBetterQueryTabBody = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      severityCount={response?.riskyHosts ?? {}}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}

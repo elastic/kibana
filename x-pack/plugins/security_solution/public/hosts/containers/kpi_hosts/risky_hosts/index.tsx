@@ -25,6 +25,7 @@ import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/
 import type { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
+import { ESTermQuery } from '../../../../../common/typed_json';
 
 export type RiskyHostsScoreRequestOptions = RequestBasicOptions;
 
@@ -68,10 +69,10 @@ const getRiskyHostsWithOptionalSignal = withOptionalSignal(getRiskyHostsComplete
 const useRiskyHostsComplete = () => useObservable(getRiskyHostsWithOptionalSignal);
 
 interface UseRiskyHostProps {
-  filterQuery?: string;
+  filterQuery?: string | ESTermQuery;
   from: string;
   to: string;
-  skip: boolean;
+  skip?: boolean;
 }
 
 export const useRiskyHosts = ({ filterQuery, from, to, skip }: UseRiskyHostProps) => {

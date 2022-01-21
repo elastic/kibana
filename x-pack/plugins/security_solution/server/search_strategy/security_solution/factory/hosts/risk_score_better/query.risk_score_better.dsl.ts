@@ -23,7 +23,6 @@ export const buildRiskScoreBetterQuery = ({
   sort,
   timerange: { from, to },
 }: RiskScoreBetterRequestOptions) => {
-  console.log('SORT', sort);
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {

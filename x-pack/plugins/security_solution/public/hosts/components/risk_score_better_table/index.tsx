@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   Columns,
   Criteria,
@@ -23,10 +24,16 @@ import type {
   RiskScoreBetterItem,
   RiskScoreBetterSortField,
 } from '../../../../common/search_strategy';
-import { RiskScoreBetterFields, Direction } from '../../../../common/search_strategy';
+import {
+  RiskScoreBetterFields,
+  Direction,
+  HostRiskSeverity,
+} from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import { HOSTS_BY_RISK } from './translations';
+import { SeverityBar } from './severity_bar';
+import { SeverityBadges } from './severity_badges';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -49,6 +56,7 @@ interface RiskScoreBetterTableProps {
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
+  severityCount: { [k in HostRiskSeverity]?: number };
   totalCount: number;
   type: hostsModel.HostsType;
 }
@@ -72,6 +80,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   loading,
   loadPage,
   showMorePagesIndicator,
+  severityCount,
   totalCount,
   type,
 }) => {
@@ -111,11 +120,6 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
           field: getSortField(criteria.sort.field),
           direction: criteria.sort.direction as Direction,
         };
-        console.log('updateSort', {
-          criteria,
-          newSort,
-          currentSort: sort,
-        });
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           dispatch(
             hostsActions.updateRiskScoreBetterSort({
@@ -132,13 +136,31 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   const columns = useMemo(() => getRiskScoreBetterColumns(), []);
 
   const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
-
+  const severity = {
+    [HostRiskSeverity.unknown]: 0,
+    [HostRiskSeverity.low]: 0,
+    [HostRiskSeverity.moderate]: 0,
+    [HostRiskSeverity.high]: 0,
+    [HostRiskSeverity.critical]: 0,
+    ...severityCount,
+  };
+  const risk = (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <SeverityBadges severity={severity} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <SeverityBar severity={severity} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
   return (
     <PaginatedTable
       activePage={activePage}
       columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
+      headerSupplement={risk}
       headerTitle={HOSTS_BY_RISK}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
@@ -151,6 +173,8 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
+      split={true}
+      stackHeader={true}
       totalCount={fakeTotalCount}
       updateLimitPagination={updateLimitPagination}
       updateActivePage={updateActivePage}

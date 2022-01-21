@@ -6,12 +6,15 @@
  */
 
 import type { HostsKpiRiskyHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
+import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiRiskyHostsQuery = ({
+  filterQuery,
   timerange: { from, to },
   defaultIndex,
 }: HostsKpiRiskyHostsRequestOptions) => {
   const filter = [
+    ...createQueryFilterClauses(filterQuery),
     {
       range: {
         '@timestamp': {

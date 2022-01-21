@@ -13,12 +13,12 @@ import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 
-const HOST_RISK_SEVERITY_COLOUR = {
-  Unknown: euiLightVars.euiColorMediumShade,
-  Low: euiLightVars.euiColorVis0,
-  Moderate: euiLightVars.euiColorWarning,
-  High: euiLightVars.euiColorVis9_behindText,
-  Critical: euiLightVars.euiColorDanger,
+export const HOST_RISK_SEVERITY_COLOUR: { [k in HostRiskSeverity]: string } = {
+  [HostRiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
+  [HostRiskSeverity.low]: euiLightVars.euiColorVis0,
+  [HostRiskSeverity.moderate]: euiLightVars.euiColorWarning,
+  [HostRiskSeverity.high]: euiLightVars.euiColorVis9_behindText,
+  [HostRiskSeverity.critical]: euiLightVars.euiColorDanger,
 };
 
 const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundColor: boolean }>`

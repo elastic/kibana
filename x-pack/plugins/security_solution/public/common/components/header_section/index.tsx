@@ -43,6 +43,7 @@ export interface HeaderSectionProps extends HeaderProps {
   id?: string;
   isInspectDisabled?: boolean;
   split?: boolean;
+  stackHeader?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
@@ -59,6 +60,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   id,
   isInspectDisabled,
   split,
+  stackHeader,
   subtitle,
   title,
   titleSize = 'm',
@@ -68,7 +70,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   hideSubtitle = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      alignItems={stackHeader ? undefined : 'center'}
+      direction={stackHeader ? 'column' : 'row'}
+      gutterSize="s"
+    >
       <EuiFlexItem grow={growLeftSplit}>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
