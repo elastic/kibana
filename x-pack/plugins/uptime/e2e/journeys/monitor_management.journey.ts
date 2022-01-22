@@ -66,7 +66,7 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
 
   step('view results in overview page', async () => {
     await uptime.navigateToOverviewPage();
-    await page.waitForSelector(`text=${httpName}`, { timeout: 60 * 1000 });
+    await page.waitForSelector(`text=${httpName}`, { timeout: 120 * 1000 });
   });
 
   step('delete http monitor', async () => {
@@ -99,7 +99,7 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
 
   step('view results in overview page', async () => {
     await uptime.navigateToOverviewPage();
-    await page.waitForSelector(`text=${tcpName}`, { timeout: 60 * 1000 });
+    await page.waitForSelector(`text=${tcpName}`, { timeout: 120 * 1000 });
   });
 
   step('delete tcp monitor', async () => {
@@ -132,7 +132,7 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
 
   step('view results in overview page', async () => {
     await uptime.navigateToOverviewPage();
-    await page.waitForSelector(`text=${icmpName}`, { timeout: 60 * 1000 });
+    await page.waitForSelector(`text=${icmpName}`, { timeout: 120 * 1000 });
   });
 
   step('delete ICMP monitor', async () => {
@@ -165,7 +165,7 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
 
   step('view results in overview page', async () => {
     await uptime.navigateToOverviewPage();
-    await page.waitForSelector(`text=${browserName} - inline`, { timeout: 60 * 1000 });
+    await page.waitForSelector(`text=${browserName} - inline`, { timeout: 120 * 1000 });
   });
 
   step('delete browser monitor', async () => {
