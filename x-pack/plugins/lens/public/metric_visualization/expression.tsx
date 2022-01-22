@@ -81,16 +81,13 @@ function getColorStyling(
   const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
   let rawIndex = stops.findIndex((v) => v > value);
 
-  // we should check it only if we don't find color index
-  if (rawIndex !== -1) {
-    if (!isFinite(rangeMax) && value > stops[stops.length - 1]) {
-      rawIndex = stops.length - 1;
-    }
+  if (!isFinite(rangeMax) && value > stops[stops.length - 1]) {
+    rawIndex = stops.length - 1;
+  }
 
-    // in this case first stop is -Infinity
-    if (!isFinite(rangeMin) && value < (isFinite(stops[0]) ? stops[0] : stops[1])) {
-      rawIndex = 0;
-    }
+  // in this case first stop is -Infinity
+  if (!isFinite(rangeMin) && value < (isFinite(stops[0]) ? stops[0] : stops[1])) {
+    rawIndex = 0;
   }
 
   const colorIndex = rawIndex;

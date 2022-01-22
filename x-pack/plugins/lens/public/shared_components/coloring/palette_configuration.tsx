@@ -80,10 +80,13 @@ export function CustomizablePalette({
           palettes={palettes}
           activePalette={localState.activePalette}
           setPalette={(newPalette) => {
-            dispatch({
-              type: 'changeColorPalette',
-              payload: { palette: newPalette, dataBounds, palettes, disableSwitchingContinuity },
-            });
+            const isPaletteChanged = newPalette.name !== activePalette.name;
+            if (isPaletteChanged) {
+              dispatch({
+                type: 'changeColorPalette',
+                payload: { palette: newPalette, dataBounds, palettes, disableSwitchingContinuity },
+              });
+            }
           }}
           showCustomPalette
           showDynamicColorOnly
