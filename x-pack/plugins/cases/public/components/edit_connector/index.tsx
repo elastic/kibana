@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiButtonIcon,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty, noop } from 'lodash/fp';
 
@@ -246,6 +247,7 @@ export const EditConnector = React.memo(
 
     return (
       <div>
+        <EuiSpacer />
         <EuiFlexGroup
           alignItems="center"
           gutterSize="xs"

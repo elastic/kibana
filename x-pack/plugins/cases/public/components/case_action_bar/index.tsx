@@ -6,16 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import styled, { css } from 'styled-components';
-import {
-  EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { Case } from '../../../common/ui/types';
 import { CaseStatuses, CaseType } from '../../../common/api';
 import * as i18n from '../case_view/translations';
@@ -27,19 +18,6 @@ import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
-
-const MyDescriptionList = styled(EuiDescriptionList)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeL};
-      border-right: ${theme.eui.euiBorderThin};
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-        padding-right: 0;
-        border-right: 0;
-      }
-    }
-  `}
-`;
 
 interface CaseActionBarProps {
   caseData: Case;
@@ -79,89 +57,46 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
-      <EuiFlexItem grow={false}>
-        <MyDescriptionList compressed>
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-            {caseData.type !== CaseType.collection && (
-              <EuiFlexItem grow={false} data-test-subj="case-view-status">
-                <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <StatusContextMenu
-                    currentStatus={caseData.status}
-                    disabled={!userCanCrud || isLoading}
-                    onStatusChanged={onStatusChanged}
-                  />
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <FormattedRelativePreferenceDate
-                  data-test-subj={'case-action-bar-status-date'}
-                  value={date}
-                />
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </MyDescriptionList>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiDescriptionList compressed>
-          <EuiFlexGroup
-            gutterSize="l"
-            alignItems="center"
-            responsive={false}
-            justifyContent="spaceBetween"
-          >
-            {userCanCrud && isSyncAlertsEnabled && (
-              <EuiFlexItem grow={false}>
-                <EuiDescriptionListTitle>
-                  <EuiFlexGroup
-                    component="span"
-                    alignItems="center"
-                    gutterSize="xs"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <span>{i18n.SYNC_ALERTS}</span>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <SyncAlertsSwitch
-                    disabled={isLoading}
-                    isSynced={caseData.settings.syncAlerts}
-                    onSwitchChange={onSyncAlertsChanged}
-                  />
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <span>
-                <EuiButtonEmpty
-                  data-test-subj="case-refresh"
-                  flush="left"
-                  iconType="refresh"
-                  onClick={onRefresh}
-                >
-                  {i18n.CASE_REFRESH}
-                </EuiButtonEmpty>
-              </span>
-            </EuiFlexItem>
-            {userCanCrud && (
-              <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-                <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiDescriptionList>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div>
+      {caseData.type !== CaseType.collection && (
+        <>
+          <StatusContextMenu
+            currentStatus={caseData.status}
+            disabled={!userCanCrud || isLoading}
+            onStatusChanged={onStatusChanged}
+          />
+        </>
+      )}
+      {title}
+      <FormattedRelativePreferenceDate
+        data-test-subj={'case-action-bar-status-date'}
+        value={date}
+      />
+      {userCanCrud && isSyncAlertsEnabled && (
+        <>
+          <span>{i18n.SYNC_ALERTS}</span>
+          <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
+          <SyncAlertsSwitch
+            disabled={isLoading}
+            isSynced={caseData.settings.syncAlerts}
+            onSwitchChange={onSyncAlertsChanged}
+          />
+        </>
+      )}
+      <EuiButtonEmpty
+        data-test-subj="case-refresh"
+        flush="left"
+        iconType="refresh"
+        onClick={onRefresh}
+      >
+        {i18n.CASE_REFRESH}
+      </EuiButtonEmpty>
+      {userCanCrud && (
+        <span data-test-subj="case-view-actions">
+          <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
+        </span>
+      )}
+    </div>
   );
 };
 CaseActionBarComponent.displayName = 'CaseActionBar';

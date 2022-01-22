@@ -15,7 +15,7 @@ export const allCaseStatus: AllCaseStatus = {
 
 export const statuses: Statuses = {
   [CaseStatuses.open]: {
-    color: 'primary',
+    color: 'success',
     label: i18n.OPEN,
     icon: 'folderOpen' as const,
     actions: {
@@ -59,7 +59,7 @@ export const statuses: Statuses = {
     },
   },
   [CaseStatuses.closed]: {
-    color: 'default',
+    color: 'danger',
     label: i18n.CLOSED,
     icon: 'folderCheck' as const,
     actions: {

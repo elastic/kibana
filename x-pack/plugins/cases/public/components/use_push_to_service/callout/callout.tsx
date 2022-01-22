@@ -51,7 +51,6 @@ const CallOutComponent = ({
           : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
       }
       color={type}
-      iconType="gear"
       data-test-subj={`case-callout-${id}`}
       size="s"
     >
@@ -61,6 +60,7 @@ const CallOutComponent = ({
           data-test-subj={`callout-onclick-${id}`}
           color={type === 'success' ? 'success' : type}
           onClick={handleCallOut}
+          size="s"
         >
           {i18n.ADD_CONNECTOR}
         </EuiButton>

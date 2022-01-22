@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { statuses } from './config';
@@ -32,14 +32,13 @@ const StatusActionButtonComponent: React.FC<Props> = ({ status, onStatusChanged,
   }, [nextStatusIndex, onStatusChanged]);
 
   return (
-    <EuiButton
+    <EuiButtonEmpty
       data-test-subj="case-view-status-action-button"
-      iconType={statuses[caseStatuses[nextStatusIndex]].icon}
       isLoading={isLoading}
       onClick={onClick}
     >
       {statuses[caseStatuses[nextStatusIndex]].button.label}
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 };
 StatusActionButtonComponent.displayName = 'StatusActionButton';

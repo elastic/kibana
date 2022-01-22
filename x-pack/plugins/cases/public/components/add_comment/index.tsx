@@ -180,7 +180,6 @@ export const AddComment = React.memo(
                         <EuiButton
                           data-test-subj="submit-comment"
                           fill
-                          iconType="plusInCircle"
                           isDisabled={isLoading}
                           isLoading={isLoading}
                           onClick={onSubmit}

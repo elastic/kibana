@@ -31,7 +31,7 @@ const StatusComponent: React.FC<Props> = ({
       color: type === StatusAll ? allCaseStatus[StatusAll].color : statuses[type].color,
       // if we are disabled, don't show the arrow and don't allow the user to click
       ...(withArrow && !disabled ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
-      ...(!disabled ? { iconOnClick: onClick } : { iconOnClick: noop }),
+      ...(!disabled ? { iconOnClick: onClick, onClick } : { iconOnClick: noop, onClick: noop }),
     }),
     [disabled, onClick, withArrow, type]
   );
@@ -39,6 +39,7 @@ const StatusComponent: React.FC<Props> = ({
   return (
     <EuiBadge
       {...props}
+      onClickAriaLabel={i18n.STATUS_ICON_ARIA}
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
       data-test-subj={`status-badge-${type}`}
     >
