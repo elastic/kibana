@@ -10,4 +10,4 @@ is_test_execution_step
 
 echo '--- Jest Integration Tests'
 checks-reporter-with-killswitch "Jest Integration Tests" \
-  node --max-old-space-size=6144 scripts/jest_integration --ci --bail 1
+  node --max-old-space-size=6144 scripts/jest_integration --ci
