@@ -67,6 +67,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
+import percolatorPolicy from './lib/detection_engine/routes/index/percolator_policy.json';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -91,6 +92,7 @@ import type {
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
+import { percolatorFieldMap } from './lib/detection_engine/field_maps/percolator_field_map';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -178,6 +180,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
     let previewRuleDataClient: IRuleDataClient | null = null;
+    let percolatorRuleDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
@@ -212,14 +215,36 @@ export class Plugin implements ISecuritySolutionPlugin {
       ],
       secondaryAlias: config.signalsIndex,
     };
-
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
-    const previewIlmPolicy = previewPolicy.policy;
 
+    const previewIlmPolicy = previewPolicy.policy;
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
       ilmPolicy: previewIlmPolicy,
+    });
+
+    const percolatorIlmPolicy = percolatorPolicy.policy;
+    percolatorRuleDataClient = ruleDataService.initializeIndex({
+      ...ruleDataServiceOptions,
+      additionalPrefix: `.percolator`,
+      ilmPolicy: percolatorIlmPolicy,
+      dataset: Dataset.alerts,
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            {
+              ...technicalRuleFieldMap,
+              ...alertsFieldMap,
+              ...rulesFieldMap,
+              ...aliasesFieldMap,
+              ...percolatorFieldMap,
+            },
+            false
+          ),
+        },
+      ],
     });
 
     const securityRuleTypeOptions = {
@@ -235,7 +260,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
     plugins.alerting.registerType(
-      securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
+      securityRuleTypeWrapper(
+        createIndicatorMatchAlertType({ ...ruleOptions, percolatorRuleDataClient })
+      )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
@@ -255,7 +282,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleOptions,
       core.getStartServices,
       securityRuleTypeOptions,
-      previewRuleDataClient
+      previewRuleDataClient,
+      percolatorRuleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

@@ -31,12 +31,14 @@ import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams, ThreatRuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
 import { RACAlert } from '../rule_types/types';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { IRuleDataClient } from '../../../../../rule_registry/server';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -260,6 +262,14 @@ export interface SignalHit {
   [key: string]: SearchTypes;
 }
 
+export interface PercolatorHit {
+  '@timestamp': string;
+  query: object;
+  rule_id: string;
+  rule_version: string;
+  [key: string]: SearchTypes;
+}
+
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
   alertTypeId: string;
@@ -373,3 +383,30 @@ export interface ThresholdAlertState extends AlertTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }
+
+export interface ThreatMatchExecutorOptions {
+  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  completeRule: CompleteRule<ThreatRuleParams>;
+  eventsTelemetry: TelemetryEventsSender | undefined;
+  exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
+  listClient: ListClient;
+  logger: Logger;
+  searchAfterSize: number;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  tuple: RuleRangeTuple;
+  version: string;
+  wrapHits: WrapHits;
+}
+
+export interface PercolateExecutorOptions extends ThreatMatchExecutorOptions {
+  percolatorRuleDataClient: IRuleDataClient;
+  tupleIndex: number;
+  withTimeout: WithTimeout;
+  spaceId: string;
+}
+
+export type IndicatorMatchExecutorOptions = PercolateExecutorOptions | ThreatMatchExecutorOptions;
+
+export type WithTimeout = <T, U>(func: (args: U) => Promise<T>, args: U) => Promise<T>;

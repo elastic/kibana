@@ -244,6 +244,8 @@ const threatMatchRuleParams = {
     threat_language: t.keyof({ kuery: null, lucene: null }),
     concurrent_searches,
     items_per_search,
+    percolate: t.union([t.boolean, t.undefined]),
+    indicator_timestamp_override: timestamp_override,
   },
   defaultable: {
     language: t.keyof({ kuery: null, lucene: null }),

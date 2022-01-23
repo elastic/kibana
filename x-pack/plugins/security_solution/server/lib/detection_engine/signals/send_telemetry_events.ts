@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
-import { SignalSearchResponse, SignalSource } from './types';
+import { SignalSearchResponse, SignalSource, SimpleHit } from './types';
 import { Logger } from '../../../../../../../src/core/server';
 
 export interface SearchResultWithSource {
   _source: SignalSource;
 }
 
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+function selectEventsFromHits(eventHits: Array<estypes.SearchHit<SignalSource>>): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
+  const sources: TelemetryEvent[] = eventHits.map(function (
     obj: SearchResultWithSource
   ): TelemetryEvent {
     return obj._source;
@@ -25,6 +26,10 @@ export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEve
 
   // Filter out non-endpoint alerts
   return sources.filter((obj: TelemetryEvent) => obj.data_stream?.dataset === 'endpoint.alerts');
+}
+
+export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+  return selectEventsFromHits(filteredEvents.hits.hits);
 }
 
 export function sendAlertTelemetryEvents(
@@ -38,6 +43,25 @@ export function sendAlertTelemetryEvents(
   }
 
   const sources = selectEvents(filteredEvents);
+
+  try {
+    eventsTelemetry.queueTelemetryEvents(sources);
+  } catch (exc) {
+    logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
+  }
+}
+
+export function sendAlertTelemetryEventsFromHits(
+  logger: Logger,
+  eventsTelemetry: TelemetryEventsSender | undefined,
+  filteredEventHits: SimpleHit[],
+  buildRuleMessage: BuildRuleMessage
+) {
+  if (eventsTelemetry === undefined) {
+    return;
+  }
+
+  const sources = selectEventsFromHits(filteredEventHits);
 
   try {
     eventsTelemetry.queueTelemetryEvents(sources);

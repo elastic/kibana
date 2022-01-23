@@ -71,6 +71,7 @@ import {
   updatedByOrNull,
   created_at,
   updated_at,
+  booleanOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SERVER_APP_ID } from '../../../../common/constants';
 import { SanitizedRuleConfig } from '../../../../../alerting/common';
@@ -135,6 +136,8 @@ const threatSpecificRuleParams = t.type({
   threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
+  percolate: booleanOrUndefined,
+  indicatorTimestampOverride: timestampOverrideOrUndefined,
 });
 export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
 export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;

@@ -6,13 +6,13 @@
  */
 
 import chunk from 'lodash/fp/chunk';
-import { getThreatList, getThreatListCount } from './get_threat_list';
-
+import { getNextPage } from './get_next_page';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { getEventCount } from './get_event_count';
 
 export const createThreatSignals = async ({
   alertId,
@@ -62,37 +62,32 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
-  let threatListCount = await getThreatListCount({
+  let threatListCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
-    threatFilters,
+    filters: threatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
   });
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
-  let threatList = await getThreatList({
-    esClient: services.scopedClusterClient.asCurrentUser,
+  let threatList = await getNextPage({
+    abortableEsClient: services.search.asCurrentUser,
     exceptionItems,
-    threatFilters,
-    query: threatQuery,
-    language: threatLanguage,
+    filters: threatFilters,
     index: threatIndex,
-    listClient,
-    searchAfter: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
-    logger,
-    buildRuleMessage,
+    language: threatLanguage,
+    logDebugMessage: (message) => logger.debug(buildRuleMessage(message)),
     perPage,
+    query: threatQuery,
+    searchAfter: undefined,
+    sortOrder: 'desc',
   });
 
   const threatEnrichment = buildThreatEnrichment({
-    buildRuleMessage,
     exceptionItems,
-    listClient,
-    logger,
+    logDebugMessage: (message) => logger.debug(buildRuleMessage(message)),
     services,
     threatFilters,
     threatIndex,
@@ -102,7 +97,7 @@ export const createThreatSignals = async ({
   });
 
   while (threatList.hits.hits.length !== 0) {
-    verifyExecutionCanProceed();
+    verifyExecutionCanProceed('createThreatSignals');
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
@@ -154,21 +149,17 @@ export const createThreatSignals = async ({
     }
     logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
-    threatList = await getThreatList({
-      esClient: services.scopedClusterClient.asCurrentUser,
+    threatList = await getNextPage({
+      abortableEsClient: services.search.asCurrentUser,
       exceptionItems,
-      query: threatQuery,
-      language: threatLanguage,
-      threatFilters,
+      filters: threatFilters,
       index: threatIndex,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
-      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
-      sortField: undefined,
-      sortOrder: undefined,
-      listClient,
-      buildRuleMessage,
-      logger,
+      language: threatLanguage,
+      logDebugMessage: (message) => logger.debug(buildRuleMessage(message)),
       perPage,
+      query: threatQuery,
+      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
+      sortOrder: 'desc',
     });
   }
 

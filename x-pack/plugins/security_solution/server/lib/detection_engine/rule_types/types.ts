@@ -31,6 +31,7 @@ import { BuildRuleMessage } from '../signals/rule_messages';
 import {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
+  WithTimeout,
   WrapHits,
   WrapSequences,
 } from '../signals/types';
@@ -66,6 +67,8 @@ export interface RunOpts<TParams extends RuleParams> {
     from: Moment;
     maxSignals: number;
   };
+  tupleIndex: number;
+  withTimeout: WithTimeout;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
 }

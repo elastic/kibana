@@ -12,11 +12,14 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { percolateExecutor } from './percolator/percolate_executor';
 
 export const createIndicatorMatchAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & { percolatorRuleDataClient: IRuleDataClient }
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version, percolatorRuleDataClient } =
+    createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -53,30 +56,40 @@ export const createIndicatorMatchAlertType = (
         runOpts: {
           buildRuleMessage,
           bulkCreate,
+          completeRule,
           exceptionItems,
           listClient,
-          completeRule,
           searchAfterSize,
           tuple,
+          tupleIndex,
+          withTimeout,
           wrapHits,
         },
         services,
         state,
+        spaceId,
       } = execOptions;
 
-      const result = await threatMatchExecutor({
+      const isPercolatorEnabled = completeRule.ruleParams.percolate;
+      const indicatorMatchExecutor = isPercolatorEnabled ? percolateExecutor : threatMatchExecutor;
+
+      const result = await indicatorMatchExecutor({
         buildRuleMessage,
         bulkCreate,
+        completeRule,
+        eventsTelemetry,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry,
         listClient,
         logger,
-        completeRule,
+        percolatorRuleDataClient,
         searchAfterSize,
         services,
+        spaceId,
         tuple,
+        tupleIndex,
         version,
+        withTimeout,
         wrapHits,
       });
       return { ...result, state };

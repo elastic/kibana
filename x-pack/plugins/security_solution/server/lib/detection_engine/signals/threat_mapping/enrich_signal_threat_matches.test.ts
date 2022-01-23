@@ -20,7 +20,7 @@ import {
   getSignalHitMock,
   getSignalsResponseMock,
 } from './enrich_signal_threat_matches.mock';
-import { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
+import { GetMatchedThreats, IndicatorHit, ThreatMatchNamedQuery } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
 describe('groupAndMergeSignalMatches', () => {
@@ -74,7 +74,7 @@ describe('groupAndMergeSignalMatches', () => {
 });
 
 describe('buildEnrichments', () => {
-  let threats: ThreatListItem[];
+  let threats: IndicatorHit[];
   let queries: ThreatMatchNamedQuery[];
   let indicatorPath: string;
 

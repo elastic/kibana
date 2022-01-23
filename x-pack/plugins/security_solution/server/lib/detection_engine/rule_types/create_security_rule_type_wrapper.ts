@@ -41,6 +41,7 @@ import { scheduleThrottledNotificationActions } from '../notifications/schedule_
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { buildExecutionIntervalValidator } from '../signals/threat_mapping/utils';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -257,6 +258,17 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               spaceId,
             });
 
+            const verifyExecutionCanProceed = buildExecutionIntervalValidator(
+              completeRule.ruleConfig.schedule.interval
+            );
+            const withTimeout = async <T, U>(func: (args: U) => Promise<T>, args: U) => {
+              // TODO: log call duration with RuleExecutionLogClient
+              const resolved = await func(args);
+              verifyExecutionCanProceed(func.name);
+              return resolved;
+            };
+
+            let tupleIndex = 0;
             for (const tuple of tuples) {
               const runResult = await type.executor({
                 ...options,
@@ -270,11 +282,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   completeRule,
                   searchAfterSize,
                   tuple,
+                  tupleIndex,
+                  withTimeout,
                   wrapHits,
                   wrapSequences,
                 },
               });
-
               const createdSignals = result.createdSignals.concat(runResult.createdSignals);
               const warningMessages = result.warningMessages.concat(runResult.warningMessages);
               result = {
@@ -290,6 +303,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 warningMessages,
               };
               runState = runResult.state;
+              tupleIndex++;
             }
 
             if (result.warningMessages.length) {

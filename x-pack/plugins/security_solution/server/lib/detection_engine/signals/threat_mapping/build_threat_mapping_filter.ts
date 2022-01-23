@@ -51,12 +51,12 @@ export const buildThreatMappingFilter = ({
  */
 export const filterThreatMapping = ({
   threatMapping,
-  threatListItem,
+  indicator,
 }: FilterThreatMappingOptions): ThreatMapping =>
   threatMapping
     .map((threatMap) => {
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
-        const itemValue = get(entry.value, threatListItem.fields);
+        const itemValue = get(entry.value, indicator.fields);
         return itemValue == null || itemValue.length !== 1;
       });
       if (atLeastOneItemMissingInThreatList) {
@@ -69,10 +69,10 @@ export const filterThreatMapping = ({
 
 export const createInnerAndClauses = ({
   threatMappingEntries,
-  threatListItem,
+  indicator,
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
-    const value = get(threatMappingEntry.value, threatListItem.fields);
+    const value = get(threatMappingEntry.value, indicator.fields);
     if (value != null && value.length === 1) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
@@ -83,8 +83,8 @@ export const createInnerAndClauses = ({
                 [threatMappingEntry.field]: {
                   query: value[0],
                   _name: encodeThreatMatchNamedQuery({
-                    id: threatListItem._id,
-                    index: threatListItem._index,
+                    id: indicator._id,
+                    index: indicator._index,
                     field: threatMappingEntry.field,
                     value: threatMappingEntry.value,
                   }),
@@ -102,12 +102,12 @@ export const createInnerAndClauses = ({
 
 export const createAndOrClauses = ({
   threatMapping,
-  threatListItem,
+  indicator,
 }: CreateAndOrClausesOptions): BooleanFilter => {
   const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
     const innerAndClauses = createInnerAndClauses({
       threatMappingEntries: threatMap.entries,
-      threatListItem,
+      indicator,
     });
     if (innerAndClauses.length !== 0) {
       // These values could be potentially 10k+ large so mutating the array intentionally
@@ -128,11 +128,11 @@ export const buildEntriesMappingFilter = ({
   const combinedShould = threatList.reduce<BooleanFilter[]>((accum, threatListSearchItem) => {
     const filteredEntries = filterThreatMapping({
       threatMapping,
-      threatListItem: threatListSearchItem,
+      indicator: threatListSearchItem,
     });
     const queryWithAndOrClause = createAndOrClauses({
       threatMapping: filteredEntries,
-      threatListItem: threatListSearchItem,
+      indicator: threatListSearchItem,
     });
     if (queryWithAndOrClause.bool.should.length !== 0) {
       // These values can be 10k+ large, so using a push here for performance

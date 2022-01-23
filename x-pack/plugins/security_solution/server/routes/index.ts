@@ -82,7 +82,8 @@ export const initRoutes = (
   ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  percolatorRuleDataClient: IRuleDataClient
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
@@ -100,7 +101,8 @@ export const initRoutes = (
     security,
     ruleOptions,
     securityRuleTypeOptions,
-    previewRuleDataClient
+    previewRuleDataClient,
+    percolatorRuleDataClient
   );
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.

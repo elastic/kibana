@@ -8,14 +8,12 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { SignalSearchResponse, SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { getThreatList } from './get_threat_list';
 import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
+import { getNextPage } from './get_next_page';
 
 export const buildThreatEnrichment = ({
-  buildRuleMessage,
   exceptionItems,
-  listClient,
-  logger,
+  logDebugMessage,
   services,
   threatFilters,
   threatIndex,
@@ -33,20 +31,17 @@ export const buildThreatEnrichment = ({
         },
       },
     };
-    const threatResponse = await getThreatList({
-      esClient: services.scopedClusterClient.asCurrentUser,
+    const threatResponse = await getNextPage({
+      abortableEsClient: services.search.asCurrentUser,
       exceptionItems,
-      threatFilters: [...threatFilters, matchedThreatsFilter],
-      query: threatQuery,
-      language: threatLanguage,
+      filters: [...threatFilters, matchedThreatsFilter],
       index: threatIndex,
-      listClient,
-      searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-      logger,
-      buildRuleMessage,
+      language: threatLanguage,
+      logDebugMessage,
       perPage: undefined,
+      query: threatQuery,
+      searchAfter: undefined,
+      sortOrder: 'desc',
     });
 
     return threatResponse.hits.hits;

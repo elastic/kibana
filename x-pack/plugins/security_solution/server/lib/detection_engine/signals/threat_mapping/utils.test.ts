@@ -717,15 +717,15 @@ describe('utils', () => {
   describe('buildExecutionIntervalValidator', () => {
     it('succeeds if the validator is called within the specified interval', () => {
       const validator = buildExecutionIntervalValidator('1m');
-      expect(() => validator()).not.toThrowError();
+      expect(() => validator('testFunctionName')).not.toThrowError();
     });
 
     it('throws an error if the validator is called after the specified interval', async () => {
       const validator = buildExecutionIntervalValidator('1s');
 
       await new Promise((r) => setTimeout(r, 2000));
-      expect(() => validator()).toThrowError(
-        'Current rule execution has exceeded its allotted interval (1s) and has been stopped.'
+      expect(() => validator('testFunctionName')).toThrowError(
+        'Current rule execution has exceeded its allotted interval (1s) and has been stopped at testFunctionName.'
       );
     });
 
