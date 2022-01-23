@@ -65,7 +65,7 @@ Upload features into {es} by drawing lines, polygons, circles, bounding boxes, a
 
 To create a new index for drawing:
 
-. <<maps-create, Create a new map>>.
+. <<maps-create, Create a map>>.
 . Click *Add layer*.
 . Select *Create index*.
 . Set *Index name*.
