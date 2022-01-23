@@ -141,6 +141,25 @@ export const formatFilterString = async (
     search
   );
 
+export const getMonitorAlertFields = (monitorInfo: Ping, statusMessage: string) => {
+  const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
+  const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const summary = {
+    monitorUrl: monitorInfo.url?.full,
+    monitorId: monitorInfo.monitor?.id,
+    monitorName,
+    monitorType: monitorInfo.monitor?.type,
+    latestErrorMessage: monitorInfo.error?.message,
+    observerLocation,
+    observerHostname: monitorInfo.agent?.name,
+  };
+
+  return {
+    ...summary,
+    reason: `${monitorName} from ${observerLocation} ${statusMessage}`,
+  };
+};
+
 export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
   const summary = {
     monitorUrl: monitorInfo.url?.full,
@@ -161,15 +180,17 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
   };
 };
 
-export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
-  'monitor.id': monitorSummary.monitorId,
-  'monitor.type': monitorSummary.monitorType,
-  'monitor.name': monitorSummary.monitorName,
-  'url.full': monitorSummary.monitorUrl,
-  'observer.geo.name': monitorSummary.observerLocation,
-  'error.message': monitorSummary.latestErrorMessage,
-  'agent.name': monitorSummary.observerHostname,
-  [ALERT_REASON]: monitorSummary.reason,
+export const getMonitorAlertDocument = (
+  monitorAlertFields: Record<string, string | undefined>
+) => ({
+  'monitor.id': monitorAlertFields.monitorId,
+  'monitor.type': monitorAlertFields.monitorType,
+  'monitor.name': monitorAlertFields.monitorName,
+  'url.full': monitorAlertFields.monitorUrl,
+  'observer.geo.name': monitorAlertFields.observerLocation,
+  'error.message': monitorAlertFields.latestErrorMessage,
+  'agent.name': monitorAlertFields.observerHostname,
+  [ALERT_REASON]: monitorAlertFields.reason,
 });
 
 export const getStatusMessage = (
@@ -368,10 +389,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
         const statusMessage = getStatusMessage(monitorStatusMessageParams);
         const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
-
+        const monitorAlertFields = getMonitorAlertFields(monitorInfo, statusMessage);
         const alert = alertWithLifecycle({
           id: getInstanceId(monitorInfo, monitorLoc.location),
-          fields: getMonitorAlertDocument(monitorSummary),
+          fields: getMonitorAlertDocument(monitorAlertFields),
         });
 
         alert.replaceState({
@@ -427,10 +448,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         availability
       );
       const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
-
+      const monitorAlertFields = getMonitorAlertFields(monitorInfo, statusMessage);
       const alert = alertWithLifecycle({
         id: getInstanceId(monitorInfo, monIdByLoc),
-        fields: getMonitorAlertDocument(monitorSummary),
+        fields: getMonitorAlertDocument(monitorAlertFields),
       });
 
       alert.replaceState({
