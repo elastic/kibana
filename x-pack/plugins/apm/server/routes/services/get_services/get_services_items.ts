@@ -45,19 +45,22 @@ export async function getServicesItems({
       end,
     };
 
-    const [transactionStats, servicesFromMetricDocuments, healthStatuses] =
-      await Promise.all([
-        getServiceTransactionStats(params),
-        getServicesFromErrorAndMetricDocuments(params),
-        getHealthStatuses(params).catch((err) => {
-          logger.error(err);
-          return [];
-        }),
-      ]);
+    const [
+      transactionStats,
+      servicesFromErrorAndMetricDocuments,
+      healthStatuses,
+    ] = await Promise.all([
+      getServiceTransactionStats(params),
+      getServicesFromErrorAndMetricDocuments(params),
+      getHealthStatuses(params).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
+    ]);
 
     return mergeServiceStats({
       transactionStats,
-      servicesFromMetricDocuments,
+      servicesFromErrorAndMetricDocuments,
       healthStatuses,
     });
   });
