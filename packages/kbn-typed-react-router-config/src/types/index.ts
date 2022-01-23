@@ -106,7 +106,9 @@ export type TypeAsArgs<TObject> = keyof TObject extends never
   : [TObject];
 
 export type FlattenRoutesOf<TRoutes extends RouteMap> = Array<
-  Omit<ValuesType<MapRoutes<TRoutes>>, 'parents'>
+  ValuesType<{
+    [key in keyof MapRoutes<TRoutes>]: ValuesType<MapRoutes<TRoutes>[key]>;
+  }>
 >;
 
 export interface Router<TRoutes extends RouteMap> {
