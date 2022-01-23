@@ -91,7 +91,7 @@ To open an existing index for drawing:
 
 . Click *Save & close*.
 
-. Click layer name in legend and select *Edit features*.
+. In the legend, click the layer name and select *Edit features*.
 
 When feature editing is open, a feature editing toolbox is displayed on the left side of the map.
 
