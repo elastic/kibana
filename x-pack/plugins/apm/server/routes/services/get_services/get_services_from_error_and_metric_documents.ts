@@ -16,7 +16,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 
-export async function getServicesFromMetricDocuments({
+export async function getServicesFromErrorAndMetricDocuments({
   environment,
   setup,
   maxNumServices,
@@ -37,7 +37,7 @@ export async function getServicesFromMetricDocuments({
     'get_services_from_metric_documents',
     {
       apm: {
-        events: [ProcessorEvent.metric],
+        events: [ProcessorEvent.metric, ProcessorEvent.error],
       },
       body: {
         size: 0,
