@@ -70,7 +70,7 @@ interface ExecutionHandlerOptions<ActionGroupIds extends string> {
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
-) => Promise<void>;
+) => Promise<AlertAction[]>;
 
 export function createExecutionHandler<
   Params extends AlertTypeParams,
@@ -116,9 +116,10 @@ export function createExecutionHandler<
     state,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
+    const executedActions: AlertAction[] = [];
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-      return;
+      return executedActions;
     }
     const actions = ruleActions
       .filter(({ group }) => group === actionGroup)
@@ -160,6 +161,7 @@ export function createExecutionHandler<
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
+
     for (const action of actions) {
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
@@ -195,13 +197,18 @@ export function createExecutionHandler<
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
-        actionsClient.ephemeralEnqueuedExecution(enqueueOptions).catch(async (err) => {
+        try {
+          await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
+        } catch (err) {
           if (isEphemeralTaskRejectedDueToCapacityError(err)) {
             await actionsClient.enqueueExecution(enqueueOptions);
           }
-        });
+        } finally {
+          executedActions.push(action);
+        }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
+        executedActions.push(action);
       }
 
       const event = createAlertEventLogRecordObject({
@@ -236,5 +243,6 @@ export function createExecutionHandler<
 
       eventLogger.logEvent(event);
     }
+    return executedActions;
   };
 }

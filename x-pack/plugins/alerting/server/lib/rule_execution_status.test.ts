@@ -26,6 +26,7 @@ describe('RuleExecutionStatus', () => {
     test('empty task state', () => {
       const status = executionStatusFromState({});
       checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfExecutedActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
@@ -33,6 +34,7 @@ describe('RuleExecutionStatus', () => {
     test('task state with no instances', () => {
       const status = executionStatusFromState({ alertInstances: {} });
       checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfExecutedActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
@@ -40,6 +42,18 @@ describe('RuleExecutionStatus', () => {
     test('task state with one instance', () => {
       const status = executionStatusFromState({ alertInstances: { a: {} } });
       checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfExecutedActions).toBe(0);
+      expect(status.status).toBe('active');
+      expect(status.error).toBe(undefined);
+    });
+
+    test('task state with numberOfExecutedActions', () => {
+      const status = executionStatusFromState({
+        executedActions: [{ group: '1' }],
+        alertInstances: { a: {} },
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.numberOfExecutedActions).toBe(1);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
     });
@@ -83,6 +97,7 @@ describe('RuleExecutionStatus', () => {
           "error": null,
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+          "numberOfExecutedActions": 0,
           "status": "ok",
         }
       `);
@@ -98,6 +113,7 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+          "numberOfExecutedActions": 0,
           "status": "ok",
         }
       `);
@@ -110,6 +126,21 @@ describe('RuleExecutionStatus', () => {
         "error": null,
         "lastDuration": 1234,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+        "numberOfExecutedActions": 0,
+        "status": "ok",
+      }
+    `);
+    });
+
+    test('status with a numberOfExecutedActions', () => {
+      expect(
+        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, numberOfExecutedActions: 5 })
+      ).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "lastDuration": 0,
+        "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+        "numberOfExecutedActions": 5,
         "status": "ok",
       }
     `);
@@ -222,6 +253,28 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 1234,
           "lastExecutionDate": 2020-09-03T16:26:58.000Z,
+          "status": "active",
+        }
+      `);
+    });
+
+    test('valid status, date, error, duration and executedActions', () => {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
+        status,
+        lastExecutionDate: date,
+        numberOfExecutedActions: 5,
+        error,
+        lastDuration: 1234,
+      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "message": "wops",
+            "reason": "execute",
+          },
+          "lastDuration": 1234,
+          "lastExecutionDate": 2020-09-03T16:26:58.000Z,
+          "numberOfExecutedActions": 5,
           "status": "active",
         }
       `);

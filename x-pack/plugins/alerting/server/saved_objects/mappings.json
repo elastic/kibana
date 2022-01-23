@@ -120,6 +120,9 @@
       },
       "executionStatus": {
         "properties": {
+          "numberOfExecutedActions": {
+            "type": "long"
+          },
           "status": {
             "type": "keyword"
           },

@@ -9,7 +9,15 @@ import * as t from 'io-ts';
 import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
 
+const actionSchema = t.partial({
+  group: t.string,
+  id: t.string,
+  actionTypeId: t.string,
+  params: t.record(t.string, t.unknown),
+});
+
 export const ruleStateSchema = t.partial({
+  executedActions: t.array(actionSchema),
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
