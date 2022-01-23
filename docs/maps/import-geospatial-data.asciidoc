@@ -104,7 +104,7 @@ To draw features:
 . Move the mouse cursor over the map and follow the on screen instructions to draw a feature.
 . When a feature is complete, the feature is added to the index as a new document.
 . Repeat to draw additional features.
-. Click *Exit* under the layer name in the legend to finish adding features.
+. When you are finished adding features, go to the legend, and click *Exit* under the layer name.
 
 [discrete]
 === Upload data with IP addresses
