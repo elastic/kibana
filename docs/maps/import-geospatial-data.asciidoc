@@ -79,7 +79,7 @@ To open an existing index for drawing:
 
 . Select *Documents*.
 
-. Select *Data view* that points to your index. A <<data-views, data view>> can point to one or more indices. For feature editing, the data view must point to a single index.
+. Select the data view that points to your index. A <<data-views, data view>> can point to one or more indices. For feature editing, the data view must point to a single index.
 
 . Click *Add layer*.
 
@@ -102,7 +102,7 @@ To draw features:
 
 . Click on the line, polygon, circle, bounding box, or point icon.
 . Move the mouse cursor over the map and follow the on screen instructions to draw a feature.
-. When a feature is complete, the feature is added to the index as a new document.
+.. When a feature is complete, the feature is added to the index as a new document.
 . Repeat to draw additional features.
 . When you are finished adding features, go to the legend, and click *Exit* under the layer name.
 
