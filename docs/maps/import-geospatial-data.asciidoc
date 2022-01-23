@@ -73,7 +73,7 @@ To create a new index for drawing:
 
 To open an existing index for drawing:
 
-. <<maps-create, Create a new map>>.
+. <<maps-create, Create a map>>.
 
 . Click *Add layer*.
 
