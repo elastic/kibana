@@ -8,12 +8,15 @@
 import { JsonObject } from '@kbn/utility-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PromiseType } from 'utility-types';
+import * as moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { UptimeESClient } from '../lib';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+momentDurationFormatSetup(moment);
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -31,12 +34,45 @@ export interface GetMonitorStatusResult {
   monitorInfo: Ping;
 }
 
+export const getInterval = (timerangeCount: number, timerangeUnit: string): string => {
+  switch (timerangeUnit) {
+    case 's':
+      return moment.duration(timerangeCount, 'seconds').format('s [sec]');
+    case 'm':
+      return moment.duration(timerangeCount, 'minutes').format('m [min]');
+    case 'h':
+      return moment.duration(timerangeCount, 'hours').format('h [hr]');
+    case 'd':
+      return moment.duration(timerangeCount, 'days').format('d [day]');
+    default:
+      return `${timerangeCount} ${timerangeUnit}`;
+  }
+};
+
 export interface GetMonitorDownStatusMessageParams {
   info: Ping;
   count: number;
   interval?: string;
   numTimes: number;
 }
+
+export const getMonitorDownStatusMessageParams = (
+  info: Ping,
+  count: number,
+  numTimes: number,
+  timerangeCount: number,
+  timerangeUnit: string,
+  oldVersionTimeRange: { from: string; to: string }
+) => {
+  return {
+    info,
+    count,
+    interval: oldVersionTimeRange
+      ? oldVersionTimeRange.from.slice(-3)
+      : getInterval(timerangeCount, timerangeUnit),
+    numTimes,
+  };
+};
 
 const getLocationClause = (locations: string[]) => ({
   bool: {
