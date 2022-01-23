@@ -11,7 +11,7 @@ import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion } from 'vega';
@@ -22,7 +22,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IServiceSettings } from '../../../../maps_ems/public';
+import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
 import {
   Bool,
   Data,
