@@ -7,20 +7,22 @@
 
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF, TaskPayloadPDF } from '../types';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../types';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPDF, TaskPayloadPDF>> =
-  function createJobFactoryFn() {
-    return async function createJobFn(
-      { relativeUrls, ...jobParams }: JobParamsPDF // relativeUrls does not belong in the payload of PDFV1
-    ) {
-      validateUrls(relativeUrls);
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsPDFDeprecated, TaskPayloadPDF>
+> = function createJobFactoryFn() {
+  return async function createJobFn(
+    { relativeUrls, ...jobParams }: JobParamsPDFDeprecated // relativeUrls does not belong in the payload of PDFV1
+  ) {
+    validateUrls(relativeUrls);
 
-      // return the payload
-      return {
-        ...jobParams,
-        forceNow: new Date().toISOString(),
-        objects: relativeUrls.map((u) => ({ relativeUrl: u })),
-      };
+    // return the payload
+    return {
+      ...jobParams,
+      isDeprecated: true,
+      forceNow: new Date().toISOString(),
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
   };
+};
