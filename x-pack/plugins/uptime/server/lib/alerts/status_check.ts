@@ -35,7 +35,6 @@ import {
   getInterval,
 } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { MonitorStatusTranslations } from '../../../common/translations';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
