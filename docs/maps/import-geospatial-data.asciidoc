@@ -59,7 +59,7 @@ On the {kib} home page, you can upload a file and import it into an {es} index w
 . Click *Import file*.
 
 [discrete]
-=== Draw features in map
+=== Draw features in a map
 
 Upload features into Elasticsearch by drawing lines, polygons, circles, bounding boxes, and points in a map.
 
