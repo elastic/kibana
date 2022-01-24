@@ -157,6 +157,22 @@ describe('SearchSource', () => {
         expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
+      test('except when size is 0', async () => {
+        const runtimeFields = { runtime_field: runtimeFieldDef };
+        searchSource.setField('size', 0).setField('index', {
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: ['hello'],
+            scriptFields: { world: {} },
+            docvalueFields: ['@timestamp'],
+            runtimeFields,
+          }),
+        } as unknown as IndexPattern);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toBeUndefined();
+      });
+
       test('never includes docvalue_fields', async () => {
         searchSource.setField('index', {
           ...indexPattern,
@@ -211,25 +227,21 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['c', { field: 'a', format: 'date_time' }]);
       });
 
-      test('allows you to override computed fields if you provide a format', async () => {
-        const indexPatternFields = indexPattern.fields;
-        indexPatternFields.getByType = (type) => {
-          return [];
-        };
-        searchSource.setField('index', {
+      test('does not allow any field info when size is 0', async () => {
+        searchSource.setField('size', 0).setField('index', {
           ...indexPattern,
-          fields: indexPatternFields,
           getComputedFields: () => ({
             storedFields: [],
             scriptFields: {},
-            docvalueFields: [{ field: 'hello', format: 'date_time' }],
+            docvalueFields: [{ field: 'a', format: 'date_time' }],
           }),
         } as unknown as IndexPattern);
-        searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
+        searchSource.setField('fields', ['c']);
+        searchSource.setField('fieldsFromSource', ['a', 'b', 'd']);
 
         const request = searchSource.getSearchRequestBody();
-        expect(request).toHaveProperty('fields');
-        expect(request.fields).toEqual([{ field: 'hello', format: 'strict_date_time' }]);
+        expect(request).not.toHaveProperty('_source');
+        expect(request).not.toHaveProperty('fields');
       });
 
       test('injects a date format for computed docvalue fields if none is provided', async () => {
