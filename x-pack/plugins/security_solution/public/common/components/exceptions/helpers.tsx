@@ -43,7 +43,7 @@ import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard'
 import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
-import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
+import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
 export const filterIndexPatterns = (
@@ -68,7 +68,7 @@ export const filterIndexPatterns = (
       return {
         ...patterns,
         fields: patterns.fields.filter(({ name }) =>
-          exceptionableEndpointEventFields.includes(name)
+          EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
         ),
       };
     default:

@@ -6,3 +6,4 @@
  */
 
 export { TrustedAppValidator } from './trusted_app_validator';
+export { EventFilterValidator } from './event_filter_validator';

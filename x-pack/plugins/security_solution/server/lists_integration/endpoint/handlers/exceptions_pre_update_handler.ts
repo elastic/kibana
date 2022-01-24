@@ -10,7 +10,7 @@ import {
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { TrustedAppValidator } from '../validators';
+import { EventFilterValidator, TrustedAppValidator } from '../validators';
 
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
@@ -30,9 +30,19 @@ export const getExceptionsPreUpdateItemHandler = (
       return data;
     }
 
+    const listId = currentSavedItem.list_id;
+
     // Validate trusted apps
-    if (TrustedAppValidator.isTrustedApp({ listId: currentSavedItem.list_id })) {
+    if (TrustedAppValidator.isTrustedApp({ listId })) {
       return new TrustedAppValidator(endpointAppContextService, request).validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
+    }
+
+    // Validate event filter
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      return new EventFilterValidator(endpointAppContextService, request).validatePreUpdateItem(
         data,
         currentSavedItem
       );
