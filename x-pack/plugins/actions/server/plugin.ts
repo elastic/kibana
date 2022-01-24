@@ -88,6 +88,8 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { registerCollector } from './monitoring';
+import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 
 export interface PluginSetupContract {
   registerType<
@@ -134,6 +136,7 @@ export interface ActionsPluginsSetup {
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   spaces?: SpacesPluginSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -282,6 +285,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     // Usage counter for telemetry
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
+
+    if (plugins.monitoringCollection) {
+      registerCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        core,
+      });
+    }
 
     // Routes
     defineRoutes(

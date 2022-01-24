@@ -16,6 +16,7 @@ import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
+import { getAllInMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -51,6 +52,11 @@ beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   getActionsClientWithRequest.mockResolvedValue(actionsClient);
+
+  const all = getAllInMemoryMetrics();
+  for (const key of Object.keys(all)) {
+    all[key as IN_MEMORY_METRICS] = 0;
+  }
 });
 
 test('successfully executes', async () => {
@@ -583,6 +589,23 @@ test('writes to event log for execute and execute start', async () => {
     },
     message: 'action executed: test:1: action-1',
   });
+});
+
+test('increments monitoring metrics after execution', async () => {
+  const executorMockSuccess = setupActionExecutorMock();
+  executorMockSuccess.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+
+  const executorMockFailure = setupActionExecutorMock();
+  executorMockFailure.mockRejectedValue(new Error('this action execution is intended to fail'));
+  await actionExecutor.execute(executeParams);
+
+  const metrics = getAllInMemoryMetrics();
+  expect(metrics[IN_MEMORY_METRICS.ACTION_EXECUTIONS]).toBe(2);
+  expect(metrics[IN_MEMORY_METRICS.ACTION_FAILURES]).toBe(1);
 });
 
 function setupActionExecutorMock() {

@@ -7,7 +7,7 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { registerRulesRoute } from './routes';
+import { registerRulesRoute, registerActionsRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
   registerMetric: (metric: Metric) => void;
@@ -61,6 +61,19 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       },
       overallStatus$: core.status.overall$,
       getMetrics: async () => (await this.getMetrics('rules')) as MetricResult,
+    });
+
+    registerActionsRoute({
+      router,
+      config: {
+        allowAnonymous: core.status.isStatusPageAnonymous(),
+        kibanaIndex,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        server: core.http.getServerInfo(),
+        uuid: this.initializerContext.env.instanceUuid,
+      },
+      overallStatus$: core.status.overall$,
+      getMetrics: async () => (await this.getMetrics('actions')) as MetricResult,
     });
 
     return {

@@ -40,6 +40,7 @@ import { omit } from 'lodash';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
+import { IN_MEMORY_METRICS, getAllInMemoryMetrics } from '../monitoring';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
@@ -195,6 +196,10 @@ describe('Task Runner', () => {
     );
     mockedRuleTypeSavedObject.monitoring!.execution.history = [];
     mockedRuleTypeSavedObject.monitoring!.execution.calculated_metrics.success_ratio = 0;
+    const all = getAllInMemoryMetrics();
+    for (const key of Object.keys(all)) {
+      all[key as IN_MEMORY_METRICS] = 0;
+    }
   });
 
   test('successfully executes the task', async () => {
@@ -4830,5 +4835,46 @@ describe('Task Runner', () => {
     }
     const runnerResult = await taskRunner.run();
     expect(runnerResult.monitoring?.execution.history.length).toBe(200);
+  });
+
+  test('increments monitoring metrics after execution', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    for (let i = 0; i < 2; i++) {
+      await taskRunner.run();
+    }
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        throw new Error('OMG');
+      }
+    );
+    await taskRunner.run();
+
+    const metrics = getAllInMemoryMetrics();
+    expect(metrics[IN_MEMORY_METRICS.RULE_EXECUTIONS]).toBe(3);
+    expect(metrics[IN_MEMORY_METRICS.RULE_FAILURES]).toBe(1);
   });
 });
