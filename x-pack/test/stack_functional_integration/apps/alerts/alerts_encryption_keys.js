@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }) => {
           await retry.try(async () => {
             const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
             expect(await executionFailureResultCallout.getVisibleText()).to.be(
-              "Test·failed·to·run\nThe·following·error·was·found:\nCannot·read·properties·of·undefined·(reading·'password')"
+              "Test failed to run\nThe following error was found:\nerror validating action type connector: secrets must be defined"
             );
           });
           expect(true).to.be(true);
