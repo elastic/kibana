@@ -99,6 +99,7 @@ export enum SecurityPageName {
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
+  hostsRisk = 'hosts-risk',
   investigate = 'investigate',
   network = 'network',
   networkAnomalies = 'network-anomalies',
@@ -263,8 +264,10 @@ export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/pre
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_find_status` as const;
+export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
+export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
@@ -359,7 +362,7 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc' as const;
 
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
