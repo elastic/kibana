@@ -226,10 +226,6 @@ const RESTRICTED_IMPORTS = [
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
   },
-  {
-    name: '@kbn/io-ts-utils',
-    message: `Import directly from @kbn/io-ts-utils/{method} submodules`,
-  },
 ];
 
 module.exports = {
@@ -1569,7 +1565,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },

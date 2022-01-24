@@ -17,7 +17,7 @@ import {
   LineAnnotation,
   TooltipValue,
 } from '@elastic/charts';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { chartDefaultSettings, useTheme } from '../../../common/components/charts/common';
