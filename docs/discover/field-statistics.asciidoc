@@ -55,4 +55,4 @@ image::images/field-statistics-geo.png["Field statistics for a geo field."]
 image:images/chart-icon.png[Click the magnifying glass icon to create a visualization of the data in Lens]
 or
 image:images/map-icon.png[Click the Maps icon to explore the data in a map]
-icon in the *Actions* column.
+in the *Actions* column.
