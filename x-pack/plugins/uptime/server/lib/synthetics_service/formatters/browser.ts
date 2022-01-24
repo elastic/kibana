@@ -22,7 +22,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
-  [ConfigKey.SYNTHETICS_ARGS]: (fields) => null,
+  [ConfigKey.SYNTHETICS_ARGS]: (fields) => arrayFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: null,
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: null,
   [ConfigKey.ZIP_URL_TLS_KEY]: null,

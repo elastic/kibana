@@ -24,6 +24,7 @@ export interface ServiceData {
     hosts: string[];
     api_key: string;
   };
+  runOnce?: boolean;
 }
 
 export class ServiceAPIClient {
@@ -79,7 +80,14 @@ export class ServiceAPIClient {
     return this.callAPI('DELETE', data);
   }
 
-  async callAPI(method: 'POST' | 'PUT' | 'DELETE', { monitors: allMonitors, output }: ServiceData) {
+  async runOnce(data: ServiceData) {
+    return this.callAPI('POST', { ...data, runOnce: true });
+  }
+
+  async callAPI(
+    method: 'POST' | 'PUT' | 'DELETE',
+    { monitors: allMonitors, output, runOnce }: ServiceData
+  ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
       return;
@@ -93,7 +101,7 @@ export class ServiceAPIClient {
 
       return axios({
         method,
-        url: (this.devUrl ?? url) + '/monitors',
+        url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output },
         headers: this.authorization
           ? {
