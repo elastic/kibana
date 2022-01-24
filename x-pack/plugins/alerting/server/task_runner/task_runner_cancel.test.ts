@@ -282,6 +282,9 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_executed_actions: 0,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
@@ -328,6 +331,7 @@ describe('Task Runner Cancel', () => {
           },
           lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
+          numberOfExecutedActions: 0,
           status: 'error',
         },
       },
@@ -449,7 +453,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"numberOfExecutedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -533,6 +537,9 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_executed_actions: 0,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
@@ -587,7 +594,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"numberOfExecutedActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -781,6 +788,9 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
+              metrics: {
+                number_of_executed_actions: 1,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
