@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -187,7 +188,14 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
 
           const alertEvent = afterViolatingDataResponse.hits.hits[0].fields as Record<string, any>;
 
-          const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID, VERSION];
+          const exclude = [
+            '@timestamp',
+            ALERT_START,
+            ALERT_UUID,
+            ALERT_RULE_EXECUTION_UUID,
+            ALERT_RULE_UUID,
+            VERSION,
+          ];
 
           const toCompare = omit(alertEvent, exclude);
 

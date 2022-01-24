@@ -7,15 +7,24 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   filterQuery?: string
 ): Promise<AlertClusterHealth[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'cluster_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: [
       'hits.hits._source.cluster_state.status',
       'hits.hits._source.cluster_uuid',
@@ -39,11 +48,7 @@ export async function fetchClusterHealth(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {
