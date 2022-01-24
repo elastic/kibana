@@ -17,7 +17,7 @@ export const getFindingsEsQuery = (
   evaluationResult?: string,
   benchmark?: string
 ): CountRequest => {
-  const filter: QueryDslQueryContainer[] = [{ term: { 'run_id.keyword': cycleId } }];
+  const filter: QueryDslQueryContainer[] = [{ term: { 'cycle_id.keyword': cycleId } }];
 
   if (benchmark) {
     filter.push({ term: { 'rule.benchmark.keyword': benchmark } });
@@ -44,7 +44,7 @@ export const getResourcesEvaluationEsQuery = (
   const query: QueryDslQueryContainer = {
     bool: {
       filter: [
-        { term: { 'run_id.keyword': cycleId } },
+        { term: { 'cycle_id.keyword': cycleId } },
         { term: { 'result.evaluation.keyword': result } },
       ],
     },
