@@ -7,15 +7,27 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import adImage from './ml_anomaly_detection.png';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 
 export const AnomalyDetectionEmptyState: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
+
+  const {
+    services: { docLinks },
+  } = useMlKibana();
 
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
@@ -67,6 +79,28 @@ export const AnomalyDetectionEmptyState: FC = () => {
             defaultMessage="Create job"
           />
         </EuiButton>
+      }
+      footer={
+        <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.common.learnMoreQuestion"
+                  defaultMessage="Want to learn more?"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink href={docLinks.links.ml.anomalyDetection} target="_blank" external>
+              <FormattedMessage
+                id="xpack.ml.common.readDocumentationLink"
+                defaultMessage="Read documentation"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       data-test-subj="mlAnomalyDetectionEmptyState"
     />

@@ -6,7 +6,16 @@
  */
 
 import React, { FC } from 'react';
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana_image.png';
@@ -20,10 +29,12 @@ interface Props {
 export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClick }) => {
   const {
     services: {
+      docLinks,
       http: { basePath },
     },
   } = useMlKibana();
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
+
   return (
     <EuiEmptyPrompt
       layout="horizontal"
@@ -91,6 +102,28 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           })}
         </EuiButton>,
       ]}
+      footer={
+        <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.common.learnMoreQuestion"
+                  defaultMessage="Want to learn more?"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
+              <FormattedMessage
+                id="xpack.ml.common.readDocumentationLink"
+                defaultMessage="Read documentation"
+              />
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       data-test-subj="mlNoDataFrameAnalyticsFound"
     />
   );
