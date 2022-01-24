@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ShapefileEditor } from './shapefile_editor';
 import { GeoFileImporter, GeoFilePreview } from '../types';
 import { CreateDocsResponse } from '../../types';
 import { Importer } from '../../importer';
@@ -15,6 +16,9 @@ export const SHAPEFILE_TYPES = ['.shp'];
 
 export class ShapefileImporter extends Importer implements GeoFileImporter {
   private _file: File;
+  private _dbfFile: File | null = null;
+  private _prjFile: File | null = null;
+  private _shxFile: File | null = null;
   private _isActive = true;
   private _geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE =
     ES_FIELD_TYPES.GEO_SHAPE;
@@ -30,12 +34,26 @@ export class ShapefileImporter extends Importer implements GeoFileImporter {
   }
 
   public canPreview() {
-    return false;
+    return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
   }
 
-  public renderEditor() {
-    // no additional configuration needed by geojson importer so there is no editor to render
-    return <div>select other files</div>;
+  public renderEditor(onChange: () => void) {
+    return (
+      <ShapefileEditor
+        onDbfSelect={(file) => {
+          this._dbfFile = file;
+          onChange();
+        }}
+        onPrjSelect={(file) => {
+          this._prjFile = file;
+          onChange();
+        }}
+        onShxSelect={(file) => {
+          this._shxFile = file;
+          onChange();
+        }}
+      />
+    );
   }
 
   public async previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview> {

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { MB } from '../../../common/constants';
 import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
-import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo'; 
+import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 
 export type OnFileSelectParameters = GeoFilePreview & {
   indexName: string;
@@ -65,10 +65,13 @@ export class GeoFilePicker extends Component<Props, State> {
       const file = files[0];
       try {
         const importer = geoImporterFactory(file);
-        this.setState({ 
-          defaultIndexName: file.name.split('.')[0].toLowerCase(),
-          importer 
-        }, this._loadFilePreview);
+        this.setState(
+          {
+            defaultIndexName: file.name.split('.')[0].toLowerCase(),
+            importer,
+          },
+          this._loadFilePreview
+        );
       } catch (error) {
         this.setState({ error: error.message });
       }
@@ -121,7 +124,7 @@ export class GeoFilePicker extends Component<Props, State> {
         indexName: this.state.defaultIndexName ? this.state.defaultIndexName : 'features',
       });
     }
-  }
+  };
 
   _renderHelpText() {
     return this.state.previewSummary !== null ? (
@@ -146,7 +149,7 @@ export class GeoFilePicker extends Component<Props, State> {
   }
 
   _renderImporterEditor() {
-    return this.state.importer ? this.state.importer.renderEditor() : null;
+    return this.state.importer ? this.state.importer.renderEditor(this._loadFilePreview) : null;
   }
 
   render() {

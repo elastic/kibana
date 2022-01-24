@@ -21,6 +21,6 @@ export interface GeoFileImporter extends IImporter {
   destroy(): void;
   canPreview(): boolean;
   previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview>;
-  renderEditor(): ReactNode;
+  renderEditor(onChange: () => void): ReactNode;
   setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE): void;
 }
