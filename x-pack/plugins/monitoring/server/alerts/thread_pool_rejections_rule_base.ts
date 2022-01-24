@@ -21,13 +21,10 @@ import {
   AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerting/server';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { Alert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 type ActionVariables = Array<{ name: string; description: string }>;
@@ -70,20 +67,13 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule {
   protected async fetchData(
     params: ThreadPoolRejectionsAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: boolean
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-
     const { threshold, duration } = params;
 
     const stats = await fetchThreadPoolRejectionStats(
       esClient,
       clusters,
-      esIndexPattern,
       Globals.app.config.ui.max_bucket_size,
       this.threadPoolType,
       duration,
