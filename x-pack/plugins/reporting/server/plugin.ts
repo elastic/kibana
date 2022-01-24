@@ -38,7 +38,6 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-    const { features, eventLog, security, spaces, taskManager } = plugins;
 
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
@@ -53,22 +52,15 @@ export class ReportingPlugin
       }
     });
 
-    const basePath = http.basePath;
-    const router = http.createRouter<ReportingRequestHandlerContext>();
-
     reportingCore.pluginSetup({
-      status,
-      features,
-      eventLog,
-      security,
-      spaces,
-      taskManager,
-      basePath,
-      router,
       logger: this.logger,
+      status,
+      basePath: http.basePath,
+      router: http.createRouter<ReportingRequestHandlerContext>(),
+      ...plugins,
     });
 
-    registerEventLogProviderActions(eventLog);
+    registerEventLogProviderActions(plugins.eventLog);
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
@@ -92,27 +84,25 @@ export class ReportingPlugin
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
     const { elasticsearch, savedObjects, uiSettings } = core;
-    const { data, licensing, screenshotting, taskManager } = plugins;
-    // use data plugin for csv formats
-    setFieldFormats(data.fieldFormats); // FIXME: 'fieldFormats' is deprecated.
+
+    // use fieldFormats plugin for csv formats
+    setFieldFormats(plugins.fieldFormats);
     const reportingCore = this.reportingCore!;
 
     // async background start
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const store = new ReportingStore(reportingCore, this.logger);
+      const logger = this.logger;
+      const store = new ReportingStore(reportingCore, logger);
 
       await reportingCore.pluginStart({
-        logger: this.logger,
+        logger,
         esClient: elasticsearch.client,
         savedObjects,
         uiSettings,
         store,
-        data,
-        licensing,
-        screenshotting,
-        taskManager,
+        ...plugins,
       });
 
       // Note: this must be called after ReportingCore.pluginStart
