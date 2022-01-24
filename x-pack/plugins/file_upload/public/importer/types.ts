@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ImportFailure,
   IngestPipeline,
   ImportDoc,
   ImportResponse,
   Mappings,
   Settings,
-} from '../../common';
+} from '../../common/types';
 
 export interface ImportConfig {
   settings: Settings;

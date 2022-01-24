@@ -18,7 +18,7 @@ import type {
   XYLayerConfig,
 } from '../../../../../../../lens/public';
 import { FieldVisConfig } from '../../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
 
 interface ColumnsAndLayer {
   columns: Record<string, GenericIndexPatternColumn>;

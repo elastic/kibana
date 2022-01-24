@@ -22,7 +22,7 @@ import {
   buildUnitedIndexQuery,
 } from '../../routes/metadata/query_builders';
 import { HostMetadata } from '../../../../common/endpoint/types';
-import { Agent } from '../../../../../fleet/common';
+import { Agent, PackagePolicy } from '../../../../../fleet/common';
 import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
@@ -212,6 +212,26 @@ describe('EndpointMetadataService', () => {
         ],
         total: 1,
       });
+    });
+  });
+
+  describe('#getAllEndpointPackagePolicies', () => {
+    it('gets all endpoint package policies', async () => {
+      const mockPolicy: PackagePolicy = {
+        id: '1',
+        policy_id: 'test-id-1',
+      } as PackagePolicy;
+      const mockPackagePolicyService = testMockedContext.packagePolicyService;
+      mockPackagePolicyService.list.mockResolvedValueOnce({
+        items: [mockPolicy],
+        total: 1,
+        perPage: 10,
+        page: 1,
+      });
+
+      const endpointPackagePolicies = await metadataService.getAllEndpointPackagePolicies();
+      const expected: PackagePolicy[] = [mockPolicy];
+      expect(endpointPackagePolicies).toEqual(expected);
     });
   });
 });

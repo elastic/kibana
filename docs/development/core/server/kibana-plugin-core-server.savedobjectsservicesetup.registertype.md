@@ -11,7 +11,7 @@ See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdef
 <b>Signature:</b>
 
 ```typescript
-registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
 ```
 
 ## Example
@@ -21,6 +21,7 @@ registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
 // src/plugins/my_plugin/server/saved_objects/my_type.ts
 import { SavedObjectsType } from 'src/core/server';
 import * as migrations from './migrations';
+import * as schemas from './schemas';
 
 export const myType: SavedObjectsType = {
   name: 'MyType',
@@ -39,6 +40,10 @@ export const myType: SavedObjectsType = {
   migrations: {
     '2.0.0': migrations.migrateToV2,
     '2.1.0': migrations.migrateToV2_1
+  },
+  schemas: {
+    '2.0.0': schemas.v2,
+    '2.1.0': schemas.v2_1,
   },
 };
 

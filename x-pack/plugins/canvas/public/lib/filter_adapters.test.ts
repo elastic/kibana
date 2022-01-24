@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST } from '@kbn/interpreter';
+import { AstFunction } from '@kbn/interpreter';
 import { adaptCanvasFilter } from './filter_adapters';
 
 describe('adaptCanvasFilter', () => {
-  const filterAST: ExpressionFunctionAST = {
+  const filterAST: AstFunction = {
     type: 'function',
     function: 'exactly',
     arguments: {

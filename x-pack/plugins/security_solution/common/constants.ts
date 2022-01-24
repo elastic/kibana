@@ -99,6 +99,7 @@ export enum SecurityPageName {
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
+  hostsRisk = 'hosts-risk',
   investigate = 'investigate',
   network = 'network',
   networkAnomalies = 'network-anomalies',
@@ -128,6 +129,7 @@ export const UEBA_PATH = '/ueba' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
+export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
@@ -146,6 +148,7 @@ export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
+export const APP_POLICIES_PATH = `${APP_PATH}${POLICIES_PATH}` as const;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
@@ -261,8 +264,10 @@ export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/pre
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_find_status` as const;
+export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
+export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
@@ -357,7 +362,7 @@ export const showAllOthersBucket: string[] = [
  */
 export const ELASTIC_NAME = 'estc' as const;
 
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_latest_' as const;
+export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
@@ -375,3 +380,30 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.STOPPED,
   TRANSFORM_STATES.STOPPING,
 ]);
+
+/**
+ * How many rules to update at a time is set to 50 from errors coming from
+ * the slow environments such as cloud when the rule updates are > 100 we were
+ * seeing timeout issues.
+ *
+ * Since there is not timeout options at the alerting API level right now, we are
+ * at the mercy of the Elasticsearch server client/server default timeouts and what
+ * we are doing could be considered a workaround to not being able to increase the timeouts.
+ *
+ * However, other bad effects and saturation of connections beyond 50 makes this a "noisy neighbor"
+ * if we don't limit its number of connections as we increase the number of rules that can be
+ * installed at a time.
+ *
+ * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
+ * which in turn could create additional connections we want to avoid.
+ *
+ * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
+ * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 50 above to a lower number.
+ *
+ * See the original ticket here:
+ * https://github.com/elastic/kibana/issues/94418
+ */
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+
+export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
