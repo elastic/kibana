@@ -32,6 +32,13 @@ export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
   }
 );
 
+export const OS_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.osLastSeenToolTip',
+  {
+    defaultMessage: 'Most recently observed OS',
+  }
+);
+
 export const OS = i18n.translate('xpack.securitySolution.hostsTable.osTitle', {
   defaultMessage: 'Operating system',
 });
