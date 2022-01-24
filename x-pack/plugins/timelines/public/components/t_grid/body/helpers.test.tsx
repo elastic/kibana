@@ -18,7 +18,7 @@ import {
   addBuildingBlockStyle,
 } from './helpers';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { mockDnsEvent } from '../../../mock';
 
 describe('helpers', () => {
