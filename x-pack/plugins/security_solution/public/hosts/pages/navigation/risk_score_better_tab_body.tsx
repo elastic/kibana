@@ -40,7 +40,6 @@ export const RiskScoreBetterQueryTabBody = ({
     from: startDate,
     to: endDate,
   });
-  console.log('response', { filterQuery, response });
 
   return (
     <RiskScoreBetterTableManage
