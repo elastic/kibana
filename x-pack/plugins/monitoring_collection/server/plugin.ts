@@ -7,7 +7,7 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { registerRulesRoute, registerActionsRoute } from './routes';
+import { registerDynamicRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
   registerMetric: (metric: Metric) => void;
@@ -44,13 +44,14 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         return await metric.fetch();
       }
     }
+    return undefined;
   }
 
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
     const kibanaIndex = core.savedObjects.getKibanaIndex();
 
-    registerRulesRoute({
+    registerDynamicRoute({
       router,
       config: {
         allowAnonymous: core.status.isStatusPageAnonymous(),
@@ -60,20 +61,9 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         uuid: this.initializerContext.env.instanceUuid,
       },
       overallStatus$: core.status.overall$,
-      getMetrics: async () => (await this.getMetrics('rules')) as MetricResult,
-    });
-
-    registerActionsRoute({
-      router,
-      config: {
-        allowAnonymous: core.status.isStatusPageAnonymous(),
-        kibanaIndex,
-        kibanaVersion: this.initializerContext.env.packageInfo.version,
-        server: core.http.getServerInfo(),
-        uuid: this.initializerContext.env.instanceUuid,
+      getMetrics: async (type: string) => {
+        return await this.getMetrics(type);
       },
-      overallStatus$: core.status.overall$,
-      getMetrics: async () => (await this.getMetrics('actions')) as MetricResult,
     });
 
     return {

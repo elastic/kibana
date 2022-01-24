@@ -77,5 +77,6 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     </>
   );
 };
+ConnectorCardDisplay.displayName = 'ConnectorCardDisplay';
 
 export const ConnectorCard = memo(ConnectorCardDisplay);
