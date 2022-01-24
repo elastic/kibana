@@ -99,9 +99,6 @@ describe('config schema', () => {
             "index": "filebeat-*",
           },
           "max_bucket_size": 10000,
-          "metricbeat": Object {
-            "index": "metricbeat-*",
-          },
           "min_interval_seconds": 10,
           "show_license_expiration": true,
         },

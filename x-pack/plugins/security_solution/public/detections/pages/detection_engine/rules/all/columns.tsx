@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { Dispatch } from 'react';
 import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
@@ -14,9 +15,11 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { sum } from 'lodash';
-import React, { Dispatch } from 'react';
 
+import {
+  RuleExecutionSummary,
+  DurationMetric,
+} from '../../../../../../common/detection_engine/schemas/common';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -26,7 +29,7 @@ import { ActionToaster } from '../../../../../common/components/toasters';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
-import { RuleExecutionStatusBadge } from '../../../../components/rules/rule_execution_status_badge';
+import { RuleStatusBadge } from '../../../../components/rules/rule_execution_status';
 import * as i18n from '../translations';
 import {
   deleteRulesAction,
@@ -271,9 +274,9 @@ export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] =>
       truncateText: true,
     },
     {
-      field: 'status_date',
+      field: 'execution_summary.last_execution.date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
-      render: (value: Rule['status_date']) => {
+      render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
@@ -289,9 +292,11 @@ export const getRulesColumns = (columnsProps: GetColumnsProps): TableColumn[] =>
       truncateText: true,
     },
     {
-      field: 'status',
+      field: 'execution_summary.last_execution.status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: Rule['status']) => <RuleExecutionStatusBadge status={value} />,
+      render: (value: RuleExecutionSummary['last_execution']['status'] | undefined) => (
+        <RuleStatusBadge status={value} />
+      ),
       width: '16%',
       truncateText: true,
     },
@@ -340,39 +345,39 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
     { ...getColumnRuleName(columnsProps), width: '28%' },
     getColumnTags(),
     {
-      field: 'bulk_create_time_durations',
+      field: 'execution_summary.last_execution.metrics.total_indexing_duration_ms',
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_INDEXING_TIMES}
           tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
         />
       ),
-      render: (value: Rule['bulk_create_time_durations'] | undefined) => (
-        <EuiText data-test-subj="bulk_create_time_durations" size="s">
-          {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
+      render: (value: DurationMetric | undefined) => (
+        <EuiText data-test-subj="total_indexing_duration_ms" size="s">
+          {value != null ? value.toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
       width: '16%',
       truncateText: true,
     },
     {
-      field: 'search_after_time_durations',
+      field: 'execution_summary.last_execution.metrics.total_search_duration_ms',
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_QUERY_TIMES}
           tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
         />
       ),
-      render: (value: Rule['search_after_time_durations'] | undefined) => (
-        <EuiText data-test-subj="search_after_time_durations" size="s">
-          {value?.length ? sum(value.map(Number)).toFixed() : getEmptyTagValue()}
+      render: (value: DurationMetric | undefined) => (
+        <EuiText data-test-subj="total_search_duration_ms" size="s">
+          {value != null ? value.toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
       width: '14%',
       truncateText: true,
     },
     {
-      field: 'last_gap',
+      field: 'execution_summary.last_execution.metrics.execution_gap_duration_s',
       name: (
         <TableHeaderTooltipCell
           title={i18n.COLUMN_GAP}
@@ -399,25 +404,27 @@ export const getMonitoringColumns = (columnsProps: GetColumnsProps): TableColumn
           }
         />
       ),
-      render: (value: Rule['last_gap'] | undefined) => (
+      render: (value: DurationMetric | undefined) => (
         <EuiText data-test-subj="gap" size="s">
-          {value ?? getEmptyTagValue()}
+          {value != null ? value.toFixed() : getEmptyTagValue()}
         </EuiText>
       ),
       width: '14%',
       truncateText: true,
     },
     {
-      field: 'status',
+      field: 'execution_summary.last_execution.status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: Rule['status'] | undefined) => <RuleExecutionStatusBadge status={value} />,
+      render: (value: RuleExecutionSummary['last_execution']['status'] | undefined) => (
+        <RuleStatusBadge status={value} />
+      ),
       width: '12%',
       truncateText: true,
     },
     {
-      field: 'status_date',
+      field: 'execution_summary.last_execution.date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
-      render: (value: Rule['status_date'] | undefined) => {
+      render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
