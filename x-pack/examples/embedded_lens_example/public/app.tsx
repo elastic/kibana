@@ -22,23 +22,22 @@ import {
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
-import {
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
   LensEmbeddableInput,
   DateHistogramIndexPatternColumn,
   DatatableVisualizationState,
+  HeatmapVisualizationState,
+  GaugeVisualizationState,
+  TermsIndexPatternColumn,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
-// Generate a Lens state based on some app-specific input parameters.
-// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
-function getLensAttributes(
-  defaultIndexPattern: IndexPattern,
-  color: string
-): TypedLensByValueInput['attributes'] {
-  const dataLayer: PersistedIndexPatternLayer = {
+// @TODO: restore original example code
+function getDataLayer(defaultIndexPattern: IndexPattern): PersistedIndexPatternLayer {
+  return {
     columnOrder: ['col1', 'col2'],
     columns: {
       col2: {
@@ -60,6 +59,49 @@ function getLensAttributes(
       } as DateHistogramIndexPatternColumn,
     },
   };
+}
+
+function getBaseAttributes(
+  defaultIndexPattern: IndexPattern,
+  dataLayer: PersistedIndexPatternLayer = getDataLayer(defaultIndexPattern)
+): Omit<TypedLensByValueInput['attributes'], 'visualizationType' | 'state'> & {
+  state: Omit<TypedLensByValueInput['attributes']['state'], 'visualization'>;
+} {
+  return {
+    title: 'Prefilled from example app',
+    references: [
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-layer-layer1',
+        type: 'index-pattern',
+      },
+    ],
+    state: {
+      datasourceStates: {
+        indexpattern: {
+          layers: {
+            layer1: dataLayer,
+          },
+        },
+      },
+      filters: [],
+      query: { language: 'kuery', query: '' },
+    },
+  };
+}
+
+// Generate a Lens state based on some app-specific input parameters.
+// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
+function getLensAttributes(
+  defaultIndexPattern: IndexPattern,
+  color: string
+): TypedLensByValueInput['attributes'] {
+  const baseAttributes = getBaseAttributes(defaultIndexPattern);
 
   const xyConfig: XYState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -82,31 +124,63 @@ function getLensAttributes(
   };
 
   return {
+    ...baseAttributes,
     visualizationType: 'lnsXY',
-    title: 'Prefilled from example app',
-    references: [
-      {
-        id: defaultIndexPattern.id!,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: defaultIndexPattern.id!,
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-    ],
     state: {
-      datasourceStates: {
-        indexpattern: {
-          layers: {
-            layer1: dataLayer,
-          },
-        },
-      },
-      filters: [],
-      query: { language: 'kuery', query: '' },
+      ...baseAttributes.state,
       visualization: xyConfig,
+    },
+  };
+}
+
+function getLensAttributesHeatmap(
+  defaultIndexPattern: IndexPattern
+): TypedLensByValueInput['attributes'] {
+  const dataLayer = getDataLayer(defaultIndexPattern);
+  const heatmapDataLayer = {
+    columnOrder: ['col1', 'col3', 'col2'],
+    columns: {
+      ...dataLayer.columns,
+      col3: {
+        label: 'Top values of @tags.keyword',
+        dataType: 'string',
+        operationType: 'terms',
+        scale: 'ordinal',
+        sourceField: '@tags.keyword',
+        isBucketed: true,
+        params: {
+          size: 5,
+          orderBy: { type: 'alphabetical', fallback: true },
+          orderDirection: 'desc',
+        },
+      } as TermsIndexPatternColumn,
+    },
+  };
+
+  const baseAttributes = getBaseAttributes(defaultIndexPattern, heatmapDataLayer);
+
+  const heatmapConfig: HeatmapVisualizationState = {
+    layerId: 'layer1',
+    layerType: 'data',
+    shape: 'heatmap',
+    xAccessor: 'col1',
+    yAccessor: 'col3',
+    valueAccessor: 'col2',
+    legend: { isVisible: true, position: 'right', type: 'heatmap_legend' },
+    gridConfig: {
+      isCellLabelVisible: true,
+      isYAxisLabelVisible: true,
+      isXAxisLabelVisible: true,
+      type: 'heatmap_grid',
+    },
+  };
+
+  return {
+    ...baseAttributes,
+    visualizationType: 'lnsHeatmap',
+    state: {
+      ...baseAttributes.state,
+      visualization: heatmapConfig,
     },
   };
 }
@@ -114,28 +188,7 @@ function getLensAttributes(
 function getLensAttributesDatatable(
   defaultIndexPattern: IndexPattern
 ): TypedLensByValueInput['attributes'] {
-  const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1', 'col2'],
-    columns: {
-      col2: {
-        dataType: 'number',
-        isBucketed: false,
-        label: 'Count of records',
-        operationType: 'count',
-        scale: 'ratio',
-        sourceField: 'Records',
-      },
-      col1: {
-        dataType: 'date',
-        isBucketed: true,
-        label: '@timestamp',
-        operationType: 'date_histogram',
-        params: { interval: 'auto' },
-        scale: 'interval',
-        sourceField: defaultIndexPattern.timeFieldName!,
-      } as DateHistogramIndexPatternColumn,
-    },
-  };
+  const baseAttributes = getBaseAttributes(defaultIndexPattern);
 
   const tableConfig: DatatableVisualizationState = {
     layerId: 'layer1',
@@ -144,31 +197,41 @@ function getLensAttributesDatatable(
   };
 
   return {
+    ...baseAttributes,
     visualizationType: 'lnsDatatable',
-    title: 'Prefilled from example app',
-    references: [
-      {
-        id: defaultIndexPattern.id!,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: defaultIndexPattern.id!,
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-    ],
     state: {
-      datasourceStates: {
-        indexpattern: {
-          layers: {
-            layer1: dataLayer,
-          },
-        },
-      },
-      filters: [],
-      query: { language: 'kuery', query: '' },
+      ...baseAttributes.state,
       visualization: tableConfig,
+    },
+  };
+}
+
+function getLensAttributesGauge(
+  defaultIndexPattern: IndexPattern
+): TypedLensByValueInput['attributes'] {
+  const dataLayer = getDataLayer(defaultIndexPattern);
+  const gaugeDataLayer = {
+    columnOrder: ['col2'],
+    columns: {
+      col2: dataLayer.columns.col2,
+    },
+  };
+
+  const baseAttributes = getBaseAttributes(defaultIndexPattern, gaugeDataLayer);
+  const gaugeConfig: GaugeVisualizationState = {
+    layerId: 'layer1',
+    layerType: 'data',
+    shape: 'horizontalBullet',
+    ticksPosition: 'auto',
+    labelMajorMode: 'auto',
+    metricAccessor: 'col1',
+  };
+  return {
+    ...baseAttributes,
+    visualizationType: 'lnsGauge',
+    state: {
+      ...baseAttributes.state,
+      visualization: gaugeConfig,
     },
   };
 }
@@ -299,6 +362,15 @@ export const App = (props: {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <LensComponent
+                  id="myGauge"
+                  style={{ height: 500 }}
+                  attributes={getLensAttributesGauge(props.defaultIndexPattern)}
+                  onLoad={(val) => {
+                    setIsLoading(val);
+                  }}
+                  viewMode={ViewMode.VIEW}
+                />
+                <LensComponent
                   id=""
                   withActions
                   style={{ height: 500 }}
@@ -321,8 +393,8 @@ export const App = (props: {
                   }}
                   viewMode={ViewMode.VIEW}
                 />
-                <LensComponent
-                  id=""
+                {/* <LensComponent
+                  id="myTable"
                   style={{ height: 500 }}
                   timeRange={time}
                   attributes={getLensAttributesDatatable(props.defaultIndexPattern)}
@@ -330,20 +402,19 @@ export const App = (props: {
                   onLoad={(val) => {
                     setIsLoading(val);
                   }}
-                  onBrushEnd={({ range }) => {
-                    setTime({
-                      from: new Date(range[0]).toISOString(),
-                      to: new Date(range[1]).toISOString(),
-                    });
-                  }}
-                  onFilter={(_data) => {
-                    // call back event for on filter event
-                  }}
-                  onTableRowClick={(_data) => {
-                    // call back event for on table row click event
-                  }}
                   viewMode={ViewMode.VIEW}
                 />
+                <LensComponent
+                  id="myHeatmap"
+                  style={{ height: 500 }}
+                  timeRange={time}
+                  attributes={getLensAttributesHeatmap(props.defaultIndexPattern)}
+                  disableTriggers
+                  onLoad={(val) => {
+                    setIsLoading(val);
+                  }}
+                  viewMode={ViewMode.VIEW}
+                /> */}
                 {isSaveModalVisible && (
                   <LensSaveModalComponent
                     initialInput={

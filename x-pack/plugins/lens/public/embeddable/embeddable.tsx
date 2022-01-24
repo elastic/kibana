@@ -182,7 +182,10 @@ export class Embeddable
     );
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
+    this.initializeSavedVis(initialInput).then(() =>
+      // @TODO: solve this without the initial flag
+      this.onContainerStateChanged(initialInput, true)
+    );
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
@@ -343,8 +346,9 @@ export class Embeddable
     this.isInitialized = true;
   }
 
-  onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState)) this.reload();
+  // @TODO: sort out this initial problem with gauges
+  onContainerStateChanged(containerState: LensEmbeddableInput, initial?: boolean) {
+    if (this.handleContainerStateChanged(containerState) || initial) this.reload();
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
