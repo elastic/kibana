@@ -68,6 +68,7 @@ export const AnomalyDetectionEmptyState: FC = () => {
           />
         </EuiButton>
       }
+      data-test-subj="mlAnomalyDetectionEmptyState"
     />
   );
 };
