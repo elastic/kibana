@@ -41,5 +41,6 @@ const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatar
     )}
   </>
 );
+UserActionTimestampComponent.displayName = 'UserActionTimestamp';
 
 export const UserActionTimestamp = memo(UserActionTimestampComponent);
