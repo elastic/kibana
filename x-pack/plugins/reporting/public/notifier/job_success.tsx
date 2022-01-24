@@ -22,7 +22,7 @@ export const getSuccessToast = (
   title: toMountPoint(
     <FormattedMessage
       id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
-      defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
+      defaultMessage="Created {reportObjectType} report for '{reportObjectTitle}'"
       values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
     />,
     { theme$: theme.theme$ }

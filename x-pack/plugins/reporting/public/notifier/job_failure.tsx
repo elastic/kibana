@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { ThemeServiceStart, ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { JobSummary, ManagementLinkFn } from '../../common/types';
+import type { JobSummary, ManagementLinkFn } from '../../common/types';
 
 export const getFailureToast = (
   errorText: string,
@@ -23,8 +23,8 @@ export const getFailureToast = (
     title: toMountPoint(
       <FormattedMessage
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
-        defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
-        values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
+        defaultMessage="Could not create {reportType} report for {reportObjectType} '{reportObjectTitle}'."
+        values={{ reportType: job.jobtype, reportObjectTitle: job.title }}
       />,
       { theme$: theme.theme$ }
     ),
