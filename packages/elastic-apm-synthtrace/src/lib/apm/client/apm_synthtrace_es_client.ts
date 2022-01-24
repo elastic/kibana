@@ -11,8 +11,9 @@ import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
 import { ApmFields } from '../apm_fields';
-import { ConcatenatedSpanGenerators, SpanIterable } from '../../span_iterable';
+import { SpanIterable } from '../../span_iterable';
 import { StreamProcessor } from '../../stream_processor';
+import { SpanGeneratorsUnion } from '../../span_generators_union';
 
 export class ApmSynthtraceEsClient {
   constructor(
@@ -70,7 +71,7 @@ export class ApmSynthtraceEsClient {
   }
 
   async index(events: SpanIterable | SpanIterable[], concurrency?: number, maxDocs?: number) {
-    const dataStream = Array.isArray(events) ? new ConcatenatedSpanGenerators(events) : events;
+    const dataStream = Array.isArray(events) ? new SpanGeneratorsUnion(events) : events;
 
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf

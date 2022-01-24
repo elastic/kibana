@@ -12,9 +12,8 @@ import { RunOptions } from './parse_run_cli_flags';
 import { getCommonServices } from './get_common_services';
 import { ApmFields } from '../../lib/apm/apm_fields';
 
-export async function startLiveDataUpload(runOptions: RunOptions, start: Date ) {
+export async function startLiveDataUpload(runOptions: RunOptions, start: Date) {
   const { logger, client } = getCommonServices(runOptions);
-
 
   const file = runOptions.file;
   const scenario = await getScenario({ file, logger });

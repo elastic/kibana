@@ -8,7 +8,7 @@
 
 import { Fields } from '../entity';
 
-export type StackMonitoringFields = Fields &
+export type StackMonitoringFieldfs = Fields &
   Partial<{
     cluster_name: string;
     cluster_uuid: string;
@@ -26,5 +26,5 @@ export type StackMonitoringFields = Fields &
     'kibana_stats.requests.total': number;
     'kibana_stats.timestamp': string;
     'kibana_stats.response_times.max': number;
-    'timestamp': number;
+    timestamp: number;
   }>;

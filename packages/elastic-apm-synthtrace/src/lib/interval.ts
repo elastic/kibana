@@ -7,7 +7,8 @@
  */
 import moment from 'moment';
 import { ApmFields } from './apm/apm_fields';
-import { SpanGenerator, SpanIterable } from './span_iterable';
+import { SpanIterable } from './span_iterable';
+import { SpanGenerator } from './span_generator';
 
 export function parseInterval(interval: string): [number, string] {
   const args = interval.match(/(\d+)(s|m|h|d)/);
@@ -22,9 +23,9 @@ export class Interval implements Iterable<number> {
     private readonly from: Date,
     private readonly to: Date,
     private readonly interval: string,
-    private readonly yieldRate: number = 1,
+    private readonly yieldRate: number = 1
   ) {
-    [this.intervalAmount, this.intervalUnit] = parseInterval(interval)
+    [this.intervalAmount, this.intervalUnit] = parseInterval(interval);
   }
 
   private readonly intervalAmount: number;
