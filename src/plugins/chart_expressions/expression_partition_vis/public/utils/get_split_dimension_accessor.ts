@@ -8,24 +8,29 @@
 import { AccessorFn } from '@elastic/charts';
 import { getColumnByAccessor } from './accessor';
 import { DatatableColumn } from '../../../../expressions/public';
-import type { FieldFormatsStart } from '../../../../field_formats/public';
+import { FieldFormat, FormatFactory } from '../../../../field_formats/common';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { getFormatter } from './formatters';
 
-export const getSplitDimensionAccessor =
-  (fieldFormats: FieldFormatsStart, columns: DatatableColumn[]) =>
-  (splitDimension: ExpressionValueVisDimension): AccessorFn => {
-    const formatter = fieldFormats.deserialize(splitDimension.format);
-    const splitChartColumn = getColumnByAccessor(splitDimension.accessor, columns);
-    const accessor = splitChartColumn.id;
+export const getSplitDimensionAccessor = (
+  columns: DatatableColumn[],
+  splitDimension: ExpressionValueVisDimension,
+  formatters: Record<string, FieldFormat | undefined>,
+  defaultFormatFactory: FormatFactory
+): AccessorFn => {
+  const splitChartColumn = getColumnByAccessor(splitDimension.accessor, columns);
+  const accessor = splitChartColumn.id;
+  const formatter = getFormatter(splitChartColumn, formatters, defaultFormatFactory);
 
-    const fn: AccessorFn = (d) => {
-      const v = d[accessor];
-      if (v === undefined) {
-        return;
-      }
-      const f = formatter.convert(v);
-      return f;
-    };
+  const fn: AccessorFn = (d) => {
+    const v = d[accessor];
+    if (v === undefined) {
+      return;
+    }
 
-    return fn;
+    const f = formatter.convert(v);
+    return f;
   };
+
+  return fn;
+};

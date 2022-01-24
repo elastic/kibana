@@ -226,16 +226,17 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     return Number.isFinite(value) && value >= 0 ? value : 0;
   }, []);
 
+  const defaultFormatter = services.fieldFormats.deserialize;
   // formatters
-  const metricFieldFormatter =
-    getFormatter(metricColumn, formatters, services.fieldFormats.deserialize) ??
-    services.fieldFormats.deserialize();
+  const metricFieldFormatter = getFormatter(metricColumn, formatters, defaultFormatter);
+  const { splitColumn, splitRow } = visParams.dimensions;
 
-  const splitChartFormatter = visParams.dimensions.splitColumn
-    ? services.fieldFormats.deserialize(visParams.dimensions.splitColumn[0].format)
-    : visParams.dimensions.splitRow
-    ? services.fieldFormats.deserialize(visParams.dimensions.splitRow[0].format)
+  const splitChartFormatter = splitColumn
+    ? getFormatter(splitColumn[0], formatters, defaultFormatter)
+    : splitRow
+    ? getFormatter(splitRow[0], formatters, defaultFormatter)
     : undefined;
+
   const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
     params: {
@@ -318,23 +319,17 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     ]
   );
 
-  const splitChartColumnAccessor = visParams.dimensions.splitColumn
-    ? getSplitDimensionAccessor(
-        services.fieldFormats,
-        visData.columns
-      )(visParams.dimensions.splitColumn[0])
+  const splitChartColumnAccessor = splitColumn
+    ? getSplitDimensionAccessor(visData.columns, splitColumn[0], formatters, defaultFormatter)
     : undefined;
-  const splitChartRowAccessor = visParams.dimensions.splitRow
-    ? getSplitDimensionAccessor(
-        services.fieldFormats,
-        visData.columns
-      )(visParams.dimensions.splitRow[0])
+  const splitChartRowAccessor = splitRow
+    ? getSplitDimensionAccessor(visData.columns, splitRow[0], formatters, defaultFormatter)
     : undefined;
 
-  const splitChartDimension = visParams.dimensions.splitColumn
-    ? getColumnByAccessor(visParams.dimensions.splitColumn[0].accessor, visData.columns)
-    : visParams.dimensions.splitRow
-    ? getColumnByAccessor(visParams.dimensions.splitRow[0].accessor, visData.columns)
+  const splitChartDimension = splitColumn
+    ? getColumnByAccessor(splitColumn[0].accessor, visData.columns)
+    : splitRow
+    ? getColumnByAccessor(splitRow[0].accessor, visData.columns)
     : undefined;
 
   /**

@@ -8,7 +8,7 @@
 
 import type { FieldFormat, FormatFactory } from '../../../../../field_formats/common';
 import { BucketColumns } from '../../../common/types';
-import { getFormatter } from '../formatters';
+import { getAvailableFormatter } from '../formatters';
 
 export const getNodeLabel = (
   nodeName: unknown,
@@ -16,7 +16,7 @@ export const getNodeLabel = (
   formatters: Record<string, FieldFormat | undefined>,
   defaultFormatFactory: FormatFactory
 ) => {
-  const formatter = getFormatter(column, formatters, defaultFormatFactory);
+  const formatter = getAvailableFormatter(column, formatters, defaultFormatFactory);
   if (formatter) {
     return formatter.convert(nodeName) ?? '';
   }

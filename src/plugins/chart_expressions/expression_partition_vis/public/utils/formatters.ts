@@ -28,7 +28,7 @@ export const generateFormatters = (
   );
 };
 
-export const getFormatter = (
+export const getAvailableFormatter = (
   column: Partial<BucketColumns>,
   formatters: Record<string, FieldFormat | undefined>,
   defaultFormatFactory: FormatFactory
@@ -44,3 +44,9 @@ export const getFormatter = (
     return defaultFormatFactory(column.format);
   }
 };
+
+export const getFormatter = (
+  column: Partial<BucketColumns>,
+  formatters: Record<string, FieldFormat | undefined>,
+  defaultFormatFactory: FormatFactory
+) => getAvailableFormatter(column, formatters, defaultFormatFactory) ?? defaultFormatFactory();
