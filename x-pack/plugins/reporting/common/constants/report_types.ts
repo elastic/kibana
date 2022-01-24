@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
 
