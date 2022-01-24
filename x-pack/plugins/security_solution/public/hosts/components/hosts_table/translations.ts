@@ -32,6 +32,21 @@ export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
   }
 );
 
+export const HOST_RISK_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.hostRiskToolTip',
+  {
+    defaultMessage:
+      'Host risk classifcation is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
+  }
+);
+
+export const OS_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.osLastSeenToolTip',
+  {
+    defaultMessage: 'Most recently observed OS',
+  }
+);
+
 export const OS = i18n.translate('xpack.securitySolution.hostsTable.osTitle', {
   defaultMessage: 'Operating system',
 });
