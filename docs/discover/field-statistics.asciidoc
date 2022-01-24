@@ -17,7 +17,7 @@ the <<gs-get-data-into-kibana, sample web logs data set>>, or you can use your o
 . Open *Stack Managment > Advanced Settings*, search for *Show field statistics*,
 and turn on the setting.
 
-. Open *Discover*, expand the {data-source} dropdown,
+. Open the main menu, click *Discover*, expand the {data-source} dropdown,
 and select *kibana_sample_data_logs*.
 
 . If you don’t see any results, expand the time range, for example, to *Last 7 days*.
