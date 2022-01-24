@@ -18,7 +18,7 @@ const hasInvalidEmail = (defaultConnectors: string[], value?: DefaultEmail) => {
   if (defaultConnectors.length === 0) {
     return;
   }
-  if (!value) {
+  if (!value || !value.to) {
     return { to: REQUIRED_EMAIL };
   }
 

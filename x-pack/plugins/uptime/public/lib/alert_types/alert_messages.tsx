@@ -15,7 +15,7 @@ import { RedirectAppLinks, toMountPoint } from '../../../../../../src/plugins/ki
 import { ActionConnector } from '../../state/alerts/alerts';
 import { Alert } from '../../../../alerting/common';
 import { kibanaService } from '../../state/kibana_service';
-import { getUrlForAlert } from '../../components/overview/monitor_list/monitor_list_drawer/enabled_alerts';
+import { getUrlForAlert } from './common';
 
 export const simpleAlertEnabled = (
   defaultActions: ActionConnector[],

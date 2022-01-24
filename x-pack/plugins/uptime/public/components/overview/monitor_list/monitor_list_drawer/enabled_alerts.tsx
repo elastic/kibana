@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { Rule } from '../../../../../../triggers_actions_ui/public';
+import { getUrlForAlert } from '../../../../lib/alert_types/common';
 
 interface Props {
   monitorAlerts: Rule[];
@@ -33,10 +34,6 @@ const LinkGroupList = styled(EuiListGroup)`
     }
   }
 `;
-
-export const getUrlForAlert = (id: string, basePath: string) => {
-  return basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + id;
-};
 
 export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
