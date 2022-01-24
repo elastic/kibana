@@ -164,18 +164,18 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should respond 400 if trying to upgrade with source_uri set', async () => {
         const kibanaVersion = await kibanaServer.version.get();
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
             version: kibanaVersion,
             source_uri: 'http://path/to/download',
           })
-          .expect(400, (err, res) => {
-            expect(res.body).to.eql({
-              message: `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`,
-            });
-          });
+          .expect(400);
+
+        expect(res.body.message).to.eql(
+          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`
+        );
       });
       it('should respond 400 if trying to upgrade an agent that is unenrolling', async () => {
         const kibanaVersion = await kibanaServer.version.get();
@@ -580,7 +580,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -589,11 +589,10 @@ export default function (providerContext: FtrProviderContext) {
             source_uri: 'http://path/to/download',
             force: true,
           })
-          .expect(400, (err, res) => {
-            expect(res.body).to.eql({
-              message: `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`,
-            });
-          });
+          .expect(400);
+        expect(res.body.message).to.eql(
+          `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`
+        );
       });
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
