@@ -10,11 +10,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import TimeseriesVisualization from './vis';
-import { setFieldFormats } from '../../../../services';
+import { setFieldFormats, setCharts, setUISettings } from '../../../../services';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import { METRIC_TYPES } from '../../../../../../../data/common';
 import { getFieldFormatsRegistry } from '../../../../../../../data/public/test_utils';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../../charts/public';
 
 jest.mock('../../../../../../../data/public/services', () => ({
   getUiSettings: () => ({ get: jest.fn() }),
@@ -35,12 +36,47 @@ describe('TimeseriesVisualization', () => {
       })
     );
 
-    const setupTimeSeriesProps = (formatters, valueTemplates) => {
+    setCharts({
+      theme: {
+        useChartsTheme: () => ({
+          axes: {
+            tickLabel: {
+              padding: {
+                inner: 0,
+              },
+            },
+          },
+        }),
+        useChartsBaseTheme: () => ({
+          axes: {
+            tickLabel: {
+              padding: {
+                inner: 0,
+              },
+            },
+          },
+        }),
+      },
+      activeCursor: {},
+    });
+
+    setUISettings({
+      get: () => ({}),
+      isDefault: () => true,
+    });
+
+    const renderShallow = (formatters, valueTemplates, modelOverwrites) => {
       const series = formatters.map((formatter, index) => ({
         id: id + index,
+        label: '',
         formatter,
         value_template: valueTemplates?.[index],
         data: [],
+        lines: {
+          show: true,
+        },
+        points: {},
+        color: '#000000',
         metrics: [
           {
             type: METRIC_TYPES.AVG,
@@ -63,6 +99,7 @@ describe('TimeseriesVisualization', () => {
             id,
             series,
             use_kibana_indexes: true,
+            ...modelOverwrites,
           }}
           visData={{
             [id]: {
@@ -75,8 +112,25 @@ describe('TimeseriesVisualization', () => {
         />
       );
 
-      return timeSeriesVisualization.find(TimeSeries).props();
+      return timeSeriesVisualization;
     };
+
+    const setupTimeSeriesProps = (formatters, valueTemplates) => {
+      return renderShallow(formatters, valueTemplates).find(TimeSeries).props();
+    };
+
+    test('should enable new time axis if ignore daylight time setting is switched off', () => {
+      const component = renderShallow(['byte'], undefined, { ignore_daylight_time: false });
+      console.log(component.find('TimeSeries').dive().debug());
+      const xAxis = component.find('TimeSeries').dive().find('[id="bottom"]');
+      expect(xAxis.prop('style')).toEqual(MULTILAYER_TIME_AXIS_STYLE);
+    });
+
+    test('should disable new time axis for ignore daylight time setting', () => {
+      const component = renderShallow(['byte'], undefined, { ignore_daylight_time: true });
+      const xAxis = component.find('TimeSeries').dive().find('[id="bottom"]');
+      expect(xAxis.prop('style')).toBeUndefined();
+    });
 
     test('should return byte formatted value from yAxis formatter for single byte series', () => {
       const timeSeriesProps = setupTimeSeriesProps(['byte']);
