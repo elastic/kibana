@@ -258,6 +258,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       (sizeLimit === undefined || this._blockSizeInBytes < sizeLimit)
     ) {
       const results = await this._readNext(this._totalFeaturesRead, this._totalBytesRead);
+      this._hasNext = results.hasNext;
       this._blockSizeInBytes = this._blockSizeInBytes + results.bytesRead;
       this._features = [...this._features, ...results.features];
       results.geometryTypesMap.forEach((value, key) => {
@@ -274,12 +275,9 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     features: Feature[];
     geometryTypesMap: Map<string, boolean>;
     invalidFeatures: ImportFailure[];
+    hasNext: boolean;
   }> {
     throw new Error('Should implement AbstractGeoFileImporter._next');
-  }
-
-  protected _done() {
-    this._hasNext = false;
   }
 
   protected _getIsActive() {

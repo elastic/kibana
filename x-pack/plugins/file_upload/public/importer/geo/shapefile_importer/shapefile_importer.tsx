@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Feature } from 'geojson';
+import type { ImportFailure } from '../../../../common/types';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
@@ -37,5 +39,17 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
         }}
       />
     );
+  }
+
+  protected async _readNext(prevTotalFeaturesRead: number, prevTotalBytesRead: number) {
+    const results = {
+      bytesRead: 0,
+      features: [] as Feature[],
+      geometryTypesMap: new Map<string, boolean>(),
+      invalidFeatures: [] as ImportFailure[],
+      hasNext: false,
+    };
+
+    return results;
   }
 }

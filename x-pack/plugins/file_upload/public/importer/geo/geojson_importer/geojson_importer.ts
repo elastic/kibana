@@ -27,6 +27,7 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
       features: [] as Feature[],
       geometryTypesMap: new Map<string, boolean>(),
       invalidFeatures: [] as ImportFailure[],
+      hasNext: true,
     };
 
     if (this._iterator === undefined) {
@@ -39,13 +40,14 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     }
 
     if (!this._getIsActive() || !this._iterator) {
+      results.hasNext = false;
       return results;
     }
 
     const { value: batch, done } = await this._iterator.next();
 
     if (!this._getIsActive() || done) {
-      this._done();
+      results.hasNext = false;
       return results;
     }
 
