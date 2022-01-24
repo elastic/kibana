@@ -149,6 +149,7 @@ export function DiscoverSidebarComponent({
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
+    available: availableFields,
   } = useMemo(
     () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
     [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
@@ -158,12 +159,9 @@ export function DiscoverSidebarComponent({
     () =>
       availableFields$.next({
         fetchStatus: FetchStatus.COMPLETE,
-        fields:
-          selectedFields.length > 0
-            ? selectedFields
-            : [...selectedFields, ...popularFields, ...unpopularFields],
+        fields: selectedFields.length > 0 ? selectedFields : availableFields,
       }),
-    [selectedFields, popularFields, unpopularFields, availableFields$]
+    [availableFields, selectedFields, availableFields$]
   );
 
   const paginate = useCallback(() => {

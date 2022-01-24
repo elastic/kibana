@@ -13,6 +13,7 @@ interface GroupedFields {
   selected: DataViewField[];
   popular: DataViewField[];
   unpopular: DataViewField[];
+  available: DataViewField[];
 }
 
 /**
@@ -31,6 +32,7 @@ export function groupFields(
     selected: [],
     popular: [],
     unpopular: [],
+    available: [],
   };
   if (!Array.isArray(fields) || !Array.isArray(columns) || typeof fieldCounts !== 'object') {
     return result;
@@ -53,6 +55,10 @@ export function groupFields(
   for (const field of fieldsSorted) {
     if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
       continue;
+    }
+
+    if (fieldCounts[field.name] > 0) {
+      result.available.push(field);
     }
     const subTypeMulti = getFieldSubtypeMulti(field?.spec);
     const isSubfield = useNewFieldsApi && subTypeMulti;
