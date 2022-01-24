@@ -21,9 +21,13 @@ import { APP_UI_ID } from '../../../../../common/constants';
 
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
-export const useKibana = jest.fn().mockReturnValue({
+export const useKibana = () => ({
   services: {
     ...mockStartServicesMock,
+    uiSettings: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
     data: {
       ...mockStartServicesMock.data,
       search: {

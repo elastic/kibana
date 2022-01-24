@@ -150,6 +150,9 @@ export const createStartServicesMock = (
     ml: {
       locator,
     },
+    theme: {
+      theme$: {},
+    },
   } as unknown as StartServices;
 };
 
