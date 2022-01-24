@@ -59,7 +59,7 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
+        defaultMessage="{reportObjectType} report '{reportObjectTitle}' may contain formulas"
         id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
         values={
           Object {
@@ -113,12 +113,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
+        defaultMessage="Could not create {reportType} report for '{reportObjectTitle}'."
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         values={
           Object {
             "reportObjectTitle": "Yas 7",
-            "reportObjectType": "yas",
+            "reportType": "yas",
           }
         }
       />,
@@ -202,12 +202,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
+        defaultMessage="Created {reportType} report for '{reportObjectTitle}'"
         id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
         values={
           Object {
             "reportObjectTitle": "Yas",
-            "reportObjectType": "yas",
+            "reportType": "yas",
           }
         }
       />,
