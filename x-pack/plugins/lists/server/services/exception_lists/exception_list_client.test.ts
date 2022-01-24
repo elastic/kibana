@@ -221,6 +221,19 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreMultiListFind.callback;
         },
       ],
+      [
+        'exportExceptionListAndItems',
+        (): ReturnType<ExceptionListClient['exportExceptionListAndItems']> => {
+          return exceptionListClient.exportExceptionListAndItems({
+            id: '1',
+            listId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreExport']['callback'] => {
+          return extensionPointStorageContext.exceptionPreExport.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {

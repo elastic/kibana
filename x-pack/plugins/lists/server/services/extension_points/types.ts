@@ -10,6 +10,7 @@ import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
+  ExportExceptionListAndItemsOptions,
   FindExceptionListItemOptions,
   FindExceptionListsItemOptions,
   GetExceptionListItemOptions,
@@ -98,12 +99,21 @@ export type ExceptionsListPreMultiListFindServerExtension = ServerExtensionPoint
   FindExceptionListsItemOptions
 >;
 
+/**
+ * Extension point is triggered prior to performing an `export` operation against exceptions list and items
+ */
+export type ExceptionsListPreExportServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreExport',
+  ExportExceptionListAndItemsOptions
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
   | ExceptionsListPreUpdateItemServerExtension
   | ExceptionsListPreGetOneItemServerExtension
   | ExceptionsListPreSingleListFindServerExtension
-  | ExceptionsListPreMultiListFindServerExtension;
+  | ExceptionsListPreMultiListFindServerExtension
+  | ExceptionsListPreExportServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

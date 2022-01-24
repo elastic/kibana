@@ -723,6 +723,18 @@ export class ExceptionListClient {
   }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreExport',
+        {
+          id,
+          listId,
+          namespaceType,
+        },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return exportExceptionListAndItems({
       id,
       listId,

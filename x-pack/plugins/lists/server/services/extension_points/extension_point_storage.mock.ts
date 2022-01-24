@@ -12,6 +12,7 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreExportServerExtension,
   ExceptionsListPreGetOneItemServerExtension,
   ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
@@ -34,6 +35,8 @@ export interface ExtensionPointStorageContextMock {
   exceptionPreSingleListFind: jest.Mocked<ExceptionsListPreSingleListFindServerExtension>;
   /** an exception list pre-find extension when searching a multiple lists */
   exceptionPreMultiListFind: jest.Mocked<ExceptionsListPreMultiListFindServerExtension>;
+  /** an exception list pre-export extension */
+  exceptionPreExport: jest.Mocked<ExceptionsListPreExportServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
 }
 
@@ -78,17 +81,24 @@ export const createExtensionPointStorageMock = (
     type: 'exceptionsListPreMultiListFind',
   };
 
+  const exceptionPreExport: ExtensionPointStorageContextMock['exceptionPreExport'] = {
+    callback: jest.fn(async ({ data }) => data),
+    type: 'exceptionsListPreExport',
+  };
+
   extensionPointStorage.add(exceptionPreCreate);
   extensionPointStorage.add(exceptionPreUpdate);
   extensionPointStorage.add(exceptionPreGetOne);
   extensionPointStorage.add(exceptionPreSingleListFind);
   extensionPointStorage.add(exceptionPreMultiListFind);
+  extensionPointStorage.add(exceptionPreExport);
 
   return {
     callbackContext: {
       request: httpServerMock.createKibanaRequest(),
     },
     exceptionPreCreate,
+    exceptionPreExport,
     exceptionPreGetOne,
     exceptionPreMultiListFind,
     exceptionPreSingleListFind,
