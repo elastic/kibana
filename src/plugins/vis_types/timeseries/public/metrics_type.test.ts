@@ -27,6 +27,9 @@ describe('metricsVisDefinition', () => {
       ).params;
       setDataStart({
         indexPatterns: {
+          async getDefault() {
+            return indexPattern1;
+          },
           async find(title: string) {
             if (title === 'pattern1') return [indexPattern1];
             if (title === 'pattern2') return [indexPattern2];
@@ -81,8 +84,36 @@ describe('metricsVisDefinition', () => {
         ],
       });
       expect(resolvedPatterns[0]).toBe(indexPattern1);
-      expect(resolvedPatterns[1]).toBe(indexPattern1);
+      expect(resolvedPatterns[1]).toBe(indexPattern2);
+      expect(resolvedPatterns[2]).toBe(indexPattern1);
+    });
+
+    it('should correctly resolve annotation index patterns along with series', async () => {
+      const resolvedPatterns = await metricsVisDefinition.getUsedIndexPattern!({
+        ...defaultParams,
+        index_pattern: { id: '1' },
+        series: [
+          {
+            ...defaultParams.series[0],
+            override_index_pattern: 1,
+            series_index_pattern: { id: '2' },
+          },
+        ],
+        annotations: [{ index_pattern: 'pattern1' }, { index_pattern: { id: '2' } }],
+      });
+      expect(resolvedPatterns[0]).toBe(indexPattern1);
+      expect(resolvedPatterns[1]).toBe(indexPattern2);
       expect(resolvedPatterns[2]).toBe(indexPattern2);
+      expect(resolvedPatterns[3]).toBe(indexPattern1);
+    });
+
+    it('should return default index pattern if none is specified', async () => {
+      const resolvedPatterns = await metricsVisDefinition.getUsedIndexPattern!({
+        ...defaultParams,
+        index_pattern: undefined,
+        series: [],
+      });
+      expect(resolvedPatterns[0]).toBe(indexPattern1);
     });
   });
 });

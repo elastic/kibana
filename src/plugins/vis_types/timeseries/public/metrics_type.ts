@@ -11,7 +11,10 @@ import uuid from 'uuid/v4';
 import { DataViewsContract, IndexPattern } from 'src/plugins/data_views/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
-import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
+import {
+  extractIndexPatternValues,
+  isStringTypeIndexPattern,
+} from '../common/index_patterns_utils';
 import { TSVB_DEFAULT_COLOR } from '../common/constants';
 import { toExpressionAst } from './to_ast';
 import {
@@ -23,7 +26,7 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
-import { IndexPatternValue, Series } from '../common/types';
+import type { IndexPatternValue, Panel } from '../common/types';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -64,27 +67,17 @@ async function resolveIndexPattern(
 
 async function getUsedIndexPatterns(params: VisParams): Promise<IndexPattern[]> {
   const { indexPatterns } = getDataStart();
-  const resolvedIndexPatterns: IndexPattern[] = [];
-  const baseIndexPattern = await resolveIndexPattern(params.index_pattern, indexPatterns);
-  if (baseIndexPattern) {
-    resolvedIndexPatterns.push(...baseIndexPattern);
-  }
-  await Promise.all(
-    (params.series as Series[]).map(async (series) => {
-      if (!series.override_index_pattern) return;
-      const indexPattern = await resolveIndexPattern(series.series_index_pattern, indexPatterns);
-      if (indexPattern) {
-        resolvedIndexPatterns.push(...indexPattern);
-      }
-    })
-  );
 
-  if (resolvedIndexPatterns.length === 0) {
-    const defaultIndex = await indexPatterns.getDefault();
-    if (defaultIndex) {
-      resolvedIndexPatterns.push(defaultIndex);
-    }
-  }
+  const defaultIndex = await indexPatterns.getDefault();
+  const resolvedIndexPatterns: IndexPattern[] = [];
+  const indexPatternValues = extractIndexPatternValues(params as Panel, defaultIndex?.id);
+  (
+    await Promise.all(
+      indexPatternValues.map((indexPatternValue) =>
+        resolveIndexPattern(indexPatternValue, indexPatterns)
+      )
+    )
+  ).forEach((patterns) => patterns && resolvedIndexPatterns.push(...patterns));
   return resolvedIndexPatterns;
 }
 
