@@ -29,6 +29,7 @@ export interface IRuleExecutionLogger {
 }
 
 export interface RuleExecutionContext {
+  executionId: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;
