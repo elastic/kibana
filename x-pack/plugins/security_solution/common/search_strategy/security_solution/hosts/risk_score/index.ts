@@ -11,13 +11,16 @@ import type {
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
-import { Inspect, Maybe, TimerangeInput } from '../../../common';
+import { Direction, Inspect, Maybe, TimerangeInput } from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   factoryQueryType?: FactoryQueryTypes;
   hostNames?: string[];
   timerange?: TimerangeInput;
+  onlyLatest?: boolean;
+  limit?: number;
+  sortOrder?: Direction.asc | Direction.desc;
 }
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
@@ -25,6 +28,7 @@ export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
 }
 
 export interface HostsRiskScore {
+  '@timestamp': string;
   host: {
     name: string;
   };
@@ -37,9 +41,9 @@ export interface HostsRiskScore {
 
 export interface RuleRisk {
   rule_name: string;
-  rule_risk: string;
+  rule_risk: number;
 }
 
-export const getHostRiskIndex = (spaceId: string): string => {
-  return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
+export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
+  return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };

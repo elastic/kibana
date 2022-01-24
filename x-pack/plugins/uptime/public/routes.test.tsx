@@ -38,7 +38,7 @@ describe('PageRouter', () => {
   ])('hides ui monitor management pages when feature flag is not enabled', (page, heading) => {
     const history = createMemoryHistory();
     history.push(page);
-    render(<PageRouter config={{ ui: { unsafe: { monitorManagement: { enabled: true } } } }} />, {
+    render(<PageRouter config={{ ui: { monitorManagement: { enabled: true } } }} />, {
       history,
     });
 

@@ -23,7 +23,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={false}
+          disableActions={false}
           entries={[getFormattedEntryMock()]}
           onDelete={jest.fn()}
           onEdit={jest.fn()}
@@ -38,7 +38,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={false}
+          disableActions={false}
           entries={[getFormattedEntryMock(), getFormattedEntryMock()]}
           onDelete={jest.fn()}
           onEdit={jest.fn()}
@@ -54,7 +54,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={false}
+          disableActions={false}
           entries={[getFormattedEntryMock()]}
           onDelete={jest.fn()}
           onEdit={mockOnEdit}
@@ -72,7 +72,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={false}
+          disableActions={false}
           entries={[getFormattedEntryMock()]}
           onDelete={mockOnDelete}
           onEdit={jest.fn()}
@@ -85,37 +85,36 @@ describe('ExceptionEntries', () => {
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
   });
 
-  test('it renders edit button disabled if "disableDelete" is "true"', () => {
+  test('it does not render edit button if "disableActions" is "true"', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={true}
+          disableActions={true}
           entries={[getFormattedEntryMock()]}
           onDelete={jest.fn()}
           onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
-    const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button').at(0);
+    const editBtns = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button');
 
-    expect(editBtn.prop('disabled')).toBeTruthy();
+    expect(editBtns).toHaveLength(0);
   });
 
-  test('it renders delete button in loading state if "disableDelete" is "true"', () => {
+  test('it does not render delete button if "disableActions" is "true"', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={true}
+          disableActions={true}
           entries={[getFormattedEntryMock()]}
           onDelete={jest.fn()}
           onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
-    const deleteBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
+    const deleteBtns = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
 
-    expect(deleteBtn.prop('disabled')).toBeTruthy();
-    expect(deleteBtn.find('.euiLoadingSpinner')).toBeTruthy();
+    expect(deleteBtns).toHaveLength(0);
   });
 
   test('it renders nested entry', () => {
@@ -126,7 +125,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={false}
+          disableActions={false}
           entries={[parentEntry, getFormattedEntryMock(true)]}
           onDelete={jest.fn()}
           onEdit={jest.fn()}
@@ -168,7 +167,7 @@ describe('ExceptionEntries', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
-          disableDelete={false}
+          disableActions={false}
           entries={[getFormattedEntryMock()]}
           onDelete={jest.fn()}
           onEdit={jest.fn()}
