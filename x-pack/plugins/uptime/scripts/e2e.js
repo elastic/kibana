@@ -69,7 +69,7 @@ function executeRunner() {
     );
   } else {
     childProcess.execSync(
-      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' `,
+      `node ../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}' --grep ${grep}`,
       {
         cwd: e2eDir,
         stdio: 'inherit',
