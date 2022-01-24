@@ -61,9 +61,10 @@ async function getApmPackageVersion(
 ) {
   if (fleetPluginStart && isPrereleaseVersion(kibanaVersion)) {
     try {
-      const latestApmPackage = await fleetPluginStart.fetchFindLatestPackage(
-        'apm'
-      );
+      const latestApmPackage =
+        await fleetPluginStart.packageService.asInternalUser.fetchFindLatestPackage(
+          'apm'
+        );
       return latestApmPackage.version;
     } catch (error) {
       return SUPPORTED_APM_PACKAGE_VERSION;

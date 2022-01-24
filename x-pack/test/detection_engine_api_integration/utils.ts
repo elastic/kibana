@@ -66,18 +66,10 @@ export const removeServerGeneratedProperties = (
 ): Partial<FullResponseSchema> => {
   const {
     /* eslint-disable @typescript-eslint/naming-convention */
+    id,
     created_at,
     updated_at,
-    id,
-    last_failure_at,
-    last_failure_message,
-    last_success_at,
-    last_success_message,
-    last_gap,
-    search_after_time_durations,
-    bulk_create_time_durations,
-    status,
-    status_date,
+    execution_summary,
     /* eslint-enable @typescript-eslint/naming-convention */
     ...removedProperties
   } = rule;
@@ -538,18 +530,18 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
 };
 
 /**
- * Remove all rules statuses from the .kibana index
+ * Remove all rules execution info saved objects from the .kibana index
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  * @param log The tooling logger
  */
-export const deleteAllRulesStatuses = async (es: Client, log: ToolingLog): Promise<void> => {
+export const deleteAllRuleExecutionInfo = async (es: Client, log: ToolingLog): Promise<void> => {
   return countDownES(
     async () => {
       return es.deleteByQuery(
         {
           index: '.kibana',
-          q: 'type:siem-detection-engine-rule-status',
+          q: 'type:siem-detection-engine-rule-execution-info',
           wait_for_completion: true,
           refresh: true,
           body: {},
@@ -557,7 +549,7 @@ export const deleteAllRulesStatuses = async (es: Client, log: ToolingLog): Promi
         { meta: true }
       );
     },
-    'deleteAllRulesStatuses',
+    'deleteAllRuleExecutionInfo',
     log
   );
 };
@@ -604,6 +596,7 @@ export const createLegacyRuleAction = async (
         },
       ],
     });
+
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
@@ -1368,9 +1361,13 @@ export const waitForRuleSuccessOrStatus = async (
             )}, status: ${JSON.stringify(response.status)}`
           );
         }
-        const rule = response.body;
 
-        if (rule?.status !== status) {
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        const rule = response.body;
+        const ruleStatus = rule?.execution_summary?.last_execution.status;
+        const ruleStatusDate = rule?.execution_summary?.last_execution.date;
+
+        if (ruleStatus !== status) {
           log.debug(
             `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
               response.body
@@ -1379,8 +1376,8 @@ export const waitForRuleSuccessOrStatus = async (
         }
         return (
           rule != null &&
-          rule.status === status &&
-          (afterDate ? new Date(rule.status_date) > afterDate : true)
+          ruleStatus === status &&
+          (afterDate ? new Date(ruleStatusDate) > afterDate : true)
         );
       } catch (e) {
         if ((e as Error).message.includes('got 503 "Service Unavailable"')) {
@@ -1832,72 +1829,6 @@ export const getOpenSignals = async (
  * Cluster stats URL. Replace this with any from kibana core if there is ever a constant there for this.
  */
 export const getStatsUrl = (): string => '/api/telemetry/v2/clusters/_stats';
-
-/**
- * Initial detection metrics initialized.
- */
-export const getInitialDetectionMetrics = (): DetectionMetrics => ({
-  ml_jobs: {
-    ml_job_usage: {
-      custom: {
-        enabled: 0,
-        disabled: 0,
-      },
-      elastic: {
-        enabled: 0,
-        disabled: 0,
-      },
-    },
-    ml_job_metrics: [],
-  },
-  detection_rules: {
-    detection_rule_detail: [],
-    detection_rule_usage: {
-      query: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      threshold: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      eql: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      machine_learning: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      threat_match: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      elastic_total: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      custom_total: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-    },
-  },
-});
 
 /**
  * Given a body this will return the detection metrics from it.

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
-import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { NotificationsStart, OverlayStart, ThemeServiceStart } from 'src/core/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { ViewMode } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
@@ -31,6 +31,7 @@ export class AddPanelAction implements Action<ActionContext> {
     private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>,
+    private readonly theme: ThemeServiceStart,
     private readonly reportUiCounter?: UsageCollectionStart['reportUiCounter']
   ) {}
 
@@ -63,6 +64,7 @@ export class AddPanelAction implements Action<ActionContext> {
       notifications: this.notifications,
       SavedObjectFinder: this.SavedObjectFinder,
       reportUiCounter: this.reportUiCounter,
+      theme: this.theme,
     });
   }
 }

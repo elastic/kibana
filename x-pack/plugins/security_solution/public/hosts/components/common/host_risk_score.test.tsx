@@ -13,7 +13,7 @@ import { HostRiskScore } from './host_risk_score';
 
 import { EuiHealth, EuiHealthProps } from '@elastic/eui';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

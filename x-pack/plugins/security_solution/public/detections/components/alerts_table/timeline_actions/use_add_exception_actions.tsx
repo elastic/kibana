@@ -35,25 +35,28 @@ export const useExceptionActions = ({
   const disabledAddException = !canUserCRUD || !hasIndexWrite;
 
   const exceptionActionItems = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="add-endpoint-exception-menu-item"
-        data-test-subj="add-endpoint-exception-menu-item"
-        disabled={disabledAddEndpointException}
-        onClick={handleEndpointExceptionModal}
-      >
-        {ACTION_ADD_ENDPOINT_EXCEPTION}
-      </EuiContextMenuItem>,
+    () =>
+      disabledAddException
+        ? []
+        : [
+            <EuiContextMenuItem
+              key="add-endpoint-exception-menu-item"
+              data-test-subj="add-endpoint-exception-menu-item"
+              disabled={disabledAddEndpointException}
+              onClick={handleEndpointExceptionModal}
+            >
+              {ACTION_ADD_ENDPOINT_EXCEPTION}
+            </EuiContextMenuItem>,
 
-      <EuiContextMenuItem
-        key="add-exception-menu-item"
-        data-test-subj="add-exception-menu-item"
-        disabled={disabledAddException}
-        onClick={handleDetectionExceptionModal}
-      >
-        {ACTION_ADD_EXCEPTION}
-      </EuiContextMenuItem>,
-    ],
+            <EuiContextMenuItem
+              key="add-exception-menu-item"
+              data-test-subj="add-exception-menu-item"
+              disabled={disabledAddException}
+              onClick={handleDetectionExceptionModal}
+            >
+              {ACTION_ADD_EXCEPTION}
+            </EuiContextMenuItem>,
+          ],
     [
       disabledAddEndpointException,
       disabledAddException,

@@ -24,7 +24,7 @@ export const setMonitor = async ({
 }: {
   monitor: SyntheticsMonitor;
   id?: string;
-}): Promise<void> => {
+}): Promise<SyntheticsMonitorSavedObject> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
@@ -58,4 +58,14 @@ export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
     ServiceLocationsApiResponseCodec
   );
   return locations;
+};
+
+export const runOnceMonitor = async ({
+  monitor,
+  id,
+}: {
+  monitor: SyntheticsMonitor;
+  id: string;
+}): Promise<{ errors: Array<{ error: Error }> }> => {
+  return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
 };
