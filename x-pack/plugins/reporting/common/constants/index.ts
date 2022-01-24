@@ -59,7 +59,7 @@ export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
 export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
-// Export Type Definitions
+// Re-export type definitions here for convenience.
 export * from './report_types';
 
 type ReportJobTypeDeclaration = typeof reportTypes;
