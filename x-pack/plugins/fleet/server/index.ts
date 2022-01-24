@@ -95,6 +95,7 @@ export const config: PluginConfigDescriptor = {
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
+      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
     }),
   }),
 };
