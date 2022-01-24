@@ -63,7 +63,6 @@ Elastic Security::
 For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
 Management::
-Display managed badge for transforms {kibana-pull}117679[#117679]
 Monitoring::
 Enterprise Search Stack Monitoring {kibana-pull}114303[#114303]
 Observability::
