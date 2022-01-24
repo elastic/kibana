@@ -34,7 +34,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
-    'get_services_from_metric_documents',
+    'get_services_from_error_and_metric_documents',
     {
       apm: {
         events: [ProcessorEvent.metric, ProcessorEvent.error],
