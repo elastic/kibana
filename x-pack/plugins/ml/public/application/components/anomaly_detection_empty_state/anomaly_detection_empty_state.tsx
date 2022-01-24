@@ -31,10 +31,10 @@ export const AnomalyDetectionEmptyState: FC = () => {
   return (
     <EuiEmptyPrompt
       layout="horizontal"
-      hasBorder={true}
+      hasBorder={false}
       hasShadow={false}
       icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
-      color="plain"
+      color="subdued"
       title={
         <h2>
           <FormattedMessage

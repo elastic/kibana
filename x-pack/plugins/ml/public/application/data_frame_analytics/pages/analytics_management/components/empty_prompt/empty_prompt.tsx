@@ -27,7 +27,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
   return (
     <EuiEmptyPrompt
       layout="horizontal"
-      hasBorder={true}
+      hasBorder={false}
       hasShadow={false}
       icon={
         <EuiImage
@@ -38,7 +38,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           })}
         />
       }
-      color="plain"
+      color="subdued"
       title={
         <h2>
           <FormattedMessage
