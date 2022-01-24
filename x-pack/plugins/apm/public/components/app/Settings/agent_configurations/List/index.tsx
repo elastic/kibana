@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
@@ -26,7 +26,7 @@ import { useTheme } from '../../../../../hooks/use_theme';
 import { LoadingStatePrompt } from '../../../../shared/loading_state_prompt';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
-import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 type Config =
   APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];

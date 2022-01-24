@@ -13,7 +13,7 @@ import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 
 export type AnomalyDetectionApiResponse =

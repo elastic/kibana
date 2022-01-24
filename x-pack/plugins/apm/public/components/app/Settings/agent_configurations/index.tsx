@@ -20,7 +20,7 @@ import React from 'react';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { AgentConfigurationList } from './List';
+import { AgentConfigurationList } from './list';
 
 const INITIAL_DATA = { configurations: [] };
 

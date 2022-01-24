@@ -14,7 +14,7 @@ import {
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';

@@ -20,10 +20,10 @@ import { CustomLink } from '../../../../../common/custom_link/custom_link_types'
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { LicensePrompt } from '../../../shared/license_prompt';
-import { CreateCustomLinkButton } from './CreateCustomLinkButton';
+import { CreateCustomLinkButton } from './create_custom_link_button';
 import { CreateEditCustomLinkFlyout } from './create_edit_custom_link_flyout';
 import { CustomLinkTable } from './custom_link_table';
-import { EmptyPrompt } from './EmptyPrompt';
+import { EmptyPrompt } from './empty_prompt';
 
 export function CustomLinkOverview() {
   const license = useLicenseContext();

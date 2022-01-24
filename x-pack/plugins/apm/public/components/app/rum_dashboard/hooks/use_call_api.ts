@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { callApi } from '../../../../services/rest/callApi';
+import { callApi } from '../../../../services/rest/call_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FetchOptions } from '../../../../../common/fetch_options';
 

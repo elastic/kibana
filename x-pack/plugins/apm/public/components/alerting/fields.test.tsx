@@ -8,7 +8,7 @@
 import React from 'react';
 import { ServiceField, TransactionTypeField } from './fields';
 import { render } from '@testing-library/react';
-import { expectTextsInDocument } from '../../utils/testHelpers';
+import { expectTextsInDocument } from '../../utils/test_helpers';
 
 describe('alerting fields', () => {
   describe('Service Field', () => {

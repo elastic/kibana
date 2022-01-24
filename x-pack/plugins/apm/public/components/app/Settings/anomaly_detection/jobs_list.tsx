@@ -26,7 +26,7 @@ import { getEnvironmentLabel } from '../../../../../common/environment_filter_va
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useMlManageJobsHref } from '../../../../hooks/use_ml_manage_jobs_href';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { MLExplorerLink } from '../../../shared/links/machine_learning_links/mlexplorer_link';
 import { MLManageJobsLink } from '../../../shared/links/machine_learning_links/mlmanage_jobs_link';
 import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';

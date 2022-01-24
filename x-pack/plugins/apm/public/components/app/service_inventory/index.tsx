@@ -18,7 +18,7 @@ import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/publ
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';

@@ -17,7 +17,7 @@ import { asInteger } from '../../../../../common/utils/formatters';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';

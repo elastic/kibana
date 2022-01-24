@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { callApmApi } from '../services/rest/createCallApmApi';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export async function hasFleetApmIntegrations() {
   try {

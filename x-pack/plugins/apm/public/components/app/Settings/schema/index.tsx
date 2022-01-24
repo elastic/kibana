@@ -9,14 +9,14 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import moment from 'moment';
-import { useLocalStorage } from '../../../../hooks/useLocalStorage';
+import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { SchemaOverview } from './schema_overview';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   callApmApi,
   APIReturnType,
-} from '../../../../services/rest/createCallApmApi';
+} from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type FleetMigrationCheckResponse =

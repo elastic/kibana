@@ -14,7 +14,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import {

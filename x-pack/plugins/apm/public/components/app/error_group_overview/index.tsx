@@ -21,10 +21,10 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
-import { ErrorDistribution } from '../error_group_details/Distribution';
+import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
 
 type ErrorGroupMainStatistics =

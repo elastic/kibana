@@ -26,7 +26,7 @@ import {
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getAlertAnnotations } from './get_alert_annotations';
 
 type Alert = ValuesType<

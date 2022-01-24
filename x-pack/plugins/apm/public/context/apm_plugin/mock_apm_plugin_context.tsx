@@ -16,7 +16,7 @@ import { createObservabilityRuleTypeRegistryMock } from '../../../../observabili
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { createCallApmApi } from '../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { MlLocatorDefinition } from '../../../../ml/public';
 

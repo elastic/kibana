@@ -23,7 +23,7 @@ import semverLt from 'semver/functions/lt';
 import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../../../common/fleet';
 import { PackagePolicy } from '../../../../../../fleet/common/types';
 import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
-import rocketLaunchGraphic from './blog-rocket-720x420.png';
+import rocketLaunchGraphic from './blog_rocket_720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';
 import { UpgradeAvailableCard } from './migrated/upgrade_available_card';
 import { SuccessfulMigrationCard } from './migrated/successful_migration_card';

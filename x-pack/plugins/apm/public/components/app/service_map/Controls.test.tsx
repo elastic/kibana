@@ -12,8 +12,8 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { Controls } from './Controls';
-import { CytoscapeContext } from './Cytoscape';
+import { Controls } from './controls';
+import { CytoscapeContext } from './cytoscape';
 
 const cy = cytoscape({
   elements: [{ classes: 'primary', data: { id: 'test node' } }],

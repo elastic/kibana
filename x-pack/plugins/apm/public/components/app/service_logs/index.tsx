@@ -13,7 +13,7 @@ import moment from 'moment';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import {
   CONTAINER_ID,

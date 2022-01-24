@@ -8,7 +8,7 @@
 import { composeStories } from '@storybook/testing-react';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { disableConsoleWarning } from '../../../../../utils/testHelpers';
+import { disableConsoleWarning } from '../../../../../utils/test_helpers';
 import * as stories from './waterfall_container.stories';
 
 const { Example } = composeStories(stories);

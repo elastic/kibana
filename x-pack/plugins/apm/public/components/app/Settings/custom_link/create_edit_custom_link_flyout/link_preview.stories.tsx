@@ -7,12 +7,12 @@
 
 import React, { ComponentProps } from 'react';
 import { CoreStart } from 'kibana/public';
-import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { LinkPreview } from './link_preview';
 
 export default {
   title:
-    'app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
+    'app/settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
   component: LinkPreview,
 };
 

@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ApiKey } from '../../../../../../security/common/model';
 
 interface Props {

@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { mountWithTheme } from '../../../utils/testHelpers';
+import { mountWithTheme } from '../../../utils/test_helpers';
 import { CauseStacktrace } from './cause_stacktrace';
 
 describe('CauseStacktrace', () => {

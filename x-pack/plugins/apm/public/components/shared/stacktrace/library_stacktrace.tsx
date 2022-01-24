@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { Stackframe as StackframeComponent } from './Stackframe';
+import { Stackframe as StackframeComponent } from './stackframe';
 
 const LibraryStacktraceAccordion = euiStyled(EuiAccordion)`
   margin: ${({ theme }) => theme.eui.euiSizeXS} 0;

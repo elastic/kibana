@@ -20,7 +20,7 @@ import {
 } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { UxUIFilters } from '../../../typings/ui_filters';
-import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
+import { useDeepObjectIdentity } from '../../hooks/use_deep_object_identity';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { UrlParams } from './types';

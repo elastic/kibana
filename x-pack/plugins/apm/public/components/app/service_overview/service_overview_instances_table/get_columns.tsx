@@ -24,7 +24,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/links/apm/service_node_metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';

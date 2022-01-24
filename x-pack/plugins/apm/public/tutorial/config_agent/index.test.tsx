@@ -10,7 +10,7 @@ import React from 'react';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../utils/testHelpers';
+} from '../../utils/test_helpers';
 import TutorialConfigAgent from './';
 
 const policyElasticAgentOnCloudAgent = {

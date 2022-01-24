@@ -12,7 +12,7 @@ import { CoreStart } from '../../../../../../../src/core/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
-import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import {
   EnvironmentField,
   ServiceField,
