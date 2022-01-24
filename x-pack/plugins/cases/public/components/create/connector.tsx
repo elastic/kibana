@@ -64,6 +64,7 @@ const ConnectorFields = ({
     />
   );
 };
+ConnectorFields.displayName = 'ConnectorFields';
 
 const ConnectorComponent: React.FC<Props> = ({
   connectors,

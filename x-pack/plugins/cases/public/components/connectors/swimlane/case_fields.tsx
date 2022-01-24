@@ -43,6 +43,7 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
     </>
   );
 };
+SwimlaneComponent.displayName = 'Swimlane';
 
 // eslint-disable-next-line import/no-default-export
 export { SwimlaneComponent as default };
