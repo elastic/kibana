@@ -36,8 +36,8 @@ export interface HostRiskScoreOverTimeProps {
   to: string;
 }
 
-const RISKY_TRESHOULD = 70;
-const DEFAULT_CHART_HEIGH = 250;
+const RISKY_THRESHOLD = 70;
+const DEFAULT_CHART_HEIGHT = 250;
 const QUERY_ID = HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME;
 
 const StyledEuiText = styled(EuiText)`
@@ -107,7 +107,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
 
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
-            <div style={{ height: DEFAULT_CHART_HEIGH }}>
+            <div style={{ height: DEFAULT_CHART_HEIGHT }}>
               {hostRisk?.loading ? (
                 <LoadingChart size="l" data-test-subj="HostRiskScoreOverTime-loading" />
               ) : (
@@ -163,8 +163,8 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                     domainType={AnnotationDomainType.YDomain}
                     dataValues={[
                       {
-                        dataValue: RISKY_TRESHOULD,
-                        details: RISKY_TRESHOULD.toString(),
+                        dataValue: RISKY_THRESHOLD,
+                        details: `${RISKY_THRESHOLD}`,
                         header: i18n.HOST_RISK_THRESHOLD,
                       },
                     ]}

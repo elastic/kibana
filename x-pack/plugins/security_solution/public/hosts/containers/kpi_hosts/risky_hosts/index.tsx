@@ -34,7 +34,7 @@ type GetHostsRiskScoreProps = RiskyHostsScoreRequestOptions & {
   signal: AbortSignal;
 };
 
-export const getRiskyHosts = ({
+const getRiskyHosts = ({
   data,
   defaultIndex,
   timerange,
@@ -54,7 +54,7 @@ export const getRiskyHosts = ({
     }
   );
 
-export const getRiskyHostsComplete = (
+const getRiskyHostsComplete = (
   props: GetHostsRiskScoreProps
 ): Observable<HostsKpiRiskyHostsStrategyResponse> => {
   return getRiskyHosts(props).pipe(
@@ -75,7 +75,7 @@ interface UseRiskyHostProps {
   skip?: boolean;
 }
 
-export const useRiskyHosts = ({ filterQuery, from, to, skip }: UseRiskyHostProps) => {
+export const useRiskScoreKpi = ({ filterQuery, from, to, skip }: UseRiskyHostProps) => {
   const { error, result: response, start, loading } = useRiskyHostsComplete();
   const { data, spaces } = useKibana().services;
   const isModuleDisabled = error && isIndexNotFoundError(error);

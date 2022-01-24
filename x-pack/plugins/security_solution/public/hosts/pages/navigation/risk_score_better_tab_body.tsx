@@ -11,7 +11,7 @@ import { useRiskScoreBetter } from '../../containers/risk_score_better';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { RiskScoreBetterTable } from '../../components/risk_score_better_table';
-import { useRiskyHosts } from '../../containers/kpi_hosts/risky_hosts';
+import { useRiskScoreKpi } from '../../containers/kpi_hosts/risky_hosts';
 
 const RiskScoreBetterTableManage = manageQuery(RiskScoreBetterTable);
 
@@ -35,11 +35,12 @@ export const RiskScoreBetterQueryTabBody = ({
       type,
     });
 
-  const { response } = useRiskyHosts({
+  const { response } = useRiskScoreKpi({
     filterQuery,
     from: startDate,
     to: endDate,
   });
+  console.log('response', { filterQuery, response });
 
   return (
     <RiskScoreBetterTableManage

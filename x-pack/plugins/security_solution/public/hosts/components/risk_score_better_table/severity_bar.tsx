@@ -13,7 +13,7 @@ import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { HOST_RISK_SEVERITY_COLOUR } from '../common/host_risk_score';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
-  &.risk-score-status-bar {
+  &.risk-score-severity-bar {
     border: none;
     border-radius: 0;
     &:after {
@@ -47,6 +47,11 @@ export const SeverityBar: React.FC<{
     [severity]
   );
   return (
-    <StyledEuiColorPaletteDisplay className="risk-score-status-bar" size="s" palette={palette} />
+    <StyledEuiColorPaletteDisplay
+      className="risk-score-severity-bar"
+      data-test-subj="risk-score-severity-bar"
+      size="s"
+      palette={palette}
+    />
   );
 };

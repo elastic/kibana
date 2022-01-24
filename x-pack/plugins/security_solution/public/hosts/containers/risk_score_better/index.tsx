@@ -82,16 +82,14 @@ export const useRiskScoreBetter = ({
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setRiskScoreBetterRequest((prevRequest) => {
-        if (!prevRequest) {
-          return prevRequest;
-        }
-
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
+      setRiskScoreBetterRequest((prevRequest) =>
+        !prevRequest
+          ? prevRequest
+          : {
+              ...prevRequest,
+              pagination: generateTablePaginationOptions(newActivePage, limit),
+            }
+      );
     },
     [limit]
   );

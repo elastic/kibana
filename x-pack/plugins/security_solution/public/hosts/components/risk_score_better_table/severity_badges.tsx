@@ -14,7 +14,11 @@ import { DefaultDraggable } from '../../../common/components/draggables';
 export const SeverityBadges: React.FC<{
   severity: { [k in HostRiskSeverity]: number };
 }> = ({ severity }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    gutterSize="m"
+    data-test-subj="risk-score-severity-badges"
+  >
     <EuiFlexItem grow={false} />
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="m">
