@@ -63,14 +63,20 @@ function getFieldsByCategory({
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
     default:
+      let fields: EventSummaryField[] = [];
+
       // If no primary category matches or hasn't been defined on purpose (e.g. in order to follow the source event)
       // resolve more fields based on the other event categories.
       if (allEventCategories?.includes(EventCategory.FILE)) {
-        return getFieldsByCategory({ primaryEventCategory: EventCategory.FILE });
-      } else if (allEventCategories?.includes(EventCategory.PROCESS)) {
-        return getFieldsByCategory({ primaryEventCategory: EventCategory.PROCESS });
+        fields = fields.concat(getFieldsByCategory({ primaryEventCategory: EventCategory.FILE }));
       }
-      return [];
+
+      if (allEventCategories?.includes(EventCategory.PROCESS)) {
+        fields = fields.concat(
+          getFieldsByCategory({ primaryEventCategory: EventCategory.PROCESS })
+        );
+      }
+      return fields;
   }
 }
 
