@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { GeoJsonPreview } from './geojson_importer';
-export { GeoJsonImporter, GEOJSON_FILE_TYPES } from './geojson_importer';
+export { GeoUploadForm } from './geo_upload_form';
+export type { OnFileSelectParameters } from './geo_file_picker';

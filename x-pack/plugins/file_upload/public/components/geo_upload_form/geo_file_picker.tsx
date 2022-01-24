@@ -10,16 +10,12 @@ import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '../../../common/constants';
 import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
-import { validateFile } from '../../importer';
-import {
-  GeoJsonImporter,
-  GeoJsonPreview,
-  GEOJSON_FILE_TYPES,
-} from '../../importer/geojson_importer';
+import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
+import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo'; 
 
-export type OnFileSelectParameters = GeoJsonPreview & {
+export type OnFileSelectParameters = GeoFilePreview & {
   indexName: string;
-  importer: GeoJsonImporter;
+  importer: GeoFileImporter;
 };
 
 interface Props {
@@ -33,7 +29,7 @@ interface State {
   previewSummary: string | null;
 }
 
-export class GeoJsonFilePicker extends Component<Props, State> {
+export class GeoFilePicker extends Component<Props, State> {
   private _isMounted = false;
 
   state: State = {
@@ -67,16 +63,15 @@ export class GeoJsonFilePicker extends Component<Props, State> {
   async _loadFilePreview(file: File) {
     this.setState({ isLoadingPreview: true });
 
-    let importer: GeoJsonImporter | null = null;
+    let importer: GeoFileImporter | null = null;
     let previewError: string | null = null;
-    let preview: GeoJsonPreview | null = null;
+    let preview: GeoFilePreview | null = null;
     try {
-      validateFile(file, GEOJSON_FILE_TYPES);
-      importer = new GeoJsonImporter(file);
+      importer = geoImporterFactory(file);
       preview = await importer.previewFile(10000, MB * 3);
       if (preview.features.length === 0) {
-        previewError = i18n.translate('xpack.fileUpload.geojsonFilePicker.noFeaturesDetected', {
-          defaultMessage: 'No GeoJson features found in selected file.',
+        previewError = i18n.translate('xpack.fileUpload.geoFilePicker.noFeaturesDetected', {
+          defaultMessage: 'No features found in selected file.',
         });
       }
     } catch (error) {
@@ -92,7 +87,7 @@ export class GeoJsonFilePicker extends Component<Props, State> {
       isLoadingPreview: false,
       previewSummary:
         !previewError && preview
-          ? i18n.translate('xpack.fileUpload.geojsonFilePicker.previewSummary', {
+          ? i18n.translate('xpack.fileUpload.geoFilePicker.previewSummary', {
               defaultMessage: 'Previewing {numFeatures} features, {previewCoverage}% of file.',
               values: {
                 numFeatures: preview.features.length,
@@ -116,17 +111,17 @@ export class GeoJsonFilePicker extends Component<Props, State> {
       this.state.previewSummary
     ) : (
       <span>
-        {i18n.translate('xpack.fileUpload.geojsonFilePicker.acceptedFormats', {
+        {i18n.translate('xpack.fileUpload.geoFilePicker.acceptedFormats', {
           defaultMessage: 'Formats accepted: {fileTypes}',
-          values: { fileTypes: GEOJSON_FILE_TYPES.join(', ') },
+          values: { fileTypes: GEO_FILE_TYPES.join(', ') },
         })}
         <br />
-        {i18n.translate('xpack.fileUpload.geojsonFilePicker.maxSize', {
+        {i18n.translate('xpack.fileUpload.geoFilePicker.maxSize', {
           defaultMessage: 'Max size: {maxFileSize}',
           values: { maxFileSize: getMaxBytesFormatted() },
         })}
         <br />
-        {i18n.translate('xpack.fileUpload.geojsonFilePicker.acceptedCoordinateSystem', {
+        {i18n.translate('xpack.fileUpload.geoFilePicker.acceptedCoordinateSystem', {
           defaultMessage: 'Coordinates must be in EPSG:4326 coordinate reference system.',
         })}
       </span>
@@ -141,11 +136,11 @@ export class GeoJsonFilePicker extends Component<Props, State> {
         helpText={this._renderHelpText()}
       >
         <EuiFilePicker
-          initialPromptText={i18n.translate('xpack.fileUpload.geojsonFilePicker.filePicker', {
+          initialPromptText={i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
             defaultMessage: 'Select or drag and drop a file',
           })}
           onChange={this._onFileSelect}
-          accept={GEOJSON_FILE_TYPES.join(',')}
+          accept={GEO_FILE_TYPES.join(',')}
           isLoading={this.state.isLoadingPreview}
         />
       </EuiFormRow>

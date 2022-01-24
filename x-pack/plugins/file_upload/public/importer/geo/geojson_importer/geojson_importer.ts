@@ -9,25 +9,19 @@ import { Feature, Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
-import { CreateDocsResponse, ImportResults } from '../types';
-import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { GeoFileImporter, GeoFilePreview } from '../types';
+import { CreateDocsResponse, ImportResults } from '../../types';
+import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../../importer';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { MB } from '../../../common/constants';
-import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
+import { MB } from '../../../../common/constants';
+import type { ImportDoc, ImportFailure, ImportResponse } from '../../../../common/types';
 
 const BLOCK_SIZE_MB = 5 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
-export interface GeoJsonPreview {
-  features: Feature[];
-  hasPoints: boolean;
-  hasShapes: boolean;
-  previewCoverage: number;
-}
-
-export class GeoJsonImporter extends Importer {
+export class GeoJsonImporter extends Importer implements GeoFileImporter {
   private _file: File;
   private _isActive = true;
   private _iterator?: Iterator<unknown>;
@@ -54,7 +48,7 @@ export class GeoJsonImporter extends Importer {
     this._isActive = false;
   }
 
-  public async previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoJsonPreview> {
+  public async previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview> {
     await this._readUntil(rowLimit, sizeLimit);
     return {
       features: [...this._features],

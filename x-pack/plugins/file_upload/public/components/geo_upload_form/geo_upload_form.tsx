@@ -8,7 +8,7 @@
 import React, { ChangeEvent, Component } from 'react';
 import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GeoJsonFilePicker, OnFileSelectParameters } from './geojson_file_picker';
+import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { IndexNameForm } from './index_name_form';
 import { validateIndexName } from '../../validate_index_name';
@@ -41,7 +41,7 @@ interface State {
   isPointsOnly: boolean;
 }
 
-export class GeoJsonUploadForm extends Component<Props, State> {
+export class GeoUploadForm extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
     hasFile: false,
@@ -116,7 +116,7 @@ export class GeoJsonUploadForm extends Component<Props, State> {
   render() {
     return (
       <EuiForm>
-        <GeoJsonFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
+        <GeoFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         {this._renderGeoFieldTypeSelect()}
         {this.state.hasFile ? (
           <IndexNameForm

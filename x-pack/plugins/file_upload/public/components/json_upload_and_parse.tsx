@@ -9,12 +9,12 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
 import { getIndexPatternService } from '../kibana_services';
-import { GeoJsonUploadForm, OnFileSelectParameters } from './geojson_upload_form';
+import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
-import { GeoJsonImporter } from '../importer/geojson_importer';
+import { GeoFileImporter } from '../importer/geo';
 import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
 
@@ -43,7 +43,7 @@ interface State {
 }
 
 export class JsonUploadAndParse extends Component<FileUploadComponentProps, State> {
-  private _geojsonImporter?: GeoJsonImporter;
+  private _geoFileImporter?: GeoFileImporter;
   private _isMounted = false;
 
   state: State = {
@@ -60,9 +60,9 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._geojsonImporter) {
-      this._geojsonImporter.destroy();
-      this._geojsonImporter = undefined;
+    if (this._geoFileImporter) {
+      this._geoFileImporter.destroy();
+      this._geoFileImporter = undefined;
     }
   }
 
@@ -73,7 +73,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   }
 
   _import = async () => {
-    if (!this._geojsonImporter) {
+    if (!this._geoFileImporter) {
       return;
     }
 
@@ -121,8 +121,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       }),
       phase: PHASE.IMPORT,
     });
-    this._geojsonImporter.setGeoFieldType(this.state.geoFieldType);
-    const initializeImportResp = await this._geojsonImporter.initializeImport(
+    this._geoFileImporter.setGeoFieldType(this.state.geoFieldType);
+    const initializeImportResp = await this._geoFileImporter.initializeImport(
       this.state.indexName,
       settings,
       mappings,
@@ -146,7 +146,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     this.setState({
       importStatus: getWritingToIndexMsg(0),
     });
-    const importResults = await this._geojsonImporter.import(
+    const importResults = await this._geoFileImporter.import(
       initializeImportResp.id,
       this.state.indexName,
       initializeImportResp.pipelineId,
@@ -242,7 +242,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   };
 
   _onFileSelect = ({ features, importer, indexName, previewCoverage }: OnFileSelectParameters) => {
-    this._geojsonImporter = importer;
+    this._geoFileImporter = importer;
 
     this.props.onFileSelect(
       {
@@ -255,9 +255,9 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   };
 
   _onFileClear = () => {
-    if (this._geojsonImporter) {
-      this._geojsonImporter.destroy();
-      this._geojsonImporter = undefined;
+    if (this._geoFileImporter) {
+      this._geoFileImporter.destroy();
+      this._geoFileImporter = undefined;
     }
 
     this.props.onFileClear();
@@ -305,7 +305,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     }
 
     return (
-      <GeoJsonUploadForm
+      <GeoUploadForm
         geoFieldType={this.state.geoFieldType}
         indexName={this.state.indexName}
         indexNameError={this.state.indexNameError}
