@@ -21,6 +21,8 @@ const mockClient = {
   security: {
     changePassword: jest.fn(),
     getUser: jest.fn(),
+    putRole: jest.fn(),
+    putUser: jest.fn(),
   },
 };
 Client.mockImplementation(() => mockClient);

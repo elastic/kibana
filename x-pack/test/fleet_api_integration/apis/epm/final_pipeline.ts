@@ -197,12 +197,17 @@ export default function (providerContext: FtrProviderContext) {
     for (const scenario of scenarios) {
       it(`Should write the correct event.agent_id_status for ${scenario.name}`, async () => {
         // Create an API key
-        const { body: apiKeyRes } = await es.security.createApiKey({
-          body: {
-            name: `test api key`,
-            ...(scenario.apiKey || {}),
+        const { body: apiKeyRes } = await es.security.createApiKey(
+          {
+            body: {
+              name: `test api key`,
+              ...(scenario.apiKey || {}),
+            },
           },
-        });
+          {
+            headers: { 'es-security-runas-user': 'elastic' }, // run as elastic suer
+          }
+        );
 
         const res = await indexUsingApiKey(
           {
