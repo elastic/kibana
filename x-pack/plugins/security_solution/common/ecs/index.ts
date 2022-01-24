@@ -37,7 +37,6 @@ import { Target } from './target_type';
 export interface Ecs {
   _id: string;
   _index?: string;
-  '@timestamp'?: string[];
   agent?: AgentEcs;
   auditd?: AuditdEcs;
   destination?: DestinationEcs;

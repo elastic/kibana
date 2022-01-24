@@ -121,18 +121,9 @@ export const updateAlertStatusAction = async ({
 export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   if (Array.isArray(ecs)) {
     const timestamps = ecs.reduce<number[]>((acc, item) => {
-      const addedTimestamp = item.timestamp;
-      const ecsTimestamp = item['@timestamp'] && item['@timestamp'][0];
-      if (addedTimestamp != null) {
-        const dateTimestamp = new Date(addedTimestamp);
-        if (!acc.includes(dateTimestamp.valueOf())) {
-          return [...acc, dateTimestamp.valueOf()];
-        }
-      } else if (ecsTimestamp != null) {
-        const dateTimestamp = new Date(ecsTimestamp);
-        if (!acc.includes(dateTimestamp.valueOf())) {
-          return [...acc, dateTimestamp.valueOf()];
-        }
+      const dateTimestamp = new Date(item.timestamp ?? '');
+      if (!acc.includes(dateTimestamp.valueOf())) {
+        return [...acc, dateTimestamp.valueOf()];
       }
       return acc;
     }, []);
@@ -146,13 +137,10 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   const elapsedTimeRule = moment.duration(
     moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-1d'))
   );
-  const addedTimestamp = ecsData.timestamp;
-  const ecsTimestamp = ecsData['@timestamp'] && ecsData['@timestamp'][0];
-  const timestampToUse = ecsTimestamp ? ecsTimestamp : addedTimestamp;
-  const from = moment(timestampToUse ?? new Date())
+  const from = moment(ecsData.timestamp ?? new Date())
     .subtract(elapsedTimeRule)
     .toISOString();
-  const to = moment(timestampToUse ?? new Date()).toISOString();
+  const to = moment(ecsData.timestamp ?? new Date()).toISOString();
 
   return { to, from };
 };
