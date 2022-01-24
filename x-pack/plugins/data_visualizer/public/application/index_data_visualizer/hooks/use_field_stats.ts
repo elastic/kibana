@@ -18,7 +18,7 @@ import type {
   Field,
 } from '../../../../common/types/field_stats';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import type { FieldRequestConfig } from '../../../../common';
+import type { FieldRequestConfig } from '../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import {
   buildBaseFilterCriteria,

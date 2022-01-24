@@ -48,7 +48,8 @@ export function normalizeNodeShards(masterNode: string) {
         [node.key]: {
           shardCount: node.doc_count,
           indexCount: node.index_count.value,
-          name: node.node_names.buckets[0].key,
+          // this field is always missing, problem with package?  elasticsearch.node.name ECS field doesn't exist
+          name: node.node_names.buckets[0]?.key || 'NO NAME',
           node_ids: nodeIds,
           type: calculateNodeType(_node, masterNode), // put the "star" icon on the node link in the shard allocator
         },
