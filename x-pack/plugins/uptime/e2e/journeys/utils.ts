@@ -30,6 +30,6 @@ export const byTestId = (testId: string) => {
 };
 
 export const assertText = async ({ page, text }: { page: Page; text: string }) => {
-  await page.waitForSelector(`text=${text}`);
+  await page.waitForSelector(`text=${text}`, { timeout: 60 * 1000 });
   expect(await page.$(`text=${text}`)).toBeTruthy();
 };
