@@ -767,13 +767,16 @@ export default function ({
           // We can not rely on prefixToAdd here, because it adds a comma at the beginning of the new token
           // Since we have access to the position of the previous token here, this could be a good place to insert a comma manually
           context.prefixToAdd = '';
-          editor.insert(
-            {
-              column: position.column + value.length,
-              lineNumber: position.lineNumber,
-            },
-            ', '
-          );
+          // Insert comma only when user moves to the next
+          if (context.textBoxPosition && position.lineNumber < context.textBoxPosition.lineNumber) {
+            editor.insert(
+              {
+                column: position.column + value.length,
+                lineNumber: position.lineNumber,
+              },
+              ', '
+            );
+          }
         }
     }
 
