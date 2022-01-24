@@ -148,7 +148,7 @@ export class CsvGenerator {
         fields: searchSource.getField('fields'),
         fieldsFromSource: searchSource.getField('fieldsFromSource'),
       };
-      const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
+      const fieldSource = fieldValues.fields ? 'fields' : 'fieldsFromSource';
       this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
 
       const fields = fieldValues[fieldSource];

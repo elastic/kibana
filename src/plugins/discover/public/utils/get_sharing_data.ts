@@ -9,11 +9,34 @@
 import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { Filter, ISearchSource, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import type {
+  Filter,
+  ISearchSource,
+  SearchSourceFields,
+  SerializedSearchSourceFields,
+} from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../application/main/services/discover_state';
+
+// Function to check if the field name values can be used as the header row
+function isPlainStringArray(fields: unknown): fields is string[] {
+  const temp = fields as string[];
+  if (!Array.isArray(temp) || !temp.length || temp.length === 0) {
+    return false;
+  }
+
+  let allPlainStrings = true;
+  if (Array.isArray(fields)) {
+    fields.forEach((field) => {
+      if (typeof field !== 'string' || field === '*' || field === '_source') {
+        allPlainStrings = false;
+      }
+    });
+  }
+  return allPlainStrings;
+}
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -70,6 +93,23 @@ export async function getSharingData(
       } else {
         const filter = timeFilter || existingFilter;
         searchSource.setField('filter', filter);
+      }
+
+      /*
+       * For downstream querying performance, the searchSource object must have fields set.
+       * Otherwise, the requests will ask for all fields, even if only a few are really needed.
+       * Discover does not set fields, since having all fields is needed for the UI.
+       */
+      // 1. Inspect the searchsource to find how fields are configured (fields API or "raw data")
+      const fieldConfigs: Pick<SearchSourceFields, 'fields' | 'fieldsFromSource'> = {
+        fields: searchSource.getField('fields'),
+        fieldsFromSource: searchSource.getField('fieldsFromSource'),
+      };
+      const fieldsConfig = fieldConfigs.fields ? 'fields' : 'fieldsFromSource';
+
+      // 2. explicitly set the fields into the searchsource object
+      if (fieldsConfig === 'fields' && isPlainStringArray(columns)) {
+        searchSource.setField('fields', columns);
       }
 
       return searchSource.getSerializedFields(true);
