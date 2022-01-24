@@ -21,10 +21,10 @@ export function getServices(core: CoreStart): Services {
       try {
         const response = await core.http.get<{ results: any[] }>(`${TOPN_ROUTE_PATH}/${type}`, {
           query: {
-            index: 'profiling-events',
-            projectID: 12345,
-            timeFrom: 1641981643,
-            timeTo: 1641988945,
+            index: 'profiling-events-test2',
+            projectID: 5,
+            timeFrom: 1642672391,
+            timeTo: 1642758791,
           },
         });
         return response;
@@ -36,9 +36,17 @@ export function getServices(core: CoreStart): Services {
     fetchFlamechart: async (seconds: string) => {
       try {
         const response = await core.http.get<{ results: any[] }>(
-          `${FLAMECHART_ROUTE_PATH}/canvas/${seconds}`
+          `${FLAMECHART_ROUTE_PATH}/canvas`,
+          {
+            query: {
+              index: 'profiling-events-test2',
+              projectID: 5,
+              timeFrom: 1642672391,
+              timeTo: 1642758791,
+            },
+          }
         );
-        return response.results;
+        return response;
       } catch (e) {
         return e;
       }
