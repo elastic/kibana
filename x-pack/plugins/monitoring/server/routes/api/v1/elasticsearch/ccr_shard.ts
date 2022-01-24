@@ -13,9 +13,10 @@ import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import { LegacyRequest } from '../../../../types';
+import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;
@@ -98,27 +99,33 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
       },
     },
     async handler(req: LegacyRequest) {
-      const config = server.config();
       const index = req.params.index;
       const shardId = req.params.shardId;
-      const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const moduleType = 'elasticsearch';
+      const dataset = 'ccr';
+      const esIndexPattern = getNewIndexPatterns({
+        config: Globals.app.config,
+        ccs: req.payload.ccs,
+        moduleType,
+        dataset,
+      });
 
       const filters = [
         {
           bool: {
             should: [
+              { term: { 'data_stream.dataset': { value: `${moduleType}.${dataset}` } } },
               {
                 term: {
-                  type: {
-                    value: 'ccr_stats',
+                  'metricset.name': {
+                    value: dataset,
                   },
                 },
               },
               {
                 term: {
-                  'metricset.name': {
-                    value: 'ccr',
+                  type: {
+                    value: 'ccr_stats',
                   },
                 },
               },
@@ -145,7 +152,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
         const [metrics, ccrResponse]: [unknown, ElasticsearchResponse] = await Promise.all([
           getMetrics(
             req,
-            esIndexPattern,
+            'elasticsearch',
             [
               { keys: ['ccr_sync_lag_time'], name: 'ccr_sync_lag_time' },
               { keys: ['ccr_sync_lag_ops'], name: 'ccr_sync_lag_ops' },
