@@ -22,7 +22,6 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.start': ['2021-11-30T20:42:04.145Z'],
       'kibana.alert.rule.rule_type_id': ['metrics.alert.threshold'],
       'event.action': ['active'],
-      'kibana.alert.instance.id': ['*'],
       'kibana.alert.rule.name': ['Uptime'],
       'kibana.alert.uuid': ['f31f5726-3c47-4c88-bc42-4e1fbde17e34'],
       'kibana.space_ids': ['default'],
@@ -40,7 +39,6 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.workflow_status': ['open'],
       'kibana.alert.start': ['2021-11-30T20:42:04.145Z'],
       'event.action': ['active'],
-      'kibana.alert.instance.id': ['*'],
       'kibana.version': ['8.1.0'],
       'event.kind': ['signal'],
     };
@@ -56,7 +54,6 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.rule.consumer': ['alerts'],
       'kibana.alert.rule.category': ['Metric threshold'],
       'kibana.alert.rule.rule_type_id': ['metrics.alert.threshold'],
-      'kibana.alert.instance.id': ['*'],
       'kibana.alert.rule.name': ['Uptime'],
       'kibana.alert.uuid': ['f31f5726-3c47-4c88-bc42-4e1fbde17e34'],
       'kibana.space_ids': ['default'],
