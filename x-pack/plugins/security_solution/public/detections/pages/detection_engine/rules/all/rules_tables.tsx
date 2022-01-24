@@ -166,7 +166,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     const isLoadingAnActionOnRule = useMemo(() => {
       if (
         loadingRuleIds.length > 0 &&
-        (loadingRulesAction === 'disable' || loadingRulesAction === 'enable')
+        ['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '')
       ) {
         return false;
       } else if (loadingRuleIds.length > 0) {
@@ -314,11 +314,9 @@ export const RulesTables = React.memo<RulesTableProps>(
         formatUrl,
         hasMlPermissions,
         hasPermissions,
-        loadingRuleIds:
-          loadingRulesAction != null &&
-          (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
-            ? loadingRuleIds
-            : [],
+        loadingRuleIds: ['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '')
+          ? loadingRuleIds
+          : [],
         navigateToApp,
         hasReadActionsPrivileges: hasActionsPrivileges,
         dispatchToaster,
@@ -602,7 +600,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
-              isBulkActionsInProgress={isCustomRulesCountLoading}
+              isBulkActionsInProgress={isCustomRulesCountLoading || loadingRulesAction != null}
               showBulkActions
             />
             <EuiBasicTable

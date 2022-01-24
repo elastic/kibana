@@ -13,20 +13,25 @@ import * as i18n from '../../../translations';
 
 import {
   BulkActionEditType,
-  BulkActionEditPayloadTags,
+  BulkActionEditPayload,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
-  FormHook,
+  useForm,
   Field,
   getUseField,
   useFormData,
-  ERROR_CODE,
   FIELD_TYPES,
   fieldValidators,
   FormSchema,
-  ValidationFunc,
 } from '../../../../../../../shared_imports';
+
+import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
+
+type TagsEditActions =
+  | BulkActionEditType.add_tags
+  | BulkActionEditType.delete_tags
+  | BulkActionEditType.set_tags;
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -42,13 +47,7 @@ const schema: FormSchema<TagsFormData> = {
     helpText: i18n.BULK_EDIT_FLYOUT_FORM_TAGS_HELP_TEXT,
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          return fieldValidators.emptyField(i18n.BULK_EDIT_FLYOUT_FORM_TAGS_REQUIRED_ERROR)(
-            ...args
-          );
-        },
+        validator: fieldValidators.emptyField(i18n.BULK_EDIT_FLYOUT_FORM_TAGS_REQUIRED_ERROR),
       },
     ],
   },
@@ -60,7 +59,7 @@ const schema: FormSchema<TagsFormData> = {
 
 const initialFormData: TagsFormData = { tags: [], overwrite: false };
 
-const getFormConfig = (editAction: BulkActionEditType) =>
+const getFormConfig = (editAction: TagsEditActions) =>
   editAction === BulkActionEditType.add_tags
     ? {
         tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL,
@@ -72,18 +71,42 @@ const getFormConfig = (editAction: BulkActionEditType) =>
       };
 
 interface Props {
-  form: FormHook;
+  editAction: TagsEditActions;
   rulesCount: number;
-  editAction: BulkActionEditType;
+  onClose: () => void;
+  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
 }
 
-const TagsFormComponent = ({ editAction, form, rulesCount }: Props) => {
+const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props) => {
+  const { form } = useForm({
+    defaultValue: initialFormData,
+    schema,
+  });
   const formConfig = getFormConfig(editAction);
 
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
 
+  const handleSubmit = async () => {
+    const { data, isValid } = await form.submit();
+    if (!isValid) {
+      return;
+    }
+
+    const payload = {
+      value: data.tags,
+      type: data.overwrite ? BulkActionEditType.set_tags : editAction,
+    };
+
+    onConfirm(payload);
+  };
+
   return (
-    <>
+    <BulkEditFormWrapper
+      form={form}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      title={formConfig.formTitle}
+    >
       <CommonUseField
         path="tags"
         config={{ ...schema.tags, label: formConfig.tagsLabel }}
@@ -117,25 +140,9 @@ const TagsFormComponent = ({ editAction, form, rulesCount }: Props) => {
           </EuiCallOut>
         </EuiFormRow>
       )}
-    </>
+    </BulkEditFormWrapper>
   );
 };
 
 export const TagsForm = React.memo(TagsFormComponent);
 TagsForm.displayName = 'TagsForm';
-
-export const tagsFormDataToEditActionPayload = (
-  formData: TagsFormData,
-  editAction: BulkActionEditType
-) =>
-  ({
-    value: formData.tags,
-    type: formData.overwrite ? BulkActionEditType.set_tags : editAction,
-  } as BulkActionEditPayloadTags);
-
-export const tagsFormConfiguration = (editAction: BulkActionEditType) => ({
-  Component: TagsFormComponent,
-  schema,
-  formTitle: getFormConfig(editAction).formTitle,
-  initialFormData,
-});

@@ -16,22 +16,26 @@ import { useKibana } from '../../../../../../../common/lib/kibana';
 
 import {
   BulkActionEditType,
-  BulkActionEditPayloadIndexPatterns,
+  BulkActionEditPayload,
 } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
-  FormHook,
   Field,
   getUseField,
   useFormData,
-  ERROR_CODE,
+  useForm,
   FIELD_TYPES,
   fieldValidators,
   FormSchema,
-  ValidationFunc,
 } from '../../../../../../../shared_imports';
 
+import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 const CommonUseField = getUseField({ component: Field });
+
+type IndexPatternsEditActions =
+  | BulkActionEditType.add_index_patterns
+  | BulkActionEditType.delete_index_patterns
+  | BulkActionEditType.set_index_patterns;
 
 interface IndexPatternsFormData {
   index: string[];
@@ -45,13 +49,9 @@ const schema: FormSchema<IndexPatternsFormData> = {
     helpText: i18n.BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT,
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          return fieldValidators.emptyField(
-            i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_REQUIRED_ERROR
-          )(...args);
-        },
+        validator: fieldValidators.emptyField(
+          i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_REQUIRED_ERROR
+        ),
       },
     ],
   },
@@ -63,7 +63,7 @@ const schema: FormSchema<IndexPatternsFormData> = {
 
 const initialFormData: IndexPatternsFormData = { index: [], overwrite: false };
 
-const getFormConfig = (editAction: BulkActionEditType) =>
+const getFormConfig = (editAction: IndexPatternsEditActions) =>
   editAction === BulkActionEditType.add_index_patterns
     ? {
         indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL,
@@ -75,20 +75,45 @@ const getFormConfig = (editAction: BulkActionEditType) =>
       };
 
 interface Props {
-  form: FormHook;
+  editAction: IndexPatternsEditActions;
   rulesCount: number;
-  editAction: BulkActionEditType;
+  onClose: () => void;
+  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
 }
 
-const IndexPatternsFormComponent = ({ editAction, rulesCount, form }: Props) => {
+const IndexPatternsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props) => {
+  const { form } = useForm({
+    defaultValue: initialFormData,
+    schema,
+  });
+
   const formConfig = getFormConfig(editAction);
 
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
+  const handleSubmit = async () => {
+    const { data, isValid } = await form.submit();
+    if (!isValid) {
+      return;
+    }
+
+    const payload = {
+      value: data.index,
+      type: data.overwrite ? BulkActionEditType.set_index_patterns : editAction,
+    };
+
+    onConfirm(payload);
+  };
+
   return (
-    <>
+    <BulkEditFormWrapper
+      form={form}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      title={formConfig.formTitle}
+    >
       <CommonUseField
         path="index"
         config={{ ...schema.index, label: formConfig.indexLabel }}
@@ -124,25 +149,9 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, form }: Props) => 
           </EuiCallOut>
         </EuiFormRow>
       )}
-    </>
+    </BulkEditFormWrapper>
   );
 };
 
 export const IndexPatternsForm = React.memo(IndexPatternsFormComponent);
 IndexPatternsForm.displayName = 'IndexPatternsForm';
-
-export const indexPatternsFormDataToEditActionPayload = (
-  formData: IndexPatternsFormData,
-  editAction: BulkActionEditType
-) =>
-  ({
-    value: formData.index,
-    type: formData.overwrite ? BulkActionEditType.set_index_patterns : editAction,
-  } as BulkActionEditPayloadIndexPatterns);
-
-export const indexPatternsFormConfiguration = (editAction: BulkActionEditType) => ({
-  Component: IndexPatternsForm,
-  schema,
-  formTitle: getFormConfig(editAction).formTitle,
-  initialFormData,
-});

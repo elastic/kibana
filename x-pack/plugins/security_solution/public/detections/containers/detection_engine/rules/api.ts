@@ -46,7 +46,10 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { convertRulesFilterToKQL } from './utils';
 import type { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
  * Create provided Rule

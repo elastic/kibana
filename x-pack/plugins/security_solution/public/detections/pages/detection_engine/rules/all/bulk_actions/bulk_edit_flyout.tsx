@@ -5,47 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiButton,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-} from '@elastic/eui';
-
-import { Form, useForm } from '../../../../../../shared_imports';
-
-import * as i18n from '../../translations';
+import React from 'react';
 
 import {
   BulkActionEditType,
   BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
-import {
-  indexPatternsFormConfiguration,
-  indexPatternsFormDataToEditActionPayload,
-} from './forms/index_patterns_form';
-import { tagsFormConfiguration, tagsFormDataToEditActionPayload } from './forms/tags_form';
-
-const isIndexPatternsForm = (editAction: BulkActionEditType) =>
-  [
-    BulkActionEditType.add_index_patterns,
-    BulkActionEditType.delete_index_patterns,
-    BulkActionEditType.set_index_patterns,
-  ].includes(editAction);
-
-const isTagsForm = (editAction: BulkActionEditType) =>
-  [
-    BulkActionEditType.add_tags,
-    BulkActionEditType.delete_tags,
-    BulkActionEditType.set_tags,
-  ].includes(editAction);
+import { IndexPatternsForm } from './forms/index_patterns_form';
+import { TagsForm } from './forms/tags_form';
 
 interface Props {
   onClose: () => void;
@@ -54,76 +22,21 @@ interface Props {
   rulesCount: number;
 }
 
-const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }: Props) => {
-  const {
-    schema,
-    Component: FormFieldsComponent,
-    initialFormData,
-    formTitle,
-  } = useMemo(() => {
-    if (isIndexPatternsForm(editAction)) {
-      return indexPatternsFormConfiguration(editAction);
-    }
-    if (isTagsForm(editAction)) {
-      return tagsFormConfiguration(editAction);
-    }
-    throw Error('Edit action is not valid');
-  }, [editAction]);
+const BulkEditFlyoutComponent = ({ editAction, ...props }: Props) => {
+  switch (editAction) {
+    case BulkActionEditType.add_index_patterns:
+    case BulkActionEditType.delete_index_patterns:
+    case BulkActionEditType.set_index_patterns:
+      return <IndexPatternsForm {...props} editAction={editAction} />;
 
-  const { form } = useForm<typeof initialFormData>({
-    defaultValue: initialFormData,
-    schema,
-  });
+    case BulkActionEditType.add_tags:
+    case BulkActionEditType.delete_tags:
+    case BulkActionEditType.set_tags:
+      return <TagsForm {...props} editAction={editAction} />;
 
-  const handleSave = async () => {
-    const { data, isValid } = await form.submit();
-    if (!isValid) {
-      return;
-    }
-
-    let payload;
-
-    if ('tags' in data) {
-      payload = tagsFormDataToEditActionPayload(data, editAction);
-    } else if ('index' in data) {
-      payload = indexPatternsFormDataToEditActionPayload(data, editAction);
-    } else {
-      return;
-    }
-
-    onConfirm(payload);
-  };
-
-  const { isValid } = form;
-
-  return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={formTitle} size="s">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{formTitle}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <Form form={form}>
-          <FormFieldsComponent rulesCount={rulesCount} editAction={editAction} form={form} />
-        </Form>
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-              {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSave} fill disabled={isValid === false}>
-              {i18n.BULK_EDIT_FLYOUT_FORM_SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
+    default:
+      return null;
+  }
 };
 
 export const BulkEditFlyout = React.memo(BulkEditFlyoutComponent);
