@@ -13,7 +13,7 @@ import {
   CreateTestEsClusterOptions,
   esTestConfig,
   kibanaServerTestUser,
-  kibanaTestUser,
+  systemIndicesSuperuser,
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -76,7 +76,9 @@ export function createRootWithSettings(
  * @param path
  */
 export function getSupertest(root: Root, method: HttpMethod, path: string) {
-  const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
+  const testUserCredentials = Buffer.from(
+    `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`
+  );
   return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);

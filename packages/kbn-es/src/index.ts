@@ -10,3 +10,4 @@
 export { run } from './cli';
 // @ts-expect-error not typed yet
 export { Cluster } from './cluster';
+export { SYSTEM_INDICES_SUPERUSER } from './utils';
