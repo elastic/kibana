@@ -83,6 +83,7 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
+        hostRisk: null,
       },
     },
     details: {
@@ -98,6 +99,7 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
+        hostRisk: null,
       },
     },
   },

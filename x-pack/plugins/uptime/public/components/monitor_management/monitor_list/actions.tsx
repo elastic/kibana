@@ -61,6 +61,7 @@ export const Actions = ({ id, setRefresh }: Props) => {
           iconType="pencil"
           href={`${basePath}/app/uptime/edit-monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
           aria-label={EDIT_MONITOR_LABEL}
+          data-test-subj="monitorManagementEditMonitor"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

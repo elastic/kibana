@@ -59012,7 +59012,7 @@ async function setupRemoteCache(repoRootPath) {
   try {
     const {
       stdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cache'], {
+    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/ui-team/kibana-bazel-remote-cache'], {
       stdio: 'pipe'
     });
     apiKey = stdout.trim();

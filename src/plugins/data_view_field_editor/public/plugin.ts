@@ -30,10 +30,7 @@ export class IndexPatternFieldEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { fieldFormatEditors } = this.formatEditorService.start();
-    const {
-      application: { capabilities },
-      http,
-    } = core;
+    const { http } = core;
     const { data, usageCollection, dataViews, fieldFormats } = plugins;
     const openDeleteModal = getFieldDeleteModalOpener({
       core,
@@ -53,9 +50,7 @@ export class IndexPatternFieldEditorPlugin
       }),
       openDeleteModal,
       userPermissions: {
-        editIndexPattern: () => {
-          return capabilities.management.kibana.indexPatterns;
-        },
+        editIndexPattern: () => dataViews.getCanSaveSync(),
       },
       DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
     };

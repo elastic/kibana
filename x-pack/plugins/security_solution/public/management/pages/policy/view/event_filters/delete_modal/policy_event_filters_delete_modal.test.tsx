@@ -17,7 +17,7 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { PolicyEventFiltersDeleteModal } from './policy_event_filters_delete_modal';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
-import { EventFiltersHttpService } from '../../../../event_filters/service';
+import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
 
 describe('Policy details event filter delete modal', () => {
   let policyId: string;
@@ -73,7 +73,7 @@ describe('Policy details event filter delete modal', () => {
     await waitFor(() => {
       expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenLastCalledWith({
         body: JSON.stringify(
-          EventFiltersHttpService.cleanEventFilterToUpdate({
+          cleanEventFilterToUpdate({
             ...exception,
             tags: ['policy:1234', 'policy:4321', 'not-a-policy-tag'],
           })
