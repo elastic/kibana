@@ -8,6 +8,7 @@
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataPluginStart } from 'src/plugins/data/server/plugin';
+import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { Writable } from 'stream';
@@ -18,7 +19,11 @@ import type {
   ScreenshotOptions as BaseScreenshotOptions,
   ScreenshottingStart,
 } from '../../screenshotting/server';
-import type { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/server';
 import type { SpacesPluginSetup } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import type { CancellationToken } from '../common/cancellation_token';
@@ -105,8 +110,10 @@ export interface ReportingSetupDeps {
  */
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
