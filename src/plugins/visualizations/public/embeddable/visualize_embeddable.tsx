@@ -455,10 +455,8 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
-    if (this.getTitle()) {
-      input.savedVis.title = this.getTitle();
-    }
     delete input.savedVis.id;
+    _.unset(input, 'savedVis.title');
     return new Promise<VisualizeByValueInput>((resolve) => {
       resolve({ ...(input as VisualizeByValueInput) });
     });
