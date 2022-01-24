@@ -55,7 +55,7 @@ export const computeParentSeries = (
       fieldName:
         subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
       params: {
-        window: currentMetric.window,
+        ...(currentMetric.window && { window: currentMetric.window }),
         ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
       },
     },
@@ -197,8 +197,8 @@ export const getFilterRatioFormula = (currentMetric: Metric) => {
 
 export const getFormulaEquivalent = (
   currentMetric: Metric,
-  metaValue: number,
-  metrics: Metric[]
+  metrics: Metric[],
+  metaValue?: number
 ) => {
   const aggregation = SUPPORTED_METRICS[currentMetric.type].name;
   let formula = null;

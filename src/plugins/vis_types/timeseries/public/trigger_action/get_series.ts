@@ -57,12 +57,23 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
           continue;
         }
         const currentMetric = metrics[layerMetricIdx];
-        const [_, meta] = variables[layerMetricIdx]?.field?.split('[') ?? [];
-        const metaValue = Number(meta?.replace(']', ''));
-        const script = getFormulaEquivalent(currentMetric, metaValue, layerMetricsArray);
-        const variable = variables.find((v) => v.field === currentMetric.id);
-        if (!script || !variable) return null;
-        finalScript = finalScript?.replace(`params.${variable.name}`, script);
+
+        // should treat percentiles differently
+        if (currentMetric.type === 'percentile') {
+          variables.forEach((variable) => {
+            const [_, meta] = variable?.field?.split('[') ?? [];
+            const metaValue = Number(meta?.replace(']', ''));
+            if (!metaValue) return;
+            const script = getFormulaEquivalent(currentMetric, layerMetricsArray, metaValue);
+            if (!script) return;
+            finalScript = finalScript?.replace(`params.${variable.name}`, script);
+          });
+        } else {
+          const script = getFormulaEquivalent(currentMetric, layerMetricsArray);
+          const variable = variables.find((v) => v.field === currentMetric.id);
+          if (!script || !variable) return null;
+          finalScript = finalScript?.replace(`params.${variable.name}`, script);
+        }
       }
       metricsArray = getFormulaSeries(finalScript);
       break;

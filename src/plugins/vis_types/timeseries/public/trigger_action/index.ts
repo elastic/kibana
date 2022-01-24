@@ -40,13 +40,8 @@ export const triggerVisualizeToLensOptions = async (
     const { indexPatternId, timeField } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
-      Boolean(layer.override_index_pattern),
-      layer.series_index_pattern
+      Boolean(layer.override_index_pattern) ? layer.series_index_pattern : undefined
     );
-
-    if (!indexPatternId) {
-      return null;
-    }
 
     const timeShift = layer.offset_time;
     // translate to Lens seriesType
@@ -61,7 +56,7 @@ export const triggerVisualizeToLensOptions = async (
     metricsArray = metricsArray.map((metric) => {
       return {
         ...metric,
-        color: layer.color,
+        color: metric.color ?? layer.color,
         params: {
           ...metric.params,
           ...(timeShift && { shift: timeShift }),

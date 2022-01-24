@@ -9,8 +9,11 @@
 interface AggOptions {
   name: string;
   isFullReference: boolean;
-  params?: any;
 }
+
+// list of supported TSVB aggregation types in Lens
+// some of them are supported on the quick functions tab and some of them
+// are supported with formulas
 
 export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
   avg: {

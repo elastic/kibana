@@ -85,8 +85,8 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
         }
       >
         {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
-          const { badgeText, color, ...badgeProps } = badge;
-          const badgeColor = color as EuiBetaBadgeProps['color'];
+          const { badgeText, ...badgeProps } = badge;
+          const badgeColor = badge.color as EuiBetaBadgeProps['color'];
           return Boolean(isBetaBadge) ? (
             <EuiBetaBadge label={badgeText} color={badgeColor ?? 'subdued'} size="s" />
           ) : (

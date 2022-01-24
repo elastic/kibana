@@ -12,7 +12,6 @@ import { getDataStart } from '../services';
 export const getDataSourceInfo = async (
   modelIndexPattern: IndexPatternValue,
   modelTimeField: string | undefined,
-  isOverwritten: boolean,
   overwrittenIndexPattern: IndexPatternValue | undefined
 ) => {
   const { dataViews } = getDataStart();
@@ -21,7 +20,7 @@ export const getDataSourceInfo = async (
 
   let timeField = modelTimeField;
   // handle override index pattern
-  if (isOverwritten) {
+  if (overwrittenIndexPattern) {
     const { indexPattern } = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
     if (indexPattern) {
       indexPatternId = indexPattern.id ?? '';

@@ -12,5 +12,5 @@ export const VISUALIZE_EDITOR_TRIGGER = 'VISUALIZE_EDITOR_TRIGGER';
 export const visualizeEditorTrigger: Trigger = {
   id: VISUALIZE_EDITOR_TRIGGER,
   title: 'Convert legacy visualizations to Lens',
-  description: 'Triggered when user to navigate from a legacy visualization to Lens.',
+  description: 'Triggered when user navigates from a legacy visualization to Lens.',
 };
