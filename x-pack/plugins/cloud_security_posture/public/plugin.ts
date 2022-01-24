@@ -15,6 +15,7 @@ import type {
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ENABLE_CSP } from '../common/constants';
+import { CSP_KUBEBEAT_INDEX_NAME } from '../common/constants';
 
 export class CspPlugin
   implements
@@ -27,7 +28,7 @@ export class CspPlugin
 {
   public setup(
     core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
-    plugins: CspClientPluginSetup
+    plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
     // Register an application into the side navigation menu
     const cspEnabled: boolean = core.uiSettings.get(ENABLE_CSP);
@@ -47,6 +48,8 @@ export class CspPlugin
       },
     });
 
+    registerKubebeatDataView(core);
+
     // Return methods that should be available to other plugins
     return {};
   }
@@ -55,4 +58,22 @@ export class CspPlugin
   }
 
   public stop() {}
+}
+
+async function registerKubebeatDataView(
+  core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>
+) {
+  try {
+    const [, depsStart] = await core.getStartServices();
+    const dataView = await depsStart.data.dataViews.find(CSP_KUBEBEAT_INDEX_NAME);
+    if (dataView) return;
+
+    await depsStart.data.dataViews.createAndSave({
+      title: CSP_KUBEBEAT_INDEX_NAME,
+      allowNoIndex: true,
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(e);
+  }
 }

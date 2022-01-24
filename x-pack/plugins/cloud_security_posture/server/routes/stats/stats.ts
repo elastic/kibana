@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter } from 'src/core/server';
+import type { ElasticsearchClient, IRouter, Logger } from 'src/core/server';
 import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { number, UnknownRecord } from 'io-ts';
+import { transformError } from '@kbn/securitysolution-es-utils';
+
 import type {
   CloudPostureStats,
   BenchmarkStats,
@@ -63,6 +65,9 @@ const calculatePostureScore = (total: number, passed: number, failed: number): S
 const getLatestCycleId = async (esClient: ElasticsearchClient) => {
   const latestFinding = await esClient.search<LastCycle>(getLatestFindingQuery());
   const lastCycle = latestFinding.body.hits.hits[0];
+  if (lastCycle?._source?.run_id === undefined) {
+    throw new Error('cycle id is missing');
+  }
   return lastCycle?._source?.run_id;
 };
 
@@ -186,7 +191,7 @@ export const getResourcesEvaluation = async (
   return [...passedEvaluationPerResources, ...failedEvaluationPerResource];
 };
 
-export const defineGetStatsRoute = (router: IRouter): void =>
+export const defineGetStatsRoute = (router: IRouter, logger: Logger): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,
@@ -199,9 +204,7 @@ export const defineGetStatsRoute = (router: IRouter): void =>
           getBenchmarks(esClient),
           getLatestCycleId(esClient),
         ]);
-        if (latestCycleID === undefined) {
-          throw new Error('cycle id is missing');
-        }
+
         const [allFindingsStats, benchmarksStats, resourcesEvaluations] = await Promise.all([
           getAllFindingsStats(esClient, latestCycleID),
           getBenchmarksStats(esClient, latestCycleID, benchmarks),
@@ -216,8 +219,12 @@ export const defineGetStatsRoute = (router: IRouter): void =>
           body,
         });
       } catch (err) {
-        // TODO - validate err object and parse
-        return response.customError({ body: { message: 'Unknown error' }, statusCode: 500 });
+        const error = transformError(err);
+
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
       }
     }
   );

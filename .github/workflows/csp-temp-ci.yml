@@ -10,7 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
       - name: Setup Node
         uses: actions/checkout@v2
         with:
@@ -25,8 +24,11 @@ jobs:
       - name: kbn bootstrap
         run: yarn kbn bootstrap
 
-      - name: check TS
-        run: node scripts/type_check
+      - name: TS
+        run: node_modules/.bin/tsc --build x-pack/plugins/cloud_security_posture/tsconfig.json --pretty
+
+      # - name: check TS
+      #   run: node scripts/type_check
 
       - name: eslint
-        run: node scripts/eslint --no-cache
+        run: node scripts/eslint  x-pack/plugins/cloud_security_posture --no-cache

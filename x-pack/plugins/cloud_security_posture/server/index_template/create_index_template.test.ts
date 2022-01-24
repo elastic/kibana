@@ -6,6 +6,7 @@
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { createFindingsIndexTemplate } from './create_index_template';
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 afterEach(() => {
@@ -13,11 +14,17 @@ afterEach(() => {
   mockEsClient.indices.existsIndexTemplate.mockClear();
 });
 describe('create index template for findings', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
   it('expect to find existing template', async () => {
     mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(true)
     );
-    const response = await createFindingsIndexTemplate(mockEsClient);
+    const response = await createFindingsIndexTemplate(mockEsClient, logger);
     expect(mockEsClient.indices.putIndexTemplate.mock.calls.length).toEqual(0);
     expect(response).toEqual(true);
   });
@@ -29,7 +36,7 @@ describe('create index template for findings', () => {
     mockEsClient.indices.putIndexTemplate.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
     );
-    const response = await createFindingsIndexTemplate(mockEsClient);
+    const response = await createFindingsIndexTemplate(mockEsClient, logger);
     await expect(response).toEqual(true);
   });
 });

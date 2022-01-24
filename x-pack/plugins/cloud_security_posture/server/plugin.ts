@@ -52,7 +52,7 @@ export class CspPlugin
   private readonly CspAppContextService = new CspAppContextService();
 
   public setup(
-    core: CoreSetup<CspServerPluginSetup>,
+    core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
@@ -66,7 +66,8 @@ export class CspPlugin
     cspContext.service.getPackagePolicyService();
     const router = core.http.createRouter();
 
-    defineRoutes(router, cspContext);
+    // Register server side APIs
+    defineRoutes(router, this.logger, cspContext);
     initUiSettings(core.uiSettings);
 
     return {};
@@ -80,12 +81,10 @@ export class CspPlugin
       logger: this.logger,
       registerIngestCallback,
     });
-    // if (plugins.fleet) {
-    //   const registerIngestCallback = plugins.fleet?.registerExternalCallback;
-    //   plugins.fleet.createArtifactsClient('csp');
-    // }
-    createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser).catch(this.logger.error);
 
+    createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser, this.logger).catch(
+      this.logger.error
+    );
     return {};
   }
   public stop() {}

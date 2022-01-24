@@ -32,21 +32,14 @@ export const useKubebeatDataView = () => {
     data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
-  const createDataView = () =>
-    dataViews.createAndSave({
-      title: CSP_KUBEBEAT_INDEX_NAME,
-      allowNoIndex: false,
-    });
-
   // TODO: check if index exists
   // if not, no point in creating a data view
   // const check = () => http?.get(`/kubebeat`);
 
+  // TODO: use `dataViews.get(ID)`
   const findDataView = async () => (await dataViews.find(CSP_KUBEBEAT_INDEX_NAME))?.[0];
 
-  const getKubebeatDataView = () => findDataView().then((v) => (v ? v : createDataView()));
-
-  return useQuery(['kubebeat_dataview'], getKubebeatDataView);
+  return useQuery(['kubebeat_dataview'], findDataView);
 };
 
 export const useEsClientMutation = <T extends unknown>({
