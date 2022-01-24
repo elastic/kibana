@@ -25,6 +25,7 @@ export function monitorManagementPageProvider({
   const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
   const addMonitor = `${basePath}/app/uptime/add-monitor`;
   const overview = `${basePath}/app/uptime`;
+  console.warn('basePath', basePath);
   return {
     ...loginPageProvider({
       page,
