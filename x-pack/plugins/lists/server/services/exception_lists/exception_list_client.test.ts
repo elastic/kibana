@@ -234,6 +234,19 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreExport.callback;
         },
       ],
+      [
+        'getExceptionListSummary',
+        (): ReturnType<ExceptionListClient['getExceptionListSummary']> => {
+          return exceptionListClient.getExceptionListSummary({
+            id: '1',
+            listId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreSummary']['callback'] => {
+          return extensionPointStorageContext.exceptionPreSummary.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {

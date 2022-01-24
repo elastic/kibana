@@ -14,6 +14,7 @@ import {
   FindExceptionListItemOptions,
   FindExceptionListsItemOptions,
   GetExceptionListItemOptions,
+  GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 
@@ -107,13 +108,22 @@ export type ExceptionsListPreExportServerExtension = ServerExtensionPointDefinit
   ExportExceptionListAndItemsOptions
 >;
 
+/**
+ * Extension point is triggered prior to performing a list summary operation
+ */
+export type ExceptionsListPreSummaryServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreSummary',
+  GetExceptionListSummaryOptions
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
   | ExceptionsListPreUpdateItemServerExtension
   | ExceptionsListPreGetOneItemServerExtension
   | ExceptionsListPreSingleListFindServerExtension
   | ExceptionsListPreMultiListFindServerExtension
-  | ExceptionsListPreExportServerExtension;
+  | ExceptionsListPreExportServerExtension
+  | ExceptionsListPreSummaryServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

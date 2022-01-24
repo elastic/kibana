@@ -135,6 +135,19 @@ export class ExceptionListClient {
     namespaceType,
   }: GetExceptionListSummaryOptions): Promise<ExceptionListSummarySchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreSummary',
+        {
+          id,
+          listId,
+          namespaceType,
+        },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
   };
 
