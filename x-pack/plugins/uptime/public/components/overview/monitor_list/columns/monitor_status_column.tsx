@@ -226,7 +226,7 @@ export const MonitorListStatusColumn = ({
           ) : (
             <EuiToolTip content="Test now">
               <EuiButtonIcon
-                iconType="playFilled"
+                iconType="play"
                 onClick={() => triggerNowClick()}
                 isDisabled={Boolean(triggerTest)}
                 aria-label={'CLick to run test now'}

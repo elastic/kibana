@@ -32,7 +32,7 @@ import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { TAGS_LABEL, URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
-import { STATUS_ALERT_COLUMN } from './translations';
+import { STATUS_ALERT_COLUMN, TEST_NOW_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
@@ -195,6 +195,18 @@ export const MonitorListComponent: ({
         align: 'center' as const,
         field: '',
         name: STATUS_ALERT_COLUMN,
+        width: '100px',
+        render: (item: MonitorSummary) => (
+          <EnableMonitorAlert
+            monitorId={item.monitor_id}
+            selectedMonitor={item.state.summaryPings[0]}
+          />
+        ),
+      },
+      {
+        align: 'center' as const,
+        field: '',
+        name: TEST_NOW_COLUMN,
         width: '100px',
         render: (item: MonitorSummary) => (
           <EnableMonitorAlert
