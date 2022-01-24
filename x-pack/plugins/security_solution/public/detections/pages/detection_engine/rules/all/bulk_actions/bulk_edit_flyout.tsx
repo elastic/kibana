@@ -76,12 +76,11 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction, rulesCount }:
   });
 
   const handleSave = async () => {
-    const isValid = await form.validate();
+    const { data, isValid } = await form.submit();
     if (!isValid) {
       return;
     }
 
-    const data = form.getFormData();
     let payload;
 
     if ('tags' in data) {
