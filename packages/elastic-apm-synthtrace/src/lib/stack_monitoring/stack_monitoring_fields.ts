@@ -8,7 +8,7 @@
 
 import { Fields } from '../entity';
 
-export type StackMonitoringFieldfs = Fields &
+export type StackMonitoringFields = Fields &
   Partial<{
     cluster_name: string;
     cluster_uuid: string;
