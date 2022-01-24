@@ -32,7 +32,6 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import {
-  OWNER_FIELD,
   GetCaseIdsByAlertIdAggs,
   AssociationType,
   CaseResponse,
@@ -1045,10 +1044,18 @@ export class CasesService {
             terms: {
               field: `${CASE_SAVED_OBJECT}.attributes.created_by.username`,
               size: MAX_DOCS_PER_PAGE,
+              order: { _key: 'asc' },
             },
             aggs: {
               top_docs: {
                 top_hits: {
+                  sort: [
+                    {
+                      [`${CASE_SAVED_OBJECT}.created_at`]: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
                   size: 1,
                 },
               },
@@ -1091,6 +1098,7 @@ export class CasesService {
             terms: {
               field: `${CASE_SAVED_OBJECT}.attributes.tags`,
               size: MAX_DOCS_PER_PAGE,
+              order: { _key: 'asc' },
             },
           },
         },

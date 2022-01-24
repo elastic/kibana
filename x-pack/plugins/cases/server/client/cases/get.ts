@@ -16,7 +16,6 @@ import {
   CaseResolveResponseRt,
   CaseResolveResponse,
   User,
-  UsersRt,
   AllTagsFindRequest,
   AllTagsFindRequestRt,
   excess,
