@@ -11,7 +11,7 @@ import { InfraSource } from '../../../lib/sources';
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
 import { queryAllData } from './query_all_data';
 import { transformMetricsApiResponseToSnapshotResponse } from './transform_metrics_ui_response';
-import { copyMissingMetrics as copyMissingMetricsFn } from './copy_missing_metrics';
+import { copyMissingMetrics } from './copy_missing_metrics';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
 
 export interface SourceOverrides {
@@ -24,14 +24,12 @@ const transformAndQueryData = async ({
   source,
   compositeSize,
   sourceOverrides,
-  copyMissingMetrics,
 }: {
   client: ESSearchClient;
   snapshotRequest: SnapshotRequest;
   source: InfraSource;
   compositeSize: number;
   sourceOverrides?: SourceOverrides;
-  copyMissingMetrics?: boolean;
 }) => {
   const metricsApiRequest = await transformRequestToMetricsAPIRequest({
     client,
@@ -47,11 +45,7 @@ const transformAndQueryData = async ({
     source,
     metricsApiResponse
   );
-  if (copyMissingMetrics) {
-    return copyMissingMetricsFn(snapshotResponse);
-  } else {
-    return snapshotResponse;
-  }
+  return copyMissingMetrics(snapshotResponse);
 };
 
 export const getNodes = async (
@@ -59,8 +53,7 @@ export const getNodes = async (
   snapshotRequest: SnapshotRequest,
   source: InfraSource,
   compositeSize: number,
-  logQueryFields?: LogQueryFields,
-  copyMissingMetrics: boolean = true
+  logQueryFields?: LogQueryFields
 ) => {
   let nodes;
 
@@ -74,7 +67,6 @@ export const getNodes = async (
           source,
           compositeSize,
           sourceOverrides: logQueryFields,
-          copyMissingMetrics,
         });
       } else {
         nodes = { nodes: [], interval: '60s' };
@@ -89,7 +81,6 @@ export const getNodes = async (
         snapshotRequest: { ...snapshotRequest, metrics: metricsWithoutLogsMetrics },
         source,
         compositeSize,
-        copyMissingMetrics,
       });
       const logRateNodes =
         logQueryFields != null
@@ -99,7 +90,6 @@ export const getNodes = async (
               source,
               compositeSize,
               sourceOverrides: logQueryFields,
-              copyMissingMetrics,
             })
           : { nodes: [], interval: '60s' };
       // Merge nodes where possible - e.g. a single host is shipping metrics and logs
@@ -124,13 +114,8 @@ export const getNodes = async (
       };
     }
   } else {
-    nodes = await transformAndQueryData({
-      client,
-      snapshotRequest,
-      source,
-      compositeSize,
-      copyMissingMetrics,
-    });
+    nodes = await transformAndQueryData({ client, snapshotRequest, source, compositeSize });
   }
+
   return nodes;
 };
