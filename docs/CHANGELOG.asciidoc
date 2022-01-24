@@ -61,7 +61,6 @@ Dashboard::
 Dashboard Integration {kibana-pull}115991[#115991]
 Elastic Security::
 For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Machine Learning::
 Management::
 Monitoring::
 Enterprise Search Stack Monitoring {kibana-pull}114303[#114303]
