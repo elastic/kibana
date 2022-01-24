@@ -8,10 +8,41 @@
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { handleErrors } from './util/handle_errors';
 import { SERVICE_PATH, SERVICE_PATH_LEGACY, SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
+
+interface GetDefaultArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+}
+
+const getDefault = async ({ indexPatternsService, usageCollection, path }: GetDefaultArgs) => {
+  usageCollection?.incrementCounter({ counterName: `GET ${path}` });
+  return indexPatternsService.getDefaultId();
+};
+
+interface SetDefaultArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  newDefaultId: string;
+  force: boolean;
+}
+
+const setDefault = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  newDefaultId,
+  force,
+}: SetDefaultArgs) => {
+  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
+  return indexPatternsService.setDefault(newDefaultId, force);
+};
 
 const manageDefaultIndexPatternRoutesFactory =
   (path: string, serviceKey: string) =>
@@ -32,18 +63,21 @@ const manageDefaultIndexPatternRoutesFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `GET ${path}` });
         const indexPatternsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
         );
 
-        const defaultIndexPatternId = await indexPatternsService.getDefaultId();
+        const id = await getDefault({
+          indexPatternsService,
+          usageCollection,
+          path,
+        });
 
         return res.ok({
           body: {
-            [`${serviceKey}_id`]: defaultIndexPatternId,
+            [`${serviceKey}_id`]: id,
           },
         });
       })
@@ -77,7 +111,7 @@ const manageDefaultIndexPatternRoutesFactory =
         const newDefaultId = req.body[`${serviceKey}_id`] as string;
         const force = req.body.force as boolean;
 
-        await indexPatternsService.setDefault(newDefaultId, force);
+        await setDefault({ indexPatternsService, usageCollection, path, newDefaultId, force });
 
         return res.ok({
           body: {

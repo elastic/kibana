@@ -121,9 +121,9 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
+            body: {
               [serviceKey]: indexPattern.toSpec(),
-            }),
+            },
           });
         })
       )

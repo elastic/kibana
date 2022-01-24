@@ -6,11 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../constants';
+
+interface HasUserDataViewArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+}
+
+const hasUserDataView = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+}: HasUserDataViewArgs) => {
+  usageCollection?.incrementCounter({ counterName: `GET ${path}` });
+  return indexPatternsService.hasUserDataView();
+};
 
 const hasUserDataViewRouteFactory =
   (path: string) =>
@@ -32,16 +48,22 @@ const hasUserDataViewRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          usageCollection?.incrementCounter({ counterName: `GET ${path}` });
+
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
           );
 
+          const result = await hasUserDataView({
+            indexPatternsService,
+            usageCollection,
+            path,
+          });
+
           return res.ok({
             body: {
-              result: await indexPatternsService.hasUserDataView(),
+              result,
             },
           });
         })

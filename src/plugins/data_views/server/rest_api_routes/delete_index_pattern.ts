@@ -8,10 +8,28 @@
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
+
+interface DeleteDataViewArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+}
+
+const deleteDataview = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+}: DeleteDataViewArgs) => {
+  usageCollection?.incrementCounter({ counterName: `DELETE ${path}` });
+  return indexPatternsService.delete(id);
+};
 
 const deleteIndexPatternRouteFactory =
   (path: string) =>
@@ -43,7 +61,6 @@ const deleteIndexPatternRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          usageCollection?.incrementCounter({ counterName: `DELETE ${path}` });
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
@@ -51,7 +68,7 @@ const deleteIndexPatternRouteFactory =
           );
           const id = req.params.id;
 
-          await indexPatternsService.delete(id);
+          await deleteDataview({ indexPatternsService, usageCollection, path, id });
 
           return res.ok({
             headers: {

@@ -22,11 +22,9 @@ import {
   DATA_VIEW_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
-  SERVICE_KEY_TYPE,
 } from '../constants';
 
-interface CreateIndexPatternArgs {
-  serviceKey: SERVICE_KEY_TYPE;
+interface CreateDataViewArgs {
   indexPatternsService: DataViewsService;
   usageCollection?: UsageCounter;
   spec: DataViewSpec;
@@ -35,26 +33,16 @@ interface CreateIndexPatternArgs {
   path: string;
 }
 
-const createIndexPattern = async ({
-  serviceKey,
+const createDataView = async ({
   indexPatternsService,
   usageCollection,
   spec,
   override,
   refreshFields,
   path,
-}: CreateIndexPatternArgs) => {
+}: CreateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName: `POST ${path}` });
-  const indexPattern = await indexPatternsService.createAndSave(spec, override, !refreshFields);
-
-  return {
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      [serviceKey]: indexPattern.toSpec(),
-    }),
-  };
+  return indexPatternsService.createAndSave(spec, override, !refreshFields);
 };
 
 const indexPatternSpecSchema = schema.object({
@@ -124,8 +112,7 @@ const registerCreateDataViewRouteFactory =
 
           const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
 
-          const result = await createIndexPattern({
-            serviceKey: serviceKey as SERVICE_KEY_TYPE,
+          const dataView = await createDataView({
             indexPatternsService,
             usageCollection,
             spec: spec as DataViewSpec,
@@ -133,7 +120,15 @@ const registerCreateDataViewRouteFactory =
             refreshFields: body.refresh_fields,
             path,
           });
-          return res.ok(result);
+
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: {
+              [serviceKey]: dataView.toSpec(),
+            },
+          });
         })
       )
     );

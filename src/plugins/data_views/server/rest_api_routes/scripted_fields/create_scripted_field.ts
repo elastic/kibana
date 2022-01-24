@@ -83,10 +83,10 @@ export const registerCreateScriptedFieldRoute = (
           headers: {
             'content-type': 'application/json',
           },
-          body: JSON.stringify({
+          body: {
             field: fieldObject.toSpec(),
             index_pattern: indexPattern.toSpec(),
-          }),
+          },
         });
       })
     )

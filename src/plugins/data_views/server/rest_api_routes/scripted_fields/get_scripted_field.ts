@@ -74,9 +74,9 @@ export const registerGetScriptedFieldRoute = (
           headers: {
             'content-type': 'application/json',
           },
-          body: JSON.stringify({
+          body: {
             field: field.toSpec(),
-          }),
+          },
         });
       })
     )
