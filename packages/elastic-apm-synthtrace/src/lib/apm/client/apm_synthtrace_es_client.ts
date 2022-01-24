@@ -15,6 +15,12 @@ import { SpanIterable } from '../../span_iterable';
 import { StreamProcessor } from '../../stream_processor';
 import { SpanGeneratorsUnion } from '../../span_generators_union';
 
+export interface StreamToBulkOptions {
+  concurrency?: number;
+  maxDocs?: number;
+  mapToIndex?: (document: Record<string, any>) => string;
+}
+
 export class ApmSynthtraceEsClient {
   constructor(
     private readonly client: Client,
@@ -70,18 +76,18 @@ export class ApmSynthtraceEsClient {
     }
   }
 
-  async index(events: SpanIterable | SpanIterable[], concurrency?: number, maxDocs?: number) {
+  async index(events: SpanIterable | SpanIterable[], options?: StreamToBulkOptions) {
     const dataStream = Array.isArray(events) ? new SpanGeneratorsUnion(events) : events;
 
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf
     await this.client.helpers.bulk<ApmFields>({
-      concurrency,
+      concurrency: options?.concurrency,
       refresh: false,
       refreshOnCompletion: false,
       datasource: new StreamProcessor({
         processors: StreamProcessor.apmProcessors,
-        maxSourceEvents: maxDocs,
+        maxSourceEvents: options?.maxDocs,
       })
         // TODO https://github.com/elastic/elasticsearch-js/issues/1610
         // having to map here is awkward, it'd be better to map just before serialization.
@@ -93,7 +99,9 @@ export class ApmSynthtraceEsClient {
       // https://github.com/elastic/elasticsearch-js/issues/1611
       onDocument: (doc: unknown) => {
         const d = doc as Record<string, any>;
-        const index = this.forceDataStreams
+        const index = options?.mapToIndex
+          ? options?.mapToIndex(d)
+          : this.forceDataStreams
           ? StreamProcessor.getDataStreamForEvent(d, writeTargets)
           : StreamProcessor.getIndexForEvent(d, writeTargets);
         return { create: { _index: index } };

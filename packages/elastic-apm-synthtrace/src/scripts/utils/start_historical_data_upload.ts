@@ -10,12 +10,17 @@ import { getScenario } from './get_scenario';
 import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
 
-export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient, logger: Logger, runOptions: RunOptions, from: Date, to: Date) {
-
+export async function startHistoricalDataUpload(
+  esClient: ApmSynthtraceEsClient,
+  logger: Logger,
+  runOptions: RunOptions,
+  from: Date,
+  to: Date
+) {
   const file = runOptions.file;
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
-  const { generate } = await scenario(runOptions);
+  const { generate, mapToIndex } = await scenario(runOptions);
 
   // if we want to generate a maximum number of documents reverse generation to descend.
   [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
@@ -26,6 +31,10 @@ export async function startHistoricalDataUpload(esClient: ApmSynthtraceEsClient,
 
   const clientWorkers = runOptions.clientWorkers;
   await logger.perf('index_scenario', () =>
-    esClient.index(events, clientWorkers, runOptions.maxDocs)
+    esClient.index(events, {
+      concurrency: clientWorkers,
+      maxDocs: runOptions.maxDocs,
+      mapToIndex,
+    })
   );
 }

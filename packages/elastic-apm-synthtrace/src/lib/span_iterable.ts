@@ -14,3 +14,23 @@ export interface SpanIterable extends Iterable<ApmFields>, AsyncIterable<ApmFiel
 
   concat(...iterables: SpanIterable[]): SpanGeneratorsUnion;
 }
+
+export class SpanArrayIterable implements SpanIterable {
+  constructor(private fields: ApmFields[]) {}
+
+  async *[Symbol.asyncIterator](): AsyncIterator<ApmFields> {
+    return this.fields[Symbol.iterator]();
+  }
+
+  [Symbol.iterator](): Iterator<ApmFields> {
+    return this.fields[Symbol.iterator]();
+  }
+
+  concat(...iterables: SpanIterable[]): SpanGeneratorsUnion {
+    return new SpanGeneratorsUnion([this, ...iterables]);
+  }
+
+  toArray(): ApmFields[] {
+    return this.fields;
+  }
+}

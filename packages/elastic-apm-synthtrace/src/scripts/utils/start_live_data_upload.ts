@@ -9,15 +9,21 @@
 import { partition } from 'lodash';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
-import { getCommonServices } from './get_common_services';
 import { ApmFields } from '../../lib/apm/apm_fields';
+import { ApmSynthtraceEsClient } from '../../lib/apm';
+import { Logger } from '../../lib/utils/create_logger';
+import { SpanArrayIterable } from '../../lib/span_iterable';
 
-export async function startLiveDataUpload(runOptions: RunOptions, start: Date) {
-  const { logger, client } = getCommonServices(runOptions);
-
+export async function startLiveDataUpload(
+  esClient: ApmSynthtraceEsClient,
+  logger: Logger,
+  runOptions: RunOptions,
+  start: Date
+) {
   const file = runOptions.file;
+
   const scenario = await getScenario({ file, logger });
-  const { generate } = await scenario(runOptions);
+  const { generate, mapToIndex } = await scenario(runOptions);
 
   let queuedEvents: ApmFields[] = [];
   let requestedUntil: Date = start;
@@ -50,13 +56,13 @@ export async function startLiveDataUpload(runOptions: RunOptions, start: Date) {
 
     queuedEvents = eventsToRemainInQueue;
 
-    await client.helpers.bulk<ApmFields>({
-      datasource: eventsToUpload,
-      onDocument: (doc) => {
-        return { index: { _index: '' } };
-      },
-      concurrency: runOptions.clientWorkers,
-    });
+    await logger.perf('index_live_scenario', () =>
+      esClient.index(new SpanArrayIterable(eventsToUpload), {
+        concurrency: runOptions.clientWorkers,
+        maxDocs: runOptions.maxDocs,
+        mapToIndex,
+      })
+    );
   }
 
   do {

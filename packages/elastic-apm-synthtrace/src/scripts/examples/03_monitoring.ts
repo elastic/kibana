@@ -17,6 +17,11 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
 
   return {
+    mapToIndex: (data) => {
+      return data.kibana_stats?.kibana?.name
+        ? '.monitoring-kibana-7-synthtrace'
+        : '.monitoring-es-7-synthtrace';
+    },
     generate: ({ from, to }) => {
       const cluster = stackMonitoring.cluster('test-cluster');
       const clusterStats = cluster.stats();
@@ -34,16 +39,6 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
             return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
           });
           return [...clusterEvents, ...kibanaEvents];
-          // TODO scenario needs to influence write
-          // const clusterOutputs = smEventsToElasticsearchOutput(
-          //   clusterEvents,
-          //   '.monitoring-es-7-synthtrace'
-          // );
-          //
-          // const kibanaOutputs = smEventsToElasticsearchOutput(
-          //   kibanaEvents,
-          //   '.monitoring-kibana-7-synthtrace'
-          // );
         });
     },
   };

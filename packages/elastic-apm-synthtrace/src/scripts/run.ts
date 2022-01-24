@@ -159,7 +159,7 @@ yargs(process.argv.slice(2))
     await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
 
     if (live) {
-      await startLiveDataUpload(runOptions, to);
+      await startLiveDataUpload(esClient, logger, runOptions, to);
     }
   })
   .parse();
