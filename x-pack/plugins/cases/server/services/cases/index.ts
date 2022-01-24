@@ -1057,6 +1057,7 @@ export class CasesService {
                     },
                   ],
                   size: 1,
+                  _source: [`${CASE_SAVED_OBJECT}.created_by`],
                 },
               },
             },
