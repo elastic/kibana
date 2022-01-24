@@ -11,6 +11,9 @@ const chalk = require('chalk');
 
 const { log: defaultLog } = require('./log');
 
+export const SYSTEM_INDICES_SUPERUSER =
+  process.env.TEST_ES_SYSTEM_INDICES_USER || 'system_indices_superuser';
+
 exports.NativeRealm = class NativeRealm {
   constructor({ elasticPassword, port, log = defaultLog, ssl = false, caCert }) {
     this._client = new Client({
@@ -60,11 +63,12 @@ exports.NativeRealm = class NativeRealm {
     }
 
     const reservedUsers = await this.getReservedUsers();
-    await Promise.all(
-      reservedUsers.map(async (user) => {
+    await Promise.all([
+      ...reservedUsers.map(async (user) => {
         await this.setPassword(user, options[`password.${user}`]);
-      })
-    );
+      }),
+      this._createSystemIndicesUser(),
+    ]);
   }
 
   async getReservedUsers(retryOpts = {}) {
@@ -119,5 +123,40 @@ exports.NativeRealm = class NativeRealm {
       };
       return await this._autoRetry(nextOpts, fn);
     }
+  }
+
+  async _createSystemIndicesUser() {
+    if (!(await this.isSecurityEnabled())) {
+      this._log.info('security is not enabled, unable to create role and user');
+      return;
+    }
+
+    await this._client.security.putRole({
+      name: SYSTEM_INDICES_SUPERUSER,
+      refresh: 'wait_for',
+      cluster: ['all'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+          allow_restricted_indices: true,
+        },
+      ],
+      applications: [
+        {
+          application: '*',
+          privileges: ['*'],
+          resources: ['*'],
+        },
+      ],
+      run_as: ['*'],
+    });
+
+    await this._client.security.putUser({
+      username: SYSTEM_INDICES_SUPERUSER,
+      refresh: 'wait_for',
+      password: this._elasticPassword,
+      roles: [SYSTEM_INDICES_SUPERUSER],
+    });
   }
 };
