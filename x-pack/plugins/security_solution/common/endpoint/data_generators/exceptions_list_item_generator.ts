@@ -36,7 +36,7 @@ type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    return {
+    const exceptionItem: ExceptionListItemSchema = {
       _version: this.randomString(5),
       comments: [],
       created_at: this.randomPastDate(),
@@ -44,19 +44,10 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       description: 'created by ExceptionListItemGenerator',
       entries: [
         {
-          field: ConditionEntryField.HASH,
+          field: 'process.hash.md5',
           operator: 'included',
           type: 'match',
-          value: '1234234659af249ddf3e40864e9fb241',
-        },
-        {
-          field: ConditionEntryField.PATH,
-          operator: 'included',
-          type: 'match',
-          value:
-            overrides.os_types && overrides.os_types[0] === 'windows'
-              ? 'c:\\fol\\bin.exe'
-              : '/one/two/three',
+          value: '741462ab431a22233C787BAAB9B653C7',
         },
       ],
       id: this.seededUUIDv4(),
@@ -73,6 +64,19 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       updated_by: this.randomUser(),
       ...(overrides || {}),
     };
+
+    // If the `entries` was not overwritten, then add in the PATH condition with a
+    // value that is OS appropriate
+    if (!overrides.entries) {
+      exceptionItem.entries.push({
+        field: ConditionEntryField.PATH,
+        operator: 'included',
+        type: 'match',
+        value: exceptionItem.os_types[0] === 'windows' ? 'c:\\fol\\bin.exe' : '/one/two/three',
+      });
+    }
+
+    return exceptionItem;
   }
 
   generateForCreate(

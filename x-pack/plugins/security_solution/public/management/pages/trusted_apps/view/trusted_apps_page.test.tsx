@@ -284,7 +284,7 @@ describe('When on the Trusted Apps Page', () => {
                   field: 'process.hash.md5',
                   operator: 'included',
                   type: 'match',
-                  value: '1234234659af249ddf3e40864e9fb241',
+                  value: '741462ab431a22233c787baab9b653c7',
                 },
                 {
                   field: 'process.executable.caseless',
