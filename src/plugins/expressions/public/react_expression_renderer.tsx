@@ -72,17 +72,16 @@ export default function ReactExpressionRenderer({
   debounce,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) {
-  const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
+  const mountpoint = useRef<HTMLDivElement | null>(null);
   const [state, setState] = useState<State>({ ...defaultState });
   const hasCustomRenderErrorHandler = !!renderError;
-  const expressionLoaderRef: React.MutableRefObject<null | ExpressionLoader> = useRef(null);
+  const expressionLoaderRef = useRef<ExpressionLoader | null>(null);
   // flag to skip next render$ notification,
   // because of just handled error
   const hasHandledErrorRef = useRef(false);
 
   // will call done() in LayoutEffect when done with rendering custom error state
-  const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> =
-    useRef(null);
+  const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
   const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
   const firstRender = useRef(true);
@@ -125,18 +124,12 @@ export default function ReactExpressionRenderer({
               error,
             }));
 
-            if (expressionLoaderOptions.onRenderError) {
-              expressionLoaderOptions.onRenderError(domNode, error, handlers);
-            }
+            expressionLoaderOptions.onRenderError?.(domNode, error, handlers);
           }
         : expressionLoaderOptions.onRenderError,
     });
     if (onEvent) {
-      subs.push(
-        expressionLoaderRef.current.events$.subscribe((event) => {
-          onEvent(event);
-        })
-      );
+      subs.push(expressionLoaderRef.current.events$.subscribe(onEvent));
     }
     if (onData$) {
       subs.push(
@@ -163,11 +156,8 @@ export default function ReactExpressionRenderer({
 
     return () => {
       subs.forEach((s) => s.unsubscribe());
-      if (expressionLoaderRef.current) {
-        expressionLoaderRef.current.destroy();
-        expressionLoaderRef.current = null;
-      }
-
+      expressionLoaderRef.current?.destroy();
+      expressionLoaderRef.current = null;
       errorRenderHandlerRef.current = null;
     };
   }, [
@@ -180,9 +170,7 @@ export default function ReactExpressionRenderer({
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {
-      if (expressionLoaderRef.current) {
-        expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
-      }
+      expressionLoaderRef.current?.update(activeExpression, expressionLoaderOptions);
     });
     return () => subscription?.unsubscribe();
   }, [reload$, activeExpression, ...Object.values(expressionLoaderOptions)]);
@@ -191,8 +179,8 @@ export default function ReactExpressionRenderer({
   useShallowCompareEffect(
     () => {
       // only update the loader if the debounce period is over
-      if (expressionLoaderRef.current && !waitingForDebounceToComplete) {
-        expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
+      if (!waitingForDebounceToComplete) {
+        expressionLoaderRef.current?.update(activeExpression, expressionLoaderOptions);
       }
     },
     // when debounced, wait for debounce status to change to update loader.
