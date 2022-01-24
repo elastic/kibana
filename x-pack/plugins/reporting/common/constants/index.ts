@@ -6,8 +6,9 @@
  */
 
 import * as reportTypes from './report_types';
+import * as jobTypes from './job_types';
 
-const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = reportTypes;
+const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 
 export const PLUGIN_ID = 'reporting';
 
@@ -61,9 +62,13 @@ export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
 // Re-export type definitions here for convenience.
 export * from './report_types';
+export * from './job_types';
 
-type ReportJobTypeDeclaration = typeof reportTypes;
-export type ReportJobTypes = ReportJobTypeDeclaration[keyof ReportJobTypeDeclaration];
+type ReportTypeDeclaration = typeof reportTypes;
+export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
+
+type JobTypeDeclaration = typeof jobTypes;
+export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
