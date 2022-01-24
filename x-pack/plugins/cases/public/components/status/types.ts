@@ -6,6 +6,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { ButtonColor } from '@elastic/eui';
 import { StatusAllType } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 
@@ -14,7 +15,7 @@ export type AllCaseStatus = Record<StatusAllType, { color: string; label: string
 export type Statuses = Record<
   CaseStatuses,
   {
-    color: string;
+    color: ButtonColor;
     label: string;
     icon: EuiIconType;
     actions: {

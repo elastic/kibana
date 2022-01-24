@@ -164,3 +164,7 @@ export const TOTAL_CONNECTORS_METRIC = i18n.translate(
     defaultMessage: 'Total Connectors',
   }
 );
+
+export const METRIC_SUMMARY = i18n.translate('xpack.cases.caseView.metrics.summary', {
+  defaultMessage: 'Summary',
+});

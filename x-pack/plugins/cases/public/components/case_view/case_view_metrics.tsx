@@ -6,8 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
@@ -15,12 +23,8 @@ import {
   ISOLATED_HOSTS_METRIC,
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
+  METRIC_SUMMARY,
 } from './translations';
-
-const MetricValue = styled(EuiFlexItem)`
-  font-size: ${({ theme }) => theme.eui.euiSizeL};
-  font-weight: bold;
-`;
 
 export interface CaseViewMetricsProps {
   metrics: CaseMetrics | null;
@@ -79,13 +83,11 @@ const useMetricItems = (
 const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
   ({ metricItems }) => (
     <>
-      {metricItems.map(({ title, value }, index) => (
-        <EuiFlexItem key={index}>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem>{title}</EuiFlexItem>
-            <MetricValue>{value}</MetricValue>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+      {metricItems.map(({ title, value }) => (
+        <>
+          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>{value}</EuiDescriptionListDescription>
+        </>
       ))}
     </>
   )
@@ -96,17 +98,22 @@ export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
   ({ metrics, features, isLoading }) => {
     const metricItems = useMetricItems(metrics, features);
     return (
-      <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
-        <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false}>
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
-            </EuiFlexItem>
-          ) : (
+      <div data-test-subj="case-view-metrics-panel">
+        <EuiTitle size="xxxs">
+          <h4>{METRIC_SUMMARY}</h4>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        {isLoading ? (
+          <EuiFlexItem>
+            <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
+          </EuiFlexItem>
+        ) : (
+          <EuiDescriptionList textStyle="reverse">
             <CaseViewMetricItems metricItems={metricItems} />
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
+          </EuiDescriptionList>
+        )}
+        <EuiSpacer />
+      </div>
     );
   }
 );

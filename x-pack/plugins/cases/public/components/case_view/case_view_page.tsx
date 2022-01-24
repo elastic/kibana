@@ -6,13 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLoadingContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 
 import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
@@ -344,24 +338,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                 )}
                 {!initLoadingData && (
                   <EuiFlexGroup direction="column" responsive={false}>
-                    {metricsFeatures.length > 0 && (
-                      <>
-                        <EuiFlexItem>
-                          <CaseViewMetrics
-                            data-test-subj="case-view-metrics"
-                            isLoading={isLoadingMetrics}
-                            metrics={metrics}
-                            features={metricsFeatures}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText>
-                            <h4>{i18n.ACTIVITY}</h4>
-                            <EuiHorizontalRule margin="xs" />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </>
-                    )}
                     <EuiFlexItem>
                       <UserActions
                         getRuleDetailsHref={ruleDetailsNavigation?.href}
@@ -396,19 +372,29 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
+                {metricsFeatures.length > 0 && (
+                  <CaseViewMetrics
+                    data-test-subj="case-view-metrics"
+                    isLoading={isLoadingMetrics}
+                    metrics={metrics}
+                    features={metricsFeatures}
+                  />
+                )}
                 <UserList
                   data-test-subj="case-view-user-list-reporter"
                   email={emailContent}
                   headline={i18n.REPORTER}
                   users={[caseData.createdBy]}
                 />
-                <UserList
-                  data-test-subj="case-view-user-list-participants"
-                  email={emailContent}
-                  headline={i18n.PARTICIPANTS}
-                  loading={isLoadingUserActions}
-                  users={participants}
-                />
+                {participants.length > 1 && (
+                  <UserList
+                    data-test-subj="case-view-user-list-participants"
+                    email={emailContent}
+                    headline={i18n.PARTICIPANTS}
+                    loading={isLoadingUserActions}
+                    users={participants}
+                  />
+                )}
                 <TagList
                   data-test-subj="case-view-tag-list"
                   userCanCrud={userCanCrud}
