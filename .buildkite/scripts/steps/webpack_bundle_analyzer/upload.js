@@ -36,7 +36,7 @@ const upload = () => {
   const originalDirectory = process.cwd();
   process.chdir(path.join('.', 'built_assets', 'webpack_bundle_analyzer'));
   try {
-    const reports = execSync(`ls -1d */`)
+    const reports = execSync(`ls -1d ./*`)
       .toString()
       .trim()
       .split('\n')
