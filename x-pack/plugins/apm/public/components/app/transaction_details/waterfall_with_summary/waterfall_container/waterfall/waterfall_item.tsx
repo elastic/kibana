@@ -228,7 +228,12 @@ export function WaterfallItem({
 
         <Duration item={item} />
         <RelatedErrors item={item} errorCount={errorCount} />
-        {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
+        {item.docType === 'span' && (
+          <SyncBadge
+            sync={item.doc.span.sync}
+            agentName={item.doc.agent.name}
+          />
+        )}
       </ItemText>
     </Container>
   );

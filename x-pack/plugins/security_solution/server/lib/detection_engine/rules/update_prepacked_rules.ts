@@ -14,7 +14,6 @@ import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { legacyMigrate } from './utils';
 
 /**
@@ -23,7 +22,6 @@ import { legacyMigrate } from './utils';
  * avoid being a "noisy neighbor".
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
- * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  */
@@ -31,7 +29,6 @@ export const updatePrepackagedRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
-  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
   isRuleRegistryEnabled: boolean
@@ -42,7 +39,6 @@ export const updatePrepackagedRules = async (
       rulesClient,
       savedObjectsClient,
       spaceId,
-      ruleStatusClient,
       ruleChunk,
       outputIndex,
       isRuleRegistryEnabled
@@ -55,7 +51,6 @@ export const updatePrepackagedRules = async (
  * Creates promises of the rules and returns them.
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
- * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  * @returns Promise of what was updated.
@@ -64,7 +59,6 @@ export const createPromises = (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   spaceId: string,
-  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
   isRuleRegistryEnabled: boolean

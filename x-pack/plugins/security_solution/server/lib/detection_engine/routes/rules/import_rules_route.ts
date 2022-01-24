@@ -92,7 +92,6 @@ export const importRulesRoute = (
           savedObjectsClient,
         });
 
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
         if (fileExtension !== '.ndjson') {
@@ -158,7 +157,6 @@ export const importRulesRoute = (
           mlAuthz,
           overwriteRules: request.query.overwrite,
           rulesClient,
-          ruleStatusClient,
           savedObjectsClient,
           exceptionsClient,
           isRuleRegistryEnabled,

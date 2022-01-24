@@ -134,5 +134,6 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
     </EuiFlexGroup>
   );
 };
+EditableTitleComponent.displayName = 'EditableTitle';
 
 export const EditableTitle = React.memo(EditableTitleComponent);
