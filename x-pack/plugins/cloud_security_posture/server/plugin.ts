@@ -43,7 +43,7 @@ export class CspPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
-  private readonly CspAppContextService = new CspAppContextService();
+  private readonly CspAppService = new CspAppContextService();
 
   public setup(
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
@@ -53,7 +53,7 @@ export class CspPlugin
 
     const cspContext: CspAppContext = {
       logger: this.logger,
-      service: this.CspAppContextService,
+      service: this.CspAppService,
       getStartServices: core.getStartServices,
     };
 
@@ -71,7 +71,8 @@ export class CspPlugin
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
     this.logger.debug('csp: Started');
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
-    this.CspAppContextService.start({
+    this.CspAppService.start({
+      // fleet: plugins.fleet,
       ...plugins.fleet,
       logger: this.logger,
       registerIngestCallback,

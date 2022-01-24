@@ -21,7 +21,7 @@ import { CspAppContext } from '../../lib/csp_app_context_services';
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
-type BenchmarksQuerySchema = TypeOf<typeof benchmarksSchema>;
+type BenchmarksQuerySchema = TypeOf<typeof benchmarksInputSchema>;
 
 export interface Benchmark {
   package_policy: Pick<
@@ -39,16 +39,16 @@ export interface Benchmark {
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
 }
 
-const DEFAULT_BENCHMARKS_PER_PAGE = 1000;
+export const DEFAULT_BENCHMARKS_PER_PAGE = 1000;
 
-const getPackagePolicies = async (
+export const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface | undefined,
   packageName: string,
   queryParams: BenchmarksQuerySchema
 ): Promise<PackagePolicy[]> => {
   if (!packagePolicyService) {
-    throw new Error('packagePolicyService client is undefined');
+    throw new Error('packagePolicyService is undefined');
   }
 
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
@@ -60,13 +60,13 @@ const getPackagePolicies = async (
   return packagePolicies;
 };
 
-const getAgentPolicies = async (
+export const getAgentPolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface | undefined
 ): Promise<AgentPolicy[] | undefined> => {
-  if (!packagePolicies) {
-    throw new Error('packagePolicies client is undefined');
+  if (!agentPolicyService) {
+    throw new Error('agentPolicyService is undefined');
   }
 
   const agentPolicyIds = uniq(map(packagePolicies, 'policy_id'));
@@ -75,15 +75,15 @@ const getAgentPolicies = async (
   return agentPolicies;
 };
 
-const addRunningAgentToAgentPolicy = async (
+export const addRunningAgentToAgentPolicy = async (
   agentService: AgentService | undefined,
   agentPolicies: AgentPolicy[] | undefined
 ): Promise<GetAgentPoliciesResponseItem[]> => {
   if (!agentService) {
-    throw new Error('agentService client is undefined');
+    throw new Error('agentService is undefined');
   }
 
-  if (!agentPolicies?.length || !agentService) return [];
+  if (!agentPolicies?.length) return [];
   return Promise.all(
     agentPolicies.map((agentPolicy) =>
       agentService?.asInternalUser
@@ -96,7 +96,7 @@ const addRunningAgentToAgentPolicy = async (
   );
 };
 
-const createBenchmarkEntry = (
+export const createBenchmarkEntry = (
   agentPolicy: GetAgentPoliciesResponseItem,
   packagePolicy: PackagePolicy
 ): Benchmark => ({
@@ -143,7 +143,7 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: benchmarksSchema },
+      validate: { query: benchmarksInputSchema },
     },
     async (context, request, response) => {
       try {
@@ -178,7 +178,7 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
     }
   );
 
-const benchmarksSchema = rt.object({
+export const benchmarksInputSchema = rt.object({
   /**
    * The page of objects to return
    */

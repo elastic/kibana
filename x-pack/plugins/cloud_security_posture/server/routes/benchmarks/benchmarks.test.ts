@@ -1,303 +1,224 @@
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0; you may not use this file except in compliance with the Elastic License
-//  * 2.0.
-//  */
-// import {
-//   elasticsearchClientMock,
-//   ElasticsearchClientMock,
-//   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// } from 'src/core/server/elasticsearch/client/mocks';
-// // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// import { KibanaRequest } from 'src/core/server/http/router/request';
-// import { httpServerMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-// import {
-//   defineFindingsIndexRoute,
-//   findingsInputSchema,
-//   DEFAULT_FINDINGS_PER_PAGE,
-// } from './findings';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { httpServiceMock, loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import {
+  defineGetBenchmarksRoute,
+  benchmarksInputSchema,
+  DEFAULT_BENCHMARKS_PER_PAGE,
+  getPackagePolicies,
+  getAgentPolicies,
+  addRunningAgentToAgentPolicy,
+  createBenchmarkEntry,
+} from './benchmarks';
+import { CoreSetup, SavedObjectsClientContract } from 'src/core/server';
+import { coreMock } from 'src/core/server/mocks';
+import {
+  createMockAgentPolicyService,
+  createMockAgentService,
+  createPackagePolicyServiceMock,
+} from '../../../../fleet/server/mocks';
+import { createPackagePolicyMock } from '../../../../fleet/common/mocks';
+import { AgentPolicy } from '../../../../fleet/common';
 
-// export const getMockCspContext = (mockEsClient: ElasticsearchClientMock): KibanaRequest => {
-//   return {
-//     core: {
-//       elasticsearch: {
-//         client: { asCurrentUser: mockEsClient },
-//       },
-//     },
-//   } as unknown as KibanaRequest;
-// };
+import { CspAppContext, CspAppContextService } from '../../lib/csp_app_context_services';
+import { CspServerPluginStart, CspServerPluginStartDeps } from '../../types';
 
-// describe('benchmarks API', () => {
-//   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
+  return {
+    id: 'some-uuid1',
+    namespace: 'default',
+    monitoring_enabled: [],
+    name: 'Test Policy',
+    description: '',
+    is_default: false,
+    is_preconfigured: false,
+    status: 'active',
+    is_managed: false,
+    revision: 1,
+    updated_at: '',
+    updated_by: 'elastic',
+    package_policies: [],
+    ...props,
+  };
+}
+describe('benchmarks API', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
-//   beforeEach(() => {
-//     logger = loggingSystemMock.createLogger();
-//   });
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
 
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//   });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-//   it('validate the API route path', async () => {
-//     const router = httpServiceMock.createRouter();
-//     defineFindingsIndexRoute(router, logger);
+  it('validate the API route path', async () => {
+    const cspAppContextService = new CspAppContextService();
+    const router = httpServiceMock.createRouter();
+    // const initializerContext = coreMock.createPluginInitializerContext({});
+    const coreSetup = coreMock.createSetup() as CoreSetup<
+      CspServerPluginStartDeps,
+      CspServerPluginStart
+    >;
+    // const coreStart = coreMock.createInternalStart();
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+      getStartServices: coreSetup.getStartServices,
+    };
+    defineGetBenchmarksRoute(router, cspContext);
 
-//     const [config, _] = router.get.mock.calls[0];
+    const [config, _] = router.get.mock.calls[0];
 
-//     expect(config.path).toEqual('/api/csp/findings');
-//   });
+    expect(config.path).toEqual('/api/csp/benchmarks');
+  });
+});
 
-//   describe('test input schema', () => {
-//     it('expect to find default values', async () => {
-//       const validatedQuery = findingsInputSchema.validate({});
+describe('test input schema', () => {
+  it('expect to find default values', async () => {
+    const validatedQuery = benchmarksInputSchema.validate({});
 
-//       expect(validatedQuery).toMatchObject({
-//         page: 1,
-//         per_page: DEFAULT_FINDINGS_PER_PAGE,
-//         sort_order: expect.stringMatching('desc'),
-//       });
-//     });
+    expect(validatedQuery).toMatchObject({
+      page: 1,
+      per_page: DEFAULT_BENCHMARKS_PER_PAGE,
+    });
+  });
 
-//     it('should throw when page field is not a positive integer', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ page: -2 });
-//       }).toThrow();
-//     });
+  it('should throw when page field is not a positive integer', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ page: -2 });
+    }).toThrow();
+  });
 
-//     it('should throw when per_page field is not a positive integer', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ per_page: -2 });
-//       }).toThrow();
-//     });
+  it('should throw when per_page field is not a positive integer', async () => {
+    expect(() => {
+      benchmarksInputSchema.validate({ per_page: -2 });
+    }).toThrow();
+  });
+});
+describe('test benchmarks utils', () => {
+  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
 
-//     it('should throw when latest_run is not a boolean', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ latest_cycle: 'some string' }); // expects to get boolean
-//       }).toThrow();
-//     });
+  beforeEach(() => {
+    mockSoClient = savedObjectsClientMock.create();
+  });
 
-//     it('should not throw when latest_run is a boolean', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ latest_cycle: true });
-//       }).not.toThrow();
-//     });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-//     it('should throw when sort_field is not string', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ sort_field: true });
-//       }).toThrow();
-//     });
+  describe('test getPackagePolicies', () => {
+    it('should throw when agentPolicyService is undefined', async () => {
+      const mockAgentPolicyService = undefined;
+      expect(
+        getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+          page: 1,
+          per_page: 100,
+        })
+      ).rejects.toThrow();
+    });
 
-//     it('should not throw when sort_field is a string', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ sort_field: 'field1' });
-//       }).not.toThrow();
-//     });
+    it('should format request by package name', async () => {
+      const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-//     it('should throw when sort_order is not `asc` or `desc`', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ sort_order: 'Other Direction' });
-//       }).toThrow();
-//     });
+      await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+        page: 1,
+        per_page: 100,
+      });
 
-//     it('should not throw when `asc` is input for sort_order field', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ sort_order: 'asc' });
-//       }).not.toThrow();
-//     });
+      expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+        expect.objectContaining({
+          kuery: 'ingest-package-policies.package.name:myPackage',
+          page: 1,
+          perPage: 100,
+        })
+      );
+    });
+  });
 
-//     it('should not throw when `desc` is input for sort_order field', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ sort_order: 'desc' });
-//       }).not.toThrow();
-//     });
+  describe('test getAgentPolicies', () => {
+    it('should throw when agentPolicyService is undefined', async () => {
+      const agentPolicyService = undefined;
+      expect(getAgentPolicies(mockSoClient, [], agentPolicyService)).rejects.toThrow();
+    });
 
-//     it('should throw when fields is not string', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ fields: ['field1', 'field2'] });
-//       }).toThrow();
-//     });
+    it('should return one agent policy id when there is duplication', async () => {
+      const agentPolicyService = createMockAgentPolicyService();
+      const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-//     it('should not throw when fields is a string', async () => {
-//       expect(() => {
-//         findingsInputSchema.validate({ sort_field: 'field1, field2' });
-//       }).not.toThrow();
-//     });
-//   });
+      await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
-//   describe('test query building', () => {
-//     it('takes cycle_id and validate the filter was built right', async () => {
-//       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-//       const router = httpServiceMock.createRouter();
-//       defineFindingsIndexRoute(router, logger);
+      expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
+    });
 
-//       const [_, handler] = router.get.mock.calls[0];
-//       const mockContext = getMockCspContext(mockEsClient);
-//       const mockResponse = httpServerMock.createResponseFactory();
-//       const mockRequest = httpServerMock.createKibanaRequest({
-//         query: { latest_cycle: true },
-//       });
+    it('should return full policy ids list when there is no id duplication', async () => {
+      const agentPolicyService = createMockAgentPolicyService();
 
-//       mockEsClient.search.mockResolvedValueOnce(
-//         // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-//         elasticsearchClientMock.createSuccessTransportRequestPromise({
-//           aggregations: {
-//             group: {
-//               buckets: [
-//                 {
-//                   group_docs: {
-//                     hits: {
-//                       hits: [{ fields: { 'run_id.keyword': ['randomId1'] } }],
-//                     },
-//                   },
-//                 },
-//               ],
-//             },
-//           },
-//         })
-//       );
+      const packagePolicy1 = createPackagePolicyMock();
+      const packagePolicy2 = createPackagePolicyMock();
+      packagePolicy2.policy_id = 'AnotherId';
+      const packagePolicies = [packagePolicy1, packagePolicy2];
 
-//       const [context, req, res] = [mockContext, mockRequest, mockResponse];
+      await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
-//       await handler(context, req, res);
+      expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
+    });
+  });
 
-//       expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+  describe('test addRunningAgentsToAgentPolicy', () => {
+    it('should throw when agentService is undefined', async () => {
+      const agentService = undefined;
 
-//       const handlerArgs = mockEsClient.search.mock.calls[1][0];
+      const agentPolicies = [createMockAgentPolicy(), createMockAgentPolicy()];
 
-//       expect(handlerArgs).toMatchObject({
-//         query: {
-//           bool: {
-//             filter: [{ term: { 'run_id.keyword': 'randomId1' } }],
-//           },
-//         },
-//       });
-//     });
+      expect(addRunningAgentToAgentPolicy(agentService, agentPolicies)).rejects.toThrow();
+    });
 
-//     it('validate that default sort is timestamp desc', async () => {
-//       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-//       const router = httpServiceMock.createRouter();
-//       defineFindingsIndexRoute(router, logger);
-//       const [_, handler] = router.get.mock.calls[0];
-//       const mockContext = getMockCspContext(mockEsClient);
-//       const mockResponse = httpServerMock.createResponseFactory();
-//       const mockRequest = httpServerMock.createKibanaRequest({
-//         query: {
-//           sort_order: 'desc',
-//         },
-//       });
+    it('should return empty array when agentPolicies is undefined', async () => {
+      const agentService = createMockAgentService();
+      const agentPolicies = undefined;
 
-//       const [context, req, res] = [mockContext, mockRequest, mockResponse];
+      const enrichAgentPolicy = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
 
-//       await handler(context, req, res);
+      expect(enrichAgentPolicy).toMatchObject([]);
+    });
+  });
 
-//       const handlerArgs = mockEsClient.search.mock.calls[0][0];
+  describe('test createBenchmarkEntry', () => {
+    it('should throw when agentService is undefined', async () => {
+      const agentService = undefined;
 
-//       expect(handlerArgs).toMatchObject({
-//         sort: [{ '@timestamp': { order: 'desc' } }],
-//       });
-//     });
+      const agentPolicies = [createMockAgentPolicy(), createMockAgentPolicy()];
 
-//     it('should build sort request by `sort_field` and `sort_order` - asc', async () => {
-//       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-//       const router = httpServiceMock.createRouter();
-//       defineFindingsIndexRoute(router, logger);
-//       const [_, handler] = router.get.mock.calls[0];
-//       const mockContext = getMockCspContext(mockEsClient);
-//       const mockResponse = httpServerMock.createResponseFactory();
-//       const mockRequest = httpServerMock.createKibanaRequest({
-//         query: {
-//           sort_field: 'agent.id',
-//           sort_order: 'asc',
-//         },
-//       });
+      expect(addRunningAgentToAgentPolicy(agentService, agentPolicies)).rejects.toThrow();
+    });
 
-//       const [context, req, res] = [mockContext, mockRequest, mockResponse];
+    it('should build benchmark entry agent policy and package policy', async () => {
+      const packagePolicy = createPackagePolicyMock();
+      const agentPolicy = createMockAgentPolicy();
+      // @ts-expect-error
+      agentPolicy.agents = 3;
 
-//       await handler(context, req, res);
+      const enrichAgentPolicy = await createBenchmarkEntry(agentPolicy, packagePolicy);
 
-//       const handlerArgs = mockEsClient.search.mock.calls[0][0];
-
-//       expect(handlerArgs).toMatchObject({
-//         sort: [{ 'agent.id': 'asc' }],
-//       });
-//     });
-
-//     it('should build sort request by `sort_field` and `sort_order` - desc', async () => {
-//       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-//       const router = httpServiceMock.createRouter();
-//       defineFindingsIndexRoute(router, logger);
-//       const [_, handler] = router.get.mock.calls[0];
-//       const mockContext = getMockCspContext(mockEsClient);
-//       const mockResponse = httpServerMock.createResponseFactory();
-//       const mockRequest = httpServerMock.createKibanaRequest({
-//         query: {
-//           sort_field: 'agent.id',
-//           sort_order: 'desc',
-//         },
-//       });
-
-//       const [context, req, res] = [mockContext, mockRequest, mockResponse];
-
-//       await handler(context, req, res);
-
-//       const handlerArgs = mockEsClient.search.mock.calls[0][0];
-
-//       expect(handlerArgs).toMatchObject({
-//         sort: [{ 'agent.id': 'desc' }],
-//       });
-//     });
-
-//     it('takes `page_number` and `per_page` validate that the requested selected page was called', async () => {
-//       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-//       const router = httpServiceMock.createRouter();
-//       defineFindingsIndexRoute(router, logger);
-//       const [_, handler] = router.get.mock.calls[0];
-//       const mockContext = getMockCspContext(mockEsClient);
-//       const mockResponse = httpServerMock.createResponseFactory();
-//       const mockRequest = httpServerMock.createKibanaRequest({
-//         query: {
-//           per_page: 10,
-//           page: 3,
-//         },
-//       });
-
-//       const [context, req, res] = [mockContext, mockRequest, mockResponse];
-//       await handler(context, req, res);
-
-//       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-//       const handlerArgs = mockEsClient.search.mock.calls[0][0];
-
-//       expect(handlerArgs).toMatchObject({
-//         from: 20,
-//         size: 10,
-//       });
-//     });
-
-//     it('should format request by fields filter', async () => {
-//       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-//       const router = httpServiceMock.createRouter();
-//       defineFindingsIndexRoute(router, logger);
-//       const [_, handler] = router.get.mock.calls[0];
-
-//       const mockContext = getMockCspContext(mockEsClient);
-//       const mockResponse = httpServerMock.createResponseFactory();
-//       const mockRequest = httpServerMock.createKibanaRequest({
-//         query: {
-//           fields: 'field1,field2,field3',
-//         },
-//       });
-
-//       const [context, req, res] = [mockContext, mockRequest, mockResponse];
-
-//       await handler(context, req, res);
-
-//       const handlerArgs = mockEsClient.search.mock.calls[0][0];
-
-//       expect(handlerArgs).toMatchObject({
-//         _source: ['field1', 'field2', 'field3'],
-//       });
-//     });
-//   });
-// });
+      expect(enrichAgentPolicy).toMatchObject({
+        package_policy: {
+          id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+          name: 'endpoint-1',
+          policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+          namespace: 'default',
+          updated_at: '2020-06-25T16:03:38.159292',
+          updated_by: 'kibana',
+          created_at: '2020-06-25T16:03:38.159292',
+          created_by: 'kibana',
+          package: [{ id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1', name: 'endpoint-1' }],
+        },
+        agent_policy: { id: 'some-uuid1', name: 'Test Policy', agents: 3 },
+      });
+    });
+  });
+});
