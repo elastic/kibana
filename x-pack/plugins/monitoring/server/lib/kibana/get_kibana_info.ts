@@ -12,6 +12,8 @@ import { checkParam, MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 import { buildKibanaInfo } from './build_kibana_info';
 
 export function handleResponse(resp: ElasticsearchResponse) {
@@ -32,13 +34,16 @@ export function handleResponse(resp: ElasticsearchResponse) {
 
 export function getKibanaInfo(
   req: LegacyRequest,
-  kbnIndexPattern: string,
   { clusterUuid, kibanaUuid }: { clusterUuid: string; kibanaUuid: string }
 ) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanaInfo');
-
+  const moduleType = 'kibana';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+  });
   const params = {
-    index: kbnIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     filter_path: [
