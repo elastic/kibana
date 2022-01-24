@@ -9,11 +9,12 @@ import React, { Component } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ML_ANOMALY_LAYERS } from './util';
+import { ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
+import { ACTUAL_LABEL, TYPICAL_LABEL, TYPICAL_TO_ACTUAL } from './anomaly_source_field';
 
 interface Props {
-  onChange: (typicalActual: ML_ANOMALY_LAYERS) => void;
-  typicalActual: ML_ANOMALY_LAYERS;
+  onChange: (typicalActual: MlAnomalyLayersType) => void;
+  typicalActual: MlAnomalyLayersType;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -33,7 +34,7 @@ export class LayerSelector extends Component<Props, State> {
   }
 
   onSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    const typicalActual: ML_ANOMALY_LAYERS = selectedOptions[0].value! as ML_ANOMALY_LAYERS;
+    const typicalActual: MlAnomalyLayersType = selectedOptions[0].value! as MlAnomalyLayersType;
     if (this._isMounted) {
       this.setState({ typicalActual });
       this.props.onChange(typicalActual);
@@ -55,21 +56,15 @@ export class LayerSelector extends Component<Props, State> {
           options={[
             {
               value: ML_ANOMALY_LAYERS.ACTUAL,
-              label: i18n.translate('xpack.ml.maps.actualLabel', {
-                defaultMessage: ML_ANOMALY_LAYERS.ACTUAL,
-              }),
+              label: ACTUAL_LABEL,
             },
             {
               value: ML_ANOMALY_LAYERS.TYPICAL,
-              label: i18n.translate('xpack.ml.maps.typicalLabel', {
-                defaultMessage: ML_ANOMALY_LAYERS.TYPICAL,
-              }),
+              label: TYPICAL_LABEL,
             },
             {
               value: ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL,
-              label: i18n.translate('xpack.ml.maps.typicalToActualLabel', {
-                defaultMessage: ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL,
-              }),
+              label: TYPICAL_TO_ACTUAL,
             },
           ]}
           selectedOptions={options}

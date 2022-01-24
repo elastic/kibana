@@ -13,11 +13,13 @@ import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { VectorSourceRequestMeta } from '../../../maps/common';
 
-export enum ML_ANOMALY_LAYERS {
-  TYPICAL = 'typical',
-  ACTUAL = 'actual',
-  TYPICAL_TO_ACTUAL = 'typical to actual',
-}
+export const ML_ANOMALY_LAYERS = {
+  TYPICAL: 'typical',
+  ACTUAL: 'actual',
+  TYPICAL_TO_ACTUAL: 'typical to actual',
+} as const;
+
+export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
@@ -32,7 +34,7 @@ function getCoordinates(actualCoordinateStr: string, round: boolean = false): nu
 export async function getResultsForJobId(
   mlResultsService: MlApiServices['results'],
   jobId: string,
-  locationType: ML_ANOMALY_LAYERS,
+  locationType: MlAnomalyLayersType,
   searchFilters: VectorSourceRequestMeta
 ): Promise<FeatureCollection> {
   const { timeFilters } = searchFilters;

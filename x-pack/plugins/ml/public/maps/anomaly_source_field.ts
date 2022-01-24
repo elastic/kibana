@@ -15,6 +15,16 @@ import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
 import { Filter } from '../../../../../src/plugins/data/public';
 
+export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
+  defaultMessage: 'Actual',
+});
+export const TYPICAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {
+  defaultMessage: 'Typical',
+});
+export const TYPICAL_TO_ACTUAL = i18n.translate('xpack.ml.maps.anomalyLayerTypicalToActualLabel', {
+  defaultMessage: 'Typical to actual',
+});
+
 export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
   record_score: {
     label: i18n.translate('xpack.ml.maps.anomalyLayerRecordScoreLabel', {
@@ -43,17 +53,13 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
   // this value is only used to place the point on the map
   actual: {},
   actualDisplay: {
-    label: i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
-      defaultMessage: 'Actual',
-    }),
+    label: ACTUAL_LABEL,
     type: 'string',
   },
   // this value is only used to place the point on the map
   typical: {},
   typicalDisplay: {
-    label: i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {
-      defaultMessage: 'Typical',
-    }),
+    label: TYPICAL_LABEL,
     type: 'string',
   },
   partition_field_name: {
