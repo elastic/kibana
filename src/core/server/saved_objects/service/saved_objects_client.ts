@@ -19,6 +19,7 @@ import type {
 } from './lib';
 import {
   SavedObject,
+  SavedObjectAttributes,
   SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
@@ -134,7 +135,9 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
  *
  * @public
  */
-export interface SavedObjectsBulkResponse<T = unknown> {
+export interface SavedObjectsBulkResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -142,7 +145,8 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+export interface SavedObjectsFindResult<T extends Record<string, unknown> = SavedObjectAttributes>
+  extends SavedObject<T> {
   /**
    * The Elasticsearch `_score` of this result.
    */
@@ -186,7 +190,10 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
  *
  * @public
  */
-export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+export interface SavedObjectsFindResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes,
+  A = unknown
+> {
   aggregations?: A;
   saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
@@ -295,7 +302,9 @@ export interface SavedObjectsBulkGetObject {
  *
  * @public
  */
-export interface SavedObjectsBulkResponse<T = unknown> {
+export interface SavedObjectsBulkResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -303,7 +312,9 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateResponse<T = unknown> {
+export interface SavedObjectsBulkUpdateResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> {
   saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -311,8 +322,9 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsUpdateResponse<T = unknown>
-  extends Omit<SavedObject<T>, 'attributes' | 'references'> {
+export interface SavedObjectsUpdateResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
   references: SavedObjectReference[] | undefined;
 }
@@ -330,7 +342,9 @@ export interface SavedObjectsBulkResolveObject {
  *
  * @public
  */
-export interface SavedObjectsBulkResolveResponse<T = unknown> {
+export interface SavedObjectsBulkResolveResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> {
   resolved_objects: Array<SavedObjectsResolveResponse<T>>;
 }
 
@@ -338,7 +352,9 @@ export interface SavedObjectsBulkResolveResponse<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsResolveResponse<T = unknown> {
+export interface SavedObjectsResolveResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> {
   /**
    * The saved object that was found.
    */
@@ -481,7 +497,7 @@ export class SavedObjectsClient {
    *
    * @param options
    */
-  async find<T = unknown, A = unknown>(
+  async find<T extends Record<string, unknown> = SavedObjectAttributes, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
@@ -498,7 +514,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T = unknown>(
+  async bulkGet<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -512,7 +528,7 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async get<T = unknown>(
+  async get<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -535,7 +551,7 @@ export class SavedObjectsClient {
    * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to
    * `bulkResolve`; the regular `resolve` API will throw an error instead.
    */
-  async bulkResolve<T = unknown>(
+  async bulkResolve<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: SavedObjectsBulkResolveObject[],
     options?: SavedObjectsBaseOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
@@ -549,7 +565,7 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async resolve<T = unknown>(
+  async resolve<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -564,7 +580,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async update<T = unknown>(
+  async update<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -578,7 +594,7 @@ export class SavedObjectsClient {
    *
    * @param objects
    */
-  async bulkUpdate<T = unknown>(
+  async bulkUpdate<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
