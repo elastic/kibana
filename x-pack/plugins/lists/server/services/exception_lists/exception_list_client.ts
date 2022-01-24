@@ -17,6 +17,7 @@ import {
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
   ExtensionPointStorageClientInterface,
@@ -70,14 +71,16 @@ import {
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 import {
+  PromiseFromStreams,
+  importExceptions,
   importExceptionsAsArray,
-  importExceptionsAsStream,
 } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
   validateData,
 } from './utils';
+import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -702,13 +705,36 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptionsAsStream({
+    // validation of import and sorting of lists and items
+    const readStream = createExceptionsStreamFromNdjson(maxExceptionsImportSize);
+    const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
       exceptionsToImport,
-      maxExceptionsImportSize,
+      ...readStream,
+    ]);
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreImport',
+        parsedObjects,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return importExceptions({
+      exceptions: parsedObjects,
       overwrite,
       savedObjectsClient,
       user,
     });
+
+    // FIXME:PT Should the `importExceptionsAsStream()` just be deleted? since it is now not used anywhere?
+    // return importExceptionsAsStream({
+    //   exceptionsToImport,
+    //   maxExceptionsImportSize,
+    //   overwrite,
+    //   savedObjectsClient,
+    //   user,
+    // });
   };
 
   /**

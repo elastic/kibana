@@ -136,7 +136,7 @@ export const importExceptionsAsArray = async ({
   });
 };
 
-const importExceptions = async ({
+export const importExceptions = async ({
   exceptions,
   overwrite,
   savedObjectsClient,

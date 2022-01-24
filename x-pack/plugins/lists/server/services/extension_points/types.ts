@@ -12,6 +12,7 @@ import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
+import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
 
 /**
  * The `this` context provided to extension point's callback function
@@ -54,6 +55,14 @@ interface ServerExtensionPointDefinition<
 }
 
 /**
+ * Extension point is triggered prior processing an import of data into the Exceptions Lists
+ */
+export type ExceptionsListPreImportServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreImport',
+  PromiseFromStreams
+>;
+
+/**
  * Extension point is triggered prior to creating a new Exception List Item. Throw'ing will cause
  * the create operation to fail
  */
@@ -72,6 +81,7 @@ export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDef
 >;
 
 export type ExtensionPoint =
+  | ExceptionsListPreImportServerExtension
   | ExceptionsListPreCreateItemServerExtension
   | ExceptionsListPreUpdateItemServerExtension;
 
