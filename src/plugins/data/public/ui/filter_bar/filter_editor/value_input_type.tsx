@@ -15,6 +15,7 @@ import { validateParams } from './lib/filter_editor_utils';
 interface Props {
   value?: string | number;
   type: string;
+  esTypes?: string[];
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;
@@ -36,6 +37,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
+            isInvalid={!validateParams(value, this.props.type, this.props.esTypes)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -63,7 +65,9 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            isInvalid={
+              !isEmpty(value) && !validateParams(value, this.props.type, this.props.esTypes)
+            }
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -77,7 +81,9 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.type)}
+            isInvalid={
+              !isEmpty(value) && !validateParams(value, this.props.type, this.props.esTypes)
+            }
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />

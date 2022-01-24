@@ -8,6 +8,8 @@
 
 import dateMath from '@elastic/datemath';
 import { Filter, FieldFilter } from '@kbn/es-query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import isSemverValid from 'semver/functions/valid';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
@@ -27,11 +29,13 @@ export function getFilterableFields(indexPattern: IIndexPattern) {
 
 export function getOperatorOptions(field: IFieldType) {
   return FILTER_OPERATORS.filter((operator) => {
-    return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
+    if (operator.field) return operator.field(field);
+    if (operator.fieldTypes) return operator.fieldTypes.includes(field.type);
+    return true;
   });
 }
 
-export function validateParams(params: any, type: string) {
+export function validateParams(params: any, type: string, esTypes?: string[]) {
   switch (type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
@@ -42,6 +46,11 @@ export function validateParams(params: any, type: string) {
       } catch (e) {
         return false;
       }
+    case 'string':
+      if (esTypes?.includes(ES_FIELD_TYPES.VERSION)) {
+        return isSemverValid(params);
+      }
+      return true;
     default:
       return true;
   }
@@ -63,14 +72,14 @@ export function isFilterValid(
       if (!Array.isArray(params) || !params.length) {
         return false;
       }
-      return params.every((phrase) => validateParams(phrase, field.type));
+      return params.every((phrase) => validateParams(phrase, field.type, field.esTypes));
     case 'range':
       if (typeof params !== 'object') {
         return false;
       }
       return (
-        (!params.from || validateParams(params.from, field.type)) &&
-        (!params.to || validateParams(params.to, field.type))
+        (!params.from || validateParams(params.from, field.type, field.esTypes)) &&
+        (!params.to || validateParams(params.to, field.type, field.esTypes))
       );
     case 'exists':
       return true;

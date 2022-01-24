@@ -70,6 +70,7 @@ function RangeValueInputUI(props: Props) {
           <ValueInputType
             controlOnly
             type={type}
+            esTypes={props.field?.esTypes}
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
             onBlur={(value) => {
@@ -85,6 +86,7 @@ function RangeValueInputUI(props: Props) {
           <ValueInputType
             controlOnly
             type={type}
+            esTypes={props.field?.esTypes}
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}
             onBlur={(value) => {
