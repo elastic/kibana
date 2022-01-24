@@ -44,6 +44,17 @@ describe('Add Integration', () => {
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
   }
 
+  it('should install integration without policy', () => {
+    cy.visit('/app/integrations/detail/tomcat-1.2.1/settings');
+
+    cy.get('.euiButton').contains('Install Apache Tomcat assets').click();
+    cy.get('.euiCallOut').contains('This action will install 1 assets');
+    cy.getBySel(CONFIRM_MODAL_BTN).click();
+
+    cy.get('.euiLoadingSpinner').should('not.exist');
+    cy.getBySel('installedVersion').contains('1.2.1');
+  });
+
   describe('Real API', () => {
     afterEach(() => {
       deleteIntegrations(integration);
@@ -74,7 +85,7 @@ describe('Add Integration', () => {
         cy.get('.euiLoadingSpinner').should('not.exist');
         cy.get('input[placeholder="Search for integrations"]').type('Apache');
         cy.get(INTEGRATIONS_CARD).contains(integration).click();
-        addIntegration();
+        addIntegration({ useExistingPolicy: true });
         cy.get('.euiBasicTable-loading').should('not.exist');
         cy.get('.euiTitle').contains('Agent policy 1');
         clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
@@ -87,7 +98,7 @@ describe('Add Integration', () => {
       installPackageWithVersion('apache', oldVersion);
       navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
 
-      addIntegration();
+      addIntegration({ useExistingPolicy: true });
 
       cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
       cy.getBySel(PACKAGE_VERSION).contains(oldVersion);
@@ -112,7 +123,7 @@ describe('Add Integration', () => {
       installPackageWithVersion('apache', oldVersion);
       navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
 
-      addIntegration();
+      addIntegration({ useExistingPolicy: true });
 
       cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
       cy.getBySel(PACKAGE_VERSION).contains(oldVersion);
@@ -138,21 +149,5 @@ describe('Add Integration', () => {
         cy.getBySel(PACKAGE_VERSION).contains(newVersion);
       });
     });
-  });
-
-  it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat-1.2.1/settings');
-
-    cy.get('.euiButton').contains('Install Apache Tomcat assets').click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
-
-    cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.getBySel('installedVersion').contains('1.2.1');
-
-    cy.get('.euiButton').contains('Uninstall Apache Tomcat').click();
-    cy.getBySel(CONFIRM_MODAL_BTN).click();
-    cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.get('.euiButton').contains('Install Apache Tomcat assets');
   });
 });

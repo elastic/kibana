@@ -50,6 +50,7 @@ export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Pr
         onChange={() => {
           updateSysMonitoring(!withSysMonitoring);
         }}
+        data-test-subj="agentPolicyFormSystemMonitoringCheckbox"
       />
     </EuiFormRow>
   );

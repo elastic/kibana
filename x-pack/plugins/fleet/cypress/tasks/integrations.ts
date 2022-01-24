@@ -16,6 +16,12 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
   cy.getBySel(ADD_POLICY_BTN).click();
   if (useExistingPolicy) {
     cy.get('#existing').click();
+  } else {
+    // speeding up creating with unchecking system and agent integration
+    cy.getBySel('agentPolicyFormSystemMonitoringCheckbox').uncheck({ force: true });
+    cy.getBySel('advancedOptionsBtn').find('.euiAccordion__button').click();
+    cy.get('*[id^="logs_"]').uncheck({ force: true });
+    cy.get('*[id^="metrics_"]').uncheck({ force: true });
   }
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
