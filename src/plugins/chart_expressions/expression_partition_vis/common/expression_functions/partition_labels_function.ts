@@ -71,7 +71,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
     },
     // Deprecated
     truncate: {
-      types: ['number'],
+      types: ['number', 'null'],
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.truncate.help', {
         defaultMessage:
           'Defines the number of characters that the slice value will display only for multilayer pie/donut charts',
