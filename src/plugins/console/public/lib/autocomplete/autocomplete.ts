@@ -762,22 +762,27 @@ export default function ({
         break;
       default:
         if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
-          const { position, value } = nonEmptyToken;
+          const { position } = nonEmptyToken;
+          if (
+            // if not on the first line
+            context.rangeToReplace &&
+            context.rangeToReplace.start &&
+            context.rangeToReplace.start.lineNumber > 1
+          ) {
+            const startColumn = context.rangeToReplace.start.column;
+            const prevTokenLineNumber = position.lineNumber;
+            const prevLineLength = context.editor?.getLineValue(prevTokenLineNumber).length ?? 0;
 
-          // We can not rely on prefixToAdd here, because it adds a comma at the beginning of the new token
-          // Since we have access to the position of the previous token here, this could be a good place to insert a comma manually
-          context.prefixToAdd = '';
-          // Insert comma only when user moves to the next
-          if (context.textBoxPosition && position.lineNumber < context.textBoxPosition.lineNumber) {
-            editor.insert(
-              {
-                column: position.column + value.length,
-                lineNumber: position.lineNumber,
-              },
-              ', '
-            );
+            // go back to the end of the previous line
+            context.rangeToReplace = {
+              start: { lineNumber: prevTokenLineNumber, column: prevLineLength + 1 },
+              end: { ...context.rangeToReplace.end }
+            };
+            const linesToEnter = context.rangeToReplace.end.lineNumber - prevTokenLineNumber;
+            const spacesToFill = linesToEnter > 0 ? startColumn - 1 : 1;
+            // add a comma at the end of the previous line, a new line and indentation
+            context.prefixToAdd = ',' + '\n'.repeat(linesToEnter) + ' '.repeat(spacesToFill);
           }
-        }
     }
 
     return context;
