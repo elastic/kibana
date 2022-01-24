@@ -13,6 +13,7 @@ import { ExtensionPointStorage } from './extension_point_storage';
 import {
   ExceptionsListPreCreateItemServerExtension,
   ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreUpdateItemServerExtension,
   ExtensionPointStorageInterface,
   ServerExtensionCallbackContext,
@@ -28,6 +29,8 @@ export interface ExtensionPointStorageContextMock {
   exceptionPreUpdate: jest.Mocked<ExceptionsListPreUpdateItemServerExtension>;
   /** An Exception List Item pre-get extension point added to the storage */
   exceptionPreGetOne: jest.Mocked<ExceptionsListPreGetOneItemServerExtension>;
+  /** an exception list pre-find extension when searching a single list */
+  exceptionPreSingleListFind: jest.Mocked<ExceptionsListPreSingleListFindServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
 }
 
@@ -63,9 +66,18 @@ export const createExtensionPointStorageMock = (
     type: 'exceptionsListPreGetOneItem',
   };
 
+  const exceptionPreSingleListFind: ExtensionPointStorageContextMock['exceptionPreSingleListFind'] =
+    {
+      callback: jest.fn(async ({ data }) => {
+        return data;
+      }),
+      type: 'exceptionsListPreSingleListFind',
+    };
+
   extensionPointStorage.add(exceptionPreCreate);
   extensionPointStorage.add(exceptionPreUpdate);
   extensionPointStorage.add(exceptionPreGetOne);
+  extensionPointStorage.add(exceptionPreSingleListFind);
 
   return {
     callbackContext: {
@@ -73,6 +85,7 @@ export const createExtensionPointStorageMock = (
     },
     exceptionPreCreate,
     exceptionPreGetOne,
+    exceptionPreSingleListFind,
     exceptionPreUpdate,
     extensionPointStorage,
     logger,

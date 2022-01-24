@@ -187,6 +187,23 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreGetOne.callback;
         },
       ],
+      [
+        'findExceptionListItem',
+        (): ReturnType<ExceptionListClient['findEndpointListItem']> => {
+          return exceptionListClient.findExceptionListItem({
+            filter: undefined,
+            listId: 'one',
+            namespaceType: 'agnostic',
+            page: 1,
+            perPage: 1,
+            sortField: 'name',
+            sortOrder: 'asc',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreSingleListFind']['callback'] => {
+          return extensionPointStorageContext.exceptionPreSingleListFind.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {
@@ -202,6 +219,17 @@ describe('exception_list_client', () => {
           await callExceptionListClientMethod();
 
           expect(getExtensionPointCallback()).toHaveBeenCalled();
+        });
+
+        it('should error if extension point callback throws an error', async () => {
+          const error = new Error('foo');
+          const extensionCallback = getExtensionPointCallback();
+
+          extensionCallback.mockImplementation(async () => {
+            throw error;
+          });
+
+          await expect(callExceptionListClientMethod()).rejects.toBe(error);
         });
 
         describe('and server extension points are DISABLED', () => {
