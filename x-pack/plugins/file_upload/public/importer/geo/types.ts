@@ -6,6 +6,7 @@
  */
 
 import { Feature } from 'geojson';
+import { ReactNode } from 'react';
 import { IImporter } from '../types';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
@@ -18,6 +19,8 @@ export interface GeoFilePreview {
 
 export interface GeoFileImporter extends IImporter {
   destroy(): void;
+  canPreview(): boolean;
   previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview>;
+  renderEditor(): ReactNode;
   setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE): void;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { GeoFileImporter, GeoFilePreview } from '../types';
 import { CreateDocsResponse } from '../../types';
 import { Importer } from '../../importer';
@@ -26,6 +27,15 @@ export class ShapefileImporter extends Importer implements GeoFileImporter {
 
   public destroy() {
     this._isActive = false;
+  }
+
+  public canPreview() {
+    return false;
+  }
+
+  public renderEditor() {
+    // no additional configuration needed by geojson importer so there is no editor to render
+    return <div>select other files</div>;
   }
 
   public async previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview> {

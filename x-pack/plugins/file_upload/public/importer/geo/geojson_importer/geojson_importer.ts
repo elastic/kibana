@@ -48,6 +48,16 @@ export class GeoJsonImporter extends Importer implements GeoFileImporter {
     this._isActive = false;
   }
 
+  public canPreview() {
+    // no additional configuration needed by geojson importer
+    return true;
+  }
+
+  public renderEditor() {
+    // no additional configuration needed by geojson importer so there is no editor to render
+    return null;
+  }
+
   public async previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview> {
     await this._readUntil(rowLimit, sizeLimit);
     return {

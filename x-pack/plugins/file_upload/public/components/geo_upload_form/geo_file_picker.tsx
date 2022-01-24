@@ -24,8 +24,10 @@ interface Props {
 }
 
 interface State {
+  defaultIndexName: string | null;
   error: string | null;
   isLoadingPreview: boolean;
+  importer: GeoFileImporter | null;
   previewSummary: string | null;
 }
 
@@ -33,8 +35,10 @@ export class GeoFilePicker extends Component<Props, State> {
   private _isMounted = false;
 
   state: State = {
+    defaultIndexName: null,
     error: null,
     isLoadingPreview: false,
+    importer: null,
     previewSummary: null,
   };
 
@@ -50,25 +54,38 @@ export class GeoFilePicker extends Component<Props, State> {
     this.props.onClear();
 
     this.setState({
+      defaultIndexName: null,
       error: null,
       isLoadingPreview: false,
+      importer: null,
       previewSummary: null,
     });
 
     if (files && files.length) {
-      this._loadFilePreview(files[0]);
+      const file = files[0];
+      try {
+        const importer = geoImporterFactory(file);
+        this.setState({ 
+          defaultIndexName: file.name.split('.')[0].toLowerCase(),
+          importer 
+        }, this._loadFilePreview);
+      } catch (error) {
+        this.setState({ error: error.message });
+      }
     }
   };
 
-  async _loadFilePreview(file: File) {
+  _loadFilePreview = async () => {
+    if (!this.state.importer || !this.state.importer.canPreview()) {
+      return;
+    }
+
     this.setState({ isLoadingPreview: true });
 
-    let importer: GeoFileImporter | null = null;
     let previewError: string | null = null;
     let preview: GeoFilePreview | null = null;
     try {
-      importer = geoImporterFactory(file);
-      preview = await importer.previewFile(10000, MB * 3);
+      preview = await this.state.importer.previewFile(10000, MB * 3);
       if (preview.features.length === 0) {
         previewError = i18n.translate('xpack.fileUpload.geoFilePicker.noFeaturesDetected', {
           defaultMessage: 'No features found in selected file.',
@@ -97,11 +114,11 @@ export class GeoFilePicker extends Component<Props, State> {
           : null,
     });
 
-    if (importer && preview) {
+    if (preview) {
       this.props.onSelect({
         ...preview,
-        importer,
-        indexName: file.name.split('.')[0].toLowerCase(),
+        importer: this.state.importer,
+        indexName: this.state.defaultIndexName ? this.state.defaultIndexName : 'features',
       });
     }
   }
@@ -128,22 +145,29 @@ export class GeoFilePicker extends Component<Props, State> {
     );
   }
 
+  _renderImporterEditor() {
+    return this.state.importer ? this.state.importer.renderEditor() : null;
+  }
+
   render() {
     return (
-      <EuiFormRow
-        isInvalid={!!this.state.error}
-        error={!!this.state.error ? [this.state.error] : []}
-        helpText={this._renderHelpText()}
-      >
-        <EuiFilePicker
-          initialPromptText={i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
-            defaultMessage: 'Select or drag and drop a file',
-          })}
-          onChange={this._onFileSelect}
-          accept={GEO_FILE_TYPES.join(',')}
-          isLoading={this.state.isLoadingPreview}
-        />
-      </EuiFormRow>
+      <>
+        <EuiFormRow
+          isInvalid={!!this.state.error}
+          error={!!this.state.error ? [this.state.error] : []}
+          helpText={this._renderHelpText()}
+        >
+          <EuiFilePicker
+            initialPromptText={i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
+              defaultMessage: 'Select or drag and drop a file',
+            })}
+            onChange={this._onFileSelect}
+            accept={GEO_FILE_TYPES.join(',')}
+            isLoading={this.state.isLoadingPreview}
+          />
+        </EuiFormRow>
+        {this._renderImporterEditor()}
+      </>
     );
   }
 }
