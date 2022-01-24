@@ -13,16 +13,11 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
 
-const listOfJourneys = [
-  'uptime',
-  'StepsDuration',
-  'TlsFlyoutInAlertingApp',
-  'StatusFlyoutInAlertingApp',
-] as const;
+const listOfJourneys = ['uptime', 'TlsFlyoutInAlertingApp', 'StatusFlyoutInAlertingApp'] as const;
 
-export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
+export function playwrightRunTests() {
   return async ({ getService }: any) => {
-    const result = await playwrightStart(getService, headless, match);
+    const result = await playwrightStart(getService);
 
     listOfJourneys.forEach((journey) => {
       if (result?.[journey] && result[journey].status !== 'succeeded') {
@@ -32,7 +27,7 @@ export function playwrightRunTests({ headless, match }: { headless: boolean; mat
   };
 }
 
-async function playwrightStart(getService: any, headless = true, match?: string) {
+async function playwrightStart(getService: any) {
   console.log('Loading esArchiver...');
   const esArchiver = getService('esArchiver');
 
@@ -51,8 +46,7 @@ async function playwrightStart(getService: any, headless = true, match?: string)
 
   const res = await playwrightRun({
     params: { kibanaUrl },
-    playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
-    match: match === 'undefined' ? '' : match,
+    playwrightOptions: { headless: true, chromiumSandbox: false, timeout: 60 * 1000 },
   });
 
   console.log('Removing esArchiver...');
