@@ -63,5 +63,6 @@ const AlertCommentEventComponent: React.FC<Props> = ({
     </>
   );
 };
+AlertCommentEventComponent.displayName = 'AlertCommentEvent';
 
 export const AlertCommentEvent = memo(AlertCommentEventComponent);
