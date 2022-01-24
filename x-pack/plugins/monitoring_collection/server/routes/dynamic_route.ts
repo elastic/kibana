@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { Observable } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import { IRouter, ServiceStatus } from '../../../../../src/core/server';
 import { getESClusterUuid, getKibanaStats } from '../lib';
 import { MetricResult } from '../plugin';
 
-export function registerRulesRoute({
+export function registerDynamicRoute({
   router,
   config,
   overallStatus$,
@@ -28,33 +29,32 @@ export function registerRulesRoute({
     };
   };
   overallStatus$: Observable<ServiceStatus>;
-  getMetrics: () => Promise<MetricResult[] | undefined>;
+  getMetrics: (type: string) => Promise<MetricResult[] | MetricResult | undefined>;
 }) {
   router.get(
     {
-      path: '/api/monitoring_collection/rules',
+      path: `/api/monitoring_collection/{type}`,
       options: {
         // authRequired: !config.allowAnonymous,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
-      validate: false,
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+        }),
+      },
     },
     async (context, req, res) => {
-      const [rules, clusterUuid, kibana] = await Promise.all([
-        getMetrics(),
+      const type = req.params.type;
+      const [data, clusterUuid, kibana] = await Promise.all([
+        getMetrics(type),
         getESClusterUuid(context.core.elasticsearch.client),
         getKibanaStats({ config, overallStatus$ }),
       ]);
 
-      const rulesById =
-        rules?.reduce((accum: { [id: string]: MetricResult }, rule) => {
-          accum[rule.id as string] = rule;
-          return accum;
-        }, {}) ?? {};
-
       return res.ok({
         body: {
-          rules: rulesById,
+          [type]: data,
           cluster_uuid: clusterUuid,
           kibana,
         },

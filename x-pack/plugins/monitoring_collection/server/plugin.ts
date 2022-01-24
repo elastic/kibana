@@ -7,7 +7,7 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { registerRulesRoute } from './routes';
+import { registerDynamicRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
   registerMetric: (metric: Metric) => void;
@@ -44,13 +44,14 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         return await metric.fetch();
       }
     }
+    return undefined;
   }
 
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
     const kibanaIndex = core.savedObjects.getKibanaIndex();
 
-    registerRulesRoute({
+    registerDynamicRoute({
       router,
       config: {
         allowAnonymous: core.status.isStatusPageAnonymous(),
@@ -60,7 +61,9 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         uuid: this.initializerContext.env.instanceUuid,
       },
       overallStatus$: core.status.overall$,
-      getMetrics: async () => (await this.getMetrics('rule')) as MetricResult[],
+      getMetrics: async (type: string) => {
+        return await this.getMetrics(type);
+      },
     });
 
     return {

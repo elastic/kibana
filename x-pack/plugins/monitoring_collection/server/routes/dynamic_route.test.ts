@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { registerRulesRoute } from './rules';
+import { registerDynamicRoute } from './dynamic_route';
 import {
   KibanaRequest,
   KibanaResponseFactory,
@@ -26,7 +26,7 @@ jest.mock('../lib', () => ({
   getKibanaStats: () => ({ name: 'myKibana' }),
 }));
 
-describe('rules', () => {
+describe('dynamic route', () => {
   const kibanaStatsConfig = {
     allowAnonymous: true,
     kibanaIndex: '.kibana',
@@ -44,19 +44,13 @@ describe('rules', () => {
     summary: 'Service is working',
   });
 
-  it('returns the existing rules', async () => {
+  it('returns for a valid type', async () => {
     const router = httpServiceMock.createRouter();
 
     const getMetrics = async () => {
-      return [
-        {
-          name: 'myRule',
-          id: '0abc',
-          drift: 50,
-        },
-      ];
+      return { foo: 1 };
     };
-    registerRulesRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
+    registerDynamicRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -68,7 +62,7 @@ describe('rules', () => {
         },
       },
     };
-    const req = {} as KibanaRequest<unknown, unknown, unknown>;
+    const req = { params: { type: 'test' } } as KibanaRequest<unknown, unknown, unknown>;
     const factory: jest.Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
 
     await handler(context, req, factory);
@@ -77,24 +71,20 @@ describe('rules', () => {
       body: {
         cluster_uuid: 'clusterA',
         kibana: { name: 'myKibana' },
-        rules: {
-          '0abc': {
-            name: 'myRule',
-            id: '0abc',
-            drift: 50,
-          },
+        test: {
+          foo: 1,
         },
       },
     });
   });
 
-  it('returns the an empty object if there are no rules', async () => {
+  it('returns the an empty object if there is no data', async () => {
     const router = httpServiceMock.createRouter();
 
     const getMetrics = async () => {
-      return [];
+      return {};
     };
-    registerRulesRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
+    registerDynamicRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
 
     const [_, handler] = router.get.mock.calls[0];
 
@@ -106,7 +96,7 @@ describe('rules', () => {
         },
       },
     };
-    const req = {} as KibanaRequest<unknown, unknown, unknown>;
+    const req = { params: { type: 'test' } } as KibanaRequest<unknown, unknown, unknown>;
     const factory: jest.Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
 
     await handler(context, req, factory);
@@ -115,7 +105,7 @@ describe('rules', () => {
       body: {
         cluster_uuid: 'clusterA',
         kibana: { name: 'myKibana' },
-        rules: {},
+        test: {},
       },
     });
   });

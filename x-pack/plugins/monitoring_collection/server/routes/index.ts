@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerRulesRoute } from './rules';
+export { registerDynamicRoute } from './dynamic_route';
