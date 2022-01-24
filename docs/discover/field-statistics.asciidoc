@@ -14,7 +14,7 @@ for the data and its cardinality?
 This example explores the fields in
 the <<gs-get-data-into-kibana, sample web logs data set>>, or you can use your own data.
 
-. Open *Stack Managment > Advanced Settings*, search for *Show field statistics*,
+. Open the main menu, click *Stack Managment > Advanced Settings*, search for *Show field statistics*,
 and turn on the setting.
 
 . Open the main menu, click *Discover*, expand the {data-source} dropdown,
