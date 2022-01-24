@@ -334,8 +334,8 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
 
-export const loginAndWaitForHostDetailsPage = () => {
-  loginAndWaitForPage(hostDetailsUrl('suricata-iowa'));
+export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
+  loginAndWaitForPage(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 

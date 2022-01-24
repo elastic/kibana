@@ -39,7 +39,7 @@ import { JobFieldType, SavedSearchSavedObject } from '../../../../../common/type
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { OMIT_FIELDS } from '../../../../../common';
+import { OMIT_FIELDS } from '../../../../../common/constants';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
