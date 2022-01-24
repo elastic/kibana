@@ -30,7 +30,7 @@ export interface HomeProps {
   localStorage: Storage;
   urlBasePath: string;
   telemetry: TelemetryPluginStart;
-  hasUserIndexPattern: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
 }
 
 interface State {
@@ -89,7 +89,7 @@ export class Home extends Component<HomeProps, State> {
         }
       }, 10000);
 
-      const hasUserIndexPattern = await this.props.hasUserIndexPattern();
+      const hasUserIndexPattern = await this.props.hasUserDataView();
 
       this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
     } catch (err) {
