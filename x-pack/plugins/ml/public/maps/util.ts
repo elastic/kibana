@@ -13,7 +13,6 @@ import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { VectorSourceRequestMeta } from '../../../maps/common';
 
-export type MlAnomalyLayers = 'typical' | 'actual' | 'typical to actual';
 export enum ML_ANOMALY_LAYERS {
   TYPICAL = 'typical',
   ACTUAL = 'actual',
@@ -33,7 +32,7 @@ function getCoordinates(actualCoordinateStr: string, round: boolean = false): nu
 export async function getResultsForJobId(
   mlResultsService: MlApiServices['results'],
   jobId: string,
-  locationType: MlAnomalyLayers,
+  locationType: ML_ANOMALY_LAYERS,
   searchFilters: VectorSourceRequestMeta
 ): Promise<FeatureCollection> {
   const { timeFilters } = searchFilters;
@@ -102,10 +101,10 @@ export async function getResultsForJobId(
       }
 
       let geometry: Geometry;
-      if (locationType === 'typical' || locationType === 'actual') {
+      if (locationType === ML_ANOMALY_LAYERS.TYPICAL || locationType === ML_ANOMALY_LAYERS.ACTUAL) {
         geometry = {
           type: 'Point',
-          coordinates: locationType === 'typical' ? typical : actual,
+          coordinates: locationType === ML_ANOMALY_LAYERS.TYPICAL ? typical : actual,
         };
       } else {
         geometry = {

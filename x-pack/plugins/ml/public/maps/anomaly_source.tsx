@@ -232,7 +232,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    return this._descriptor.typicalActual === 'typical to actual'
+    return this._descriptor.typicalActual === ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL
       ? [VECTOR_SHAPE_TYPE.LINE]
       : [VECTOR_SHAPE_TYPE.POINT];
   }
