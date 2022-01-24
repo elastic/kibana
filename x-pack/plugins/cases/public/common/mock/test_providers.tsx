@@ -54,8 +54,9 @@ TestProvidersComponent.displayName = 'TestProviders';
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-export interface AppMockRenderer extends StartServices {
+export interface AppMockRenderer {
   render: UiRender;
+  coreStart: StartServices;
 }
 
 export const createAppMockRenderer = ({
@@ -85,7 +86,7 @@ export const createAppMockRenderer = ({
     });
   };
   return {
-    ...services,
+    coreStart: services,
     render,
   };
 };
