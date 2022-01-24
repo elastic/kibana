@@ -44,6 +44,13 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
         id: 'host.name',
       },
       {
+        label: 'TOP_DNS_DOMAINS',
+        id: 'TOP_DNS_DOMAINS',
+        field: 'dns.question.registered_domain',
+        columnType: FILTER_RECORDS,
+        columnFilters: [],
+      },
+      {
         label: 'External alerts',
         id: 'EXTERNAL_ALERTS',
         columnType: FILTER_RECORDS,

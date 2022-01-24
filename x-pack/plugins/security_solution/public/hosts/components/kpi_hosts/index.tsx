@@ -16,7 +16,7 @@ import { RiskyHosts } from './risky_hosts';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useRiskyHosts } from '../../containers/kpi_hosts/risky_hosts';
 import { CallOutSwitcher } from '../../../common/components/callouts';
-import { HostCharts } from '../../../common/components/stat_items/host_charts';
+import { ExploratoryCharts } from '../../../common/components/stat_items/exploratory_charts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
 
@@ -94,7 +94,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <HostCharts from={from} to={to} indexNames={indexNames} />
+        <ExploratoryCharts from={from} to={to} indexNames={indexNames} />
       </>
     );
   }

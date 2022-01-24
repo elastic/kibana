@@ -159,7 +159,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         <ExploratoryViewEmbeddable
           appId="security"
           appendHeader={appendTitle}
-          title={'Events'}
+          title="Events"
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
           reportType={ReportTypes.KPI}

@@ -38,7 +38,12 @@ interface Props {
   indexNames: string[];
 }
 
-export const HostCharts = ({ from, to, indexNames, inputsModelId = 'global' }: Props) => {
+export const ExploratoryChartsComponents = ({
+  from,
+  to,
+  indexNames,
+  inputsModelId = 'global',
+}: Props) => {
   const timerange = useMemo<TimeRange>(
     () => ({
       from: new Date(from).toISOString(),
@@ -78,7 +83,7 @@ export const HostCharts = ({ from, to, indexNames, inputsModelId = 'global' }: P
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
                   appId="security"
-                  title={'Hosts'}
+                  title="Hosts"
                   reportConfigMap={reportConfigMap}
                   dataTypesIndexPatterns={indexPatternList}
                   reportType="singleMetric"
@@ -143,8 +148,8 @@ export const HostCharts = ({ from, to, indexNames, inputsModelId = 'global' }: P
             direction="row"
             grow={true}
             color="transparent"
-            hasBorder
             paddingSize="m"
+            hasBorder
           >
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
@@ -162,7 +167,7 @@ export const HostCharts = ({ from, to, indexNames, inputsModelId = 'global' }: P
                           'host.name': ['ALL_VALUES'],
                         },
                         name: 'Source IPs',
-                        dataType: 'security', // number (?)
+                        dataType: 'security',
                         selectedMetricField: 'source.ip',
                         time: timerange,
                         operationType: 'unique_count',
@@ -302,3 +307,7 @@ export const HostCharts = ({ from, to, indexNames, inputsModelId = 'global' }: P
     </>
   );
 };
+
+export const ExploratoryCharts = React.memo(ExploratoryChartsComponents);
+
+ExploratoryCharts.displayName = 'ExploratoryCharts';
