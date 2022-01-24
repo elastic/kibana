@@ -121,8 +121,15 @@ export const updateAlertStatusAction = async ({
 export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   if (Array.isArray(ecs)) {
     const timestamps = ecs.reduce<number[]>((acc, item) => {
-      if (item.timestamp != null) {
-        const dateTimestamp = new Date(item.timestamp);
+      const addedTimestamp = item.timestamp;
+      const ecsTimestamp = item['@timestamp'] && item['@timestamp'][0];
+      if (addedTimestamp != null) {
+        const dateTimestamp = new Date(addedTimestamp);
+        if (!acc.includes(dateTimestamp.valueOf())) {
+          return [...acc, dateTimestamp.valueOf()];
+        }
+      } else if (ecsTimestamp != null) {
+        const dateTimestamp = new Date(ecsTimestamp);
         if (!acc.includes(dateTimestamp.valueOf())) {
           return [...acc, dateTimestamp.valueOf()];
         }
@@ -137,12 +144,15 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   const ecsData = ecs as Ecs;
   const ruleFrom = getField(ecsData, ALERT_RULE_FROM);
   const elapsedTimeRule = moment.duration(
-    moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-0s'))
+    moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-1d'))
   );
-  const from = moment(ecsData?.timestamp ?? new Date())
+  const addedTimestamp = ecsData.timestamp;
+  const ecsTimestamp = ecsData['@timestamp'] && ecsData['@timestamp'][0];
+  const timestampToUse = ecsTimestamp ? ecsTimestamp : addedTimestamp;
+  const from = moment(timestampToUse ?? new Date())
     .subtract(elapsedTimeRule)
     .toISOString();
-  const to = moment(ecsData?.timestamp ?? new Date()).toISOString();
+  const to = moment(timestampToUse ?? new Date()).toISOString();
 
   return { to, from };
 };
@@ -289,7 +299,7 @@ export const buildAlertsKqlFilter = (
         },
       },
       meta: {
-        alias: `Alert Ids: ${alertIds.join()}`,
+        alias: 'Alert Ids',
         negate: false,
         disabled: false,
         type: 'phrases',
@@ -304,62 +314,50 @@ export const buildAlertsKqlFilter = (
   ];
 };
 
-export const buildTimelineDataProviderOrFilter = (
-  alertsIds: string[],
+const buildTimelineDataProviderOrFilter = (
+  alertIds: string[],
   _id: string
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
-  if (!isEmpty(alertsIds)) {
+  if (!isEmpty(alertIds)) {
+    return {
+      filters: buildAlertsKqlFilter('_id', alertIds),
+      dataProviders: [],
+    };
+  } else {
     return {
       filters: [],
-      dataProviders: alertsIds.map((id) => {
-        return {
+      dataProviders: [
+        {
           and: [],
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${id}`,
-          name: id,
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${_id}`,
+          name: _id,
           enabled: true,
           excluded: false,
           kqlQuery: '',
           queryMatch: {
             field: '_id',
-            value: id,
+            value: _id,
             operator: ':' as const,
           },
-        };
-      }),
+        },
+      ],
     };
   }
-  return {
-    filters: [],
-    dataProviders: [
-      {
-        and: [],
-        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${_id}`,
-        name: _id,
-        enabled: true,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: '_id',
-          value: _id,
-          operator: ':' as const,
-        },
-      },
-    ],
-  };
 };
 
 const buildEqlDataProviderOrFilter = (
-  alertsIds: string[],
-  ecs: Ecs
+  alertIds: string[],
+  ecs: Ecs[] | Ecs
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
-  if (!isEmpty(alertsIds) && Array.isArray(ecs)) {
+  if (!isEmpty(alertIds) && Array.isArray(ecs) && ecs.length > 1) {
     return {
       dataProviders: [],
       filters: buildAlertsKqlFilter(
-        'signal.group.id',
+        ALERT_GROUP_ID,
         ecs.reduce<string[]>((acc, ecsData) => {
           const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
-          const alertGroupId = alertGroupIdField?.length ? alertGroupIdField : 'unknown-group-id';
+          const alertGroupId =
+            alertGroupIdField?.length > 1 ? alertGroupIdField : alertGroupIdField[0];
           if (!acc.includes(alertGroupId)) {
             return [...acc, alertGroupId];
           }
@@ -367,16 +365,17 @@ const buildEqlDataProviderOrFilter = (
         }, [])
       ),
     };
-  } else if (!Array.isArray(ecs)) {
-    const alertGroupIdField = getField(ecs, ALERT_GROUP_ID);
-    const queryMatchField = getFieldKey(ecs, ALERT_GROUP_ID);
-    const alertGroupId = alertGroupIdField?.length ? alertGroupIdField : 'unknown-group-id';
+  } else if (!Array.isArray(ecs) || ecs.length === 1) {
+    const ecsData = Array.isArray(ecs) ? ecs[0] : ecs;
+    const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
+    const queryMatchField = getFieldKey(ecsData, ALERT_GROUP_ID);
+    const alertGroupId = alertGroupIdField?.length > 1 ? alertGroupIdField : alertGroupIdField[0];
     return {
       dataProviders: [
         {
           and: [],
           id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${alertGroupId}`,
-          name: ecs._id,
+          name: ecsData._id,
           enabled: true,
           excluded: false,
           kqlQuery: '',
@@ -534,7 +533,7 @@ export const sendAlertToTimelineAction = async ({
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlRuleWithGroupId(ecsData)) {
-      const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecsData);
+      const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;
     }
