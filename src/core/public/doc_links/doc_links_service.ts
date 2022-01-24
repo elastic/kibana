@@ -68,7 +68,7 @@ export class DocLinksService {
           urlDrilldownVariables: `${KIBANA_DOCS}url_templating-language.html#url-template-variables`,
         },
         discover: {
-          guide: `${KIBANA_DOCS}discover  .html`,
+          guide: `${KIBANA_DOCS}discover.html`,
         },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
