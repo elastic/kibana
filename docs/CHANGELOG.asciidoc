@@ -62,7 +62,6 @@ Dashboard Integration {kibana-pull}115991[#115991]
 Elastic Security::
 For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
-Adds the new Model Management tab {kibana-pull}115772[#115772]
 Management::
 Display managed badge for transforms {kibana-pull}117679[#117679]
 Monitoring::
