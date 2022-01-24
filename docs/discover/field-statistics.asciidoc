@@ -24,7 +24,7 @@ and select *kibana_sample_data_logs*.
 
 . Click *Field statistics*.
 +
-The table summarizes how many documents in the sample
+The table summarizes how many documents in the sample contain each field for the selected time period
 for the selected time period contain each field,
 the number of distinct values, and the distribution.
 +
