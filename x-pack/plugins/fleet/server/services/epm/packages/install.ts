@@ -402,12 +402,6 @@ async function installPackageByUpload({
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
-    if (installType !== 'install') {
-      throw new PackageOperationNotSupportedError(
-        `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
-      );
-    }
-
     const installSource = 'upload';
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
