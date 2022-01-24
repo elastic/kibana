@@ -9,11 +9,11 @@ import React, { Component } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MlAnomalyLayers } from './util';
+import { ML_ANOMALY_LAYERS } from './util';
 
 interface Props {
-  onChange: (typicalActual: MlAnomalyLayers) => void;
-  typicalActual: MlAnomalyLayers;
+  onChange: (typicalActual: ML_ANOMALY_LAYERS) => void;
+  typicalActual: ML_ANOMALY_LAYERS;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -33,10 +33,7 @@ export class LayerSelector extends Component<Props, State> {
   }
 
   onSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    const typicalActual: MlAnomalyLayers = selectedOptions[0].value! as
-      | 'typical'
-      | 'actual'
-      | 'typical to actual';
+    const typicalActual: ML_ANOMALY_LAYERS = selectedOptions[0].value! as ML_ANOMALY_LAYERS;
     if (this._isMounted) {
       this.setState({ typicalActual });
       this.props.onChange(typicalActual);
@@ -56,9 +53,24 @@ export class LayerSelector extends Component<Props, State> {
           singleSelection={true}
           onChange={this.onSelect}
           options={[
-            { value: 'actual', label: 'actual' },
-            { value: 'typical', label: 'typical' },
-            { value: 'typical to actual', label: 'typical to actual' },
+            {
+              value: ML_ANOMALY_LAYERS.ACTUAL,
+              label: i18n.translate('xpack.ml.maps.actualLabel', {
+                defaultMessage: ML_ANOMALY_LAYERS.ACTUAL,
+              }),
+            },
+            {
+              value: ML_ANOMALY_LAYERS.TYPICAL,
+              label: i18n.translate('xpack.ml.maps.typicalLabel', {
+                defaultMessage: ML_ANOMALY_LAYERS.TYPICAL,
+              }),
+            },
+            {
+              value: ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL,
+              label: i18n.translate('xpack.ml.maps.typicalToActualLabel', {
+                defaultMessage: ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL,
+              }),
+            },
           ]}
           selectedOptions={options}
         />

@@ -40,6 +40,7 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
+  // this value is only used to place the point on the map
   actual: {},
   actualDisplay: {
     label: i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
@@ -47,6 +48,7 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
+  // this value is only used to place the point on the map
   typical: {},
   typicalDisplay: {
     label: i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {

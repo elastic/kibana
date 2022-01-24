@@ -14,6 +14,11 @@ import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { VectorSourceRequestMeta } from '../../../maps/common';
 
 export type MlAnomalyLayers = 'typical' | 'actual' | 'typical to actual';
+export enum ML_ANOMALY_LAYERS {
+  TYPICAL = 'typical',
+  ACTUAL = 'actual',
+  TYPICAL_TO_ACTUAL = 'typical to actual',
+}
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {

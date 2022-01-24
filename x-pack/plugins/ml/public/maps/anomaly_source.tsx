@@ -29,13 +29,13 @@ import type { SourceEditorArgs } from '../../../maps/public';
 import type { DataRequest } from '../../../maps/public';
 import type { IVectorSource, SourceStatus } from '../../../maps/public';
 import { ML_ANOMALY } from './anomaly_source_factory';
-import { getResultsForJobId, MlAnomalyLayers } from './util';
+import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
-  typicalActual: MlAnomalyLayers;
+  typicalActual: ML_ANOMALY_LAYERS;
 }
 
 export class AnomalySource implements IVectorSource {
@@ -50,7 +50,7 @@ export class AnomalySource implements IVectorSource {
     return {
       type: ML_ANOMALY,
       jobId: descriptor.jobId,
-      typicalActual: descriptor.typicalActual || 'actual',
+      typicalActual: descriptor.typicalActual || ML_ANOMALY_LAYERS.ACTUAL,
     };
   }
 
