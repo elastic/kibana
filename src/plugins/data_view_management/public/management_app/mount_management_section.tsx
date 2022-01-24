@@ -43,7 +43,7 @@ export async function mountManagementSection(
     { data, dataViewFieldEditor, dataViewEditor, dataViews, fieldFormats },
     indexPatternManagementStart,
   ] = await getStartServices();
-  const canSave = Boolean(application.capabilities.indexPatterns.save);
+  const canSave = dataViews.getCanSaveSync();
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
