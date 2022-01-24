@@ -7,13 +7,23 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
-import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
+import {
+  getMonitorList,
+  getMonitorListSuccess,
+  getMonitorListFailure,
+  getUpdatedMonitor,
+  clearRefreshedMonitorId,
+  setUpdatingMonitorId,
+} from '../actions';
 import { MonitorSummariesResult } from '../../../common/runtime_types';
+import { AppState } from '../index';
 
 export interface MonitorList {
-  error?: IHttpFetchError<ResponseErrorBody>;
   loading: boolean;
+  refreshedMonitorId?: string[];
+  isUpdating?: string[];
   list: MonitorSummariesResult;
+  error?: IHttpFetchError<ResponseErrorBody>;
 }
 
 export const initialState: MonitorList = {
@@ -25,7 +35,7 @@ export const initialState: MonitorList = {
   loading: false,
 };
 
-type Payload = MonitorSummariesResult & IHttpFetchError<ResponseErrorBody>;
+type Payload = MonitorSummariesResult & IHttpFetchError<ResponseErrorBody> & string;
 
 export const monitorListReducer = handleActions<MonitorList, Payload>(
   {
@@ -50,6 +60,63 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
       error: action.payload,
       loading: false,
     }),
+    [String(setUpdatingMonitorId)]: (state: MonitorList, action: Action<string>) => ({
+      ...state,
+      isUpdating: [...(state.isUpdating ?? []), action.payload],
+    }),
+    [String(getUpdatedMonitor.get)]: (state: MonitorList) => ({
+      ...state,
+    }),
+    [String(getUpdatedMonitor.success)]: (
+      state: MonitorList,
+      action: Action<MonitorSummariesResult>
+    ) => {
+      const summaries = state.list.summaries;
+
+      const newSummary = action.payload.summaries?.[0];
+
+      if (!newSummary) {
+        return { ...state, isUpdating: [] };
+      }
+
+      return {
+        ...state,
+        loading: false,
+        error: undefined,
+        isUpdating: state.isUpdating?.filter((item) => item !== newSummary.monitor_id),
+        refreshedMonitorId: [...(state.refreshedMonitorId ?? []), newSummary.monitor_id],
+        list: {
+          ...state.list,
+          summaries: summaries.map((summary) => {
+            if (summary.monitor_id === newSummary.monitor_id) {
+              return newSummary;
+            }
+            return summary;
+          }),
+        },
+      };
+    },
+    [String(getUpdatedMonitor.fail)]: (
+      state: MonitorList,
+      action: Action<IHttpFetchError<ResponseErrorBody>>
+    ) => ({
+      ...state,
+      error: action.payload,
+      loading: false,
+      isUpdating: [],
+    }),
+    [String(clearRefreshedMonitorId)]: (state: MonitorList, action: Action<string>) => ({
+      ...state,
+      refreshedMonitorId: (state.refreshedMonitorId ?? []).filter(
+        (item) => item !== action.payload
+      ),
+    }),
   },
   initialState
 );
+
+export const refreshedMonitorSelector = ({ monitorList }: AppState) =>
+  monitorList.refreshedMonitorId ?? [];
+
+export const isUpdatingMonitorSelector = ({ monitorList }: AppState) =>
+  monitorList.isUpdating ?? [];

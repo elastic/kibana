@@ -5,13 +5,25 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
-import moment from 'moment';
+import React, { useCallback, useContext, useState } from 'react';
+import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiBadge, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  EuiBadge,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiLoadingSpinner,
+  EuiHighlight,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { parseTimestamp } from '../parse_timestamp';
-import { Ping } from '../../../../../common/runtime_types';
+import { DataStream, Ping } from '../../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,
@@ -22,10 +34,18 @@ import {
 import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
+import { triggerMonitor } from '../../../../state/api';
+import { useFetcher } from '../../../../../../observability/public';
+import { MonitorProgress } from './progress/monitor_progress';
+import { refreshedMonitorSelector } from '../../../../state/reducers/monitor_list';
 
 interface MonitorListStatusColumnProps {
+  configId?: string;
+  monitorId?: string;
   status: string;
+  monitorType: string;
   timestamp: string;
+  duration: number;
   summaryPings: Ping[];
 }
 
@@ -63,7 +83,7 @@ export const getShortTimeStamp = (timeStamp: moment.Moment, relative = false) =>
       shortTimestamp = timeStamp.fromNow();
     }
 
-    // Reset it so, it does't impact other part of the app
+    // Reset it so, it doesn't impact other part of the app
     moment.locale(prevLocale);
     return shortTimestamp;
   } else {
@@ -144,11 +164,17 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
 };
 
 export const MonitorListStatusColumn = ({
+  monitorType,
+  configId,
+  monitorId,
   status,
+  duration,
   summaryPings = [],
   timestamp: tsString,
 }: MonitorListStatusColumnProps) => {
   const timestamp = parseTimestamp(tsString);
+
+  const [triggerTest, setTriggerTest] = useState<string>();
 
   const {
     colors: { dangerBehindText },
@@ -156,16 +182,57 @@ export const MonitorListStatusColumn = ({
 
   const { statusMessage, locTooltip } = getLocationStatus(summaryPings, status);
 
+  const { loading, data } = useFetcher(() => {
+    return triggerMonitor({ id: triggerTest });
+  }, [triggerTest]);
+
+  const triggerNowClick = () => {
+    if (configId) {
+      setTriggerTest(configId);
+    }
+  };
+
+  const stopProgressTrack = useCallback(() => {
+    setTriggerTest(undefined);
+  }, []);
+
+  const refreshedMonitorIds = useSelector(refreshedMonitorSelector);
+
   return (
     <div>
-      <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
+      <StatusColumnFlexG alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
-          <EuiBadge
-            className="eui-textCenter"
-            color={status === STATUS.UP ? 'success' : dangerBehindText}
-          >
-            {getHealthMessage(status)}
-          </EuiBadge>
+          {triggerTest && data?.triggerId ? (
+            <MonitorProgress
+              monitorId={monitorId!}
+              configId={triggerTest}
+              triggerId={data?.triggerId}
+              monitorType={monitorType as DataStream}
+              duration={duration}
+              stopProgressTrack={stopProgressTrack}
+            />
+          ) : (
+            <EuiBadge
+              className="eui-textCenter"
+              color={status === STATUS.UP ? 'success' : dangerBehindText}
+            >
+              {getHealthMessage(status)}
+            </EuiBadge>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {loading ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EuiToolTip content="Test now">
+              <EuiButtonIcon
+                iconType="playFilled"
+                onClick={() => triggerNowClick()}
+                isDisabled={Boolean(triggerTest)}
+                aria-label={'CLick to run test now'}
+              />
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       </StatusColumnFlexG>
       <EuiSpacer size="xs" />
@@ -183,18 +250,37 @@ export const MonitorListStatusColumn = ({
         </EuiToolTip>
         <EuiToolTip
           content={
-            <EuiText color="ghost" size="xs">
-              {timestamp.toLocaleString()}
-            </EuiText>
+            <>
+              <EuiText color="text" size="xs">
+                <strong> {timestamp.fromNow()}</strong>
+              </EuiText>
+              <EuiHorizontalRule margin="xs" />
+              <EuiText color="ghost" size="xs">
+                {timestamp.toLocaleString()}
+              </EuiText>
+            </>
           }
         >
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            Checked {getShortTimeStamp(timestamp)}
-          </EuiText>
+          {monitorId && refreshedMonitorIds.includes(monitorId) ? (
+            <EuiHighlight highlightAll={true} search={getCheckedLabel(timestamp)}>
+              {getCheckedLabel(timestamp)}
+            </EuiHighlight>
+          ) : (
+            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+              {getCheckedLabel(timestamp)}
+            </EuiText>
+          )}
         </EuiToolTip>
       </EuiText>
     </div>
   );
+};
+
+const getCheckedLabel = (timestamp: Moment) => {
+  return i18n.translate('xpack.uptime.monitorList.statusColumn.checkedTimestamp', {
+    defaultMessage: 'Checked {timestamp}',
+    values: { timestamp: getShortTimeStamp(timestamp) },
+  });
 };
 
 const PaddedText = euiStyled(EuiText)`

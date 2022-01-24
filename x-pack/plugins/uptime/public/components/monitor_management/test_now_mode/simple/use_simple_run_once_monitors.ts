@@ -12,8 +12,14 @@ import { Ping } from '../../../../../common/runtime_types';
 import { createEsParams, useEsSearch } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
 
-export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
-  const { refreshTimer, lastRefresh } = useTickTick();
+export const useSimpleRunOnceMonitors = ({
+  monitorId,
+  triggerId,
+}: {
+  monitorId: string;
+  triggerId?: string;
+}) => {
+  const { refreshTimer, lastRefresh } = useTickTick(2 * 1000, false);
 
   const { settings } = useSelector(selectDynamicSettings);
 
@@ -39,6 +45,15 @@ export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) =
                   field: 'summary',
                 },
               },
+              ...(triggerId
+                ? [
+                    {
+                      term: {
+                        trigger_id: triggerId,
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         },

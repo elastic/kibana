@@ -69,3 +69,14 @@ export const runOnceMonitor = async ({
 }): Promise<{ errors: Array<{ error: Error }> }> => {
   return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
 };
+
+export const triggerMonitor = async ({
+  id,
+}: {
+  id?: string;
+}): Promise<{ errors?: Array<{ error: Error }>; triggerId?: string } | undefined> => {
+  if (!id) {
+    return;
+  }
+  return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${id}`);
+};

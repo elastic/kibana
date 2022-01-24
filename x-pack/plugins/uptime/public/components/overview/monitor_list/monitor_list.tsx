@@ -36,11 +36,13 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
+  refreshedMonitorIds: string[];
 }
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
@@ -52,8 +54,15 @@ export const MonitorListComponent: ({
   filters,
   monitorList: { list, error, loading },
   pageSize,
+  refreshedMonitorIds,
   setPageSize,
-}: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
+}: Props) => any = ({
+  filters,
+  refreshedMonitorIds,
+  monitorList: { list, error, loading },
+  pageSize,
+  setPageSize,
+}) => {
   const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
   const { width } = useWindowSize();
   const [hideExtraColumns, setHideExtraColumns] = useState(false);
@@ -103,12 +112,27 @@ export const MonitorListComponent: ({
         mobileOptions: {
           fullWidth: true,
         },
-        render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
+        render: (
+          status: string,
+          {
+            monitor_id: monitorId,
+            state: {
+              timestamp,
+              summaryPings,
+              monitor: { type, duration },
+            },
+            configId,
+          }: MonitorSummary
+        ) => {
           return (
             <MonitorListStatusColumn
+              configId={configId}
               status={status}
               timestamp={timestamp}
               summaryPings={summaryPings ?? []}
+              monitorType={type}
+              duration={duration!.us}
+              monitorId={monitorId}
             />
           );
         },
@@ -205,7 +229,7 @@ export const MonitorListComponent: ({
   ];
 
   return (
-    <EuiPanel hasBorder>
+    <WrapperPanel hasBorder>
       <MonitorListHeader />
       <EuiSpacer size="m" />
       <EuiBasicTable
@@ -226,7 +250,9 @@ export const MonitorListComponent: ({
                 onClick: () => toggleDrawer(monitorId),
                 'aria-label': labels.getExpandDrawerLabel(monitorId),
               })
-            : undefined
+            : ({ monitor_id: monitorId }) => ({
+                className: refreshedMonitorIds.includes(monitorId) ? 'refresh-row' : undefined,
+              })
         }
       />
       <EuiSpacer size="m" />
@@ -253,6 +279,17 @@ export const MonitorListComponent: ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </WrapperPanel>
   );
 };
+
+const WrapperPanel = euiStyled(EuiPanel)`
+  &&&  {
+  .refresh-row{
+    background-color: #f0f4fb;
+    -webkit-transition: background-color 3000ms linear;
+    -ms-transition: background-color 3000ms linear;
+    transition: background-color 3000ms linear;
+    }
+  }
+`;

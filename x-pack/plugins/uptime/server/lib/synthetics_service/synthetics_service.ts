@@ -168,7 +168,15 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+  async pushConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
@@ -195,6 +203,32 @@ export class SyntheticsService {
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
         fields?: { run_once: boolean; config_id: string };
+      }
+    >
+  ) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    try {
+      return await this.apiClient.runOnce(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async triggerConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string; trigger_id: string };
       }
     >
   ) {

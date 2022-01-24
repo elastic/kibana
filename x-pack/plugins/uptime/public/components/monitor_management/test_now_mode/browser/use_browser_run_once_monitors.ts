@@ -15,10 +15,12 @@ import { fetchJourneySteps } from '../../../../state/api/journey';
 import { isStepEnd } from '../../../synthetics/check_steps/steps_list';
 
 export const useBrowserEsResults = ({
-  monitorId,
+  configId,
+  triggerId,
   lastRefresh,
 }: {
-  monitorId: string;
+  configId: string;
+  triggerId?: string;
   lastRefresh: number;
 }) => {
   const { settings } = useSelector(selectDynamicSettings);
@@ -37,7 +39,7 @@ export const useBrowserEsResults = ({
             filter: [
               {
                 term: {
-                  config_id: monitorId,
+                  config_id: configId,
                 },
               },
               {
@@ -45,25 +47,42 @@ export const useBrowserEsResults = ({
                   'synthetics.type': ['heartbeat/summary', 'journey/start'],
                 },
               },
+              ...(triggerId
+                ? [
+                    {
+                      term: {
+                        trigger_id: triggerId,
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
         },
       },
       size: 10,
     }),
-    [monitorId, settings?.heartbeatIndices, lastRefresh],
+    [configId, settings?.heartbeatIndices, lastRefresh],
     { name: 'TestRunData' }
   );
 };
 
-export const useBrowserRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
-  const { refreshTimer, lastRefresh } = useTickTick();
+export const useBrowserRunOnceMonitors = ({
+  configId,
+  triggerId,
+  refresh = true,
+}: {
+  configId: string;
+  triggerId?: string;
+  refresh?: boolean;
+}) => {
+  const { refreshTimer, lastRefresh } = useTickTick(3 * 1000, refresh);
 
   const [checkGroupId, setCheckGroupId] = useState('');
   const [stepEnds, setStepEnds] = useState<JourneyStep[]>([]);
   const [summary, setSummary] = useState<JourneyStep>();
 
-  const { data, loading } = useBrowserEsResults({ monitorId, lastRefresh });
+  const { data, loading } = useBrowserEsResults({ configId, triggerId, lastRefresh });
 
   const { data: stepListData } = useFetcher(() => {
     if (checkGroupId) {
