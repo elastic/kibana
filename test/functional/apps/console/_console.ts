@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/123456
-  describe.skip('console app', function describeIndexTests() {
+  describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -93,7 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should add comma after previous non empty line on autocomplete', async () => {
+    // Flaky, see https://github.com/elastic/kibana/issues/123556
+    it.skip('should add comma after previous non empty line on autocomplete', async () => {
       const LINE_NUMBER = 2;
 
       await PageObjects.console.dismissTutorial();
