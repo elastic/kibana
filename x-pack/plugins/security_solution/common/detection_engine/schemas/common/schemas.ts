@@ -196,19 +196,6 @@ export const status = t.keyof({
 });
 export type Status = t.TypeOf<typeof status>;
 
-export enum RuleExecutionStatus {
-  'succeeded' = 'succeeded',
-  'failed' = 'failed',
-  'going to run' = 'going to run',
-  'partial failure' = 'partial failure',
-  /**
-   * @deprecated 'partial failure' status should be used instead
-   */
-  'warning' = 'warning',
-}
-
-export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
-
 export const conflicts = t.keyof({ abort: null, proceed: null });
 export type Conflicts = t.TypeOf<typeof conflicts>;
 
@@ -334,30 +321,6 @@ export const updatedByOrNull = t.union([updated_by, t.null]);
 export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
 export const createdByOrNull = t.union([created_by, t.null]);
 export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
-
-export const last_success_at = IsoDateString;
-export type LastSuccessAt = t.TypeOf<typeof IsoDateString>;
-
-export const last_success_message = t.string;
-export type LastSuccessMessage = t.TypeOf<typeof last_success_message>;
-
-export const last_failure_at = IsoDateString;
-export type LastFailureAt = t.TypeOf<typeof last_failure_at>;
-
-export const last_failure_message = t.string;
-export type LastFailureMessage = t.TypeOf<typeof last_failure_message>;
-
-export const last_gap = t.string;
-export type LastGap = t.TypeOf<typeof last_gap>;
-
-export const bulk_create_time_durations = t.array(t.string);
-export type BulkCreateTimeDurations = t.TypeOf<typeof bulk_create_time_durations>;
-
-export const search_after_time_durations = t.array(t.string);
-export type SearchAfterTimeDurations = t.TypeOf<typeof search_after_time_durations>;
-
-export const status_date = IsoDateString;
-export type StatusDate = t.TypeOf<typeof status_date>;
 
 export const rules_installed = PositiveInteger;
 export const rules_updated = PositiveInteger;

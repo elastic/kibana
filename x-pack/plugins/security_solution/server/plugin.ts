@@ -68,7 +68,10 @@ import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifa
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import percolatorPolicy from './lib/detection_engine/routes/index/percolator_policy.json';
-import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
+import {
+  registerEventLogProvider,
+  ruleExecutionLoggerFactory,
+} from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
@@ -253,6 +256,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       ruleDataClient,
       eventLogService,
+      ruleExecutionLoggerFactory,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);

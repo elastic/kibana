@@ -64,17 +64,9 @@ import {
   updated_by,
   created_at,
   created_by,
-  ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   namespace,
-  last_gap,
-  bulk_create_time_durations,
-  search_after_time_durations,
-} from '../common/schemas';
+  ruleExecutionSummary,
+} from '../common';
 
 export const createSchema = <
   Required extends t.Props,
@@ -421,16 +413,9 @@ const responseRequiredFields = {
   created_at,
   created_by,
 };
+
 const responseOptionalFields = {
-  status: ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
-  last_gap,
-  bulk_create_time_durations,
-  search_after_time_durations,
+  execution_summary: ruleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([

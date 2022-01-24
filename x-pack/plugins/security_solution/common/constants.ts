@@ -264,8 +264,10 @@ export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/pre
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_find_status` as const;
+export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
+export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;

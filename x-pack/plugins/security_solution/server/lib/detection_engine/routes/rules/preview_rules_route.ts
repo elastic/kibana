@@ -11,7 +11,7 @@ import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
+import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
@@ -24,7 +24,7 @@ import {
   previewRulesSchema,
   RulePreviewLogs,
 } from '../../../../../common/detection_engine/schemas/request';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
 import {
   AlertInstanceContext,
@@ -76,10 +76,7 @@ export const previewRulesRoute = async (
       }
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-        if (!siemClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         let invocationCount = request.body.invocationCount;
         if (
@@ -116,14 +113,14 @@ export const previewRulesRoute = async (
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
+        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
           ruleDataClient: previewRuleDataClient,
-          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+          ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
         });
 
         const runExecutors = async <
@@ -174,6 +171,7 @@ export const previewRulesRoute = async (
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
+              executionId: uuid.v4(),
               name: rule.name,
               params,
               previousStartedAt,
@@ -195,21 +193,25 @@ export const previewRulesRoute = async (
             })) as TState;
 
             // Save and reset error and warning logs
-            const currentLogs = {
-              errors: warningsAndErrorsStore
-                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-                .map((item) => item.message ?? 'Unkown Error'),
-              warnings: warningsAndErrorsStore
-                .filter(
-                  (item) =>
-                    item.newStatus === RuleExecutionStatus['partial failure'] ||
-                    item.newStatus === RuleExecutionStatus.warning
-                )
-                .map((item) => item.message ?? 'Unknown Warning'),
+            const errors = previewRuleExecutionLogger.logged.statusChanges
+              .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+              .map((item) => item.message ?? 'Unkown Error');
+
+            const warnings = previewRuleExecutionLogger.logged.statusChanges
+              .filter(
+                (item) =>
+                  item.newStatus === RuleExecutionStatus['partial failure'] ||
+                  item.newStatus === RuleExecutionStatus.warning
+              )
+              .map((item) => item.message ?? 'Unknown Warning');
+
+            logs.push({
+              errors,
+              warnings,
               startedAt: startedAt.toDate().toISOString(),
-            };
-            logs.push(currentLogs);
-            previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
+            });
+
+            previewRuleExecutionLogger.clearLogs();
 
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
