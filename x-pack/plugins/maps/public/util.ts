@@ -6,6 +6,7 @@
  */
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
+import type { KibanaExecutionContext } from 'kibana/public';
 import { FONTS_API_PATH } from '../common/constants';
 import { getHttp, getTilemap, getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
@@ -58,6 +59,9 @@ export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
 }
 
-export function makePublicExecutionContext(id: string, description?: string) {
+export function makePublicExecutionContext(
+  id: string,
+  description?: string
+): KibanaExecutionContext {
   return makeExecutionContext('application', id, description || '', window.location.pathname);
 }

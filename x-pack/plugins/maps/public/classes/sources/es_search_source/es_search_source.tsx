@@ -358,6 +358,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
     });
 
     const allHits: any[] = [];
@@ -439,6 +440,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
     });
 
     const isTimeExtentForTimeslice =
