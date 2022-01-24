@@ -171,7 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(firstAxesLabels).to.eql(['12.2GB', '12.21GB']);
       expect(secondAxesLabels).to.eql(['5.59KB', '5.6KB']);
       expect(thirdAxesLabels.toString()).to.be(
-        'BYTES_5721,BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
+        'BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
       );
     });
 
