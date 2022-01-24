@@ -10,6 +10,7 @@ import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
+  GetExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 
@@ -70,10 +71,18 @@ export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDef
   'exceptionsListPreUpdateItem',
   UpdateExceptionListItemOptions
 >;
+/**
+ * Extension point is triggered prior to performing a `patch` operation on the exception item
+ */
+export type ExceptionsListPreGetOneItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreGetOneItem',
+  GetExceptionListItemOptions
+>;
 
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
-  | ExceptionsListPreUpdateItemServerExtension;
+  | ExceptionsListPreUpdateItemServerExtension
+  | ExceptionsListPreGetOneItemServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

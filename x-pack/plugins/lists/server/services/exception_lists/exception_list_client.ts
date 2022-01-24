@@ -151,6 +151,15 @@ export class ExceptionListClient {
     namespaceType,
   }: GetExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreGetOneItem',
+        { id, itemId, namespaceType },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return getExceptionListItem({ id, itemId, namespaceType, savedObjectsClient });
   };
 
