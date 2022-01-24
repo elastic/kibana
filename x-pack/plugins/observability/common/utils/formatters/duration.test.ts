@@ -71,7 +71,7 @@ describe('duration formatters', () => {
       [1000, '1,000.0 tpm'],
       [1000000, '1,000,000.0 tpm'],
     ])(
-      'displays the correct label when the number is integer and has zero decimals',
+      'displays the correct label when the number is a positive integer and has zero decimals',
       (value, formattedValue) => {
         expect(asTransactionRate(value)).toBe(formattedValue);
       }
@@ -89,12 +89,39 @@ describe('duration formatters', () => {
         expect(asTransactionRate(value)).toBe(formattedValue);
       }
     );
+
+    it.each([
+      [-1, '< 0.1 tpm'],
+      [-10, '< 0.1 tpm'],
+      [-100, '< 0.1 tpm'],
+      [-1000, '< 0.1 tpm'],
+      [-1000000, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is a negative integer and has zero decimals',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [-1.23, '< 0.1 tpm'],
+      [-12.34, '< 0.1 tpm'],
+      [-123.45, '< 0.1 tpm'],
+      [-1234.56, '< 0.1 tpm'],
+      [-1234567.89, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is negative and has decimal part',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
   });
 
   describe('asMilliseconds', () => {
     it('converts to formatted decimal milliseconds', () => {
       expect(asMillisecondDuration(0)).toEqual('0 ms');
     });
+
     it('formats correctly with undefined values', () => {
       expect(asMillisecondDuration(undefined)).toEqual('N/A');
     });
