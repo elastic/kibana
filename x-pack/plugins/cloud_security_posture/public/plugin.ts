@@ -65,6 +65,9 @@ async function registerKubebeatDataView(
 ) {
   try {
     const [, depsStart] = await core.getStartServices();
+    const dataView = await depsStart.data.dataViews.find(CSP_KUBEBEAT_INDEX_NAME);
+    if (dataView) return;
+
     await depsStart.data.dataViews.createAndSave({
       title: CSP_KUBEBEAT_INDEX_NAME,
       allowNoIndex: true,
