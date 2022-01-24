@@ -20,5 +20,6 @@ const UserActionAvatarComponent = ({ username, fullName, size = 'm' }: UserActio
   const avatarName = fullName && fullName.length > 0 ? fullName : username ?? i18n.UNKNOWN;
   return <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} size={size} />;
 };
+UserActionAvatarComponent.displayName = 'UserActionAvatar';
 
 export const UserActionAvatar = memo(UserActionAvatarComponent);

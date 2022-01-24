@@ -186,9 +186,8 @@ export async function mountApp(
     embeddableEditorIncomingState,
     initialContext,
   };
-  const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: emptyState,
+    lens: getPreloadedState(storeDeps) as LensAppState,
   } as PreloadedState<LensState>);
 
   const EditorRenderer = React.memo(
@@ -208,7 +207,7 @@ export async function mountApp(
       if (!initialContext) {
         data.query.filterManager.setAppFilters([]);
       }
-      lensStore.dispatch(setState(emptyState));
+      lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
       lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       return (

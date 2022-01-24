@@ -36,7 +36,7 @@ import { isFullLicense, isMlEnabled } from '../common/license';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '../../maps/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -66,6 +66,7 @@ export interface MlStartDependencies {
 
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
+  maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -159,11 +160,23 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
-        await import('./register_helper');
+      const {
+        registerEmbeddables,
+        registerMlUiActions,
+        registerSearchLinks,
+        registerMlAlerts,
+        registerMapExtension,
+      } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
+
+      if (pluginsSetup.maps) {
+        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
+        const canGetJobs = capabilities.ml?.canGetJobs === true || false;
+        await registerMapExtension(pluginsSetup.maps, core, canGetJobs);
+      }
+
       if (mlEnabled) {
         registerSearchLinks(this.appUpdater$, fullLicense);
 
