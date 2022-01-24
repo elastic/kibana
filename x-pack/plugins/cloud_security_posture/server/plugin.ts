@@ -8,13 +8,7 @@
 import { TypeOf, schema } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'kibana/server';
 import { CspAppContextService, CspAppContext } from './lib/csp_app_context_services';
-import type {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-  RequestHandlerContext,
-} from '../../../../src/core/server';
+import type { CoreSetup, CoreStart, Plugin, Logger } from '../../../../src/core/server';
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type {
   CspServerPluginSetup,

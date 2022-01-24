@@ -156,4 +156,3 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #data.autocomplete.valueSuggestions.terminateAfter: 100000
-xpack.fleet.registryUrl: 'http://localhost:8080'

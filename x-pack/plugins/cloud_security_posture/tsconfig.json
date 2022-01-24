@@ -19,6 +19,8 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/navigation/tsconfig.json" }
+    { "path": "../../../src/plugins/navigation/tsconfig.json" },
+    // requiredPlugins from ./kibana.json
+    { "path": "../fleet/tsconfig.json" }
   ]
 }
