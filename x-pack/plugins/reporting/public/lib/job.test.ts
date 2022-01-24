@@ -13,7 +13,7 @@ describe('Job', () => {
   it('should provide a pretty name for all known job types', () => {
     for (const jobType of Object.values(jobTypes)) {
       const job = new Job({ ...mockJobs[0], jobtype: jobType });
-      expect(job.prettyJobTypeName).toBeTruthy();
+      expect(job.prettyJobTypeName).toEqual(expect.any(String));
     }
   });
 
