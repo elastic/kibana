@@ -132,10 +132,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const core = useStartServices();
   const { notifications } = core;
 
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const integrations = useAuthz().integrations;
-  const hasIntegrationsPermissions = integrations.installPackages || integrations.readPackageInfo;
-  const hasPrivileges = hasFleetWritePermissions && hasIntegrationsPermissions;
+  const hasPrivileges = useAuthz().fleet.all;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();

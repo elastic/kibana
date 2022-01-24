@@ -82,9 +82,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const { getPath } = useLink();
 
   const { notifications } = useStartServices();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+  const hasWritePermissions = useAuthz().integrations.installPackages;
 
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -299,7 +297,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
             data-test-subj="updatePackageBtn"
-            isDisabled={!hasAllWritePermissions}
+            isDisabled={!hasWritePermissions}
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
@@ -317,7 +315,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                 },
               }}
               id="upgradePoliciesCheckbox"
-              disabled={!hasAllWritePermissions}
+              disabled={!hasWritePermissions}
               checked={upgradePackagePolicies}
               onChange={handleUpgradePackagePoliciesChange}
               label={i18n.translate(

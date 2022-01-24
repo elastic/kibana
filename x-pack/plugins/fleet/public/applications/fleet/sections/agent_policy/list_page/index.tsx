@@ -43,8 +43,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
   const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
 
   const {
     agents: { enabled: isFleetEnabled },
@@ -181,7 +179,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasAllWritePermissions}
+        isDisabled={!hasFleetWritePermissions}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
       >
         <FormattedMessage
@@ -190,7 +188,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasAllWritePermissions, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetWritePermissions, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(

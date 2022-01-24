@@ -98,15 +98,12 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  // Update this component, needs more granular permissions
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasIntReadPermissions = useAuthz().integrations.readInstalledPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+  const hasFleetPermissions = useAuthz().fleet.all;
+  const hasWritePermissions = useAuthz().integrations.installPackages;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallIntegrations = hasAllWritePermissions && permissionCheck.data?.success;
+  const userCanInstallIntegrations = hasWritePermissions && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -462,7 +459,7 @@ export function Detail() {
       },
     ];
 
-    if (hasIntReadPermissions && packageInstallStatus === InstallStatus.installed) {
+    if (hasWritePermissions && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'policies',
         name: (
@@ -498,7 +495,7 @@ export function Detail() {
       });
     }
 
-    if (hasIntReadPermissions) {
+    if (hasFleetPermissions) {
       tabs.push({
         id: 'settings',
         name: (
@@ -540,7 +537,8 @@ export function Detail() {
     panel,
     getHref,
     integration,
-    hasIntReadPermissions,
+    hasFleetPermissions,
+    hasWritePermissions,
     packageInstallStatus,
     CustomAssets,
     showCustomTab,

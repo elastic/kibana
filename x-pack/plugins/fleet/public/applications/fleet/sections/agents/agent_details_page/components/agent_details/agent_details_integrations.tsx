@@ -70,9 +70,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   packagePolicy: PackagePolicy;
 }> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+  const hasWritePermissions = useAuthz().integrations.installPackages;
 
   const inputs = useMemo(() => {
     return packagePolicy.inputs.filter((input) => input.enabled);
@@ -140,7 +138,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                 )}
               </EuiFlexItem>
               <EuiFlexItem className="eui-textTruncate">
-                {hasAllWritePermissions ? (
+                {hasWritePermissions ? (
                   <EuiLink
                     className="eui-textTruncate"
                     data-test-subj="agentPolicyDetailsLink"

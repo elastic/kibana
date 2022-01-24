@@ -30,9 +30,7 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const hasFleetWritePermissions = useAuthz().fleet.all;
-    const hasIntWritePermissions = useAuthz().integrations.installPackages;
-    const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+    const hasWritePermissions = useAuthz().integrations.installPackages;
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
@@ -78,7 +76,7 @@ export const AgentPolicyActionMenu = memo<{
             ? [viewPolicyItem]
             : [
                 <EuiContextMenuItem
-                  disabled={!hasAllWritePermissions}
+                  disabled={!hasWritePermissions}
                   icon="plusInCircle"
                   onClick={() => {
                     setIsContextMenuOpen(false);
@@ -93,7 +91,7 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={!hasAllWritePermissions}
+                  disabled={!hasWritePermissions}
                   icon="copy"
                   onClick={() => {
                     setIsContextMenuOpen(false);

@@ -50,9 +50,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+  const hasWritePermissions = useAuthz().integrations.installPackages;
+  const hasReadPermissions = useAuthz().integrations.readPackageInfo;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
 
@@ -106,7 +105,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiLink
             title={value}
-            {...(hasAllWritePermissions
+            {...(hasReadPermissions
               ? {
                   href: getHref('edit_integration', {
                     policyId: agentPolicy.id,
@@ -139,49 +138,42 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
-          const integrationPackageName = (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {packagePolicy.package && (
-                <EuiFlexItem grow={false}>
-                  <PackageIcon
-                    packageName={packagePolicy.package.name}
-                    version={packagePolicy.package.version}
-                    size="m"
-                    tryApi={true}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
-              {packagePolicy.package && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                    <FormattedMessage
-                      id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
-                      defaultMessage="v{version}"
-                      values={{ version: packagePolicy.package.version }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          );
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
-                {hasAllWritePermissions ? (
-                  <EuiLink
-                    href={
-                      packagePolicy.package &&
-                      getHref('integration_details_overview', {
-                        pkgkey: pkgKeyFromPackageInfo(packagePolicy.package),
-                      })
-                    }
-                  >
-                    {integrationPackageName}
-                  </EuiLink>
-                ) : (
-                  integrationPackageName
-                )}
+                <EuiLink
+                  href={
+                    packagePolicy.package &&
+                    getHref('integration_details_overview', {
+                      pkgkey: pkgKeyFromPackageInfo(packagePolicy.package),
+                    })
+                  }
+                >
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    {packagePolicy.package && (
+                      <EuiFlexItem grow={false}>
+                        <PackageIcon
+                          packageName={packagePolicy.package.name}
+                          version={packagePolicy.package.version}
+                          size="m"
+                          tryApi={true}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+                    {packagePolicy.package && (
+                      <EuiFlexItem grow={false}>
+                        <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                          <FormattedMessage
+                            id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
+                            defaultMessage="v{version}"
+                            values={{ version: packagePolicy.package.version }}
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiLink>
               </EuiFlexItem>
               {packagePolicy.hasUpgrade && (
                 <>
@@ -199,7 +191,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     <EuiButton
                       size="s"
                       minWidth="0"
-                      isDisabled={Boolean(!hasAllWritePermissions)}
+                      isDisabled={!hasWritePermissions}
                       href={`${getHref('upgrade_package_policy', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,
@@ -236,7 +228,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
-              return hasAllWritePermissions ? (
+              return hasWritePermissions ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
                   packagePolicy={packagePolicy}
@@ -253,7 +245,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy, getHref, hasAllWritePermissions]
+    [agentPolicy, getHref, hasWritePermissions, hasReadPermissions]
   );
 
   return (
@@ -275,7 +267,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiButton
                 key="addPackagePolicyButton"
                 fill
-                isDisabled={!hasAllWritePermissions}
+                isDisabled={!hasWritePermissions}
                 iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {

@@ -104,9 +104,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   });
   const { updatableIntegrations } = usePackageInstallations();
   const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+
+  const hasWritePermissions = useAuthz().integrations.installPackages;
 
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicy: GetAgentPoliciesResponseItem;
@@ -248,7 +247,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                       policyId: agentPolicy.id,
                       packagePolicyId: packagePolicy.id,
                     })}?from=integrations-policy-list`}
-                    isDisabled={Boolean(!hasAllWritePermissions)}
+                    isDisabled={Boolean(!hasWritePermissions)}
                   >
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
@@ -334,7 +333,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [getHref, showAddAgentHelpForPackagePolicyId, viewDataStep, hasAllWritePermissions]
+    [getHref, showAddAgentHelpForPackagePolicyId, viewDataStep, hasWritePermissions]
   );
 
   const noItemsMessage = useMemo(() => {

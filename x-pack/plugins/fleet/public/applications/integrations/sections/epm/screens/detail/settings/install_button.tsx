@@ -26,9 +26,7 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> &
 };
 export function InstallButton(props: InstallationButtonProps) {
   const { name, numOfAssets, title, version } = props;
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+  const hasWritePermissions = useAuthz().integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
@@ -54,7 +52,7 @@ export function InstallButton(props: InstallationButtonProps) {
     />
   );
 
-  return hasAllWritePermissions ? (
+  return hasWritePermissions ? (
     <Fragment>
       <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
         {isInstalling ? (

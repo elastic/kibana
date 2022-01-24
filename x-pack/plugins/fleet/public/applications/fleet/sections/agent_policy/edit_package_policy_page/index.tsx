@@ -42,6 +42,7 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendUpgradePackagePolicyDryRun,
+  useAuthz,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -122,6 +123,8 @@ export const EditPackagePolicyForm = memo<{
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
 
   const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  const hasWritePermissions = useAuthz().integrations.installPackages;
 
   useEffect(() => {
     if (forceUpgrade) {
@@ -629,7 +632,9 @@ export const EditPackagePolicyForm = memo<{
                         onClick={onSubmit}
                         isLoading={formState === 'LOADING'}
                         // Allow to save only if the package policy is upgraded or had been edited
-                        disabled={formState !== 'VALID' || (!isEdited && !isUpgrade)}
+                        disabled={
+                          !hasWritePermissions || formState !== 'VALID' || (!isEdited && !isUpgrade)
+                        }
                         iconType="save"
                         color="primary"
                         fill

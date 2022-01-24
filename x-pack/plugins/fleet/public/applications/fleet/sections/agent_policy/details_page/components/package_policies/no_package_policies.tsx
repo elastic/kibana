@@ -14,9 +14,7 @@ import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constant
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
-  const hasIntWritePermissions = useAuthz().integrations.installPackages;
-  const hasAllWritePermissions = hasFleetWritePermissions && hasIntWritePermissions;
+  const hasWritePermissions = useAuthz().integrations.installPackages;
 
   return (
     <EuiEmptyPrompt
@@ -37,7 +35,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       }
       actions={
         <EuiButton
-          isDisabled={!hasAllWritePermissions}
+          isDisabled={!hasWritePermissions}
           fill
           onClick={() =>
             application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
