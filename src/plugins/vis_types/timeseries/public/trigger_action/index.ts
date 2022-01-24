@@ -26,6 +26,7 @@ const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
 export const triggerVisualizeToLensOptions = async (
   model: Panel
 ): Promise<NavigateToLensOptions | null> => {
+  // console.dir(model);
   // For now we will disable the option for not timeseries charts and for the string mode
   if (model.type !== PANEL_TYPES.TIMESERIES || !model.use_kibana_indexes) {
     return null;
@@ -81,24 +82,21 @@ export const triggerVisualizeToLensOptions = async (
           ? `${chartType}_stacked`
           : 'line',
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
-      splitField: layer.terms_field ?? undefined,
-      splitMode: layer.split_mode !== 'everything' ? layer.split_mode : undefined,
-      splitFilters: splitFilters.length > 0 ? splitFilters : undefined,
+      ...(layer.terms_field && { splitField: layer.terms_field }),
+      ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
+      ...(splitFilters.length > 0 && { splitFilters }),
       palette: (layer.palette as PaletteOutput) ?? undefined,
       ...(layer.split_mode === 'terms' && {
         termsParams: {
           size: layer.terms_size ?? 10,
           otherBucket: false,
           orderDirection: layer.terms_direction,
-          orderBy:
-            layer.terms_order_by === '_key'
-              ? { type: 'alphabetical', fallback: true }
-              : { type: 'column' },
+          orderBy: layer.terms_order_by === '_key' ? { type: 'alphabetical' } : { type: 'column' },
         },
       }),
       metrics: [...metricsArray],
       timeInterval: model.interval || 'auto',
-      format: SUPPORTED_FORMATTERS.includes(layer.formatter) ? layer.formatter : undefined,
+      ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
     };
     options[layerIdx] = triggerOptions;
