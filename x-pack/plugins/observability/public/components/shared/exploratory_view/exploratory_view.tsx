@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { EuiButtonEmpty, EuiResizableContainer, EuiTitle, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiResizableContainer, EuiTitle } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -93,72 +93,68 @@ export function ExploratoryView({
     }
   };
 
-  return (
-    <Wrapper>
-      {lens ? (
-        <>
-          <ExploratoryViewHeader
-            lensAttributes={lensAttributes}
-            chartTimeRange={chartTimeRangeContext}
-          />
-          <LensWrapper ref={wrapperRef} height={height}>
-            <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
-              {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
-                collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
+  return lens ? (
+    <>
+      <ExploratoryViewHeader
+        lensAttributes={lensAttributes}
+        chartTimeRange={chartTimeRangeContext}
+      />
+      <LensWrapper ref={wrapperRef} height={height}>
+        <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
+          {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+            collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
 
-                return (
-                  <>
-                    <EuiResizablePanel
-                      initialSize={40}
-                      minSize={'30%'}
-                      mode={'collapsible'}
-                      id="chartPanel"
-                    >
-                      {lensAttributes ? (
-                        <LensEmbeddable
-                          setChartTimeRangeContext={setChartTimeRangeContext}
-                          lensAttributes={lensAttributes}
-                        />
-                      ) : (
-                        <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
-                      )}
-                    </EuiResizablePanel>
-                    <EuiResizableButton />
-                    <EuiResizablePanel
-                      initialSize={60}
-                      minSize="10%"
-                      mode={'main'}
-                      id="seriesPanel"
-                      color="subdued"
-                      className="paddingTopSmall"
-                    >
-                      <ChartToggle
-                        isCollapsed={hiddenPanel === 'chartPanel'}
-                        onClick={() => onChange('chartPanel')}
-                      />
+            return (
+              <>
+                <EuiResizablePanel
+                  initialSize={40}
+                  minSize={'30%'}
+                  mode={'collapsible'}
+                  id="chartPanel"
+                >
+                  {lensAttributes ? (
+                    <LensEmbeddable
+                      setChartTimeRangeContext={setChartTimeRangeContext}
+                      lensAttributes={lensAttributes}
+                    />
+                  ) : (
+                    <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
+                  )}
+                </EuiResizablePanel>
+                <EuiResizableButton />
+                <EuiResizablePanel
+                  initialSize={60}
+                  minSize="10%"
+                  mode={'main'}
+                  id="seriesPanel"
+                  color="subdued"
+                  className="paddingTopSmall"
+                >
+                  <ChartToggle
+                    isCollapsed={hiddenPanel === 'chartPanel'}
+                    onClick={() => onChange('chartPanel')}
+                  />
 
-                      <SeriesViews
-                        seriesBuilderRef={seriesBuilderRef}
-                        onSeriesPanelCollapse={onChange}
-                      />
-                    </EuiResizablePanel>
-                  </>
-                );
-              }}
-            </ResizableContainer>
-            {hiddenPanel === 'seriesPanel' && (
-              <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
-                {PREVIEW_LABEL}
-              </ShowPreview>
-            )}
-          </LensWrapper>
-        </>
-      ) : (
-        <EuiTitle>
-          <h2>{LENS_NOT_AVAILABLE}</h2>
-        </EuiTitle>
-      )}
-    </Wrapper>
+                  <SeriesViews
+                    seriesBuilderRef={seriesBuilderRef}
+                    onSeriesPanelCollapse={onChange}
+                  />
+                </EuiResizablePanel>
+              </>
+            );
+          }}
+        </ResizableContainer>
+        {hiddenPanel === 'seriesPanel' && (
+          <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
+            {PREVIEW_LABEL}
+          </ShowPreview>
+        )}
+      </LensWrapper>
+    </>
+  ) : (
+    <EuiTitle>
+      <h2>{LENS_NOT_AVAILABLE}</h2>
+    </EuiTitle>
   );
 }
 const LensWrapper = styled.div<{ height: string }>`
@@ -174,19 +170,6 @@ const ResizableContainer = styled(EuiResizableContainer)`
   height: 100%;
   &&& .paddingTopSmall {
     padding-top: 8px;
-  }
-`;
-
-const Wrapper = styled(EuiPanel)`
-  max-width: 1800px;
-  min-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-  overflow-x: auto;
-  position: relative;
-
-  .echLegendItem__action {
-    display: none;
   }
 `;
 

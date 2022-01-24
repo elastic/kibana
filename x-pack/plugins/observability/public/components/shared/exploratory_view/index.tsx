@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButton } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -18,7 +19,7 @@ import {
   withNotifyOnErrors,
   createSessionStorageStateStorage,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
-import { UrlStorageContextProvider } from './hooks/use_series_storage';
+import { UrlStorageContextProvider, useSeriesStorage } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -28,6 +29,13 @@ export interface ExploratoryViewPageProps {
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
   app?: { id: string; label: string };
 }
+
+const TITLE = i18n.translate('xpack.observability.overview.exploratoryView', {
+  defaultMessage: 'Explore data',
+});
+const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
+  defaultMessage: 'Refresh',
+});
 
 export function ExploratoryViewPage({
   app,
@@ -41,18 +49,10 @@ export function ExploratoryViewPage({
     delay: 15000,
   });
 
-  useBreadcrumbs(
-    [
-      {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
-          defaultMessage: 'Explore data',
-        }),
-      },
-    ],
-    app
-  );
+  useBreadcrumbs([{ text: TITLE }], app);
 
   const { ObservabilityPageTemplate } = usePluginContext();
+  const { setLastRefresh } = useSeriesStorage();
 
   const {
     services: { uiSettings, notifications },
@@ -68,8 +68,19 @@ export function ExploratoryViewPage({
         ...withNotifyOnErrors(notifications!.toasts),
       });
 
+  const refresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
+
   return (
-    <ObservabilityPageTemplate>
+    <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle: TITLE,
+        rightSideItems: [
+          <EuiButton iconType="refresh" onClick={refresh}>
+            {REFRESH_LABEL}
+          </EuiButton>,
+        ],
+      }}
+    >
       <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
           <ExploratoryView saveAttributes={saveAttributes} />
