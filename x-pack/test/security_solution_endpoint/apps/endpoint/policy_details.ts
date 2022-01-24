@@ -402,9 +402,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 version: policyInfo.packageInfo.version,
               },
             },
-            artifact_manifest: {
-              manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-            },
+            artifact_manifest: agentFullPolicy.inputs[0].artifact_manifest,
             policy: {
               linux: {
                 events: {
@@ -451,9 +449,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 version: policyInfo.packageInfo.version,
               },
             },
-            artifact_manifest: {
-              manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-            },
+            artifact_manifest: agentFullPolicy.inputs[0].artifact_manifest,
             policy: {
               linux: {
                 advanced: {
@@ -490,9 +486,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 version: policyInfo.packageInfo.version,
               },
             },
-            artifact_manifest: {
-              manifest_version: agentFullPolicy.inputs[0].artifact_manifest.manifest_version,
-            },
+            artifact_manifest: agentFullPolicy.inputs[0].artifact_manifest,
           }),
         ]);
       });
