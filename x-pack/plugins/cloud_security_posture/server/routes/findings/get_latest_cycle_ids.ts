@@ -12,13 +12,11 @@ import { AGENT_LOGS_INDEX } from '../../../common/constants';
 const getAgentLogsEsQuery = (): SearchRequest => ({
   index: AGENT_LOGS_INDEX,
   size: 0,
-  //   query: {
-  //     bool: {
-  //       filter: [
-  //         { term: { 'event_status.keyword': 'end' } }, // TODO: comment out when updating agent to send logs
-  //       ],
-  //     },
-  //   },
+  query: {
+    bool: {
+      filter: [{ term: { 'status.keyword': 'end' } }],
+    },
+  },
   aggs: {
     group: {
       terms: { field: 'agent.id.keyword' },

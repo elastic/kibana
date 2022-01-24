@@ -39,7 +39,7 @@ function assertBenchmarkStats(v: unknown): asserts v is BenchmarkStats {
 }
 
 interface LastCycle {
-  run_id: string;
+  cycle_id: string;
 }
 
 interface GroupFilename {
@@ -65,10 +65,11 @@ const calculatePostureScore = (total: number, passed: number, failed: number): S
 const getLatestCycleId = async (esClient: ElasticsearchClient) => {
   const latestFinding = await esClient.search<LastCycle>(getLatestFindingQuery());
   const lastCycle = latestFinding.body.hits.hits[0];
-  if (lastCycle?._source?.run_id === undefined) {
+
+  if (lastCycle?._source?.cycle_id === undefined) {
     throw new Error('cycle id is missing');
   }
-  return lastCycle?._source?.run_id;
+  return lastCycle?._source?.cycle_id;
 };
 
 export const getBenchmarks = async (esClient: ElasticsearchClient) => {
@@ -77,6 +78,7 @@ export const getBenchmarks = async (esClient: ElasticsearchClient) => {
     { benchmarks: AggregationsMultiBucketAggregateBase<Pick<GroupFilename, 'key'>> }
   >(getBenchmarksQuery());
   const benchmarksBuckets = queryResult.body.aggregations?.benchmarks;
+
   if (!benchmarksBuckets || !Array.isArray(benchmarksBuckets?.buckets)) {
     throw new Error('missing buckets');
   }
