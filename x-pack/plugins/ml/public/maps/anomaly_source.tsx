@@ -232,7 +232,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    return this._descriptor.typicalActual === 'connected'
+    return this._descriptor.typicalActual === 'typical to actual'
       ? [VECTOR_SHAPE_TYPE.LINE]
       : [VECTOR_SHAPE_TYPE.POINT];
   }
@@ -251,6 +251,9 @@ export class AnomalySource implements IVectorSource {
         const label = ANOMALY_SOURCE_FIELDS[key]?.label;
         if (label) {
           tooltipProperties.push(new AnomalySourceTooltipProperty(label, properties[key]));
+        } else if (!ANOMALY_SOURCE_FIELDS[key]) {
+          // partition field keys will be different each time so won't be in ANOMALY_SOURCE_FIELDS
+          tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
         }
       }
     }

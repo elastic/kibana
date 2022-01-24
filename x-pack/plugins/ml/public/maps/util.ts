@@ -13,18 +13,7 @@ import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { VectorSourceRequestMeta } from '../../../maps/common';
 
-export type MlAnomalyLayers = 'typical' | 'actual' | 'connected';
-interface Hit {
-  [x: string]: any;
-  actual: number[];
-  actualDisplay: number[];
-  fieldName?: string;
-  functionDescription: string;
-  typical: number[];
-  typicalDisplay: number[];
-  record_score: number;
-  timestamp: string;
-}
+export type MlAnomalyLayers = 'typical' | 'actual' | 'typical to actual';
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
@@ -75,7 +64,6 @@ export async function getResultsForJobId(
   }
 
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
-  let hits: Hit[] = [];
 
   try {
     resp = await mlResultsService.anomalySearch(
@@ -88,8 +76,9 @@ export async function getResultsForJobId(
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
   }
-  if (resp !== null && resp.hits.total.value > 0) {
-    hits = resp.hits.hits.map(({ _source }) => {
+
+  const features: Feature[] =
+    resp?.hits.hits.map(({ _source }) => {
       const geoResults = _source.geo_results;
       const actualCoordStr = geoResults && geoResults.actual_point;
       const typicalCoordStr = geoResults && geoResults.typical_point;
@@ -106,65 +95,41 @@ export async function getResultsForJobId(
         typical = getCoordinates(typicalCoordStr);
         typicalDisplay = getCoordinates(typicalCoordStr, true);
       }
-      return {
-        fieldName: _source.field_name,
-        functionDescription: _source.function_description,
-        timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
-        typical,
-        typicalDisplay,
-        actual,
-        actualDisplay,
-        record_score: Math.floor(_source.record_score),
-        ...(_source.partition_field_name
-          ? { partition_field_name: _source.partition_field_name }
-          : {}),
-        ...(_source.partition_field_value
-          ? { partition_field_value: _source.partition_field_value }
-          : {}),
-        ...(_source.by_field_name ? { by_field_name: _source.by_field_name } : {}),
-        ...(_source.by_field_value ? { by_field_value: _source.by_field_value } : {}),
-        ...(_source.over_field_value ? { over_field_value: _source.over_field_value } : {}),
-      };
-    });
-  }
 
-  const features: Feature[] = hits.map((result) => {
-    let geometry: Geometry;
-    if (locationType === 'typical' || locationType === 'actual') {
-      geometry = {
-        type: 'Point',
-        coordinates: locationType === 'typical' ? result.typical : result.actual,
+      let geometry: Geometry;
+      if (locationType === 'typical' || locationType === 'actual') {
+        geometry = {
+          type: 'Point',
+          coordinates: locationType === 'typical' ? typical : actual,
+        };
+      } else {
+        geometry = {
+          type: 'LineString',
+          coordinates: [typical, actual],
+        };
+      }
+      return {
+        type: 'Feature',
+        geometry,
+        properties: {
+          actual,
+          actualDisplay,
+          typical,
+          typicalDisplay,
+          fieldName: _source.field_name,
+          functionDescription: _source.function_description,
+          timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
+          record_score: Math.floor(_source.record_score),
+          ...(_source.partition_field_name
+            ? { [_source.partition_field_name]: _source.partition_field_value }
+            : {}),
+          ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
+          ...(_source.over_field_name
+            ? { [_source.over_field_name]: _source.over_field_value }
+            : {}),
+        },
       };
-    } else {
-      geometry = {
-        type: 'LineString',
-        coordinates: [result.typical, result.actual],
-      };
-    }
-    return {
-      type: 'Feature',
-      geometry,
-      properties: {
-        actual: result.actual,
-        actualDisplay: result.actualDisplay,
-        typical: result.typical,
-        typicalDisplay: result.typicalDisplay,
-        fieldName: result.fieldName,
-        functionDescription: result.functionDescription,
-        timestamp: result.timestamp,
-        record_score: result.record_score,
-        ...(result.partition_field_name
-          ? { partition_field_name: result.partition_field_name }
-          : {}),
-        ...(result.partition_field_value
-          ? { partition_field_value: result.partition_field_value }
-          : {}),
-        ...(result.by_field_name ? { by_field_name: result.by_field_name } : {}),
-        ...(result.by_field_value ? { by_field_value: result.by_field_value } : {}),
-        ...(result.over_field_value ? { over_field_value: result.over_field_value } : {}),
-      },
-    };
-  });
+    }) || [];
 
   return {
     type: 'FeatureCollection',

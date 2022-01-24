@@ -40,12 +40,14 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
+  actual: {},
   actualDisplay: {
     label: i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
       defaultMessage: 'Actual',
     }),
     type: 'string',
   },
+  typical: {},
   typicalDisplay: {
     label: i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {
       defaultMessage: 'Typical',

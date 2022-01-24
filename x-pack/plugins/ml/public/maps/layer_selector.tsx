@@ -36,7 +36,7 @@ export class LayerSelector extends Component<Props, State> {
     const typicalActual: MlAnomalyLayers = selectedOptions[0].value! as
       | 'typical'
       | 'actual'
-      | 'connected';
+      | 'typical to actual';
     if (this._isMounted) {
       this.setState({ typicalActual });
       this.props.onChange(typicalActual);
@@ -58,7 +58,7 @@ export class LayerSelector extends Component<Props, State> {
           options={[
             { value: 'actual', label: 'actual' },
             { value: 'typical', label: 'typical' },
-            { value: 'connected', label: 'connected' },
+            { value: 'typical to actual', label: 'typical to actual' },
           ]}
           selectedOptions={options}
         />
