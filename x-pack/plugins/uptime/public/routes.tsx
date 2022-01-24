@@ -206,6 +206,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               ),
             },
             bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -225,6 +226,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               ),
             },
             bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {

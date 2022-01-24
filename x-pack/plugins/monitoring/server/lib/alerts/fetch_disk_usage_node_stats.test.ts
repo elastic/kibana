@@ -10,6 +10,18 @@ import { elasticsearchClientMock } from '../../../../../../src/core/server/elast
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchDiskUsageNodeStats } from './fetch_disk_usage_node_stats';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchDiskUsageNodeStats', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
@@ -19,7 +31,6 @@ describe('fetchDiskUsageNodeStats', () => {
       clusterName: 'test-cluster',
     },
   ];
-  const index = '.monitoring-es-*';
   const duration = '5m';
   const size = 10;
 
@@ -63,7 +74,7 @@ describe('fetchDiskUsageNodeStats', () => {
       })
     );
 
-    const result = await fetchDiskUsageNodeStats(esClient, clusters, index, duration, size);
+    const result = await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
