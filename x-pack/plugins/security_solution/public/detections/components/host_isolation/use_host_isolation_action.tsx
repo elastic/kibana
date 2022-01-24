@@ -9,11 +9,11 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { useIsolationPrivileges } from '../../../common/hooks/endpoint/use_isolate_privileges';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;
@@ -62,7 +62,7 @@ export const useHostIsolationAction = ({
     capabilities,
   });
 
-  const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
+  const isIsolationAllowed = useUserPrivileges().endpointPrivileges.canIsolateHost;
 
   const isolateHostHandler = useCallback(() => {
     closePopover();
