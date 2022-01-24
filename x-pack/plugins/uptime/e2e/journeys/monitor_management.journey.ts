@@ -8,7 +8,7 @@
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 
-journey('Monitor Management', async ({ page, params }: { page: Page; params: any }) => {
+journey('MonitorManagement', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const basicMonitorDetails = {
     name: 'Sample monitor',

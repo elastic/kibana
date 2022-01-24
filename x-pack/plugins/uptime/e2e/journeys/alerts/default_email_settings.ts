@@ -12,11 +12,12 @@
  * 2.0.
  */
 
-import { journey, step, before } from '@elastic/synthetics';
+import { journey, step, before, beforeAll } from '@elastic/synthetics';
 import {
   assertNotText,
   assertText,
   byTestId,
+  clearSettings,
   loginToKibana,
   waitForLoadingToFinish,
 } from '../utils';
@@ -24,6 +25,16 @@ import { settingsPageProvider } from '../../page_objects/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
   const settings = settingsPageProvider({ page, kibanaUrl: params.kibanaUrl });
+
+  beforeAll(async () => {
+    await clearSettings({
+      kibanaUrl: params.kibanaUrl,
+      user: {
+        username: 'elastic',
+        password: 'changeme',
+      },
+    });
+  });
 
   before(async () => {
     await waitForLoadingToFinish({ page });
@@ -41,6 +52,21 @@ journey('DefaultEmailSettings', async ({ page, params }) => {
       waitUntil: 'networkidle',
     });
     await loginToKibana({ page });
+  });
+
+  step('clear existing settings', async () => {
+    await settings.dismissSyntheticsCallout();
+    await page.waitForSelector(byTestId('"default-connectors-input-loaded"'));
+    await page.waitForTimeout(10 * 1000);
+    const toEmailInput = await page.$(byTestId('toEmailAddressInput'));
+
+    if (toEmailInput !== null) {
+      await page.click(`${byTestId('toEmailAddressInput')} >> ${byTestId('comboBoxClearButton')}`);
+      await page.click(
+        `${byTestId('"default-connectors-input-loaded"')} >> ${byTestId('comboBoxClearButton')}`
+      );
+      await settings.saveSettings();
+    }
   });
 
   step('Add email connector', async () => {
