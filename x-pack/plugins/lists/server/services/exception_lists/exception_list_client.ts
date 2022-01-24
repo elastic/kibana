@@ -70,17 +70,16 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import {
-  PromiseFromStreams,
-  importExceptions,
-  importExceptionsAsArray,
-} from './import_exception_list_and_items';
+import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
   validateData,
 } from './utils';
-import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
+import {
+  createExceptionsStreamFromNdjson,
+  exceptionsChecksFromArray,
+} from './utils/import/create_exceptions_stream_logic';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -726,15 +725,6 @@ export class ExceptionListClient {
       savedObjectsClient,
       user,
     });
-
-    // FIXME:PT Should the `importExceptionsAsStream()` just be deleted? since it is now not used anywhere?
-    // return importExceptionsAsStream({
-    //   exceptionsToImport,
-    //   maxExceptionsImportSize,
-    //   overwrite,
-    //   savedObjectsClient,
-    //   user,
-    // });
   };
 
   /**
@@ -751,9 +741,19 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptionsAsArray({
-      exceptionsToImport,
-      maxExceptionsImportSize,
+    // validation of import and sorting of lists and items
+    const parsedObjects = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreImport',
+        parsedObjects,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return importExceptions({
+      exceptions: parsedObjects,
       overwrite,
       savedObjectsClient,
       user,

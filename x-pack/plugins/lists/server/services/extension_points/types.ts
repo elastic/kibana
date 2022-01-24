@@ -55,7 +55,9 @@ interface ServerExtensionPointDefinition<
 }
 
 /**
- * Extension point is triggered prior processing an import of data into the Exceptions Lists
+ * Extension point is triggered prior processing an import of data into the Exceptions Lists. The callback
+ * in this extension will be called by both the `importExceptionListAndItems()` and
+ * `importExceptionListAndItemsAsArray()`
  */
 export type ExceptionsListPreImportServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreImport',

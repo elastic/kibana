@@ -12,6 +12,7 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreImportServerExtension,
   ExceptionsListPreUpdateItemServerExtension,
   ExtensionPointStorageInterface,
   ServerExtensionCallbackContext,
@@ -26,6 +27,8 @@ export interface ExtensionPointStorageContextMock {
   /** An Exception List Item pre-update extension point added to the storage. Appends `-2` to the data's `name` attribute */
   exceptionPreUpdate: jest.Mocked<ExceptionsListPreUpdateItemServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
+  /** An Exception List pre-import extension point */
+  exceptionPreImport: jest.Mocked<ExceptionsListPreImportServerExtension>;
 }
 
 export const createExtensionPointStorageMock = (
@@ -53,6 +56,12 @@ export const createExtensionPointStorageMock = (
     type: 'exceptionsListPreUpdateItem',
   };
 
+  const exceptionPreImport: ExtensionPointStorageContextMock['exceptionPreImport'] = {
+    callback: jest.fn(async ({ data }) => data),
+    type: 'exceptionsListPreImport',
+  };
+
+  extensionPointStorage.add(exceptionPreImport);
   extensionPointStorage.add(exceptionPreCreate);
   extensionPointStorage.add(exceptionPreUpdate);
 
@@ -61,6 +70,7 @@ export const createExtensionPointStorageMock = (
       request: httpServerMock.createKibanaRequest(),
     },
     exceptionPreCreate,
+    exceptionPreImport,
     exceptionPreUpdate,
     extensionPointStorage,
     logger,
