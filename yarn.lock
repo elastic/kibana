@@ -22635,10 +22635,10 @@ pretty-ms@*:
   dependencies:
     parse-ms "^2.1.0"
 
-pretty-ms@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/pretty-ms/-/pretty-ms-5.0.0.tgz#6133a8f55804b208e4728f6aa7bf01085e951e24"
-  integrity sha512-94VRYjL9k33RzfKiGokPBPpsmloBYSf5Ri+Pq19zlsEcUKFob+admeXr5eFDRuPjFmEOcjJvPGdillYOJyvZ7Q==
+pretty-ms@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/pretty-ms/-/pretty-ms-6.0.0.tgz#39a0eb5f31d359bcee43c9579e6ddf4a02a82ff0"
+  integrity sha512-X5i1y9/8VuBMb9WU8zubTiLKnJG4lcKvL7eaCEVc/jpTe3aS74gCcBM6Yd1vvUDoTCXm4Y15obNS/16yB0FTaQ==
   dependencies:
     parse-ms "^2.1.0"
 

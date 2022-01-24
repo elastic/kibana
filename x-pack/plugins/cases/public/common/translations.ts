@@ -25,8 +25,8 @@ export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const OPENED_ON = i18n.translate('xpack.cases.caseView.openedOn', {
-  defaultMessage: 'Opened on',
+export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
+  defaultMessage: 'Created on',
 });
 
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {

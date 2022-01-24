@@ -7622,7 +7622,6 @@
     "xpack.cases.caseView.noReportersAvailable": "没有报告者。",
     "xpack.cases.caseView.noTags": "当前没有为此案例分配标签。",
     "xpack.cases.caseView.openCase": "创建案例",
-    "xpack.cases.caseView.openedOn": "打开时间",
     "xpack.cases.caseView.optional": "可选",
     "xpack.cases.caseView.otherEndpoints": " 以及{endpoints, plural, other {其他}} {endpoints} 个",
     "xpack.cases.caseView.particpantsLabel": "参与者",

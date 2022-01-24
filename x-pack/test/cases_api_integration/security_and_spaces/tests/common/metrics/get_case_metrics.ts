@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
             statusInfo: {
               openDuration: minutesToMilliseconds(30),
               inProgressDuration: minutesToMilliseconds(10),
-              numberOfReopens: 2,
+              reopenDates: ['2022-01-05T15:30:00.000Z', '2022-01-05T15:50:00.000Z'],
             },
           },
         });

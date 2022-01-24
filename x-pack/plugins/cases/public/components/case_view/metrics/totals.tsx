@@ -6,9 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
@@ -16,17 +15,32 @@ import {
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { CaseViewMetricsProps } from './types';
 
-const MetricValue = styled(EuiFlexItem)`
+export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
+  React.memo(({ metrics, features }) => {
+    const metricItems = useGetTitleValueMetricItems(metrics, features);
+
+    return (
+      <>
+        {metricItems.map(({ title, value }) => (
+          <EuiFlexItem key={title}>
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              <EuiFlexItem>{title}</EuiFlexItem>
+              <MetricValue>{value}</MetricValue>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </>
+    );
+  });
+CaseViewMetricItems.displayName = 'CaseViewMetricItems';
+
+const MetricValue = euiStyled(EuiFlexItem)`
   font-size: ${({ theme }) => theme.eui.euiSizeL};
   font-weight: bold;
 `;
-
-export interface CaseViewMetricsProps {
-  metrics: CaseMetrics | null;
-  features: CaseMetricsFeature[];
-  isLoading: boolean;
-}
 
 interface MetricItem {
   title: string;
@@ -34,7 +48,7 @@ interface MetricItem {
 }
 type MetricItems = MetricItem[];
 
-const useMetricItems = (
+const useGetTitleValueMetricItems = (
   metrics: CaseMetrics | null,
   features: CaseMetricsFeature[]
 ): MetricItems => {
@@ -43,10 +57,7 @@ const useMetricItems = (
   const alertsCount = alerts?.count ?? 0;
   const totalAlertUsers = alerts?.users?.total ?? 0;
   const totalAlertHosts = alerts?.hosts?.total ?? 0;
-  const totalIsolatedHosts =
-    actions?.isolateHost && actions.isolateHost.isolate.total >= actions.isolateHost.unisolate.total
-      ? actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total
-      : 0;
+  const totalIsolatedHosts = calculateTotalIsolatedHosts(actions);
 
   const metricItems = useMemo<MetricItems>(() => {
     const items: Array<[CaseMetricsFeature, MetricItem]> = [
@@ -76,38 +87,11 @@ const useMetricItems = (
   return metricItems;
 };
 
-const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
-  ({ metricItems }) => (
-    <>
-      {metricItems.map(({ title, value }, index) => (
-        <EuiFlexItem key={index}>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem>{title}</EuiFlexItem>
-            <MetricValue>{value}</MetricValue>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
-    </>
-  )
-);
-CaseViewMetricItems.displayName = 'CaseViewMetricItems';
-
-export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
-  ({ metrics, features, isLoading }) => {
-    const metricItems = useMetricItems(metrics, features);
-    return (
-      <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
-        <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false}>
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
-            </EuiFlexItem>
-          ) : (
-            <CaseViewMetricItems metricItems={metricItems} />
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
+const calculateTotalIsolatedHosts = (actions: CaseMetrics['actions']) => {
+  if (!actions?.isolateHost) {
+    return 0;
   }
-);
-CaseViewMetrics.displayName = 'CaseViewMetrics';
+
+  // prevent the metric from being negative
+  return Math.max(actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total, 0);
+};
