@@ -9,8 +9,9 @@
 import { pick, throttle, cloneDeep } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import {
+import type {
   SavedObject,
+  SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsBulkResolveResponse,
   SavedObjectsClientContract as SavedObjectsApi,
@@ -115,9 +116,12 @@ export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
 interface BatchGetQueueEntry {
   type: string;
   id: string;
-  resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
+  resolve: <T extends Record<string, unknown> = SavedObjectAttributes>(
+    value: SimpleSavedObject<T> | SavedObject<T>
+  ) => void;
   reject: (reason?: any) => void;
 }
+
 interface BatchResolveQueueEntry {
   type: string;
   id: string;
@@ -278,7 +282,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = <T = unknown>(
+  public create = <T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -523,7 +527,9 @@ export class SavedObjectsClient {
    * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
    * public client uses `bulkResolve` under the hood, so it behaves the same way.
    */
-  public bulkResolve = async <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
+  public bulkResolve = async <T extends Record<string, unknown> = SavedObjectAttributes>(
+    objects: Array<{ id: string; type: string }> = []
+  ) => {
     const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
     const response = await this.performBulkResolve<T>(filteredObjects);
     return {
@@ -533,7 +539,9 @@ export class SavedObjectsClient {
     };
   };
 
-  private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
+  private async performBulkResolve<T extends Record<string, unknown> = SavedObjectAttributes>(
+    objects: ObjectTypeAndId[]
+  ) {
     const path = this.getPath(['_bulk_resolve']);
     const request: Promise<SavedObjectsBulkResolveResponse<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
@@ -553,7 +561,7 @@ export class SavedObjectsClient {
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns
    */
-  public update<T = unknown>(
+  public update<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     attributes: T,
@@ -585,7 +593,9 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing both failed and updated saved objects.
    */
-  public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
+  public bulkUpdate<T extends Record<string, unknown> = SavedObjectAttributes>(
+    objects: SavedObjectsBulkUpdateObject[] = []
+  ) {
     const path = this.getPath(['_bulk_update']);
 
     return this.savedObjectsFetch<{ saved_objects: Array<SavedObject<T>> }>(path, {
@@ -600,11 +610,13 @@ export class SavedObjectsClient {
     });
   }
 
-  private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
+  private createSavedObject<T extends Record<string, unknown> = SavedObjectAttributes>(
+    options: SavedObject<T>
+  ): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);
   }
 
-  private createResolvedSavedObject<T = unknown>(
+  private createResolvedSavedObject<T extends Record<string, unknown> = SavedObjectAttributes>(
     resolveResponse: SavedObjectsResolveResponse<T>
   ): ResolvedSimpleSavedObject<T> {
     const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);

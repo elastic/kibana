@@ -450,7 +450,11 @@ export class SavedObjectsClient {
    * @param attributes
    * @param options
    */
-  async create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) {
+  async create<T extends Record<string, unknown> = SavedObjectAttributes>(
+    type: string,
+    attributes: T,
+    options?: SavedObjectsCreateOptions
+  ) {
     return await this._repository.create(type, attributes, options);
   }
 
@@ -460,7 +464,7 @@ export class SavedObjectsClient {
    * @param objects
    * @param options
    */
-  async bulkCreate<T = unknown>(
+  async bulkCreate<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
