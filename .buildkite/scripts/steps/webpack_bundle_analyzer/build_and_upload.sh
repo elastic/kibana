@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-# .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/bootstrap.sh
 
-# node scripts/build_kibana_platform_plugins.js --dist --profile
+node scripts/build_kibana_platform_plugins.js --dist --profile
 
 mkdir -p built_assets/webpack_bundle_analyzer
 find . -path "*target/public/*" -name "stats.json" | while read line; do
