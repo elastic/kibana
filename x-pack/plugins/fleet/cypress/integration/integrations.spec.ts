@@ -53,6 +53,11 @@ describe('Add Integration', () => {
 
     cy.get('.euiLoadingSpinner').should('not.exist');
     cy.getBySel('installedVersion').contains('1.2.1');
+
+    cy.get('.euiButton').contains('Uninstall Apache Tomcat').click();
+    cy.getBySel(CONFIRM_MODAL_BTN).click();
+    cy.get('.euiLoadingSpinner').should('not.exist');
+    cy.get('.euiButton').contains('Install Apache Tomcat assets');
   });
 
   describe('Real API', () => {
