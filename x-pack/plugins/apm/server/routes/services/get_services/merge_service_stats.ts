@@ -8,17 +8,17 @@ import { uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getHealthStatuses } from './get_health_statuses';
-import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
+import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 
 export function mergeServiceStats({
   transactionStats,
-  servicesFromMetricDocuments,
+  servicesFromErrorAndMetricDocuments,
   healthStatuses,
 }: {
   transactionStats: Awaited<ReturnType<typeof getServiceTransactionStats>>;
-  servicesFromMetricDocuments: Awaited<
-    ReturnType<typeof getServicesFromMetricDocuments>
+  servicesFromErrorAndMetricDocuments: Awaited<
+    ReturnType<typeof getServicesFromErrorAndMetricDocuments>
   >;
   healthStatuses: Awaited<ReturnType<typeof getHealthStatuses>>;
 }) {
@@ -26,9 +26,10 @@ export function mergeServiceStats({
     ({ serviceName }) => serviceName
   );
 
-  const servicesWithOnlyMetricDocuments = servicesFromMetricDocuments.filter(
-    ({ serviceName }) => !foundServiceNames.includes(serviceName)
-  );
+  const servicesWithOnlyMetricDocuments =
+    servicesFromErrorAndMetricDocuments.filter(
+      ({ serviceName }) => !foundServiceNames.includes(serviceName)
+    );
 
   const allServiceNames = foundServiceNames.concat(
     servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
@@ -43,7 +44,7 @@ export function mergeServiceStats({
   return joinByKey(
     asMutableArray([
       ...transactionStats,
-      ...servicesFromMetricDocuments,
+      ...servicesFromErrorAndMetricDocuments,
       ...matchedHealthStatuses,
     ] as const),
     'serviceName',

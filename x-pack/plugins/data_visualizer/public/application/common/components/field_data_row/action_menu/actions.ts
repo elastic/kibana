@@ -17,7 +17,7 @@ import {
   dataVisualizerRefresh$,
   Refresh,
 } from '../../../../index_data_visualizer/services/timefilter_refresh_service';
-import { JOB_FIELD_TYPES } from '../../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../../../../../src/plugins/ui_actions/public';
 
 export function getActions(
