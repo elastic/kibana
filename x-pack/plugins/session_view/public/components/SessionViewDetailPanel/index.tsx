@@ -13,7 +13,6 @@ import { EventKind, Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 
 interface SessionViewDetailPanelDeps {
-  isDetailMounted: boolean;
   height?: number;
   selectedProcess: Process | null;
   setIsDetailOpen(isDetailOpen: boolean): void;
@@ -31,7 +30,6 @@ interface ProcessDetailTabData {
  * Detail panel in the session view.
  */
 export const SessionViewDetailPanel = ({
-  isDetailMounted,
   height,
   selectedProcess,
   setIsDetailOpen,
@@ -73,12 +71,6 @@ export const SessionViewDetailPanel = ({
     setAlertTabs(processAlertTabs);
     setSelectedAlertTab(processAlertTabs[0]?.id || '');
   }, [selectedProcess]);
-
-  const handleAnimationEnd = () => {
-    if (!isDetailMounted) {
-      setIsDetailOpen(false);
-    }
-  };
 
   const renderSelectedProcessCommandDetail = () => {
     if (selectedProcess) {
@@ -140,13 +132,7 @@ export const SessionViewDetailPanel = ({
   };
 
   return (
-    <EuiSplitPanel.Inner
-      paddingSize="s"
-      color="plain"
-      css={isDetailMounted ? styles.detailPanelIn : styles.detailPanelOut}
-      onAnimationEnd={handleAnimationEnd}
-      data-test-subj="sessionViewDetailPanel"
-    >
+    <>
       {renderSelectedProcessCommandDetail()}
       <div data-test-subj="sessionViewDetailPanelSessionDetail">
         <EuiTitle size="s">
@@ -170,6 +156,6 @@ export const SessionViewDetailPanel = ({
       </div>
       <EuiSpacer size="xxl" />
       {renderSelectedProcessAlertDetail()}
-    </EuiSplitPanel.Inner>
+    </>
   );
 };
