@@ -11,6 +11,18 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchClusters', () => {
   const clusterUuid = '1sdfds734';
   const clusterName = 'monitoring';
@@ -31,8 +43,7 @@ describe('fetchClusters', () => {
         },
       } as estypes.SearchResponse)
     );
-    const index = '.monitoring-es-*';
-    const result = await fetchClusters(esClient, index);
+    const result = await fetchClusters(esClient);
     expect(result).toEqual([{ clusterUuid, clusterName }]);
   });
 
@@ -60,15 +71,13 @@ describe('fetchClusters', () => {
         },
       } as estypes.SearchResponse)
     );
-    const index = '.monitoring-es-*';
-    const result = await fetchClusters(esClient, index);
+    const result = await fetchClusters(esClient);
     expect(result).toEqual([{ clusterUuid, clusterName: metadataName }]);
   });
 
   it('should limit the time period in the query', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    const index = '.monitoring-es-*';
-    await fetchClusters(esClient, index);
+    await fetchClusters(esClient);
     const params = esClient.search.mock.calls[0][0] as any;
     expect(params?.body?.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
   });

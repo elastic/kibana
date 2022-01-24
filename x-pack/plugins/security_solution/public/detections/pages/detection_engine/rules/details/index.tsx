@@ -27,7 +27,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 import {
   ExceptionListTypeEnum,
   ExceptionListIdentifiers,
@@ -52,7 +51,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
-import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
@@ -75,9 +74,6 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_overflow';
-import { RuleStatusFailedCallOut } from './status_failed_callout';
-import { FailureHistory } from './failure_history';
-import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
@@ -109,12 +105,17 @@ import {
   isBoolean,
 } from '../../../../../common/utils/privileges';
 
+import {
+  RuleStatus,
+  RuleStatusFailedCallOut,
+  ruleStatusI18n,
+} from '../../../../components/rules/rule_execution_status';
+import { FailureHistory } from './failure_history';
+
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
-import * as statusI18n from '../../../../components/rules/rule_status/translations';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
-import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 import { BadgeOptions } from '../../../../../common/components/header_page/types';
@@ -208,7 +209,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const loading = userInfoLoading || listsConfigLoading;
+
+  const {
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
+  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
     rule: maybeRule,
@@ -217,15 +225,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     isExistingRule,
   } = useRuleWithFallback(ruleId);
   const { pollForSignalIndex } = useSignalHelpers();
-  const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
-  const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
-    ruleStatus?.current_status ?? null
-  );
-  useEffect(() => {
-    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
-      setCurrentStatus(ruleStatus?.current_status ?? null);
-    }
-  }, [currentStatus, ruleStatus, setCurrentStatus]);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
@@ -459,27 +458,25 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         : DEFAULT_INDEX_PATTERN),
     [rule?.index, uebaEnabled]
   );
-  const handleRefresh = useCallback(() => {
-    if (fetchRuleStatus != null && ruleId != null) {
-      fetchRuleStatus(ruleId);
-    }
-  }, [fetchRuleStatus, ruleId]);
 
+  const lastExecution = rule?.execution_summary?.last_execution;
+  const lastExecutionStatus = lastExecution?.status;
+  const lastExecutionDate = lastExecution?.date ?? '';
+  const lastExecutionMessage = lastExecution?.message ?? '';
+
+  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   const ruleStatusInfo = useMemo(() => {
-    return loadingStatus ? (
+    return ruleLoading ? (
       <EuiFlexItem>
         <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
       </EuiFlexItem>
     ) : (
       <>
-        <RuleStatus
-          status={getRuleStatusText(currentStatus?.status)}
-          statusDate={currentStatus?.status_date}
-        >
+        <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
           <EuiButtonIcon
             data-test-subj="refreshButton"
             color="primary"
-            onClick={handleRefresh}
+            onClick={refreshRule}
             iconType="refresh"
             aria-label={ruleI18n.REFRESH}
             isDisabled={!isExistingRule}
@@ -487,41 +484,26 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         </RuleStatus>
       </>
     );
-  }, [isExistingRule, currentStatus, loadingStatus, handleRefresh]);
+  }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
+  // TODO: https://github.com/elastic/kibana/pull/121644 clean up
   const ruleError = useMemo(() => {
-    if (loadingStatus) {
+    if (ruleLoading) {
       return (
         <EuiFlexItem>
           <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
         </EuiFlexItem>
       );
-    } else if (
-      currentStatus?.status === 'failed' &&
-      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
-      currentStatus?.last_failure_at != null
-    ) {
-      return (
-        <RuleStatusFailedCallOut
-          message={currentStatus?.last_failure_message ?? ''}
-          date={currentStatus?.last_failure_at}
-        />
-      );
-    } else if (
-      (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
-      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
-      currentStatus?.last_success_at != null
-    ) {
-      return (
-        <RuleStatusFailedCallOut
-          message={currentStatus?.last_success_message ?? ''}
-          date={currentStatus?.last_success_at}
-          color="warning"
-        />
-      );
     }
-    return null;
-  }, [ruleDetailTab, currentStatus, loadingStatus]);
+
+    return (
+      <RuleStatusFailedCallOut
+        status={lastExecutionStatus}
+        date={lastExecutionDate}
+        message={lastExecutionMessage}
+      />
+    );
+  }, [lastExecutionStatus, lastExecutionDate, lastExecutionMessage, ruleLoading]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -601,7 +583,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [setShowOnlyThreatIndicatorAlerts]
   );
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
     allowedExceptionListTypes: ExceptionListTypeEnum[];
@@ -698,7 +679,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <>
                   <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
                     <EuiFlexItem grow={false}>
-                      {statusI18n.STATUS}
+                      {ruleStatusI18n.STATUS}
                       {':'}
                     </EuiFlexItem>
                     {ruleStatusInfo}
@@ -819,6 +800,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   signalIndexName={signalIndexName}
                   defaultStackByOption={defaultRuleStackByOption}
                   updateDateRange={updateDateRangeCallback}
+                  runtimeMappings={runtimeMappings}
                 />
                 <EuiSpacer />
               </Display>
@@ -852,7 +834,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               onRuleChange={refreshRule}
             />
           )}
-          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
+          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory ruleId={ruleId} />}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
 

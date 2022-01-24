@@ -22,6 +22,7 @@ const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const mockedActionExecutor = actionExecutorMock.create();
+const eventLogger = eventLoggerMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
@@ -62,7 +63,7 @@ const actionExecutorInitializerParams = {
   actionTypeRegistry,
   getActionsClientWithRequest: jest.fn(async () => actionsClientMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
-  eventLogger: eventLoggerMock.create(),
+  eventLogger,
   preconfiguredActions: [],
 };
 const taskRunnerFactoryInitializerParams = {
@@ -234,6 +235,37 @@ test('cleans up action_task_params object', async () => {
   await taskRunner.run();
 
   expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3');
+});
+
+test('task runner should implement CancellableTask cancel method with logging warning message', async () => {
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  await taskRunner.cancel();
+  expect(mockedActionExecutor.logCancellation.mock.calls[0][0].actionId).toBe('2');
+
+  expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
+
+  expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
+    `Cancelling action task for action with id 2 - execution error due to timeout.`
+  );
 });
 
 test('runs successfully when cleanup fails and logs the error', async () => {

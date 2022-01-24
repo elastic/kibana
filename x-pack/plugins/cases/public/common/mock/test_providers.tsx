@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 
@@ -43,6 +43,7 @@ const TestProvidersComponent: React.FC<Props> = ({
     </I18nProvider>
   );
 };
+TestProvidersComponent.displayName = 'TestProviders';
 
 export const TestProviders = React.memo(TestProvidersComponent);
 

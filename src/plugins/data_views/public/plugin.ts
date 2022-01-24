@@ -16,12 +16,13 @@ import {
 } from './types';
 
 import {
-  DataViewsService,
   onRedirectNoIndexPattern,
   DataViewsApiClient,
   UiSettingsPublicToCommon,
   SavedObjectsClientPublicToCommon,
 } from '.';
+
+import { DataViewsServicePublic } from './data_views_service_public';
 
 export class DataViewsPublicPlugin
   implements
@@ -47,7 +48,7 @@ export class DataViewsPublicPlugin
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
 
-    return new DataViewsService({
+    return new DataViewsServicePublic({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
       apiClient: new DataViewsApiClient(http),
@@ -63,6 +64,7 @@ export class DataViewsPublicPlugin
         theme
       ),
       getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
+      getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
     });
   }
 
