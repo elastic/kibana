@@ -56,5 +56,6 @@ const MappingComponent: React.FC<MappingProps> = ({ actionTypeName, isLoading, m
     </EuiFlexGroup>
   );
 };
+MappingComponent.displayName = 'Mapping';
 
 export const Mapping = React.memo(MappingComponent);

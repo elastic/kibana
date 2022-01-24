@@ -90,6 +90,7 @@ export interface AlertExecutorOptions<
   ActionGroupIds extends string = never
 > {
   alertId: string;
+  executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
