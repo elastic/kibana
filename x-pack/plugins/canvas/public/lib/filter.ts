@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast, ExpressionFunctionAST, fromExpression, toExpression } from '@kbn/interpreter';
+import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
 import { flowRight, get, groupBy } from 'lodash';
 import {
   Filter as FilterType,
@@ -63,7 +63,7 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
   }));
 };
 
-const excludeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctionAST) => {
+const excludeFiltersByGroups = (filters: Ast[], filterExprAst: AstFunction) => {
   const groupsToExclude = filterExprAst.arguments.group ?? [];
   const removeUngrouped = filterExprAst.arguments.ungrouped?.[0] ?? false;
   return filters.filter((filter) => {
@@ -85,7 +85,7 @@ const excludeFiltersByGroups = (filters: Ast[], filterExprAst: ExpressionFunctio
 
 const includeFiltersByGroups = (
   filters: Ast[],
-  filterExprAst: ExpressionFunctionAST,
+  filterExprAst: AstFunction,
   ignoreUngroupedIfGroups: boolean = false
 ) => {
   const groupsToInclude = filterExprAst.arguments.group ?? [];
@@ -109,7 +109,7 @@ const includeFiltersByGroups = (
 
 export const getFiltersByFilterExpressions = (
   filters: string[],
-  filterExprsAsts: ExpressionFunctionAST[]
+  filterExprsAsts: AstFunction[]
 ) => {
   const filtersAst = filters.map((filter) => fromExpression(filter));
   const matchedFiltersAst = filterExprsAsts.reduce((includedFilters, filter) => {
