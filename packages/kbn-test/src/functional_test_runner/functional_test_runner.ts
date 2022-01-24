@@ -95,13 +95,6 @@ export class FunctionalTestRunner {
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
-      this.log.info('Waiting 90s for cluster to stabilize...');
-      await new Promise((resolve) =>
-        setTimeout(() => {
-          resolve(void 0);
-        }, 90 * 1000)
-      );
-
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 

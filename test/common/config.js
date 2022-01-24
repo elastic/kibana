@@ -65,7 +65,7 @@ export default function () {
           { name: 'plugins.security', appenders: ['console'], level: 'debug' },
           { name: 'plugins.taskManager', appenders: ['console'], level: 'warn' },
           { name: 'plugins.data', appenders: ['console'], level: 'debug' },
-          { name: 'plugins.data_enhanced', appenders: ['console'], level: 'debug' },
+          { name: 'plugins.dataEnhanced', appenders: ['console'], level: 'debug' },
           { name: 'http.server', appenders: ['console'], level: 'debug' },
         ])}`,
       ],

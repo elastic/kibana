@@ -337,12 +337,19 @@ export class SessionIndex {
    * Initializes index that is used to store session values.
    */
   async initialize() {
+    const start = Date.now();
     if (this.indexInitialization) {
-      return await this.indexInitialization;
+      this.indexInitialization
+        .catch(() => {})
+        .finally(() => {
+          const end = Date.now();
+          this.options.logger.warn(`security index initialize took: ${end - start}`);
+        });
+      return this.indexInitialization;
     }
 
     const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
-    return (this.indexInitialization = new Promise<void>(async (resolve, reject) => {
+    this.indexInitialization = new Promise<void>(async (resolve, reject) => {
       try {
         // Check if legacy index template exists, and remove it if it does.
         let legacyIndexTemplateExists = false;
@@ -356,6 +363,7 @@ export class SessionIndex {
           this.options.logger.error(
             `Failed to check if session legacy index template exists: ${err.message}`
           );
+          this.indexInitialization = undefined;
           return reject(err);
         }
 
@@ -369,6 +377,7 @@ export class SessionIndex {
             this.options.logger.error(
               `Failed to delete session legacy index template: ${err.message}`
             );
+            this.indexInitialization = undefined;
             return reject(err);
           }
         }
@@ -385,6 +394,7 @@ export class SessionIndex {
           this.options.logger.error(
             `Failed to check if session index template exists: ${err.message}`
           );
+          this.indexInitialization = undefined;
           return reject(err);
         }
 
@@ -399,6 +409,7 @@ export class SessionIndex {
             this.options.logger.debug('Successfully created session index template.');
           } catch (err) {
             this.options.logger.error(`Failed to create session index template: ${err.message}`);
+            this.indexInitialization = undefined;
             return reject(err);
           }
         }
@@ -412,6 +423,7 @@ export class SessionIndex {
           ).body;
         } catch (err) {
           this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
+          this.indexInitialization = undefined;
           return reject(err);
         }
 
@@ -428,19 +440,30 @@ export class SessionIndex {
               this.options.logger.debug('Session index already exists.');
             } else {
               this.options.logger.error(`Failed to create session index: ${err.message}`);
+              this.indexInitialization = undefined;
               return reject(err);
             }
           }
         }
 
         // Notify any consumers that are awaiting on this promise and immediately reset it.
+        this.indexInitialization = undefined;
         resolve();
       } catch (error) {
+        this.indexInitialization = undefined;
         reject(error);
       }
-    }).finally(() => {
-      this.indexInitialization = undefined;
-    }));
+    });
+
+    this.indexInitialization
+      .catch(() => {})
+      .finally(() => {
+        this.indexInitialization = undefined;
+        const end = Date.now();
+        this.options.logger.warn(`security index initialize took: ${end - start}`);
+      });
+
+    return this.indexInitialization;
   }
 
   /**
