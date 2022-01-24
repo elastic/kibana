@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, LoggerFactory } from 'kibana/server';
 import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { Comparator } from 'semver';
+import { LogLevel } from '@kbn/logging';
 import { RecoveredActionGroup } from '../../../../../alerting/common';
 import { InfraSource } from '../../sources';
 import {
@@ -23,8 +24,28 @@ import { createFormatter } from '../../../../common/formatters';
 import { AlertStates } from './types';
 import { FIRED_ACTIONS, WARNING_ACTIONS } from './metric_threshold_executor';
 
-async function metricThreshold({
-  esClient,
+import { configureClient } from '../../../../../../../src/core/server/elasticsearch/client';
+import { BaseLogger } from '../../../../../../../src/core/server/logging/logger';
+
+const scopedClient = configureClient(
+  {
+    customHeaders: {},
+    sniffOnStart: false,
+    sniffOnConnectionFault: false,
+    requestHeadersWhitelist: [],
+    sniffInterval: false,
+    hosts: [],
+    username: 'elastic',
+    password: 'changeme',
+  },
+  {
+    logger: new BaseLogger('worker thread', LogLevel.All, [], {} as LoggerFactory),
+    type: 'foobar',
+    scoped: true,
+  }
+);
+
+async function getActionsFromMetricThreshold({
   params,
   config,
   prevGroups,
@@ -38,7 +59,7 @@ async function metricThreshold({
   alertOnNoData: boolean;
   alertOnGroupDisappear?: boolean;
 }) {
-  const alertResults = await evaluateRule(esClient, params, config, prevGroups);
+  const alertResults = await evaluateRule(scopedClient, params, config, prevGroups);
 
   // Because each alert result has the same group definitions, just grab the groups from the first one.
   const resultGroups = Object.keys(first(alertResults)!);
@@ -207,4 +228,4 @@ const mapToConditionsLookup = (
       {}
     );
 
-export { metricThreshold };
+export { getActionsFromMetricThreshold };

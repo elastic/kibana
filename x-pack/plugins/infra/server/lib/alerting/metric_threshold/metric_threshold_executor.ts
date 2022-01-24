@@ -26,7 +26,7 @@ import {
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { AlertStates } from './types';
-import { metricThreshold } from './worker';
+import { getActionsFromMetricThreshold } from './worker';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -126,8 +126,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
         : [];
 
-    const { groups, actionsToSchedule } = await metricThreshold({
-      esClient: services.scopedClusterClient.asCurrentUser,
+    const { groups, actionsToSchedule } = await getActionsFromMetricThreshold({
       params,
       config,
       prevGroups,
