@@ -190,10 +190,11 @@ describe('install', () => {
   });
 
   describe('upload', () => {
-    it('should send telemetry on install failure', async () => {
+    it('should send telemetry on update', async () => {
       jest
         .spyOn(obj, 'getInstallationObject')
         .mockImplementationOnce(() => Promise.resolve({ attributes: { version: '1.2.0' } } as any));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
@@ -206,13 +207,11 @@ describe('install', () => {
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: '1.2.0',
         dryRun: false,
-        errorMessage:
-          'Package upload only supports fresh installations. Package apache is already installed, please uninstall first.',
         eventType: 'package-install',
         installType: 'update',
         newVersion: '1.3.0',
         packageName: 'apache',
-        status: 'failure',
+        status: 'success',
       });
     });
 

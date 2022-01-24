@@ -19,11 +19,7 @@ import type {
   InstallSource,
 } from '../../../../common';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
-import {
-  IngestManagerError,
-  PackageOperationNotSupportedError,
-  PackageOutdatedError,
-} from '../../../errors';
+import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../../';
