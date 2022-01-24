@@ -39,7 +39,7 @@ import {
 } from '../../../common/components/stats_table';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common';
+import type { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common/types';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';

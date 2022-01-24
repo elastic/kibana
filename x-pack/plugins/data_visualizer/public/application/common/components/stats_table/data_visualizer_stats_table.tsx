@@ -23,7 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
-import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import type { JobFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 

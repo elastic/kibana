@@ -30,9 +30,6 @@
     "fieldFormats",
     "uiActions"
   ],
-  "extraPublicDirs": [
-    "common"
-  ],
   "owner": {
     "name": "Machine Learning UI",
     "githubTeam": "ml-ui"
