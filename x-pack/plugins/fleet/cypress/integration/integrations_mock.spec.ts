@@ -6,7 +6,7 @@
  */
 
 import { navigateTo } from '../tasks/navigation';
-import { PACKAGE_VERSION, POLICIES_TAB, UPDATE_PACKAGE_BTN } from '../screens/integrations';
+import { UPDATE_PACKAGE_BTN } from '../screens/integrations';
 
 describe('Add Integration - Mock API', () => {
   describe('upgrade package and upgrade package policy', () => {
