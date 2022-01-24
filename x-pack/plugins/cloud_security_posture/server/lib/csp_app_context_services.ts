@@ -22,7 +22,6 @@ export type CspAppContextServiceStartContract = Partial<
   >
 > & {
   logger: Logger;
-  // config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
 };
 
@@ -31,8 +30,6 @@ export class CspAppContextService {
   private packageService: PackageService | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
-
-  // public start(dependencies: CspAppContextServiceStartContract) {
 
   public start(dependencies: CspAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;

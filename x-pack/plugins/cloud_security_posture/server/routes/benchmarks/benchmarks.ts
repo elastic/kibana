@@ -6,6 +6,7 @@
  */
 import { uniq, map } from 'lodash';
 import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
+import { schema as rt, TypeOf } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { string } from 'io-ts';
 import {
@@ -19,6 +20,8 @@ import { CspAppContext } from '../../lib/csp_app_context_services';
 
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
+
+type BenchmarksQuerySchema = TypeOf<typeof benchmarksSchema>;
 
 export interface Benchmark {
   package_policy: Pick<
@@ -36,10 +39,13 @@ export interface Benchmark {
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
 }
 
+const DEFAULT_BENCHMARKS_PER_PAGE = 1000;
+
 const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface | undefined,
-  packageName: string
+  packageName: string,
+  queryParams: BenchmarksQuerySchema
 ): Promise<PackagePolicy[]> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService client is undefined');
@@ -47,8 +53,8 @@ const getPackagePolicies = async (
 
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
     kuery: `ingest-package-policies.package.name:${packageName}`,
-    perPage: 1000,
-    page: 1,
+    page: queryParams.page,
+    perPage: queryParams.per_page,
   })) ?? { items: [] as PackagePolicy[] };
 
   return packagePolicies;
@@ -89,6 +95,7 @@ const addRunningAgentToAgentPolicy = async (
     )
   );
 };
+
 const createBenchmarkEntry = (
   agentPolicy: GetAgentPoliciesResponseItem,
   packagePolicy: PackagePolicy
@@ -136,11 +143,12 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
-      validate: false,
+      validate: { query: benchmarksSchema },
     },
-    async (context, _, response) => {
+    async (context, request, response) => {
       try {
         const soClient = context.core.savedObjects.client;
+        const { query } = request;
 
         const agentService = cspContext.service.getAgentService();
         const agentPolicyService = cspContext.service.getAgentPolicyService();
@@ -149,7 +157,8 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
         const packagePolicies = await getPackagePolicies(
           soClient,
           packagePolicyService,
-          CIS_VANILLA_PACKAGE_NAME
+          CIS_VANILLA_PACKAGE_NAME,
+          query
         );
 
         const agentPolicies = await getAgentPolicies(soClient, packagePolicies, agentPolicyService);
@@ -168,3 +177,14 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
       }
     }
   );
+
+const benchmarksSchema = rt.object({
+  /**
+   * The page of objects to return
+   */
+  page: rt.number({ defaultValue: 1, min: 1 }),
+  /**
+   * The number of objects to include in each page
+   */
+  per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
+});

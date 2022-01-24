@@ -15,6 +15,7 @@ import { CspAppContext } from '../../lib/csp_app_context_services';
 import { getLatestCycleIds } from './get_latest_cycle_ids';
 import { CSP_KUBEBEAT_INDEX_NAME, FINDINGS_ROUTE_PATH } from '../../../common/constants';
 export const DEFAULT_FINDINGS_PER_PAGE = 20;
+
 type FindingsQuerySchema = TypeOf<typeof schema>;
 
 const buildQueryFilter = async (
