@@ -58,16 +58,17 @@ export class CspPlugin
     this.logger.debug('csp: Setup');
 
     const cspContext: CspAppContext = {
-      // config: (): ConfigType => config,
       logger: this.logger,
-      getStartServices: core.getStartServices,
       service: this.CspAppContextService,
+      getStartServices: core.getStartServices,
     };
+
     cspContext.service.getPackagePolicyService();
+
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger, cspContext);
+    defineRoutes(router, cspContext);
     initUiSettings(core.uiSettings);
 
     return {};

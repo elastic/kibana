@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '../../../../../src/core/server';
+import type { IRouter } from '../../../../../src/core/server';
 import { defineGetStatsRoute } from './stats/stats';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineFindingsIndexRoute as defineGetFindingsIndexRoute } from './findings/findings';
 import { CspAppContext } from '../lib/csp_app_context_services';
 
-export function defineRoutes(router: IRouter, logger: Logger, cspContext: CspAppContext) {
-  defineGetStatsRoute(router, logger);
-  defineGetFindingsIndexRoute(router, logger);
+export function defineRoutes(router: IRouter, cspContext: CspAppContext) {
+  defineGetStatsRoute(router, cspContext);
+  defineGetFindingsIndexRoute(router, cspContext);
   defineGetBenchmarksRoute(router, cspContext);
 }

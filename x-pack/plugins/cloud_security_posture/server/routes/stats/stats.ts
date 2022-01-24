@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter, Logger } from 'src/core/server';
+import type { ElasticsearchClient, IRouter } from 'src/core/server';
 import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { number, UnknownRecord } from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { CspAppContext } from '../../lib/csp_app_context_services';
 
 import type {
   CloudPostureStats,
@@ -191,7 +192,7 @@ export const getResourcesEvaluation = async (
   return [...passedEvaluationPerResources, ...failedEvaluationPerResource];
 };
 
-export const defineGetStatsRoute = (router: IRouter, logger: Logger): void =>
+export const defineGetStatsRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,

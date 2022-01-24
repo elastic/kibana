@@ -41,6 +41,10 @@ const getPackagePolicies = async (
   packagePolicyService: PackagePolicyServiceInterface | undefined,
   packageName: string
 ): Promise<PackagePolicy[]> => {
+  if (!packagePolicyService) {
+    throw new Error('packagePolicyService client is undefined');
+  }
+
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
     kuery: `ingest-package-policies.package.name:${packageName}`,
     perPage: 1000,
@@ -55,6 +59,10 @@ const getAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface | undefined
 ): Promise<AgentPolicy[] | undefined> => {
+  if (!packagePolicies) {
+    throw new Error('packagePolicies client is undefined');
+  }
+
   const agentPolicyIds = uniq(map(packagePolicies, 'policy_id'));
   const agentPolicies = await agentPolicyService?.getByIds(soClient, agentPolicyIds);
 
@@ -62,9 +70,13 @@ const getAgentPolicies = async (
 };
 
 const addRunningAgentToAgentPolicy = async (
-  agentPolicies: AgentPolicy[] | undefined,
-  agentService: AgentService | undefined
+  agentService: AgentService | undefined,
+  agentPolicies: AgentPolicy[] | undefined
 ): Promise<GetAgentPoliciesResponseItem[]> => {
+  if (!agentService) {
+    throw new Error('agentService client is undefined');
+  }
+
   if (!agentPolicies?.length || !agentService) return [];
   return Promise.all(
     agentPolicies.map((agentPolicy) =>
@@ -130,9 +142,9 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
       try {
         const soClient = context.core.savedObjects.client;
 
-        const packagePolicyService = cspContext.service.getPackagePolicyService();
-        const agentPolicyService = cspContext.service.getAgentPolicyService();
         const agentService = cspContext.service.getAgentService();
+        const agentPolicyService = cspContext.service.getAgentPolicyService();
+        const packagePolicyService = cspContext.service.getPackagePolicyService();
 
         const packagePolicies = await getPackagePolicies(
           soClient,
@@ -141,8 +153,8 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
         );
 
         const agentPolicies = await getAgentPolicies(soClient, packagePolicies, agentPolicyService);
-        const agentPolicies2 = await addRunningAgentToAgentPolicy(agentPolicies, agentService);
-        const benchmarks = createBenchmarks(agentPolicies2, packagePolicies);
+        const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
+        const benchmarks = createBenchmarks(enrichAgentPolicies, packagePolicies);
 
         return response.ok({
           body: benchmarks,
