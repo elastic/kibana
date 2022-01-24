@@ -299,7 +299,7 @@ export const useCasesColumns = ({
         }
       : {
           field: 'createdAt',
-          name: i18n.OPENED_ON,
+          name: i18n.CREATED_ON,
           sortable: true,
           render: (createdAt: Case['createdAt']) => {
             if (createdAt != null) {
@@ -456,3 +456,4 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
     </p>
   );
 };
+ExternalServiceColumn.displayName = 'ExternalServiceColumn';

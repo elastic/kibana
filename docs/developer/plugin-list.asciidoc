@@ -144,6 +144,9 @@ All the arguments to expression functions need to be serializable, as well as in
 Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
 make it possible to serialize the whole chain as well as output at every step of execution.
 
+It is possible to add comments to expressions by starting them with a `//` sequence
+or by using `/*` and `*/` to enclose multi-line comments.
+
 Expressions power visualizations in Dashboard and Lens, as well as, every
 *element* in Canvas is backed by an expression.
 

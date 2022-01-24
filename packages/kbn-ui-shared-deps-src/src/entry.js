@@ -11,9 +11,10 @@ require('./polyfills');
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
 // mutates window.jQuery and window.$
-require('./flot_charts');
+require('@kbn/flot-charts');
 
 // stateful deps
+export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
 export const KbnI18nReact = require('@kbn/i18n-react');
 export const EmotionReact = require('@emotion/react');
@@ -43,7 +44,6 @@ export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme
 export const ElasticDatemath = require('@elastic/datemath');
 export const ReactBeautifulDnD = require('react-beautiful-dnd');
 
-export const Theme = require('./theme.ts');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
