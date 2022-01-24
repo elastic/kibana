@@ -152,7 +152,7 @@ Object.keys(configuration).forEach((type) => {
 
 journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
-  const basicMonitorDetails = {
+  const defaultMonitorDetails = {
     name: 'Sample monitor',
     location: 'US Central',
     schedule: '@every 3m',
@@ -186,7 +186,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
 
   step('create monitor http monitor', async () => {
     const monitorDetails = {
-      ...basicMonitorDetails,
+      ...defaultMonitorDetails,
       url: 'https://elastic.co',
       locations: [basicMonitorDetails.location],
     };
