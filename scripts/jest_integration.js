@@ -8,5 +8,6 @@
 
 require('../src/setup_node_env/ensure_node_preserve_symlinks');
 process.argv.push('--runInBand');
+process.argv.push('--bail');
 
 require('@kbn/test').runJest('jest.config.integration.js');
