@@ -10,6 +10,12 @@ import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
+  DeleteExceptionListItemOptions,
+  ExportExceptionListAndItemsOptions,
+  FindExceptionListItemOptions,
+  FindExceptionListsItemOptions,
+  GetExceptionListItemOptions,
+  GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 
@@ -71,9 +77,65 @@ export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDef
   UpdateExceptionListItemOptions
 >;
 
+/**
+ * Extension point is triggered prior to performing a `patch` operation on the exception item
+ */
+export type ExceptionsListPreGetOneItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreGetOneItem',
+  GetExceptionListItemOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a `find` operation against a SINGLE list
+ */
+export type ExceptionsListPreSingleListFindServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreSingleListFind',
+  FindExceptionListItemOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a `find` operation against a multiple lists
+ */
+export type ExceptionsListPreMultiListFindServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreMultiListFind',
+  FindExceptionListsItemOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing an `export` operation against exceptions list and items
+ */
+export type ExceptionsListPreExportServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreExport',
+  ExportExceptionListAndItemsOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a list summary operation
+ */
+export type ExceptionsListPreSummaryServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreSummary',
+  GetExceptionListSummaryOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a list item deletion. Note, this extension point
+ * is triggered by both `deleteExceptionListItem()` and `deleteExceptionListItemById()` methods of the
+ * `ExceptionListClient` class
+ */
+export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreDeleteItem',
+  DeleteExceptionListItemOptions
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
-  | ExceptionsListPreUpdateItemServerExtension;
+  | ExceptionsListPreUpdateItemServerExtension
+  | ExceptionsListPreGetOneItemServerExtension
+  | ExceptionsListPreSingleListFindServerExtension
+  | ExceptionsListPreMultiListFindServerExtension
+  | ExceptionsListPreExportServerExtension
+  | ExceptionsListPreSummaryServerExtension
+  | ExceptionsListPreDeleteItemServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks
