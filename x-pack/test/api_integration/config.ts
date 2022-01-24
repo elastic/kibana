@@ -39,8 +39,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.uptime.service.password=test',
         '--xpack.uptime.service.manifestUrl=http://test.com',
         '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
-        '--xpack.task_manager.monitored_stats_health_verbose_log.enabled=true',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`
       ],
     },
     esTestCluster: {
