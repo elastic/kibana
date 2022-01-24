@@ -79,4 +79,5 @@ export const createDefaultAlertExecutorOptions = <
   updatedBy: null,
   previousStartedAt: null,
   namespace: undefined,
+  executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
 });

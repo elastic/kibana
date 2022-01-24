@@ -12,7 +12,7 @@ import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
