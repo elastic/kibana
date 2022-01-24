@@ -21,7 +21,7 @@ import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/
 import {
   EndpointFleetServicesFactory,
   EndpointInternalFleetServicesInterface,
-} from '../endpoint_fleet_services';
+} from '../fleet/endpoint_fleet_services_factory';
 
 const createCustomizedPackagePolicyService = () => {
   const service = createPackagePolicyServiceMock();
@@ -62,12 +62,15 @@ export const createEndpointMetadataServiceTestContextMock = (
     .create()
     .get()
 ): EndpointMetadataServiceTestContextMock => {
-  const fleetServices = new EndpointFleetServicesFactory({
-    agentService,
-    packageService,
-    packagePolicyService,
-    agentPolicyService,
-  }).asInternalUser();
+  const fleetServices = new EndpointFleetServicesFactory(
+    {
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+    },
+    savedObjectsStart
+  ).asInternalUser();
 
   const endpointMetadataService = new EndpointMetadataService(
     savedObjectsStart,
