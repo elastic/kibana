@@ -27,6 +27,7 @@ import { useInitApp } from '../../hooks/use_init_app';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public/';
 import { ActionTypeId } from './types';
+import { DefaultEmail } from './default_email';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
@@ -157,6 +158,16 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
               defaultMessage="Default connectors"
             />
           }
+          labelAppend={
+            <AddConnectorFlyout
+              isDisabled={isDisabled}
+              focusInput={useCallback(() => {
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                }
+              }, [])}
+            />
+          }
         >
           <EuiComboBox
             placeholder={alertFormI18n.inputPlaceHolder}
@@ -176,16 +187,16 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             renderOption={renderOption}
           />
         </EuiFormRow>
-        <span>
-          <AddConnectorFlyout
-            focusInput={useCallback(() => {
-              if (inputRef.current) {
-                inputRef.current.focus();
-              }
-            }, [])}
-          />
-        </span>
       </EuiDescribedFormGroup>
+      <DefaultEmail
+        value={formFields?.defaultEmail}
+        connectors={formFields?.defaultConnectors}
+        onChange={onChange}
+        isLoading={loading}
+        isDisabled={isDisabled}
+        errors={fieldErrors?.invalidEmail}
+      />
+      <EuiSpacer />
     </>
   );
 };

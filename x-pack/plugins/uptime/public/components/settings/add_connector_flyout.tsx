@@ -19,6 +19,7 @@ import { ActionTypeId } from './types';
 
 interface Props {
   focusInput: () => void;
+  isDisabled: boolean;
 }
 
 interface KibanaDeps {
@@ -34,15 +35,19 @@ export const ALLOWED_ACTION_TYPES: ActionTypeId[] = [
   '.servicenow',
   '.jira',
   '.webhook',
+  '.email',
 ];
 
-export const AddConnectorFlyout = ({ focusInput }: Props) => {
+export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const {
     services: {
+      application,
       triggersActionsUi: { getAddConnectorFlyout },
     },
   } = useKibana<KibanaDeps>();
+
+  const canEdit: boolean = !!application?.capabilities.actions.save;
 
   const dispatch = useDispatch();
 
@@ -69,13 +74,14 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
     <>
       <EuiButtonEmpty
         data-test-subj="createConnectorButton"
-        iconType="plusInCircleFilled"
-        iconSide="left"
         onClick={() => setAddFlyoutVisibility(true)}
+        size="s"
+        flush="both"
+        isDisabled={isDisabled || !canEdit}
       >
         <FormattedMessage
-          id="xpack.uptime.alerts.settings.createConnector"
-          defaultMessage="Create connector"
+          id="xpack.uptime.alerts.settings.addConnector"
+          defaultMessage="Add connector"
         />
       </EuiButtonEmpty>
       {addFlyoutVisible ? ConnectorAddFlyout : null}

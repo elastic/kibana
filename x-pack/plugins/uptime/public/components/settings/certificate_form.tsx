@@ -19,11 +19,15 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { DefaultEmail, DynamicSettings } from '../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';
 import { certificateFormTranslations } from './translations';
 
-export type OnFieldChangeType = (changedValues: Partial<DynamicSettings>) => void;
+export type OnFieldChangeType = (
+  changedValues: Partial<Omit<DynamicSettings, 'defaultEmail'>> & {
+    defaultEmail?: Partial<DefaultEmail>;
+  }
+) => void;
 
 export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
   loading,

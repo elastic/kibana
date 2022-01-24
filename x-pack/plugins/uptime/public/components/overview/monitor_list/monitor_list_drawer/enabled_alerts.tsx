@@ -34,6 +34,10 @@ const LinkGroupList = styled(EuiListGroup)`
   }
 `;
 
+export const getUrlForAlert = (id: string, basePath: string) => {
+  return basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + id;
+};
+
 export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
 
@@ -41,9 +45,9 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
 
   (monitorAlerts ?? []).forEach((alert, ind) => {
     listItems.push({
-      label: alert.name,
-      href: basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + alert.id,
       size: 's',
+      label: alert.name,
+      href: getUrlForAlert(alert.id, basePath),
       'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,
     });
   });

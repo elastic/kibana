@@ -19,6 +19,8 @@ const listOfJourneys = [
   'StepsDuration',
   'TlsFlyoutInAlertingApp',
   'StatusFlyoutInAlertingApp',
+  'DefaultEmailSettings',
+  'Monitor Management',
 ] as const;
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
