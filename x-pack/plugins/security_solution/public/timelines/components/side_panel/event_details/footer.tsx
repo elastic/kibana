@@ -21,6 +21,7 @@ import { Status } from '../../../../../common/detection_engine/schemas/common/sc
 import { Ecs } from '../../../../../common/ecs';
 import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import { ACTIVE_PANEL } from './index';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -35,6 +36,7 @@ interface EventDetailsFooterProps {
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
+  handlePanelChange: (type: ACTIVE_PANEL) => void;
 }
 
 interface AddExceptionModalWrapperData {
@@ -56,6 +58,7 @@ export const EventDetailsFooterComponent = React.memo(
     timelineId,
     globalQuery,
     timelineQuery,
+    handlePanelChange,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
@@ -137,6 +140,7 @@ export const EventDetailsFooterComponent = React.memo(
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
                   timelineId={timelineId}
+                  handlePanelChange={handlePanelChange}
                 />
               )}
             </EuiFlexItem>

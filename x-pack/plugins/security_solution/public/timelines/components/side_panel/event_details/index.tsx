@@ -26,6 +26,7 @@ import { HostIsolationPanel } from '../../../../detections/components/host_isola
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import {
   ISOLATE_HOST,
+  RUN_OSQUERY,
   UNISOLATE_HOST,
 } from '../../../../detections/components/host_isolation/translations';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
@@ -34,6 +35,7 @@ import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoin
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
 import { useHostsRiskScore } from '../../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -66,6 +68,11 @@ interface EventDetailsPanelProps {
   timelineId: string;
 }
 
+export enum ACTIVE_PANEL {
+  HOST_ISOLATION = 0,
+  OSQUERY = 1,
+}
+
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
   docValueFields,
@@ -78,7 +85,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, ecsData, ...rest] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -87,23 +94,25 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     skip: !expandedEvent.eventId,
   });
 
+  const {
+    services: { osquery },
+  } = useKibana();
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
-
+  const [isActivePanel, setIsActivePanel] = useState<number | null>(null);
   const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
     'isolateHost'
   );
-
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
     useState(false);
 
   const showAlertDetails = useCallback(() => {
-    setIsHostIsolationPanel(false);
+    setIsActivePanel(null);
     setIsIsolateActionSuccessBannerVisible(false);
   }, []);
 
   const showHostIsolationPanel = useCallback((action) => {
     if (action === 'isolateHost' || action === 'unisolateHost') {
-      setIsHostIsolationPanel(true);
+      setIsActivePanel(ACTIVE_PANEL.HOST_ISOLATION);
       setIsolateAction(action);
     }
   }, []);
@@ -133,6 +142,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
     [detailsData]
   );
+
+  const agentId = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+    [detailsData]
+  );
+
+  const OsqueryLiveQuery = useMemo(() => osquery.OsqueryAction, [osquery]);
 
   const backToAlertDetailsLink = useMemo(() => {
     return (
@@ -164,40 +180,42 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     }
   }, [caseDetailsRefresh]);
 
-  if (!expandedEvent?.eventId) {
-    return null;
-  }
-
-  return isFlyoutView ? (
-    <>
-      <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
-        {isHostIsolationPanelOpen ? (
-          backToAlertDetailsLink
-        ) : (
+  const renderFlyoutHeader = useMemo(() => {
+    switch (isActivePanel) {
+      case ACTIVE_PANEL.OSQUERY:
+        return (
+          <EuiTitle>
+            <h2>{RUN_OSQUERY}</h2>
+          </EuiTitle>
+        );
+      case ACTIVE_PANEL.HOST_ISOLATION:
+        return backToAlertDetailsLink;
+      default:
+        return (
           <ExpandableEventTitle
             isAlert={isAlert}
             loading={loading}
             ruleName={ruleName}
             timestamp={timestamp}
           />
-        )}
-      </EuiFlyoutHeader>
-      {isIsolateActionSuccessBannerVisible && (
-        <EndpointIsolateSuccess
-          hostName={hostName}
-          alertId={alertId}
-          isolateAction={isolateAction}
-        />
-      )}
-      <StyledEuiFlyoutBody>
-        {isHostIsolationPanelOpen ? (
+        );
+    }
+  }, [backToAlertDetailsLink, isActivePanel, isAlert, loading, ruleName, timestamp]);
+  const renderFlyoutBody = useMemo(() => {
+    switch (isActivePanel) {
+      case ACTIVE_PANEL.OSQUERY:
+        return <OsqueryLiveQuery agentId={agentId} formType={'steps'} />;
+      case ACTIVE_PANEL.HOST_ISOLATION:
+        return (
           <HostIsolationPanel
             details={detailsData}
             cancelCallback={showAlertDetails}
             successCallback={handleIsolationActionSuccess}
             isolateAction={isolateAction}
           />
-        ) : (
+        );
+      default:
+        return (
           <ExpandableEvent
             browserFields={browserFields}
             detailsData={detailsData}
@@ -211,18 +229,54 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
           />
-        )}
-      </StyledEuiFlyoutBody>
+        );
+    }
+  }, [
+    agentId,
+    browserFields,
+    detailsData,
+    expandedEvent,
+    handleIsolationActionSuccess,
+    handleOnEventClosed,
+    hostRisk,
+    isActivePanel,
+    isAlert,
+    isDraggable,
+    isolateAction,
+    loading,
+    rawEventData,
+    showAlertDetails,
+    timelineId,
+  ]);
 
+  if (!expandedEvent?.eventId) {
+    return null;
+  }
+
+  const hostIsolation = isFlyoutView ? (
+    <>
+      <EuiFlyoutHeader hasBorder={isActivePanel != null}>{renderFlyoutHeader}</EuiFlyoutHeader>
+      {isIsolateActionSuccessBannerVisible && (
+        <EndpointIsolateSuccess
+          hostName={hostName}
+          alertId={alertId}
+          isolateAction={isolateAction}
+        />
+      )}
+      <StyledEuiFlyoutBody>{renderFlyoutBody}</StyledEuiFlyoutBody>
+
+      {/* TODO add osquery footer*/}
       <EventDetailsFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
+        // TODO verify this one, maybe pass some generic object with config
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
         timelineId={timelineId}
+        handlePanelChange={setIsActivePanel}
       />
     </>
   ) : (
@@ -249,6 +303,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       />
     </>
   );
+  return hostIsolation;
 };
 
 export const EventDetailsPanel = React.memo(

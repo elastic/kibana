@@ -13,6 +13,7 @@ import { getAgentStatusForAgentPolicyRoute } from './get_agent_status_for_agent_
 import { getPackagePoliciesRoute } from './get_package_policies';
 import { getAgentsRoute } from './get_agents';
 import { getAgentDetailsRoute } from './get_agent_details';
+import { getOsqueryAvailable } from './get_osquery_available';
 
 export const initFleetWrapperRoutes = (router: IRouter, context: OsqueryAppContext) => {
   getAgentDetailsRoute(router, context);
@@ -21,4 +22,5 @@ export const initFleetWrapperRoutes = (router: IRouter, context: OsqueryAppConte
   getAgentStatusForAgentPolicyRoute(router, context);
   getPackagePoliciesRoute(router, context);
   getAgentsRoute(router, context);
+  getOsqueryAvailable(router, context);
 };

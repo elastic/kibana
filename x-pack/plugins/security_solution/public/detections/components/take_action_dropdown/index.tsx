@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash/fp';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
@@ -23,6 +23,9 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
+import { useOsqueryActions } from '../alerts_table/timeline_actions/use_osquery_actions';
+import { ACTIVE_PANEL } from '../../../timelines/components/side_panel/event_details';
+
 interface ActionsData {
   alertStatus: Status;
   eventId: string;
@@ -43,6 +46,7 @@ export interface TakeActionDropdownProps {
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
   timelineId: string;
+  handlePanelChange: (type: ACTIVE_PANEL) => void;
 }
 
 export const TakeActionDropdown = React.memo(
@@ -58,6 +62,7 @@ export const TakeActionDropdown = React.memo(
     onAddIsolationStatusClick,
     refetch,
     timelineId,
+    handlePanelChange,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
@@ -90,6 +95,11 @@ export const TakeActionDropdown = React.memo(
     const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
 
     const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
+
+    const agentId = useMemo(
+      () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+      [detailsData]
+    );
 
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
@@ -161,6 +171,11 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
+    const { osqueryActions } = useOsqueryActions({
+      onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
+      agentId,
+    });
+
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
@@ -190,6 +205,7 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
+        ...osqueryActions,
         ...investigateInTimelineActionItems,
       ],
       [
@@ -197,6 +213,7 @@ export const TakeActionDropdown = React.memo(
         alertsActionItems,
         addToCaseActionItems,
         hostIsolationActionItems,
+        osqueryActions,
         investigateInTimelineActionItems,
       ]
     );
@@ -214,7 +231,6 @@ export const TakeActionDropdown = React.memo(
         </EuiButton>
       );
     }, [togglePopoverHandler]);
-
     return items.length && !loadingEventDetails && ecsData ? (
       <EuiPopover
         id="AlertTakeActionPanel"

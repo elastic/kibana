@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const preparePack = (packName: string, savedQueryId: string) => {
+export const preparePack = (packName: string) => {
   cy.contains('Packs').click();
   const createdPack = cy.contains(packName);
   createdPack.click();

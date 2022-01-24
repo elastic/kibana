@@ -22,6 +22,7 @@ import { getLazyOsqueryAction } from './shared_components';
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  osqueryMenuItem: (agentId: string, onClick: () => void) => Element[];
 }
 
 export interface AppPluginStartDependencies {
