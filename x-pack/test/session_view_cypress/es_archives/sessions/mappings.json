@@ -1057,31 +1057,12 @@
                 "end": {
                   "type": "date"
                 },
-                "evaluation": {
-                  "properties": {
-                    "threshold": {
-                      "scaling_factor": 100,
-                      "type": "scaled_float"
-                    },
-                    "value": {
-                      "scaling_factor": 100,
-                      "type": "scaled_float"
-                    }
-                  }
-                },
                 "group": {
                   "properties": {
                     "id": {
                       "type": "keyword"
                     },
                     "index": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "instance": {
-                  "properties": {
-                    "id": {
                       "type": "keyword"
                     }
                   }
@@ -1236,9 +1217,9 @@
                     "note": {
                       "type": "keyword"
                     },
-                    "params": {
-                      "index": false,
-                      "type": "keyword"
+                    "parameters": {
+                      "ignore_above": 4096,
+                      "type": "flattened"
                     },
                     "producer": {
                       "type": "keyword"
@@ -1248,22 +1229,6 @@
                     },
                     "references": {
                       "type": "keyword"
-                    },
-                    "risk_score": {
-                      "type": "float"
-                    },
-                    "risk_score_mapping": {
-                      "properties": {
-                        "field": {
-                          "type": "keyword"
-                        },
-                        "operator": {
-                          "type": "keyword"
-                        },
-                        "value": {
-                          "type": "keyword"
-                        }
-                      }
                     },
                     "rule_id": {
                       "type": "keyword"
@@ -1276,25 +1241,6 @@
                     },
                     "saved_id": {
                       "type": "keyword"
-                    },
-                    "severity": {
-                      "type": "keyword"
-                    },
-                    "severity_mapping": {
-                      "properties": {
-                        "field": {
-                          "type": "keyword"
-                        },
-                        "operator": {
-                          "type": "keyword"
-                        },
-                        "severity": {
-                          "type": "keyword"
-                        },
-                        "value": {
-                          "type": "keyword"
-                        }
-                      }
                     },
                     "tags": {
                       "type": "keyword"
@@ -1847,6 +1793,13 @@
             },
             "entity_id": {
               "type": "keyword"
+            },
+            "entry": {
+              "properties": {
+                "entity_id": {
+                  "type": "keyword"
+                }
+              }
             },
             "executable": {
               "type": "keyword"
@@ -2483,22 +2436,6 @@
                   "path": "kibana.alert.risk_score",
                   "type": "alias"
                 },
-                "risk_score_mapping": {
-                  "properties": {
-                    "field": {
-                      "path": "kibana.alert.rule.risk_score_mapping.field",
-                      "type": "alias"
-                    },
-                    "operator": {
-                      "path": "kibana.alert.rule.risk_score_mapping.operator",
-                      "type": "alias"
-                    },
-                    "value": {
-                      "path": "kibana.alert.rule.risk_score_mapping.value",
-                      "type": "alias"
-                    }
-                  }
-                },
                 "rule_id": {
                   "path": "kibana.alert.rule.rule_id",
                   "type": "alias"
@@ -2514,26 +2451,6 @@
                 "severity": {
                   "path": "kibana.alert.severity",
                   "type": "alias"
-                },
-                "severity_mapping": {
-                  "properties": {
-                    "field": {
-                      "path": "kibana.alert.rule.severity_mapping.field",
-                      "type": "alias"
-                    },
-                    "operator": {
-                      "path": "kibana.alert.rule.severity_mapping.operator",
-                      "type": "alias"
-                    },
-                    "severity": {
-                      "path": "kibana.alert.rule.severity_mapping.severity",
-                      "type": "alias"
-                    },
-                    "value": {
-                      "path": "kibana.alert.rule.severity_mapping.value",
-                      "type": "alias"
-                    }
-                  }
                 },
                 "tags": {
                   "path": "kibana.alert.rule.tags",
@@ -2851,8 +2768,318 @@
         },
         "threat": {
           "properties": {
+            "enrichments": {
+              "properties": {
+                "feed": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "indicator": {
+                  "properties": {
+                    "as": {
+                      "properties": {
+                        "number": {
+                          "type": "long"
+                        },
+                        "organization": {
+                          "properties": {
+                            "name": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "confidence": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword"
+                    },
+                    "email": {
+                      "properties": {
+                        "address": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "file": {
+                      "properties": {
+                        "accessed": {
+                          "type": "date"
+                        },
+                        "attributes": {
+                          "type": "keyword"
+                        },
+                        "code_signature": {
+                          "properties": {
+                            "digest_algorithm": {
+                              "type": "keyword"
+                            },
+                            "exists": {
+                              "type": "boolean"
+                            },
+                            "signing_id": {
+                              "type": "keyword"
+                            },
+                            "status": {
+                              "type": "keyword"
+                            },
+                            "subject_name": {
+                              "type": "keyword"
+                            },
+                            "team_id": {
+                              "type": "keyword"
+                            },
+                            "timestamp": {
+                              "type": "date"
+                            },
+                            "trusted": {
+                              "type": "boolean"
+                            },
+                            "valid": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "created": {
+                          "type": "date"
+                        },
+                        "ctime": {
+                          "type": "date"
+                        },
+                        "device": {
+                          "type": "keyword"
+                        },
+                        "directory": {
+                          "type": "keyword"
+                        },
+                        "drive_letter": {
+                          "type": "keyword"
+                        },
+                        "extension": {
+                          "type": "keyword"
+                        },
+                        "fork_name": {
+                          "type": "keyword"
+                        },
+                        "gid": {
+                          "type": "keyword"
+                        },
+                        "group": {
+                          "type": "keyword"
+                        },
+                        "hash": {
+                          "properties": {
+                            "md5": {
+                              "type": "keyword"
+                            },
+                            "sha1": {
+                              "type": "keyword"
+                            },
+                            "sha256": {
+                              "type": "keyword"
+                            },
+                            "sha512": {
+                              "type": "keyword"
+                            },
+                            "ssdeep": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "inode": {
+                          "type": "keyword"
+                        },
+                        "mime_type": {
+                          "type": "keyword"
+                        },
+                        "mode": {
+                          "type": "keyword"
+                        },
+                        "mtime": {
+                          "type": "date"
+                        },
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "owner": {
+                          "type": "keyword"
+                        },
+                        "path": {
+                          "type": "keyword"
+                        },
+                        "size": {
+                          "type": "long"
+                        },
+                        "target_path": {
+                          "type": "keyword"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        },
+                        "uid": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "first_seen": {
+                      "type": "date"
+                    },
+                    "ip": {
+                      "type": "ip"
+                    },
+                    "last_seen": {
+                      "type": "date"
+                    },
+                    "marking": {
+                      "properties": {
+                        "tlp": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "modified_at": {
+                      "type": "date"
+                    },
+                    "port": {
+                      "type": "long"
+                    },
+                    "provider": {
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "type": "keyword"
+                    },
+                    "registry": {
+                      "properties": {
+                        "data": {
+                          "properties": {
+                            "bytes": {
+                              "type": "keyword"
+                            },
+                            "strings": {
+                              "type": "wildcard"
+                            },
+                            "type": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "hive": {
+                          "type": "keyword"
+                        },
+                        "key": {
+                          "type": "keyword"
+                        },
+                        "path": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "scanner_stats": {
+                      "type": "long"
+                    },
+                    "sightings": {
+                      "type": "long"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "url": {
+                      "properties": {
+                        "domain": {
+                          "type": "keyword"
+                        },
+                        "extension": {
+                          "type": "keyword"
+                        },
+                        "fragment": {
+                          "type": "keyword"
+                        },
+                        "full": {
+                          "type": "wildcard"
+                        },
+                        "original": {
+                          "type": "wildcard"
+                        },
+                        "password": {
+                          "type": "keyword"
+                        },
+                        "path": {
+                          "type": "wildcard"
+                        },
+                        "port": {
+                          "type": "long"
+                        },
+                        "query": {
+                          "type": "keyword"
+                        },
+                        "registered_domain": {
+                          "type": "keyword"
+                        },
+                        "scheme": {
+                          "type": "keyword"
+                        },
+                        "subdomain": {
+                          "type": "keyword"
+                        },
+                        "top_level_domain": {
+                          "type": "keyword"
+                        },
+                        "username": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "matched": {
+                  "properties": {
+                    "atomic": {
+                      "type": "keyword"
+                    },
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "index": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              },
+              "type": "nested"
+            },
             "framework": {
               "type": "keyword"
+            },
+            "group": {
+              "properties": {
+                "alias": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "reference": {
+                  "type": "keyword"
+                }
+              }
             },
             "tactic": {
               "properties": {
@@ -3489,7 +3716,7 @@
         },
         "mapping": {
           "total_fields": {
-            "limit": "1100"
+            "limit": "1200"
           }
         },
         "number_of_replicas": "1",
@@ -3551,6 +3778,135 @@
                 }
               },
               "type": "text"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "architecture": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "hostname": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ip": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "mac": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "os": {
+              "properties": {
+                "Ext": {
+                  "properties": {
+                    "variant": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "family": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "full": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "kernel": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "platform": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
             }
           }
         },
@@ -3858,6 +4214,135 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "architecture": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "hostname": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "ip": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "mac": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "os": {
+              "properties": {
+                "Ext": {
+                  "properties": {
+                    "variant": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                },
+                "family": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "full": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "kernel": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "platform": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
         "network": {
           "properties": {
             "application": {
@@ -3967,11 +4452,39 @@
                   },
                   "type": "text"
                 },
+                "executable": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
                 "interactive": {
                   "type": "boolean"
                 },
+                "pgid": {
+                  "type": "long"
+                },
+                "pid": {
+                  "type": "long"
+                },
                 "user": {
-                  "type": "object"
+                  "properties": {
+                    "id": {
+                      "type": "long"
+                    },
+                    "name": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
                 }
               }
             },
@@ -3992,11 +4505,39 @@
                   },
                   "type": "text"
                 },
+                "executable": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
                 "interactive": {
                   "type": "boolean"
                 },
+                "pgid": {
+                  "type": "long"
+                },
+                "pid": {
+                  "type": "long"
+                },
                 "user": {
-                  "type": "object"
+                  "properties": {
+                    "id": {
+                      "type": "long"
+                    },
+                    "name": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 256,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
                 }
               }
             },
