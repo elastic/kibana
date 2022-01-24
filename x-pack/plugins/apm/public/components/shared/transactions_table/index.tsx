@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
@@ -22,12 +17,13 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
+import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../Links/ElasticDocsLink';
+import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { ManagedTable } from '../managed_table';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -60,6 +56,7 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
+  hidePerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
@@ -73,13 +70,14 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
+  hidePerPageOptions = false,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
   start,
   end,
 }: Props) {
-  const [tableOptions, setTableOptions] = useState<{
+  const [tableOptions] = useState<{
     pageIndex: number;
     sort: {
       direction: SortDirection;
@@ -228,13 +226,6 @@ export function TransactionsTable({
   const isLoading = status === FETCH_STATUS.LOADING;
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
-  const pagination = {
-    pageIndex,
-    pageSize: numberOfTransactionsPerPage,
-    totalItemCount: transactionGroupsTotalItems,
-    hidePerPageOptions: true,
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -309,7 +300,14 @@ export function TransactionsTable({
               transactionGroupsTotalItems === 0 && isNotInitiated
             }
           >
-            <EuiBasicTable
+            <ManagedTable
+              isLoading={isLoading}
+              error={status === FETCH_STATUS.FAILURE}
+              columns={columns}
+              items={transactionGroups}
+              initialSortField="impact"
+              initialSortDirection="desc"
+              initialPageSize={numberOfTransactionsPerPage}
               noItemsMessage={
                 isLoading
                   ? i18n.translate('xpack.apm.transactionsTable.loading', {
@@ -319,34 +317,7 @@ export function TransactionsTable({
                       defaultMessage: 'No transaction groups found',
                     })
               }
-              loading={isLoading}
-              error={
-                status === FETCH_STATUS.FAILURE
-                  ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
-                      defaultMessage: 'Failed to fetch',
-                    })
-                  : ''
-              }
-              items={transactionGroups}
-              columns={columns}
-              pagination={pagination}
-              sorting={{ sort: { field, direction } }}
-              onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-              }}
+              hidePerPageOptions={hidePerPageOptions}
             />
           </OverviewTableContainer>
         </EuiFlexItem>

@@ -16,9 +16,10 @@ export {
 export { onRedirectNoIndexPattern } from './data_views';
 
 export type { IIndexPatternFieldList, TypeMeta } from '../common';
-export { IndexPatternField, DataViewField } from '../common';
+export { IndexPatternField, DataViewField, DataViewType, META_FIELDS } from '../common';
 
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export type { IndexPatternsContract } from './data_views';
+export type { DataViewListItem } from './data_views';
 export {
   IndexPatternsService,
   IndexPattern,
@@ -39,7 +40,11 @@ export function plugin() {
   return new DataViewsPublicPlugin();
 }
 
-export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart } from './types';
+export type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+  DataViewsContract,
+} from './types';
 
 // Export plugin after all other imports
-export type { DataViewsPublicPlugin as DataPlugin };
+export type { DataViewsPublicPlugin as DataViewsPlugin };

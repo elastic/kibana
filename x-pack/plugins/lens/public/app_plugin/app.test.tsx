@@ -24,12 +24,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import {
-  esFilters,
-  FilterManager,
-  IndexPattern,
-  Query,
-} from '../../../../../src/plugins/data/public';
+import { FilterManager, IndexPattern, Query } from '../../../../../src/plugins/data/public';
+import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { LensByValueInput } from '../embeddable/embeddable';
@@ -126,11 +122,13 @@ describe('Lens App', () => {
     defaultSavedObjectId = '1234';
     defaultDoc = {
       savedObjectId: defaultSavedObjectId,
+      visualizationType: 'testVis',
+      type: 'lens',
       title: 'An extremely cool default document!',
       expression: 'definitely a valid expression',
       state: {
         query: 'lucene',
-        filters: [{ query: { match_phrase: { src: 'test' } } }],
+        filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
     } as unknown as Document;
@@ -145,7 +143,7 @@ describe('Lens App', () => {
     const services = makeDefaultServicesForApp();
     const indexPattern = { id: 'index1' } as unknown as IndexPattern;
     const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    const pinnedFilter = buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
       return [];
     });
@@ -666,10 +664,10 @@ describe('Lens App', () => {
         const indexPattern = { id: 'index1' } as unknown as IndexPattern;
         const field = { name: 'myfield' } as unknown as FieldSpec;
         const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-        const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-        const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+        const unpinned = buildExistsFilter(field, indexPattern);
+        const pinned = buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
-          FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+          FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
         });
         const { services } = await save({
           initialSavedObjectId: defaultSavedObjectId,
@@ -685,7 +683,7 @@ describe('Lens App', () => {
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
             state: expect.objectContaining({
-              filters: [unpinned],
+              filters: services.data.query.filterManager.inject([unpinned], []),
             }),
           }),
           true,
@@ -880,14 +878,12 @@ describe('Lens App', () => {
         }),
       });
       act(() =>
-        services.data.query.filterManager.setFilters([
-          esFilters.buildExistsFilter(field, indexPattern),
-        ])
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
       );
       instance.update();
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
-          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+          filters: [buildExistsFilter(field, indexPattern)],
         }),
       });
     });
@@ -930,9 +926,7 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       act(() =>
-        services.data.query.filterManager.setFilters([
-          esFilters.buildExistsFilter(field, indexPattern),
-        ])
+        services.data.query.filterManager.setFilters([buildExistsFilter(field, indexPattern)])
       );
       instance.update();
       expect(lensStore.getState()).toEqual({
@@ -1065,9 +1059,9 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      const unpinned = buildExistsFilter(field, indexPattern);
+      const pinned = buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
       act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
@@ -1122,9 +1116,9 @@ describe('Lens App', () => {
       const indexPattern = { id: 'index1' } as unknown as IndexPattern;
       const field = { name: 'myfield' } as unknown as FieldSpec;
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
-      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      const unpinned = buildExistsFilter(field, indexPattern);
+      const pinned = buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       instance.update();
       act(() => instance.find(services.navigation.ui.TopNavMenu).prop('onClearSavedQuery')!());
@@ -1252,24 +1246,28 @@ describe('Lens App', () => {
     });
 
     it('should not confirm when changes are saved', async () => {
-      const { props } = await mountWith({
-        preloadedState: {
-          persistedDoc: {
-            ...defaultDoc,
-            state: {
-              ...defaultDoc.state,
-              datasourceStates: { testDatasource: {} },
-              visualization: {},
-            },
-          },
-          isSaveable: true,
-          ...(defaultDoc.state as Partial<LensAppState>),
-          visualization: {
-            activeId: 'testVis',
-            state: {},
+      const preloadedState = {
+        persistedDoc: {
+          ...defaultDoc,
+          state: {
+            ...defaultDoc.state,
+            datasourceStates: { testDatasource: {} },
+            visualization: {},
           },
         },
-      });
+        isSaveable: true,
+        ...(defaultDoc.state as Partial<LensAppState>),
+        visualization: {
+          activeId: 'testVis',
+          state: {},
+        },
+      };
+
+      const customProps = makeDefaultProps();
+      customProps.datasourceMap.testDatasource.isEqual = () => true; // if this returns false, the documents won't be accounted equal
+
+      const { props } = await mountWith({ preloadedState, props: customProps });
+
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();
