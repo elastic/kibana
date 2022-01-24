@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { applicationPath, featureId, featureTitle } from '../common';
+import { applicationPath, featureId, featureTitle } from '../common/constants';
 
 export function registerWithCustomIntegrations(customIntegrations: CustomIntegrationsPluginSetup) {
   customIntegrations.registerCustomIntegration({
