@@ -37,6 +37,8 @@ import { DiscoverIndexPatternManagement } from './discover_index_pattern_managem
 import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { FetchStatus } from '../../../types';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -175,6 +177,53 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewFieldEditor } = props.services;
+  const { availableFields$ } = props;
+
+  useEffect(
+    () => {
+      // For an external embeddable like the Field stats
+      // it is useful to know what fields are populated in the docs fetched
+      // or what fields are selected by the user
+
+      const documents = documentState.result;
+      const availableFields: DataViewField[] = [];
+      const fieldCnts = fieldCounts.current;
+      if (!fieldCnts) return;
+
+      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCnts);
+
+      // If fields are selected, we only need to broadcast the selected fields
+      if (props.columns.length > 0) {
+        newFields.forEach((field) => {
+          if (props.columns.findIndex((c) => c === field.name) > -1) {
+            availableFields.push(field);
+          }
+        });
+      } else {
+        // Else, go through the docs and find out what fields are populated/available
+        if (documents && fieldCounts?.current !== null) {
+          newFields.forEach((field) => {
+            if (fieldCnts[field.name] > 0) {
+              availableFields.push(field);
+            }
+          });
+        }
+      }
+
+      availableFields$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        fields: availableFields,
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      selectedIndexPattern,
+      availableFields$,
+      fieldCounts.current,
+      documentState.result,
+      props.columns.length,
+    ]
+  );
 
   const editField = useCallback(
     (fieldName?: string) => {
