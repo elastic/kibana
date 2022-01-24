@@ -34,5 +34,6 @@ const UserActionMoveToReferenceComponent = ({
     </EuiToolTip>
   );
 };
+UserActionMoveToReferenceComponent.displayName = 'UserActionMoveToReference';
 
 export const UserActionMoveToReference = memo(UserActionMoveToReferenceComponent);

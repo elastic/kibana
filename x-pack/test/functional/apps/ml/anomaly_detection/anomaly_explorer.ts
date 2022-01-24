@@ -337,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
           await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swimlane embeddable to the dashboard'
+            'should allow to attach anomaly swim lane embeddable to the dashboard'
           );
           await ml.anomalyExplorer.openAddToDashboardControl();
           await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');

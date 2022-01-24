@@ -82,5 +82,35 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(connectorWithoutService.body.config).key('service');
       expect(connectorWithoutService.body.config.service).to.eql('other');
     });
+
+    it('decryption error during migration', async () => {
+      const badEmailConnector = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/connector/0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d`
+      );
+
+      expect(badEmailConnector.status).to.eql(200);
+      expect(badEmailConnector.body.secrets).to.eql(undefined);
+
+      const response = await supertest
+        .post(
+          `${getUrlPrefix(``)}/api/actions/connector/0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d/_execute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: 'am i working?',
+            to: ['user@test.com'],
+            subject: 'test',
+          },
+        });
+
+      expect(response.status).to.eql(200);
+      expect(response.body).to.eql({
+        connector_id: '0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d',
+        status: 'error',
+        message: `error validating action type connector: secrets must be defined`,
+        retry: false,
+      });
+    });
   });
 }

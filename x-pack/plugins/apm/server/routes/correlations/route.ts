@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { isActivePlatinumLicense } from '../../../common/license_check';
 

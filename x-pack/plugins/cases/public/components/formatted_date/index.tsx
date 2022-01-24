@@ -93,7 +93,7 @@ PreferenceFormattedP1DTDate.displayName = 'PreferenceFormattedP1DTDate';
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
 export const FormattedDate = React.memo<{
-  fieldName: string;
+  fieldName?: string;
   value?: string | number | null;
   className?: string;
 }>(({ value, fieldName, className = '' }): JSX.Element => {
@@ -142,6 +142,7 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
     </LocalizedDateTooltip>
   );
 };
+FormattedRelativePreferenceDate.displayName = 'FormattedRelativePreferenceDate';
 
 /**
  * Renders a preceding label according to under/over one hour

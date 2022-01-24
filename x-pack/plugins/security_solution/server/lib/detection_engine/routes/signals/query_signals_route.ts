@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
@@ -35,7 +36,7 @@ export const querySignalsRoute = (
     },
     async (context, request, response) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { query, aggs, _source, track_total_hits, size } = request.body;
+      const { query, aggs, _source, track_total_hits, size, runtime_mappings } = request.body;
       const siemResponse = buildSiemResponse(response);
       if (
         query == null &&
@@ -61,6 +62,7 @@ export const querySignalsRoute = (
               _source,
               track_total_hits,
               size,
+              runtime_mappings: runtime_mappings as MappingRuntimeFields,
             },
             ignore_unavailable: true,
           });
