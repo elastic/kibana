@@ -114,8 +114,11 @@ export const getLegendText = (
   if (isOrdinalChartData(chartData) && isNumeric) {
     // The original data could be numerical but also ordinal (e.g. "2340")
     return i18n.translate('xpack.dataVisualizer.dataGridChart.singleTopValueLegend', {
-      defaultMessage: `{cardinality, plural, one {# top value} other {# top values}}`,
-      values: { cardinality: chartData.cardinality },
+      defaultMessage: `{cardinality, plural, one {# value {exampleValue}} other {# values}}`,
+      values: {
+        cardinality: chartData.cardinality,
+        exampleValue: chartData.data[0].key ? `(${chartData.data[0].key})` : '',
+      },
     });
   }
 
