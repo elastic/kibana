@@ -141,7 +141,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 
         const deprecationMsg = `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nStack trace:\n${stackTrace}\nQuery:\n${queryMsg}`;
         if (requestOrigin === 'kibana') {
-          deprecationLogger.info(deprecationMsg);
+          deprecationLogger.debug(deprecationMsg);
         } else {
           deprecationLogger.debug(deprecationMsg);
         }
