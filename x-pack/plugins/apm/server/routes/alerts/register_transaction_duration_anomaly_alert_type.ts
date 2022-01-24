@@ -230,7 +230,6 @@ export function registerTransactionDurationAnomalyAlertType({
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
                 [ALERT_REASON]: formatTransactionDurationAnomalyReason({
-                  threshold,
                   measured: score,
                   serviceName,
                   severityLevel,
