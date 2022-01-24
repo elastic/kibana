@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '../../../../../observability/common';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getServiceNames } from './get_service_names';
