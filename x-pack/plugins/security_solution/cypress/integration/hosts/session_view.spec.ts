@@ -48,8 +48,8 @@ const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
 const ALERT_RULE_ID = '422ff92b-837a-49a3-9746-188b7286f56f';
 const FIRST_CHILD_COMMAND = '/usr/bin/id';
 
-const SELECTED_COMMAND_COLOR = 'rgb(240, 78, 152)'
-const ALERT_COMMAND_COLOR = 'rgba(189, 39, 30, 0.48)'
+const SELECTED_COMMAND_COLOR = 'rgb(240, 78, 152)';
+const ALERT_COMMAND_COLOR = 'rgba(189, 39, 30, 0.48)';
 
 describe('Session view', () => {
   context('Rendering table empty state', () => {
@@ -186,7 +186,6 @@ describe('Session view', () => {
         });
     });
 
-    
     // Commented out Root Escalation check until we have better filtering
     /*
     it('root escalation', () => {
@@ -207,43 +206,47 @@ describe('Session view', () => {
       })
     });
     */
-    
 
-   it('selected command is highlighted properly', () => {
-    openSessionView(TEST_EVENT_ID);
-    cy.wait(10000)
-    //Click on 1st command and make sure that clicked command is highlighted
-    cy.get(SESSION_COMMANDS)
-      .eq(0)
-      .click()
-      .children()
-      .eq(0)
-      .should('have.css', 'background-color')
-      .and('eq',SELECTED_COMMAND_COLOR)
-  });
+    it('selected command is highlighted properly', () => {
+      openSessionView(TEST_EVENT_ID);
+      cy.wait(10000);
+      // Click on 1st command and make sure that clicked command is highlighted
+      cy.get(SESSION_COMMANDS)
+        .eq(0)
+        .click()
+        .children()
+        .eq(0)
+        .should('have.css', 'background-color')
+        .and('eq', SELECTED_COMMAND_COLOR);
+    });
 
-  it('Commands with Alerts is highlighted', () => {
-    openSessionView(TEST_EVENT_ID);
-    
-    //Gets the number of Alerts we have in a session
-    cy.get(PROCESS_TREE_NODE_ALERT).contains("Alerts").its('length').then(lengthBefore =>{
-      console.log("LENGHT BEFORE IS " + lengthBefore )
-      const beforeClick = lengthBefore;
-      const genArr = Array.from({length:beforeClick},(v,k)=>k)
-      console.log(genArr)
-    //Checks every alerts in that session is correctly highlighted 
-      cy.wrap(genArr).each((index)=>{
-        cy.get(PROCESS_TREE_NODE_ALERT+":eq("+index+")")
-          .parent()
-          .parent()
-          .then((childElement) => {
-            const childWin = childElement[0].ownerDocument.defaultView;
-            const alertHighlight = childWin && childWin.getComputedStyle(childElement[0], 'before');
-            const alertHighlightValue = alertHighlight && alertHighlight.getPropertyValue('border-left-color');
-            expect(alertHighlightValue).to.equal(ALERT_COMMAND_COLOR)
+    it('Commands with Alerts is highlighted', () => {
+      openSessionView(TEST_EVENT_ID);
+
+      // Gets the number of Alerts we have in a session
+      cy.get(PROCESS_TREE_NODE_ALERT)
+        .contains('Alerts')
+        .its('length')
+        .then((lengthBefore) => {
+          console.log(`LENGHT BEFORE IS ${lengthBefore}`);
+          const beforeClick = lengthBefore;
+          const genArr = Array.from({ length: beforeClick }, (v, k) => k);
+          console.log(genArr);
+          // Checks every alerts in that session is correctly highlighted
+          cy.wrap(genArr).each((index) => {
+            cy.get(`${PROCESS_TREE_NODE_ALERT}:eq(${index})`)
+              .parent()
+              .parent()
+              .then((childElement) => {
+                const childWin = childElement[0].ownerDocument.defaultView;
+                const alertHighlight =
+                  childWin && childWin.getComputedStyle(childElement[0], 'before');
+                const alertHighlightValue =
+                  alertHighlight && alertHighlight.getPropertyValue('border-left-color');
+                expect(alertHighlightValue).to.equal(ALERT_COMMAND_COLOR);
+              });
           });
         });
-      });
     });
   });
 
@@ -258,78 +261,72 @@ describe('Session view', () => {
     });
 
     after(() => {
-      //esArchiverUnload('session_view_commands');
+      // esArchiverUnload('session_view_commands');
     });
 
     it('Scrolling to hit load more', () => {
       openSessionView(TEST_EVENT_ID_MANY_COMMANDS);
-      
-      //Scroll down on main page to allow us to see Load More message
-      cy.scrollTo('bottom')
 
-      cy.get(SESSION_COMMANDS)
+      // Scroll down on main page to allow us to see Load More message
+      cy.scrollTo('bottom');
 
-      cy.get(PROCESS_TREE)
-        .scrollTo('bottom')
-      
-      //Once user hits the end, Load next bar would be visible while for the the next set of commands to load
-      cy.get('button').contains('Load next').should('be.visible')
+      cy.get(SESSION_COMMANDS);
 
+      cy.get(PROCESS_TREE).scrollTo('bottom');
 
+      // Once user hits the end, Load next bar would be visible while for the the next set of commands to load
+      cy.get('button').contains('Load next').should('be.visible');
     });
-      
-      it('Load more events via scrolling till the end', () => {
-        openSessionView(TEST_EVENT_ID_MANY_COMMANDS);
-  
-        //Scroll down on main page to allow us to see Load More message
-        cy.scrollTo('bottom')
-  
-        cy.get(SESSION_COMMANDS)
-          .its('length')
-          .then((elementsBefore) => {
-            const beforeLoadingMore = elementsBefore;
 
-            cy.get(PROCESS_TREE)
-              .scrollTo('bottom')
-            
-            cy.wait(3000)
-  
-            cy.get(SESSION_COMMANDS)
-              .its('length')
-              .then((elementsAfter) => {
-                  expect(elementsAfter).to.be.greaterThan(beforeLoadingMore);
-
-        })
-      })
-    })
-
-    it('Load more events via clicking on Load next button when visible', () =>{
+    it('Load more events via scrolling till the end', () => {
       openSessionView(TEST_EVENT_ID_MANY_COMMANDS);
-      
-      //Scroll down on main page to allow us to see Load More message
-      cy.scrollTo('bottom')
+
+      // Scroll down on main page to allow us to see Load More message
+      cy.scrollTo('bottom');
 
       cy.get(SESSION_COMMANDS)
-      .its('length')
-      .then((elementsBefore) => {
-        const beforeLoadingMore = elementsBefore;
+        .its('length')
+        .then((elementsBefore) => {
+          const beforeLoadingMore = elementsBefore;
 
-        cy.get(PROCESS_TREE)
-          .scrollTo('bottom')
-        
-        //User clicks on the Load Next button to load more commands
-        cy.contains('Load next').should('be.visible')
-        cy.contains('Load next').click()
+          cy.get(PROCESS_TREE).scrollTo('bottom');
 
-        //Allow a couple of seconds to allow session to load more commands
-        cy.wait(3000)
+          cy.wait(3000);
 
-        cy.get(SESSION_COMMANDS)
-          .its('length')
-          .then((elementsAfter) => {
+          cy.get(SESSION_COMMANDS)
+            .its('length')
+            .then((elementsAfter) => {
               expect(elementsAfter).to.be.greaterThan(beforeLoadingMore);
-        })
-      })
-    })
+            });
+        });
+    });
+
+    it('Load more events via clicking on Load next button when visible', () => {
+      openSessionView(TEST_EVENT_ID_MANY_COMMANDS);
+
+      // Scroll down on main page to allow us to see Load More message
+      cy.scrollTo('bottom');
+
+      cy.get(SESSION_COMMANDS)
+        .its('length')
+        .then((elementsBefore) => {
+          const beforeLoadingMore = elementsBefore;
+
+          cy.get(PROCESS_TREE).scrollTo('bottom');
+
+          // User clicks on the Load Next button to load more commands
+          cy.contains('Load next').should('be.visible');
+          cy.contains('Load next').click();
+
+          // Allow a couple of seconds to allow session to load more commands
+          cy.wait(3000);
+
+          cy.get(SESSION_COMMANDS)
+            .its('length')
+            .then((elementsAfter) => {
+              expect(elementsAfter).to.be.greaterThan(beforeLoadingMore);
+            });
+        });
+    });
   });
 });
