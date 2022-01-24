@@ -23,6 +23,7 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
     cy.get('*[id^="logs_"]').uncheck({ force: true });
     cy.get('*[id^="metrics_"]').uncheck({ force: true });
   }
+  cy.getBySel('toastCloseButton').click();
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL_BTN).click();
