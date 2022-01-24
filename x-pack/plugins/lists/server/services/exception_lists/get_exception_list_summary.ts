@@ -87,7 +87,12 @@ export const getExceptionListSummary = async ({
     (acc, item: ByOsAggBucketType) => ({
       ...acc,
       [item.key]: item.doc_count,
-      total: acc.total + item.doc_count,
+      total:
+        // Do not add up the items by OS if host isolation exception
+        // As each host exception entry applies to all OSs
+        listId === 'endpoint_host_isolation_exceptions'
+          ? item.doc_count
+          : acc.total + item.doc_count,
     }),
     { linux: 0, macos: 0, total: 0, windows: 0 }
   );
