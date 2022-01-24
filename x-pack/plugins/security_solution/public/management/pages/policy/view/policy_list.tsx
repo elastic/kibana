@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiText,
@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,15 +26,17 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { TextValueDisplay } from '../../../components/artifact_entry_card/components/text_value_display';
 import { EndpointPolicyLink } from '../../endpoint_hosts/view/components/endpoint_policy_link';
 import { PolicyData } from '../../../../../common/endpoint/types';
+import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
 
 const MAX_PAGINATED_ITEM = 9999;
 export const PolicyList = memo(() => {
   const http = useHttp();
+  const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const result = useQuery(['policyList'], () => {
     return sendGetEndpointSpecificPackagePolicies(http, {
       query: {
-        page: 1,
-        perPage: 10,
+        page: pagination.currentPage,
+        perPage: pagination.pageSize,
       },
     });
   });
@@ -41,8 +44,6 @@ export const PolicyList = memo(() => {
   const totalItemCount = useMemo(() => {
     return result.data ? result.data.items.length : 0;
   }, [result]);
-
-  console.log(result);
 
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
@@ -139,6 +140,25 @@ export const PolicyList = memo(() => {
     ];
   }, []);
 
+  const handleTableOnChange = useCallback(
+    ({ page }: CriteriaWithPagination<PolicyData>) => {
+      setPagination({
+        currentPage: page.index + 1,
+        pageSize: page.size,
+      });
+    },
+    [setPagination]
+  );
+
+  const tablePagination = useMemo(() => {
+    return {
+      pageIndex: pagination.currentPage - 1,
+      pageSize: pagination.pageSize,
+      totalItemCount,
+      pageSizeOptions,
+    };
+  }, [totalItemCount, pageSizeOptions, pagination.currentPage, pagination.pageSize]);
+
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
@@ -167,16 +187,15 @@ export const PolicyList = memo(() => {
             )}
           </EuiText>
           <EuiHorizontalRule margin="xs" />
+          <EuiBasicTable
+            data-test-subj="policyListTable"
+            items={result.data.items}
+            columns={policyColumns}
+            pagination={tablePagination}
+            onChange={handleTableOnChange}
+            loading={result.isLoading}
+          />
         </>
-      )}
-      {result.data && (
-        <EuiBasicTable
-          data-test-subj="policyListTable"
-          items={result.data.items}
-          columns={policyColumns}
-          // pagination
-          loading={result.isLoading}
-        />
       )}
     </AdministrationListPage>
   );
