@@ -7,8 +7,7 @@
 
 import { PolicyData } from '../../../../common/endpoint/types';
 import { EffectedPolicySelection } from './effected_policy_select';
-
-export const GLOBAL_POLICY_TAG = 'policy:all';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 
 /**
  * Given a list of artifact tags, returns the tags that are not policy tags
@@ -27,7 +26,7 @@ export function getArtifactTagsByEffectedPolicySelection(
   otherTags: string[] = []
 ): string[] {
   if (selection.isGlobal) {
-    return [GLOBAL_POLICY_TAG, ...otherTags];
+    return [GLOBAL_ARTIFACT_TAG, ...otherTags];
   }
   const newTags = selection.selected.map((policy) => {
     return `policy:${policy.id}`;
@@ -47,7 +46,7 @@ export function getEffectedPolicySelectionByTags(
   tags: string[],
   policies: PolicyData[]
 ): EffectedPolicySelection {
-  if (tags.find((tag) => tag === GLOBAL_POLICY_TAG)) {
+  if (tags.find((tag) => tag === GLOBAL_ARTIFACT_TAG)) {
     return {
       isGlobal: true,
       selected: [],
@@ -71,7 +70,7 @@ export function getEffectedPolicySelectionByTags(
 }
 
 export function isGlobalPolicyEffected(tags?: string[]): boolean {
-  return tags !== undefined && tags.find((tag) => tag === GLOBAL_POLICY_TAG) !== undefined;
+  return tags !== undefined && tags.find((tag) => tag === GLOBAL_ARTIFACT_TAG) !== undefined;
 }
 
 /**
