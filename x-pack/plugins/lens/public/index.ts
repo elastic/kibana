@@ -28,6 +28,8 @@ export type {
 } from '../common/expressions';
 export type { ValueLabelConfig } from '../common/types';
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
+export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
