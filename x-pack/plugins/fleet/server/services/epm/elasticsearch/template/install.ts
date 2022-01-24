@@ -44,6 +44,8 @@ import {
 } from './template';
 import { buildDefaultSettings } from './default_settings';
 
+// lodash mergeWith but with a customizer function that
+// concatenates arrays together
 const mergeWithArrayConcat = (a: any, b: any) =>
   mergeWith(a, b, (val1, val2) => {
     if (isArray(val1)) {
