@@ -9,15 +9,15 @@ import { chunk, intersection } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getHttp } from '../kibana_services';
-import {
+import { MB } from '../../common/constants';
+import type {
   ImportDoc,
   ImportFailure,
   ImportResponse,
   Mappings,
   Settings,
   IngestPipeline,
-  MB,
-} from '../../common';
+} from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 import { isPopulatedObject } from '../../common/utils';
 

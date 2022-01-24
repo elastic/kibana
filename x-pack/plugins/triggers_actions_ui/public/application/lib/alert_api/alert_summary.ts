@@ -40,12 +40,17 @@ const rewriteBodyRes: RewriteRequestCase<AlertSummary> = ({
 export async function loadAlertSummary({
   http,
   ruleId,
+  numberOfExecutions,
 }: {
   http: HttpSetup;
   ruleId: string;
+  numberOfExecutions?: number;
 }): Promise<AlertSummary> {
   const res = await http.get<AsApiContract<AlertSummary>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_alert_summary`
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_alert_summary`,
+    {
+      query: { number_of_executions: numberOfExecutions },
+    }
   );
   return rewriteBodyRes(res);
 }
