@@ -16,3 +16,4 @@ export { getSplitDimensionAccessor } from './get_split_dimension_accessor';
 export { getDistinctSeries } from './get_distinct_series';
 export { getColumnByAccessor } from './accessor';
 export { isLegendFlat, shouldShowLegend } from './legend';
+export { generateFormatters, getFormatter } from './formatters';

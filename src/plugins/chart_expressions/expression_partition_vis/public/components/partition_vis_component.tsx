@@ -53,6 +53,8 @@ import {
   getColumnByAccessor,
   isLegendFlat,
   shouldShowLegend,
+  generateFormatters,
+  getFormatter,
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
@@ -96,6 +98,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { bucketColumns, metricColumn } = useMemo(
     () => getColumns(props.visParams, props.visData),
     [props.visData, props.visParams]
+  );
+
+  const formatters = useMemo(
+    () => generateFormatters(visParams, visData, services.fieldFormats.deserialize),
+    [services.fieldFormats.deserialize, visData, visParams]
   );
 
   const [showLegend, setShowLegend] = useState<boolean>(() => {
@@ -220,9 +227,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, []);
 
   // formatters
-  const metricFieldFormatter = services.fieldFormats.deserialize(
-    visParams.dimensions.metric?.format
-  );
+  const metricFieldFormatter =
+    getFormatter(metricColumn, formatters, services.fieldFormats.deserialize) ??
+    services.fieldFormats.deserialize();
+
   const splitChartFormatter = visParams.dimensions.splitColumn
     ? services.fieldFormats.deserialize(visParams.dimensions.splitColumn[0].format)
     : visParams.dimensions.splitRow
@@ -246,6 +254,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         props.uiState?.get('vis.colors', {}),
         visData.rows,
         props.palettesRegistry,
+        formatters,
         services.fieldFormats,
         syncColors,
         isDarkMode
@@ -257,6 +266,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       visData,
       props.uiState,
       props.palettesRegistry,
+      formatters,
       services.fieldFormats,
       syncColors,
       isDarkMode,

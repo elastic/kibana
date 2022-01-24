@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { FormatFactory } from '../../../../../field_formats/common';
-import type { Datatable } from '../../../../../expressions/public';
-import { PartitionVisParams } from '../../../common/types';
+import type { FieldFormat, FormatFactory } from '../../../../field_formats/common';
+import type { Datatable } from '../../../../expressions/public';
+import { BucketColumns, PartitionVisParams } from '../../common/types';
 
 export const generateFormatters = (
   visParams: PartitionVisParams,
@@ -26,4 +26,21 @@ export const generateFormatters = (
     }),
     {}
   );
+};
+
+export const getFormatter = (
+  column: Partial<BucketColumns>,
+  formatters: Record<string, FieldFormat | undefined>,
+  defaultFormatFactory: FormatFactory
+) => {
+  if (column?.meta?.params) {
+    const formatter = column?.id ? formatters[column?.id] : undefined;
+    if (formatter) {
+      return formatter;
+    }
+  }
+
+  if (column?.format) {
+    return defaultFormatFactory(column.format);
+  }
 };

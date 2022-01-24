@@ -7,6 +7,7 @@
  */
 
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
+import { FieldFormat } from '../../../../../field_formats/common';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
 import { PaletteRegistry } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
@@ -14,7 +15,6 @@ import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/t
 import { sortPredicateByType } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
-import { generateFormatters } from './get_formatters';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -26,6 +26,7 @@ export const getLayers = (
   overwriteColors: { [key: string]: string } = {},
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
+  formatters: Record<string, FieldFormat | undefined>,
   formatter: FieldFormatsStart,
   syncColors: boolean,
   isDarkMode: boolean
@@ -39,8 +40,6 @@ export const getLayers = (
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';
   }
-
-  const formatters = generateFormatters(visParams, visData, formatter.deserialize);
 
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
