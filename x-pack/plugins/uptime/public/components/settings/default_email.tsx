@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { OnFieldChangeType } from './certificate_form';
 import { connectorsSelector } from '../../state/alerts/alerts';
-import { DefaultEmail as DefaultEMailType } from '../../../common/runtime_types';
+import { DefaultEmail as DefaultEmailType } from '../../../common/runtime_types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimePluginServices } from '../../apps/plugin';
 import { SettingsPageFieldErrors } from '../../pages/settings';
@@ -25,7 +25,7 @@ export function DefaultEmail({
   connectors,
 }: {
   errors: SettingsPageFieldErrors['invalidEmail'];
-  value?: DefaultEMailType;
+  value?: DefaultEmailType;
   isLoading: boolean;
   isDisabled: boolean;
   onChange: OnFieldChangeType;

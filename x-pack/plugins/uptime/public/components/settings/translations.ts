@@ -34,7 +34,7 @@ export const alertFormI18n = {
   emailPlaceHolder: i18n.translate(
     'xpack.uptime.sourceConfiguration.alertDefaultForm.emailConnectorPlaceHolder',
     {
-      defaultMessage: 'To: Email for emails connector',
+      defaultMessage: 'To: Email for email connector',
     }
   ),
 };
