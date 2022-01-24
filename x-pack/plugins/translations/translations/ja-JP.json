@@ -20004,7 +20004,6 @@
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "レポートをダウンロード",
     "xpack.reporting.publicNotifier.error.calloutTitle": "レポートジョブが失敗しました",
     "xpack.reporting.publicNotifier.error.checkManagement": "詳細については、{path}を参照してください。",
-    "xpack.reporting.publicNotifier.error.couldNotCreateReportTitle": "{reportObjectType}「{reportObjectTitle}」のレポートを作成できませんでした。",
     "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "管理 > Kibana > レポート",
     "xpack.reporting.publicNotifier.error.tryRefresh": "ページを更新してみてください。",
     "xpack.reporting.publicNotifier.httpErrorMessage": "レポートジョブステータスを確認できませんでした",

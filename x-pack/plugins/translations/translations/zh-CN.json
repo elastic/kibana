@@ -20295,7 +20295,6 @@
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "下载报告",
     "xpack.reporting.publicNotifier.error.calloutTitle": "报告作业失败",
     "xpack.reporting.publicNotifier.error.checkManagement": "更多信息位于 {path}。",
-    "xpack.reporting.publicNotifier.error.couldNotCreateReportTitle": "无法为 {reportObjectType} '{reportObjectTitle}' 创建报告。",
     "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "管理 > Kibana > Reporting",
     "xpack.reporting.publicNotifier.error.tryRefresh": "请尝试刷新页面。",
     "xpack.reporting.publicNotifier.httpErrorMessage": "无法检查 Reporting 作业状态！",
