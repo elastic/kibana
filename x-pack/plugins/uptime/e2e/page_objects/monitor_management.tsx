@@ -6,6 +6,7 @@
  */
 
 import { Page } from '@elastic/synthetics';
+import { DataStream } from '../../common/runtime_types/monitor_management';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
@@ -194,6 +195,35 @@ export function monitorManagementPageProvider({
       await this.fillByTestSubj('syntheticsBrowserZipUrlUsername', username || '');
       await this.fillByTestSubj('syntheticsBrowserZipUrlPassword', password || '');
       await this.fillCodeEditor(params || '');
+    },
+
+    async createMonitor({
+      monitorConfig,
+      monitorType,
+    }: {
+      monitorConfig: Record<string, string | string[]>;
+      monitorType: DataStream;
+    }) {
+      switch (monitorType) {
+        case DataStream.HTTP:
+          // @ts-ignore
+          await this.createBasicHTTPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.TCP:
+          // @ts-ignore
+          await this.createBasicTCPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.ICMP:
+          // @ts-ignore
+          await this.createBasicICMPMonitorDetails(monitorConfig);
+          break;
+        case DataStream.BROWSER:
+          // @ts-ignore
+          await this.createBasicBrowserMonitorDetails(monitorConfig, true);
+          break;
+        default:
+          break;
+      }
     },
   };
 }
