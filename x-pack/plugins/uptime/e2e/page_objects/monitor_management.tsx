@@ -25,13 +25,12 @@ export function monitorManagementPageProvider({
   const monitorManagement = `${basePath}/app/uptime/manage-monitors`;
   const addMonitor = `${basePath}/app/uptime/add-monitor`;
   const overview = `${basePath}/app/uptime`;
-  console.warn('basePath', basePath);
   return {
     ...loginPageProvider({
       page,
       isRemote,
-      username: remoteUsername,
-      password: remotePassword,
+      username: isRemote ? remoteUsername : 'elastic',
+      password: isRemote ? remotePassword : 'changeme',
     }),
     ...utilsPageProvider({ page }),
 
