@@ -92,7 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should add comma after previous non empty line on autocomplete', async () => {
+    // Flaky, see https://github.com/elastic/kibana/issues/123556
+    it.skip('should add comma after previous non empty line on autocomplete', async () => {
       const LINE_NUMBER = 2;
 
       await PageObjects.console.dismissTutorial();
