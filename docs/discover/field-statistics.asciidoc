@@ -3,8 +3,8 @@
 
 beta::[]
 
-Explore the fields in your data with the *Field statistics* view in *Discover*.
-You can answer questions such as:
+Explore the fields in your data with the *Field statistics* view in *Discover* and
+answer such questions as:
 
 * What does the latency
 look like when one of the containers is down on a Sunday?
@@ -12,7 +12,7 @@ look like when one of the containers is down on a Sunday?
 for the data and its cardinality?
 
 This example explores the fields in
-the <<gs-get-data-into-kibana, sample web logs data set>>, or you can use your own data.
+the <<gs-get-data-into-kibana, sample web logs data>>, or you can use your own data.
 
 . Open the main menu, click *Stack Managment > Advanced Settings*, search for *Show field statistics*,
 and turn on the setting.
