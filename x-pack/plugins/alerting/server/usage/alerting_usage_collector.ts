@@ -39,6 +39,12 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // Security Solution
   siem__signals: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   siem__notifications: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__eqlRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__indicatorRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__mlRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__queryRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__savedQueryRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__thresholdRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   // Uptime
   xpack__uptime__alerts__monitorStatus: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   xpack__uptime__alerts__tls: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention

@@ -400,6 +400,24 @@
             "siem__notifications": {
               "type": "long"
             },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
             "xpack__uptime__alerts__monitorStatus": {
               "type": "long"
             },
@@ -483,6 +501,24 @@
               "type": "long"
             },
             "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
               "type": "long"
             },
             "xpack__uptime__alerts__monitorStatus": {
@@ -574,6 +610,24 @@
               "type": "long"
             },
             "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
               "type": "long"
             },
             "xpack__uptime__alerts__monitorStatus": {
@@ -685,6 +739,24 @@
                 "siem__notifications": {
                   "type": "long"
                 },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
                 "xpack__uptime__alerts__monitorStatus": {
                   "type": "long"
                 },
@@ -768,6 +840,24 @@
                   "type": "long"
                 },
                 "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
                   "type": "long"
                 },
                 "xpack__uptime__alerts__monitorStatus": {
@@ -855,6 +945,24 @@
                 "siem__notifications": {
                   "type": "long"
                 },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
                 "xpack__uptime__alerts__monitorStatus": {
                   "type": "long"
                 },
@@ -940,6 +1048,24 @@
                 "siem__notifications": {
                   "type": "long"
                 },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
                 "xpack__uptime__alerts__monitorStatus": {
                   "type": "long"
                 },
@@ -1023,6 +1149,24 @@
                   "type": "long"
                 },
                 "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
                   "type": "long"
                 },
                 "xpack__uptime__alerts__monitorStatus": {
@@ -1115,6 +1259,24 @@
             "siem__notifications": {
               "type": "long"
             },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
             "xpack__uptime__alerts__monitorStatus": {
               "type": "long"
             },
@@ -1201,6 +1363,24 @@
               "type": "long"
             },
             "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
               "type": "long"
             },
             "xpack__uptime__alerts__monitorStatus": {
