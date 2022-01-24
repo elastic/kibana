@@ -1066,11 +1066,10 @@ export class CasesService {
       });
 
       return (
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        results?.aggregations?.reporters?.buckets.map(({ key, top_docs }) => {
-          const user = top_docs?.hits?.hits?.[0]?._source?.cases?.created_by ?? {};
+        results?.aggregations?.reporters?.buckets.map(({ key: username, top_docs: topDocs }) => {
+          const user = topDocs?.hits?.hits?.[0]?._source?.cases?.created_by ?? {};
           return {
-            username: key,
+            username,
             full_name: user.full_name ?? null,
             email: user.email ?? null,
           };
