@@ -32,7 +32,6 @@ async function playwrightStart(getService: any) {
   const esArchiver = getService('esArchiver');
 
   esArchiverLoad('full_heartbeat');
-  esArchiverLoad('browser');
 
   const config = getService('config');
 
@@ -51,7 +50,6 @@ async function playwrightStart(getService: any) {
 
   console.log('Removing esArchiver...');
   esArchiverUnload('full_heartbeat');
-  esArchiverUnload('browser');
 
   return res;
 }
