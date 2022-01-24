@@ -95,6 +95,7 @@ describe('HeatmapComponent', function () {
       onSelectRange: jest.fn(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
+      interactive: true,
     };
   });
 
@@ -242,5 +243,11 @@ describe('HeatmapComponent', function () {
       ],
     ]);
     expect(wrapperProps.onClickValue).toHaveBeenCalled();
+  });
+
+  it('does not add callbacks when not interactive', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} interactive={false} />);
+    expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    expect(component.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
   });
 });

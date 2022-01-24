@@ -32,6 +32,7 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   onSelectRange: (data: BrushEvent['data']) => void;
   paletteService: PaletteRegistry;
   uiState: PersistedState;
+  interactive: boolean;
 };
 
 export interface ColorStop {
