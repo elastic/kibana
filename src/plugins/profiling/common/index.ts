@@ -21,10 +21,6 @@ export const FLAMECHART_ROUTE_PATH = `${BASE_ROUTE_PATH}/flamechart`;
 export const FLAMECHART_CANVAS_ROUTE_PATH = `${FLAMECHART_ROUTE_PATH}/canvas`;
 export const FLAMECHART_WEBGL_ROUTE_PATH = `${FLAMECHART_ROUTE_PATH}/webgl`;
 
-function toMilliseconds(seconds: string): number {
-  return parseInt(seconds, 10) * 1000;
-}
-
 export function getTopN(obj) {
   const data = [];
   for (let i = 0; i < obj.topN.histogram.buckets.length; i++) {
@@ -32,9 +28,9 @@ export function getTopN(obj) {
     for (let j = 0; j < bucket.group_by.buckets.length; j++) {
       const v = bucket.group_by.buckets[j];
       if(typeof v.key === 'string') {
-        data.push({x: bucket.key, y: v.doc_count, g: v.key});
+        data.push({x: bucket.key, y: v.Count.value, g: v.key});
       } else {
-        data.push({x: bucket.key, y: v.doc_count, g: v.key_as_string});
+        data.push({x: bucket.key, y: v.Count.value, g: v.key_as_string});
       }
 
     }
