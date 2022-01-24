@@ -36,12 +36,7 @@ const upload = () => {
   const originalDirectory = process.cwd();
   process.chdir(path.join('.', 'built_assets', 'webpack_bundle_analyzer'));
   try {
-    const reports = execSync(`ls -1d ./*`)
-      .toString()
-      .trim()
-      .split('\n')
-      .map((path) => path.replace('/', ''));
-
+    const reports = execSync(`ls -1`).toString().trim().split('\n');
     const listHtml = reports
       .map((report) => `<li><a href="${WEBPACK_REPORTS_BASE_URL}/${report}">${report}</a></li>`)
       .join('\n');
@@ -49,7 +44,7 @@ const upload = () => {
     const html = `
       <html>
         <body>
-          <h1>Webpack bundle analyzer</h1>
+          <h1>Webpack Bundle Analyzer</h1>
           <ul>
             ${listHtml}
           </ul>
@@ -58,8 +53,7 @@ const upload = () => {
     `;
 
     fs.writeFileSync('index.html', html);
-
-    console.log('--- Uploading webpack bundle reports');
+    console.log('--- Uploading Webpack Bundle Analyzer reports');
     exec(`
       gsutil -q -m cp -r -z html '*' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/latest/'
@@ -76,10 +70,10 @@ const upload = () => {
 };
 
 try {
-  ghStatus('pending', 'Building webpack bundle analyzer reports');
+  ghStatus('pending', 'Building Webpack Bundle Analyzer reports');
   upload();
   ghStatus('success', 'Webpack bundle analyzer reports built');
 } catch (error) {
-  ghStatus('error', 'Building webpack bundle analyzer reports failed');
+  ghStatus('error', 'Building Webpack Bundle Analyzer reports failed');
   throw error;
 }
