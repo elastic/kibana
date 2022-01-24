@@ -121,6 +121,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && onToggleSelectAll && hasPagination && (
                   <UtilityBarAction
+                    disabled={isBulkActionsInProgress}
                     dataTestSubj="selectAllRules"
                     iconType={isAllSelected ? 'cross' : 'pagesSelect'}
                     iconSide="left"
@@ -144,6 +145,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 <UtilityBarAction
+                  disabled={isBulkActionsInProgress}
                   dataTestSubj="refreshRulesAction"
                   iconSide="left"
                   iconType="refresh"

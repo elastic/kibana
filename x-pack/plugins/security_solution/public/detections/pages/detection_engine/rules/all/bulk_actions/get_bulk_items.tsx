@@ -41,6 +41,8 @@ import {
   BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
+import type { BulkActionPartialErrorResponseSchema } from '../../../../../../../common/detection_engine/schemas/response/perform_bulk_action_schema';
+import type { HTTPError } from '../../../../../../../common/detection_engine/types';
 interface GetBatchItems {
   closePopover: () => void;
   dispatch: Dispatch<RulesTableAction>;
@@ -232,11 +234,27 @@ export const getBatchItems = ({
       return;
     }
 
+    let longEditWarningToast;
+    let isBulkEditFinished = false;
     try {
       const editPayload = await completeBulkEditForm(bulkEditActionType);
       if (editPayload == null) {
         throw Error('Bulk edit payload is empty');
       }
+
+      // show warning toast only if bulk edit action exceeds 5s
+      setTimeout(() => {
+        if (!isBulkEditFinished) {
+          longEditWarningToast = toastsApi.addWarning(
+            {
+              title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
+              text: i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount),
+            },
+            { toastLifeTimeMs: 5 * 60 * 1000 }
+          );
+        }
+      }, 5 * 1000);
+
       const rulesBulkAction = initRulesBulkAction({
         visibleRuleIds: selectedRuleIds,
         selectedItemsCount: customRulesCount,
@@ -250,25 +268,24 @@ export const getBatchItems = ({
             text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(customRulesCount),
           });
         },
-        onError: (error: Error) => {
-          // if response doesn't have number of failed rules, it means the whole bulk action failed.
-          // and generel error toast will be shown
-          // TODO: define correct typings
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const failedRulesCount = (error as any)?.body?.attributes?.rules?.failed;
+        onError: (error: HTTPError) => {
+          // if response doesn't have number of failed rules, it means the whole bulk action failed
+          // and generel error toast will be shown. Otherwise - error toast for partial failure
+          const failedRulesCount = (error?.body as BulkActionPartialErrorResponseSchema)?.attributes
+            ?.rules?.failed;
 
           if (isNaN(failedRulesCount)) {
             toastsApi.addError(error, { title: i18n.BULK_ACTION_FAILED });
           } else {
-            // Passing body to stack here to display it's as formatted JSON to end users through error toast  modal
-            // Body passed instead of actual stack(it includes response body as well), because on large response(thousands of failed rules)
-            // browser tab hangs and sometimes crashes
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            error.stack = JSON.stringify((error as any).body, null, 2);
-            toastsApi.addError(error, {
-              title: i18n.BULK_EDIT_ERROR_TOAST_TITLE(failedRulesCount),
-              toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCIRPTION(failedRulesCount),
-            });
+            try {
+              error.stack = JSON.stringify(error.body, null, 2);
+              toastsApi.addError(error, {
+                title: i18n.BULK_EDIT_ERROR_TOAST_TITLE(failedRulesCount),
+                toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCIRPTION(failedRulesCount),
+              });
+            } catch (e) {
+              // toast error has failed
+            }
           }
         },
       });
@@ -287,6 +304,11 @@ export const getBatchItems = ({
       await reFetchRules();
     } catch (e) {
       // user has cancelled form or error has occured
+    } finally {
+      isBulkEditFinished = true;
+      if (longEditWarningToast) {
+        toastsApi.remove(longEditWarningToast);
+      }
     }
   };
 

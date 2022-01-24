@@ -195,6 +195,23 @@ export const BULK_EDIT_SUCCESS_TOAST_DESCRIPTION = (rulesCount: number) =>
     }
   );
 
+export const BULK_EDIT_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle',
+  {
+    defaultMessage: 'Rule updates is still work in progress',
+  }
+);
+
+export const BULK_EDIT_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        '{rulesCount, plural, =1 {# rule update is} other {# rules update are}} in progress.',
+    }
+  );
+
 export const BULK_EDIT_ERROR_TOAST_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
