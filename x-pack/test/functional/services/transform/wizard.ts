@@ -758,6 +758,57 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
+    async assertRetentionPolicySwitchExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, { allowHidden: true });
+    },
+
+    async assertRetentionPolicySwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformRetentionPolicySwitch', 'aria-checked')) ===
+        'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Retention policy switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicyFieldSelectExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionPolicyFieldSelectValue(expectedValue: string) {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        timeout: 1000,
+      });
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyDateFieldSelect',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Retention policy field option value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertRetentionPolicyMaxAgeInputExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyMaxAgeInput`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionsPolicyMaxAgeValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyMaxAgeInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform retention policy max age input text should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
     async assertTransformAdvancedSettingsAccordionExists() {
       await testSubjects.existOrFail('transformWizardAccordionAdvancedSettings');
     },
