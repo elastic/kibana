@@ -140,6 +140,9 @@ export const config: PluginConfigDescriptor = {
     agentPolicies: PreconfiguredAgentPoliciesSchema,
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    developer: schema.object({
+      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 
