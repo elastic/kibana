@@ -5,15 +5,12 @@
  * 2.0.
  */
 
+import { mockHttpRequest, pageHelpers } from './helpers';
+
+import { act } from 'react-dom/test-utils';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
-import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
-
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
 
 const { setup } = pageHelpers.jobClone;
 const {
@@ -29,9 +26,14 @@ describe('Cloning a rollup job through create job wizard', () => {
   let startMock;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
@@ -149,9 +151,10 @@ describe('Cloning a rollup job through create job wizard', () => {
 
     // Changing the index pattern value after cloning a rollup job should update a number of values.
     // On each view of the set up wizard we check for the expected state after this change.
-    form.setInputValue('rollupIndexPattern', 'test');
-    // Fires off a network request.
-    await nextTick();
+
+    await act(async () => {
+      form.setInputValue('rollupIndexPattern', 'test');
+    });
 
     const {
       groups: { date_histogram: dateHistogram },

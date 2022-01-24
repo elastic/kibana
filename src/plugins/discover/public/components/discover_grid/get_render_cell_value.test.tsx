@@ -35,7 +35,6 @@ const rowsSource: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: { bytes: 100, extension: '.gz' },
     highlight: {
@@ -48,7 +47,6 @@ const rowsFields: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { bytes: [100], extension: ['.gz'] },
@@ -62,7 +60,6 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { 'object.value': [100], extension: ['.gz'] },
@@ -202,7 +199,6 @@ describe('Discover grid cell rendering', function () {
               "bytes": 100,
               "extension": ".gz",
             },
-            "_type": "test",
             "highlight": Object {
               "extension": Array [
                 "@kibana-highlighted-field.gz@/kibana-highlighted-field",
@@ -397,7 +393,6 @@ describe('Discover grid cell rendering', function () {
             "_index": "test",
             "_score": 1,
             "_source": undefined,
-            "_type": "test",
             "fields": Object {
               "bytes": Array [
                 100,
@@ -604,5 +599,65 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
+  });
+
+  it('renders unmapped fields correctly', () => {
+    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const rowsFieldsUnmapped: ElasticSearchHit[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { unmapped: ['.gz'] },
+        highlight: {
+          extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
+        },
+      },
+    ];
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsUnmapped,
+      rowsFieldsUnmapped.map(flatten),
+      true,
+      ['unmapped'],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="unmapped"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <Fragment>
+        .gz
+      </Fragment>
+    `);
+
+    const componentWithDetails = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="unmapped"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithDetails).toMatchInlineSnapshot(`
+      <JsonCodeEditor
+        json={
+          Array [
+            ".gz",
+          ]
+        }
+        width={370}
+      />
+    `);
   });
 });

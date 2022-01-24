@@ -28,8 +28,6 @@
         "ml": ["read"],
         "siem": ["read", "read_alerts"],
         "securitySolutionCases": ["read"],
-        "indexPatterns": ["read"],
-        "savedObjectsManagement": ["read"],
         "actions": ["read"],
         "builtInAlerts": ["read"]
       },

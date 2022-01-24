@@ -10,7 +10,6 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { basename } from 'path';
-import { AxiosResponse } from 'axios';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -21,14 +20,9 @@ import {
 import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
-import {
-  PACKAGE_POLICY_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common';
+
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
+import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
 const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
 const separator = '----------------------------------------';
@@ -88,35 +82,9 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
   // and
   // and ensure the trusted apps list is created
   logger.info('setting up Fleet with endpoint and creating trusted apps list');
-  const [installedEndpointPackage] = await Promise.all([
-    setupFleetForEndpoint(kbnClient).then((response) => response.endpointPackage),
+  ensureCreateEndpointTrustedAppsList(kbnClient);
 
-    ensureCreateEndpointTrustedAppsList(kbnClient),
-  ]);
-
-  // Setup a list of real endpoint policies and return a method to randomly select one
-  const randomPolicyId: () => string = await (async () => {
-    const randomN = (max: number): number => Math.floor(Math.random() * max);
-    const policyIds: string[] =
-      (await fetchEndpointPolicies(kbnClient)).data.items.map((policy) => policy.id) || [];
-
-    // If the number of existing policies is less than 5, then create some more policies
-    if (policyIds.length < 5) {
-      for (let i = 0, t = 5 - policyIds.length; i < t; i++) {
-        policyIds.push(
-          (
-            await indexFleetEndpointPolicy(
-              kbnClient,
-              `Policy for Trusted App assignment ${i + 1}`,
-              installedEndpointPackage.version
-            )
-          ).integrationPolicies[0].id
-        );
-      }
-    }
-
-    return () => policyIds[randomN(policyIds.length)];
-  })();
+  const randomPolicyId = await randomPolicyIdGenerator(kbnClient, logger);
 
   return pMap(
     Array.from({ length: count }),
@@ -165,19 +133,6 @@ const createRunLogger = () => {
           }
         }
       },
-    },
-  });
-};
-
-const fetchEndpointPolicies = (
-  kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
-  return kbnClient.request<GetPolicyListResponse>({
-    method: 'GET',
-    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
-    query: {
-      perPage: 100,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };

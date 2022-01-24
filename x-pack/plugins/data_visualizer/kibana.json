@@ -10,7 +10,9 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
@@ -26,10 +28,7 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "charts"
-  ],
-  "extraPublicDirs": [
-    "common"
+    "uiActions"
   ],
   "owner": {
     "name": "Machine Learning UI",

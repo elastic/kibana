@@ -616,7 +616,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"database\" | \"package\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"network\" | \"web\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"database\" | \"package\" | \"network\" | \"web\" | \"host\" | \"session\" | \"file\" | \"process\" | \"registry\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
@@ -658,7 +658,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"end\" | \"user\" | \"info\" | \"group\" | \"error\" | \"connection\" | \"protocol\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"user\" | \"error\" | \"end\" | \"info\" | \"group\" | \"connection\" | \"protocol\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,
@@ -674,9 +674,9 @@
           "\nRepresents the ECS schema with the following reserved keys excluded:\n- `ecs`\n- `@timestamp`\n- `message`\n- `log.level`\n- `log.logger`\n"
         ],
         "signature": [
-          "Pick<",
+          "Omit<",
           "EcsBase",
-          ", \"tags\" | \"labels\"> & ",
+          ", \"message\" | \"@timestamp\"> & ",
           "EcsTracing",
           " & { agent?: ",
           "EcsAgent",
@@ -704,9 +704,9 @@
           "EcsHost",
           " | undefined; http?: ",
           "EcsHttp",
-          " | undefined; log?: Pick<",
+          " | undefined; log?: Omit<",
           "EcsLog",
-          ", \"origin\" | \"file\" | \"syslog\"> | undefined; network?: ",
+          ", \"logger\" | \"level\"> | undefined; network?: ",
           "EcsNetwork",
           " | undefined; observer?: ",
           "EcsObserver",

@@ -16,12 +16,13 @@ import type {
   TimefilterContract,
   TimeRange,
   IndexPattern,
+  FilterManager,
 } from 'src/plugins/data/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
-import { toExpression, Ast } from '@kbn/interpreter/common';
+import { toExpression, Ast } from '@kbn/interpreter';
 import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
@@ -42,7 +43,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
-import { Document, injectFilterReferences } from '../persistence';
+import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
@@ -107,6 +108,7 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
@@ -477,7 +479,7 @@ export class Embeddable
       output.filters = [...this.savedVis.state.filters];
     }
 
-    output.filters = injectFilterReferences(output.filters, this.savedVis.references);
+    output.filters = this.deps.injectFilterReferences(output.filters, this.savedVis.references);
     return output;
   }
 
@@ -610,16 +612,14 @@ export class Embeddable
   };
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsRefType(input, {
+    return this.deps.attributeService.getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsValueType(input);
+    return this.deps.attributeService.getInputAsValueType(this.getExplicitInput());
   };
 
   // same API as Visualize

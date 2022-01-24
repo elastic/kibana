@@ -15,6 +15,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
+import { ParsedIndexAlias } from './init';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -281,15 +282,15 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async setIndexAliasToHidden(
-    indexName: string,
-    currentAliases: estypes.IndicesGetAliasIndexAliases
+    aliasName: string,
+    currentAliasData: ParsedIndexAlias[]
   ): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.updateAliases({
         body: {
-          actions: Object.keys(currentAliases.aliases).map((aliasName) => {
-            const existingAliasOptions = pick(currentAliases.aliases[aliasName], [
+          actions: currentAliasData.map((aliasData) => {
+            const existingAliasOptions = pick(aliasData, [
               'is_write_index',
               'filter',
               'index_routing',
@@ -299,7 +300,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
             return {
               add: {
                 ...existingAliasOptions,
-                index: indexName,
+                index: aliasData.indexName,
                 alias: aliasName,
                 is_hidden: true,
               },
@@ -309,7 +310,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       });
     } catch (err) {
       throw new Error(
-        `error setting existing index aliases for index ${indexName} to is_hidden: ${err.message}`
+        `error setting existing index aliases for alias ${aliasName} to is_hidden: ${err.message}`
       );
     }
   }
@@ -537,7 +538,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       return {
         page,
         per_page: perPage,
-        total: isNumber(total) ? total : total.value,
+        total: isNumber(total) ? total : total!.value,
         data: hits.map((hit) => hit._source),
       };
     } catch (err) {

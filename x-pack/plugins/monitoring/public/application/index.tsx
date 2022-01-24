@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart, AppMountParameters, MountPoint } from 'kibana/public';
+import { CoreStart, AppMountParameters, MountPoint, CoreTheme } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
+import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { LoadingPage } from './pages/loading_page';
 import { LicensePage } from './pages/license_page';
@@ -62,7 +63,7 @@ import { AccessDeniedPage } from './pages/access_denied';
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, history, setHeaderActionMenu }: AppMountParameters,
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
   // dispatch synthetic hash change event to update hash history objects
@@ -77,6 +78,7 @@ export const renderApp = (
       plugins={plugins}
       externalConfig={externalConfig}
       setHeaderActionMenu={setHeaderActionMenu}
+      theme$={theme$}
     />,
     element
   );
@@ -92,14 +94,15 @@ const MonitoringApp: React.FC<{
   plugins: MonitoringStartPluginDependencies;
   externalConfig: ExternalConfig;
   setHeaderActionMenu: (element: MountPoint<HTMLElement> | undefined) => void;
-}> = ({ core, plugins, externalConfig, setHeaderActionMenu }) => {
+  theme$: Observable<CoreTheme>;
+}> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
   const history = createPreserveQueryHistory();
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
       <ExternalConfigContext.Provider value={externalConfig}>
         <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
-          <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu }}>
+          <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
             <MonitoringTimeContainer.Provider>
               <BreadcrumbContainer.Provider history={history}>
                 <Router history={history}>

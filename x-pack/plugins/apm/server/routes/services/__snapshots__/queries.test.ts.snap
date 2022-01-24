@@ -99,7 +99,9 @@ Object {
     },
     "size": 1,
     "sort": Object {
-      "_score": "desc",
+      "_score": Object {
+        "order": "desc",
+      },
     },
   },
   "terminate_after": 1,
@@ -185,6 +187,7 @@ Array [
     "apm": Object {
       "events": Array [
         "metric",
+        "error",
       ],
     },
     "body": Object {

@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { has } from 'lodash';
-
 import type { TableSearchRequest } from '../table/types';
 import type { Series } from '../../../../../common/types';
 
 export function calculateAggRoot(doc: TableSearchRequest, column: Series) {
-  let aggRoot = `aggs.pivot.aggs.${column.id}.aggs`;
-
-  if (has(doc, `aggs.pivot.aggs.${column.id}.aggs.column_filter`)) {
-    aggRoot = `aggs.pivot.aggs.${column.id}.aggs.column_filter.aggs`;
-  }
-  return aggRoot;
+  return `aggs.pivot.aggs.${column.id}.aggs`;
 }

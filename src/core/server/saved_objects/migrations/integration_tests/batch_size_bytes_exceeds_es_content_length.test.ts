@@ -20,7 +20,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-// un-skip after https://github.com/elastic/kibana/issues/116111
+// dataArchive not compatible with ES 8.0+
 describe.skip('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
@@ -55,7 +55,7 @@ describe.skip('migration v2', () => {
   });
 
   it('fails with a descriptive message when maxBatchSizeBytes exceeds ES http.max_content_length', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1715275 });
+    root = createRoot({ maxBatchSizeBytes: 1715329 });
     esServer = await startES();
     await root.preboot();
     await root.setup();
@@ -111,7 +111,7 @@ function createRoot(options: { maxBatchSizeBytes?: number }) {
       },
     },
     {
-      oss: true,
+      oss: false,
     }
   );
 }

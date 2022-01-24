@@ -134,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
                   },
                 ],
                 influencers: [],
+                model_prune_window: '30d',
               },
             },
           },

@@ -74,14 +74,41 @@ export const useWorkspaceLoader = ({
       store.dispatch({ type: 'x-pack/graph/RESET' });
     }
 
+    async function* pageThroughIndexPatterns() {
+      let perPage = 1000;
+      let total = 0;
+      let savedObjects: IndexPatternSavedObject[] = [];
+
+      async function* makeRequest(page: number): AsyncGenerator<IndexPatternSavedObject[]> {
+        await savedObjectsClient
+          .find<{ title: string }>({
+            type: 'index-pattern',
+            fields: ['title', 'type'],
+            perPage,
+            page,
+          })
+          .then((response) => {
+            perPage = response.perPage;
+            total = response.total;
+            savedObjects = response.savedObjects;
+          });
+
+        yield savedObjects;
+
+        if (total > page * perPage) {
+          yield* makeRequest(++page);
+        }
+      }
+      yield* makeRequest(1);
+    }
+
     async function fetchIndexPatterns() {
-      return await savedObjectsClient
-        .find<{ title: string }>({
-          type: 'index-pattern',
-          fields: ['title', 'type'],
-          perPage: 10000,
-        })
-        .then((response) => response.savedObjects);
+      const result = pageThroughIndexPatterns();
+      let fetchedIndexPatterns: IndexPatternSavedObject[] = [];
+      for await (const page of result) {
+        fetchedIndexPatterns = fetchedIndexPatterns.concat(page);
+      }
+      return fetchedIndexPatterns;
     }
 
     async function fetchSavedWorkspace(): Promise<{

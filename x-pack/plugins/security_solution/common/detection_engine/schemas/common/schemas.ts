@@ -193,19 +193,6 @@ export const status = t.keyof({
 });
 export type Status = t.TypeOf<typeof status>;
 
-export enum RuleExecutionStatus {
-  'succeeded' = 'succeeded',
-  'failed' = 'failed',
-  'going to run' = 'going to run',
-  'partial failure' = 'partial failure',
-  /**
-   * @deprecated 'partial failure' status should be used instead
-   */
-  'warning' = 'warning',
-}
-
-export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
-
 export const conflicts = t.keyof({ abort: null, proceed: null });
 export type Conflicts = t.TypeOf<typeof conflicts>;
 
@@ -332,30 +319,6 @@ export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
 export const createdByOrNull = t.union([created_by, t.null]);
 export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
 
-export const last_success_at = IsoDateString;
-export type LastSuccessAt = t.TypeOf<typeof IsoDateString>;
-
-export const last_success_message = t.string;
-export type LastSuccessMessage = t.TypeOf<typeof last_success_message>;
-
-export const last_failure_at = IsoDateString;
-export type LastFailureAt = t.TypeOf<typeof last_failure_at>;
-
-export const last_failure_message = t.string;
-export type LastFailureMessage = t.TypeOf<typeof last_failure_message>;
-
-export const last_gap = t.string;
-export type LastGap = t.TypeOf<typeof last_gap>;
-
-export const bulk_create_time_durations = t.array(t.string);
-export type BulkCreateTimeDurations = t.TypeOf<typeof bulk_create_time_durations>;
-
-export const search_after_time_durations = t.array(t.string);
-export type SearchAfterTimeDurations = t.TypeOf<typeof search_after_time_durations>;
-
-export const status_date = IsoDateString;
-export type StatusDate = t.TypeOf<typeof status_date>;
-
 export const rules_installed = PositiveInteger;
 export const rules_updated = PositiveInteger;
 export const status_code = PositiveInteger;
@@ -453,6 +416,53 @@ export enum BulkAction {
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
+  'edit' = 'edit',
 }
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
+
+export enum BulkActionEditType {
+  'add_tags' = 'add_tags',
+  'delete_tags' = 'delete_tags',
+  'set_tags' = 'set_tags',
+  'add_index_patterns' = 'add_index_patterns',
+  'delete_index_patterns' = 'delete_index_patterns',
+  'set_index_patterns' = 'set_index_patterns',
+  'set_timeline' = 'set_timeline',
+}
+
+export const bulkActionEditType = enumeration('BulkActionEditType', BulkActionEditType);
+
+const bulkActionEditPayloadTags = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_tags),
+    t.literal(BulkActionEditType.delete_tags),
+    t.literal(BulkActionEditType.set_tags),
+  ]),
+  value: tags,
+});
+
+const bulkActionEditPayloadIndexPatterns = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_index_patterns),
+    t.literal(BulkActionEditType.delete_index_patterns),
+    t.literal(BulkActionEditType.set_index_patterns),
+  ]),
+  value: index,
+});
+
+const bulkActionEditPayloadTimeline = t.type({
+  type: t.literal(BulkActionEditType.set_timeline),
+  value: t.type({
+    timeline_id,
+    timeline_title,
+  }),
+});
+
+export const bulkActionEditPayload = t.union([
+  bulkActionEditPayloadTags,
+  bulkActionEditPayloadIndexPatterns,
+  bulkActionEditPayloadTimeline,
+]);
+
+export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;

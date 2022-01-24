@@ -328,6 +328,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'all_assets',
       });
       expect(res.attributes).eql({
+        installed_kibana_space_id: 'default',
         installed_kibana: [
           {
             id: 'sample_dashboard',

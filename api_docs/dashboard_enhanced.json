@@ -489,15 +489,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.StartServices",
-                "text": "StartServices"
-              },
-              "<{ uiActionsEnhanced: ",
+              "() => StartServices<{ uiActionsEnhanced: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",
@@ -610,13 +602,7 @@
               "<unknown>; navigate(options: ",
               "RedirectOptions",
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
               {
                 "pluginId": "share",
@@ -723,13 +709,7 @@
               "<unknown>; navigate(options: ",
               "RedirectOptions",
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">): void; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",

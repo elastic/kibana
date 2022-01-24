@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   PluginInitializerContext,
   CoreStart,
@@ -24,6 +23,7 @@ import {
 } from './lib/adapters';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
@@ -59,7 +59,10 @@ export class Plugin implements PluginType {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(
+            { ...uptimeRuleFieldMap, ...experimentalRuleFieldMap },
+            'strict'
+          ),
         },
       ],
     });
@@ -70,8 +73,13 @@ export class Plugin implements PluginType {
       cloud: plugins.cloud,
     } as UptimeServerSetup;
 
-    if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService = new SyntheticsService(this.logger, this.server);
+    if (this.server?.config?.service?.enabled) {
+      this.syntheticService = new SyntheticsService(
+        this.logger,
+        this.server,
+        this.server.config.service
+      );
+
       this.syntheticService.registerSyncTask(plugins.taskManager);
     }
 
@@ -90,7 +98,7 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    if (this.server?.config?.unsafe?.service.enabled) {
+    if (this.server?.config?.service?.enabled) {
       this.savedObjectsClient = new SavedObjectsClient(
         coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
       );
@@ -107,8 +115,8 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService?.init(coreStart);
+    if (this.server?.config?.service?.enabled) {
+      this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {
         this.server.syntheticsService = this.syntheticService;

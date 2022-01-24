@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PLUGIN_ID, AGENT_POLICY_API_ROUTES } from '../../constants';
+import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -15,7 +15,7 @@ import {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
-import type { FleetRouter } from '../../types/request_context';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   getAgentPoliciesHandler,
@@ -28,85 +28,99 @@ import {
   downloadFullAgentPolicy,
 } from './handlers';
 
-export const registerRoutes = (routers: { superuser: FleetRouter; fleetSetup: FleetRouter }) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   // List - Fleet Server needs access to run setup
-  routers.fleetSetup.get(
+  router.get(
     {
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetAgentPoliciesRequestSchema,
-      // Disable this tag and the automatic RBAC support until elastic/fleet-server access is removed in 8.0
-      // Required to allow elastic/fleet-server to access this API.
-      // options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { readAgentPolicies: true },
+      },
     },
     getAgentPoliciesHandler
   );
 
   // Get one
-  routers.superuser.get(
+  router.get(
     {
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getOneAgentPolicyHandler
   );
 
   // Create
-  routers.superuser.post(
+  router.post(
     {
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreateAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     createAgentPolicyHandler
   );
 
   // Update
-  routers.superuser.put(
+  router.put(
     {
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     updateAgentPolicyHandler
   );
 
   // Copy
-  routers.superuser.post(
+  router.post(
     {
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
       validate: CopyAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     copyAgentPolicyHandler
   );
 
   // Delete
-  routers.superuser.post(
+  router.post(
     {
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     deleteAgentPoliciesHandler
   );
 
   // Get one full agent policy
-  routers.superuser.get(
+  router.get(
     {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getFullAgentPolicy
   );
 
   // Download one full agent policy
-  routers.superuser.get(
+  router.get(
     {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     downloadFullAgentPolicy
   );

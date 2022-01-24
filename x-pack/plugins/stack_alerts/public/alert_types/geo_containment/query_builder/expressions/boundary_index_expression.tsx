@@ -20,7 +20,7 @@ import { IFieldType } from '../../../../../../../../src/plugins/data/common';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
-  alertParams: GeoContainmentAlertParams;
+  ruleParams: GeoContainmentAlertParams;
   errors: IErrorObject;
   boundaryIndexPattern: IIndexPattern;
   boundaryNameField?: string;
@@ -35,7 +35,7 @@ interface KibanaDeps {
 }
 
 export const BoundaryIndexExpression: FunctionComponent<Props> = ({
-  alertParams,
+  ruleParams,
   errors,
   boundaryIndexPattern,
   boundaryNameField,
@@ -48,7 +48,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { http } = useKibana<KibanaDeps>().services;
   const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
-  const { boundaryGeoField } = alertParams;
+  const { boundaryGeoField } = ruleParams;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nothingSelected: IFieldType = {
     name: '<nothing selected>',

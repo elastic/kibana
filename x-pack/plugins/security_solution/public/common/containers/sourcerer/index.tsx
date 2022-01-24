@@ -72,22 +72,54 @@ export const useInitSourcerer = (
     getTimelineSelector(state, TimelineId.active)
   );
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const { selectedDataViewId: scopeDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, scopeId)
-  );
-  const { selectedDataViewId: timelineDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, SourcererScopeName.timeline)
-  );
-  const activeDataViewIds = useMemo(
-    () => [...new Set([scopeDataViewId, timelineDataViewId])],
-    [scopeDataViewId, timelineDataViewId]
-  );
+  const {
+    selectedDataViewId: scopeDataViewId,
+    selectedPatterns,
+    missingPatterns,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, scopeId));
+  const {
+    selectedDataViewId: timelineDataViewId,
+    selectedPatterns: timelineSelectedPatterns,
+    missingPatterns: timelineMissingPatterns,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
 
-  useEffect(
-    () => activeDataViewIds.forEach((id) => id != null && id.length > 0 && indexFieldsSearch(id)),
-    [activeDataViewIds, indexFieldsSearch]
-  );
+  /*
+   * Note for future engineer:
+   * we changed the logic to not fetch all the index fields for every data view on the loading of the app
+   * because user can have a lot of them and it can slow down the loading of the app
+   * and maybe blow up the memory of the browser. We decided to load this data view on demand,
+   * we know that will only have to load this dataview on default and timeline scope.
+   * We will use two conditions to see if we need to fetch and initialize the dataview selected.
+   * First, we will make sure that we did not already fetch them by using `searchedIds`
+   * and then we will init them if selectedPatterns and missingPatterns are empty.
+   */
+  const searchedIds = useRef<string[]>([]);
+  useEffect(() => {
+    const activeDataViewIds = [...new Set([scopeDataViewId, timelineDataViewId])];
+    activeDataViewIds.forEach((id) => {
+      if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
+        searchedIds.current = [...searchedIds.current, id];
+        indexFieldsSearch(
+          id,
+          id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
+          id === scopeDataViewId
+            ? selectedPatterns.length === 0 && missingPatterns.length === 0
+            : timelineDataViewId === id
+            ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+            : false
+        );
+      }
+    });
+  }, [
+    indexFieldsSearch,
+    missingPatterns.length,
+    scopeDataViewId,
+    selectedPatterns.length,
+    timelineDataViewId,
+    timelineMissingPatterns.length,
+    timelineSelectedPatterns.length,
+  ]);
 
   // Related to timeline
   useEffect(() => {
@@ -180,28 +212,33 @@ export const useInitSourcerer = (
     },
     [defaultDataView.title, dispatch, indexFieldsSearch, addError]
   );
-  useEffect(() => {
+
+  const onSignalIndexUpdated = useCallback(() => {
     if (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSourcerer == null &&
       defaultDataView.id.length > 0
     ) {
-      // update signal name also updates sourcerer
-      // we hit this the first time signal index is created
       updateSourcererDataView(signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
   }, [
-    defaultDataView.id,
+    defaultDataView.id.length,
     dispatch,
-    indexFieldsSearch,
-    isSignalIndexExists,
     loadingSignalIndex,
     signalIndexName,
     signalIndexNameSourcerer,
     updateSourcererDataView,
   ]);
+
+  useEffect(() => {
+    onSignalIndexUpdated();
+    // because we only want onSignalIndexUpdated to run when signalIndexName updates,
+    // but we want to know about the updates from the dependencies of onSignalIndexUpdated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signalIndexName]);
+
   // Related to the detection page
   useEffect(() => {
     if (
@@ -322,12 +359,14 @@ export const useSourcererDataView = (
 
   const indicesExist = useMemo(
     () =>
-      checkIfIndicesExist({
-        scopeId,
-        signalIndexName,
-        patternList: sourcererDataView.patternList,
-      }),
-    [scopeId, signalIndexName, sourcererDataView]
+      loading || sourcererDataView.loading
+        ? true
+        : checkIfIndicesExist({
+            scopeId,
+            signalIndexName,
+            patternList: sourcererDataView.patternList,
+          }),
+    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
   return useMemo(

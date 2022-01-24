@@ -6,8 +6,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -20,18 +18,15 @@ export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'trained_models',
   path: '/trained_models',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.modelsListLabel', {
-        defaultMessage: 'Model Management',
-      }),
-      href: '',
-    },
+    getBreadcrumbWithUrlForApp('TRAINED_MODELS'),
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageModelManagement',
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {

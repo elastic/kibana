@@ -27,7 +27,7 @@ export const CaseDetailsRefreshContext =
  * const caseDetailsRefresh = useWithCaseDetailsRefresh();
  * ...
  * if (caseDetailsRefresh) {
- *   caseDetailsRefresh.refreshUserActionsAndComments();
+ *   caseDetailsRefresh.refreshCase();
  * }
  */
 export const useWithCaseDetailsRefresh = (): Readonly<CaseViewRefreshPropInterface> | undefined => {

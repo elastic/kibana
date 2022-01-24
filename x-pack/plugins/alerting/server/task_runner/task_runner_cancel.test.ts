@@ -32,6 +32,10 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
+jest.mock('uuid', () => ({
+  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
@@ -191,6 +195,12 @@ describe('Task Runner Cancel', () => {
     await taskRunner.cancel();
     await promise;
 
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      3,
+      `Aborting any in-progress ES searches for rule type test with id 1`
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     // execute-start event, timeout event and then an execute event because rule executors are not cancelling anything yet
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -202,6 +212,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -230,6 +247,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -255,6 +279,13 @@ describe('Task Runner Cancel', () => {
         outcome: 'success',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'ok',
         },
@@ -394,7 +425,7 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -402,18 +433,22 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `Updating rule task for test rule with id 1 - execution error due to timeout`
+      'Aborting any in-progress ES searches for rule type test with id 1'
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `Updating rule task for test rule with id 1 - execution error due to timeout`
     );
     expect(logger.debug).nthCalledWith(
       5,
-      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
     );
     expect(logger.debug).nthCalledWith(
       6,
+      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`
+    );
+    expect(logger.debug).nthCalledWith(
+      7,
       'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
@@ -427,6 +462,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -455,6 +497,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -481,6 +530,13 @@ describe('Task Runner Cancel', () => {
         outcome: 'success',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'active',
         },
@@ -511,7 +567,7 @@ describe('Task Runner Cancel', () => {
 
   function testActionsExecute() {
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(5);
+    expect(logger.debug).toHaveBeenCalledTimes(6);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -519,14 +575,18 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `Updating rule task for test rule with id 1 - execution error due to timeout`
+      'Aborting any in-progress ES searches for rule type test with id 1'
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `Updating rule task for test rule with id 1 - execution error due to timeout`
     );
     expect(logger.debug).nthCalledWith(
       5,
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
       'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
@@ -539,6 +599,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -568,6 +635,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -595,6 +669,13 @@ describe('Task Runner Cancel', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -628,6 +709,13 @@ describe('Task Runner Cancel', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -652,6 +740,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
@@ -683,6 +778,13 @@ describe('Task Runner Cancel', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(6, {
       event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'active',
         },

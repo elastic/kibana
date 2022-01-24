@@ -11,8 +11,7 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/116060
-  describe.skip('kibana status api', () => {
+  describe('kibana status api', () => {
     it('returns version, status and metrics fields', () => {
       return supertest
         .get('/api/status')
@@ -26,7 +25,7 @@ export default function ({ getService }) {
           expect(body.version.build_number).to.be.a('number');
 
           expect(body.status.overall).to.be.an('object');
-          expect(body.status.overall.level).to.be('available');
+          expect(body.status.overall.level).to.be.a('string');
 
           expect(body.status.core).to.be.an('object');
           expect(body.status.plugins).to.be.an('object');

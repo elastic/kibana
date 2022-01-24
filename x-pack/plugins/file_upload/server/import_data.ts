@@ -14,7 +14,7 @@ import {
   Settings,
   Mappings,
   IngestPipelineWrapper,
-} from '../common';
+} from '../common/types';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
@@ -103,6 +103,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       body.settings = settings;
     }
 
+    // @ts-expect-error settings.index is not compatible
     await asCurrentUser.indices.create({ index, body });
   }
 

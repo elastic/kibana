@@ -105,7 +105,7 @@
         "label": "Unit",
         "description": [],
         "signature": [
-          "\"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\""
+          "\"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"m\" | \"s\" | \"ms\""
         ],
         "path": "packages/elastic-datemath/src/index.ts",
         "deprecated": false,
@@ -119,7 +119,13 @@
         "label": "units",
         "description": [],
         "signature": [
-          "Unit",
+          {
+            "pluginId": "@elastic/datemath",
+            "scope": "server",
+            "docId": "kibElasticDatemathPluginApi",
+            "section": "def-server.Unit",
+            "text": "Unit"
+          },
           "[]"
         ],
         "path": "packages/elastic-datemath/src/index.ts",
@@ -134,7 +140,13 @@
         "label": "unitsAsc",
         "description": [],
         "signature": [
-          "Unit",
+          {
+            "pluginId": "@elastic/datemath",
+            "scope": "server",
+            "docId": "kibElasticDatemathPluginApi",
+            "section": "def-server.Unit",
+            "text": "Unit"
+          },
           "[]"
         ],
         "path": "packages/elastic-datemath/src/index.ts",
@@ -149,7 +161,13 @@
         "label": "unitsDesc",
         "description": [],
         "signature": [
-          "Unit",
+          {
+            "pluginId": "@elastic/datemath",
+            "scope": "server",
+            "docId": "kibElasticDatemathPluginApi",
+            "section": "def-server.Unit",
+            "text": "Unit"
+          },
           "[]"
         ],
         "path": "packages/elastic-datemath/src/index.ts",
@@ -164,7 +182,7 @@
         "label": "UnitsMap",
         "description": [],
         "signature": [
-          "{ ms: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; s: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; m: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; h: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; d: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; w: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; M: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; y: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; }"
+          "{ y: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; M: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; w: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; d: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; h: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; m: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; s: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; ms: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; }"
         ],
         "path": "packages/elastic-datemath/src/index.ts",
         "deprecated": false,

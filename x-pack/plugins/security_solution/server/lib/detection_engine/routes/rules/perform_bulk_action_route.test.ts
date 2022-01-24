@@ -11,6 +11,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getBulkActionRequest,
+  getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../__mocks__/request_responses';
@@ -18,24 +19,28 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { isElasticRule } from '../../../../usage/detections';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+  const isElasticRuleMock = isElasticRule as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-
+    isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
@@ -66,27 +71,78 @@ describe.each([
         status_code: 400,
       });
     });
+  });
 
-    it('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getBulkActionRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+  describe('rules execution failures', () => {
+    it('returns error if rule is immutable/elastic', async () => {
+      isElasticRuleMock.mockReturnValue(true);
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithMultiHits({
+          data: [mockRule],
+          total: 1,
+        })
+      );
+
+      const response = await server.inject(getBulkActionEditRequest(), context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: [
+            {
+              message: 'Elastic rule can`t be edited',
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
+      });
     });
 
-    it('catches error if disable throws error', async () => {
+    it('returns error if disable rule throws error', async () => {
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'Test error',
+        message: 'Bulk edit failed',
         status_code: 500,
+        attributes: {
+          errors: [
+            {
+              message: 'Test error',
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
       });
     });
 
-    it('rejects patching a rule if mlAuthz fails', async () => {
+    it('returns error if machine learning rule validation fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -94,11 +150,104 @@ describe.each([
       });
       const response = await server.inject(getBulkActionRequest(), context);
 
-      expect(response.status).toEqual(403);
+      expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'mocked validation message',
-        status_code: 403,
+        attributes: {
+          errors: [
+            {
+              message: 'mocked validation message',
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
+        message: 'Bulk edit failed',
+        status_code: 500,
       });
+    });
+
+    it('returns partial failure error if couple of rule validations fail and the rest are successfull', async () => {
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithMultiHits({
+          data: [
+            { ...mockRule, id: 'failed-rule-id-1' },
+            { ...mockRule, id: 'failed-rule-id-2' },
+            { ...mockRule, id: 'failed-rule-id-3' },
+            mockRule,
+            mockRule,
+          ],
+          total: 5,
+        })
+      );
+
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: false, message: 'test failure' }))
+          .mockImplementationOnce(() => ({ valid: true }))
+          .mockImplementationOnce(() => ({ valid: true })),
+      });
+      const response = await server.inject(getBulkActionEditRequest(), context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          rules: {
+            failed: 3,
+            succeeded: 2,
+            total: 5,
+          },
+          errors: [
+            {
+              message: 'mocked validation message',
+              status_code: 403,
+              rules: [
+                {
+                  id: 'failed-rule-id-1',
+                  name: 'Detect Root/Admin Users',
+                },
+                {
+                  id: 'failed-rule-id-2',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+            {
+              message: 'test failure',
+              status_code: 403,
+              rules: [
+                {
+                  id: 'failed-rule-id-3',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
+      });
+    });
+
+    it('return error message limited to length of 1000, to prevent large response size', async () => {
+      clients.rulesClient.disable.mockImplementation(async () => {
+        throw new Error('a'.repeat(1_300));
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.errors[0].message.length).toEqual(1000);
     });
   });
 
@@ -111,7 +260,7 @@ describe.each([
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "action"'
+        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "edit"'
       );
     });
 
@@ -123,7 +272,7 @@ describe.each([
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown" supplied to "action"'
+        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "edit"'
       );
     });
 
@@ -148,5 +297,20 @@ describe.each([
 
       expect(result.ok).toHaveBeenCalled();
     });
+  });
+
+  it('should process large number of rules, larger than configured concurrency', async () => {
+    const rulesNumber = 6_000;
+    clients.rulesClient.find.mockResolvedValue(
+      getFindResultWithMultiHits({
+        data: Array.from({ length: rulesNumber }).map(() => mockRule),
+        total: rulesNumber,
+      })
+    );
+
+    const response = await server.inject(getBulkActionEditRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ success: true, rules_count: rulesNumber });
   });
 });

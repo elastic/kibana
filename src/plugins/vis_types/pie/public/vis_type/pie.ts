@@ -11,7 +11,13 @@ import { Position } from '@elastic/charts';
 import { AggGroupNames } from '../../../../data/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
+import { PieTypeProps } from '../types';
+import {
+  PieVisParams,
+  LabelPositions,
+  ValueFormats,
+  EmptySizeRatios,
+} from '../../../../chart_expressions/expression_pie/common';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
@@ -39,6 +45,7 @@ export const getPieVisTypeDefinition = ({
       maxLegendLines: 1,
       distinctColors: false,
       isDonut: true,
+      emptySizeRatio: EmptySizeRatios.SMALL,
       palette: {
         type: 'palette',
         name: 'default',
@@ -86,7 +93,9 @@ export const getPieVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -104,7 +113,9 @@ export const getPieVisTypeDefinition = ({
           '!filter',
           '!sampler',
           '!diversified_sampler',
+          '!rare_terms',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],

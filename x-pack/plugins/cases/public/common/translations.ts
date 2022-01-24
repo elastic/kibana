@@ -25,8 +25,8 @@ export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const OPENED_ON = i18n.translate('xpack.cases.caseView.openedOn', {
-  defaultMessage: 'Opened on',
+export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
+  defaultMessage: 'Created on',
 });
 
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
@@ -41,8 +41,8 @@ export const PARTICIPANTS = i18n.translate('xpack.cases.caseView.particpantsLabe
   defaultMessage: 'Participants',
 });
 
-export const CREATE_TITLE = i18n.translate('xpack.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+export const CREATE_CASE_TITLE = i18n.translate('xpack.cases.caseView.create', {
+  defaultMessage: 'Create case',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.caseView.description', {
@@ -53,6 +53,20 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.cases.createCase.descriptionFieldRequiredError',
   {
     defaultMessage: 'A description is required.',
+  }
+);
+
+export const SOLUTION_REQUIRED = i18n.translate(
+  'xpack.cases.createCase.solutionFieldRequiredError',
+  {
+    defaultMessage: 'A solution is required',
+  }
+);
+
+export const ARIA_KEYPAD_LEGEND = i18n.translate(
+  'xpack.cases.createCase.ariaKeypadSolutionSelection',
+  {
+    defaultMessage: 'Single solution select',
   }
 );
 
@@ -106,6 +120,10 @@ export const TO = i18n.translate('xpack.cases.caseView.to', {
 
 export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
+});
+
+export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
+  defaultMessage: 'Solution',
 });
 
 export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {

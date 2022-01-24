@@ -22,7 +22,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly host?: string | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
+          "{ readonly host?: string | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
@@ -38,62 +38,20 @@
         "label": "configSchema",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
-            "text": "ObjectType"
-          },
+          "ObjectType",
           "<{ host: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; accessCheckTimeout: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<number>; accessCheckTimeoutWarning: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<number>; ssl: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
-            "text": "ObjectType"
-          },
+          "ObjectType",
           "<{ certificateAuthorities: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | string[] | undefined>; verificationMode: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
-          "<\"none\" | \"certificate\" | \"full\">; }>; }>"
+          "Type",
+          "<\"none\" | \"full\" | \"certificate\">; }>; }>"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,

@@ -104,6 +104,9 @@ export const createdEventFilterEntryMock = (): ExceptionListItemSchema => ({
 export type EventFiltersListQueryHttpMockProviders = ResponseProvidersInterface<{
   eventFiltersList: () => FoundExceptionListItemSchema;
   eventFiltersCreateList: () => ExceptionListItemSchema;
+  eventFiltersGetOne: () => ExceptionListItemSchema;
+  eventFiltersCreateOne: () => ExceptionListItemSchema;
+  eventFiltersUpdateOne: () => ExceptionListItemSchema;
 }>;
 
 export const esResponseData = () => ({
@@ -226,6 +229,30 @@ export const eventFiltersListQueryHttpMock =
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       handler: (): FoundExceptionListItemSchema => {
         return getFoundExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersGetOne',
+      method: 'get',
+      path: `${EXCEPTION_LIST_ITEM_URL}`,
+      handler: (): ExceptionListItemSchema => {
+        return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersCreateOne',
+      method: 'post',
+      path: `${EXCEPTION_LIST_ITEM_URL}`,
+      handler: (): ExceptionListItemSchema => {
+        return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersUpdateOne',
+      method: 'put',
+      path: `${EXCEPTION_LIST_ITEM_URL}`,
+      handler: (): ExceptionListItemSchema => {
+        return getExceptionListItemSchemaMock();
       },
     },
   ]);

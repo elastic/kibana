@@ -762,7 +762,18 @@ export default function ({
         break;
       default:
         if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
-          context.prefixToAdd = ', ';
+          const { position, value } = nonEmptyToken;
+
+          // We can not rely on prefixToAdd here, because it adds a comma at the beginning of the new token
+          // Since we have access to the position of the previous token here, this could be a good place to insert a comma manually
+          context.prefixToAdd = '';
+          editor.insert(
+            {
+              column: position.column + value.length,
+              lineNumber: position.lineNumber,
+            },
+            ', '
+          );
         }
     }
 
@@ -802,7 +813,7 @@ export default function ({
 
   function addPathAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
-    context.method = ret.method;
+    context.method = ret.method?.toUpperCase();
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
@@ -929,9 +940,12 @@ export default function ({
       return; // wait for the next typing.
     }
 
+    // if the column or the line number have not changed for the last token and
+    // user did not provided a new value, then we should not show autocomplete
+    // this guards against triggering autocomplete when clicking around the editor
     if (
-      lastEvaluatedToken.position.column !== currentToken.position.column ||
-      lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
+      (lastEvaluatedToken.position.column !== currentToken.position.column ||
+        lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber) &&
       lastEvaluatedToken.value === currentToken.value
     ) {
       // not on the same place or nothing changed, cache and wait for the next time

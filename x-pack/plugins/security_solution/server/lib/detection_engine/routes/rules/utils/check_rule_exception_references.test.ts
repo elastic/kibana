@@ -1,0 +1,142 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getImportRulesSchemaDecodedMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import { getExceptionListSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+
+describe('checkRuleExceptionReferences', () => {
+  it('returns empty array if rule has no exception list references', () => {
+    const result = checkRuleExceptionReferences({
+      existingLists: {},
+      rule: { ...getImportRulesSchemaDecodedMock(), exceptions_list: [] },
+    });
+
+    expect(result).toEqual([[], []]);
+  });
+
+  it('does not modify exceptions reference array if they match existing lists', () => {
+    const result = checkRuleExceptionReferences({
+      existingLists: {
+        'my-list': {
+          ...getExceptionListSchemaMock(),
+          list_id: 'my-list',
+          namespace_type: 'single',
+          type: 'detection',
+        },
+      },
+      rule: {
+        ...getImportRulesSchemaDecodedMock(),
+        exceptions_list: [
+          { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
+        ],
+      },
+    });
+
+    expect(result).toEqual([
+      [],
+      [
+        {
+          id: '1',
+          list_id: 'my-list',
+          namespace_type: 'single',
+          type: 'detection',
+        },
+      ],
+    ]);
+  });
+
+  it('removes an exception reference if list not found to exist', () => {
+    const result = checkRuleExceptionReferences({
+      existingLists: {},
+      rule: {
+        ...getImportRulesSchemaDecodedMock(),
+        exceptions_list: [
+          { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
+        ],
+      },
+    });
+
+    expect(result).toEqual([
+      [
+        {
+          error: {
+            message:
+              'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ],
+      [],
+    ]);
+  });
+
+  it('removes an exception reference if list namespace_type does not match', () => {
+    const result = checkRuleExceptionReferences({
+      existingLists: {
+        'my-list': {
+          ...getExceptionListSchemaMock(),
+          list_id: 'my-list',
+          namespace_type: 'agnostic',
+          type: 'detection',
+        },
+      },
+      rule: {
+        ...getImportRulesSchemaDecodedMock(),
+        exceptions_list: [
+          { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
+        ],
+      },
+    });
+    expect(result).toEqual([
+      [
+        {
+          error: {
+            message:
+              'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ],
+      [],
+    ]);
+  });
+
+  it('removes an exception reference if list type does not match', () => {
+    const result = checkRuleExceptionReferences({
+      existingLists: {
+        'my-list': {
+          ...getExceptionListSchemaMock(),
+          list_id: 'my-list',
+          namespace_type: 'single',
+          type: 'endpoint',
+        },
+      },
+      rule: {
+        ...getImportRulesSchemaDecodedMock(),
+        exceptions_list: [
+          { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
+        ],
+      },
+    });
+    expect(result).toEqual([
+      [
+        {
+          error: {
+            message:
+              'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "my-list". Reference has been removed.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ],
+      [],
+    ]);
+  });
+});

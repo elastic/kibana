@@ -20,7 +20,7 @@ import {
   SavedObjectsErrorHelpers,
   ExecutionContextStart,
 } from '../../../../../src/core/server';
-
+import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,
@@ -104,6 +104,7 @@ type Opts = {
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
+  usageCounter?: UsageCounter;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -150,6 +151,7 @@ export class TaskManagerRunner implements TaskRunner {
   private defaultMaxAttempts: number;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
+  private usageCounter?: UsageCounter;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -171,6 +173,7 @@ export class TaskManagerRunner implements TaskRunner {
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
+    usageCounter,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -181,6 +184,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
+    this.usageCounter = usageCounter;
     this.uuid = uuid.v4();
   }
 
@@ -427,6 +431,7 @@ export class TaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }
@@ -458,6 +463,11 @@ export class TaskManagerRunner implements TaskRunner {
   private shouldTryToScheduleRetry(): boolean {
     if (this.instance.task.schedule) {
       return true;
+    }
+
+    if (this.isExpired) {
+      this.logger.warn(`Skipping reschedule for task ${this} due to the task expiring`);
+      return false;
     }
 
     const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
@@ -522,20 +532,28 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    this.instance = asRan(
-      await this.bufferedTaskStore.update(
-        defaults(
-          {
-            ...fieldUpdates,
-            // reset fields that track the lifecycle of the concluded `task run`
-            startedAt: null,
-            retryAt: null,
-            ownerId: null,
-          },
-          this.instance.task
+    if (!this.isExpired) {
+      this.instance = asRan(
+        await this.bufferedTaskStore.update(
+          defaults(
+            {
+              ...fieldUpdates,
+              // reset fields that track the lifecycle of the concluded `task run`
+              startedAt: null,
+              retryAt: null,
+              ownerId: null,
+            },
+            this.instance.task
+          )
         )
-      )
-    );
+      );
+    } else {
+      this.usageCounter?.incrementCounter({
+        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    }
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed

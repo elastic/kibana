@@ -22,22 +22,23 @@ export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvata
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<KibanaPageTemplateSolutionNavAvatarProps> =
-  ({ className, size, ...rest }) => {
-    return (
-      // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
-      <EuiAvatar
-        className={classNames(
-          'kbnPageTemplateSolutionNavAvatar',
-          {
-            [`kbnPageTemplateSolutionNavAvatar--${size}`]: size,
-          },
-          className
-        )}
-        color="plain"
-        size={size === 'xxl' ? 'xl' : size}
-        iconSize={size}
-        {...rest}
-      />
-    );
-  };
+export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
+  KibanaPageTemplateSolutionNavAvatarProps
+> = ({ className, size, ...rest }) => {
+  return (
+    // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
+    <EuiAvatar
+      className={classNames(
+        'kbnPageTemplateSolutionNavAvatar',
+        {
+          [`kbnPageTemplateSolutionNavAvatar--${size}`]: size,
+        },
+        className
+      )}
+      color="plain"
+      size={size === 'xxl' ? 'xl' : size}
+      iconSize={size}
+      {...rest}
+    />
+  );
+};

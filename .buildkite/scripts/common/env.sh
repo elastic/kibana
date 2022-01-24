@@ -22,6 +22,9 @@ KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH
 export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 
+KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
+export KIBANA_PKG_VERSION
+
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
@@ -76,8 +79,14 @@ export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105
 
-export DETECT_CHROMEDRIVER_VERSION=true
-export CHROMEDRIVER_FORCE_DOWNLOAD=true
+# Mac agents currently don't have Chrome
+if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+  export DETECT_CHROMEDRIVER_VERSION=true
+  export CHROMEDRIVER_FORCE_DOWNLOAD=true
+else
+  echo "Chrome not detected, installing default chromedriver binary for the package version"
+fi
 
 export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 

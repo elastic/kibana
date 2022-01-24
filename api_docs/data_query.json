@@ -26,13 +26,7 @@
             "text": "PersistableStateService"
           },
           "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "Filter",
           "[]>"
         ],
         "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -83,13 +77,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -106,13 +94,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -129,13 +111,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -151,8 +127,7 @@
             "label": "getPartitionedFilters",
             "description": [],
             "signature": [
-              "() => ",
-              "PartitionedFilters"
+              "() => PartitionedFilters"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
             "deprecated": false,
@@ -202,21 +177,9 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], pinFilterStatus?: boolean) => void"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -230,21 +193,9 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   " | ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -277,13 +228,7 @@
             "description": [],
             "signature": [
               "(newFilters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], pinFilterStatus?: boolean) => void"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -297,13 +242,7 @@
                 "label": "newFilters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -338,13 +277,7 @@
             ],
             "signature": [
               "(newGlobalFilters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]) => void"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -358,13 +291,7 @@
                 "label": "newGlobalFilters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -385,13 +312,7 @@
             ],
             "signature": [
               "(newAppFilters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]) => void"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -405,13 +326,7 @@
                 "label": "newAppFilters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -430,13 +345,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               ") => void"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -450,13 +359,7 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  }
+                  "Filter"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
@@ -489,21 +392,9 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], store: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.FilterStateStore",
-                "text": "FilterStateStore"
-              },
+              "FilterStateStore",
               ", shouldOverrideStore?: boolean) => void"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -517,13 +408,7 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -538,13 +423,7 @@
                 "label": "store",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.FilterStateStore",
-                    "text": "FilterStateStore"
-                  }
+                  "FilterStateStore"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
@@ -576,21 +455,9 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]) => { state: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]; references: ",
               "SavedObjectReference",
               "[]; }"
@@ -607,13 +474,7 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/common/query/persistable_state.ts",
@@ -630,23 +491,11 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], references: ",
               "SavedObjectReference",
               "[]) => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -661,13 +510,7 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/common/query/persistable_state.ts",
@@ -698,13 +541,7 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], collector: unknown) => {}"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -719,13 +556,7 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "src/plugins/data/common/query/persistable_state.ts",
@@ -884,6 +715,31 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimeHistory.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -909,13 +765,7 @@
             "text": "QueryState"
           },
           ">({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
+          "Query",
           ") => void; filterManager: ",
           {
             "pluginId": "data",
@@ -924,9 +774,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          "; queryString: Pick<",
-          "QueryStringManager",
-          ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: { createQuery: (attributes: ",
+          "; queryString: ",
+          "QueryStringContract",
+          "; savedQueries: { createQuery: (attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1019,13 +869,7 @@
             "text": "TimeRange"
           },
           " | undefined) => { bool: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.BoolQuery",
-            "text": "BoolQuery"
-          },
+          "BoolQuery",
           "; }; } | { filterManager: ",
           {
             "pluginId": "data",
@@ -1036,9 +880,9 @@
           },
           "; timefilter: ",
           "TimefilterSetup",
-          "; queryString: Pick<",
-          "QueryStringManager",
-          ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; state$: ",
+          "; queryString: ",
+          "QueryStringContract",
+          "; state$: ",
           "Observable",
           "<{ changes: ",
           {
@@ -1065,13 +909,7 @@
             "text": "BaseStateContainer"
           },
           "<S>, syncConfig: { time?: boolean | undefined; refreshInterval?: boolean | undefined; filters?: boolean | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.FilterStateStore",
-            "text": "FilterStateStore"
-          },
+          "FilterStateStore",
           " | undefined; query?: boolean | undefined; }) => () => void"
         ],
         "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
@@ -1086,13 +924,7 @@
             "description": [],
             "signature": [
               "Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               ") => void; filterManager: ",
               {
                 "pluginId": "data",
@@ -1101,9 +933,9 @@
                 "section": "def-public.FilterManager",
                 "text": "FilterManager"
               },
-              "; queryString: Pick<",
-              "QueryStringManager",
-              ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: { createQuery: (attributes: ",
+              "; queryString: ",
+              "QueryStringContract",
+              "; savedQueries: { createQuery: (attributes: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1196,13 +1028,7 @@
                 "text": "TimeRange"
               },
               " | undefined) => { bool: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.BoolQuery",
-                "text": "BoolQuery"
-              },
+              "BoolQuery",
               "; }; } | { filterManager: ",
               {
                 "pluginId": "data",
@@ -1213,9 +1039,9 @@
               },
               "; timefilter: ",
               "TimefilterSetup",
-              "; queryString: Pick<",
-              "QueryStringManager",
-              ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; state$: ",
+              "; queryString: ",
+              "QueryStringContract",
+              "; state$: ",
               "Observable",
               "<{ changes: ",
               {
@@ -1307,13 +1133,7 @@
                 "description": [],
                 "signature": [
                   "boolean | ",
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.FilterStateStore",
-                    "text": "FilterStateStore"
-                  },
+                  "FilterStateStore",
                   " | undefined"
                 ],
                 "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
@@ -1448,21 +1268,9 @@
         "description": [],
         "signature": [
           "(filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "Filter",
           "[], timeFieldName: string | undefined) => { restOfFilters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "Filter",
           "[]; timeRange?: ",
           {
             "pluginId": "data",
@@ -1484,13 +1292,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.ts",
@@ -1542,13 +1344,7 @@
             "text": "IFieldType"
           },
           ", values: any, operation: string, index: string) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "Filter",
           "[]"
         ],
         "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts",
@@ -1661,11 +1457,7 @@
         "label": "getDefaultQuery",
         "description": [],
         "signature": [
-          "(language: ",
-          "QueryLanguage",
-          ") => { query: string; language: ",
-          "QueryLanguage",
-          "; }"
+          "(language: QueryLanguage) => { query: string; language: QueryLanguage; }"
         ],
         "path": "src/plugins/data/public/query/lib/get_default_query.ts",
         "deprecated": false,
@@ -1697,13 +1489,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "Filter",
           ", indexPatterns: ",
           {
             "pluginId": "dataViews",
@@ -1725,13 +1511,7 @@
             "label": "filter",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              }
+              "Filter"
             ],
             "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
             "deprecated": false,
@@ -1773,13 +1553,7 @@
         ],
         "signature": [
           "(query: Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
+          "Query",
           ") => void; filterManager: ",
           {
             "pluginId": "data",
@@ -1788,9 +1562,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          "; queryString: Pick<",
-          "QueryStringManager",
-          ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: { createQuery: (attributes: ",
+          "; queryString: ",
+          "QueryStringContract",
+          "; savedQueries: { createQuery: (attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1883,13 +1657,7 @@
             "text": "TimeRange"
           },
           " | undefined) => { bool: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.BoolQuery",
-            "text": "BoolQuery"
-          },
+          "BoolQuery",
           "; }; } | { filterManager: ",
           {
             "pluginId": "data",
@@ -1900,9 +1668,9 @@
           },
           "; timefilter: ",
           "TimefilterSetup",
-          "; queryString: Pick<",
-          "QueryStringManager",
-          ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; state$: ",
+          "; queryString: ",
+          "QueryStringContract",
+          "; state$: ",
           "Observable",
           "<{ changes: ",
           {
@@ -1942,13 +1710,7 @@
             "description": [],
             "signature": [
               "Pick<{ addToQueryLog: (appName: string, { language, query }: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               ") => void; filterManager: ",
               {
                 "pluginId": "data",
@@ -1957,9 +1719,9 @@
                 "section": "def-public.FilterManager",
                 "text": "FilterManager"
               },
-              "; queryString: Pick<",
-              "QueryStringManager",
-              ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: { createQuery: (attributes: ",
+              "; queryString: ",
+              "QueryStringContract",
+              "; savedQueries: { createQuery: (attributes: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2052,13 +1814,7 @@
                 "text": "TimeRange"
               },
               " | undefined) => { bool: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.BoolQuery",
-                "text": "BoolQuery"
-              },
+              "BoolQuery",
               "; }; } | { filterManager: ",
               {
                 "pluginId": "data",
@@ -2069,9 +1825,9 @@
               },
               "; timefilter: ",
               "TimefilterSetup",
-              "; queryString: Pick<",
-              "QueryStringManager",
-              ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; state$: ",
+              "; queryString: ",
+              "QueryStringContract",
+              "; state$: ",
               "Observable",
               "<{ changes: ",
               {
@@ -2183,13 +1939,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "path": "src/plugins/data/public/query/state_sync/types.ts",
@@ -2203,13 +1953,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "src/plugins/data/public/query/state_sync/types.ts",
@@ -2610,13 +2354,7 @@
         "description": [],
         "signature": [
           "{ addToQueryLog: (appName: string, { language, query }: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
+          "Query",
           ") => void; filterManager: ",
           {
             "pluginId": "data",
@@ -2625,9 +2363,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          "; queryString: Pick<",
-          "QueryStringManager",
-          ", \"getDefaultQuery\" | \"formatQuery\" | \"getUpdates$\" | \"getQuery\" | \"setQuery\" | \"clearQuery\">; savedQueries: { createQuery: (attributes: ",
+          "; queryString: ",
+          "QueryStringContract",
+          "; savedQueries: { createQuery: (attributes: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2720,13 +2458,7 @@
             "text": "TimeRange"
           },
           " | undefined) => { bool: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.BoolQuery",
-            "text": "BoolQuery"
-          },
+          "BoolQuery",
           "; }; }"
         ],
         "path": "src/plugins/data/public/query/query_service.ts",
@@ -2839,24 +2571,10 @@
             "text": "TimeRange"
           },
           " | undefined) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
-          },
+          "RangeFilter",
           " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.ScriptedRangeFilter",
-            "text": "ScriptedRangeFilter"
-          },
-          " | ",
-          "MatchAllRangeFilter",
-          " | undefined; createRelativeFilter: (indexPattern: ",
+          "ScriptedRangeFilter",
+          " | MatchAllRangeFilter | undefined; createRelativeFilter: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -2873,24 +2591,10 @@
             "text": "TimeRange"
           },
           " | undefined) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
-          },
+          "RangeFilter",
           " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.ScriptedRangeFilter",
-            "text": "ScriptedRangeFilter"
-          },
-          " | ",
-          "MatchAllRangeFilter",
-          " | undefined; getBounds: () => ",
+          "ScriptedRangeFilter",
+          " | MatchAllRangeFilter | undefined; getBounds: () => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2952,7 +2656,9 @@
         "label": "TimeHistoryContract",
         "description": [],
         "signature": [
-          "{ get: () => ",
+          "{ get$: () => ",
+          "Observable",
+          "<",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2960,7 +2666,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          "[]; add: (time: ",
+          "[]>; add: (time: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2968,7 +2674,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => void; }"
+          ") => void; get: () => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          "[]; }"
         ],
         "path": "src/plugins/data/public/query/timefilter/time_history.ts",
         "deprecated": false,
@@ -3156,24 +2870,10 @@
             "text": "TimeRange"
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
-          },
+          "RangeFilter",
           " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.ScriptedRangeFilter",
-            "text": "ScriptedRangeFilter"
-          },
-          " | ",
-          "MatchAllRangeFilter",
-          " | undefined"
+          "ScriptedRangeFilter",
+          " | MatchAllRangeFilter | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -3286,24 +2986,10 @@
             "text": "TimeRange"
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.RangeFilter",
-            "text": "RangeFilter"
-          },
+          "RangeFilter",
           " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.ScriptedRangeFilter",
-            "text": "ScriptedRangeFilter"
-          },
-          " | ",
-          "MatchAllRangeFilter",
-          " | undefined"
+          "ScriptedRangeFilter",
+          " | MatchAllRangeFilter | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
         "deprecated": false,
@@ -3400,13 +3086,7 @@
         "description": [],
         "signature": [
           "(x: unknown) => x is ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          }
+          "Query"
         ],
         "path": "src/plugins/data/common/query/is_query.ts",
         "deprecated": false,
@@ -3562,13 +3242,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[] | undefined"
             ],
             "path": "src/plugins/data/common/query/types.ts",

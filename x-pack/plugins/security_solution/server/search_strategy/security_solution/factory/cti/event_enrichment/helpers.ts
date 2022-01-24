@@ -74,7 +74,9 @@ const buildIndicatorMatchedFields = (
   };
 };
 
-export const getTotalCount = (total: number | estypes.SearchTotalHits | null): number => {
+export const getTotalCount = (
+  total: number | estypes.SearchTotalHits | null | undefined
+): number => {
   if (total == null) {
     return 0;
   }

@@ -31,6 +31,8 @@ export function getDeprecations({
     if (!fleet) {
       return deprecations;
     }
+    // TODO: remove when docs support "main"
+    const docBranch = branch === 'main' ? 'master' : branch;
 
     const fleetPluginStart = await fleet.start();
     const cloudAgentPolicy = await getCloudAgentPolicy({
@@ -39,12 +41,10 @@ export function getDeprecations({
     });
 
     const isCloudEnabled = !!cloudSetup?.isCloudEnabled;
+    const hasCloudAgentPolicy = !isEmpty(cloudAgentPolicy);
     const hasAPMPackagePolicy = !isEmpty(getApmPackagePolicy(cloudAgentPolicy));
 
-    // TODO: remove when docs support "main"
-    const docBranch = branch === 'main' ? 'master' : branch;
-
-    if (isCloudEnabled && !hasAPMPackagePolicy) {
+    if (isCloudEnabled && hasCloudAgentPolicy && !hasAPMPackagePolicy) {
       deprecations.push({
         title: i18n.translate('xpack.apm.deprecations.legacyModeTitle', {
           defaultMessage: 'APM Server running in legacy mode',

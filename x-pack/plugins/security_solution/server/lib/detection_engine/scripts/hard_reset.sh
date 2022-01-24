@@ -10,15 +10,12 @@
 set -e
 ./check_env_variables.sh
 
-# Clean up and remove all actions and alerts from SIEM
-# within saved objects
+# Clean up and remove all Detection Engine's saved objects and related data
 ./delete_all_actions.sh
 ./delete_all_alerts.sh
 ./delete_all_alert_tasks.sh
+./delete_all_rule_execution_data.sh
 
-# delete all the statuses from the signal index
-./delete_all_statuses.sh
-
-# re-create the signal index
+# Re-create the signal index
 ./delete_signal_index.sh
 ./post_signal_index.sh

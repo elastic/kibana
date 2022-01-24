@@ -7,60 +7,55 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ValuesType } from 'utility-types';
-
-import {
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClient,
-} from '../../../../../../src/core/server';
+import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskInstance,
 } from '../../../../task_manager/server';
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
-import { UptimeConfig } from '../../../common/config';
+import { ServiceConfig } from '../../../common/config';
 import { ServiceAPIClient } from './service_api_client';
 import { formatMonitorConfig } from './formatters/format_configs';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types/monitor_management';
-
-export type MonitorFieldsWithID = MonitorFields & { id: string };
+import {
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../common/runtime_types';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
 export class SyntheticsService {
   private logger: Logger;
   private readonly server: UptimeServerSetup;
   private apiClient: ServiceAPIClient;
 
-  private readonly config: UptimeConfig;
+  private readonly config: ServiceConfig;
   private readonly esHosts: string[];
 
   private apiKey: SyntheticsServiceApiKey | undefined;
 
-  constructor(logger: Logger, server: UptimeServerSetup) {
+  constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
-    this.config = server.config;
+    this.config = config;
 
-    const { manifestUrl, username, password } = this.config.unsafe.service;
-
-    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
+    this.apiClient = new ServiceAPIClient(logger, this.config);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
 
-  public init(coreStart: CoreStart) {
+  public init() {
     // TODO: Figure out fake kibana requests to handle API keys on start up
     // getAPIKeyForSyntheticsService({ server: this.server }).then((apiKey) => {
     //   if (apiKey) {
@@ -68,20 +63,11 @@ export class SyntheticsService {
     //   }
     // });
 
-    this.setupIndexTemplates(coreStart);
+    this.setupIndexTemplates();
   }
 
-  private setupIndexTemplates(coreStart: CoreStart) {
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const savedObjectsClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository()
-    );
-
-    installSyntheticsIndexTemplates({
-      esClient,
-      server: this.server,
-      savedObjectsClient,
-    }).then(
+  private setupIndexTemplates() {
+    installSyntheticsIndexTemplates(this.server).then(
       (result) => {
         if (result.name === 'synthetics' && result.install_status === 'installed') {
           this.logger.info('Installed synthetics index templates');
@@ -125,27 +111,37 @@ export class SyntheticsService {
     });
   }
 
-  public scheduleSyncTask(taskManager: TaskManagerStartContract) {
-    taskManager
-      .ensureScheduled({
+  public async scheduleSyncTask(
+    taskManager: TaskManagerStartContract
+  ): Promise<TaskInstance | null> {
+    const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
+
+    try {
+      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
+      const taskInstance = await taskManager.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
-          interval: '1m',
+          interval,
         },
         params: {},
         state: {},
         scope: ['uptime'],
-      })
-      .then((_result) => {
-        this.logger?.info(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled. `);
-      })
-      .catch((e) => {
-        this.logger?.error(
-          `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-          e?.message() ?? e
-        );
       });
+
+      this.logger?.info(
+        `Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
+      );
+
+      return taskInstance;
+    } catch (e) {
+      this.logger?.error(
+        `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
+        e?.message() ?? e
+      );
+
+      return null;
+    }
   }
 
   async getOutput(request?: KibanaRequest) {
@@ -153,6 +149,7 @@ export class SyntheticsService {
       try {
         this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
       } catch (err) {
+        this.logger.error(err);
         throw err;
       }
     }
@@ -163,13 +160,44 @@ export class SyntheticsService {
       throw error;
     }
 
+    this.logger.debug('Found api key and esHosts for service.');
+
     return {
       hosts: this.esHosts,
       api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: MonitorFieldsWithID[]) {
+  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      this.logger.debug('No monitor found which can be pushed to service.');
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
+    try {
+      return await this.apiClient.post(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async runOnceConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { run_once: boolean; config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -180,14 +208,14 @@ export class SyntheticsService {
     };
 
     try {
-      return await this.apiClient.post(data);
+      return await this.apiClient.runOnce(data);
     } catch (e) {
       this.logger.error(e);
       throw e;
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: MonitorFieldsWithID[]) {
+  async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
     const data = {
       monitors: this.formatConfigs(configs),
       output: await this.getOutput(request),
@@ -197,20 +225,24 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
-    const monitorsSavedObjects = await savedObjectsClient?.find<
-      SyntheticsMonitorSavedObject['attributes']
-    >({
+
+    if (!savedObjectsClient?.find) {
+      return [] as SyntheticsMonitorWithId[];
+    }
+
+    const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
     });
 
-    const savedObjectsList = monitorsSavedObjects?.saved_objects ?? [];
-    return savedObjectsList.map<ValuesType<MonitorFields[]>>(({ attributes, id }) => ({
+    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
-    }));
+      fields_under_root: true,
+      fields: { config_id: id },
+    })) as SyntheticsMonitorWithId[];
   }
 
-  formatConfigs(configs: MonitorFields[]) {
+  formatConfigs(configs: SyntheticsMonitorWithId[]) {
     return configs.map((config: Partial<MonitorFields>) =>
       formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
     );

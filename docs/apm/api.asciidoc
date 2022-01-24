@@ -11,6 +11,7 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<apm-annotation-api>>
 * <<rum-sourcemap-api>>
+* <<agent-key-api>>
 
 [float]
 [[apm-api-example]]
@@ -708,3 +709,105 @@ curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9"
 --------------------------------------------------
 {}
 --------------------------------------------------
+
+////
+*******************************************************
+*******************************************************
+////
+
+[role="xpack"]
+[[agent-key-api]]
+=== APM agent Key API
+
+The Agent Key API allows you to configure agent keys to authorize requests from APM agents to the APM Server.
+
+The following Agent key APIs are available:
+
+* <<apm-create-agent-key>> to create an agent key
+
+[float]
+[[use-agent-key-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[apm-create-agent-key]]
+==== Create agent key
+
+Create an APM agent key. Specify privileges in the request body at creation time.
+
+[[apm-create-agent-key-privileges]]
+===== Privileges
+
+Users must have at least the `manage_own_api_key` cluster privilege and the required application privileges.
+
+====== Example role:
+
+[source,js]
+--------------------------------------------------
+POST /_security/role/apm_agent_key_user
+{
+  "cluster": ["manage_own_api_key"], 
+  "applications": [{
+    "application": "apm",
+    "privileges": ["event:write", "sourcemap:write", "config_agent:read"],
+    "resources": ["*"]
+  }]
+}
+--------------------------------------------------
+
+[[apm-create-agent-key-req]]
+===== Request
+
+`POST /api/apm/agent_keys`
+
+[role="child_attributes"]
+[[apm-create-agent-key-req-body]]
+===== Request body
+
+`name`::
+(required, string) Name of the agent key.
+
+`privileges`::
+(required, array) APM agent key privileges. It can take one or more of the following values:
+
+  - `event:write`. Required for ingesting agent events.
+  - `config_agent:read`. Required for agents to read agent configuration remotely.
+  - `sourcemap:write`. Required for uploading sourcemaps.
+
+[[apm-agent-key-create-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+POST /api/apm/agent_keys
+{
+    "name": "apm-key",
+    "privileges": ["event:write", "config_agent:read", "sourcemap:write"]
+}
+--------------------------------------------------
+
+[[apm-agent-key-create-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "agentKey": {
+    "id": "3DCLmn0B3ZMhLUa7WBG9",
+    "name": "apm-key",
+    "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+    "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+  }
+}
+--------------------------------------------------
+
+Once created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.

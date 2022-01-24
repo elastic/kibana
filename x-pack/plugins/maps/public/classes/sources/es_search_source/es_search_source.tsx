@@ -10,7 +10,8 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
@@ -122,7 +123,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         : SortDirection.desc,
       scalingType: isValidStringConfig(descriptor.scalingType)
         ? descriptor.scalingType!
-        : SCALING_TYPES.LIMIT,
+        : SCALING_TYPES.MVT,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
         ? descriptor.topHitsSplitField!
         : '',
@@ -280,21 +281,26 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: IndexPattern = await this.getIndexPattern();
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
     const topHits: {
       size: number;
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
+      fields: string[];
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirectionNumeric>>;
     } = {
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
+      fields: [this._descriptor.geoField],
     };
 
     if (this._hasSort()) {
@@ -388,9 +394,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
 
@@ -417,6 +426,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     } else {
       searchSource.setField('source', sourceOnlyFields);
     }
+    searchSource.setField('fields', [this._descriptor.geoField]);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }
@@ -799,9 +809,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
 
@@ -840,9 +853,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return null;
     }
-
-    const indexPattern = await this.getIndexPattern();
-    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    } catch (e) {
+      // do not throw when index pattern does not exist, error will be surfaced by getGeoJsonWithMeta
+      return null;
+    }
   }
 
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {

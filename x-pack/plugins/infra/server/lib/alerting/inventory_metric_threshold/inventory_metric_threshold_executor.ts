@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { first, get, last } from 'lodash';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -74,7 +74,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         id,
         fields: {
           [ALERT_REASON]: reason,
-          [ALERT_RULE_PARAMS]: JSON.stringify(params),
+          [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
         },
       });
 

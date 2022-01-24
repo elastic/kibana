@@ -23,7 +23,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { esFilters, IndexPatternField } from '../../../../../../data/public';
+import { esFilters } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data/common';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -167,7 +168,7 @@ export function DiscoverLayout({
   });
 
   const onAddFilter = useCallback(
-    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = esFilters.generateFilters(
@@ -303,7 +304,6 @@ export function DiscoverLayout({
                 >
                   <EuiFlexItem grow={false}>
                     <DiscoverChartMemoized
-                      state={state}
                       resetSavedSearch={resetSavedSearch}
                       savedSearch={savedSearch}
                       savedSearchDataChart$={charts$}
@@ -313,6 +313,8 @@ export function DiscoverLayout({
                       isTimeBased={isTimeBased}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
+                      hideChart={state.hideChart}
+                      interval={state.interval}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />

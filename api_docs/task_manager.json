@@ -1189,15 +1189,15 @@
             "\nMethod for allowing consumers to register task definitions into the system."
           ],
           "signature": [
-            "(taskDefinitions: Record<string, ",
+            "(taskDefinitions: ",
             {
               "pluginId": "taskManager",
               "scope": "server",
               "docId": "kibTaskManagerPluginApi",
-              "section": "def-server.TaskRegisterDefinition",
-              "text": "TaskRegisterDefinition"
+              "section": "def-server.TaskDefinitionRegistry",
+              "text": "TaskDefinitionRegistry"
             },
-            ">) => void"
+            ") => void"
           ],
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
           "deprecated": false,
@@ -1212,15 +1212,13 @@
                 "- The Kibana task definitions dictionary"
               ],
               "signature": [
-                "Record<string, ",
                 {
                   "pluginId": "taskManager",
                   "scope": "server",
                   "docId": "kibTaskManagerPluginApi",
-                  "section": "def-server.TaskRegisterDefinition",
-                  "text": "TaskRegisterDefinition"
-                },
-                ">"
+                  "section": "def-server.TaskDefinitionRegistry",
+                  "text": "TaskDefinitionRegistry"
+                }
               ],
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
               "deprecated": false,
@@ -1245,7 +1243,7 @@
         "TaskScheduling",
         ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\"> & Pick<",
         "TaskStore",
-        ", \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+        ", \"remove\" | \"fetch\" | \"get\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,

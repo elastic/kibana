@@ -58,7 +58,6 @@ describe('<WaterfallMarkerTrend />', () => {
       {
         core: {
           http: {
-            // @ts-expect-error incomplete implementation for testing purposes
             basePath: {
               get: () => BASE_PATH,
             },

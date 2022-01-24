@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  IScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
+import { IScopedClusterClient, KibanaRequest } from '../../../../../../../src/core/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
@@ -77,8 +72,6 @@ const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: stri
 
 export async function getAgentPolicySummary(
   endpointAppContext: EndpointAppContext,
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
   request: KibanaRequest,
   packageName: string,
   policyId?: string,
@@ -89,8 +82,6 @@ export async function getAgentPolicySummary(
     return transformAgentVersionMap(
       await agentVersionsMap(
         endpointAppContext,
-        soClient,
-        esClient,
         request,
         `${agentQuery} AND policy_id:${policyId}`,
         pageSize
@@ -99,14 +90,12 @@ export async function getAgentPolicySummary(
   }
 
   return transformAgentVersionMap(
-    await agentVersionsMap(endpointAppContext, soClient, esClient, request, agentQuery, pageSize)
+    await agentVersionsMap(endpointAppContext, request, agentQuery, pageSize)
   );
 }
 
 export async function agentVersionsMap(
   endpointAppContext: EndpointAppContext,
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
   request: KibanaRequest,
   kqlQuery: string,
   pageSize: number = 1000

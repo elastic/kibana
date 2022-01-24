@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, { ComponentType } from 'react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../../../context/plugin_context';
