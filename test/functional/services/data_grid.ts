@@ -86,7 +86,7 @@ export class DataGridService extends FtrService {
    */
   public async getCellElement(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.byCssSelector(
-      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${columnIndex}"]`
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`
     );
   }
 
