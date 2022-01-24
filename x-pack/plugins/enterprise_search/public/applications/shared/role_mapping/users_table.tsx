@@ -116,24 +116,9 @@ export const UsersTable: React.FC<Props> = ({
     {
       field: 'accessItems',
       name: accessItemKey === 'groups' ? GROUPS_LABEL : ENGINES_LABEL,
-      render: (_, { accessItems, accessAll }: SharedUser) => {
-        const isAppSearch = accessItemKey === 'engines';
-        // Design calls for showing the first 2 items followed by a +x after those 2.
-        // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
-        const numItems = accessItems.length;
-        if (numItems === 0) {
-          // There is a possibility to add users without setting an access. We should not show All in that case
-          if (isAppSearch && !accessAll) {
-            return <span data-test-subj="NoItems">-</span>;
-          }
-          return <span data-test-subj="AllItems">{ALL_LABEL}</span>;
-        }
-        const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
-        const names = accessItems.map((item) => item.name);
-        return (
-          <span data-test-subj="AccessItems">{names.slice(0, 2).join(', ') + additionalItems}</span>
-        );
-      },
+      render: (_, user: SharedUser) => (
+        <span data-test-subj="AccessItems">{getAccessItemsContent(user)}</span>
+      ),
     },
     {
       field: 'id',
@@ -148,6 +133,23 @@ export const UsersTable: React.FC<Props> = ({
       ),
     },
   ];
+
+  const getAccessItemsContent = ({ accessItems, accessAll }: SharedUser): string => {
+    const isAppSearch = accessItemKey === 'engines';
+    const numItems = accessItems.length;
+
+    if (numItems === 0) {
+      // There is a possibility to add users without setting an access. We should not show 'All' in that case.
+      return isAppSearch && !accessAll ? '-' : ALL_LABEL;
+    }
+
+    // Design calls for showing the first 2 items followed by a +x after those 2.
+    // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
+    const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
+    const names = accessItems.map((item) => item.name);
+
+    return names.slice(0, 2).join(', ') + additionalItems;
+  };
 
   const pagination = {
     hidePerPageOptions: true,
