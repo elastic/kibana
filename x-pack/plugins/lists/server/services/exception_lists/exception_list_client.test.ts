@@ -204,6 +204,23 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreSingleListFind.callback;
         },
       ],
+      [
+        'findExceptionListsItem',
+        (): ReturnType<ExceptionListClient['findExceptionListsItem']> => {
+          return exceptionListClient.findExceptionListsItem({
+            filter: [],
+            listId: ['one'],
+            namespaceType: ['agnostic'],
+            page: 1,
+            perPage: 1,
+            sortField: 'name',
+            sortOrder: 'asc',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreMultiListFind']['callback'] => {
+          return extensionPointStorageContext.exceptionPreMultiListFind.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {

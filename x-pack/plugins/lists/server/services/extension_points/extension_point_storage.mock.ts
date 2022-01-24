@@ -13,6 +13,7 @@ import { ExtensionPointStorage } from './extension_point_storage';
 import {
   ExceptionsListPreCreateItemServerExtension,
   ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreUpdateItemServerExtension,
   ExtensionPointStorageInterface,
@@ -31,6 +32,8 @@ export interface ExtensionPointStorageContextMock {
   exceptionPreGetOne: jest.Mocked<ExceptionsListPreGetOneItemServerExtension>;
   /** an exception list pre-find extension when searching a single list */
   exceptionPreSingleListFind: jest.Mocked<ExceptionsListPreSingleListFindServerExtension>;
+  /** an exception list pre-find extension when searching a multiple lists */
+  exceptionPreMultiListFind: jest.Mocked<ExceptionsListPreMultiListFindServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
 }
 
@@ -60,24 +63,26 @@ export const createExtensionPointStorageMock = (
   };
 
   const exceptionPreGetOne: ExtensionPointStorageContextMock['exceptionPreGetOne'] = {
-    callback: jest.fn(async ({ data }) => {
-      return data;
-    }),
+    callback: jest.fn(async ({ data }) => data),
     type: 'exceptionsListPreGetOneItem',
   };
 
   const exceptionPreSingleListFind: ExtensionPointStorageContextMock['exceptionPreSingleListFind'] =
     {
-      callback: jest.fn(async ({ data }) => {
-        return data;
-      }),
+      callback: jest.fn(async ({ data }) => data),
       type: 'exceptionsListPreSingleListFind',
     };
+
+  const exceptionPreMultiListFind: ExtensionPointStorageContextMock['exceptionPreMultiListFind'] = {
+    callback: jest.fn(async ({ data }) => data),
+    type: 'exceptionsListPreMultiListFind',
+  };
 
   extensionPointStorage.add(exceptionPreCreate);
   extensionPointStorage.add(exceptionPreUpdate);
   extensionPointStorage.add(exceptionPreGetOne);
   extensionPointStorage.add(exceptionPreSingleListFind);
+  extensionPointStorage.add(exceptionPreMultiListFind);
 
   return {
     callbackContext: {
@@ -85,6 +90,7 @@ export const createExtensionPointStorageMock = (
     },
     exceptionPreCreate,
     exceptionPreGetOne,
+    exceptionPreMultiListFind,
     exceptionPreSingleListFind,
     exceptionPreUpdate,
     extensionPointStorage,

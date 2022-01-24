@@ -11,6 +11,7 @@ import { KibanaRequest } from 'kibana/server';
 import {
   CreateExceptionListItemOptions,
   FindExceptionListItemOptions,
+  FindExceptionListsItemOptions,
   GetExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
@@ -89,11 +90,20 @@ export type ExceptionsListPreSingleListFindServerExtension = ServerExtensionPoin
   FindExceptionListItemOptions
 >;
 
+/**
+ * Extension point is triggered prior to performing a `find` operation against a multiple lists
+ */
+export type ExceptionsListPreMultiListFindServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreMultiListFind',
+  FindExceptionListsItemOptions
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
   | ExceptionsListPreUpdateItemServerExtension
   | ExceptionsListPreGetOneItemServerExtension
-  | ExceptionsListPreSingleListFindServerExtension;
+  | ExceptionsListPreSingleListFindServerExtension
+  | ExceptionsListPreMultiListFindServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

@@ -613,6 +613,23 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListsItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreMultiListFind',
+        {
+          filter,
+          listId,
+          namespaceType,
+          page,
+          perPage,
+          sortField,
+          sortOrder,
+        },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return findExceptionListsItem({
       filter,
       listId,
