@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import * as reportTypes from './report_types';
+
+const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = reportTypes;
+
 export const PLUGIN_ID = 'reporting';
 
 export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
@@ -56,18 +60,10 @@ export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
 // Export Type Definitions
-export const CSV_REPORT_TYPE = 'CSV';
-export const CSV_JOB_TYPE = 'csv_searchsource';
+export * from './report_types';
 
-export const PDF_REPORT_TYPE = 'printablePdf';
-export const PDF_REPORT_TYPE_V2 = 'printablePdfV2';
-export const PDF_JOB_TYPE = 'printable_pdf';
-export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
-
-export const PNG_REPORT_TYPE = 'PNG';
-export const PNG_REPORT_TYPE_V2 = 'pngV2';
-export const PNG_JOB_TYPE = 'PNG';
-export const PNG_JOB_TYPE_V2 = 'PNGV2';
+type ReportJobTypeDeclaration = typeof reportTypes;
+export type ReportJobTypes = ReportJobTypeDeclaration[keyof ReportJobTypeDeclaration];
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
