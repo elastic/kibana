@@ -271,6 +271,7 @@ export function createTestEsCluster<
           'log.level': string;
           message: string;
           'elasticsearch.http.request.x_opaque_id': string;
+          'elasticsearch.elastic_product_origin': string;
         }>(
           { index: '.logs-deprecation.elasticsearch-default', ignore_unavailable: true, size: 100 },
           { ignore: [404] } // The index doesn't exist if there's no deprecation logs
@@ -278,8 +279,11 @@ export function createTestEsCluster<
         .then((res) => {
           const deps = res.body.hits.hits
             .filter((d) => /^kbn-test.*/.test(d._source!['elasticsearch.http.request.x_opaque_id']))
+            .filter((d) => /^kibana*/.test(d._source!['elasticsearch.elastic_product_origin']))
             .map((d) => {
-              return `ES DEPRECATION ${d._source!['log.level']} ${d._source!.message}`;
+              return `ES DEPRECATION ${d._source!['log.level']} ${
+                d._source!.message
+              } ${JSON.stringify(d._source)}`;
             });
 
           if (deps.length > 0) {
