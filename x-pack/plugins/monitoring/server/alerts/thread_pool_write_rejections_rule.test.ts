@@ -29,7 +29,6 @@ jest.mock('../static_globals', () => ({
         ui: {
           show_license_expiration: true,
           ccs: { enabled: true },
-          metricbeat: { index: 'metricbeat-*' },
           container: { elasticsearch: { enabled: false } },
         },
       },

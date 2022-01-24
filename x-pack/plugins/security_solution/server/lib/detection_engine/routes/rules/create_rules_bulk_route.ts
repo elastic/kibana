@@ -43,14 +43,10 @@ export const createRulesBulkRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = context.alerting.getRulesClient();
       const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution?.getAppClient();
-
-      if (!siemClient || !rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+      const siemClient = context.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
         license: context.licensing.license,
@@ -119,7 +115,7 @@ export const createRulesBulkRoute = (
               return transformValidateBulkError(
                 internalRule.params.ruleId,
                 createdRule,
-                undefined,
+                null,
                 isRuleRegistryEnabled
               );
             } catch (err) {
