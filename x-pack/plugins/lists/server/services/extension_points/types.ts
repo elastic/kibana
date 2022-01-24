@@ -10,6 +10,7 @@ import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
+  DeleteExceptionListItemOptions,
   ExportExceptionListAndItemsOptions,
   FindExceptionListItemOptions,
   FindExceptionListsItemOptions,
@@ -116,6 +117,16 @@ export type ExceptionsListPreSummaryServerExtension = ServerExtensionPointDefini
   GetExceptionListSummaryOptions
 >;
 
+/**
+ * Extension point is triggered prior to performing a list item deletion. Note, this extension point
+ * is triggered by both `deleteExceptionListItem()` and `deleteExceptionListItemById()` methods of the
+ * `ExceptionListClient` class
+ */
+export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreDeleteItem',
+  DeleteExceptionListItemOptions
+>;
+
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
   | ExceptionsListPreUpdateItemServerExtension
@@ -123,7 +134,8 @@ export type ExtensionPoint =
   | ExceptionsListPreSingleListFindServerExtension
   | ExceptionsListPreMultiListFindServerExtension
   | ExceptionsListPreExportServerExtension
-  | ExceptionsListPreSummaryServerExtension;
+  | ExceptionsListPreSummaryServerExtension
+  | ExceptionsListPreDeleteItemServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

@@ -12,6 +12,7 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreDeleteItemServerExtension,
   ExceptionsListPreExportServerExtension,
   ExceptionsListPreGetOneItemServerExtension,
   ExceptionsListPreMultiListFindServerExtension,
@@ -40,6 +41,8 @@ export interface ExtensionPointStorageContextMock {
   exceptionPreExport: jest.Mocked<ExceptionsListPreExportServerExtension>;
   /** an exception list pre-summary extension */
   exceptionPreSummary: jest.Mocked<ExceptionsListPreSummaryServerExtension>;
+  /** an exception list pre-delete extension */
+  exceptionPreDelete: jest.Mocked<ExceptionsListPreDeleteItemServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
 }
 
@@ -94,6 +97,11 @@ export const createExtensionPointStorageMock = (
     type: 'exceptionsListPreSummary',
   };
 
+  const exceptionPreDelete: ExtensionPointStorageContextMock['exceptionPreDelete'] = {
+    callback: jest.fn(async ({ data }) => data),
+    type: 'exceptionsListPreDeleteItem',
+  };
+
   extensionPointStorage.add(exceptionPreCreate);
   extensionPointStorage.add(exceptionPreUpdate);
   extensionPointStorage.add(exceptionPreGetOne);
@@ -101,12 +109,14 @@ export const createExtensionPointStorageMock = (
   extensionPointStorage.add(exceptionPreMultiListFind);
   extensionPointStorage.add(exceptionPreExport);
   extensionPointStorage.add(exceptionPreSummary);
+  extensionPointStorage.add(exceptionPreDelete);
 
   return {
     callbackContext: {
       request: httpServerMock.createKibanaRequest(),
     },
     exceptionPreCreate,
+    exceptionPreDelete,
     exceptionPreExport,
     exceptionPreGetOne,
     exceptionPreMultiListFind,

@@ -247,6 +247,31 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreSummary.callback;
         },
       ],
+      [
+        'deleteExceptionListItem',
+        (): ReturnType<ExceptionListClient['deleteExceptionListItem']> => {
+          return exceptionListClient.deleteExceptionListItem({
+            id: '1',
+            itemId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'deleteExceptionListItemById',
+        (): ReturnType<ExceptionListClient['deleteExceptionListItemById']> => {
+          return exceptionListClient.deleteExceptionListItemById({
+            id: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {

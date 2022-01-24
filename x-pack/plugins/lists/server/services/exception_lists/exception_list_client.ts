@@ -535,6 +535,15 @@ export class ExceptionListClient {
     namespaceType,
   }: DeleteExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteItem',
+        { id, itemId, namespaceType },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return deleteExceptionListItem({
       id,
       itemId,
@@ -554,6 +563,15 @@ export class ExceptionListClient {
     namespaceType,
   }: DeleteExceptionListItemByIdOptions): Promise<void> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteItem',
+        { id, itemId: undefined, namespaceType },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return deleteExceptionListItemById({
       id,
       namespaceType,
