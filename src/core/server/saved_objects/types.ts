@@ -29,7 +29,7 @@ export type {
   SavedObjectsImportWarning,
 } from './import/types';
 
-import { SavedObject } from '../../types';
+import { SavedObject, SavedObjectAttributes } from '../../types';
 import { ElasticsearchClient } from '../elasticsearch';
 
 type KueryNode = any;
@@ -253,7 +253,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 /**
  * @public
  */
-export interface SavedObjectsType<Attributes = any> {
+export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -358,7 +358,9 @@ export interface SavedObjectsType<Attributes = any> {
  *
  * @public
  */
-export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
+export interface SavedObjectsTypeManagementDefinition<
+  Attributes extends SavedObjectAttributes = any
+> {
   /**
    * Is the type importable or exportable. Defaults to `false`.
    */
@@ -511,9 +513,9 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
 /**
  * @public
  */
-export type SavedObjectsExportablePredicate<Attributes = unknown> = (
-  obj: SavedObject<Attributes>
-) => boolean;
+export type SavedObjectsExportablePredicate<
+  Attributes extends SavedObjectAttributes = SavedObjectAttributes
+> = (obj: SavedObject<Attributes>) => boolean;
 
 /**
  * If defined, allows a type to run a search query and return a query filter that may match any documents which may
