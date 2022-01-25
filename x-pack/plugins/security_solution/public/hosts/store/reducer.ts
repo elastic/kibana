@@ -186,6 +186,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         [HostsTableType.riskScoreBetter]: {
           ...state[hostsType].queries[HostsTableType.riskScoreBetter],
           severitySelection,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },
