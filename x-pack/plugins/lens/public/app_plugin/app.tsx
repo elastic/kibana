@@ -106,7 +106,9 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
-  const [initialDoc, setInitialDoc] = useState<Document | undefined>(undefined);
+  const [initialDocFromContext, setInitialDocFromContext] = useState<Document | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (currentDoc) {
@@ -158,13 +160,13 @@ export function App({
         'vizEditorOriginatingAppUrl' in initialContext &&
         initialContext.vizEditorOriginatingAppUrl
       ) {
-        const initialDocHasChanged = !isLensEqual(
-          initialDoc,
+        const initialDocFromContextHasChanged = !isLensEqual(
+          initialDocFromContext,
           lastKnownDoc,
           data.query.filterManager.inject,
           datasourceMap
         );
-        if (!initialDocHasChanged) {
+        if (!initialDocFromContextHasChanged) {
           return actions.default();
         } else {
           return actions.confirm(
@@ -179,8 +181,6 @@ export function App({
           );
         }
       }
-      // Confirm when the user has made any changes to an existing doc
-      // or when the user has configured something without saving
 
       if (
         application.capabilities.visualize.save &&
@@ -206,7 +206,7 @@ export function App({
     persistedDoc,
     application.capabilities.visualize.save,
     initialContext,
-    initialDoc,
+    initialDocFromContext,
     contextOriginatingApp,
     data.query.filterManager.inject,
     datasourceMap,
@@ -332,12 +332,14 @@ export function App({
     ]
   );
 
+  // keeping the initial doc state created by the context
   useEffect(() => {
-    if (lastKnownDoc && !initialDoc) {
-      setInitialDoc(lastKnownDoc);
+    if (lastKnownDoc && !initialDocFromContext) {
+      setInitialDocFromContext(lastKnownDoc);
     }
-  }, [lastKnownDoc, initialDoc]);
+  }, [lastKnownDoc, initialDocFromContext]);
 
+  // if users comes to Lens from the Viz editor, they should have the option to navigate back
   const goBackToOriginatingApp = useCallback(() => {
     if (
       initialContext &&
@@ -349,10 +351,9 @@ export function App({
   }, [application, initialContext]);
 
   const initialContextIsEmbedded = useMemo(() => {
-    if (initialContext && 'originatingApp' in initialContext && initialContext.originatingApp) {
-      return true;
-    }
-    return false;
+    return Boolean(
+      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp
+    );
   }, [initialContext]);
 
   return (

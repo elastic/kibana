@@ -33,7 +33,7 @@ import { SavedObjectReference } from '../../../../../src/core/types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';
 
-import { setState, LensAppState } from '../state_management/index';
+import { setState, LensAppState, VisualizationState } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -1243,6 +1243,210 @@ describe('Lens App', () => {
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
+    });
+
+    it('should confirm when leaving from a context initial doc with changes made in lens', async () => {
+      const initialProps = {
+        ...makeDefaultProps(),
+        contextOriginatingApp: 'TSVB',
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              timeFieldName: 'order_date',
+              chartType: 'area',
+              axisPosition: 'left',
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+              metrics: [
+                {
+                  agg: 'count',
+                  isFullReference: false,
+                  fieldName: 'document',
+                  params: {},
+                  color: '#68BC00',
+                },
+              ],
+              timeInterval: 'auto',
+            },
+          ],
+          configuration: {
+            fill: 0.5,
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            extents: {
+              yLeftExtent: {
+                mode: 'full',
+              },
+              yRightExtent: {
+                mode: 'full',
+              },
+            },
+          },
+          savedObjectId: '',
+          vizEditorOriginatingAppUrl: '#/tsvb-link',
+          isVisualizeAction: true,
+        },
+      };
+
+      const mountedApp = await mountWith({
+        props: initialProps as unknown as jest.Mocked<LensAppProps>,
+        preloadedState: {
+          persistedDoc: defaultDoc,
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+          },
+          isSaveable: true,
+        },
+      });
+      const lastCall =
+        mountedApp.props.onAppLeave.mock.calls[
+          mountedApp.props.onAppLeave.mock.calls.length - 1
+        ][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).not.toHaveBeenCalled();
+      expect(confirmLeave).toHaveBeenCalled();
+    });
+
+    it('should not confirm when leaving from a context initial doc without changes made in lens', async () => {
+      const initialProps = {
+        ...makeDefaultProps(),
+        contextOriginatingApp: 'TSVB',
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              timeFieldName: 'order_date',
+              chartType: 'area',
+              axisPosition: 'left',
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+              metrics: [
+                {
+                  agg: 'count',
+                  isFullReference: false,
+                  fieldName: 'document',
+                  params: {},
+                  color: '#68BC00',
+                },
+              ],
+              timeInterval: 'auto',
+            },
+          ],
+          configuration: {
+            fill: 0.5,
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            extents: {
+              yLeftExtent: {
+                mode: 'full',
+              },
+              yRightExtent: {
+                mode: 'full',
+              },
+            },
+          },
+          savedObjectId: '',
+          vizEditorOriginatingAppUrl: '#/tsvb-link',
+          isVisualizeAction: true,
+        },
+      };
+
+      const mountedApp = await mountWith({
+        props: initialProps as unknown as jest.Mocked<LensAppProps>,
+        preloadedState: {
+          persistedDoc: defaultDoc,
+          visualization: {
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            valueLabels: 'hide',
+            fittingFunction: 'None',
+            fillOpacity: 0.5,
+            yLeftExtent: {
+              mode: 'full',
+            },
+            yRightExtent: {
+              mode: 'full',
+            },
+            axisTitlesVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            tickLabelsVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            labelsOrientation: {
+              x: 0,
+              yLeft: 0,
+              yRight: 0,
+            },
+            gridlinesVisibilitySettings: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                palette: {
+                  name: 'default',
+                  type: 'palette',
+                },
+                layerId: '7cc40c65-1b72-4307-8ad1-0a62c9240077',
+                seriesType: 'area',
+                xAccessor: '75d58d17-6357-4b8d-8c55-2b393badeccd',
+                accessors: ['65043689-ce94-4eac-b2f8-30015f663237'],
+                yConfig: [
+                  {
+                    color: '#68BC00',
+                    forAccessor: '65043689-ce94-4eac-b2f8-30015f663237',
+                    axisMode: 'left',
+                  },
+                ],
+                layerType: 'data',
+              },
+            ],
+          } as unknown as VisualizationState,
+          isSaveable: true,
+        },
+      });
+      const lastCall =
+        mountedApp.props.onAppLeave.mock.calls[
+          mountedApp.props.onAppLeave.mock.calls.length - 1
+        ][0];
+      lastCall({ default: defaultLeave, confirm: confirmLeave });
+      expect(defaultLeave).toHaveBeenCalled();
+      expect(confirmLeave).not.toHaveBeenCalled();
     });
 
     it('should not confirm when changes are saved', async () => {

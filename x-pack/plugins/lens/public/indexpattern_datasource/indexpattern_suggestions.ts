@@ -132,7 +132,7 @@ export function getDatasourceSuggestionsForField(
   }
 }
 
-// Called when the user navigates from TSVB to Lens
+// Called when the user navigates from Visualize editor to Lens
 export function getDatasourceSuggestionsForVisualizeCharts(
   state: IndexPatternPrivateState,
   context: VisualizeEditorLayersContext[]
@@ -158,7 +158,7 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
     const newId = generateId();
     let newLayer: IndexPatternLayer | undefined;
     if (indexPattern.timeFieldName) {
-      newLayer = createNewLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
+      newLayer = createNewTimeseriesLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
     }
     if (newLayer) {
       suggestions.push(
@@ -174,7 +174,7 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
   return suggestions;
 }
 
-function createNewLayerWithMetricAggregationFromVizEditor(
+function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer | undefined {

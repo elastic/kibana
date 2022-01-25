@@ -12,7 +12,6 @@ import { isFilterPinned } from '@kbn/es-query';
 
 import type { SavedObjectReference } from 'kibana/public';
 import { SaveModal } from './save_modal';
-
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle } from '../persistence';

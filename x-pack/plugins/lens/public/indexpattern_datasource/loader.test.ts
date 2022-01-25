@@ -506,6 +506,57 @@ describe('loader', () => {
       });
     });
 
+    it('should use the indexPatternId of the visualize trigger chart context, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: '1',
+              timeFieldName: 'timestamp',
+              chartType: 'area',
+              axisPosition: 'left',
+              metrics: [],
+              timeInterval: 'auto',
+            },
+          ],
+          configuration: {
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: true,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+          },
+          savedObjectId: '',
+          isVisualizeAction: true,
+        },
+        options: { isFullEditor: true },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
+      });
+    });
+
     it('should initialize all the embeddable references without local storage', async () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
