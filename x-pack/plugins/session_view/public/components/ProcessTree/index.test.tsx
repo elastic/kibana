@@ -48,7 +48,7 @@ describe('ProcessTree component', () => {
           pid: 123,
           pgid: 123,
           parent: {
-            ...mockEvents[0].process.parent
+            ...mockEvents[0].process.parent,
           },
         },
       } as unknown as typeof mockEvents[0];

@@ -469,7 +469,7 @@ export const childProcessMock: Process = {
         pgid: 1,
         user: {
           id: '1',
-          name: 'vagrant'
+          name: 'vagrant',
         },
         parent: {
           args: ['bash'],
@@ -484,8 +484,8 @@ export const childProcessMock: Process = {
           pgid: 1,
           user: {
             id: '1',
-            name: 'vagrant'
-          }
+            name: 'vagrant',
+          },
         },
         session: {} as ProcessFields,
         entry: {} as ProcessFields,
@@ -530,7 +530,7 @@ export const processMock: Process = {
         pgid: 1,
         user: {
           id: '1',
-          name: 'vagrant'
+          name: 'vagrant',
         },
         parent: {} as ProcessFields,
         session: {} as ProcessFields,

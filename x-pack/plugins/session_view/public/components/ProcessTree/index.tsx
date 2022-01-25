@@ -51,7 +51,7 @@ export const ProcessTree = ({
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
-  const { sessionLeader, processMap, searchResults } = useProcessTree({
+  const { sessionLeader, processMap } = useProcessTree({
     sessionEntityId,
     data,
     searchQuery,
@@ -121,13 +121,8 @@ export const ProcessTree = ({
   }, [selectedProcess, selectProcess]);
 
   useEffect(() => {
-    if (searchResults.length > 0) {
-      selectProcess(searchResults[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchResults]);
-
-  useEffect(() => {
+    // after 2 pages are loaded (due to bi-directional jump to), auto select the process
+    // for the jumpToEvent
     if (jumpToEvent && data.length === 2) {
       const process = processMap[jumpToEvent.process.entity_id];
 
@@ -135,14 +130,14 @@ export const ProcessTree = ({
         onProcessSelected(process);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jumpToEvent, processMap, onProcessSelected]);
+  }, [jumpToEvent, processMap, onProcessSelected, data]);
 
+  // auto selects the session leader process if no selection is made yet
   useEffect(() => {
     if (!selectedProcess && onProcessSelected) {
-      onProcessSelected(sessionLeader); 
-    } 
-  }, [sessionLeader, onProcessSelected])
+      onProcessSelected(sessionLeader);
+    }
+  }, [sessionLeader, onProcessSelected, selectedProcess]);
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
     return (
@@ -166,7 +161,11 @@ export const ProcessTree = ({
           onProcessSelected={onProcessSelected}
         />
       )}
-      <div data-test-subj="processTreeSelectionArea" ref={selectionAreaRef} css={styles.selectionArea} />
+      <div
+        data-test-subj="processTreeSelectionArea"
+        ref={selectionAreaRef}
+        css={styles.selectionArea}
+      />
       {hasNextPage &&
         renderLoadMoreButton(
           <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,

@@ -42,7 +42,7 @@ describe('SessionView component', () => {
       });
 
       it('should not display the search bar', async () => {
-        render()
+        render();
         await waitForApiCall();
         expect(renderResult.queryByTestId('sessionViewProcessEventsSearch')).toBeFalsy();
       });

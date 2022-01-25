@@ -11,26 +11,26 @@ import { mockEvents } from '../../common/mocks/constants/session_view_process.mo
 const getEmptyResponse = async () => {
   return {
     body: {
-      hits: { 
-        total: { value: 0, relation: 'eq' }, 
-        hits: [] 
-      } 
-    }
-  }
-}
+      hits: {
+        total: { value: 0, relation: 'eq' },
+        hits: [],
+      },
+    },
+  };
+};
 
 const getResponse = async () => {
   return {
     body: {
-      hits: { 
-        total: { value: mockEvents.length, relation: 'eq' }, 
-        hits: mockEvents.map(event => {
+      hits: {
+        total: { value: mockEvents.length, relation: 'eq' },
+        hits: mockEvents.map((event) => {
           return { _source: event };
-        })
-      } 
-    }
-  }
-}
+        }),
+      },
+    },
+  };
+};
 
 describe('process_events_route.ts', () => {
   describe('doSearch(client, entityId, cursor, forward)', () => {
@@ -49,7 +49,7 @@ describe('process_events_route.ts', () => {
 
       expect(body.events.length).toBe(mockEvents.length);
     });
-    
+
     it('returns hits in reverse order when paginating backwards', async () => {
       const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
 

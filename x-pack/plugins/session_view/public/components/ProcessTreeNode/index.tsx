@@ -146,10 +146,14 @@ export function ProcessTreeNode({
                 id="xpack.sessionView.plusCountMore"
                 defaultMessage="+{count} more"
                 values={{
-                  count: sameGroupCount 
+                  count: sameGroupCount,
                 }}
               />
-              <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(showGroupLeadersOnly)} />
+              <EuiIcon
+                css={styles.buttonArrow}
+                size="s"
+                type={getExpandedIcon(showGroupLeadersOnly)}
+              />
             </EuiButton>
           </EuiToolTip>
         );

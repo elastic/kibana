@@ -122,7 +122,7 @@ export interface Process {
   id: string; // the process entity_id
   events: ProcessEvent[];
   children: Process[];
-  orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children 
+  orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery

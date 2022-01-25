@@ -54,9 +54,9 @@ export class ProcessImpl implements Process {
     if (hideSameGroup) {
       const { pid } = this.getDetails().process;
 
-      return children.filter(process => {
+      return children.filter((process) => {
         const { pgid } = process.getDetails().process;
-        
+
         // TODO: needs update after field rename to match ECS
         return pgid !== pid || process.searchMatched;
       });
