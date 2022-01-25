@@ -61,7 +61,7 @@ Select a subset of documents that you want to compare.
 
 . Select the documents you want to compare.
 
-. Click the *documents selected* link, and then select *Show selected documents only*.
+. Click and open the *documents selected* options, and then select *Show selected documents only*.
 +
 [role="screenshot"]
 image::images/document-explorer-compare-data.png[Multi field sort in Document Explorer, width="75%"]
