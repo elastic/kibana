@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRouter, Outlet, route } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Breadcrumb } from '../app/breadcrumb';
@@ -19,9 +19,8 @@ import { settings } from './settings';
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const apmRoutes = route([
-  {
-    path: '/link-to/transaction/{transactionId}',
+const apmRoutes = {
+  '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
     params: t.intersection([
       t.type({
@@ -37,8 +36,7 @@ const apmRoutes = route([
       }),
     ]),
   },
-  {
-    path: '/link-to/trace/{traceId}',
+  '/link-to/trace/{traceId}': {
     element: <TraceLink />,
     params: t.intersection([
       t.type({
@@ -54,16 +52,19 @@ const apmRoutes = route([
       }),
     ]),
   },
-  {
-    path: '/',
+  '/': {
     element: (
       <Breadcrumb title="APM" href="/">
         <Outlet />
       </Breadcrumb>
     ),
-    children: [settings, serviceDetail, home],
+    children: {
+      ...settings,
+      ...serviceDetail,
+      ...home,
+    },
   },
-] as const);
+};
 
 export type ApmRoutes = typeof apmRoutes;
 
