@@ -142,6 +142,7 @@ export class ExceptionListClient {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSummary',
         {
+          filter,
           id,
           listId,
           namespaceType,
