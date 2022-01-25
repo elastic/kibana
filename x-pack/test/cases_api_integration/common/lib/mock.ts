@@ -15,7 +15,6 @@ import {
   CommentRequestAlertType,
   CommentType,
   CaseStatuses,
-  CasesClientPostRequest,
   CommentRequest,
   CommentRequestActionsType,
 } from '../../../../plugins/cases/common/api';
@@ -54,13 +53,6 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
  * The fields for creating a collection style case.
  */
 export const postCollectionReq: CasePostRequest = {
-  ...postCaseReq,
-};
-
-/**
- * This is needed because the post api does not allow specifying the case type. But the response will include the type.
- */
-export const userActionPostResp: CasesClientPostRequest = {
   ...postCaseReq,
 };
 

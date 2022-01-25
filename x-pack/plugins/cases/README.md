@@ -140,16 +140,6 @@ Arguments:
 UI component:
 ![Recent Cases Component][recent-cases-img]
 
-## Case Action Type
-
-_**\*Feature in development, disabled by default**_
-
-See [Kibana Actions](https://github.com/elastic/kibana/tree/main/x-pack/plugins/actions) for more information.
-
-ID: `.case`
-
-The params properties are modelled after the arguments to the [Cases API](https://www.elastic.co/guide/en/security/master/cases-api-overview.html).
-
 ### `config`
 
 This action has no `config` properties.
