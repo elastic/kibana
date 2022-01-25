@@ -11,20 +11,20 @@ import { useBrowserRunOnceMonitors } from '../../../../monitor_management/test_n
 
 export const BrowserMonitorProgress = ({
   configId,
-  triggerId,
+  testRunId,
   duration,
   isUpdating,
   updateMonitorStatus,
 }: {
   configId: string;
-  triggerId: string;
+  testRunId: string;
   duration: number;
   isUpdating: boolean;
   updateMonitorStatus: () => void;
 }) => {
   const { journeyStarted, summaryDoc, data } = useBrowserRunOnceMonitors({
     configId,
-    triggerId,
+    testRunId,
     refresh: false,
   });
 
@@ -60,7 +60,7 @@ export const BrowserMonitorProgress = ({
   if (isUpdating) {
     return (
       <>
-        <EuiBadge>UPDATING</EuiBadge>
+        <EuiBadge>IN PROGRESS</EuiBadge>
         <EuiProgress size="xs" />
       </>
     );

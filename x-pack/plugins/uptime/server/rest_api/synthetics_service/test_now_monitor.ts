@@ -11,7 +11,7 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 
-export const triggerMonitorRoute: UMRestApiRouteFactory = () => ({
+export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.TRIGGER_MONITOR + '/{monitorId}',
   validate: {
@@ -28,21 +28,21 @@ export const triggerMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const { syntheticsService } = server;
 
-    const triggerId = uuidv4();
+    const testRunId = uuidv4();
 
     const errors = await syntheticsService.triggerConfigs(request, [
       {
         ...monitor.attributes,
         id: monitorId,
         fields_under_root: true,
-        fields: { config_id: monitorId, trigger_id: triggerId },
+        fields: { config_id: monitorId, test_run_id: testRunId },
       },
     ]);
 
     if (errors && errors?.length > 0) {
-      return { errors };
+      return { errors, testRunId, monitorId };
     }
 
-    return { triggerId };
+    return { testRunId, monitorId };
   },
 });

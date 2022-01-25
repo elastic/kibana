@@ -11,8 +11,9 @@ import {
   getMonitorListSuccess,
   getMonitorListFailure,
   getUpdatedMonitor,
+  testNowMonitorAction,
 } from '../actions';
-import { fetchMonitorList } from '../api';
+import { fetchMonitorList, testNowMonitor } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorListEffect() {
@@ -26,5 +27,12 @@ export function* fetchUpdatedMonitorEffect() {
   yield takeLatest(
     getUpdatedMonitor.get,
     fetchEffectFactory(fetchMonitorList, getUpdatedMonitor.success, getUpdatedMonitor.fail)
+  );
+}
+
+export function* fetchRunNowMonitorEffect() {
+  yield takeLatest(
+    testNowMonitorAction.get,
+    fetchEffectFactory(testNowMonitor, testNowMonitorAction.success, testNowMonitorAction.fail)
   );
 }

@@ -11,10 +11,10 @@ import { getUpdatedMonitor, setUpdatingMonitorId } from '../../../../../state/ac
 import { isUpdatingMonitorSelector } from '../../../../../state/reducers/monitor_list';
 
 export const useUpdatedMonitor = ({
-  triggerId,
+  testRunId,
   monitorId,
 }: {
-  triggerId: string;
+  testRunId: string;
   monitorId: string;
 }) => {
   const dispatch = useDispatch();
@@ -22,14 +22,14 @@ export const useUpdatedMonitor = ({
   const isUpdatingMonitors = useSelector(isUpdatingMonitorSelector);
 
   const updateMonitorStatus = useCallback(() => {
-    if (triggerId) {
+    if (testRunId) {
       dispatch(
         getUpdatedMonitor.get({
           dateRangeStart: 'now-10m',
           dateRangeEnd: 'now',
           filters: JSON.stringify({
             bool: {
-              should: [{ match_phrase: { trigger_id: triggerId } }],
+              should: [{ match_phrase: { test_run_id: testRunId } }],
               minimum_should_match: 1,
             },
           }),
@@ -38,7 +38,7 @@ export const useUpdatedMonitor = ({
       );
       dispatch(setUpdatingMonitorId(monitorId));
     }
-  }, [dispatch, monitorId, triggerId]);
+  }, [dispatch, monitorId, testRunId]);
 
   return { updateMonitorStatus, isUpdating: isUpdatingMonitors.includes(monitorId) };
 };

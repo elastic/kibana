@@ -11,18 +11,21 @@ import { useSimpleRunOnceMonitors } from '../../../../monitor_management/test_no
 
 export const SimpleMonitorProgress = ({
   monitorId,
-  triggerId,
+  testRunId,
   duration,
   isUpdating,
   updateMonitorStatus,
 }: {
   monitorId: string;
-  triggerId: string;
+  testRunId: string;
   duration: number;
   isUpdating: boolean;
   updateMonitorStatus: () => void;
 }) => {
-  const { summaryDoc, data } = useSimpleRunOnceMonitors({ monitorId, triggerId });
+  const { summaryDoc, data } = useSimpleRunOnceMonitors({
+    configId: monitorId,
+    testRunId,
+  });
 
   const startTime = useRef(Date.now());
 

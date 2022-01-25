@@ -16,11 +16,11 @@ import { isStepEnd } from '../../../synthetics/check_steps/steps_list';
 
 export const useBrowserEsResults = ({
   configId,
-  triggerId,
+  testRunId,
   lastRefresh,
 }: {
   configId: string;
-  triggerId?: string;
+  testRunId?: string;
   lastRefresh: number;
 }) => {
   const { settings } = useSelector(selectDynamicSettings);
@@ -47,11 +47,11 @@ export const useBrowserEsResults = ({
                   'synthetics.type': ['heartbeat/summary', 'journey/start'],
                 },
               },
-              ...(triggerId
+              ...(testRunId
                 ? [
                     {
                       term: {
-                        trigger_id: triggerId,
+                        test_run_id: testRunId,
                       },
                     },
                   ]
@@ -69,11 +69,11 @@ export const useBrowserEsResults = ({
 
 export const useBrowserRunOnceMonitors = ({
   configId,
-  triggerId,
+  testRunId,
   refresh = true,
 }: {
   configId: string;
-  triggerId?: string;
+  testRunId?: string;
   refresh?: boolean;
 }) => {
   const { refreshTimer, lastRefresh } = useTickTick(3 * 1000, refresh);
@@ -82,7 +82,7 @@ export const useBrowserRunOnceMonitors = ({
   const [stepEnds, setStepEnds] = useState<JourneyStep[]>([]);
   const [summary, setSummary] = useState<JourneyStep>();
 
-  const { data, loading } = useBrowserEsResults({ configId, triggerId, lastRefresh });
+  const { data, loading } = useBrowserEsResults({ configId, testRunId, lastRefresh });
 
   const { data: stepListData } = useFetcher(() => {
     if (checkGroupId) {

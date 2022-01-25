@@ -228,7 +228,7 @@ export class SyntheticsService {
     configs?: Array<
       SyntheticsMonitorWithId & {
         fields_under_root?: boolean;
-        fields?: { config_id: string; trigger_id: string };
+        fields?: { config_id: string; test_run_id: string };
       }
     >
   ) {

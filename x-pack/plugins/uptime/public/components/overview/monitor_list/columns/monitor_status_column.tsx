@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -16,12 +16,10 @@ import {
   EuiToolTip,
   EuiBadge,
   EuiSpacer,
-  EuiButtonIcon,
-  EuiLoadingSpinner,
   EuiHighlight,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { parseTimestamp } from '../parse_timestamp';
 import { DataStream, Ping } from '../../../../../common/runtime_types';
 import {
@@ -34,10 +32,10 @@ import {
 import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
-import { triggerMonitor } from '../../../../state/api';
-import { useFetcher } from '../../../../../../observability/public';
 import { MonitorProgress } from './progress/monitor_progress';
 import { refreshedMonitorSelector } from '../../../../state/reducers/monitor_list';
+import { testNowRunSelector } from '../../../../state/reducers/test_now_runs';
+import { clearTestNowMonitorAction } from '../../../../state/actions';
 
 interface MonitorListStatusColumnProps {
   configId?: string;
@@ -174,39 +172,33 @@ export const MonitorListStatusColumn = ({
 }: MonitorListStatusColumnProps) => {
   const timestamp = parseTimestamp(tsString);
 
-  const [triggerTest, setTriggerTest] = useState<string>();
-
   const {
     colors: { dangerBehindText },
   } = useContext(UptimeThemeContext);
 
   const { statusMessage, locTooltip } = getLocationStatus(summaryPings, status);
 
-  const { loading, data } = useFetcher(() => {
-    return triggerMonitor({ id: triggerTest });
-  }, [triggerTest]);
-
-  const triggerNowClick = () => {
-    if (configId) {
-      setTriggerTest(configId);
-    }
-  };
+  const dispatch = useDispatch();
 
   const stopProgressTrack = useCallback(() => {
-    setTriggerTest(undefined);
-  }, []);
+    if (configId) {
+      dispatch(clearTestNowMonitorAction(configId));
+    }
+  }, [configId, dispatch]);
 
   const refreshedMonitorIds = useSelector(refreshedMonitorSelector);
+
+  const testNowRun = useSelector(testNowRunSelector(configId));
 
   return (
     <div>
       <StatusColumnFlexG alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
-          {triggerTest && data?.triggerId ? (
+          {testNowRun && configId && testNowRun?.testRunId ? (
             <MonitorProgress
               monitorId={monitorId!}
-              configId={triggerTest}
-              triggerId={data?.triggerId}
+              configId={configId}
+              testRunId={testNowRun?.testRunId}
               monitorType={monitorType as DataStream}
               duration={duration}
               stopProgressTrack={stopProgressTrack}
@@ -218,20 +210,6 @@ export const MonitorListStatusColumn = ({
             >
               {getHealthMessage(status)}
             </EuiBadge>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {loading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            <EuiToolTip content="Test now">
-              <EuiButtonIcon
-                iconType="play"
-                onClick={() => triggerNowClick()}
-                isDisabled={Boolean(triggerTest)}
-                aria-label={'CLick to run test now'}
-              />
-            </EuiToolTip>
           )}
         </EuiFlexItem>
       </StatusColumnFlexG>

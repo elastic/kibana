@@ -13,11 +13,11 @@ import { createEsParams, useEsSearch } from '../../../../../../observability/pub
 import { useTickTick } from '../use_tick_tick';
 
 export const useSimpleRunOnceMonitors = ({
-  monitorId,
-  triggerId,
+  configId,
+  testRunId,
 }: {
-  monitorId: string;
-  triggerId?: string;
+  configId: string;
+  testRunId?: string;
 }) => {
   const { refreshTimer, lastRefresh } = useTickTick(2 * 1000, false);
 
@@ -37,7 +37,7 @@ export const useSimpleRunOnceMonitors = ({
             filter: [
               {
                 term: {
-                  config_id: monitorId,
+                  config_id: configId,
                 },
               },
               {
@@ -45,11 +45,11 @@ export const useSimpleRunOnceMonitors = ({
                   field: 'summary',
                 },
               },
-              ...(triggerId
+              ...(testRunId
                 ? [
                     {
                       term: {
-                        trigger_id: triggerId,
+                        test_run_id: testRunId,
                       },
                     },
                   ]
@@ -60,7 +60,7 @@ export const useSimpleRunOnceMonitors = ({
       },
       size: 10,
     }),
-    [monitorId, settings?.heartbeatIndices, lastRefresh],
+    [configId, settings?.heartbeatIndices, lastRefresh],
     { name: 'TestRunData' }
   );
 

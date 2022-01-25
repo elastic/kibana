@@ -37,6 +37,7 @@ import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { TestNowColumn } from './columns/test_now_col';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -209,10 +210,7 @@ export const MonitorListComponent: ({
         name: TEST_NOW_COLUMN,
         width: '100px',
         render: (item: MonitorSummary) => (
-          <EnableMonitorAlert
-            monitorId={item.monitor_id}
-            selectedMonitor={item.state.summaryPings[0]}
-          />
+          <TestNowColumn monitorId={item.monitor_id} configId={item.configId} />
         ),
       },
     ],

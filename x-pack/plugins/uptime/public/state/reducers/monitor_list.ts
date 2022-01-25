@@ -17,6 +17,7 @@ import {
 } from '../actions';
 import { MonitorSummariesResult } from '../../../common/runtime_types';
 import { AppState } from '../index';
+import { TestNowResponse } from '../api';
 
 export interface MonitorList {
   loading: boolean;
@@ -35,7 +36,10 @@ export const initialState: MonitorList = {
   loading: false,
 };
 
-type Payload = MonitorSummariesResult & IHttpFetchError<ResponseErrorBody> & string;
+type Payload = MonitorSummariesResult &
+  IHttpFetchError<ResponseErrorBody> &
+  string &
+  TestNowResponse;
 
 export const monitorListReducer = handleActions<MonitorList, Payload>(
   {
