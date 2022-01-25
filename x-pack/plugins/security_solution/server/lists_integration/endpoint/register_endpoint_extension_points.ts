@@ -9,6 +9,7 @@ import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_s
 import { getExceptionsPreCreateItemHandler } from './handlers/exceptions_pre_create_handler';
 import { getExceptionsPreUpdateItemHandler } from './handlers/exceptions_pre_update_handler';
 import type { ListsServerExtensionRegistrar } from '../../../../lists/server';
+import { getExceptionsPreGetOneHandler } from './handlers/exceptions_pre_get_one_handler';
 
 export const registerListsPluginEndpointExtensionPoints = (
   registerListsExtensionPoint: ListsServerExtensionRegistrar,
@@ -24,5 +25,11 @@ export const registerListsPluginEndpointExtensionPoints = (
   registerListsExtensionPoint({
     type: 'exceptionsListPreUpdateItem',
     callback: getExceptionsPreUpdateItemHandler(endpointAppContextService),
+  });
+
+  // PRE-GET ONE handler
+  registerListsExtensionPoint({
+    type: 'exceptionsListPreGetOneItem',
+    callback: getExceptionsPreGetOneHandler(endpointAppContextService),
   });
 };

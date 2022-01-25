@@ -16,6 +16,10 @@ export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreUpdateItemServerExtension['callback'] => {
   return async function ({ data, context: { request } }): Promise<UpdateExceptionListItemOptions> {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     const currentSavedItem = await endpointAppContextService
       .getExceptionListsClient()
       .getExceptionListItem({
@@ -24,7 +28,7 @@ export const getExceptionsPreUpdateItemHandler = (
         namespaceType: data.namespaceType,
       });
 
-    // We don't want to `throw` here becuase we don't know for sure that the item is one we care about.
+    // We don't want to `throw` here because we don't know for sure that the item is one we care about.
     // So we just return the data and the Lists plugin will likely error out because it can't find the item
     if (!currentSavedItem) {
       return data;
