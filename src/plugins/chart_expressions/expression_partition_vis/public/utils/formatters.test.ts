@@ -10,7 +10,7 @@ import { Datatable } from '../../../../expressions';
 import { createMockPieParams, createMockVisData } from '../mocks';
 import { generateFormatters } from './formatters';
 
-describe('filterOutConfig', () => {
+describe('generateFormatters', () => {
   const visParams = createMockPieParams();
   const visData = createMockVisData();
   const defaultFormatter = jest.fn((formatParams: any) => ({
