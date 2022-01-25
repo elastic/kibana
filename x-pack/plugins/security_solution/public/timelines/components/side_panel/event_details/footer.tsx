@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { find, get, isEmpty } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
@@ -22,6 +23,7 @@ import { Ecs } from '../../../../../common/ecs';
 import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { ACTIVE_PANEL } from './index';
+import { CANCEL } from './translations';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -36,7 +38,8 @@ interface EventDetailsFooterProps {
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
-  handlePanelChange: (type: ACTIVE_PANEL) => void;
+  handlePanelChange: (type: ACTIVE_PANEL | null) => void;
+  preventTakeActionDropdown: boolean;
 }
 
 interface AddExceptionModalWrapperData {
@@ -59,6 +62,7 @@ export const EventDetailsFooterComponent = React.memo(
     globalQuery,
     timelineQuery,
     handlePanelChange,
+    preventTakeActionDropdown,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
@@ -122,28 +126,52 @@ export const EventDetailsFooterComponent = React.memo(
     });
 
     const ecsData = detailsEcsData ?? get(0, alertsEcsData);
+    const renderFooterBody = useCallback(() => {
+      if (preventTakeActionDropdown) {
+        return (
+          <EuiButtonEmpty onClick={() => handlePanelChange(null)}>
+            <FormattedMessage id={CANCEL} defaultMessage="Cancel" />
+          </EuiButtonEmpty>
+        );
+      }
+      return (
+        ecsData && (
+          <TakeActionDropdown
+            detailsData={detailsData}
+            ecsData={ecsData}
+            handleOnEventClosed={handleOnEventClosed}
+            isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+            loadingEventDetails={loadingEventDetails}
+            onAddEventFilterClick={onAddEventFilterClick}
+            onAddExceptionTypeClick={onAddExceptionTypeClick}
+            onAddIsolationStatusClick={onAddIsolationStatusClick}
+            refetch={refetchAll}
+            indexName={expandedEvent.indexName}
+            timelineId={timelineId}
+            handlePanelChange={handlePanelChange}
+          />
+        )
+      );
+    }, [
+      detailsData,
+      ecsData,
+      expandedEvent.indexName,
+      handleOnEventClosed,
+      handlePanelChange,
+      isHostIsolationPanelOpen,
+      loadingEventDetails,
+      onAddEventFilterClick,
+      onAddExceptionTypeClick,
+      onAddIsolationStatusClick,
+      preventTakeActionDropdown,
+      refetchAll,
+      timelineId,
+    ]);
     return (
       <>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              {ecsData && (
-                <TakeActionDropdown
-                  detailsData={detailsData}
-                  ecsData={ecsData}
-                  handleOnEventClosed={handleOnEventClosed}
-                  isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-                  loadingEventDetails={loadingEventDetails}
-                  onAddEventFilterClick={onAddEventFilterClick}
-                  onAddExceptionTypeClick={onAddExceptionTypeClick}
-                  onAddIsolationStatusClick={onAddIsolationStatusClick}
-                  refetch={refetchAll}
-                  indexName={expandedEvent.indexName}
-                  timelineId={timelineId}
-                  handlePanelChange={handlePanelChange}
-                />
-              )}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{renderFooterBody()}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
         {/* This is still wrong to do render flyout/modal inside of the flyout

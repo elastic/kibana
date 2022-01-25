@@ -37,7 +37,7 @@ import { EntityType } from '../../../../../../timelines/common';
 import { useHostsRiskScore } from '../../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)<{ preventPadding: boolean }>`
   .euiFlyoutBody__overflow {
     display: flex;
     flex: 1;
@@ -46,7 +46,8 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
+      padding: ${({ theme, preventPadding }) =>
+        !preventPadding && `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
     }
   }
 `;
@@ -85,7 +86,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   tabType,
   timelineId,
 }) => {
-  const [loading, detailsData, rawEventData, ecsData, ...rest] = useTimelineEventsDetails({
+  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
@@ -97,7 +98,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const {
     services: { osquery },
   } = useKibana();
-  const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
   const [isActivePanel, setIsActivePanel] = useState<number | null>(null);
   const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
     'isolateHost'
@@ -150,25 +150,26 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const OsqueryLiveQuery = useMemo(() => osquery.OsqueryAction, [osquery]);
 
-  const backToAlertDetailsLink = useMemo(() => {
-    return (
-      <>
-        <EuiButtonEmpty
-          iconType="arrowLeft"
-          iconSide="left"
-          flush="left"
-          onClick={() => showAlertDetails()}
-        >
-          <EuiText size="xs">
-            <p>{ALERT_DETAILS}</p>
-          </EuiText>
-        </EuiButtonEmpty>
-        <EuiTitle>
-          <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
-        </EuiTitle>
-      </>
-    );
-  }, [showAlertDetails, isolateAction]);
+  const backToAlertDetailsLink = useCallback(
+    (primaryText) => {
+      return (
+        <>
+          <EuiButtonEmpty
+            iconType="arrowLeft"
+            iconSide="left"
+            flush="left"
+            onClick={() => showAlertDetails()}
+          >
+            <EuiText size="xs">
+              <p>{ALERT_DETAILS}</p>
+            </EuiText>
+          </EuiButtonEmpty>
+          <EuiTitle>{primaryText}</EuiTitle>
+        </>
+      );
+    },
+    [showAlertDetails]
+  );
 
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
@@ -181,15 +182,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }, [caseDetailsRefresh]);
 
   const renderFlyoutHeader = useMemo(() => {
+    let text;
     switch (isActivePanel) {
       case ACTIVE_PANEL.OSQUERY:
-        return (
-          <EuiTitle>
-            <h2>{RUN_OSQUERY}</h2>
-          </EuiTitle>
-        );
+        text = <h2>{RUN_OSQUERY}</h2>;
+        return backToAlertDetailsLink(text);
       case ACTIVE_PANEL.HOST_ISOLATION:
-        return backToAlertDetailsLink;
+        text = <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>;
+        return backToAlertDetailsLink(text);
       default:
         return (
           <ExpandableEventTitle
@@ -232,6 +232,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         );
     }
   }, [
+    OsqueryLiveQuery,
     agentId,
     browserFields,
     detailsData,
@@ -253,7 +254,15 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     return null;
   }
 
-  const hostIsolation = isFlyoutView ? (
+  const handlePanelChange = (panelType: ACTIVE_PANEL | null) => {
+    if (isActivePanel === ACTIVE_PANEL.OSQUERY && panelType === null) {
+      showAlertDetails();
+      return;
+    }
+    setIsActivePanel(panelType);
+  };
+
+  return isFlyoutView ? (
     <>
       <EuiFlyoutHeader hasBorder={isActivePanel != null}>{renderFlyoutHeader}</EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
@@ -263,20 +272,21 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           isolateAction={isolateAction}
         />
       )}
-      <StyledEuiFlyoutBody>{renderFlyoutBody}</StyledEuiFlyoutBody>
+      <StyledEuiFlyoutBody preventPadding={isActivePanel === ACTIVE_PANEL.OSQUERY}>
+        {renderFlyoutBody}
+      </StyledEuiFlyoutBody>
 
-      {/* TODO add osquery footer*/}
       <EventDetailsFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
         handleOnEventClosed={handleOnEventClosed}
-        // TODO verify this one, maybe pass some generic object with config
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isHostIsolationPanelOpen={isActivePanel === ACTIVE_PANEL.HOST_ISOLATION}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
         timelineId={timelineId}
-        handlePanelChange={setIsActivePanel}
+        handlePanelChange={handlePanelChange}
+        preventTakeActionDropdown={isActivePanel === ACTIVE_PANEL.OSQUERY}
       />
     </>
   ) : (
@@ -303,7 +313,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       />
     </>
   );
-  return hostIsolation;
 };
 
 export const EventDetailsPanel = React.memo(
