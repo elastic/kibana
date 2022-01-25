@@ -19,6 +19,7 @@ import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 export const SHAPEFILE_TYPES = ['.shp'];
 
 export class ShapefileImporter extends AbstractGeoFileImporter {
+  private _tableRowCount: number | null = null;
   private _dbfFile: File | null = null;
   private _prjFile: File | null = null;
   private _shxFile: File | null = null;
@@ -45,6 +46,18 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
         }}
       />
     );
+  }
+
+  protected _getProgress(featuresProcessed: number, bytesProcessed: number) {
+    if (this._tableRowCount === null || this._tableRowCount === 0) {
+      return 0;
+    }
+
+    if (featuresProcessed > this._tableRowCount) {
+      return 100;
+    }
+
+    return (featuresProcessed / this._tableRowCount) * 100;
   }
 
   protected async _readNext(prevTotalFeaturesRead: number, prevTotalBytesRead: number) {
@@ -75,10 +88,10 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
           // Don't log the metadata, only the geo data
           metadata: false,
         });
-      console.log(this._iterator);
     }
 
     const { value: batch, done } = await this._iterator.next();
+    console.log(this._iterator);
 
     console.log(batch);
     console.log(done);
@@ -94,6 +107,8 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
         results.geometryTypesMap.set(feature.geometry.type, true);
       }
       results.features.push(feature);
+      const featureChars = JSON.stringify(feature).length;
+      results.bytesRead = results.bytesRead + featureChars;
     }
 
     return results;

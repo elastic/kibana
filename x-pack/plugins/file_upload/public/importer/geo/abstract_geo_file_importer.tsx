@@ -55,7 +55,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     return {
       features: [...this._features],
       previewCoverage: this._hasNext
-        ? Math.round((this._blockSizeInBytes / this._file.size) * 100)
+        ? Math.round(this._getProgress(this._features.length, this._blockSizeInBytes))
         : 100,
       hasPoints: this._geometryTypesMap.has('Point') || this._geometryTypesMap.has('MultiPoint'),
       hasShapes:
@@ -232,8 +232,8 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
         // because features are converted to elasticsearch documents which changes the size.
         const chunkProgress = (i + 1) / chunks.length;
         const totalBytesImported = this._totalBytesImported + blockSizeInBytes * chunkProgress;
-        const progressPercent = (totalBytesImported / this._file.size) * 100;
-        setImportProgress(Math.round(progressPercent * 10) / 10);
+        const importPercent = this._getProgress(this._totalFeaturesImported, totalBytesImported);
+        setImportProgress(Math.round(importPercent * 10) / 10);
       } else {
         success = false;
         error = resp.error;
@@ -278,6 +278,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     hasNext: boolean;
   }> {
     throw new Error('Should implement AbstractGeoFileImporter._next');
+  }
+
+  protected _getProgress(featuresProcessed: number, bytesProcessed: number) {
+    return (bytesProcessed / this._file.size) * 100;
   }
 
   protected _getIsActive() {
