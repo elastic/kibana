@@ -15,9 +15,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiTourStep,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../data/public';
-import { AdjustSearch, getTimeFieldMessage } from './no_results_helper';
+import { AdjustSearch } from './no_results_helper';
 import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';
 
@@ -28,6 +31,8 @@ export interface DiscoverNoResultsProps {
   hasQuery?: boolean;
   hasFilters?: boolean;
   onDisableFilters: () => void;
+  onOpenDatePicker: () => void;
+  onEditSearch: () => void;
 }
 
 export function DiscoverNoResults({
@@ -37,6 +42,8 @@ export function DiscoverNoResults({
   hasFilters,
   hasQuery,
   onDisableFilters,
+  onOpenDatePicker,
+  onEditSearch,
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
     <EuiFlexItem grow={false} className="dscNoResults">
@@ -54,12 +61,14 @@ export function DiscoverNoResults({
           <NoResultsIllustration />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          {isTimeBased && getTimeFieldMessage()}
-          {(hasFilters || hasQuery) && (
+          {(hasFilters || hasQuery || isTimeBased) && (
             <AdjustSearch
+              isTimeBased={isTimeBased}
               hasFilters={hasFilters}
               hasQuery={hasQuery}
               onDisableFilters={onDisableFilters}
+              onOpenDatePicker={onOpenDatePicker}
+              onEditSearch={onEditSearch}
             />
           )}
         </EuiFlexItem>

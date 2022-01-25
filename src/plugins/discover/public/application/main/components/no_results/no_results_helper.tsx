@@ -16,36 +16,51 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export function getTimeFieldMessage() {
-  return (
-    <Fragment>
-      <EuiDescriptionList compressed>
-        <EuiDescriptionListTitle data-test-subj="discoverNoResultsTimefilter">
-          <FormattedMessage
-            id="discover.noResults.expandYourTimeRangeTitle"
-            defaultMessage="Expand your time range"
-          />
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <FormattedMessage
-            id="discover.noResults.queryMayNotMatchTitle"
-            defaultMessage="Try searching over a longer period of time."
-          />
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
-    </Fragment>
-  );
-}
-
 interface AdjustSearchProps {
   onDisableFilters: () => void;
+  onOpenDatePicker: () => void;
+  onEditSearch: () => void;
+  isTimeBased?: boolean;
   hasFilters?: boolean;
   hasQuery?: boolean;
 }
 
-export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustSearchProps) {
+export function AdjustSearch({
+  isTimeBased,
+  hasFilters,
+  hasQuery,
+  onDisableFilters,
+  onOpenDatePicker,
+  onEditSearch,
+}: AdjustSearchProps) {
   return (
     <Fragment>
+      {isTimeBased && (
+        <EuiDescriptionList compressed>
+          <EuiDescriptionListTitle data-test-subj="discoverNoResultsTimefilter">
+            <FormattedMessage
+              id="discover.noResults.expandYourTimeRangeTitle"
+              defaultMessage="Expand your time range"
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            <FormattedMessage
+              id="discover.noResults.queryMayNotMatchTitle"
+              defaultMessage="Try {openDatePickerLink}."
+              values={{
+                openDatePickerLink: (
+                  <EuiLink data-test-subj="discoverBadTimeRange" onClick={onOpenDatePicker}>
+                    <FormattedMessage
+                      id="discover.noResults.badTimeRange"
+                      defaultMessage="searching over a longer period of time"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      )}
       {hasQuery && (
         <>
           <EuiSpacer size="s" />
@@ -59,7 +74,20 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
             <EuiDescriptionListDescription>
               <FormattedMessage
                 id="discover.noResults.trySearchingForDifferentCombination"
-                defaultMessage="Try searching for a different combination of terms."
+                defaultMessage="Try {searchLink}."
+                values={{
+                  searchLink: (
+                    <EuiLink
+                      data-test-subj="discoverNoResultsDisableFilters"
+                      onClick={onEditSearch}
+                    >
+                      <FormattedMessage
+                        id="discover.noResults.temporaryDisablingFiltersLinkText"
+                        defaultMessage="searching for a different combination of terms"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
@@ -78,7 +106,7 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
             <EuiDescriptionListDescription>
               <FormattedMessage
                 id="discover.noResults.tryRemovingOrDisablingFilters"
-                defaultMessage="Try removing or {disablingFiltersLink}."
+                defaultMessage="Try {disablingFiltersLink}."
                 values={{
                   disablingFiltersLink: (
                     <EuiLink

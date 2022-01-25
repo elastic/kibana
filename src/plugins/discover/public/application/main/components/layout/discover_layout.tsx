@@ -198,6 +198,14 @@ export function DiscoverLayout({
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
+  const onOpenDatePicker = useCallback(() => {
+    console.log('Open date picker...');
+  }, []);
+
+  const onEditSearch = useCallback(() => {
+    console.log('Edit search...');
+  }, []);
+
   const toggleSidebarCollapse = useCallback(() => {
     storage.set(SIDEBAR_CLOSED_KEY, !isSidebarClosed);
     setIsSidebarClosed(!isSidebarClosed);
@@ -287,6 +295,8 @@ export function DiscoverLayout({
                     state.filters && state.filters.filter((f) => !f.meta.disabled).length > 0
                   }
                   onDisableFilters={onDisableFilters}
+                  onEditSearch={onEditSearch}
+                  onOpenDatePicker={onOpenDatePicker}
                 />
               )}
               {resultState === 'uninitialized' && (
