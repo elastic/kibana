@@ -144,11 +144,13 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
     await this.apiClient
       .createImmediateReport(immediateJobParams)
-      .then((rawResponse) => {
+      .then(({ body, response }) => {
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([body as BlobPart], {
+          type: response?.headers.get('content-type') || undefined,
+        });
 
         // Hack for IE11 Support
         // @ts-expect-error
