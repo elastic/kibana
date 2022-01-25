@@ -6,17 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionVariables } from '../../types';
-import { ActionVariable } from '../../../../alerting/common';
+import { pick } from 'lodash';
+import { ActionVariables, REQUIRED_ACTION_VARIABLES } from '../../types';
+import { ActionVariable, RecoveredActionGroup } from '../../../../alerting/common';
+import { ActionGroupWithMessageVariables } from '../sections/action_connector_form/action_form';
 
 // return a "flattened" list of action variables for an alertType
-export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {
+export function transformActionVariables(
+  actionVariables: ActionVariables,
+  actionGroup?: ActionGroupWithMessageVariables
+): ActionVariable[] {
+  const filteredActionVariables: ActionVariables = actionGroup?.omitOptionalMessageVariables
+    ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
+    : actionVariables;
+
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
-  const contextVars = actionVariables.context
-    ? prefixKeys(actionVariables.context, 'context.')
+  const contextVars = filteredActionVariables.context
+    ? prefixKeys(filteredActionVariables.context, 'context.')
     : [];
-  const paramsVars = prefixKeys(actionVariables.params, 'params.');
-  const stateVars = prefixKeys(actionVariables.state, 'state.');
+
+  const paramsVars = prefixKeys(filteredActionVariables.params, 'params.');
+  const stateVars =
+    actionGroup?.id === RecoveredActionGroup.id
+      ? []
+      : prefixKeys(filteredActionVariables.state, 'state.');
 
   return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }
