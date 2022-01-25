@@ -35,22 +35,23 @@ export function useErrorGroupDistributionFetcher({
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/errors/distribution',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              comparisonStart,
-              comparisonEnd,
-              groupId,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/distribution',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                comparisonStart,
+                comparisonEnd,
+                groupId,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [
