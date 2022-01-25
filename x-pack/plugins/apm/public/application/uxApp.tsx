@@ -90,7 +90,7 @@ function UxApp() {
   );
 }
 
-const uxRouter = createRouter([]);
+const uxRouter = createRouter({});
 
 export function UXAppRoot({
   appMountParameters,
