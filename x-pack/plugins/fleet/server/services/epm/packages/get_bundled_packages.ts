@@ -24,7 +24,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
       const file = await fs.readFile(path.join(BUNDLED_PACKAGE_DIRECTORY, zipFile));
 
       return {
-        name: zipFile.replace('.zip', ''),
+        name: zipFile.replace(/\.zip$/, ''),
         buffer: file,
       };
     })

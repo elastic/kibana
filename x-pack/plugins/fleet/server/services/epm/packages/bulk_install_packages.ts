@@ -47,7 +47,7 @@ export async function bulkInstallPackages({
   logger.debug(
     `kicking off bulk install of ${packagesToInstall.join(
       ', '
-    )} with preferred source of ${preferredSource}`
+    )} with preferred source of "${preferredSource}"`
   );
 
   const bulkInstallResults = await Promise.allSettled(

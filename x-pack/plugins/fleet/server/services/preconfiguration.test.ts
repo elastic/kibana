@@ -170,6 +170,7 @@ jest.mock('./epm/packages/install', () => ({
         return installedPackage;
       }
 
+      // Just install every bundled package at version '1.0.0'
       const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
       mockInstalledPackages.set(pkgName, packageInstallation);
 
@@ -179,7 +180,31 @@ jest.mock('./epm/packages/install', () => ({
   ensurePackagesCompletedInstall() {
     return [];
   },
-  isPackageVersionOrLaterInstalled() {
+  isPackageVersionOrLaterInstalled({
+    soClient,
+    pkgName,
+    pkgVersion,
+  }: {
+    soClient: any;
+    pkgName: string;
+    pkgVersion: string;
+  }) {
+    const installedPackage = mockInstalledPackages.get(pkgName);
+
+    if (installedPackage) {
+      if (installedPackage.version === pkgVersion) {
+        return { package: installedPackage, installType: 'reinstall' };
+      }
+
+      // Importing semver methods throws an error in jest, so just use a rough check instead
+      if (installedPackage.version < pkgVersion) {
+        return false;
+      }
+      if (installedPackage.version > pkgVersion) {
+        return { package: installedPackage, installType: 'rollback' };
+      }
+    }
+
     return false;
   },
   getInstallType: jest.fn(),
@@ -660,6 +685,7 @@ describe('policy preconfiguration', () => {
 
   describe('with bundled packages', () => {
     beforeEach(() => {
+      mockInstalledPackages.clear();
       mockedGetBundledPackages.mockReset();
     });
 
@@ -700,6 +726,91 @@ describe('policy preconfiguration', () => {
       expect(policies).toEqual([]);
       expect(packages).toEqual(['test_package-1.0.0', 'test_package_2-1.0.0']);
       expect(nonFatalErrors).toEqual([]);
+    });
+
+    describe('package updates', () => {
+      describe('when bundled package is a newer version', () => {
+        it('installs new version of package from disk', async () => {
+          mockedGetBundledPackages.mockResolvedValue([
+            {
+              name: 'test_package',
+              buffer: Buffer.from('test_package'),
+            },
+          ]);
+
+          const soClient = getPutPreconfiguredPackagesMock();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+          // Install an older version of a test package
+          mockInstalledPackages.set('test_package', { version: '0.9.0' });
+
+          const { policies, packages, nonFatalErrors } =
+            await ensurePreconfiguredPackagesAndPolicies(
+              soClient,
+              esClient,
+              [],
+              [
+                {
+                  name: 'test_package',
+                  version: 'latest',
+                },
+              ],
+              mockDefaultOutput,
+              DEFAULT_SPACE_ID
+            );
+
+          // Package version should be updated
+          expect(mockInstalledPackages.get('test_package').version).toEqual('1.0.0');
+
+          expect(policies).toEqual([]);
+          expect(packages).toEqual(['test_package-1.0.0']);
+          expect(nonFatalErrors).toEqual([]);
+        });
+      });
+
+      describe('when bundled package is not a newer version', () => {
+        it('does not install package from disk', async () => {
+          mockedGetBundledPackages.mockResolvedValue([
+            {
+              name: 'test_package',
+              buffer: Buffer.from('test_package'),
+            },
+          ]);
+
+          const soClient = getPutPreconfiguredPackagesMock();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+          // Install an newer version of a test package
+          mockInstalledPackages.set('test_package', {
+            version: '2.0.0',
+            name: 'test_package',
+            installed_es: [],
+            installed_kibana: [],
+          });
+
+          const { policies, packages, nonFatalErrors } =
+            await ensurePreconfiguredPackagesAndPolicies(
+              soClient,
+              esClient,
+              [],
+              [
+                {
+                  name: 'test_package',
+                  version: 'latest',
+                },
+              ],
+              mockDefaultOutput,
+              DEFAULT_SPACE_ID
+            );
+
+          // Package version should be unchanged
+          expect(mockInstalledPackages.get('test_package').version).toEqual('2.0.0');
+
+          expect(packages).toEqual(['test_package-2.0.0']);
+          expect(policies).toEqual([]);
+          expect(nonFatalErrors).toEqual([]);
+        });
+      });
     });
   });
 });

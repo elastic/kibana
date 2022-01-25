@@ -10,7 +10,11 @@ import { compact } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
-import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
+import type {
+  DefaultPackagesInstallationError,
+  PreconfigurationError,
+  FleetConfigType,
+} from '../../common';
 import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
@@ -43,23 +47,33 @@ export interface SetupStatus {
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  // Allows for passing in config options rather than pulling from the `appContextService` - useful in tests
+  configOverride?: FleetConfigType
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, configOverride));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  configOverride?: FleetConfigType
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
-  const {
+  let {
     agentPolicies: policiesOrUndefined,
     packages: packagesOrUndefined,
     outputs: outputsOrUndefined,
   } = appContextService.getConfig() ?? {};
+
+  // If an override option is provided, re
+  if (configOverride) {
+    policiesOrUndefined = configOverride.agentPolicies;
+    packagesOrUndefined = configOverride.packages;
+    outputsOrUndefined = configOverride.outputs;
+  }
 
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];

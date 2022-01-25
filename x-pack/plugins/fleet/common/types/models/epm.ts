@@ -415,13 +415,13 @@ export interface PackageUsageStats {
 }
 
 export type Installable<T> =
-  | Installed<T>
+  | InstalledRegistry<T>
   | Installing<T>
   | NotInstalled<T>
   | InstallFailed<T>
   | InstalledBundled<T>;
 
-export type Installed<T = {}> = T & {
+export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
 };
