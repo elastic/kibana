@@ -7,5 +7,6 @@
   "types": "./target_types/index.d.ts",
   "kibana": {
     "devOnly": true
-  }
+  },
+  "sideEffects": false
 }

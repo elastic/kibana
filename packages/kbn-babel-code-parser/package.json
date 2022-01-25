@@ -8,5 +8,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana/tree/main/packages/kbn-babel-code-parser"
-  }
+  },
+  "sideEffects": false
 }

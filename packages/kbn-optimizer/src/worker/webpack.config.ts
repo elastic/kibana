@@ -132,6 +132,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.css$/,
           include: /node_modules/,
+          sideEffects: true,
           use: [
             {
               loader: 'style-loader',
@@ -147,6 +148,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.scss$/,
           exclude: nodeModulesButNotKbnPackages,
+          sideEffects: true,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,
@@ -204,6 +206,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
           loader: 'url-loader',
+          sideEffects: true,
           options: {
             limit: 8192,
           },
@@ -224,6 +227,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
+          sideEffects: true,
           use: {
             loader: 'raw-loader',
           },
@@ -276,6 +280,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     ],
 
     optimization: {
+      usedExports: true,
       minimizer: [
         new TerserPlugin({
           cache: false,

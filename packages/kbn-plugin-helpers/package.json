@@ -10,5 +10,6 @@
   "main": "target_node/index.js",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
-  }
+  },
+  "sideEffects": false
 }

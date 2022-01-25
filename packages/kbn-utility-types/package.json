@@ -9,5 +9,6 @@
   },
   "scripts": {
     "test": "../../node_modules/.bin/tsd src/tsd_tests"
-  }
+  },
+  "sideEffects": false
 }

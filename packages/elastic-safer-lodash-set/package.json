@@ -33,5 +33,6 @@
     "ignore": [
       "/lodash/"
     ]
-  }
+  },
+  "sideEffects": false
 }

@@ -11,5 +11,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana/tree/main/packages/kbn-eslint-import-resolver-kibana"
-  }
+  },
+  "sideEffects": false
 }

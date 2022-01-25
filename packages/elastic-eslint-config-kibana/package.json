@@ -16,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana"
+  "homepage": "https://github.com/elastic/kibana/tree/main/packages/elastic-eslint-config-kibana",
+  "sideEffects": false
 }

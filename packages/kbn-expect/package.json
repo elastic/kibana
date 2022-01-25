@@ -7,5 +7,6 @@
   "private": true,
   "kibana": {
     "devOnly": true
-  }
+  },
+  "sideEffects": false
 }

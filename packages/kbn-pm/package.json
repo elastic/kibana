@@ -11,5 +11,6 @@
     "build": "../../node_modules/.bin/webpack",
     "kbn:watch": "../../node_modules/.bin/webpack --watch",
     "prettier": "../../node_modules/.bin/prettier --write './src/**/*.ts'"
-  }
+  },
+  "sideEffects": false
 }

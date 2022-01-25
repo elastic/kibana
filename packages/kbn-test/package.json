@@ -7,5 +7,6 @@
   "types": "./target_types",
   "kibana": {
     "devOnly": true
-  }
+  },
+  "sideEffects": false
 }
