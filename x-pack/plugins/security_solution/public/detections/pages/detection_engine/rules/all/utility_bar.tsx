@@ -29,7 +29,7 @@ interface AllRulesUtilityBarProps {
   isAutoRefreshOn?: boolean;
   numberSelectedItems: number;
   onGetBatchItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
-  onRefresh?: (refreshRule: boolean) => void;
+  onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
   paginationTotal: number;

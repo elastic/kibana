@@ -52,6 +52,36 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
   defaultMessage: 'Rules',
 });
 
+export const EXPERIMENTAL_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOn',
+  {
+    defaultMessage: 'Experimental: On',
+  }
+);
+
+export const EXPERIMENTAL_ON_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOnDescription',
+  {
+    defaultMessage:
+      'The experimental rules table view allows for advanced sorting and filtering capabilities. If you experience performance issues when working with the table, you can turn the experimental view off in Security Solution Advanced Settings.',
+  }
+);
+
+export const EXPERIMENTAL_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
+  {
+    defaultMessage: 'Experimental: Off',
+  }
+);
+
+export const EXPERIMENTAL_OFF_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOffDescription',
+  {
+    defaultMessage:
+      "The experimental rules table view allows for advanced sorting and filtering capabilities. It is turned off because you have more than 3000 rules. If you'd like to turn it on, you can do that in Security Solutions Advanced Settings.",
+  }
+);
+
 export const ADD_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addPageTitle',
   {
