@@ -16,7 +16,13 @@ import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
-import { createMockPieParams, createMockVisData } from '../mocks';
+import {
+  createMockDonutParams,
+  createMockPieParams,
+  createMockTreemapMosaicParams,
+  createMockVisData,
+  createMockWaffleParams,
+} from '../mocks';
 import { ChartTypes } from '../../common/types';
 
 jest.mock('@elastic/charts', () => {
@@ -62,6 +68,67 @@ describe('PartitionVisComponent', function () {
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
       },
     };
+  });
+
+  it('should render correct structure for pie', function () {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render correct structure for donut', function () {
+    const donutVisParams = createMockDonutParams();
+    const component = shallow(
+      <PartitionVisComponent
+        {...{
+          ...wrapperProps,
+          visType: ChartTypes.DONUT,
+          visParams: donutVisParams,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render correct structure for treemap', function () {
+    const treemapVisParams = createMockTreemapMosaicParams();
+    const component = shallow(
+      <PartitionVisComponent
+        {...{
+          ...wrapperProps,
+          visType: ChartTypes.TREEMAP,
+          visParams: treemapVisParams,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render correct structure for mosaic', function () {
+    const mosaicVisParams = createMockTreemapMosaicParams();
+    const component = shallow(
+      <PartitionVisComponent
+        {...{
+          ...wrapperProps,
+          visType: ChartTypes.MOSAIC,
+          visParams: mosaicVisParams,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render correct structure for waffle', function () {
+    const waffleVisParams = createMockWaffleParams();
+    const component = shallow(
+      <PartitionVisComponent
+        {...{
+          ...wrapperProps,
+          visType: ChartTypes.MOSAIC,
+          visParams: waffleVisParams,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
   });
 
   it('renders the legend on the correct position', () => {

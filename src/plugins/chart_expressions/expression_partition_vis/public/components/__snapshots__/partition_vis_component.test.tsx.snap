@@ -1,0 +1,956 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PartitionVisComponent should render correct structure for donut 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "14oiihj",
+      "next": undefined,
+      "styles": "
+  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 8px;
+  margin-left: auto;
+  margin-right: auto;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="visTypePieChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "1lu5dww",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "toString": [Function],
+      }
+    }
+  >
+    <Memo(LegendToggleComponent)
+      legendPosition="right"
+      onClick={[Function]}
+      showLegend={true}
+    />
+    <Chart
+      renderer="canvas"
+      size="100%"
+    >
+      <ChartSplit />
+      <Connect(SpecInstance)
+        baseTheme={Object {}}
+        debugState={false}
+        flatLegend={false}
+        legendAction={[Function]}
+        legendColorPicker={[Function]}
+        legendMaxDepth={1}
+        legendPosition="right"
+        onElementClick={[Function]}
+        onRenderChange={[Function]}
+        showLegend={true}
+        theme={
+          Array [
+            Object {
+              "background": Object {
+                "color": "transparent",
+              },
+            },
+            Object {
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 1,
+                },
+              },
+            },
+          ]
+        }
+        tooltip={
+          Object {
+            "type": "follow",
+          }
+        }
+      />
+      <Connect(SpecInstance)
+        config={
+          Object {
+            "circlePadding": 4,
+            "emptySizeRatio": 0.3,
+            "fontFamily": undefined,
+            "linkLabel": Object {
+              "fontSize": 11,
+              "maxCount": 5,
+              "maxTextLength": 100,
+              "textColor": undefined,
+            },
+            "maxFontSize": 16,
+            "minFontSize": 10,
+            "outerSizeRatio": undefined,
+            "partitionLayout": "sunburst",
+            "sectorLineStroke": undefined,
+            "sectorLineWidth": 1.5,
+          }
+        }
+        data={
+          Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ]
+        }
+        id="donut"
+        layers={
+          Array [
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": undefined,
+            },
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": undefined,
+            },
+          ]
+        }
+        percentFormatter={[Function]}
+        smallMultiples="__pie_chart_sm__"
+        valueAccessor={[Function]}
+        valueFormatter={[Function]}
+        valueGetter="percent"
+      />
+    </Chart>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for mosaic 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "14oiihj",
+      "next": undefined,
+      "styles": "
+  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 8px;
+  margin-left: auto;
+  margin-right: auto;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="visTypePieChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "1lu5dww",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "toString": [Function],
+      }
+    }
+  >
+    <Memo(LegendToggleComponent)
+      legendPosition="right"
+      onClick={[Function]}
+      showLegend={true}
+    />
+    <Chart
+      renderer="canvas"
+      size="100%"
+    >
+      <ChartSplit />
+      <Connect(SpecInstance)
+        baseTheme={Object {}}
+        debugState={false}
+        flatLegend={false}
+        legendAction={[Function]}
+        legendColorPicker={[Function]}
+        legendPosition="right"
+        onElementClick={[Function]}
+        onRenderChange={[Function]}
+        showLegend={true}
+        theme={
+          Array [
+            Object {
+              "background": Object {
+                "color": "transparent",
+              },
+            },
+            Object {
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 1,
+                },
+              },
+            },
+          ]
+        }
+        tooltip={
+          Object {
+            "type": "follow",
+          }
+        }
+      />
+      <Connect(SpecInstance)
+        config={
+          Object {
+            "circlePadding": 4,
+            "emptySizeRatio": 0,
+            "fontFamily": undefined,
+            "linkLabel": Object {
+              "fontSize": 11,
+              "maxCount": 5,
+              "maxTextLength": undefined,
+              "textColor": undefined,
+            },
+            "maxFontSize": 16,
+            "minFontSize": 10,
+            "outerSizeRatio": 1,
+            "partitionLayout": "mosaic",
+            "sectorLineStroke": undefined,
+            "sectorLineWidth": 1.5,
+          }
+        }
+        data={
+          Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ]
+        }
+        id="mosaic"
+        layers={
+          Array [
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": [Function],
+            },
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": [Function],
+            },
+          ]
+        }
+        percentFormatter={[Function]}
+        smallMultiples="__pie_chart_sm__"
+        valueAccessor={[Function]}
+        valueFormatter={[Function]}
+        valueGetter="percent"
+      />
+    </Chart>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for pie 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "14oiihj",
+      "next": undefined,
+      "styles": "
+  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 8px;
+  margin-left: auto;
+  margin-right: auto;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="visTypePieChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "1lu5dww",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "toString": [Function],
+      }
+    }
+  >
+    <Memo(LegendToggleComponent)
+      legendPosition="right"
+      onClick={[Function]}
+      showLegend={true}
+    />
+    <Chart
+      renderer="canvas"
+      size="100%"
+    >
+      <ChartSplit />
+      <Connect(SpecInstance)
+        baseTheme={Object {}}
+        debugState={false}
+        flatLegend={false}
+        legendAction={[Function]}
+        legendColorPicker={[Function]}
+        legendMaxDepth={1}
+        legendPosition="right"
+        onElementClick={[Function]}
+        onRenderChange={[Function]}
+        showLegend={true}
+        theme={
+          Array [
+            Object {
+              "background": Object {
+                "color": "transparent",
+              },
+            },
+            Object {
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 1,
+                },
+              },
+            },
+          ]
+        }
+        tooltip={
+          Object {
+            "type": "follow",
+          }
+        }
+      />
+      <Connect(SpecInstance)
+        config={
+          Object {
+            "circlePadding": 4,
+            "emptySizeRatio": 0,
+            "fontFamily": undefined,
+            "linkLabel": Object {
+              "fontSize": 11,
+              "maxCount": 5,
+              "maxTextLength": 100,
+              "textColor": undefined,
+            },
+            "maxFontSize": 16,
+            "minFontSize": 10,
+            "outerSizeRatio": undefined,
+            "partitionLayout": "sunburst",
+            "sectorLineStroke": undefined,
+            "sectorLineWidth": 1.5,
+          }
+        }
+        data={
+          Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ]
+        }
+        id="pie"
+        layers={
+          Array [
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": undefined,
+            },
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": undefined,
+            },
+          ]
+        }
+        percentFormatter={[Function]}
+        smallMultiples="__pie_chart_sm__"
+        valueAccessor={[Function]}
+        valueFormatter={[Function]}
+        valueGetter="percent"
+      />
+    </Chart>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for treemap 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "14oiihj",
+      "next": undefined,
+      "styles": "
+  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 8px;
+  margin-left: auto;
+  margin-right: auto;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="visTypePieChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "1lu5dww",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "toString": [Function],
+      }
+    }
+  >
+    <Memo(LegendToggleComponent)
+      legendPosition="right"
+      onClick={[Function]}
+      showLegend={true}
+    />
+    <Chart
+      renderer="canvas"
+      size="100%"
+    >
+      <ChartSplit />
+      <Connect(SpecInstance)
+        baseTheme={Object {}}
+        debugState={false}
+        flatLegend={false}
+        legendAction={[Function]}
+        legendColorPicker={[Function]}
+        legendPosition="right"
+        onElementClick={[Function]}
+        onRenderChange={[Function]}
+        showLegend={true}
+        theme={
+          Array [
+            Object {
+              "background": Object {
+                "color": "transparent",
+              },
+            },
+            Object {
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 1,
+                },
+              },
+            },
+          ]
+        }
+        tooltip={
+          Object {
+            "type": "follow",
+          }
+        }
+      />
+      <Connect(SpecInstance)
+        config={
+          Object {
+            "circlePadding": 4,
+            "emptySizeRatio": 0,
+            "fontFamily": undefined,
+            "linkLabel": Object {
+              "fontSize": 11,
+              "maxCount": 5,
+              "maxTextLength": undefined,
+              "textColor": undefined,
+            },
+            "maxFontSize": 16,
+            "minFontSize": 10,
+            "outerSizeRatio": 1,
+            "partitionLayout": "treemap",
+            "sectorLineStroke": undefined,
+            "sectorLineWidth": 1.5,
+          }
+        }
+        data={
+          Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ]
+        }
+        id="treemap"
+        layers={
+          Array [
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": undefined,
+            },
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": undefined,
+            },
+          ]
+        }
+        percentFormatter={[Function]}
+        smallMultiples="__pie_chart_sm__"
+        valueAccessor={[Function]}
+        valueFormatter={[Function]}
+        valueGetter="percent"
+      />
+    </Chart>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for waffle 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "14oiihj",
+      "next": undefined,
+      "styles": "
+  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 8px;
+  margin-left: auto;
+  margin-right: auto;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="visTypePieChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "1lu5dww",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "toString": [Function],
+      }
+    }
+  >
+    <Memo(LegendToggleComponent)
+      legendPosition="right"
+      onClick={[Function]}
+      showLegend={true}
+    />
+    <Chart
+      renderer="canvas"
+      size="100%"
+    >
+      <ChartSplit />
+      <Connect(SpecInstance)
+        baseTheme={Object {}}
+        debugState={false}
+        flatLegend={false}
+        legendAction={[Function]}
+        legendColorPicker={[Function]}
+        legendMaxDepth={1}
+        legendPosition="right"
+        onElementClick={[Function]}
+        onRenderChange={[Function]}
+        showLegend={true}
+        showLegendExtra={true}
+        theme={
+          Array [
+            Object {
+              "background": Object {
+                "color": "transparent",
+              },
+            },
+            Object {
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 1,
+                },
+              },
+            },
+          ]
+        }
+        tooltip={
+          Object {
+            "type": "follow",
+          }
+        }
+      />
+      <Connect(SpecInstance)
+        config={
+          Object {
+            "circlePadding": 4,
+            "emptySizeRatio": 0,
+            "fontFamily": undefined,
+            "linkLabel": Object {
+              "fontSize": 11,
+              "maxCount": 5,
+              "maxTextLength": undefined,
+              "textColor": undefined,
+            },
+            "maxFontSize": 16,
+            "minFontSize": 10,
+            "outerSizeRatio": 1,
+            "partitionLayout": "mosaic",
+            "sectorLineStroke": undefined,
+            "sectorLineWidth": 1.5,
+          }
+        }
+        data={
+          Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ]
+        }
+        id="mosaic"
+        layers={
+          Array [
+            Object {
+              "fillLabel": Object {
+                "valueFont": Object {
+                  "fontWeight": 700,
+                },
+              },
+              "groupByRollup": [Function],
+              "nodeLabel": [Function],
+              "shape": Object {
+                "fillColor": [Function],
+              },
+              "showAccessor": [Function],
+              "sortPredicate": [Function],
+            },
+          ]
+        }
+        percentFormatter={[Function]}
+        smallMultiples="__pie_chart_sm__"
+        valueAccessor={[Function]}
+        valueFormatter={[Function]}
+        valueGetter="percent"
+      />
+    </Chart>
+  </div>
+</div>
+`;

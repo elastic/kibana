@@ -348,3 +348,35 @@ export const createMockDonutParams = (): PartitionVisParams => {
     emptySizeRatio: 0.3,
   };
 };
+
+export const createMockTreemapMosaicParams = (): PartitionVisParams => {
+  return {
+    ...createMockPartitionVisParams(),
+    nestedLegend: true,
+  };
+};
+
+export const createMockWaffleParams = (): PartitionVisParams => {
+  const visParams = createMockPartitionVisParams();
+  return {
+    ...visParams,
+    dimensions: {
+      ...visParams.dimensions,
+      buckets: [
+        {
+          type: 'vis_dimension',
+          accessor: 0,
+          format: {
+            id: 'terms',
+            params: {
+              id: 'string',
+              otherBucketLabel: 'Other',
+              missingBucketLabel: 'Missing',
+            },
+          },
+        },
+      ],
+    },
+    showValuesInLegend: true,
+  };
+};
