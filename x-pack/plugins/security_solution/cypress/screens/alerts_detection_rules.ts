@@ -72,10 +72,6 @@ export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
 
 export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
 
-export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
-
-export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
-
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 
 export const rowsPerPageSelector = (count: number) =>
