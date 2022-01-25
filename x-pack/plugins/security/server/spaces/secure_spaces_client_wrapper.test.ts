@@ -72,7 +72,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
       yield {
         saved_objects: [
           {
-            namespaces: undefined,
+            namespaces: ['*'],
             type: 'dashboard',
             id: '1',
           },
@@ -697,10 +697,6 @@ describe('SecureSpacesClientWrapper', () => {
       expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'unknown', {
         type: 'space',
         id: space.id,
-      });
-      expectAuditEvent(auditLogger, SavedObjectAction.DELETE, 'unknown', {
-        type: 'dashboard',
-        id: '1',
       });
       expectAuditEvent(auditLogger, SavedObjectAction.DELETE, 'unknown', {
         type: 'dashboard',

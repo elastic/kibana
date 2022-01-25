@@ -17,6 +17,7 @@ import type {
   LegacyUrlAliasTarget,
   Space,
 } from '../../../spaces/server';
+import { ALL_SPACES_ID } from '../../common/constants';
 import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
@@ -275,7 +276,12 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       try {
         for await (const response of finder.find()) {
           response.saved_objects.forEach((savedObject) => {
-            const isOnlySpace = !savedObject.namespaces || savedObject.namespaces.length === 1;
+            const { namespaces = [] } = savedObject;
+            const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
+            if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(id)) {
+              // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
+              return;
+            }
             this.auditLogger.log(
               savedObjectEvent({
                 action: isOnlySpace

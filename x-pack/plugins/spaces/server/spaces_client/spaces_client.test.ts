@@ -90,7 +90,10 @@ describe('#getAll', () => {
   });
 
   test(`throws Boom.badRequest when an invalid purpose is provided'`, async () => {
-    const client = new SpacesClient(null as any, null as any, null as any, null as any);
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    const mockConfig = createMockConfig();
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"unsupported space purpose: invalid_purpose"`);
