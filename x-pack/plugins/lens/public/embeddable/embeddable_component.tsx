@@ -99,8 +99,6 @@ interface EmbeddablePanelWrapperProps {
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
   theme: ThemeServiceStart;
-  hideHeader?: boolean;
-  showShadow?: boolean;
   extraActions: Action[];
 }
 
@@ -112,8 +110,6 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   input,
   theme,
   extraActions,
-  hideHeader = false,
-  showShadow = false,
 }) => {
   useEffect(() => {
     embeddable.updateInput(input);
@@ -121,7 +117,6 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
   return (
     <EmbeddablePanel
-      hideHeader={hideHeader}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
       getActions={async (triggerId, context) => {
         const actions = await uiActions.getTriggerCompatibleActions(triggerId, context);
@@ -129,7 +124,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
       }}
       inspector={inspector}
       actionPredicate={actionPredicate}
-      showShadow={showShadow}
+      showShadow={false}
       showBadges={false}
       showNotifications={false}
       theme={theme}
