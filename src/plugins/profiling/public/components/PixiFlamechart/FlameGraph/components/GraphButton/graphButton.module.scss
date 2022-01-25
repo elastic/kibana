@@ -1,0 +1,44 @@
+@value colors: '../../styles/shared/colors.css';
+@value white, soft-light, dust, sword, metal from colors;
+
+@value shadows: '../../styles/shared/shadows.css';
+@value tiny-dark-shadow from shadows;
+
+.host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 28px;
+  padding: 6px 8px;
+
+  background-color: white;
+  border: 1px solid soft-light;
+  border-radius: 4px;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.host:hover {
+  border: 1px solid sword;
+  box-shadow: tiny-dark-shadow;
+}
+
+.host:disabled {
+  background-color: dust;
+  cursor: not-allowed;
+}
+
+.host:disabled .icon {
+  stroke: sword;
+}
+
+.host:disabled:hover {
+  border: 1px solid soft-light;
+  box-shadow: none;
+}
+
+.icon {
+  stroke: metal;
+}

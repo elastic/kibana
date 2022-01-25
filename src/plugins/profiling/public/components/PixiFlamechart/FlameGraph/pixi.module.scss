@@ -1,0 +1,51 @@
+.host {
+  position: relative;
+}
+
+.userActionsContainer {
+  position: absolute;
+  top: 22px;
+  left: 50px;
+  /* as it is positioned absolute we need to remove 2 * padding to the 100% width */
+  width: calc(100% - 2 * 50px);
+
+  /* let the event pass down the container to the canvas */
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rightSideContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* let the event pass down the container to the canvas */
+  pointer-events: all;
+}
+
+/* re-allow user events only on buttons or input */
+.historyActionsContainer,
+.filterInput {
+  pointer-events: all;
+}
+
+.historyActionsContainer {
+  display: flex;
+  align-items: center;
+}
+
+.controlButton {
+  margin-right: 4px;
+}
+
+.filterInput {
+  width: 400px;
+}
+
+.canvas {
+  overflow: hidden;
+  /* avoid double click selecting external text */
+  user-select: none;
+}

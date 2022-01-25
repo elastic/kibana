@@ -1,0 +1,62 @@
+@value colors: '../../styles/shared/colors.css';
+@value dark-blue, mid-grey from colors;
+
+.host {
+  min-height: 36px;
+}
+
+.host > :first-child {
+  margin-bottom: 8px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  align-self: flex-start;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link > :first-child {
+  margin-right: 8px;
+}
+
+.link.disabled {
+  pointer-events: none;
+}
+
+.functionIcon {
+  stroke: dark-blue;
+}
+
+.fileIcon {
+  stroke: mid-grey;
+}
+
+.fileIcon,
+.functionIcon {
+  flex-shrink: 0;
+}
+
+.text {
+  word-break: break-all;
+  white-space: normal;
+}
+
+.fnText {
+  font-weight: 500;
+}
+
+.linkText {
+  color: mid-grey;
+}
+
+.isCollapsed {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  word-wrap: break-word;
+}

@@ -1,0 +1,193 @@
+@value colors: '../../styles/shared/colors.css';
+@value white, blue, sword, soft-light, alumi, grey-white, red, light-grey, soft-grey, metal, dark-icon from colors;
+
+@value shadows: '../../styles/shared/shadows.css';
+@value big-inset-white-shadow, tiny-dark-shadow from shadows;
+
+.host {
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+
+  height: 40px;
+  padding: 11px 12px;
+  background-color: white;
+  border: 1px solid soft-light;
+  border-radius: 4px;
+
+  cursor: pointer;
+}
+
+.inputWrapper.focused {
+  border-color: sword;
+  box-shadow: tiny-dark-shadow;
+}
+
+.input {
+  composes: s-text from '../../styles/shared/typography.css';
+
+  display: block;
+  width: 100%;
+  margin-right: 5px;
+  border: none;
+  outline: 0;
+
+  cursor: pointer;
+}
+
+/* start of: hide the up & down controls when it is a number */
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* end of: hide the up & down controls when it is a number */
+
+.input::placeholder {
+  font-size: 14px;
+  line-height: 16px;
+  letter-spacing: -0.01px;
+  color: alumi;
+}
+
+.input:-ms-input-placeholder {
+  font-size: 14px;
+  line-height: 16px;
+  letter-spacing: -0.01px;
+  color: alumi;
+}
+
+.input::-ms-input-placeholder {
+  font-size: 14px;
+  line-height: 16px;
+  letter-spacing: -0.01px;
+  color: alumi;
+}
+
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  box-shadow: big-inset-white-shadow;
+}
+
+.counterContainer {
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.counterContainer .hidden {
+  visibility: hidden;
+}
+
+.counter {
+  composes: xs-text from '../../styles/shared/typography.css';
+  color: light-grey;
+}
+
+.counterSeparator {
+  width: 1px;
+  height: 24px;
+  background-color: soft-grey;
+
+  margin: 0 8px;
+}
+
+.actionButton,
+.regexButton,
+.caseSensitiveButton {
+  margin-right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.actionButton:last-of-type {
+  margin-right: 0;
+}
+
+.actionButton:hover,
+.regexButton:hover,
+.caseSensitiveButton:hover {
+  cursor: pointer;
+  background-color: soft-grey;
+  color: light-grey;
+}
+
+.actionButton:disabled {
+  cursor: not-allowed;
+}
+
+.actionButton:disabled:hover {
+  background: none;
+}
+
+.actionButton:disabled .icon {
+  stroke: sword;
+}
+
+.icon {
+  stroke: light-grey;
+}
+
+.regexButton,
+.caseSensitiveButton {
+  composes: xs-text from '../../styles/shared/typography.css';
+}
+
+.regexButtonEnabled,
+.caseSensitiveButtonEnabled {
+  color: white;
+  background-color: blue;
+}
+
+/* Tooltip on hover */
+.caseSensitiveButton[data-tooltip]:before {
+  width: 120px;
+}
+
+.regexButton[data-tooltip]:before {
+  width: 100px;
+}
+
+.regexButton[data-tooltip]:before,
+.caseSensitiveButton[data-tooltip]:before {
+  content: attr(data-tooltip);
+  text-align: left;
+
+  position: absolute;
+  top: 0px;
+
+  opacity: 0;
+
+  padding: 10px;
+
+  color: metal;
+  background: white;
+
+  border-radius: 4px;
+  box-shadow: tiny-dark-shadow;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.regexButton[data-tooltip]:hover:before,
+.caseSensitiveButton[data-tooltip]:hover:before {
+  opacity: 1;
+  top: 45px;
+}
+
+.regexButton[data-tooltip]:not([data-tooltip-persistent]):before,
+.caseSensitiveButton[data-tooltip]:not([data-tooltip-persistent]):before {
+  pointer-events: none;
+}

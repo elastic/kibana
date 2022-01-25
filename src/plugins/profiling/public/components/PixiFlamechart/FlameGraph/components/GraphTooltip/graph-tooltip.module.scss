@@ -1,0 +1,25 @@
+@value colors: '../../../../styles/shared/colors.css';
+@value soft-light, white from colors;
+
+@value shadows: '../../../../styles/shared/shadows.css';
+@value tiny-dark-shadow from shadows;
+
+.host {
+  position: absolute;
+  max-width: 95%;
+  max-height: 95%;
+
+  padding: 8px;
+  border: 1px solid soft-light;
+  border-radius: 4px;
+  background: white;
+  box-shadow: tiny-dark-shadow;
+  pointer-events: none;
+  user-select: none;
+}
+
+.content {
+  composes: xs-text from '../../../../styles/shared/typography.css';
+  line-height: 16px;
+  white-space: pre-line;
+}
