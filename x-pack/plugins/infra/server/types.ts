@@ -34,6 +34,9 @@ export interface InfraPluginRequestHandlerContext extends RequestHandlerContext 
 
 export interface InfraConfig {
   alerting: {
+    inventory_threshold: {
+      group_by_page_size: number;
+    };
     metric_threshold: {
       group_by_page_size: number;
     };

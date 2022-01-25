@@ -147,22 +147,23 @@ export function ServiceProfilingFlamegraph({
         return undefined;
       }
 
-      return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/profiling/statistics',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/profiling/statistics',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              kuery,
+              start,
+              end,
+              environment,
+              valueType,
+            },
           },
-          query: {
-            kuery,
-            start,
-            end,
-            environment,
-            valueType,
-          },
-        },
-      });
+        }
+      );
     },
     [kuery, start, end, environment, serviceName, valueType]
   );
