@@ -48,7 +48,7 @@ const scopedClient = configureClient(
     password: 'changeme',
   },
   {
-    logger: new BaseLogger('worker thread', LogLevel.All, [], {} as LoggerFactory),
+    logger: new BaseLogger('worker thread', LogLevel.All, [], { get: () => {} } as LoggerFactory),
     type: 'foobar',
     scoped: true,
   }
