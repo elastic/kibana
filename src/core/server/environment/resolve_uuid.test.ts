@@ -91,7 +91,7 @@ describe('resolveInstanceUuid', () => {
         expect(logger.debug).toHaveBeenCalledTimes(1);
         expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Updating Kibana instance UUID to: ${DEFAULT_CONFIG_UUID} (was: ${DEFAULT_FILE_UUID})",
+            "Updating Kibana instance UUID to: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee (was: ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee)",
           ]
         `);
       });
@@ -106,7 +106,7 @@ describe('resolveInstanceUuid', () => {
         expect(logger.debug).toHaveBeenCalledTimes(1);
         expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Kibana instance UUID: ${DEFAULT_CONFIG_UUID}",
+            "Kibana instance UUID: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee",
           ]
         `);
       });
@@ -126,7 +126,7 @@ describe('resolveInstanceUuid', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Setting new Kibana instance UUID: ${DEFAULT_CONFIG_UUID}",
+          "Setting new Kibana instance UUID: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee",
         ]
       `);
     });
@@ -144,7 +144,7 @@ describe('resolveInstanceUuid', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Resuming persistent Kibana instance UUID: ${DEFAULT_FILE_UUID}",
+          "Resuming persistent Kibana instance UUID: ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee",
         ]
       `);
     });
@@ -213,7 +213,7 @@ describe('resolveInstanceUuid', () => {
               "UUID from 7.6.0 bug detected, ignoring file UUID",
             ],
             Array [
-              "Setting new Kibana instance UUID: ${DEFAULT_CONFIG_UUID}",
+              "Setting new Kibana instance UUID: cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee",
             ],
           ]
         `);
