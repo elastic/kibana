@@ -59,6 +59,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
 import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
+import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -159,6 +160,8 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const isRulesBulkEditEnabled = useIsExperimentalFeatureEnabled('rulesBulkEditEnabled');
 
+    const [isLoadingTags, tags, reFetchTags] = useTags();
+
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -253,6 +256,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           fetchCustomRulesCount,
           selectedItemsCount,
           isRulesBulkEditEnabled,
+          reFetchTags,
         });
       },
       [
@@ -274,6 +278,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         selectedItemsCount,
         fetchCustomRulesCount,
         isRulesBulkEditEnabled,
+        reFetchTags,
       ]
     );
 
@@ -525,6 +530,9 @@ export const RulesTables = React.memo<RulesTableProps>(
               rulesCustomInstalled={rulesCustomInstalled}
               rulesInstalled={rulesInstalled}
               currentFilterTags={filterOptions.tags}
+              isLoadingTags={isLoadingTags}
+              tags={tags}
+              reFetchTags={reFetchTags}
             />
           )}
         </HeaderSection>

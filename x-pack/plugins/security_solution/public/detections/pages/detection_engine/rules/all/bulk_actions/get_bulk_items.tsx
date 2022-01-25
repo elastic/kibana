@@ -65,6 +65,7 @@ interface GetBatchItems {
   fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   selectedItemsCount: number;
   isRulesBulkEditEnabled: boolean;
+  reFetchTags: () => void;
 }
 
 // eslint-disable-next-line complexity
@@ -88,6 +89,7 @@ export const getBatchItems = ({
   fetchCustomRulesCount,
   selectedItemsCount,
   isRulesBulkEditEnabled,
+  reFetchTags,
 }: GetBatchItems): EuiContextMenuPanelDescriptor[] => {
   const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
 
@@ -301,7 +303,17 @@ export const getBatchItems = ({
         await rulesBulkAction.byIds(customSelectedRuleIds);
       }
 
-      await reFetchRules();
+      const isTagsAction = [
+        BulkActionEditType.add_tags,
+        BulkActionEditType.set_tags,
+        BulkActionEditType.delete_tags,
+      ].includes(bulkEditActionType);
+
+      await Promise.all([
+        reFetchRules(),
+        // refetch tags if edit action is related to tags: add/delete/set
+        isTagsAction ? reFetchTags() : Promise.resolve,
+      ]);
     } catch (e) {
       // user has cancelled form or error has occured
     } finally {
