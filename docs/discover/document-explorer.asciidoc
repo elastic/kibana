@@ -46,7 +46,7 @@ image::images/document-explorer-sort-data.png[Pop-up in Document Explorer for so
 . To add more fields, expand the dropdown menu.
 +
 By default, columns in a multi-field are sorted in the order they are added.
-This example sorts first by `order_date`, and then by `geo.country_iso_code`.
+For example, to sort by `order_date` then `geo.country_iso_code`, make sure `order_date` appears first.
 +
 [role="screenshot"]
 image::images/document-explorer-multi-field.png[Multi field sort in Document Explorer, width="75%"]
