@@ -24,6 +24,7 @@ const alwaysImportedTests = [
   require.resolve('../test/saved_object_tagging/functional/config.ts'),
   require.resolve('../test/usage_collection/config.ts'),
   require.resolve('../test/fleet_functional/config.ts'),
+  require.resolve('../test/functional_synthetics/config.js'),
 ];
 const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config_security_basic.ts'),

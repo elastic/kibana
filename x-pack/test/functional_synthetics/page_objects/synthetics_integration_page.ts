@@ -451,7 +451,7 @@ export function SyntheticsIntegrationPageProvider({
       await testSubjects.click('syntheticsBrowserAdvancedFieldsAccordion');
 
       const throttleSwitch = await this.findThrottleSwitch();
-      if ((await throttleSwitch.isSelected()) !== isThrottlingEnabled) {
+      if (!isThrottlingEnabled) {
         await throttleSwitch.click();
       }
 

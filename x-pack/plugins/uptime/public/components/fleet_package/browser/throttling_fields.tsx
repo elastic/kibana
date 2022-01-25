@@ -120,7 +120,6 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
         }
         labelAppend={<OptionalLabel />}
         isInvalid={!!validate[ConfigKey.LATENCY]?.(fields)}
-        data-test-subj="syntheticsBrowserLatency"
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
@@ -137,6 +136,7 @@ export const ThrottlingFields = memo<Props>(({ validate }) => {
               configKey: ConfigKey.LATENCY,
             })
           }
+          data-test-subj="syntheticsBrowserLatency"
           append={
             <EuiText size="xs">
               <strong>ms</strong>
