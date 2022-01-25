@@ -6,9 +6,8 @@
  */
 
 import { useState } from 'react';
-import type { FilterOptions } from '../types';
-
-import { fetchRules } from '../api';
+import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
+import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 
 interface UseCustomRulesCount {
   fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
