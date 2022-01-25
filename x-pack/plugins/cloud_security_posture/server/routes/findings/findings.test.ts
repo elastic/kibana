@@ -312,7 +312,7 @@ describe('findings API', () => {
       });
     });
 
-    it('takes `page_number` and `per_page` validate that the requested selected page was called', async () => {
+    it('takes `page` number and `per_page` validate that the requested selected page was called', async () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
