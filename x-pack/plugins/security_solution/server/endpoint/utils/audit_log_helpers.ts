@@ -12,7 +12,7 @@ import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import {
   ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   failedFleetActionErrorCode,
 } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -32,7 +32,8 @@ import {
 import { doesLogsEndpointActionsIndexExist } from '../utils';
 
 const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
-const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
+// search all responses indices irrelevant of namespace
+const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN];
 export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
 export const logsEndpointResponsesRegex = new RegExp(
   `(^\.ds-\.logs-endpoint\.action\.responses-default-).+`
@@ -231,7 +232,7 @@ export const getActionResponsesResult = async ({
   const hasLogsEndpointActionResponsesIndex = await doesLogsEndpointActionsIndexExist({
     context,
     logger,
-    indexName: ENDPOINT_ACTION_RESPONSES_INDEX,
+    indexName: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   });
 
   const responsesSearchQuery: SearchRequest = {
