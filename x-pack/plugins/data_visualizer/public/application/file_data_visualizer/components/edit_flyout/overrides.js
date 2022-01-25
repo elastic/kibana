@@ -23,7 +23,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import { FILE_FORMATS } from '../../../../../common';
+import { FILE_FORMATS } from '../../../../../common/constants';
 
 import {
   getFormatOptions,
