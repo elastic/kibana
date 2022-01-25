@@ -7,6 +7,18 @@
 
 import { getNodeIds } from './get_node_ids';
 
+jest.mock('../../../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('getNodeIds', () => {
   it('should return a list of ids and uuids', async () => {
     const callWithRequest = jest.fn().mockReturnValue({
@@ -37,6 +49,9 @@ describe('getNodeIds', () => {
         },
       },
       server: {
+        config: () => ({
+          get: () => true,
+        }),
         plugins: {
           elasticsearch: {
             getCluster: () => ({

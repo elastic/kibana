@@ -113,6 +113,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
+    const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
     const previousGroupBy = state.groupBy;
     const previousFilterQuery = state.filterQuery;

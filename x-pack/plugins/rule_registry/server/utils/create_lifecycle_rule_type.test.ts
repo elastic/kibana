@@ -119,6 +119,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         tags: ['tags'],
         updatedBy: 'updatedBy',
         namespace: 'namespace',
+        executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -224,6 +225,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
+              "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
@@ -251,6 +253,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
+              "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
