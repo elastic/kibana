@@ -68,7 +68,7 @@ export const EmailParamsFields = ({
         labelAppend={
           <>
             <span>
-              {!addCC && cc?.length === 0 ? (
+              {!addCC && (!cc || cc?.length === 0) ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
                     defaultMessage="Cc"
@@ -76,7 +76,7 @@ export const EmailParamsFields = ({
                   />
                 </EuiButtonEmpty>
               ) : null}
-              {!addBCC && bcc?.length === 0 ? (
+              {!addBCC && (!bcc || bcc?.length === 0) ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
                     defaultMessage="Bcc"
