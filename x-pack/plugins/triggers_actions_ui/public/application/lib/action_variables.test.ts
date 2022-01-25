@@ -8,7 +8,6 @@
 import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
 import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
-import { ActionGroupWithMessageVariables } from '../sections/action_connector_form/action_form';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -192,38 +191,15 @@ describe('transformActionVariables', () => {
     ]);
   });
 
-  test('should not return state when the action group recovered is selected', () => {
-    const recoveredActionGroup = {
-      id: 'recovered',
-    } as ActionGroupWithMessageVariables;
-
-    const alertType = getAlertType({
-      context: mockContextVariables(),
-      state: mockStateVariables(),
-      params: mockParamsVariables(),
-    });
-    expect(transformActionVariables(alertType.actionVariables, recoveredActionGroup)).toEqual([
-      ...expectedTransformResult,
-      ...expectedContextTransformResult(),
-      ...expectedParamsTransformResult(),
-    ]);
-  });
-
   test('should return only the required action variables when omitOptionalMessageVariables is provided', () => {
-    const actionGroup = {
-      id: 'an-action-group-id',
-      omitOptionalMessageVariables: true,
-    } as ActionGroupWithMessageVariables;
-
     const alertType = getAlertType({
       context: mockContextVariables(),
       state: mockStateVariables(),
       params: mockParamsVariables(),
     });
-    expect(transformActionVariables(alertType.actionVariables, actionGroup)).toEqual([
+    expect(transformActionVariables(alertType.actionVariables, true)).toEqual([
       ...expectedTransformResult,
       ...expectedParamsTransformResult(),
-      ...expectedStateTransformResult(),
     ]);
   });
 });
