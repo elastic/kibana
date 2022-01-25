@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type {
   ExceptionListSummarySchema,
   FilterOrUndefined,
@@ -90,7 +91,7 @@ export const getExceptionListSummary = async ({
       total:
         // Do not add up the items by OS if host isolation exception
         // As each host exception entry applies to all OSs
-        listId === 'endpoint_host_isolation_exceptions'
+        listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
           ? item.doc_count
           : acc.total + item.doc_count,
     }),

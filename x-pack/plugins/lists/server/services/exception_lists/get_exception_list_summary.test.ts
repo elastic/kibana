@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { SavedObjectsClientContract } from '../../../../../../src/core/server';
@@ -74,7 +75,7 @@ describe('get_exception_list_summary', () => {
       const summary = (await getExceptionListSummary({
         filter: undefined,
         id: undefined,
-        listId: 'endpoint_host_isolation_exceptions',
+        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
         namespaceType: 'agnostic',
         savedObjectsClient,
       })) as ExceptionListSummarySchema;
