@@ -16,6 +16,8 @@ import type {
 } from './types';
 import type { EngagementServices } from './services';
 import { ServicesProvider } from './services';
+import type { GetChatTokenResponseBody } from '../common';
+import { GET_CHAT_TOKEN_ROUTE_PATH } from '../common';
 
 export interface EngagementConfigType {
   chat: {
@@ -52,17 +54,30 @@ export class EngagementPlugin
     }
   }
 
-  private async getChatIdentityToken(): Promise<string | null> {
-    // TODO: fetch identity token from plugin internal endpoint
-    return 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Mzg3Nzk3NSIsImV4cCI6MTY0MjUxNDc0Mn0.CcAZbD8R865UmoHGi27wKn0aH1bzkZXhX449yyDH2Vk';
+  private async getChatIdentityToken(core: CoreStart, user: ChatUser | null): Promise<string | null> {
+    if (!user) {
+      return null;
+    }
+
+    try {
+      const response = await core.http.get<GetChatTokenResponseBody>(GET_CHAT_TOKEN_ROUTE_PATH, {
+        query: {
+          userId: user.id,
+        }
+      });
+      return response.token;
+    } catch (error) {
+      // TODO: add logger
+      return null;
+    }
   }
 
-  public async start(_core: CoreStart, plugins: EngagementPluginStartDeps): Promise<EngagementPluginStart> {
+  public async start(core: CoreStart, plugins: EngagementPluginStartDeps): Promise<EngagementPluginStart> {
     const { sharedUX } = plugins;
 
     const user = await this.getChatUser();
 
-    const chatIdentityToken = await this.getChatIdentityToken();
+    const chatIdentityToken = await this.getChatIdentityToken(core, user);
 
     const config = this.initializerContext.config.get<EngagementConfigType>();
 

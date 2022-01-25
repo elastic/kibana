@@ -16,6 +16,7 @@ const chatConfigSchema = schema.object({
 
 const configSchema = schema.object({
   chat: chatConfigSchema,
+  chatIdentitySecret: schema.string(),
 });
 
 export type EngagementConfigType = TypeOf<typeof configSchema>;

@@ -6,19 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, Plugin, Logger } from '../../../core/server';
+import type { CoreSetup, PluginInitializerContext, Plugin, Logger } from '../../../core/server';
 
 import { EngagementPluginSetup, EngagementPluginStart } from './types';
+import type { EngagementConfigType } from './config';
+import { registerGetChatTokenRoute } from './getChatTokenRoute';
 
 export class EngagementPlugin implements Plugin<EngagementPluginSetup, EngagementPluginStart> {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup() {
+  public setup(core: CoreSetup) {
     this.logger.debug('engagement: Setup');
+    const router = core.http.createRouter();
+    const config = this.initializerContext.config.get<EngagementConfigType>();
+
+    registerGetChatTokenRoute(router, { chatIdentitySecret: config.chatIdentitySecret });
+
     return {};
   }
 

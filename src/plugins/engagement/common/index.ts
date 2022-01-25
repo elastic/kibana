@@ -7,3 +7,8 @@
  */
 
 export const PLUGIN_ID = 'engagement';
+
+export const GET_CHAT_TOKEN_ROUTE_PATH = '/internal/engagement/chat_token';
+export interface GetChatTokenResponseBody {
+  token: string;
+}
