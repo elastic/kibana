@@ -162,5 +162,14 @@ const Wrapper = styled.div`
     .embPanel__title {
       display: none;
     }
+    .embPanel__optionsMenuPopover {
+      visibility: collapse;
+    }
+
+    &&&:hover {
+      .embPanel__optionsMenuPopover {
+        visibility: visible;
+      }
+    }
   }
 `;
