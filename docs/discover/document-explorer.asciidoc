@@ -51,7 +51,7 @@ For example, to sort by `order_date` then `geo.country_iso_code`, make sure `ord
 [role="screenshot"]
 image::images/document-explorer-multi-field.png[Multi field sort in Document Explorer, width="75%"]
 
-. To change the order of a multi-field sort, select a field in the pop-up, and then drag it to the new location.
+. To change the order of a multi-field, select a field in the pop-up, and then drag it to the new location.
 
 [float]
 [[document-explorer-compare-data]]
