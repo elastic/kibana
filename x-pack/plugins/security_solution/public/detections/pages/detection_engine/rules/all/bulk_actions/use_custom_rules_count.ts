@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 
@@ -19,7 +19,7 @@ export const useCustomRulesCount = (): UseCustomRulesCount => {
   const [customRulesCount, setCustomRulesCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fetchCustomRulesCount = async (filterOptions: FilterOptions) => {
+  const fetchCustomRulesCount = useCallback(async (filterOptions: FilterOptions) => {
     const abortController = new AbortController();
     try {
       setIsLoading(true);
@@ -36,7 +36,7 @@ export const useCustomRulesCount = (): UseCustomRulesCount => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   return {
     fetchCustomRulesCount,

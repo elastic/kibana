@@ -173,7 +173,8 @@ export interface PaginationOptions {
 }
 
 export interface FetchRulesProps {
-  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'> &
+    Partial<Pick<PaginationOptions, 'total'>>;
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
   signal?: AbortSignal;

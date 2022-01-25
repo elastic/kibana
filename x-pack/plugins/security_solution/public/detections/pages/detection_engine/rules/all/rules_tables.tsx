@@ -34,7 +34,6 @@ import {
 } from '../../../../containers/detection_engine/rules';
 import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
-import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -42,7 +41,7 @@ import { EuiBasicTableOnChange } from '../types';
 import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 
-import { useBulkActions } from './use_bulk_actions';
+import { useBulkActions } from './bulk_actions/use_bulk_actions';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 
 import { showRulesTable } from './helpers';
@@ -51,8 +50,6 @@ import { AllRulesUtilityBar } from './utility_bar';
 
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
 
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
 import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
@@ -137,9 +134,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       rulesNotUpdated
     );
 
-    const { api: toastsApi } = useAppToasts();
-    const isRulesBulkEditEnabled = useIsExperimentalFeatureEnabled('rulesBulkEditEnabled');
-
     const [isLoadingTags, tags, reFetchTags] = useTags();
     const { customRulesCount, isCustomRulesCountLoading, fetchCustomRulesCount } =
       useCustomRulesCount();
@@ -178,9 +172,13 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [rules, selectedRuleIds]);
 
     const getBatchItemsPopoverContent = useBulkActions({
-      filterQuery: convertRulesFilterToKQL(filterOptions),
+      filterOptions,
       confirmDeletion,
+      confirmBulkEdit,
       selectedItemsCount,
+      completeBulkEditForm,
+      reFetchTags,
+      fetchCustomRulesCount,
     });
 
     const paginationMemo = useMemo(
