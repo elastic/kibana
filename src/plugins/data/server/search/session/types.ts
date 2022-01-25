@@ -10,6 +10,7 @@ import {
   CoreStart,
   KibanaRequest,
   SavedObject,
+  SavedObjectAttributes,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
@@ -17,7 +18,9 @@ import {
 import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
 import { SearchSessionsConfigSchema } from '../../../config';
 
-export interface IScopedSearchSessionsClient<T = unknown> {
+export interface IScopedSearchSessionsClient<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
   trackId: (
     request: IKibanaSearchRequest,
@@ -35,6 +38,6 @@ export interface IScopedSearchSessionsClient<T = unknown> {
   getConfig: () => SearchSessionsConfigSchema | null;
 }
 
-export interface ISearchSessionService<T = unknown> {
+export interface ISearchSessionService<T extends SavedObjectAttributes = SavedObjectAttributes> {
   asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient<T>;
 }

@@ -21,10 +21,12 @@ export interface SavedQuery {
   attributes: SavedQueryAttributes;
 }
 
-export interface SavedQueryAttributes {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SavedQueryAttributes = {
   title: string;
   description: string;
   query: Query;
   filters?: Filter[];
   timefilter?: SavedQueryTimeFilter;
-}
+};

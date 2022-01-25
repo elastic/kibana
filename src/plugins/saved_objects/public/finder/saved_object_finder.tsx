@@ -31,6 +31,7 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
+import type { SavedObjectAttributes } from 'src/core/types';
 import {
   SimpleSavedObject,
   CoreStart,
@@ -40,7 +41,7 @@ import {
 
 import { LISTING_LIMIT_SETTING } from '../../common';
 
-export interface SavedObjectMetaData<T = unknown> {
+export interface SavedObjectMetaData<T extends SavedObjectAttributes = SavedObjectAttributes> {
   type: string;
   name: string;
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
@@ -50,10 +51,12 @@ export interface SavedObjectMetaData<T = unknown> {
   includeFields?: string[];
 }
 
-interface FinderAttributes {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type FinderAttributes = {
   title?: string;
   type: string;
-}
+};
 
 interface SavedObjectFinderState {
   items: Array<{

@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject, SavedObjectAttributes } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from './fields';
@@ -22,6 +22,7 @@ export type { QueryDslQueryContainer };
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
 export interface RuntimeField {
   type: RuntimeType;
   script?: {
@@ -42,7 +43,9 @@ export interface IIndexPattern extends DataViewBase {
    */
   type?: string;
   timeFieldName?: string;
+
   getTimeField?(): IFieldType | undefined;
+
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   /**
    * Look up a formatter for a given field
@@ -53,7 +56,9 @@ export interface IIndexPattern extends DataViewBase {
 /**
  * Interface for an index pattern saved object
  */
-export interface DataViewAttributes {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewAttributes = {
   fields: string;
   title: string;
   type?: string;
@@ -67,7 +72,7 @@ export interface DataViewAttributes {
    * prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
-}
+};
 
 /**
  * @deprecated Use DataViewAttributes. All index pattern interfaces were renamed.
@@ -106,19 +111,24 @@ export interface SavedObjectsClientCommonFindArgs {
 }
 
 export interface SavedObjectsClientCommon {
-  find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
-  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
-  update: (
+  find: <T extends SavedObjectAttributes = SavedObjectAttributes>(
+    options: SavedObjectsClientCommonFindArgs
+  ) => Promise<Array<SavedObject<T>>>;
+  get: <T extends SavedObjectAttributes = SavedObjectAttributes>(
+    type: string,
+    id: string
+  ) => Promise<SavedObject<T>>;
+  update: <T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
-    attributes: Record<string, any>,
+    attributes: Partial<T>,
     options: Record<string, any>
-  ) => Promise<SavedObject>;
-  create: (
+  ) => Promise<SavedObject<T>>;
+  create: <T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
-    attributes: Record<string, any>,
+    attributes: T,
     options: Record<string, any>
-  ) => Promise<SavedObject>;
+  ) => Promise<SavedObject<T>>;
   delete: (type: string, id: string) => Promise<{}>;
 }
 
