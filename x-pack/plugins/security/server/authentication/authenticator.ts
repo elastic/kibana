@@ -415,7 +415,7 @@ export class Authenticator {
 
     const existingSessionValue = await this.getSessionValue(request);
     if (!existingSessionValue) {
-      this.logger.warn('It is not possible to extend session since it is no longer available.');
+      this.logger.warn('Session is no longer available and cannot be re-authenticated.');
       return AuthenticationResult.notHandled();
     }
 

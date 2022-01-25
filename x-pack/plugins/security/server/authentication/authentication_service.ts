@@ -240,7 +240,9 @@ export class AuthenticationService {
         return toolkit.notHandled();
       }
 
-      this.logger.warn(`Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`);
+      this.logger.debug(
+        `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
+      );
 
       let authenticationResult;
       const originalHeaders = request.headers;
