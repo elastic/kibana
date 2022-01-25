@@ -177,7 +177,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'anomaly_detection',
             name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-              defaultMessage: 'Jobs',
+              defaultMessage: 'Jobs management',
             }),
             disabled: disableLinks,
             pathId: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -189,6 +189,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               defaultMessage: 'Anomaly Explorer',
             }),
             disabled: disableLinks,
+            pathId: ML_PAGES.ANOMALY_EXPLORER,
             onClick: getJobSelectionCallback(ML_PAGES.ANOMALY_EXPLORER),
             testSubj: 'mlMainTab anomalyExplorer',
           },
@@ -197,6 +198,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
               defaultMessage: 'Single Metric Viewer',
             }),
+            pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
             onClick: getJobSelectionCallback(ML_PAGES.SINGLE_METRIC_VIEWER),
             disabled: disableLinks,
           },
@@ -222,7 +224,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'data_frame_analytics_jobs',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
             name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-              defaultMessage: 'Jobs',
+              defaultMessage: 'Jobs management',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalytics',
@@ -296,7 +298,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       return {
         id,
         name,
-        isSelected: id === activeRouteId || activeRoute?.path.includes(`${pathId}/`),
+        isSelected: `/${pathId}` === activeRoute?.path || activeRoute?.path.includes(`${pathId}/`),
         disabled,
         ...(onClickCallback ? { onClick: onClickCallback } : {}),
         'data-test-subj': testSubj + (id === activeRouteId ? ' selected' : ''),
@@ -304,7 +306,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         forceOpen: true,
       };
     },
-    [activeRoute]
+    [activeRoute?.path]
   );
 
   return useMemo(() => tabsDefinition.map(getTabItem), [tabsDefinition, getTabItem]);
