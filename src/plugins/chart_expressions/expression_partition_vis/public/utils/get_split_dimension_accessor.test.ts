@@ -7,8 +7,8 @@
  */
 
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { Datatable, DatatableColumn } from '../../../../expressions';
-import { createMockPieParams, createMockVisData } from '../mocks';
+import { DatatableColumn } from '../../../../expressions';
+import { createMockVisData } from '../mocks';
 import { getSplitDimensionAccessor } from './get_split_dimension_accessor';
 import { BucketColumns } from '../../common/types';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
