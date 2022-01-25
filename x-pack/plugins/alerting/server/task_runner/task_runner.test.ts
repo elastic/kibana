@@ -449,6 +449,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "1",
           "params": Object {
             "foo": true,
@@ -1358,6 +1359,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "1",
           "params": Object {
             "foo": true,
@@ -1990,6 +1992,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "2",
           "params": Object {
             "isResolved": true,
@@ -2223,6 +2226,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "2",
           "params": Object {
             "isResolved": true,
