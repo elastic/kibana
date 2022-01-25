@@ -10,13 +10,16 @@ import semverGte from 'semver/functions/gte';
 import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 import { SerializedSearchSourceFields } from 'src/plugins/data/public';
+import { GetMigrationFunctionObjectFn } from 'src/plugins/kibana_utils/common';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {
     const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
       return semverGte(version, '7.13.1');
     });
-    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory(() => ({}))()?.migrations;
+    const embeddableMigrationVersions = (
+      makeVisualizeEmbeddableFactory(() => ({}))()?.migrations as GetMigrationFunctionObjectFn
+    )();
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
         Object.keys(embeddableMigrationVersions).sort()
@@ -38,14 +41,16 @@ describe('embeddable migrations', () => {
       },
     };
 
-    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory(() => ({
-      [migrationVersion]: (searchSource: SerializedSearchSourceFields) => {
-        return {
-          ...searchSource,
-          migrated: true,
-        };
-      },
-    }))()?.migrations;
+    const embeddableMigrationVersions = (
+      makeVisualizeEmbeddableFactory(() => ({
+        [migrationVersion]: (searchSource: SerializedSearchSourceFields) => {
+          return {
+            ...searchSource,
+            migrated: true,
+          };
+        },
+      }))()?.migrations as GetMigrationFunctionObjectFn
+    )();
 
     const migratedVisualizationDoc =
       embeddableMigrationVersions?.[migrationVersion](embeddedVisualizationDoc);

@@ -116,28 +116,28 @@ export const makeVisualizeEmbeddableFactory =
   (getSearchSourceMigrations: () => MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
     return {
       id: 'visualization',
-      // TODO - embeddable factory migrations should accept a function that evaluates to a MigrationFunctionMap like we allow for saved object definitions.
-      // https://github.com/elastic/kibana/issues/123309
-      migrations: mergeMigrationFunctionMaps(
-        getEmbeddedVisualizationSearchSourceMigrations(getSearchSourceMigrations()),
-        {
-          // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
-          '7.13.1': (state) =>
-            flow(
-              byValueAddSupportOfDualIndexSelectionModeInTSVB,
-              byValueHideTSVBLastValueIndicator,
-              byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
-            )(state),
-          '7.14.0': (state) =>
-            flow(
-              byValueAddEmptyValueColorRule,
-              byValueMigrateVislibPie,
-              byValueMigrateTagcloud,
-              byValueAddDropLastBucketIntoTSVBModel
-            )(state),
-          '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
-          '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
-        }
-      ),
+      // migrations set up as a callable so that getSearchSourceMigrations doesn't get invoked till after plugin setup steps
+      migrations: () =>
+        mergeMigrationFunctionMaps(
+          getEmbeddedVisualizationSearchSourceMigrations(getSearchSourceMigrations()),
+          {
+            // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
+            '7.13.1': (state) =>
+              flow(
+                byValueAddSupportOfDualIndexSelectionModeInTSVB,
+                byValueHideTSVBLastValueIndicator,
+                byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
+              )(state),
+            '7.14.0': (state) =>
+              flow(
+                byValueAddEmptyValueColorRule,
+                byValueMigrateVislibPie,
+                byValueMigrateTagcloud,
+                byValueAddDropLastBucketIntoTSVBModel
+              )(state),
+            '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
+            '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
+          }
+        ),
     };
   };
