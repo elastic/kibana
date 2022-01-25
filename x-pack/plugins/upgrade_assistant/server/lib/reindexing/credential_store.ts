@@ -17,14 +17,9 @@ export type Credential = Record<string, any>;
 
 // Generates a stable hash for the reindex operation's current state.
 const getHash = (reindexOp: ReindexSavedObject) => {
+  const { reindexOptions, ...attributes } = reindexOp.attributes;
   return createHash('sha256')
-    .update(
-      stringify({
-        id: reindexOp.id,
-        reindexTaskId: reindexOp.attributes.reindexTaskId,
-        status: reindexOp.attributes.status,
-      })
-    )
+    .update(stringify({ id: reindexOp.id, ...attributes }))
     .digest('base64');
 };
 
