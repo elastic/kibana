@@ -45,6 +45,11 @@ const StyledEuiSelectable = styled.div`
   }
 `;
 
+const StyledButtonGroup = styled(EuiButtonGroup)`
+  display: flex;
+  justify-content: right;
+`;
+
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
     text-decoration: none !important;
@@ -208,13 +213,12 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <EuiFormRow fullWidth>
-              <EuiButtonGroup
+              <StyledButtonGroup
                 legend="Global Policy Toggle"
                 options={toggleGlobal}
                 idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
                 onChange={handleGlobalButtonChange}
                 color="primary"
-                isFullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>
