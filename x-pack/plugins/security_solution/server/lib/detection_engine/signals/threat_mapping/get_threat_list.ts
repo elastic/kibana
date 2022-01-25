@@ -35,6 +35,7 @@ export const getThreatList = async ({
   buildRuleMessage,
   logger,
   threatIndicatorPath,
+  threatMapping,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -53,13 +54,10 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const { body: response } = await esClient.search<
-    ThreatListDoc,
-    Record<string, estypes.AggregationsAggregate>
-  >({
-    body: {
-      query: queryFilter,
-      fields: [
+
+  const fields = threatMapping
+    ? threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat()
+    : [
         {
           field: `${threatIndicatorPath}.*`,
           include_unmapped: true,
@@ -68,7 +66,15 @@ export const getThreatList = async ({
           field: 'threat.feed.*',
           include_unmapped: true,
         },
-      ],
+      ];
+
+  const { body: response } = await esClient.search<
+    ThreatListDoc,
+    Record<string, estypes.AggregationsAggregate>
+  >({
+    body: {
+      query: queryFilter,
+      fields,
       search_after: searchAfter,
       // @ts-expect-error is not compatible with SortCombinations
       sort: getSortWithTieBreaker({

@@ -145,6 +145,7 @@ export interface GetThreatListOptions {
   sortOrder: SortOrderOrUndefined;
   threatFilters: unknown[];
   threatIndicatorPath: ThreatIndicatorPath;
+  threatMapping: ThreatMapping | undefined;
 }
 
 export interface ThreatListCountOptions {

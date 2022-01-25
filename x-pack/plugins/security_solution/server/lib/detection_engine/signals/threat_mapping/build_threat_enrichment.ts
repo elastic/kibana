@@ -47,6 +47,8 @@ export const buildThreatEnrichment = ({
       logger,
       buildRuleMessage,
       perPage: undefined,
+      threatIndicatorPath,
+      threatMapping: undefined,
     });
 
     return threatResponse.hits.hits;
