@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { callApmApi } from './createCallApmApi';
+// compile typescript on the fly
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-export const createStaticDataView = async () => {
-  return await callApmApi('POST /internal/apm/data_view/static', {
-    signal: null,
-  });
-};
+require('./infer_route_return_types/index.ts');
