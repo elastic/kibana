@@ -380,12 +380,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     features={metricsFeatures}
                   />
                 )}
-                <UserList
-                  data-test-subj="case-view-user-list-reporter"
-                  email={emailContent}
-                  headline={i18n.REPORTER}
-                  users={[caseData.createdBy]}
-                />
                 {participants.length > 1 && (
                   <UserList
                     data-test-subj="case-view-user-list-participants"

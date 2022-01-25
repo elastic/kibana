@@ -28,6 +28,10 @@ export const STATUS_ICON_ARIA = i18n.translate('xpack.cases.status.iconAria', {
   defaultMessage: 'Change status',
 });
 
+export const CASE_OPENED_BY = i18n.translate('xpack.cases.caseView.caseOpenedBy', {
+  defaultMessage: 'Opened by',
+});
+
 export const CASE_OPENED = i18n.translate('xpack.cases.caseView.caseOpened', {
   defaultMessage: 'Case opened',
 });

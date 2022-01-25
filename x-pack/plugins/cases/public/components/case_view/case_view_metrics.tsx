@@ -97,24 +97,27 @@ CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
   ({ metrics, features, isLoading }) => {
     const metricItems = useMetricItems(metrics, features);
-    return (
-      <div data-test-subj="case-view-metrics-panel">
-        <EuiTitle size="xxxs">
-          <h4>{METRIC_SUMMARY}</h4>
-        </EuiTitle>
-        <EuiHorizontalRule margin="xs" />
-        {isLoading ? (
-          <EuiFlexItem>
-            <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
-          </EuiFlexItem>
-        ) : (
-          <EuiDescriptionList textStyle="reverse">
-            <CaseViewMetricItems metricItems={metricItems} />
-          </EuiDescriptionList>
-        )}
-        <EuiSpacer />
-      </div>
-    );
+    const metricItemsWithValues = metricItems.filter((metric) => metric.value !== 0);
+    if (isLoading) {
+      return <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />;
+    } else {
+      return (
+        <div data-test-subj="case-view-metrics-panel">
+          {metricItemsWithValues.length > 0 && (
+            <>
+              <EuiTitle size="xxxs">
+                <h4>{METRIC_SUMMARY}</h4>
+              </EuiTitle>
+              <EuiHorizontalRule margin="xs" />
+              <EuiDescriptionList textStyle="reverse">
+                <CaseViewMetricItems metricItems={metricItemsWithValues} />
+              </EuiDescriptionList>
+              <EuiSpacer />
+            </>
+          )}
+        </div>
+      );
+    }
   }
 );
 CaseViewMetrics.displayName = 'CaseViewMetrics';
