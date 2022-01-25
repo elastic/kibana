@@ -109,7 +109,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       )
       .catch(() => undefined);
 
-    const compositeSize = libs.configuration.inventory.compositeSize;
+    const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
     const results = await Promise.all(
       criteria.map((condition) =>
         evaluateCondition({
