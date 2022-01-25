@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
@@ -17,20 +15,10 @@ import {
 import { importExceptionsAsStream } from './import_exception_list_and_items';
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { toReadable } from './exception_list_client.mock';
 
 jest.mock('./utils/import/import_exception_lists');
 jest.mock('./utils/import/import_exception_list_items');
-
-const toReadable = (items: unknown[]): Readable => {
-  const stringOfExceptions = items.map((item) => JSON.stringify(item));
-
-  return new Readable({
-    read(): void {
-      this.push(stringOfExceptions.join('\n'));
-      this.push(null);
-    },
-  });
-};
 
 describe('import_exception_list_and_items', () => {
   beforeEach(() => {
