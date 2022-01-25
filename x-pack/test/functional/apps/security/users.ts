@@ -24,8 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('users', function () {
-    this.onlyEsVersion('<=7');
-
     const optionalUser: UserFormValues = {
       username: 'OptionalUser',
       password: 'OptionalUserPwd',
@@ -120,9 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(roles.kibana_user.reserved).to.be(true);
       expect(roles.kibana_user.deprecated).to.be(true);
-
-      expect(roles.kibana_dashboard_only_user.reserved).to.be(true);
-      expect(roles.kibana_dashboard_only_user.deprecated).to.be(true);
 
       expect(roles.kibana_system.reserved).to.be(true);
       expect(roles.kibana_system.deprecated).to.be(false);
