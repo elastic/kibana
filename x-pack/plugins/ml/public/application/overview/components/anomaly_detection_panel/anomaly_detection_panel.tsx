@@ -21,7 +21,7 @@ import { AnomalyTimelineService } from '../../../services/anomaly_timeline_servi
 import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 import { JobStatsBarStats } from '../../../components/stats_bar';
-import { AnomalyDetectionEmptyState } from '../../../components/anomaly_detection_empty_state';
+import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 
 export type GroupsDictionary = Dictionary<Group>;
 

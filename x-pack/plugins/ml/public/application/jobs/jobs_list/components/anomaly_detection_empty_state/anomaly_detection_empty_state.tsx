@@ -17,10 +17,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import adImage from './ml_anomaly_detection.png';
-import { ML_PAGES } from '../../../../common/constants/locator';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../ml_nodes_check';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
 export const AnomalyDetectionEmptyState: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();

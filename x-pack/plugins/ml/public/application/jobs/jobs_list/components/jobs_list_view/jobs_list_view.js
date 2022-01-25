@@ -31,7 +31,7 @@ import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/cons
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
-import { AnomalyDetectionEmptyState } from '../../../../components/anomaly_detection_empty_state';
+import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 
 let blockingJobsRefreshTimeout = null;
 
