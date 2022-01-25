@@ -77,7 +77,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
       getTimelineShowStatus(state, TimelineId.active)
     );
 
-    const userHasSecuritySolutionCrud = useKibana().services.application.capabilities.siem.crud;
+    const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
     const emptyStateProps = showEmptyState ? NO_DATA_PAGE_TEMPLATE_PROPS : {};
 
@@ -93,7 +93,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
-          userHasSecuritySolutionCrud ? (
+          userHasSecuritySolutionVisible ? (
             <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
           ) : (
             <></>

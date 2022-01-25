@@ -75,17 +75,17 @@ const renderComponent = () => {
 describe('SecuritySolutionTemplateWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSiemUserCanCrud.mockReturnValue({ crud: true });
+    mockSiemUserCanCrud.mockReturnValue({ show: true });
   });
 
-  it('Should render to the page with bottom bar if user has SIEM crud', async () => {
+  it('Should render to the page with bottom bar if user has SIEM show', async () => {
     const { getByText } = renderComponent();
     expect(getByText('child of wrapper')).toBeInTheDocument();
     expect(getByText('Bottom Bar')).toBeInTheDocument();
   });
 
-  it('Should not show bottom bar if user does not have SIEM crud', async () => {
-    mockSiemUserCanCrud.mockReturnValue({ crud: false });
+  it('Should not show bottom bar if user does not have SIEM show', async () => {
+    mockSiemUserCanCrud.mockReturnValue({ show: false });
 
     const { getByText } = renderComponent();
     expect(getByText('child of wrapper')).toBeInTheDocument();
