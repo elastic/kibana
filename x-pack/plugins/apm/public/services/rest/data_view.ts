@@ -8,8 +8,7 @@
 import { callApmApi } from './createCallApmApi';
 
 export const createStaticDataView = async () => {
-  return await callApmApi({
-    endpoint: 'POST /internal/apm/data_view/static',
+  return await callApmApi('POST /internal/apm/data_view/static', {
     signal: null,
   });
 };
