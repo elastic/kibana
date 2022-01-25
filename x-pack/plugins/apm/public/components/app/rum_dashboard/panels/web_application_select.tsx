@@ -19,8 +19,7 @@ export function WebApplicationSelect() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/services',
+        return callApmApi('GET /internal/apm/ux/services', {
           params: {
             query: {
               start,
