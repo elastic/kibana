@@ -19,15 +19,17 @@ interface Props {
 export function TransactionMetadata({ transaction }: Props) {
   const { data: transactionEvent, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-        params: {
-          path: {
-            processorEvent: ProcessorEvent.transaction,
-            id: transaction.transaction.id,
+      return callApmApi(
+        'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+        {
+          params: {
+            path: {
+              processorEvent: ProcessorEvent.transaction,
+              id: transaction.transaction.id,
+            },
           },
-        },
-      });
+        }
+      );
     },
     [transaction.transaction.id]
   );
