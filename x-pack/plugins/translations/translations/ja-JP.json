@@ -17246,8 +17246,6 @@
     "xpack.ml.newJob.wizard.validateJob.summaryCountFieldMissing": "データフィードとして必要なフィールドはアグリゲーションを使用します。",
     "xpack.ml.newJobAwaitingNodeWarning.noMLNodesAvailableDescription": "現在ジョブを実行できるノードがないため、該当するノードが使用可能になるまで、OPENING状態のままです。",
     "xpack.ml.overview.analytics.resultActions.openJobText": "ジョブ結果を表示",
-    "xpack.ml.overview.analyticsList.createFirstJobMessage": "最初のデータフレーム分析ジョブを作成",
-    "xpack.ml.overview.analyticsList.createJobButtonText": "ジョブを作成",
     "xpack.ml.overview.analyticsList.emptyPromptText": "データフレーム分析では、データに対して異常値検出、回帰、分類分析を実行し、結果に注釈を付けることができます。ジョブは注釈付きデータと共に、ソースデータのコピーを新規インデックスに保存します。",
     "xpack.ml.overview.analyticsList.errorPromptTitle": "データフレーム分析リストの取得中にエラーが発生しました。",
     "xpack.ml.overview.analyticsList.id": "ID",
