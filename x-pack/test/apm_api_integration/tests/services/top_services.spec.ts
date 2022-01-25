@@ -138,9 +138,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .serialize(),
           ]),
-          ...errorInterval
+          errorInterval
             .rate(1)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...errorOnlyInstance.error('Foo').timestamp(timestamp).serialize(),
             ]),
         ]);
