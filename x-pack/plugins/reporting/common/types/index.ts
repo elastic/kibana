@@ -7,9 +7,9 @@
 
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobParamsPNG } from './export_types/png';
+export type { JobParamsPNGDeprecated } from './export_types/png';
 export type { JobParamsPNGV2 } from './export_types/png_v2';
-export type { JobAppParamsPDF, JobParamsPDF } from './export_types/printable_pdf';
+export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';
 export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,

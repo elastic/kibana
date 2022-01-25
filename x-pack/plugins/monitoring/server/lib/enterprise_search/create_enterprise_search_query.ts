@@ -16,7 +16,6 @@ import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
  */
 export function createEnterpriseSearchQuery(options: {
   filters?: any[];
-  types?: string[];
   metric?: EnterpriseSearchMetricFields;
   uuid?: string;
   start?: number;
@@ -25,7 +24,6 @@ export function createEnterpriseSearchQuery(options: {
   const opts = {
     filters: [] as any[],
     metric: EnterpriseSearchMetric.getMetricFields(),
-    types: ['health', 'stats'],
     clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID, // This is to disable the stack monitoring clusterUuid filter
     ...(options ?? {}),
   };
@@ -33,6 +31,26 @@ export function createEnterpriseSearchQuery(options: {
   opts.filters.push({
     bool: {
       should: [
+        {
+          term: {
+            type: 'health',
+          },
+        },
+        {
+          term: {
+            type: 'stats',
+          },
+        },
+        {
+          term: {
+            'metricset.name': 'health',
+          },
+        },
+        {
+          term: {
+            'metricset.name': 'stats',
+          },
+        },
         { term: { 'event.dataset': 'enterprisesearch.health' } },
         { term: { 'event.dataset': 'enterprisesearch.stats' } },
       ],

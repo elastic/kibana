@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
-import { featureTitle, FILE_DATA_VIS_TAB_ID, applicationPath, featureId } from '../common';
+import {
+  featureTitle,
+  FILE_DATA_VIS_TAB_ID,
+  applicationPath,
+  featureId,
+} from '../common/constants';
 
 export function registerHomeAddData(home: HomePublicPluginSetup) {
   home.addData.registerAddDataTab({
