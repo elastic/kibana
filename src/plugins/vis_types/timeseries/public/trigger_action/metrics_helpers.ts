@@ -64,9 +64,10 @@ export const computeParentSeries = (
 
 export const getParentPipelineSeries = (
   aggregation: MetricType,
-  currentMetric: Metric,
+  currentMetricIdx: number,
   metrics: Metric[]
 ) => {
+  const currentMetric = metrics[currentMetricIdx];
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
@@ -142,8 +143,8 @@ export const getParentPipelineSeriesFormula = (
     formula = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
       additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
     }))`;
-    return formula;
   }
+  return formula;
 };
 
 export const getSiblingPipelineSeriesFormula = (

@@ -82,7 +82,7 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
     case 'derivative': {
       metricsArray = getParentPipelineSeries(
         aggregation,
-        metrics[metricIdx],
+        metricIdx,
         metrics
       ) as VisualizeEditorLayersContext['metrics'];
       break;
