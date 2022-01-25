@@ -309,10 +309,10 @@ export const getBatchItems = ({
         BulkActionEditType.delete_tags,
       ].includes(bulkEditActionType);
 
-      await Promise.all([
+      await Promise.allSettled([
         reFetchRules(),
         // refetch tags if edit action is related to tags: add/delete/set
-        isTagsAction ? reFetchTags() : Promise.resolve,
+        isTagsAction ? reFetchTags() : undefined,
       ]);
     } catch (e) {
       // user has cancelled form or error has occured
