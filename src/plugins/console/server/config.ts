@@ -84,7 +84,7 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
   },
   schema: schema7x,
   deprecations: ({ unused }) => [
-    unused('ssl', { level: 'warning' }),
+    unused('ssl', { level: 'critical' }),
     (completeConfig, rootPath, addDeprecation) => {
       if (get(completeConfig, 'console.enabled') === undefined) {
         return completeConfig;
