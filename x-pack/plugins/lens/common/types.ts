@@ -11,6 +11,7 @@ import type {
   SerializedFieldFormat,
 } from '../../../../src/plugins/field_formats/common';
 import type { Datatable } from '../../../../src/plugins/expressions/common';
+import type { PaletteContinuity } from '../../../../src/plugins/charts/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -50,7 +51,7 @@ export interface CustomPaletteParams {
   name?: string;
   reverse?: boolean;
   rangeType?: 'number' | 'percent';
-  continuity?: 'above' | 'below' | 'all' | 'none';
+  continuity?: PaletteContinuity;
   progression?: 'fixed';
   rangeMin?: number;
   rangeMax?: number;

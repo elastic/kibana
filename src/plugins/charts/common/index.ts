@@ -18,7 +18,6 @@ export type {
 export { defaultCustomColors, palette, systemPalette } from './palette';
 
 export { paletteIds } from './constants';
-
 export type { ColorSchema, RawColorSchema, ColorMap } from './static';
 export {
   ColorSchemas,
@@ -31,6 +30,8 @@ export {
   LabelRotation,
   defaultCountLabel,
   MULTILAYER_TIME_AXIS_STYLE,
+  checkIsMinContinuity,
+  checkIsMaxContinuity,
 } from './static';
 
-export type { ColorSchemaParams, Labels, Style } from './types';
+export type { ColorSchemaParams, Labels, Style, PaletteContinuity } from './types';

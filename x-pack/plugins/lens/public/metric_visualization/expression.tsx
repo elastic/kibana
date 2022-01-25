@@ -70,28 +70,27 @@ function getColorStyling(
     return {};
   }
 
-  const { continuity = 'above', rangeMin, stops, colors } = palette.params;
-  const penultimateStop = stops[stops.length - 2];
+  const { rangeMin, rangeMax, stops, colors } = palette.params;
 
-  if (continuity === 'none' && (value < rangeMin || value > penultimateStop)) {
+  if (value > rangeMax) {
     return {};
   }
-  if (continuity === 'below' && value > penultimateStop) {
-    return {};
-  }
-  if (continuity === 'above' && value < rangeMin) {
+  if (value < rangeMin) {
     return {};
   }
   const cssProp = colorMode === ColorMode.Background ? 'backgroundColor' : 'color';
-  const rawIndex = stops.findIndex((v) => v > value);
+  let rawIndex = stops.findIndex((v) => v > value);
 
-  let colorIndex = rawIndex;
-  if (['all', 'below'].includes(continuity) && value < rangeMin && colorIndex < 0) {
-    colorIndex = 0;
+  if (!isFinite(rangeMax) && value > stops[stops.length - 1]) {
+    rawIndex = stops.length - 1;
   }
-  if (['all', 'above'].includes(continuity) && value > penultimateStop && colorIndex < 0) {
-    colorIndex = stops.length - 1;
+
+  // in this case first stop is -Infinity
+  if (!isFinite(rangeMin) && value < (isFinite(stops[0]) ? stops[0] : stops[1])) {
+    rawIndex = 0;
   }
+
+  const colorIndex = rawIndex;
 
   const color = colors[colorIndex];
   const styling = {

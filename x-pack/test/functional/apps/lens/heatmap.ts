@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
       await retry.try(async () => {
-        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
+        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10', {
           clearWithKeyboard: true,
           typeCharByChar: true,
         });
@@ -108,16 +108,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '7,126 - 8,529.22', name: '7,126 - 8,529.22', color: '#6092c0' },
-        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
-        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
-        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
-        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
+        { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#6092c0' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
+        {
+          color: '#e7664c',
+          key: '≥ 16,948.55',
+          name: '≥ 16,948.55',
+        },
       ]);
     });
 
     it('should reflect stop changes when in number to the chart', async () => {
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '0', {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '0', {
         clearWithKeyboard: true,
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -130,8 +134,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '0 - 8,529.21', name: '0 - 8,529.21', color: '#6092c0' },
-        { key: '8,529.21 - 11,335.66', name: '8,529.21 - 11,335.66', color: '#a8bfda' },
+        { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#6092c0' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
         { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
