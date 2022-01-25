@@ -5,7 +5,7 @@
     "private": true,
     "license": "Elastic-License",
     "scripts": {
-        "test:jest": "node ../../scripts/jest",
+        "test:jest": "node ../../scripts/jest --coverage",
         "cypress": "../../../node_modules/.bin/cypress",
         "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
         "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",

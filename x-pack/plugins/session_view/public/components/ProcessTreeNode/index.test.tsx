@@ -9,6 +9,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import {
   processMock,
+  childProcessMock,
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
@@ -29,10 +30,29 @@ describe('ProcessTreeNode component', () => {
 
       expect(renderResult.queryByTestId('processTreeNode')).toBeTruthy();
     });
-    it('renders orphaned node', async () => {
-      renderResult = mockedContext.render(<ProcessTreeNode process={processMock} isOrphan />);
-      expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
+    
+    it('should have an alternate rendering for a session leader', async () => {
+      renderResult = mockedContext.render(<ProcessTreeNode isSessionLeader process={processMock} />);
+     
+      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
     });
+    
+    it('if many processes with same pgid as session leader, +X more button should be shown', async () => {
+      const processMockWithChildren: typeof processMock = {
+        ...processMock,
+        getChildren: (showSameGroup) => showSameGroup ? [] : [childProcessMock], // TODO: seems strange we are mocking out ProcessImpl, testing a mock seems pointless. 
+      };
+
+      renderResult = mockedContext.render(<ProcessTreeNode isSessionLeader process={processMockWithChildren} />);
+     
+      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant+1 more');
+    });
+
+    // commented out until we get new UX for orphans treatment aka disjointed tree
+    // it('renders orphaned node', async () => {
+    //   renderResult = mockedContext.render(<ProcessTreeNode process={processMock} />);
+    //   expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
+    // });
 
     it('renders user icon for user entered process', async () => {
       const userEnteredProcessMock: typeof processMock = {
@@ -134,7 +154,7 @@ describe('ProcessTreeNode component', () => {
       it('renders Child processes button when process has Child processes', async () => {
         const processMockWithChildren: typeof processMock = {
           ...processMock,
-          children: [processMock],
+          getChildren: () => [childProcessMock]
         };
 
         renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithChildren} />);
@@ -144,7 +164,7 @@ describe('ProcessTreeNode component', () => {
       it('toggle Child processes nodes when Child processes button is clicked', async () => {
         const processMockWithChildren: typeof processMock = {
           ...processMock,
-          children: [processMock],
+          getChildren: () => [childProcessMock]
         };
 
         renderResult = mockedContext.render(<ProcessTreeNode process={processMockWithChildren} />);
@@ -158,5 +178,17 @@ describe('ProcessTreeNode component', () => {
         expect(renderResult.getAllByTestId('processTreeNode')).toHaveLength(1);
       });
     });
+    describe('Search', () => {
+      it('highlights text within the process node line item if it matches the searchQuery', () => {
+        // set a mock search matched indicator for the process (typically done by ProcessTree/helpers.ts)
+        processMock.searchMatched = '/vagrant';
+
+        renderResult = mockedContext.render(
+          <ProcessTreeNode process={processMock} />
+        );
+        
+        expect(renderResult.getByTestId('processNodeSearchHighlight').textContent).toEqual('/vagrant');
+      });
+    })
   });
 });

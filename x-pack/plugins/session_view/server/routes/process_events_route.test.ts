@@ -6,13 +6,27 @@
  */
 import { elasticsearchServiceMock } from '../../../../../src/core/server/elasticsearch/elasticsearch_service.mock';
 import { doSearch } from './process_events_route';
-const getEmptyResponse = async () => {
+import { mockEvents } from '../../common/mocks/constants/session_view_process.mock';
 
+const getEmptyResponse = async () => {
   return {
     body: {
       hits: { 
         total: { value: 0, relation: 'eq' }, 
         hits: [] 
+      } 
+    }
+  }
+}
+
+const getResponse = async () => {
+  return {
+    body: {
+      hits: { 
+        total: { value: mockEvents.length, relation: 'eq' }, 
+        hits: mockEvents.map(event => {
+          return { _source: event };
+        })
       } 
     }
   }
@@ -28,20 +42,20 @@ describe('process_events_route.ts', () => {
       expect(body.events.length).toBe(0);
     });
 
-    it('returns results for a particular session entity_id', () => {
-      throw "not implemented";
+    it('returns results for a particular session entity_id', async () => {
+      const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+
+      const body = await doSearch(client, 'mockId', undefined);
+
+      expect(body.events.length).toBe(mockEvents.length);
     });
     
-    it('has a page size which mathces Constants.PROCESS_EVENTS_PER_PAGE', () => {
-      throw "not implemented";
-    });
-    
-    it('the date of the last event in the first page can be used as a cursor for the next page', () => {
-      throw "not implemented";
-    });
-    
-    it('should allow reverse pagination by setting forward=false', () => {
-      throw "not implemented";
+    it('returns hits in reverse order when paginating backwards', async () => {
+      const client = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+
+      const body = await doSearch(client, 'mockId', undefined, false);
+
+      expect(body.events[0]._source).toEqual(mockEvents[mockEvents.length - 1]);
     });
   });
 });

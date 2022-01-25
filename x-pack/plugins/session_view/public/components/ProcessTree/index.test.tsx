@@ -20,10 +20,10 @@ describe('ProcessTree component', () => {
   });
 
   describe('When ProcessTree is mounted', () => {
-    it('should render given a valid sessionEntityId and Forward data', () => {
+    it('should render given a valid sessionEntityId and data', () => {
       renderResult = mockedContext.render(
         <ProcessTree
-          sessionEntityId="1"
+          sessionEntityId="3d0192c6-7c54-5ee6-a110-3539a7cf42bc"
           data={mockData}
           isFetching={false}
           fetchNextPage={() => true}
@@ -33,7 +33,7 @@ describe('ProcessTree component', () => {
         />
       );
       expect(renderResult.queryByTestId('sessionViewProcessTree')).toBeTruthy();
-      expect(renderResult.queryByTestId('processTreeNode')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('processTreeNode')).toBeTruthy();
     });
     describe('Orphaned childrens', () => {
       const mockEvents = mockData[0].events;
@@ -45,10 +45,10 @@ describe('ProcessTree component', () => {
           entity_id: 'orphaned-id',
           args: ['orphaned'],
           executable: 'orphaned',
-          working_directory: 'orphaned',
+          pid: 123,
+          pgid: 123,
           parent: {
-            ...mockEvents[0].process.parent,
-            entity_id: 'orphaned-parent-id',
+            ...mockEvents[0].process.parent
           },
         },
       } as unknown as typeof mockEvents[0];
@@ -58,7 +58,7 @@ describe('ProcessTree component', () => {
 
         renderResult = mockedContext.render(
           <ProcessTree
-            sessionEntityId="1"
+            sessionEntityId="3d0192c6-7c54-5ee6-a110-3539a7cf42bc"
             data={mockData}
             isFetching={false}
             fetchNextPage={() => true}

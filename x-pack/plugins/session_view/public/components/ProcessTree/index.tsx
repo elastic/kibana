@@ -51,7 +51,7 @@ export const ProcessTree = ({
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
-  const { sessionLeader, processMap, orphans, searchResults } = useProcessTree({
+  const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
     searchQuery,
@@ -131,12 +131,18 @@ export const ProcessTree = ({
     if (jumpToEvent && data.length === 2) {
       const process = processMap[jumpToEvent.process.entity_id];
 
-      if (process) {
-        selectProcess(process);
+      if (process && onProcessSelected) {
+        onProcessSelected(process);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jumpToEvent, processMap]);
+  }, [jumpToEvent, processMap, onProcessSelected]);
+
+  useEffect(() => {
+    if (!selectedProcess && onProcessSelected) {
+      onProcessSelected(sessionLeader); 
+    } 
+  }, [sessionLeader, onProcessSelected])
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
     return (
@@ -157,11 +163,10 @@ export const ProcessTree = ({
         <ProcessTreeNode
           isSessionLeader
           process={sessionLeader}
-          orphans={orphans}
           onProcessSelected={onProcessSelected}
         />
       )}
-      <div ref={selectionAreaRef} css={styles.selectionArea} />
+      <div data-test-subj="processTreeSelectionArea" ref={selectionAreaRef} css={styles.selectionArea} />
       {hasNextPage &&
         renderLoadMoreButton(
           <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,

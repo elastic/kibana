@@ -15,15 +15,12 @@ import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEven
 import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
-import { sortProcesses } from '../../../common/utils/sort_processes';
 import { useStyles, ButtonType } from './styles';
 import { ProcessTreeAlerts } from '../ProcessTreeAlerts';
 
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
-  orphans?: Process[];
-  isOrphan?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
 }
@@ -35,8 +32,6 @@ interface ProcessDeps {
 export function ProcessTreeNode({
   process,
   isSessionLeader = false,
-  orphans,
-  isOrphan,
   depth = 0,
   onProcessSelected,
 }: ProcessDeps) {
@@ -71,14 +66,16 @@ export function ProcessTreeNode({
   useLayoutEffect(() => {
     if (searchMatched !== null && textRef.current) {
       const regex = new RegExp(searchMatched);
+      const text = textRef.current.textContent;
 
-      const text = textRef.current.innerText;
-      const html = text.replace(regex, (match) => {
-        return `<span style="${styles.searchHighlight}">${match}</span>`;
-      });
+      if (text) {
+        const html = text.replace(regex, (match) => {
+          return `<span data-test-subj="processNodeSearchHighlight" style="${styles.searchHighlight}">${match}</span>`;
+        });
 
-      // eslint-disable-next-line no-unsanitized/property
-      textRef.current.innerHTML = html;
+        // eslint-disable-next-line no-unsanitized/property
+        textRef.current.innerHTML = html;
+      }
     }
   }, [searchMatched, styles.searchHighlight]);
 
@@ -89,25 +86,7 @@ export function ProcessTreeNode({
   const { interactive } = processDetails.process;
 
   const renderChildren = () => {
-    let { children } = process;
-
-    // we pass an array of orphans to the session leader
-    // for lack of a better approach, we just mix the orphans with its children and re-sort by timestamp.
-    // we could just add orphans to the children of the session leader in useProcessTree, but
-    // it makes it difficult to re-parent them when their parent actually shows up (e.g in the case of reverse pagination)
-    if (orphans) {
-      children = [...children, ...orphans].sort(sortProcesses);
-    }
-
-    // this toggle helps to de-noise the session leader process groups
-    // typically caused by bashrc, shell startup, shell completions, builtins
-    if (showGroupLeadersOnly) {
-      children = children.filter(process => {
-        const details = process.getDetails();
-
-        return details.process.pgid === details.process.pid || process.searchMatched;
-      });
-    }
+    const children = process.getChildren(showGroupLeadersOnly);
 
     if (!childrenExpanded || !children || children.length === 0) {
       return;
@@ -137,17 +116,22 @@ export function ProcessTreeNode({
 
   const renderButtons = () => {
     const buttons = [];
+    const childCount = process.getChildren().length;
 
-    if (process.children.length > 0) {
-      if (isSessionLeader) {
+    if (isSessionLeader) {
+      const groupLeaderCount = process.getChildren(true).length;
+      const sameGroupCount = childCount - groupLeaderCount;
+
+      if (sameGroupCount > 0) {
         buttons.push(
           <EuiToolTip
+            key="samePgidTooltip"
             position="top"
             content={
               <p>
                 <FormattedMessage
                   id="xpack.sessionView.groupLeaderTooltip"
-                  defaultMessage="Hides or shows supplementary processes in the session leader process group. This typically includes noisy fork events, auto completions and other shell startup activity."
+                  defaultMessage="Hide or show other processes in the same 'process group' (pgid) as the session leader. This typically includes forks from bash builtins, auto completions and other shell startup activity."
                 />
               </p>
             }
@@ -162,30 +146,29 @@ export function ProcessTreeNode({
                 id="xpack.sessionView.plusCountMore"
                 defaultMessage="+{count} more"
                 values={{
-                  count: process.children.length - 1
+                  count: sameGroupCount 
                 }}
               />
               <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(showGroupLeadersOnly)} />
             </EuiButton>
           </EuiToolTip>
         );
-
-      } else {
-        buttons.push(
-          <EuiButton
-            key="child-processes-button"
-            css={styles.getButtonStyle(ButtonType.children)}
-            onClick={() => setChildrenExpanded(!childrenExpanded)}
-            data-test-subj="processTreeNodeChildProcessesButton"
-          >
-            <FormattedMessage
-              id="xpack.sessionView.childProcesses"
-              defaultMessage="Child processes"
-            />
-            <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
-          </EuiButton>
-        );
       }
+    } else if (childCount > 0) {
+      buttons.push(
+        <EuiButton
+          key="child-processes-button"
+          css={styles.getButtonStyle(ButtonType.children)}
+          onClick={() => setChildrenExpanded(!childrenExpanded)}
+          data-test-subj="processTreeNodeChildProcessesButton"
+        >
+          <FormattedMessage
+            id="xpack.sessionView.childProcesses"
+            defaultMessage="Child processes"
+          />
+          <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(childrenExpanded)} />
+        </EuiButton>
+      );
     }
 
     if (alerts.length) {
@@ -206,16 +189,18 @@ export function ProcessTreeNode({
   };
 
   const renderSessionLeader = () => {
-    const { name, executable, user } = process.getDetails().process;
+    const { name, args, user } = process.getDetails().process;
     const sessionIcon = interactive ? 'consoleApp' : 'compute';
 
     return (
       <>
-        <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || executable}</b>
+        <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || args[0]}</b>
         &nbsp;
         <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />
         &nbsp;
-        <EuiIcon type="user" /> <b css={styles.darkText}>{user.name}</b>
+        <EuiIcon type="user" />
+        &nbsp;
+        <b css={styles.darkText}>{user.name}</b>
       </>
     );
   };
@@ -240,6 +225,7 @@ export function ProcessTreeNode({
     } else {
       return (
         <span ref={textRef}>
+          <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
           <span css={styles.darkText}>{executable}</span>&nbsp;
         </span>
       );
@@ -262,7 +248,6 @@ export function ProcessTreeNode({
           <EuiIcon type="branch" />
         )}
         {template()}
-        {isOrphan ? '(orphaned)' : ''}
       </span>
     );
   };

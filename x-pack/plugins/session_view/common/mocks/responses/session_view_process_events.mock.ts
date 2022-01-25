@@ -68,7 +68,7 @@ export const sessionViewProcessEventsMock = {
           user: { name: 'vagrant', id: 1000 },
           executable: '/usr/bin/cat',
           interactive: true,
-          entity_id: 'bb5efe42-54a6-597c-bd0e-33a1a3fc372e',
+          entity_id: 'bb5efe42-54a6-597c-bd0e-33a1a3fc372f',
           parent: {
             pid: 51547,
             pgid: 51547,
@@ -117,7 +117,7 @@ export const sessionViewProcessEventsMock = {
           user: { name: 'vagrant', id: 1000 },
           executable: '/usr/bin/cat',
           interactive: true,
-          entity_id: '628f412a-172c-5cf4-b452-a070e1e9cbeb',
+          entity_id: '628f412a-172c-5cf4-b452-a070e1e9cbeg',
           parent: {
             pid: 51547,
             pgid: 51547,
@@ -166,7 +166,7 @@ export const sessionViewProcessEventsMock = {
           user: { name: 'vagrant', id: -1 },
           executable: '/bin/bash',
           interactive: false,
-          entity_id: '628f412a-172c-5cf4-b452-a070e1e9cbeb',
+          entity_id: '628f412a-172c-5cf4-b452-a070e1e9cbej',
           parent: {
             pid: 51547,
             pgid: 51547,
@@ -215,7 +215,7 @@ export const sessionViewProcessEventsMock = {
           user: { name: 'vagrant', id: 1000 },
           executable: '/usr/bin/cat',
           interactive: true,
-          entity_id: '628f412a-172c-5cf4-b452-a070e1e9cbeb',
+          entity_id: '628f412a-172c-5cf4-b452-a070e1e9cbei',
           parent: {
             pid: 51547,
             pgid: 51547,
@@ -313,7 +313,7 @@ export const sessionViewProcessEventsMock = {
           user: { name: 'vagrant', id: 1000 },
           executable: '/usr/bin/ls',
           interactive: true,
-          entity_id: 'a459679d-a1d5-56ae-9ebb-23f82edf40aa',
+          entity_id: 'a459679d-a1d5-56ae-9ebb-23f82edf40ab',
           parent: {
             pid: 51547,
             pgid: 51547,
