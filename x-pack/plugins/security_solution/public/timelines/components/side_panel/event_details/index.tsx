@@ -200,7 +200,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         );
     }
-  }, [backToAlertDetailsLink, isActivePanel, isAlert, loading, ruleName, timestamp]);
+  }, [backToAlertDetailsLink, isActivePanel, isAlert, isolateAction, loading, ruleName, timestamp]);
   const renderFlyoutBody = useMemo(() => {
     switch (isActivePanel) {
       case ACTIVE_PANEL.OSQUERY:
