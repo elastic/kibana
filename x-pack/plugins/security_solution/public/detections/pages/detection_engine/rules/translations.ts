@@ -369,13 +369,6 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedTitle',
-  {
-    defaultMessage: 'Activate selected',
-  }
-);
-
 export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
@@ -385,13 +378,6 @@ export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     }
   );
 
-export const BATCH_ACTION_DEACTIVATE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedTitle',
-  {
-    defaultMessage: 'Deactivate selected',
-  }
-);
-
 export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
@@ -400,27 +386,6 @@ export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
       defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
-
-export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.exportSelectedTitle',
-  {
-    defaultMessage: 'Export selected',
-  }
-);
-
-export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
-  {
-    defaultMessage: 'Duplicate selected',
-  }
-);
-
-export const BATCH_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedTitle',
-  {
-    defaultMessage: 'Delete selected',
-  }
-);
 
 export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
