@@ -8,5 +8,5 @@
   "scripts": {
     "build:antlr4ts": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js"
   },
-  "sideEffects": true
+  "sideEffects": false
 }
