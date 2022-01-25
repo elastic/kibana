@@ -399,10 +399,10 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           selected={selection.selected}
           options={policies}
           isGlobal={selection.isGlobal}
+          isLoading={arePoliciesLoading}
           isPlatinumPlus={isPlatinumPlus}
           onChange={handleOnChangeEffectScope}
           data-test-subj={'effectedPolicies-select'}
-          arePoliciesLoading={arePoliciesLoading}
         />
       ),
       [policies, selection, isPlatinumPlus, handleOnChangeEffectScope, arePoliciesLoading]

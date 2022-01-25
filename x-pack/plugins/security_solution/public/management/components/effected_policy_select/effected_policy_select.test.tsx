@@ -150,9 +150,10 @@ describe('when using EffectedPolicySelect component', () => {
       });
     });
 
-    it('should show loader and hide selector when policies are loading', () => {
-      const { queryByTestId } = render({ arePoliciesLoading: true });
-      expect(queryByTestId('test-byPolicyGlobalButtonGroup')).toBeNull();
+    it('should show loader only when by polocy selected', () => {
+      const { queryByTestId } = render({ isLoading: true });
+      expect(queryByTestId('loading-spinner')).toBeNull();
+      selectPerPolicy();
       expect(queryByTestId('loading-spinner')).not.toBeNull();
     });
   });

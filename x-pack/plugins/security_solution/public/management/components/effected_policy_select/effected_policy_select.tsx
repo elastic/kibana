@@ -72,7 +72,6 @@ export type EffectedPolicySelectProps = Omit<
   isGlobal: boolean;
   isPlatinumPlus: boolean;
   description?: string;
-  arePoliciesLoading?: boolean;
   onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
 };
@@ -81,7 +80,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     isGlobal,
     isPlatinumPlus,
     description,
-    arePoliciesLoading = false,
+    isLoading = false,
     onChange,
     listProps,
     options,
@@ -209,27 +208,25 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </p>
             </EuiText>
           </EuiFlexItem>
-          {!arePoliciesLoading && (
-            <EuiFlexItem grow={1}>
-              <EuiFormRow fullWidth>
-                <EuiButtonGroup
-                  legend="Global Policy Toggle"
-                  options={toggleGlobal}
-                  idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
-                  onChange={handleGlobalButtonChange}
-                  color="primary"
-                  isFullWidth
-                  data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={1}>
+            <EuiFormRow fullWidth>
+              <EuiButtonGroup
+                legend="Global Policy Toggle"
+                options={toggleGlobal}
+                idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
+                onChange={handleGlobalButtonChange}
+                color="primary"
+                isFullWidth
+                data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        {arePoliciesLoading ? (
-          <Loader size="l" data-test-subj={getTestId('policiesLoader')} />
-        ) : (
-          !isGlobal && (
+        {!isGlobal &&
+          (isLoading ? (
+            <Loader size="l" data-test-subj={getTestId('policiesLoader')} />
+          ) : (
             <EuiFormRow fullWidth>
               <StyledEuiSelectable>
                 <EuiSelectable<OptionPolicyData>
@@ -245,8 +242,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 </EuiSelectable>
               </StyledEuiSelectable>
             </EuiFormRow>
-          )
-        )}
+          ))}
       </EffectivePolicyFormContainer>
     );
   }
