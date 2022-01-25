@@ -8,7 +8,6 @@
 /*
  * Before 8.0.0 we had a few types of cases, comments, and other fields that were never actually used, I'm preserving them here for the migrations
  */
-// TODO: make these capitalized
 export const GENERATED_ALERT = 'generated_alert';
 export const COMMENT_ASSOCIATION_TYPE = 'case';
 export const CASE_TYPE_INDIVIDUAL = 'individual';

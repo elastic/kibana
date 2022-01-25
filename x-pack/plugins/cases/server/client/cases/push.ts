@@ -26,11 +26,8 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 
-// TODO: rewrite comment
 /**
- * Returns true if the case should be closed based on the configuration settings and whether the case
- * is a collection. Collections are not closable because we aren't allowing their status to be changed.
- * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
+ * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
   configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>

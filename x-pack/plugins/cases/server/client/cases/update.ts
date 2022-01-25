@@ -45,7 +45,7 @@ import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
   flattenCaseSavedObject,
-  isCommentRequestTypeAlertOrGenAlert,
+  isCommentRequestTypeAlert,
 } from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
@@ -175,7 +175,7 @@ async function updateAlerts({
   // create an array of requests that indicate the id, index, and status to update an alert
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
     (acc: UpdateAlertRequest[], alertComment) => {
-      if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
+      if (isCommentRequestTypeAlert(alertComment.attributes)) {
         const status = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,

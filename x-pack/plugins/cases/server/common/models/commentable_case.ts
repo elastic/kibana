@@ -57,11 +57,8 @@ interface CommentableCaseParams {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
-// TODO: refactor, what is the purpose of this class now? It could be useful to interact with a case more easily?
-// but it doesn't abstract multiple things now
 /**
- * This class represents a case that can have a comment attached to it. This includes
- * a Sub Case, Case, and Collection.
+ * This class represents a case that can have a comment attached to it.
  */
 export class CommentableCase {
   private readonly collection: SavedObject<CaseAttributes>;

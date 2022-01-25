@@ -85,8 +85,7 @@ export const useDeleteCases = (): UseDeleteCase => {
       dispatch({ type: 'FETCH_INIT' });
 
       const caseIds = cases.map((theCase) => theCase.id);
-      // TODO: is this logic right?
-      if (cases.length > 1) {
+      if (cases.length > 0) {
         await deleteCases(caseIds, abortCtrlRef.current.signal);
       }
 

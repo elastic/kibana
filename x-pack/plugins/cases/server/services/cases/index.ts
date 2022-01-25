@@ -115,10 +115,6 @@ interface CaseCommentStats {
   alertTotals: Map<string, number>;
 }
 
-interface Collection {
-  case: SavedObjectsFindResult<CaseAttributes>;
-}
-
 interface CasesMapWithPageInfo {
   casesMap: Map<string, CaseResponse>;
   page: number;
@@ -205,7 +201,7 @@ export class CasesService {
   }
 
   /**
-   * Returns a map of all cases combined with their sub cases if they are collections.
+   * Returns a map of all cases.
    */
   public async findCasesGroupedByID({
     unsecuredSavedObjectsClient,
@@ -220,22 +216,10 @@ export class CasesService {
     });
 
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
-      accMap.set(caseInfo.id, { case: caseInfo });
+      accMap.set(caseInfo.id, caseInfo);
       return accMap;
-    }, new Map<string, Collection>());
+    }, new Map<string, SavedObjectsFindResult<CaseAttributes>>());
 
-    // TODO: use an aggregation here I think
-    /**
-     * One potential optimization here is to get all comment stats for individual cases, parent cases, and sub cases
-     * in a single request. This can be done because comments that are for sub cases have a reference to both the sub case
-     * and the parent. The associationType field allows us to determine which type of case the comment is attached to.
-     *
-     * So we could use the ids for all the valid cases (individual cases and parents with sub cases) to grab everything.
-     * Once we have it we can build the maps.
-     *
-     * Currently we get all comment stats for all sub cases in one go and we get all comment stats for cases (individual and parent)
-     * in another request (the one below this comment).
-     */
     const totalCommentsForCases = await this.getCaseCommentStats({
       unsecuredSavedObjectsClient,
       ids: Array.from(casesMap.keys()),
@@ -246,7 +230,7 @@ export class CasesService {
       casesWithComments.set(
         id,
         flattenCaseSavedObject({
-          savedObject: caseInfo.case,
+          savedObject: caseInfo,
           totalComment: totalCommentsForCases.commentTotals.get(id) ?? 0,
           totalAlerts: totalCommentsForCases.alertTotals.get(id) ?? 0,
         })
@@ -263,7 +247,6 @@ export class CasesService {
 
   /**
    * Retrieves the number of cases that exist with a given status (open, closed, etc).
-   * This also counts sub cases. Parent cases are excluded from the statistics.
    */
   public async findCaseStatusStats({
     unsecuredSavedObjectsClient,
@@ -274,27 +257,6 @@ export class CasesService {
     caseOptions: SavedObjectFindOptionsKueryNode;
     ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
   }): Promise<number> {
-    // TODO: review this and maybe use an aggregation now
-    /**
-     * This could be made more performant. What we're doing here is retrieving all cases
-     * that match the API request's filters instead of just counts. This is because we need to grab
-     * the ids for the parent cases that match those filters. Then we use those IDS to count how many
-     * sub cases those parents have to calculate the total amount of cases that are open, closed, or in-progress.
-     *
-     * Another solution would be to store ALL filterable fields on both a case and sub case. That we could do a single
-     * query for each type to calculate the totals using the filters. This has drawbacks though:
-     *
-     * We'd have to sync up the parent case's editable attributes with the sub case any time they were change to avoid
-     * them getting out of sync and causing issues when we do these types of stats aggregations. This would result in a lot
-     * of update requests if the user is editing their case details often. Which could potentially cause conflict failures.
-     *
-     * Another option is to prevent the ability from update the parent case's details all together once it's created. A user
-     * could instead modify the sub case details directly. This could be weird though because individual sub cases for the same
-     * parent would have different titles, tags, etc.
-     *
-     * Another potential issue with this approach is when you push a case and all its sub case information. If the sub cases
-     * don't have the same title and tags, we'd need to account for that as well.
-     */
     const cases = await this.findCases({
       unsecuredSavedObjectsClient,
       options: {
@@ -312,9 +274,8 @@ export class CasesService {
     return cases.saved_objects.length;
   }
 
-  // TODO: review I think this could use a aggregation now for the stats
   /**
-   * Returns the number of total comments and alerts for a case (or sub case)
+   * Returns the number of total comments and alerts for a case
    */
   public async getCaseCommentStats({
     unsecuredSavedObjectsClient,

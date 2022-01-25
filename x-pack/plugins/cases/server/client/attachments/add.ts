@@ -37,8 +37,7 @@ import { CasesClientArgs, CasesClientInternal } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 
-// TODO: rename
-async function getCombinedCase({
+async function createCommentableCase({
   caseService,
   attachmentService,
   unsecuredSavedObjectsClient,
@@ -121,7 +120,7 @@ export const addComment = async (
 
     const createdDate = new Date().toISOString();
 
-    const combinedCase = await getCombinedCase({
+    const combinedCase = await createCommentableCase({
       caseService,
       attachmentService,
       unsecuredSavedObjectsClient,

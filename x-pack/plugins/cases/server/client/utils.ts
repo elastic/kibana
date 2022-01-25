@@ -27,7 +27,7 @@ import {
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
-  isCommentRequestTypeAlertOrGenAlert,
+  isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
 } from '../common/utils';
@@ -38,7 +38,7 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeActions(comment)) {
     pipe(excess(ActionsCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+  } else if (isCommentRequestTypeAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
@@ -89,7 +89,7 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
  */
 export const getAlertIds = (comment: CommentRequest): string[] => {
-  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+  if (isCommentRequestTypeAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   }
   return [];
@@ -183,33 +183,6 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
   return fromKueryExpression(expression);
 }
 
-// TODO: refactor this since there won't be case type anymore
-/**
- * Constructs the filters used for finding cases and sub cases.
- * There are a few scenarios that this function tries to handle when constructing the filters used for finding cases
- * and sub cases.
- *
- * Scenario 1:
- *  Type == Individual
- *  If the API request specifies that it wants only individual cases (aka not collections) then we need to add that
- *  specific filter when call the saved objects find api. This will filter out any collection cases.
- *
- * Scenario 2:
- *  Type == collection
- *  If the API request specifies that it only wants collection cases (cases that have sub cases) then we need to add
- *  the filter for collections AND we need to ignore any status filter for the case find call. This is because a
- *  collection's status is no longer relevant when it has sub cases. The user cannot change the status for a collection
- *  only for its sub cases. The status filter will be applied to the find request when looking for sub cases.
- *
- * Scenario 3:
- *  No Type is specified
- *  If the API request does not want to filter on type but instead get both collections and regular individual cases then
- *  we need to find all cases that match the other filter criteria and sub cases. To do this we construct the following query:
- *
- *    ((status == some_status and type === individual) or type == collection) and (tags == blah) and (reporter == yo)
- *  This forces us to honor the status request for individual cases but gets us ALL collection cases that match the other
- *  filter criteria. When we search for sub cases we will use that status filter in that find call as well.
- */
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -224,8 +197,7 @@ export const constructQueryOptions = ({
   sortByField?: string;
   owner?: string | string[];
   authorizationFilter?: KueryNode;
-}): { case: SavedObjectFindOptionsKueryNode } => {
-  // TODO: review and make sure this logic is still correct
+}): SavedObjectFindOptionsKueryNode => {
   const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
     filter != null;
 
@@ -247,10 +219,8 @@ export const constructQueryOptions = ({
   const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 
   return {
-    case: {
-      filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-      sortField,
-    },
+    filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
+    sortField,
   };
 };
 

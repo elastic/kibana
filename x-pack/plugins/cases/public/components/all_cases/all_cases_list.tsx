@@ -210,7 +210,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const tableRowProps = useCallback(
       (theCase: Case) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
-        // TODO: should we just remove this line?
         className: classnames({ isDisabled: false }),
       }),
       []

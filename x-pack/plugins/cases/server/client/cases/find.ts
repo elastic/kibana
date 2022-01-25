@@ -60,7 +60,7 @@ export const find = async (
       unsecuredSavedObjectsClient,
       caseOptions: {
         ...queryParams,
-        ...caseQueries.case,
+        ...caseQueries,
         searchFields:
           queryParams.searchFields != null
             ? Array.isArray(queryParams.searchFields)
@@ -79,7 +79,7 @@ export const find = async (
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
         return caseService.findCaseStatusStats({
           unsecuredSavedObjectsClient,
-          caseOptions: statusQuery.case,
+          caseOptions: statusQuery,
           ensureSavedObjectsAreAuthorized,
         });
       }),

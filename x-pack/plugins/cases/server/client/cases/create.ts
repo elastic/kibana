@@ -17,9 +17,9 @@ import {
   excess,
   CaseResponseRt,
   CaseResponse,
-  CasesClientPostRequestRt,
   CasePostRequest,
   ActionTypes,
+  CasePostRequestRt,
 } from '../../../common/api';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 
@@ -47,8 +47,7 @@ export const create = async (
   } = clientArgs;
 
   const query = pipe(
-    // decode with the defaulted type field
-    excess(CasesClientPostRequestRt).decode({
+    excess(CasePostRequestRt).decode({
       ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)

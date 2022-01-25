@@ -41,8 +41,7 @@ interface CombinedCaseParams {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
-// TODO: rename
-async function getCommentableCase({
+async function createCommentableCase({
   attachmentService,
   caseService,
   unsecuredSavedObjectsClient,
@@ -94,7 +93,7 @@ export async function update(
 
     decodeCommentRequest(queryRestAttributes);
 
-    const commentableCase = await getCommentableCase({
+    const commentableCase = await createCommentableCase({
       attachmentService,
       caseService,
       unsecuredSavedObjectsClient,

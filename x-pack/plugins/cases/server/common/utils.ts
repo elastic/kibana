@@ -17,8 +17,8 @@ import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   CaseAttributes,
+  CasePostRequest,
   CaseResponse,
-  CasesClientPostRequest,
   CasesFindResponse,
   CaseStatuses,
   CommentAttributes,
@@ -52,7 +52,7 @@ export const transformNewCase = ({
   newCase,
 }: {
   user: User;
-  newCase: CasesClientPostRequest;
+  newCase: CasePostRequest;
 }): CaseAttributes => ({
   ...newCase,
   closed_at: null,
@@ -152,7 +152,7 @@ export const getIDsAndIndicesAsArrays = (
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
 const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[] => {
-  if (!isCommentRequestTypeAlertOrGenAlert(comment)) {
+  if (!isCommentRequestTypeAlert(comment)) {
     return [];
   }
 
@@ -220,11 +220,10 @@ export const isCommentRequestTypeActions = (
   return context.type === CommentType.actions;
 };
 
-// TODO: rename to just alert
 /**
  * A type narrowing function for alert comments. Exporting so integration tests can use it.
  */
-export const isCommentRequestTypeAlertOrGenAlert = (
+export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
