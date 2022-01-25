@@ -21,16 +21,16 @@ describe('inMemoryMetrics', () => {
   });
 
   it('should increment', () => {
-    incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-    expect(getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS)).toBe(1);
+    incrementInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+    expect(getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(1);
   });
 
   it('should set to null if incrementing will set over the max integer', () => {
     const all = getAllInMemoryMetrics();
-    all[IN_MEMORY_METRICS.RULE_EXECUTIONS] = Number.MAX_SAFE_INTEGER;
-    incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-    expect(getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS)).toBe(null);
-    incrementInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-    expect(getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS)).toBe(null);
+    all[IN_MEMORY_METRICS.ACTION_EXECUTIONS] = Number.MAX_SAFE_INTEGER;
+    incrementInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+    expect(getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(null);
+    incrementInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+    expect(getInMemoryMetric(IN_MEMORY_METRICS.ACTION_EXECUTIONS)).toBe(null);
   });
 });
