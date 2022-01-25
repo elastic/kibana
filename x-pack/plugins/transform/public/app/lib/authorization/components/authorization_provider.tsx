@@ -28,6 +28,7 @@ const initialCapabilities: Capabilities = {
   canStartStopTransform: false,
   canCreateTransformAlerts: false,
   canUseTransformAlerts: false,
+  canResetTransform: false,
 };
 
 const initialValue: Authorization = {
@@ -76,6 +77,8 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
     'cluster',
     'cluster:admin/transform/delete',
   ]);
+
+  value.capabilities.canResetTransform = hasPrivilege(['cluster', 'cluster:admin/transform/reset']);
 
   value.capabilities.canPreviewTransform = hasPrivilege([
     'cluster',

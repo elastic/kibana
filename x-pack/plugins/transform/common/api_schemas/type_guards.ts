@@ -16,6 +16,7 @@ import { isPopulatedObject } from '../shared_imports';
 import type { FieldHistogramsResponseSchema } from './field_histograms';
 import type { GetTransformsAuditMessagesResponseSchema } from './audit_messages';
 import type { DeleteTransformsResponseSchema } from './delete_transforms';
+import type { ResetTransformsResponseSchema } from './reset_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
 import type {
@@ -53,6 +54,15 @@ export const isDeleteTransformsResponseSchema = (
   return (
     isPopulatedObject(arg) &&
     Object.values(arg).every((d) => isPopulatedObject(d, ['transformDeleted']))
+  );
+};
+
+export const isResetTransformsResponseSchema = (
+  arg: unknown
+): arg is ResetTransformsResponseSchema => {
+  return (
+    isPopulatedObject(arg) &&
+    Object.values(arg).every((d) => isPopulatedObject(d, ['transformReset']))
   );
 };
 

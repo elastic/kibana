@@ -8,6 +8,7 @@
 export { useApi } from './use_api';
 export { useGetTransforms } from './use_get_transforms';
 export { useDeleteTransforms, useDeleteIndexAndTargetIndex } from './use_delete_transform';
+export { useResetTransforms } from './use_reset_transform';
 export { useStartTransforms } from './use_start_transform';
 export { useStopTransforms } from './use_stop_transform';
 export { useRequest } from './use_request';
