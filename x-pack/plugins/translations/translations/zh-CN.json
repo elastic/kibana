@@ -20303,7 +20303,6 @@
     "xpack.reporting.publicNotifier.pollingErrorMessage": "报告通知器错误！",
     "xpack.reporting.publicNotifier.reportLink.pickItUpFromPathDescription": "从 {path} 中提取。",
     "xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel": "“堆栈管理”>“告警和洞见”>“报告”",
-    "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "已为 {reportObjectType}“{reportObjectTitle}”创建报告",
     "xpack.reporting.redirectApp.errorTitle": "重定向错误",
     "xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel": "重定向页面错误：",
     "xpack.reporting.registerFeature.reportingDescription": "管理您从 Discover、Visualize 和 Dashboard 生成的报告。",

@@ -20012,7 +20012,6 @@
     "xpack.reporting.publicNotifier.pollingErrorMessage": "レポート通知エラー",
     "xpack.reporting.publicNotifier.reportLink.pickItUpFromPathDescription": "{path}から開始します。",
     "xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel": "スタック管理 > アラートとインサイト > レポート",
-    "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "{reportObjectType}「{reportObjectTitle}」のレポートが作成されました",
     "xpack.reporting.redirectApp.errorTitle": "リダイレクトエラー",
     "xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel": "リダイレクトページエラー：",
     "xpack.reporting.registerFeature.reportingDescription": "Discover、可視化、ダッシュボードから生成されたレポートを管理します。",
