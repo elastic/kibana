@@ -8,7 +8,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, has } from 'lodash';
-import { SavedObject as SavedObjectType } from '../../server';
+import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 
 /**
@@ -20,7 +20,7 @@ import { SavedObjectsClientContract } from './saved_objects_client';
  *
  * @public
  */
-export class SimpleSavedObject<T = unknown> {
+export class SimpleSavedObject<T extends Record<string, unknown> = SavedObjectAttributes> {
   public attributes: T;
   // We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];

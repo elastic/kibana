@@ -17,7 +17,7 @@ import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
+import type { SavedObject, SavedObjectsBaseOptions, SavedObjectAttributes } from '../../types';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsResolveResponse,
@@ -50,7 +50,7 @@ export interface InternalBulkResolveParams {
   client: RepositoryEsClient;
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
-  incrementCounterInternal: <T = unknown>(
+  incrementCounterInternal: <T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
@@ -65,7 +65,9 @@ export interface InternalBulkResolveParams {
  *
  * @public
  */
-export interface InternalSavedObjectsBulkResolveResponse<T = unknown> {
+export interface InternalSavedObjectsBulkResolveResponse<
+  T extends Record<string, unknown> = SavedObjectAttributes
+> {
   resolved_objects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>;
 }
 
@@ -80,9 +82,9 @@ export interface InternalBulkResolveError {
   error: DecoratedError;
 }
 
-export async function internalBulkResolve<T>(
-  params: InternalBulkResolveParams
-): Promise<InternalSavedObjectsBulkResolveResponse<T>> {
+export async function internalBulkResolve<
+  T extends Record<string, unknown> = SavedObjectAttributes
+>(params: InternalBulkResolveParams): Promise<InternalSavedObjectsBulkResolveResponse<T>> {
   const {
     registry,
     allowedTypes,

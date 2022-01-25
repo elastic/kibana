@@ -59,6 +59,7 @@ import {
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import {
   SavedObject,
+  SavedObjectAttributes,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
@@ -303,7 +304,7 @@ export class SavedObjectsRepository {
    * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async create<T = unknown>(
+  public async create<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -415,7 +416,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkCreate<T = unknown>(
+  async bulkCreate<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -894,7 +895,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T = unknown, A = unknown>(
+  async find<T extends Record<string, unknown> = SavedObjectAttributes, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     const {
@@ -1067,7 +1068,7 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T = unknown>(
+  async bulkGet<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -1185,7 +1186,7 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkResolve<T = unknown>(
+  async bulkResolve<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
@@ -1223,7 +1224,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get<T = unknown>(
+  async get<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -1265,7 +1266,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_object, outcome }
    */
-  async resolve<T = unknown>(
+  async resolve<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -1298,7 +1299,7 @@ export class SavedObjectsRepository {
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise}
    */
-  async update<T = unknown>(
+  async update<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -1471,7 +1472,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkUpdate<T = unknown>(
+  async bulkUpdate<T extends Record<string, unknown> = SavedObjectAttributes>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
@@ -1807,7 +1808,7 @@ export class SavedObjectsRepository {
    * @param options - {@link SavedObjectsIncrementCounterOptions}
    * @returns The saved object after the specified fields were incremented
    */
-  async incrementCounter<T = unknown>(
+  async incrementCounter<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
@@ -1837,7 +1838,7 @@ export class SavedObjectsRepository {
   }
 
   /** @internal incrementCounter function that is used internally and bypasses validation checks. */
-  private async incrementCounterInternal<T = unknown>(
+  private async incrementCounterInternal<T extends Record<string, unknown> = SavedObjectAttributes>(
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
@@ -2176,7 +2177,9 @@ export class SavedObjectsRepository {
     return unique(types.map((t) => this.getIndexForType(t)));
   }
 
-  private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
+  private _rawToSavedObject<T extends Record<string, unknown> = SavedObjectAttributes>(
+    raw: SavedObjectsRawDoc
+  ): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     const { namespace, type } = savedObject;
     if (this._registry.isSingleNamespace(type)) {
