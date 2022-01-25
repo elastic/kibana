@@ -392,6 +392,7 @@
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt

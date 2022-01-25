@@ -6,13 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLoadingContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 
 import { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/api';
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
@@ -37,7 +31,7 @@ import { useCaseViewNavigation } from '../../common/navigation';
 import { HeaderPage } from '../header_page';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { CaseViewMetrics } from './case_view_metrics';
+import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps, OnUpdateFields } from './types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 
@@ -330,30 +324,25 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         <WhitePageWrapper>
           <ContentWrapper>
             <EuiFlexGroup>
+              <EuiFlexItem>
+                {!initLoadingData && metricsFeatures.length > 0 ? (
+                  <CaseViewMetrics
+                    data-test-subj="case-view-metrics"
+                    isLoading={isLoadingMetrics}
+                    metrics={metrics}
+                    features={metricsFeatures}
+                  />
+                ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
                   <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
                 )}
                 {!initLoadingData && (
                   <EuiFlexGroup direction="column" responsive={false}>
-                    {metricsFeatures.length > 0 && (
-                      <>
-                        <EuiFlexItem>
-                          <CaseViewMetrics
-                            data-test-subj="case-view-metrics"
-                            isLoading={isLoadingMetrics}
-                            metrics={metrics}
-                            features={metricsFeatures}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText>
-                            <h4>{i18n.ACTIVITY}</h4>
-                            <EuiHorizontalRule margin="xs" />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </>
-                    )}
                     <EuiFlexItem>
                       <UserActions
                         getRuleDetailsHref={ruleDetailsNavigation?.href}
