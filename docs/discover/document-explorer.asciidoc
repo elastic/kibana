@@ -57,7 +57,7 @@ image::images/document-explorer-multi-field.png[Multi field sort in Document Exp
 [[document-explorer-compare-data]]
 === Compare data
 
-Select specific documents to compare a subset of data.
+Select a subset of documents that you want to compare.
 
 . Select the checkboxes of the documents that you want to compare.
 
