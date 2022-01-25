@@ -416,7 +416,6 @@ export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
-  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,

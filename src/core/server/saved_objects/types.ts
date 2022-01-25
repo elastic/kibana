@@ -37,7 +37,6 @@ type KueryNode = any;
 export type {
   SavedObjectAttributes,
   SavedObjectAttribute,
-  SavedObjectAttributeSingle,
   SavedObject,
   SavedObjectError,
   SavedObjectReference,

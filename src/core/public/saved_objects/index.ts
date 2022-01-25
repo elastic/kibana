@@ -51,7 +51,6 @@ export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
-  SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
 } from '../../types';

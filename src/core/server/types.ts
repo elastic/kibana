@@ -23,7 +23,6 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectAttributes,
   SavedObjectAttribute,
-  SavedObjectAttributeSingle,
   SavedObject,
   SavedObjectError,
   SavedObjectReference,

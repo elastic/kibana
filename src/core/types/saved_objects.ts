@@ -9,19 +9,6 @@
 import { Serializable } from '@kbn/utility-types';
 
 /**
- * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
- *
- * @public
- */
-export type SavedObjectAttributeSingle =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes;
-
-/**
  * Type definition for a Saved Object attribute value
  *
  * @public
