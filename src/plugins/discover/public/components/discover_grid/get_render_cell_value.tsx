@@ -7,11 +7,7 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  euiLightVars as themeLight,
-  euiDarkVars as themeDark,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from 'src/plugins/data/common';
 import {
   EuiDataGridCellValueElementProps,
@@ -139,7 +135,7 @@ function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
  * Helper function for the cell popover
  */
 function renderPopoverContent(
-  rowRaw: estypes.SearchHit,
+  rowRaw: ElasticSearchHit,
   rowFlattened: Record<string, unknown>,
   field: DataViewField | undefined,
   columnId: string,
@@ -170,7 +166,7 @@ function renderPopoverContent(
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairs(
-  row: estypes.SearchHit,
+  row: ElasticSearchHit,
   columnId: string,
   dataView: DataView,
   fieldsToShow: string[]
