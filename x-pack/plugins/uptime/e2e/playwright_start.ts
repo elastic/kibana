@@ -19,7 +19,10 @@ const listOfJourneys = [
   'StepsDuration',
   'TlsFlyoutInAlertingApp',
   'StatusFlyoutInAlertingApp',
-  'Monitor Management',
+  'Monitor Management - http',
+  'Monitor Management - tcp',
+  'Monitor Management - icmp',
+  'Monitor Management - browser',
   'Monitor Management breadcrumbs',
 ] as const;
 
