@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import {
+  elasticsearchClientMock,
+  ElasticsearchClientMock,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from 'src/core/server/elasticsearch/client/mocks';
+
 import {
   getBenchmarks,
   getAllFindingsStats,
@@ -13,13 +17,28 @@ import {
   getBenchmarksStats,
   getResourcesEvaluation,
 } from './stats';
-import { mockCountResultOnce, mockSearchResultOnce } from './stats_mock_query_response';
-// TODO  figure out the right permissions we need to ESClient to run with
+
+export const mockCountResultOnce = async (mockEsClient: ElasticsearchClientMock, count: number) => {
+  mockEsClient.count.mockReturnValueOnce(
+    // @ts-expect-error @elast  ic/elasticsearch Aggregate only allows unknown values
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ count })
+  );
+};
+
+export const mockSearchResultOnce = async (
+  mockEsClient: ElasticsearchClientMock,
+  returnedMock: object
+) => {
+  mockEsClient.search.mockReturnValueOnce(
+    // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+    elasticsearchClientMock.createSuccessTransportRequestPromise(returnedMock)
+  );
+};
+
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
 afterEach(() => {
-  mockEsClient.search.mockClear();
-  mockEsClient.count.mockClear();
+  jest.clearAllMocks();
 });
 
 describe('testing round score', () => {
@@ -30,7 +49,7 @@ describe('testing round score', () => {
 });
 
 describe('general cloud posture score', () => {
-  it('expect to valid score from getAllFindingsStats ', async () => {
+  it('expect to valid score from getAllFindingsStats', async () => {
     mockCountResultOnce(mockEsClient, 10); // total findings
     mockCountResultOnce(mockEsClient, 3); // pass findings
     mockCountResultOnce(mockEsClient, 7); // fail findings
@@ -56,7 +75,7 @@ describe('general cloud posture score', () => {
 });
 
 describe('get benchmarks list', () => {
-  it('getBenchmarks - takes aggregated data and expect unique benchmarks array ', async () => {
+  it('getBenchmarks - takes aggregated data and expect unique benchmarks array', async () => {
     const returnedMock = {
       aggregations: {
         benchmarks: {
@@ -92,7 +111,6 @@ describe('score per benchmark, testing getBenchmarksStats', () => {
     ]);
   });
 
-  // TODO Solve async
   it('get data two benchmarks and check', async () => {
     mockCountResultOnce(mockEsClient, 10); // total findings
     mockCountResultOnce(mockEsClient, 3); // pass findings
@@ -123,7 +141,7 @@ describe('score per benchmark, testing getBenchmarksStats', () => {
   });
 });
 
-describe('Evluation Per Resource', () => {
+describe('Evaluation Per Resource', () => {
   it('getResourcesEvaluation - check for one resource', async () => {
     const returnedMock = {
       aggregations: {

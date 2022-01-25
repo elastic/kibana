@@ -5,69 +5,94 @@
  * 2.0.
  */
 
-import { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-
-import { schema as rt, TypeOf } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'src/core/server';
 import type { IRouter } from 'src/core/server';
+import { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { schema as rt, TypeOf } from '@kbn/config-schema';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { CspAppContext } from '../../plugin';
 import { getLatestCycleIds } from './get_latest_cycle_ids';
-import { CSP_KUBEBEAT_INDEX_NAME, FINDINGS_ROUTE_PATH } from '../../../common/constants';
+
+import { CSP_KUBEBEAT_INDEX_PATTERN, FINDINGS_ROUTE_PATH } from '../../../common/constants';
+
+type FindingsQuerySchema = TypeOf<typeof findingsInputSchema>;
+
 export const DEFAULT_FINDINGS_PER_PAGE = 20;
 
-type FindingsQuerySchema = TypeOf<typeof schema>;
+export interface FindingsOptions {
+  size: number;
+  from?: number;
+  page?: number;
+  sortField?: string;
+  sortOrder?: SortOrder;
+  fields?: string[];
+}
 
-const buildQueryFilter = async (
-  esClient: ElasticsearchClient,
-  queryParams: FindingsQuerySchema
-): Promise<QueryDslQueryContainer> => {
-  if (queryParams.latest_cycle) {
-    const latestCycleIds = await getLatestCycleIds(esClient);
-    if (!!latestCycleIds) {
-      const filter = latestCycleIds.map((latestCycleId) => ({
-        term: { 'run_id.keyword': latestCycleId },
-      }));
+const getPointerForFirstDoc = (page: number, perPage: number): number =>
+  page <= 1 ? 0 : page * perPage - perPage;
 
-      return {
-        bool: { filter },
-      };
-    }
-  }
+const getSort = (sortField: string | undefined, sortOrder: string) =>
+  sortField
+    ? { sort: [{ [sortField]: sortOrder }] }
+    : { sort: [{ '@timestamp': { order: sortOrder } }] };
+
+const getSearchFields = (fields: string | undefined) =>
+  fields ? { _source: fields.split(',') } : {};
+
+const getFindingsEsQuery = (
+  query: QueryDslQueryContainer,
+  options: FindingsOptions
+): SearchRequest => {
   return {
-    match_all: {},
-  };
-};
-
-const getFindingsEsQuery = async (
-  esClient: ElasticsearchClient,
-  queryParams: FindingsQuerySchema
-): Promise<SearchRequest> => {
-  const query = await buildQueryFilter(esClient, queryParams);
-  return {
-    index: CSP_KUBEBEAT_INDEX_NAME,
+    index: CSP_KUBEBEAT_INDEX_PATTERN,
     query,
-    size: queryParams.per_page,
-    from:
-      queryParams.page <= 1
-        ? 0
-        : queryParams.page * queryParams.per_page - queryParams.per_page + 1,
+    ...options,
   };
 };
+
+const buildQueryRequest = (latestCycleIds?: string[]): QueryDslQueryContainer => {
+  let filterPart: QueryDslQueryContainer = { match_all: {} };
+  if (!!latestCycleIds) {
+    const filter = latestCycleIds.map((latestCycleId) => ({
+      term: { 'run_id.keyword': latestCycleId },
+    }));
+    filterPart = { bool: { filter } };
+  }
+
+  return {
+    ...filterPart,
+  };
+};
+
+const buildOptionsRequest = (queryParams: FindingsQuerySchema): FindingsOptions => ({
+  size: queryParams.per_page,
+  from: getPointerForFirstDoc(queryParams.page, queryParams.per_page),
+  ...getSort(queryParams.sort_field, queryParams.sort_order),
+  ...getSearchFields(queryParams.fields),
+});
 
 export const defineFindingsIndexRoute = (router: IRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: FINDINGS_ROUTE_PATH,
-      validate: { query: schema },
+      validate: { query: findingsInputSchema },
     },
     async (context, request, response) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const { query } = request;
-        const esQuery = await getFindingsEsQuery(esClient, query);
+        const options = buildOptionsRequest(request.query);
+
+        const latestCycleIds =
+          request.query.latest_cycle === true
+            ? await getLatestCycleIds(esClient, cspContext.logger)
+            : undefined;
+
+        const query = buildQueryRequest(latestCycleIds);
+        const esQuery = getFindingsEsQuery(query, options);
+
         const findings = await esClient.search(esQuery);
         const hits = findings.body.hits.hits;
+
         return response.ok({ body: hits });
       } catch (err) {
         const error = transformError(err);
@@ -79,8 +104,29 @@ export const defineFindingsIndexRoute = (router: IRouter, cspContext: CspAppCont
     }
   );
 
-const schema = rt.object({
-  latest_cycle: rt.maybe(rt.boolean()),
-  page: rt.number({ defaultValue: 1, min: 0 }), // TODO: research for pagination best practice
+export const findingsInputSchema = rt.object({
+  /**
+   * The page of objects to return
+   */
+  page: rt.number({ defaultValue: 1, min: 1 }),
+  /**
+   * The number of objects to include in each page
+   */
   per_page: rt.number({ defaultValue: DEFAULT_FINDINGS_PER_PAGE, min: 0 }),
+  /**
+   * Boolean flag to indicate for receiving only the latest findings
+   */
+  latest_cycle: rt.maybe(rt.boolean()),
+  /**
+   * The field to use for sorting the found objects.
+   */
+  sort_field: rt.maybe(rt.string()),
+  /**
+   * The order to sort by
+   */
+  sort_order: rt.oneOf([rt.literal('asc'), rt.literal('desc')], { defaultValue: 'desc' }),
+  /**
+   * The fields in the entity to return in the response
+   */
+  fields: rt.maybe(rt.string()),
 });
