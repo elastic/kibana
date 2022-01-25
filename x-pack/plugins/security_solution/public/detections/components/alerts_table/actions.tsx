@@ -306,7 +306,7 @@ const buildTimelineDataProviderOrFilter = (
   alertIds: string[],
   _id: string
 ): { filters: Filter[]; dataProviders: DataProvider[] } => {
-  if (!isEmpty(alertIds)) {
+  if (!isEmpty(alertIds) && Array.isArray(alertIds) && alertIds.length > 1) {
     return {
       filters: buildAlertsKqlFilter('_id', alertIds),
       dataProviders: [],
