@@ -229,11 +229,11 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   }
 };
 
-export const getFullAgentPolicy: RequestHandler<
+export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
 
   if (request.query.kubernetes === true) {
     try {
@@ -284,11 +284,11 @@ export const getFullAgentPolicy: RequestHandler<
   }
 };
 
-export const downloadFullAgentPolicy: RequestHandler<
+export const downloadFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const {
     params: { agentPolicyId },
   } = request;

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
-import { useLink, useAuthz } from '../../../../../hooks';
+import { useLink } from '../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
 
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
@@ -70,7 +70,6 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   packagePolicy: PackagePolicy;
 }> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
-  const hasWritePermissions = useAuthz().integrations.installPackages;
 
   const inputs = useMemo(() => {
     return packagePolicy.inputs.filter((input) => input.enabled);
@@ -138,20 +137,16 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                 )}
               </EuiFlexItem>
               <EuiFlexItem className="eui-textTruncate">
-                {hasWritePermissions ? (
-                  <EuiLink
-                    className="eui-textTruncate"
-                    data-test-subj="agentPolicyDetailsLink"
-                    href={getHref('edit_integration', {
-                      policyId: agentPolicy.id,
-                      packagePolicyId: packagePolicy.id,
-                    })}
-                  >
-                    {packagePolicy.name}
-                  </EuiLink>
-                ) : (
-                  packagePolicy.name
-                )}
+                <EuiLink
+                  className="eui-textTruncate"
+                  data-test-subj="agentPolicyDetailsLink"
+                  href={getHref('edit_integration', {
+                    policyId: agentPolicy.id,
+                    packagePolicyId: packagePolicy.id,
+                  })}
+                >
+                  {packagePolicy.name}
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           </h3>
