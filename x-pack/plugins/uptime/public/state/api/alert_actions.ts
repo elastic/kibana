@@ -241,8 +241,8 @@ function getEmailActionParams(
       },
     }),
     message: MonitorStatusTranslations.defaultActionMessage,
-    cc: defaultEmail.cc,
-    bcc: defaultEmail.bcc,
+    cc: defaultEmail.cc ?? [],
+    bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {
       path: '',
       text: '',
