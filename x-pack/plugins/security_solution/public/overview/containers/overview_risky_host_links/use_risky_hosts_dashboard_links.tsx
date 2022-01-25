@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { LinkPanelListItem } from '../../components/link_panel';
 import { useRiskyHostsDashboardId } from './use_risky_hosts_dashboard_id';
@@ -14,14 +14,21 @@ export const useRiskyHostsDashboardLinks = (
   from: string,
   listItems: LinkPanelListItem[]
 ) => {
-  const createDashboardUrl = useKibana().services.dashboard?.dashboardUrlGenerator?.createUrl;
+  const createDashboardUrl = useKibana().services.dashboard?.locator?.getLocation;
+  const resolveSavedObject = useKibana().services.savedObjects.client.resolve;
   const dashboardId = useRiskyHostsDashboardId();
   const [listItemsWithLinks, setListItemsWithLinks] = useState<LinkPanelListItem[]>([]);
+
+  const dashboardExists = useCallback(async () => {
+    if (!dashboardId) return false;
+    const { saved_object: dashboard } = await resolveSavedObject('dashboard', dashboardId);
+    return !dashboard.error;
+  }, [dashboardId, resolveSavedObject]);
 
   useEffect(() => {
     let cancelled = false;
     const createLinks = async () => {
-      if (createDashboardUrl && dashboardId) {
+      if (createDashboardUrl && dashboardId && (await dashboardExists())) {
         const dashboardUrls = await Promise.all(
           listItems.map((listItem) =>
             createDashboardUrl({
@@ -59,7 +66,7 @@ export const useRiskyHostsDashboardLinks = (
     return () => {
       cancelled = true;
     };
-  }, [createDashboardUrl, dashboardId, from, listItems, to]);
+  }, [createDashboardUrl, dashboardId, from, listItems, to, dashboardExists]);
 
   return { listItemsWithLinks };
 };
