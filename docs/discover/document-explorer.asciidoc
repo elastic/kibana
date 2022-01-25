@@ -36,7 +36,7 @@ Column widths are stored with a saved search.  When you reuse your saved search 
 === Sort data
 
 Sort your data by one or more fields, in ascending or descending order.
-The default sort is based on the time field, from new to old.
+The default is based on the time field, from new to old.
 
 . In the *Document Explorer*, click and open the *field sorted* options.
 +
