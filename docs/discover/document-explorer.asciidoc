@@ -59,7 +59,7 @@ image::images/document-explorer-multi-field.png[Multi field sort in Document Exp
 
 Select a subset of documents that you want to compare.
 
-. Select the checkboxes of the documents that you want to compare.
+. Select the documents you want to compare.
 
 . Click the *documents selected* link, and then select *Show selected documents only*.
 +
