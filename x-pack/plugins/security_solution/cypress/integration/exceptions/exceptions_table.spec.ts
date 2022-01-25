@@ -15,7 +15,7 @@ import { getNewRule } from '../../objects/rule';
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import { goToRuleDetails, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import {
   loginAndWaitForPageWithoutDateRange,
@@ -63,7 +63,6 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList(), getExceptionList().list_id).as('exceptionListResponse');
 
     goBackToAllRulesTable();
-    waitForRulesTableToBeLoaded();
   });
 
   after(() => {

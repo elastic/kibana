@@ -10,7 +10,6 @@ import {
   RULE_NAME,
   RULE_SWITCH,
   SECOND_RULE,
-  RULE_AUTO_REFRESH_IDLE_MODAL,
   FOURTH_RULE,
   RULES_TABLE,
   pageSelector,
@@ -20,11 +19,8 @@ import { goToManageAlertsDetectionRules, waitForAlertsPanelToBeLoaded } from '..
 import {
   activateRule,
   changeRowsPerPageTo,
-  checkAllRulesIdleModal,
   checkAutoRefresh,
-  dismissAllRulesIdleModal,
   goToPage,
-  resetAllRulesIdleModalTimeout,
   sortByActivatedRules,
   waitForRulesTableToBeLoaded,
   waitForRuleToChangeStatus,
@@ -58,36 +54,18 @@ describe('Alerts detection rules', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
 
-    cy.get(RULE_NAME)
-      .eq(SECOND_RULE)
-      .invoke('text')
-      .then((secondInitialRuleName) => {
-        activateRule(SECOND_RULE);
-        waitForRuleToChangeStatus();
-        cy.get(RULE_NAME)
-          .eq(FOURTH_RULE)
-          .invoke('text')
-          .then((fourthInitialRuleName) => {
-            activateRule(FOURTH_RULE);
-            waitForRuleToChangeStatus();
-            sortByActivatedRules();
-            cy.get(RULE_NAME)
-              .eq(FIRST_RULE)
-              .invoke('text')
-              .then((firstRuleName) => {
-                cy.get(RULE_NAME)
-                  .eq(SECOND_RULE)
-                  .invoke('text')
-                  .then((secondRuleName) => {
-                    const expectedRulesNames = `${firstRuleName} ${secondRuleName}`;
-                    cy.wrap(expectedRulesNames).should('include', secondInitialRuleName);
-                    cy.wrap(expectedRulesNames).should('include', fourthInitialRuleName);
-                  });
-              });
-            cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
-            cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
-          });
-      });
+    activateRule(SECOND_RULE);
+    waitForRuleToChangeStatus();
+    activateRule(FOURTH_RULE);
+    waitForRuleToChangeStatus();
+
+    cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
+    cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
+
+    sortByActivatedRules();
+
+    cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
+    cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
   });
 
   it('Pagination updates page number and results', () => {
@@ -143,19 +121,5 @@ describe('Alerts detection rules', () => {
     // mock 1 minute passing to make sure refresh
     // is conducted
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
-
-    // mock 45 minutes passing to check that idle modal shows
-    // and refreshing is paused
-    checkAllRulesIdleModal('be.visible');
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
-
-    // clicking on modal to continue, should resume refreshing
-    dismissAllRulesIdleModal();
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
-
-    // if mouse movement detected, idle modal should not
-    // show after 45 min
-    resetAllRulesIdleModalTimeout();
-    cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
   });
 });
