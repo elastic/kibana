@@ -25,7 +25,6 @@ export function loginPageProvider({
       }
     },
     async loginToKibana() {
-      console.warn('isRemote', isRemote);
       if (isRemote) {
         await page.click('text="Log in with Elasticsearch"');
       }
