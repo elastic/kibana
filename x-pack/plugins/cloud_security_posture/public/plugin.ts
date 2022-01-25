@@ -15,7 +15,7 @@ import type {
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ENABLE_CSP } from '../common/constants';
-import { CSP_KUBEBEAT_INDEX_NAME } from '../common/constants';
+import { CSP_KUBEBEAT_INDEX_PATTERN } from '../common/constants';
 
 export class CspPlugin
   implements
@@ -65,11 +65,11 @@ async function registerKubebeatDataView(
 ) {
   try {
     const [, depsStart] = await core.getStartServices();
-    const dataView = await depsStart.data.dataViews.find(CSP_KUBEBEAT_INDEX_NAME);
+    const dataView = await depsStart.data.dataViews.find(CSP_KUBEBEAT_INDEX_PATTERN);
     if (dataView) return;
 
     await depsStart.data.dataViews.createAndSave({
-      title: CSP_KUBEBEAT_INDEX_NAME,
+      title: CSP_KUBEBEAT_INDEX_PATTERN,
       allowNoIndex: true,
     });
   } catch (e) {
