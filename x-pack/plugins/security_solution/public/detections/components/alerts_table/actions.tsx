@@ -406,7 +406,7 @@ export const sendAlertToTimelineAction = async ({
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
-  if (!isEmpty(timelineId) && isThresholdRule(ecsData) === false) {
+  if (!isEmpty(timelineId)) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
@@ -435,56 +435,110 @@ export const sendAlertToTimelineAction = async ({
           true,
           timelineTemplate.timelineType ?? TimelineType.default
         );
-        const query = replaceTemplateFieldFromQuery(
-          timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-          eventData,
-          timeline.timelineType
-        );
-        const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], eventData);
-        const dataProviders = replaceTemplateFieldFromDataProviders(
-          timeline.dataProviders ?? [],
-          eventData,
-          timeline.timelineType
-        );
 
-        return createTimeline({
-          from,
-          timeline: {
-            ...timeline,
-            title: '',
-            timelineType: TimelineType.default,
-            templateTimelineId: null,
-            status: TimelineStatus.draft,
-            dataProviders,
-            eventType: 'all',
-            filters,
-            dateRange: {
-              start: from,
-              end: to,
-            },
-            kqlQuery: {
-              filterQuery: {
-                kuery: {
-                  kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-                  expression: query,
+        // threshold with template
+        if (isThresholdRule(ecsData)) {
+          const { thresholdFrom, thresholdTo, dataProviders } =
+            getThresholdAggregationData(ecsData);
+
+          const params = getField(ecsData, ALERT_RULE_PARAMETERS);
+          const filters = getFiltersFromRule(params.filters ?? ecsData.signal?.rule?.filters) ?? [];
+          const language = params.language ?? ecsData.signal?.rule?.language ?? 'kuery';
+          const query = params.query ?? ecsData.signal?.rule?.query ?? '';
+          const indexNames = params.index ?? ecsData.signal?.rule?.index ?? [];
+
+          return createTimeline({
+            from: thresholdFrom,
+            notes: null,
+            timeline: {
+              ...timelineDefaults,
+              description: `_id: ${ecsData._id}`,
+              filters,
+              dataProviders,
+              id: TimelineId.active,
+              indexNames,
+              dateRange: {
+                start: thresholdFrom,
+                end: thresholdTo,
+              },
+              eventType: 'all',
+              kqlQuery: {
+                filterQuery: {
+                  kuery: {
+                    kind: language,
+                    expression: query,
+                  },
+                  serializedQuery: query,
                 },
-                serializedQuery: convertKueryToElasticSearchQuery(query),
               },
             },
-            noteIds: notes?.map((n) => n.noteId) ?? [],
-            show: true,
-          },
-          to,
-          ruleNote: noteContent,
-          notes: notes ?? null,
-        });
+            to: thresholdTo,
+            ruleNote: noteContent,
+          });
+        } else {
+          const query = replaceTemplateFieldFromQuery(
+            timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
+            eventData,
+            timeline.timelineType
+          );
+          const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], eventData);
+          const dataProviders = replaceTemplateFieldFromDataProviders(
+            timeline.dataProviders ?? [],
+            eventData,
+            timeline.timelineType
+          );
+          return createTimeline({
+            from,
+            timeline: {
+              ...timeline,
+              title: '',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              status: TimelineStatus.draft,
+              dataProviders,
+              eventType: 'all',
+              filters,
+              dateRange: {
+                start: from,
+                end: to,
+              },
+              kqlQuery: {
+                filterQuery: {
+                  kuery: {
+                    kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
+                    expression: query,
+                  },
+                  serializedQuery: convertKueryToElasticSearchQuery(query),
+                },
+              },
+              noteIds: notes?.map((n) => n.noteId) ?? [],
+              show: true,
+            },
+            to,
+            ruleNote: noteContent,
+            notes: notes ?? null,
+          });
+        }
       }
     } catch {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
+      return createTimeline({
+        from,
+        notes: null,
+        timeline: {
+          ...timelineDefaults,
+          id: TimelineId.active,
+          indexNames: [],
+          dateRange: {
+            start: from,
+            end: to,
+          },
+          eventType: 'all',
+        },
+        to,
+      });
     }
-  }
-
-  if (isThresholdRule(ecsData)) {
+  } else if (isThresholdRule(ecsData)) {
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
     const params = getField(ecsData, ALERT_RULE_PARAMETERS);

@@ -268,6 +268,9 @@ describe('alert actions', () => {
           updateTimelineIsLoading,
           searchStrategyClient,
         });
+        const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
+
+        delete defaultTimelinePropsWithoutNote.ruleNote;
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -278,7 +281,17 @@ describe('alert actions', () => {
           isLoading: false,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+        expect(createTimeline).toHaveBeenCalledWith({
+          ...defaultTimelinePropsWithoutNote,
+          timeline: {
+            ...defaultTimelinePropsWithoutNote.timeline,
+            dataProviders: [],
+            kqlQuery: {
+              filterQuery: null,
+            },
+            resolveTimelineConfig: undefined,
+          },
+        });
       });
     });
 
