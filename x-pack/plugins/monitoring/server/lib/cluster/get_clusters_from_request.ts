@@ -38,6 +38,7 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
+import { getRuleDataForClusters } from '../kibana/rules';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -167,10 +168,13 @@ export async function getClustersFromRequest(
     }
   }
   // add kibana data
-  const kibanas =
+  const [kibanas, kibanaRules] =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, clusters, '*')
-      : [];
+      ? await Promise.all([
+          getKibanasForClusters(req, clusters, '*'),
+          getRuleDataForClusters(req, clusters, '*'),
+        ])
+      : [[], []];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
     const clusterIndex = clusters.findIndex(
@@ -178,6 +182,9 @@ export async function getClustersFromRequest(
         get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === kibana.clusterUuid
     );
     set(clusters[clusterIndex], 'kibana', kibana.stats);
+
+    const clusterKibanaRules = kibanaRules?.find((rule) => rule.clusterUuid === kibana.clusterUuid);
+    set(clusters[clusterIndex], 'kibana.ruleData', clusterKibanaRules ?? {});
   });
 
   // add logstash data

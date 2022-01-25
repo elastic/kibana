@@ -11,4 +11,6 @@ export const metricSet = [
     keys: ['kibana_cluster_max_response_times', 'kibana_cluster_average_response_times'],
     name: 'kibana_cluster_response_times',
   },
+  'kibana_cluster_rule_failures',
+  'kibana_cluster_rule_executions',
 ];

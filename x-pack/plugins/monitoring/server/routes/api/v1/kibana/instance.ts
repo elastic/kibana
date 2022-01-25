@@ -44,9 +44,32 @@ export function kibanaInstanceRoute(server: LegacyServer) {
       const clusterUuid = req.params.clusterUuid;
       const kibanaUuid = req.params.kibanaUuid;
 
+      const moduleType = 'kibana';
+      const dsDatasets = ['stats', 'rules'];
+      const bools = dsDatasets.reduce(
+        (accum: Array<{ term: { [key: string]: string } }>, dsDataset) => {
+          accum.push(
+            ...[
+              { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+              { term: { 'metricset.name': dsDataset } },
+              { term: { type: `kibana_${dsDataset}` } },
+              { term: { [`kibana_${dsDataset}.kibana.uuid`]: kibanaUuid } },
+            ]
+          );
+          return accum;
+        },
+        []
+      );
+
       try {
         const [metrics, kibanaSummary] = await Promise.all([
-          getMetrics(req, 'kibana', metricSet),
+          getMetrics(req, 'kibana', metricSet, [
+            {
+              bool: {
+                should: bools,
+              },
+            },
+          ]),
           getKibanaInfo(req, { clusterUuid, kibanaUuid }),
         ]);
 

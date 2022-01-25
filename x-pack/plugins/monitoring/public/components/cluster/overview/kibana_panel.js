@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { formatNumber } from '../../../lib/format_number';
+import { formatNumber, formatPercentageUsage } from '../../../lib/format_number';
 import {
   ClusterItemContainer,
   HealthStatusIndicator,
@@ -135,6 +135,27 @@ export function KibanaPanel(props) {
                   defaultMessage="{maxTime} ms"
                   values={{ maxTime: props.response_time_max }}
                 />
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.ruleFailuresLabel"
+                  defaultMessage="Rule Success Ratio"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="kbnRuleFailures">
+                {formatPercentageUsage(
+                  props.ruleData.executions - props.ruleData.failures,
+                  props.ruleData.executions
+                )}
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.overdueTaskCountLabel"
+                  defaultMessage="Overdue Rules"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="kbnOverdueRules">
+                {props.ruleData.overdueCount}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>

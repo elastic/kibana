@@ -25,6 +25,74 @@ export class KibanaClusterMetric extends ClusterMetric {
   }
 }
 
+export class KibanaClusterRuleMetric extends ClusterMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaClusterRuleMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'cluster_uuid',
+      timestampField: 'kibana_rules.timestamp',
+    };
+  }
+}
+
+export class KibanaInstanceRuleMetric extends Metric {
+  constructor(opts) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaInstanceRuleMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'kibana_rules.kibana.uuid',
+      timestampField: 'kibana_rules.timestamp',
+    };
+  }
+}
+
+export class KibanaClusterActionMetric extends ClusterMetric {
+  constructor(opts) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaClusterActionMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'cluster_uuid',
+      timestampField: 'kibana_actions.timestamp',
+    };
+  }
+}
+
+export class KibanaInstanceActionMetric extends Metric {
+  constructor(opts) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaInstanceActionMetric.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'kibana_actions.kibana.uuid',
+      timestampField: 'kibana_action.timestamp',
+    };
+  }
+}
+
 export class KibanaEventsRateClusterMetric extends KibanaClusterMetric {
   constructor(opts) {
     super({

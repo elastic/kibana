@@ -57,6 +57,22 @@ const KibanaOverview = ({ data }: { data: any }) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_cluster_rule_failures}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_cluster_rule_executions}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

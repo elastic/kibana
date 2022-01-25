@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
+import {
+  KibanaEventsRateClusterMetric,
+  KibanaMetric,
+  KibanaClusterRuleMetric,
+  KibanaInstanceRuleMetric,
+} from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
@@ -247,6 +252,73 @@ export const metrics = {
       'xpack.monitoring.metrics.kibanaInstance.clientRequestsDisconnectsDescription',
       {
         defaultMessage: 'Total number of client disconnects to the Kibana instance.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+
+  kibana_cluster_rule_failures: new KibanaClusterRuleMetric({
+    derivative: true,
+    field: 'kibana_rules.failures',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleClusterFailuresLabel', {
+      defaultMessage: 'Rule Failures Rate',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleClusterFailuresDescription',
+      {
+        defaultMessage: 'Rate of rule failures across the entire cluster.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+  kibana_instance_rule_failures: new KibanaInstanceRuleMetric({
+    derivative: true,
+    field: 'kibana_rules.failures',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresLabel', {
+      defaultMessage: 'Rule Failures Rate',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresDescription',
+      {
+        defaultMessage: 'Rate of rule failures for this Kibana',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+
+  kibana_cluster_rule_executions: new KibanaClusterRuleMetric({
+    derivative: true,
+    field: 'kibana_rules.executions',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleClusterExecutionsLabel', {
+      defaultMessage: 'Rule Executions Rate',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleClusterExecutionsDescription',
+      {
+        defaultMessage: 'Rate of rule executions across the entire cluster.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    debug: true,
+  }),
+  kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
+    derivative: true,
+    field: 'kibana_rules.executions',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsLabel', {
+      defaultMessage: 'Rule Executions Rate',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleInstanceExecutionsDescription',
+      {
+        defaultMessage: 'Rate of rule executions for this Kibana',
       }
     ),
     format: SMALL_FLOAT,
