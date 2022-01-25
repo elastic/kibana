@@ -42,6 +42,7 @@
     "model_memory_limit": "64mb"
   },
   "custom_settings": {
+    "managed": true,
     "created_by": "ml-module-metrics-ui-k8s",
     "custom_urls": [
       {

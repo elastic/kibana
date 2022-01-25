@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Dispatch } from 'react';
+import { Dispatch } from 'react';
 import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
@@ -27,8 +27,8 @@ import {
   exportRules,
   performBulkAction,
   Rule,
-  RulesTableAction,
 } from '../../../../containers/detection_engine/rules';
+import { RulesTableActions } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import { transformOutput } from '../../../../containers/detection_engine/rules/transforms';
 import * as i18n from '../translations';
 import { bucketRulesResponse, getExportedRulesCount } from './helpers';
@@ -46,11 +46,11 @@ export const editRuleAction = (
 export const duplicateRulesAction = async (
   rules: Rule[],
   ruleIds: string[],
-  dispatch: React.Dispatch<RulesTableAction>,
-  dispatchToaster: Dispatch<ActionToaster>
+  dispatchToaster: Dispatch<ActionToaster>,
+  setLoadingRules: RulesTableActions['setLoadingRules']
 ): Promise<Rule[] | undefined> => {
   try {
-    dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'duplicate' });
+    setLoadingRules({ ids: ruleIds, action: 'duplicate' });
     const response = await duplicateRules({
       // We cast this back and forth here as the front end types are not really the right io-ts ones
       // and the two types conflict with each other.
@@ -70,17 +70,17 @@ export const duplicateRulesAction = async (
   } catch (error) {
     errorToToaster({ title: i18n.DUPLICATE_RULE_ERROR, error, dispatchToaster });
   } finally {
-    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    setLoadingRules({ ids: [], action: null });
   }
 };
 
 export const exportRulesAction = async (
   exportRuleId: string[],
-  dispatch: React.Dispatch<RulesTableAction>,
-  dispatchToaster: Dispatch<ActionToaster>
+  dispatchToaster: Dispatch<ActionToaster>,
+  setLoadingRules: RulesTableActions['setLoadingRules']
 ) => {
   try {
-    dispatch({ type: 'loadingRuleIds', ids: exportRuleId, actionType: 'export' });
+    setLoadingRules({ ids: exportRuleId, action: 'export' });
     const blob = await exportRules({ ids: exportRuleId });
     downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
 
@@ -92,18 +92,18 @@ export const exportRulesAction = async (
   } catch (e) {
     displayErrorToast(i18n.BULK_ACTION_FAILED, [e.message], dispatchToaster);
   } finally {
-    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    setLoadingRules({ ids: [], action: null });
   }
 };
 
 export const deleteRulesAction = async (
   ruleIds: string[],
-  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
+  setLoadingRules: RulesTableActions['setLoadingRules'],
   onRuleDeleted?: () => void
 ) => {
   try {
-    dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'delete' });
+    setLoadingRules({ ids: ruleIds, action: 'delete' });
     const response = await deleteRules({ ids: ruleIds });
     const { errors } = bucketRulesResponse(response);
     if (errors.length > 0) {
@@ -122,27 +122,27 @@ export const deleteRulesAction = async (
       dispatchToaster,
     });
   } finally {
-    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    setLoadingRules({ ids: [], action: null });
   }
 };
 
 export const enableRulesAction = async (
   ids: string[],
   enabled: boolean,
-  dispatch: React.Dispatch<RulesTableAction>,
-  dispatchToaster: Dispatch<ActionToaster>
+  dispatchToaster: Dispatch<ActionToaster>,
+  setLoadingRules: RulesTableActions['setLoadingRules'],
+  updateRules: RulesTableActions['updateRules']
 ) => {
   const errorTitle = enabled
     ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(ids.length)
     : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(ids.length);
 
   try {
-    dispatch({ type: 'loadingRuleIds', ids, actionType: enabled ? 'enable' : 'disable' });
+    setLoadingRules({ ids, action: enabled ? 'enable' : 'disable' });
 
     const response = await enableRules({ ids, enabled });
     const { rules, errors } = bucketRulesResponse(response);
-
-    dispatch({ type: 'updateRules', rules });
+    updateRules(rules);
 
     if (errors.length > 0) {
       displayErrorToast(
@@ -167,7 +167,7 @@ export const enableRulesAction = async (
   } catch (e) {
     displayErrorToast(errorTitle, [e.message], dispatchToaster);
   } finally {
-    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    setLoadingRules({ ids: [], action: null });
   }
 };
 
@@ -176,11 +176,11 @@ export const rulesBulkActionByQuery = async (
   selectedItemsCount: number,
   query: string,
   action: BulkAction,
-  dispatch: React.Dispatch<RulesTableAction>,
-  dispatchToaster: Dispatch<ActionToaster>
+  dispatchToaster: Dispatch<ActionToaster>,
+  setLoadingRules: RulesTableActions['setLoadingRules']
 ) => {
   try {
-    dispatch({ type: 'loadingRuleIds', ids: visibleRuleIds, actionType: action });
+    setLoadingRules({ ids: visibleRuleIds, action });
 
     if (action === BulkAction.export) {
       const blob = await performBulkAction({ query, action });
@@ -197,6 +197,6 @@ export const rulesBulkActionByQuery = async (
   } catch (e) {
     displayErrorToast(i18n.BULK_ACTION_FAILED, [e.message], dispatchToaster);
   } finally {
-    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    setLoadingRules({ ids: [], action: null });
   }
 };
