@@ -7,7 +7,7 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { isColorDark } from '@elastic/eui';
 import type { Datatable } from 'src/plugins/expressions/public';
 import {
@@ -293,9 +293,17 @@ export function getColorStops(
   return freshColorStops;
 }
 
-export function getContrastColor(color: string, isDarkTheme: boolean) {
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
-  const lightColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
+export function getContrastColor(
+  color: string,
+  isDarkTheme: boolean,
+  darkTextProp: 'euiColorInk' | 'euiTextColor' = 'euiColorInk',
+  lightTextProp: 'euiColorGhost' | 'euiTextColor' = 'euiColorGhost'
+) {
+  // when in light theme both text color and colorInk are dark and the choice
+  // may depends on the specific context.
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars[darkTextProp];
+  // Same thing for light color in dark theme
+  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorGhost;
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;

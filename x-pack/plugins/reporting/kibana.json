@@ -11,6 +11,7 @@
   "configPath": ["xpack", "reporting"],
   "requiredPlugins": [
     "data",
+    "fieldFormats",
     "esUiShared",
     "home",
     "management",

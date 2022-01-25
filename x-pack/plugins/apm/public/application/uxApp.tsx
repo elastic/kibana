@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
@@ -90,7 +90,7 @@ function UxApp() {
   );
 }
 
-const uxRouter = createRouter([]);
+const uxRouter = createRouter({});
 
 export function UXAppRoot({
   appMountParameters,
