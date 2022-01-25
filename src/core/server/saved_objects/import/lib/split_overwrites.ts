@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../types';
+import { SavedObject, SavedObjectAttributes } from '../../types';
 import { SavedObjectsImportRetry } from '../types';
 
-export function splitOverwrites<T>(
+export function splitOverwrites<T extends SavedObjectAttributes>(
   savedObjects: Array<SavedObject<T>>,
   retries: SavedObjectsImportRetry[]
 ) {

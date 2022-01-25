@@ -7,7 +7,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectAttributes } from '../types';
 
 /**
  * Describes a retry operation for importing a saved object.
@@ -176,7 +176,9 @@ export interface SavedObjectsResolveImportErrorsOptions {
   createNewCopies: boolean;
 }
 
-export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
+export type CreatedObject<T extends SavedObjectAttributes> = SavedObject<T> & {
+  destinationId?: string;
+};
 
 /**
  * A simple informative warning that will be displayed to the user.
@@ -243,6 +245,6 @@ export interface SavedObjectsImportHookResult {
  *
  * @public
  */
-export type SavedObjectsImportHook<T = unknown> = (
+export type SavedObjectsImportHook<T extends SavedObjectAttributes = SavedObjectAttributes> = (
   objects: Array<SavedObject<T>>
 ) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;

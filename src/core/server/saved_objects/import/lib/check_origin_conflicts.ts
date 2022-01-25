@@ -8,7 +8,12 @@
 
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectsImportFailure,
+} from '../../types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { ImportStateMap } from './types';
 import { createOriginQuery } from './utils';
@@ -28,20 +33,24 @@ type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects' | 'i
   objectIdsBeingImported: Set<string>;
 };
 
-interface InexactMatch<T> {
+interface InexactMatch<T extends SavedObjectAttributes> {
   object: SavedObject<T>;
   destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
 }
-interface Left<T> {
+
+interface Left<T extends SavedObjectAttributes> {
   tag: 'left';
   value: InexactMatch<T>;
 }
-interface Right<T> {
+
+interface Right<T extends SavedObjectAttributes> {
   tag: 'right';
   value: SavedObject<T>;
 }
-type Either<T> = Left<T> | Right<T>;
-const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left';
+
+type Either<T extends SavedObjectAttributes> = Left<T> | Right<T>;
+const isLeft = <T extends SavedObjectAttributes>(object: Either<T>): object is Left<T> =>
+  object.tag === 'left';
 
 const MAX_CONCURRENT_SEARCHES = 10;
 
@@ -63,8 +72,9 @@ const transformObjectsToAmbiguousConflictFields = (
       }
       return a.id < b.id ? -1 : 1; // ascending
     });
-const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
-  `${object.type}:${object.originId || object.id}`;
+const getAmbiguousConflictSourceKey = <T extends SavedObjectAttributes>({
+  object,
+}: InexactMatch<T>) => `${object.type}:${object.originId || object.id}`;
 
 /**
  * Make a search request for an import object to check if any objects of this type that match this object's `originId` or `id` exist in the

@@ -9,7 +9,7 @@
 import type { Payload } from '@hapi/boom';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
-import type { SavedObject } from '../../types';
+import type { SavedObject, SavedObjectAttributes } from '../../types';
 import { decodeRequestVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
@@ -19,6 +19,7 @@ import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
  * @internal
  */
 export type Either<L = unknown, R = L> = Left<L> | Right<R>;
+
 /**
  * Left part of discriminated union ({@link Either}).
  * @internal
@@ -27,6 +28,7 @@ export interface Left<L> {
   tag: 'Left';
   value: L;
 }
+
 /**
  * Right part of discriminated union ({@link Either}).
  * @internal
@@ -35,6 +37,7 @@ export interface Right<R> {
   tag: 'Right';
   value: R;
 }
+
 /**
  * Type guard for left part of discriminated union ({@link Left}, {@link Either}).
  * @internal
@@ -113,7 +116,7 @@ export function getExpectedVersionProperties(version?: string, document?: SavedO
  *
  * @internal
  */
-export function getSavedObjectFromSource<T>(
+export function getSavedObjectFromSource<T extends SavedObjectAttributes>(
   registry: ISavedObjectTypeRegistry,
   type: string,
   id: string,
