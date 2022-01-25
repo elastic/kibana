@@ -20,24 +20,6 @@ import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../application/main/services/discover_state';
 
-// Function to check if the field name values can be used as the header row
-function isPlainStringArray(fields: unknown): fields is string[] {
-  const temp = fields as string[];
-  if (!Array.isArray(temp) || !temp.length || temp.length === 0) {
-    return false;
-  }
-
-  let allPlainStrings = true;
-  if (Array.isArray(fields)) {
-    fields.forEach((field) => {
-      if (typeof field !== 'string' || field === '*' || field === '_source') {
-        allPlainStrings = false;
-      }
-    });
-  }
-  return allPlainStrings;
-}
-
 /**
  * Preparing data to share the current state as link or CSV/Report
  */
@@ -108,7 +90,7 @@ export async function getSharingData(
       const fieldsConfig = fieldConfigs.fields ? 'fields' : 'fieldsFromSource';
 
       // 2. explicitly set the fields into the searchsource object
-      if (fieldsConfig === 'fields' && isPlainStringArray(columns)) {
+      if (fieldsConfig === 'fields' && columns.length > 0) {
         searchSource.setField('fields', columns);
       }
 
