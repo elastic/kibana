@@ -87,7 +87,9 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 }
 
 /** @public */
-export interface SavedObjectsBatchResponse<T = unknown> {
+export interface SavedObjectsBatchResponse<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> {
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
@@ -105,8 +107,10 @@ export interface SavedObjectsDeleteOptions {
  *
  * @public
  */
-export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
-  extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<
+  T extends SavedObjectAttributes = SavedObjectAttributes,
+  A = unknown
+> extends SavedObjectsBatchResponse<T> {
   aggregations?: A;
   total: number;
   perPage: number;
@@ -116,7 +120,7 @@ export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown>
 interface BatchGetQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends Record<string, unknown> = SavedObjectAttributes>(
+  resolve: <T extends SavedObjectAttributes = SavedObjectAttributes>(
     value: SimpleSavedObject<T> | SavedObject<T>
   ) => void;
   reject: (reason?: any) => void;
@@ -282,7 +286,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = <T extends Record<string, unknown> = SavedObjectAttributes>(
+  public create = <T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -375,7 +379,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T = unknown, A = unknown>(
+  public find = <T extends SavedObjectAttributes = SavedObjectAttributes, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -442,7 +446,10 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns The saved object for the given type and id.
    */
-  public get = <T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>> => {
+  public get = <T extends SavedObjectAttributes = SavedObjectAttributes>(
+    type: string,
+    id: string
+  ): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -527,7 +534,7 @@ export class SavedObjectsClient {
    * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
    * public client uses `bulkResolve` under the hood, so it behaves the same way.
    */
-  public bulkResolve = async <T extends Record<string, unknown> = SavedObjectAttributes>(
+  public bulkResolve = async <T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: Array<{ id: string; type: string }> = []
   ) => {
     const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
@@ -539,7 +546,7 @@ export class SavedObjectsClient {
     };
   };
 
-  private async performBulkResolve<T extends Record<string, unknown> = SavedObjectAttributes>(
+  private async performBulkResolve<T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: ObjectTypeAndId[]
   ) {
     const path = this.getPath(['_bulk_resolve']);
@@ -561,7 +568,7 @@ export class SavedObjectsClient {
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns
    */
-  public update<T extends Record<string, unknown> = SavedObjectAttributes>(
+  public update<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
     attributes: T,
@@ -593,7 +600,7 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing both failed and updated saved objects.
    */
-  public bulkUpdate<T extends Record<string, unknown> = SavedObjectAttributes>(
+  public bulkUpdate<T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: SavedObjectsBulkUpdateObject[] = []
   ) {
     const path = this.getPath(['_bulk_update']);
@@ -610,13 +617,13 @@ export class SavedObjectsClient {
     });
   }
 
-  private createSavedObject<T extends Record<string, unknown> = SavedObjectAttributes>(
+  private createSavedObject<T extends SavedObjectAttributes = SavedObjectAttributes>(
     options: SavedObject<T>
   ): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);
   }
 
-  private createResolvedSavedObject<T extends Record<string, unknown> = SavedObjectAttributes>(
+  private createResolvedSavedObject<T extends SavedObjectAttributes = SavedObjectAttributes>(
     resolveResponse: SavedObjectsResolveResponse<T>
   ): ResolvedSimpleSavedObject<T> {
     const simpleSavedObject = new SimpleSavedObject<T>(this, resolveResponse.saved_object);

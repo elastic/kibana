@@ -20,7 +20,7 @@ import { SavedObjectsClientContract } from './saved_objects_client';
  *
  * @public
  */
-export class SimpleSavedObject<T extends Record<string, unknown> = SavedObjectAttributes> {
+export class SimpleSavedObject<T extends SavedObjectAttributes = SavedObjectAttributes> {
   public attributes: T;
   // We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];

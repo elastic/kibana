@@ -135,9 +135,7 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
  *
  * @public
  */
-export interface SavedObjectsBulkResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes
-> {
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -145,7 +143,7 @@ export interface SavedObjectsBulkResponse<
  *
  * @public
  */
-export interface SavedObjectsFindResult<T extends Record<string, unknown> = SavedObjectAttributes>
+export interface SavedObjectsFindResult<T extends SavedObjectAttributes = SavedObjectAttributes>
   extends SavedObject<T> {
   /**
    * The Elasticsearch `_score` of this result.
@@ -191,7 +189,7 @@ export interface SavedObjectsFindResult<T extends Record<string, unknown> = Save
  * @public
  */
 export interface SavedObjectsFindResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes,
+  T extends SavedObjectAttributes = SavedObjectAttributes,
   A = unknown
 > {
   aggregations?: A;
@@ -302,9 +300,7 @@ export interface SavedObjectsBulkGetObject {
  *
  * @public
  */
-export interface SavedObjectsBulkResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes
-> {
+export interface SavedObjectsBulkResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
   saved_objects: Array<SavedObject<T>>;
 }
 
@@ -313,7 +309,7 @@ export interface SavedObjectsBulkResponse<
  * @public
  */
 export interface SavedObjectsBulkUpdateResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes
+  T extends SavedObjectAttributes = SavedObjectAttributes
 > {
   saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }
@@ -322,9 +318,8 @@ export interface SavedObjectsBulkUpdateResponse<
  *
  * @public
  */
-export interface SavedObjectsUpdateResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes
-> extends Omit<SavedObject<T>, 'attributes' | 'references'> {
+export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = SavedObjectAttributes>
+  extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
   references: SavedObjectReference[] | undefined;
 }
@@ -343,7 +338,7 @@ export interface SavedObjectsBulkResolveObject {
  * @public
  */
 export interface SavedObjectsBulkResolveResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes
+  T extends SavedObjectAttributes = SavedObjectAttributes
 > {
   resolved_objects: Array<SavedObjectsResolveResponse<T>>;
 }
@@ -353,7 +348,7 @@ export interface SavedObjectsBulkResolveResponse<
  * @public
  */
 export interface SavedObjectsResolveResponse<
-  T extends Record<string, unknown> = SavedObjectAttributes
+  T extends SavedObjectAttributes = SavedObjectAttributes
 > {
   /**
    * The saved object that was found.
@@ -450,7 +445,7 @@ export class SavedObjectsClient {
    * @param attributes
    * @param options
    */
-  async create<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async create<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     attributes: T,
     options?: SavedObjectsCreateOptions
@@ -464,7 +459,7 @@ export class SavedObjectsClient {
    * @param objects
    * @param options
    */
-  async bulkCreate<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async bulkCreate<T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsCreateOptions
   ) {
@@ -501,7 +496,7 @@ export class SavedObjectsClient {
    *
    * @param options
    */
-  async find<T extends Record<string, unknown> = SavedObjectAttributes, A = unknown>(
+  async find<T extends SavedObjectAttributes = SavedObjectAttributes, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
@@ -518,7 +513,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async bulkGet<T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -532,7 +527,7 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async get<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async get<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -555,7 +550,7 @@ export class SavedObjectsClient {
    * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior is unique to
    * `bulkResolve`; the regular `resolve` API will throw an error instead.
    */
-  async bulkResolve<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async bulkResolve<T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: SavedObjectsBulkResolveObject[],
     options?: SavedObjectsBaseOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
@@ -569,7 +564,7 @@ export class SavedObjectsClient {
    * @param id - The ID of the SavedObject to retrieve
    * @param options
    */
-  async resolve<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async resolve<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -584,7 +579,7 @@ export class SavedObjectsClient {
    * @param id
    * @param options
    */
-  async update<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async update<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -598,7 +593,7 @@ export class SavedObjectsClient {
    *
    * @param objects
    */
-  async bulkUpdate<T extends Record<string, unknown> = SavedObjectAttributes>(
+  async bulkUpdate<T extends SavedObjectAttributes = SavedObjectAttributes>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
