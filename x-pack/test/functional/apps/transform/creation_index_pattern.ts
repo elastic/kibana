@@ -353,7 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
             label: 'geoip.city_name.terms',
           },
         ],
-        transformId: `ec_2_${Date.now()}`,
+        transformId: `ec_3_${Date.now()}`,
         transformDescription:
           'ecommerce batch transform with group by terms(customer_gender) and aggregation terms(geoip.city_name)',
         get destinationIndex(): string {
@@ -409,7 +409,7 @@ export default function ({ getService }: FtrProviderContext) {
           identifier: 'order_date',
           label: 'order_date',
         },
-        transformId: `ec_3_${Date.now()}`,
+        transformId: `ec_4_${Date.now()}`,
 
         transformDescription:
           'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',
