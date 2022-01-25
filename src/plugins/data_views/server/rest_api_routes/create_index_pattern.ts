@@ -33,7 +33,7 @@ interface CreateDataViewArgs {
   path: string;
 }
 
-const createDataView = async ({
+export const createDataView = async ({
   indexPatternsService,
   usageCollection,
   spec,

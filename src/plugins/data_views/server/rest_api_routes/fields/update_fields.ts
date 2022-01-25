@@ -7,10 +7,12 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import { FieldFormatParams, SerializedFieldFormat } from '../../../../field_formats/common';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -21,6 +23,79 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
 } from '../../constants';
+
+interface UpdateFieldsArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+  fields: Record<string, FieldUpdateType>;
+}
+
+export const updateFields = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+  fields,
+}: UpdateFieldsArgs) => {
+  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
+  const indexPattern = await indexPatternsService.get(id);
+
+  const fieldNames = Object.keys(fields);
+
+  if (fieldNames.length < 1) {
+    throw new Error('No fields provided.');
+  }
+
+  let changeCount = 0;
+  for (const fieldName of fieldNames) {
+    const field = fields[fieldName];
+
+    if (field.customLabel !== undefined) {
+      changeCount++;
+      indexPattern.setFieldCustomLabel(fieldName, field.customLabel);
+    }
+
+    if (field.count !== undefined) {
+      changeCount++;
+      indexPattern.setFieldCount(fieldName, field.count);
+    }
+
+    if (field.format !== undefined) {
+      changeCount++;
+      if (field.format) {
+        indexPattern.setFieldFormat(fieldName, field.format);
+      } else {
+        indexPattern.deleteFieldFormat(fieldName);
+      }
+    }
+  }
+
+  if (changeCount < 1) {
+    throw new Error('Change set is empty.');
+  }
+
+  await indexPatternsService.updateSavedObject(indexPattern);
+  return indexPattern;
+};
+
+interface FieldUpdateType {
+  customLabel?: string;
+  count?: number;
+  format?: SerializedFieldFormat<FieldFormatParams>;
+}
+
+const fieldUpdateSchema = schema.object({
+  customLabel: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 1_000,
+    })
+  ),
+  count: schema.maybe(schema.maybe(schema.number())),
+  format: schema.maybe(schema.maybe(serializedFieldFormatSchema)),
+});
 
 const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
   return (
@@ -50,18 +125,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
                 minLength: 1,
                 maxLength: 1_000,
               }),
-              schema.object({
-                customLabel: schema.maybe(
-                  schema.nullable(
-                    schema.string({
-                      minLength: 1,
-                      maxLength: 1_000,
-                    })
-                  )
-                ),
-                count: schema.maybe(schema.nullable(schema.number())),
-                format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
-              })
+              fieldUpdateSchema
             ),
           }),
         },
@@ -71,7 +135,6 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          usageCollection?.incrementCounter({ counterName: `POST ${path}` });
           const indexPatternsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
@@ -79,43 +142,14 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           );
           const id = req.params.id;
           const { fields } = req.body;
-          const fieldNames = Object.keys(fields);
 
-          if (fieldNames.length < 1) {
-            throw new Error('No fields provided.');
-          }
-
-          const indexPattern = await indexPatternsService.get(id);
-
-          let changeCount = 0;
-          for (const fieldName of fieldNames) {
-            const field = fields[fieldName];
-
-            if (field.customLabel !== undefined) {
-              changeCount++;
-              indexPattern.setFieldCustomLabel(fieldName, field.customLabel);
-            }
-
-            if (field.count !== undefined) {
-              changeCount++;
-              indexPattern.setFieldCount(fieldName, field.count);
-            }
-
-            if (field.format !== undefined) {
-              changeCount++;
-              if (field.format) {
-                indexPattern.setFieldFormat(fieldName, field.format);
-              } else {
-                indexPattern.deleteFieldFormat(fieldName);
-              }
-            }
-          }
-
-          if (changeCount < 1) {
-            throw new Error('Change set is empty.');
-          }
-
-          await indexPatternsService.updateSavedObject(indexPattern);
+          const indexPattern = await updateFields({
+            indexPatternsService,
+            usageCollection,
+            id,
+            fields,
+            path,
+          });
 
           return res.ok({
             headers: {

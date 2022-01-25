@@ -19,7 +19,7 @@ interface HasUserDataViewArgs {
   path: string;
 }
 
-const hasUserDataView = async ({
+export const hasUserDataView = async ({
   indexPatternsService,
   usageCollection,
   path,

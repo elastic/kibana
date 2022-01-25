@@ -7,6 +7,7 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
@@ -16,6 +17,38 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import { SPECIFIC_RUNTIME_FIELD_PATH, SPECIFIC_RUNTIME_FIELD_PATH_LEGACY } from '../../constants';
+
+interface DeleteRuntimeFieldArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+  name: string;
+}
+
+const deleteRuntimeField = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+  name,
+}: DeleteRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName: `DELETE ${path}` });
+  const indexPattern = await indexPatternsService.get(id);
+  const field = indexPattern.fields.getByName(name);
+
+  if (!field) {
+    throw new ErrorIndexPatternFieldNotFound(id, name);
+  }
+
+  if (!field.runtimeField) {
+    throw new Error('Only runtime fields can be deleted.');
+  }
+
+  indexPattern.removeRuntimeField(name);
+
+  await indexPatternsService.updateSavedObject(indexPattern);
+};
 
 const deleteRuntimeFieldRouteFactory =
   (path: string) =>
@@ -47,7 +80,6 @@ const deleteRuntimeFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `DELETE ${path}` });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
@@ -56,20 +88,7 @@ const deleteRuntimeFieldRouteFactory =
         const id = req.params.id;
         const name = req.params.name;
 
-        const indexPattern = await indexPatternsService.get(id);
-        const field = indexPattern.fields.getByName(name);
-
-        if (!field) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
-
-        if (!field.runtimeField) {
-          throw new Error('Only runtime fields can be deleted.');
-        }
-
-        indexPattern.removeRuntimeField(name);
-
-        await indexPatternsService.updateSavedObject(indexPattern);
+        await deleteRuntimeField({ indexPatternsService, usageCollection, id, name, path });
 
         return res.ok();
       })

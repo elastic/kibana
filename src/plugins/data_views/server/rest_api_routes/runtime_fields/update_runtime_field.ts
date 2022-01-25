@@ -8,7 +8,7 @@
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
-import { RuntimeField } from 'src/plugins/data_views/common';
+import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpec, runtimeFieldSpecTypeSchema } from '../util/schemas';
@@ -24,6 +24,44 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+
+interface UpdateRuntimeFieldArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+  name: string;
+  runtimeField: Partial<RuntimeField>;
+}
+
+const updateRuntimeField = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+  name,
+  runtimeField,
+}: UpdateRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
+  const indexPattern = await indexPatternsService.get(id);
+  const existingRuntimeField = indexPattern.getRuntimeField(name);
+
+  if (!existingRuntimeField) {
+    throw new ErrorIndexPatternFieldNotFound(id, name);
+  }
+
+  indexPattern.removeRuntimeField(name);
+  indexPattern.addRuntimeField(name, {
+    ...existingRuntimeField,
+    ...runtimeField,
+  });
+
+  await indexPatternsService.updateSavedObject(indexPattern);
+
+  const fieldObject = indexPattern.fields.getByName(name);
+  if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
+  return { indexPattern, fieldObject };
+};
 
 const updateRuntimeFieldRouteFactory =
   (path: string, serviceKey: SERVICE_KEY_TYPE) =>
@@ -74,23 +112,14 @@ const updateRuntimeFieldRouteFactory =
         const name = req.params.name;
         const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const indexPattern = await indexPatternsService.get(id);
-        const existingRuntimeField = indexPattern.getRuntimeField(name);
-
-        if (!existingRuntimeField) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
-
-        indexPattern.removeRuntimeField(name);
-        indexPattern.addRuntimeField(name, {
-          ...existingRuntimeField,
-          ...runtimeField,
+        const { indexPattern, fieldObject } = await updateRuntimeField({
+          indexPatternsService,
+          usageCollection,
+          path,
+          id,
+          name,
+          runtimeField,
         });
-
-        await indexPatternsService.updateSavedObject(indexPattern);
-
-        const fieldObject = indexPattern.fields.getByName(name);
-        if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
 
         const legacyResponse = {
           body: {

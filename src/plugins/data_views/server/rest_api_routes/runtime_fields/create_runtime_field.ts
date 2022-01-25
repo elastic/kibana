@@ -7,6 +7,7 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
@@ -22,6 +23,43 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+
+interface CreateRuntimeFieldArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+  name: string;
+  runtimeField: RuntimeField;
+}
+
+const createRuntimeField = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+  name,
+  runtimeField,
+}: CreateRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
+  const indexPattern = await indexPatternsService.get(id);
+
+  if (indexPattern.fields.getByName(name)) {
+    throw new Error(`Field [name = ${name}] already exists.`);
+  }
+
+  indexPattern.addRuntimeField(name, runtimeField);
+
+  const addedField = indexPattern.fields.getByName(name);
+  if (!addedField) throw new Error(`Could not create a field [name = ${name}].`);
+
+  await indexPatternsService.updateSavedObject(indexPattern);
+
+  const savedField = indexPattern.fields.getByName(name);
+  if (!savedField) throw new Error(`Could not create a field [name = ${name}].`);
+
+  return { indexPattern, savedField };
+};
 
 const runtimeCreateFieldRouteFactory =
   (path: string, serviceKey: SERVICE_KEY_TYPE) =>
@@ -56,7 +94,6 @@ const runtimeCreateFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `POST ${path}` });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
@@ -65,21 +102,14 @@ const runtimeCreateFieldRouteFactory =
         const id = req.params.id;
         const { name, runtimeField } = req.body;
 
-        const indexPattern = await indexPatternsService.get(id);
-
-        if (indexPattern.fields.getByName(name)) {
-          throw new Error(`Field [name = ${name}] already exists.`);
-        }
-
-        indexPattern.addRuntimeField(name, runtimeField);
-
-        const addedField = indexPattern.fields.getByName(name);
-        if (!addedField) throw new Error(`Could not create a field [name = ${name}].`);
-
-        await indexPatternsService.updateSavedObject(indexPattern);
-
-        const savedField = indexPattern.fields.getByName(name);
-        if (!savedField) throw new Error(`Could not create a field [name = ${name}].`);
+        const { indexPattern, savedField } = await createRuntimeField({
+          indexPatternsService,
+          usageCollection,
+          path,
+          id,
+          name,
+          runtimeField,
+        });
 
         const response = {
           body: {

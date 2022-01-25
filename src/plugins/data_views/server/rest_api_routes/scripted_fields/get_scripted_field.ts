@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
@@ -16,19 +15,16 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 
-const path = '/api/index_patterns/index_pattern/{id}/scripted_field/{name}';
-
 export const registerGetScriptedFieldRoute = (
   router: IRouter,
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >,
-  usageCollection?: UsageCounter
+  >
 ) => {
   router.get(
     {
-      path,
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       validate: {
         params: schema.object(
           {
@@ -50,7 +46,6 @@ export const registerGetScriptedFieldRoute = (
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `GET ${path}` });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
@@ -74,9 +69,9 @@ export const registerGetScriptedFieldRoute = (
           headers: {
             'content-type': 'application/json',
           },
-          body: {
+          body: JSON.stringify({
             field: field.toSpec(),
-          },
+          }),
         });
       })
     )

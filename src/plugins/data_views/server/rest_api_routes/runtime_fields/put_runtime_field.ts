@@ -7,6 +7,7 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
@@ -21,6 +22,46 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
 } from '../../constants';
+
+interface PutRuntimeFieldArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+  name: string;
+  runtimeField: RuntimeField;
+}
+
+const putRuntimeField = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+  name,
+  runtimeField,
+}: PutRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName: `PUT ${path}` });
+  const indexPattern = await indexPatternsService.get(id);
+
+  const oldFieldObject = indexPattern.fields.getByName(name);
+
+  if (oldFieldObject && !oldFieldObject.runtimeField) {
+    throw new Error('Only runtime fields can be updated');
+  }
+
+  if (oldFieldObject) {
+    indexPattern.removeRuntimeField(name);
+  }
+
+  indexPattern.addRuntimeField(name, runtimeField);
+
+  await indexPatternsService.updateSavedObject(indexPattern);
+
+  const fieldObject = indexPattern.fields.getByName(name);
+  if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
+
+  return { indexPattern, fieldObject };
+};
 
 const putRuntimeFieldRouteFactory =
   (path: string, serviceKey: string) =>
@@ -55,7 +96,6 @@ const putRuntimeFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `PUT ${path}` });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
@@ -64,24 +104,14 @@ const putRuntimeFieldRouteFactory =
         const id = req.params.id;
         const { name, runtimeField } = req.body;
 
-        const indexPattern = await indexPatternsService.get(id);
-
-        const oldFieldObject = indexPattern.fields.getByName(name);
-
-        if (oldFieldObject && !oldFieldObject.runtimeField) {
-          throw new Error('Only runtime fields can be updated');
-        }
-
-        if (oldFieldObject) {
-          indexPattern.removeRuntimeField(name);
-        }
-
-        indexPattern.addRuntimeField(name, runtimeField);
-
-        await indexPatternsService.updateSavedObject(indexPattern);
-
-        const fieldObject = indexPattern.fields.getByName(name);
-        if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
+        const { indexPattern, fieldObject } = await putRuntimeField({
+          indexPatternsService,
+          id,
+          name,
+          runtimeField,
+          usageCollection,
+          path,
+        });
 
         const legacyResponse = {
           body: {

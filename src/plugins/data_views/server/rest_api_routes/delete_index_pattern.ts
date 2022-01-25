@@ -21,7 +21,7 @@ interface DeleteDataViewArgs {
   id: string;
 }
 
-const deleteDataview = async ({
+export const deleteDataView = async ({
   indexPatternsService,
   usageCollection,
   path,
@@ -68,7 +68,7 @@ const deleteIndexPatternRouteFactory =
           );
           const id = req.params.id;
 
-          await deleteDataview({ indexPatternsService, usageCollection, path, id });
+          await deleteDataView({ indexPatternsService, usageCollection, path, id });
 
           return res.ok({
             headers: {

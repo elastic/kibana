@@ -7,6 +7,7 @@
  */
 
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
@@ -22,6 +23,37 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+
+interface GetRuntimeFieldArgs {
+  indexPatternsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  path: string;
+  id: string;
+  name: string;
+}
+
+const getRuntimeField = async ({
+  indexPatternsService,
+  usageCollection,
+  path,
+  id,
+  name,
+}: GetRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName: `GET ${path}` });
+  const indexPattern = await indexPatternsService.get(id);
+
+  const field = indexPattern.fields.getByName(name);
+
+  if (!field) {
+    throw new ErrorIndexPatternFieldNotFound(id, name);
+  }
+
+  if (!field.runtimeField) {
+    throw new Error('Only runtime fields can be retrieved.');
+  }
+
+  return { indexPattern, field };
+};
 
 const getRuntimeFieldRouteFactory =
   (path: string, serviceKey: SERVICE_KEY_TYPE) =>
@@ -54,7 +86,6 @@ const getRuntimeFieldRouteFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `GET ${path}` });
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
@@ -63,17 +94,13 @@ const getRuntimeFieldRouteFactory =
         const id = req.params.id;
         const name = req.params.name;
 
-        const indexPattern = await indexPatternsService.get(id);
-
-        const field = indexPattern.fields.getByName(name);
-
-        if (!field) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
-
-        if (!field.runtimeField) {
-          throw new Error('Only runtime fields can be retrieved.');
-        }
+        const { indexPattern, field } = await getRuntimeField({
+          indexPatternsService,
+          usageCollection,
+          path,
+          id,
+          name,
+        });
 
         const legacyResponse = {
           body: {

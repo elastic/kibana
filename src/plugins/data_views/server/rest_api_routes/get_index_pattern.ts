@@ -26,7 +26,7 @@ interface GetDataViewArgs {
   id: string;
 }
 
-const getDataView = async ({
+export const getDataView = async ({
   indexPatternsService,
   usageCollection,
   path,

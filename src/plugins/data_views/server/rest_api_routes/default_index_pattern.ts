@@ -33,7 +33,7 @@ interface SetDefaultArgs {
   force: boolean;
 }
 
-const setDefault = async ({
+export const setDefault = async ({
   indexPatternsService,
   usageCollection,
   path,

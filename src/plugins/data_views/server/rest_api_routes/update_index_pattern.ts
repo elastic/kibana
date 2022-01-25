@@ -51,7 +51,7 @@ interface UpdateDataViewArgs {
   path: string;
 }
 
-const updateDataView = async ({
+export const updateDataView = async ({
   indexPatternsService,
   usageCollection,
   spec,
