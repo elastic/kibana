@@ -96,6 +96,50 @@ describe('Discover grid cell rendering', function () {
     expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
   });
 
+  it('renders bytes column correctly using _source when details is true', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsSource,
+      rowsSource.map(flatten),
+      false,
+      [],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="bytes"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+  });
+
+  it('renders bytes column correctly using fields when details is true', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFields,
+      rowsFields.map(flatten),
+      false,
+      [],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="bytes"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+  });
+
   it('renders _source column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       indexPatternMock,
@@ -637,9 +681,15 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        .gz
-      </Fragment>
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
+          }
+        }
+      />
     `);
 
     const componentWithDetails = shallow(
@@ -653,13 +703,14 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
-      <JsonCodeEditor
-        json={
-          Array [
-            ".gz",
-          ]
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
+          }
         }
-        width={370}
       />
     `);
   });
