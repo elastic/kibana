@@ -5,6 +5,6 @@
   "main": "./target_node/index.js",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "sideEffects": [
-    "./src/ace/modes/x_json/worker/x_json.ace.worker.js"
+    "target_node/ace/modes/x_json/worker/x_json.ace.worker.js"
   ]
 }
