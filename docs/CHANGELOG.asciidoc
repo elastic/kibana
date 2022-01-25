@@ -20,8 +20,6 @@ Review important information about the {kib} 8.0.0 releases.
 [[release-notes-8.0.0-rc2]]
 == {kib} 8.0.0-rc2
 
-coming::[8.0.0-rc2]
-
 For information about the {kib} 8.0.0-rc2 release, review the following information.
 
 [float]
