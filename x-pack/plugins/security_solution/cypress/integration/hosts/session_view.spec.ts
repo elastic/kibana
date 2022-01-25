@@ -38,14 +38,14 @@ const tableHeaders = {
   'process.args': 'process.args',
 };
 
-const TEST_EVENT_ID = 'K6H1AX4BnCZfhnl7tkjN';
+const TEST_EVENT_ID = 'yZPMjX4Bk7-YSjE3jHMY';
 const TEST_EVENT_ID_MANY_COMMANDS = 'MsOQb34B4qQiNuYq8lAp';
 const LS_TEST_COMMAND = 'ls --color=auto';
-const ALERT_TEST_COMMAND = 'vi cmd/config.ini';
+const ALERT_TEST_COMMAND = 'vi EventConverter/package.json';
 const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
-  '8a60ee0c7ae7f41d83a07bd80220ec04527464cbf32ea62f9e671c2d43d9d71c'
+  '5e87fb264551e29ef0e2ec64d2f66736b13c2000a157b1e3a264918ae45cbe1b'
 );
-const ALERT_RULE_ID = '422ff92b-837a-49a3-9746-188b7286f56f';
+const ALERT_RULE_ID = '3bafc570-7d55-11ec-8934-792a0acbcb6c';
 const FIRST_CHILD_COMMAND = '/usr/bin/id';
 
 const SELECTED_COMMAND_COLOR = 'rgb(240, 78, 152)';
@@ -223,6 +223,8 @@ describe('Session view', () => {
     it('Commands with Alerts is highlighted', () => {
       openSessionView(TEST_EVENT_ID);
 
+      cy.wait(10000)
+
       // Gets the number of Alerts we have in a session
       cy.get(PROCESS_TREE_NODE_ALERT)
         .contains('Alerts')
@@ -261,7 +263,7 @@ describe('Session view', () => {
     });
 
     after(() => {
-      // esArchiverUnload('session_view_commands');
+       esArchiverUnload('session_view_commands');
     });
 
     it('Scrolling to hit load more', () => {
@@ -329,4 +331,5 @@ describe('Session view', () => {
         });
     });
   });
+  
 });
