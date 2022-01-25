@@ -62,6 +62,14 @@
       "requests_total": 42,
       "concurrent_connections": 0,
       "response_time_max": 864,
+      "ruleData": {
+        "clusterUuid": "lfhHkgqfTy2Vy3SvlPSvXg",
+        "executions": null,
+        "failures": null,
+        "overdueCount": null,
+        "overdueDurationP50": null,
+        "overdueDurationP99": null
+      },
       "memory_size": 127283200,
       "memory_limit": 8564343808,
       "count": 1
@@ -150,6 +158,14 @@
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,
+      "ruleData": {
+        "clusterUuid": "lfhHkgqfTy2Vy3SvlPSvXg",
+        "executions": null,
+        "failures": null,
+        "overdueCount": null,
+        "overdueDurationP50": null,
+        "overdueDurationP99": null
+      },
       "memory_size": 0,
       "memory_limit": 0,
       "count": 0

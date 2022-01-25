@@ -78,6 +78,14 @@
       "requests_total": 914,
       "concurrent_connections": 646,
       "response_time_max": 2873,
+      "ruleData": {
+        "clusterUuid": "y1qOsQPiRrGtmdEuM3APJw",
+        "executions": null,
+        "failures": null,
+        "overdueCount": null,
+        "overdueDurationP50": null,
+        "overdueDurationP99": null
+      },
       "memory_size": 196005888,
       "memory_limit": 1501560832,
       "count": 1

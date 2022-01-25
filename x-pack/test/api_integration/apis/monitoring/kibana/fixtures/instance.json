@@ -634,6 +634,48 @@
           ]
         ]
       }
+    ],
+    "kibana_instance_rule_executions": [
+      {
+        "bucket_size": "10 seconds",
+        "data": [],
+        "metric": {
+          "app": "kibana",
+          "description": "Rate of rule executions for this Kibana",
+          "field": "kibana_rules.executions",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true,
+          "label": "Rule Executions Rate",
+          "metricAgg": "max",
+          "units": ""
+        },
+        "timeRange": {
+          "max": 1504027568000,
+          "min": 1504027457000
+        }
+      }
+    ],
+    "kibana_instance_rule_failures": [
+      {
+        "bucket_size": "10 seconds",
+        "data": [],
+        "metric": {
+          "app": "kibana",
+          "description": "Rate of rule failures for this Kibana",
+          "field": "kibana_rules.failures",
+          "format": "0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true,
+          "label": "Rule Failures Rate",
+          "metricAgg": "max",
+          "units": ""
+        },
+        "timeRange": {
+          "max": 1504027568000,
+          "min": 1504027457000
+        }
+      }
     ]
   },
   "kibanaSummary": {

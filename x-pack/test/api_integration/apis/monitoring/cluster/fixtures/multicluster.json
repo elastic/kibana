@@ -62,6 +62,14 @@
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,
+      "ruleData": {
+        "clusterUuid": "6d-9tDFTRe-qT5GoBytdlQ",
+        "executions": null,
+        "failures": null,
+        "overdueCount": null,
+        "overdueDurationP50": null,
+        "overdueDurationP99": null
+      },
       "memory_size": 0,
       "memory_limit": 0,
       "count": 0
@@ -173,6 +181,14 @@
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,
+      "ruleData": {
+        "clusterUuid": "lOF8kofiS_2DX58o9mXJ1Q",
+        "executions": null,
+        "failures": null,
+        "overdueCount": null,
+        "overdueDurationP50": null,
+        "overdueDurationP99": null
+      },
       "memory_size": 0,
       "memory_limit": 0,
       "count": 0
@@ -277,15 +293,21 @@
         "memory": 1,
         "persisted": 0
       },
-      "versions": [
-        "7.0.0-alpha1"
-      ]
+      "versions": ["7.0.0-alpha1"]
     },
     "kibana": {
       "status": "green",
       "requests_total": 571,
       "concurrent_connections": 307,
       "response_time_max": 1930,
+      "ruleData": {
+        "clusterUuid": "TkHOX_-1TzWwbROwQJU5IA",
+        "executions": null,
+        "failures": null,
+        "overdueCount": null,
+        "overdueDurationP50": null,
+        "overdueDurationP99": null
+      },
       "memory_size": 231141376,
       "memory_limit": 1501560832,
       "count": 1
