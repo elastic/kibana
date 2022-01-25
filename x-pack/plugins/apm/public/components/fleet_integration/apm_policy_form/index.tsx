@@ -13,6 +13,7 @@ import {
   getRUMSettings,
   isRUMFormValid,
 } from './settings_definition/rum_settings';
+import { getTailSamplingSettings } from './settings_definition/tail_sampling_settings';
 import {
   getTLSSettings,
   isTLSFormValid,
@@ -32,17 +33,23 @@ export function APMPolicyForm({
   isCloudPolicy,
   updateAPMPolicy,
 }: Props) {
-  const { apmSettings, rumSettings, tlsSettings, agentAuthorizationSettings } =
-    useMemo(() => {
-      return {
-        apmSettings: getApmSettings({ isCloudPolicy }),
-        rumSettings: getRUMSettings(),
-        tlsSettings: getTLSSettings(),
-        agentAuthorizationSettings: getAgentAuthorizationSettings({
-          isCloudPolicy,
-        }),
-      };
-    }, [isCloudPolicy]);
+  const {
+    apmSettings,
+    rumSettings,
+    tlsSettings,
+    agentAuthorizationSettings,
+    tailSamplingSettings,
+  } = useMemo(() => {
+    return {
+      apmSettings: getApmSettings({ isCloudPolicy }),
+      rumSettings: getRUMSettings(),
+      tlsSettings: getTLSSettings(),
+      agentAuthorizationSettings: getAgentAuthorizationSettings({
+        isCloudPolicy,
+      }),
+      tailSamplingSettings: getTailSamplingSettings(),
+    };
+  }, [isCloudPolicy]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields
@@ -59,6 +66,21 @@ export function APMPolicyForm({
   }
 
   const settingsSections: SettingsSection[] = [
+    {
+      id: 'tailSampling',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.tailSampling.settings.title',
+        { defaultMessage: 'Tail-based sampling' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.tailSampling.settings.subtitle',
+        {
+          defaultMessage: 'Manage tail-based sampling for services and traces.',
+        }
+      ),
+      settings: tailSamplingSettings,
+      isBeta: true,
+    },
     {
       id: 'apm',
       title: i18n.translate(

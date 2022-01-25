@@ -62,6 +62,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'area': {
       return (
         <EuiTextArea
+          placeholder={row.placeholder}
           value={value}
           onChange={(e) => {
             onChange(row.key, e.target.value);

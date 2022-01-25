@@ -43,6 +43,7 @@ export interface BasicSettingRow {
   helpText?: string;
   placeholder?: string;
   labelAppend?: string;
+  labelAppendLink?: string;
   settings?: SettingsRow[];
   validation?: SettingValidation;
   required?: boolean;
