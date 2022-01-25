@@ -429,7 +429,7 @@ export class TaskRunner<
       });
     }
 
-    let executedActions: AlertAction[] = [];
+    let triggeredActions: AlertAction[] = [];
     if (!muteAll && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
@@ -446,7 +446,7 @@ export class TaskRunner<
         ruleLabel,
       });
 
-      executedActions = concat(executedActions, scheduledActionsForRecoveredAlerts);
+      triggeredActions = concat(triggeredActions, scheduledActionsForRecoveredAlerts);
 
       const alertsToExecute =
         notifyWhen === 'onActionGroupChange'
@@ -477,14 +477,14 @@ export class TaskRunner<
               }
             );
 
-      const allExecutedActions = await Promise.all(
+      const allTriggeredActions = await Promise.all(
         alertsToExecute.map(
           ([alertId, alert]: [string, AlertInstance<InstanceState, InstanceContext>]) =>
             this.executeAlert(alertId, alert, executionHandler)
         )
       );
 
-      executedActions = concat(executedActions, ...allExecutedActions);
+      triggeredActions = concat(triggeredActions, ...allTriggeredActions);
     } else {
       if (muteAll) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is muted.`);
@@ -497,7 +497,7 @@ export class TaskRunner<
     }
 
     return {
-      executedActions,
+      triggeredActions,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, AlertInstance<InstanceState, InstanceContext>>,
@@ -712,8 +712,8 @@ export class TaskRunner<
     } else {
       set(
         event,
-        'kibana.alert.rule.execution.metrics.number_of_executed_actions',
-        executionStatus.numberOfExecutedActions ?? 0
+        'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+        executionStatus.numberOfTriggeredActions ?? 0
       );
     }
 
@@ -1087,7 +1087,7 @@ async function scheduleActionsForRecoveredAlerts<
     ruleLabel,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
-  let executedActions: AlertAction[] = [];
+  let triggeredActions: AlertAction[] = [];
   for (const id of recoveredIds) {
     if (mutedAlertIdsSet.has(id)) {
       logger.debug(
@@ -1097,17 +1097,17 @@ async function scheduleActionsForRecoveredAlerts<
       const alert = recoveredAlerts[id];
       alert.updateLastScheduledActions(recoveryActionGroup.id);
       alert.unscheduleActions();
-      const executedActionsForRecoveredAlert = await executionHandler({
+      const triggeredActionsForRecoveredAlert = await executionHandler({
         actionGroup: recoveryActionGroup.id,
         context: {},
         state: {},
         alertId: id,
       });
       alert.scheduleActions(recoveryActionGroup.id);
-      executedActions = concat(executedActions, executedActionsForRecoveredAlert);
+      triggeredActions = concat(triggeredActions, triggeredActionsForRecoveredAlert);
     }
   }
-  return executedActions;
+  return triggeredActions;
 }
 
 interface LogActiveAndRecoveredAlertsParams<

@@ -116,10 +116,10 @@ export function createExecutionHandler<
     state,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
-    const executedActions: AlertAction[] = [];
+    const triggeredActions: AlertAction[] = [];
     if (!ruleTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
-      return executedActions;
+      return triggeredActions;
     }
     const actions = ruleActions
       .filter(({ group }) => group === actionGroup)
@@ -204,11 +204,11 @@ export function createExecutionHandler<
             await actionsClient.enqueueExecution(enqueueOptions);
           }
         } finally {
-          executedActions.push(action);
+          triggeredActions.push(action);
         }
       } else {
         await actionsClient.enqueueExecution(enqueueOptions);
-        executedActions.push(action);
+        triggeredActions.push(action);
       }
 
       const event = createAlertEventLogRecordObject({
@@ -243,6 +243,6 @@ export function createExecutionHandler<
 
       eventLogger.logEvent(event);
     }
-    return executedActions;
+    return triggeredActions;
   };
 }

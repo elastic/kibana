@@ -120,7 +120,7 @@
       },
       "executionStatus": {
         "properties": {
-          "numberOfExecutedActions": {
+          "numberOfTriggeredActions": {
             "type": "long"
           },
           "status": {

@@ -289,7 +289,7 @@
                                         },
                                         "metrics": {
                                             "properties": {
-                                                "number_of_executed_actions": {
+                                                "number_of_triggered_actions": {
                                                     "type": "long"
                                                 },
                                                 "total_indexing_duration_ms": {

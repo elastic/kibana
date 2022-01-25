@@ -17,7 +17,7 @@ const actionSchema = t.partial({
 });
 
 export const ruleStateSchema = t.partial({
-  executedActions: t.array(actionSchema),
+  triggeredActions: t.array(actionSchema),
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),

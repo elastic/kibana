@@ -26,7 +26,7 @@ describe('RuleExecutionStatus', () => {
     test('empty task state', () => {
       const status = executionStatusFromState({});
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfExecutedActions).toBe(0);
+      expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
@@ -34,7 +34,7 @@ describe('RuleExecutionStatus', () => {
     test('task state with no instances', () => {
       const status = executionStatusFromState({ alertInstances: {} });
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfExecutedActions).toBe(0);
+      expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
     });
@@ -42,18 +42,18 @@ describe('RuleExecutionStatus', () => {
     test('task state with one instance', () => {
       const status = executionStatusFromState({ alertInstances: { a: {} } });
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfExecutedActions).toBe(0);
+      expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
     });
 
-    test('task state with numberOfExecutedActions', () => {
+    test('task state with numberOfTriggeredActions', () => {
       const status = executionStatusFromState({
-        executedActions: [{ group: '1' }],
+        triggeredActions: [{ group: '1' }],
         alertInstances: { a: {} },
       });
       checkDateIsNearNow(status.lastExecutionDate);
-      expect(status.numberOfExecutedActions).toBe(1);
+      expect(status.numberOfTriggeredActions).toBe(1);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
     });
@@ -97,7 +97,7 @@ describe('RuleExecutionStatus', () => {
           "error": null,
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-          "numberOfExecutedActions": 0,
+          "numberOfTriggeredActions": 0,
           "status": "ok",
         }
       `);
@@ -113,7 +113,7 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-          "numberOfExecutedActions": 0,
+          "numberOfTriggeredActions": 0,
           "status": "ok",
         }
       `);
@@ -126,21 +126,21 @@ describe('RuleExecutionStatus', () => {
         "error": null,
         "lastDuration": 1234,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-        "numberOfExecutedActions": 0,
+        "numberOfTriggeredActions": 0,
         "status": "ok",
       }
     `);
     });
 
-    test('status with a numberOfExecutedActions', () => {
+    test('status with a numberOfTriggeredActions', () => {
       expect(
-        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, numberOfExecutedActions: 5 })
+        ruleExecutionStatusToRaw({ lastExecutionDate: date, status, numberOfTriggeredActions: 5 })
       ).toMatchInlineSnapshot(`
       Object {
         "error": null,
         "lastDuration": 0,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-        "numberOfExecutedActions": 5,
+        "numberOfTriggeredActions": 5,
         "status": "ok",
       }
     `);
@@ -258,11 +258,11 @@ describe('RuleExecutionStatus', () => {
       `);
     });
 
-    test('valid status, date, error, duration and executedActions', () => {
+    test('valid status, date, error, duration and triggeredActions', () => {
       const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         status,
         lastExecutionDate: date,
-        numberOfExecutedActions: 5,
+        numberOfTriggeredActions: 5,
         error,
         lastDuration: 1234,
       });
@@ -274,7 +274,7 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 1234,
           "lastExecutionDate": 2020-09-03T16:26:58.000Z,
-          "numberOfExecutedActions": 5,
+          "numberOfTriggeredActions": 5,
           "status": "active",
         }
       `);

@@ -247,8 +247,8 @@ describe('Task Runner', () => {
                                     "state": Object {
                                       "alertInstances": Object {},
                                       "alertTypeState": undefined,
-                                      "executedActions": Array [],
                                       "previousStartedAt": 1970-01-01T00:00:00.000Z,
+                                      "triggeredActions": Array [],
                                     },
                                   }
                   `);
@@ -314,7 +314,7 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleExecutionStatus for test:1: {"numberOfExecutedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -384,7 +384,7 @@ describe('Task Runner', () => {
           error: null,
           lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
-          numberOfExecutedActions: 0,
+          numberOfTriggeredActions: 0,
           status: 'ok',
         },
       },
@@ -482,7 +482,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         3,
-        'ruleExecutionStatus for test:1: {"numberOfExecutedActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
       // ruleExecutionStatus for test:1: {\"lastExecutionDate\":\"1970-01-01T00:00:00.000Z\",\"status\":\"error\",\"error\":{\"reason\":\"unknown\",\"message\":\"Cannot read property 'catch' of undefined\"}}
 
@@ -655,7 +655,7 @@ describe('Task Runner', () => {
               execution: {
                 uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 metrics: {
-                  number_of_executed_actions: 1,
+                  number_of_triggered_actions: 1,
                 },
               },
             },
@@ -739,7 +739,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleExecutionStatus for test:1: {"numberOfExecutedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -874,7 +874,7 @@ describe('Task Runner', () => {
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               metrics: {
-                number_of_executed_actions: 0,
+                number_of_triggered_actions: 0,
               },
             },
           },
@@ -965,7 +965,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleExecutionStatus for test:1: {"numberOfExecutedActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
     }
   );
@@ -1127,7 +1127,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -1568,7 +1568,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 1,
+                      "number_of_triggered_actions": 1,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -1701,7 +1701,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleExecutionStatus for test:1: {"numberOfExecutedActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1944,7 +1944,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 2,
+                      "number_of_triggered_actions": 2,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -2095,7 +2095,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        `ruleExecutionStatus for test:${alertId}: {"numberOfExecutedActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+        `ruleExecutionStatus for test:${alertId}: {"numberOfTriggeredActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -2456,7 +2456,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -2659,8 +2659,8 @@ describe('Task Runner', () => {
         "state": Object {
           "alertInstances": Object {},
           "alertTypeState": undefined,
-          "executedActions": Array [],
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          "triggeredActions": Array [],
         },
       }
     `);
@@ -3836,7 +3836,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -4080,7 +4080,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -4312,7 +4312,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -4543,7 +4543,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -4770,7 +4770,7 @@ describe('Task Runner', () => {
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
-                      "number_of_executed_actions": 0,
+                      "number_of_triggered_actions": 0,
                     },
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
@@ -4854,8 +4854,8 @@ describe('Task Runner', () => {
                                     "state": Object {
                                       "alertInstances": Object {},
                                       "alertTypeState": undefined,
-                                      "executedActions": Array [],
                                       "previousStartedAt": 1970-01-01T00:00:00.000Z,
+                                      "triggeredActions": Array [],
                                     },
                                   }
                   `);
@@ -4921,7 +4921,7 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleExecutionStatus for test:1: {"numberOfExecutedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -4991,7 +4991,7 @@ describe('Task Runner', () => {
           error: null,
           lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
-          numberOfExecutedActions: 0,
+          numberOfTriggeredActions: 0,
           status: 'ok',
         },
       },
@@ -5132,8 +5132,8 @@ describe('Task Runner', () => {
                                       "state": Object {
                                         "alertInstances": Object {},
                                         "alertTypeState": undefined,
-                                        "executedActions": Array [],
                                         "previousStartedAt": 1970-01-01T00:00:00.000Z,
+                                        "triggeredActions": Array [],
                                       },
                                     }
                     `);

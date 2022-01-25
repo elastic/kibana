@@ -191,7 +191,7 @@ export interface AlertMeta extends SavedObjectAttributes {
 // delete any previous error if the current status has no error
 export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
-  numberOfExecutedActions?: number;
+  numberOfTriggeredActions?: number;
   lastExecutionDate: string;
   lastDuration?: number;
   error: null | {

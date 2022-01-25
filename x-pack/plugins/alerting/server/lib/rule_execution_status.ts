@@ -14,7 +14,7 @@ import { AlertExecutionStatuses } from '../../common';
 export function executionStatusFromState(state: RuleTaskState): AlertExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
   return {
-    numberOfExecutedActions: state.executedActions?.length ?? 0,
+    numberOfTriggeredActions: state.triggeredActions?.length ?? 0,
     lastExecutionDate: new Date(),
     status: alertIds.length === 0 ? 'ok' : 'active',
   };
@@ -32,14 +32,14 @@ export function executionStatusFromError(error: Error): AlertExecutionStatus {
 }
 
 export function ruleExecutionStatusToRaw({
-  numberOfExecutedActions,
+  numberOfTriggeredActions,
   lastExecutionDate,
   lastDuration,
   status,
   error,
 }: AlertExecutionStatus): RawRuleExecutionStatus {
   return {
-    numberOfExecutedActions: numberOfExecutedActions ?? 0,
+    numberOfTriggeredActions: numberOfTriggeredActions ?? 0,
     lastExecutionDate: lastExecutionDate.toISOString(),
     lastDuration: lastDuration ?? 0,
     status,
@@ -58,7 +58,7 @@ export function ruleExecutionStatusFromRaw(
   const {
     lastExecutionDate,
     lastDuration,
-    numberOfExecutedActions,
+    numberOfTriggeredActions,
     status = 'unknown',
     error,
   } = rawRuleExecutionStatus;
@@ -80,8 +80,8 @@ export function ruleExecutionStatusFromRaw(
     executionStatus.lastDuration = lastDuration;
   }
 
-  if (null != numberOfExecutedActions) {
-    executionStatus.numberOfExecutedActions = numberOfExecutedActions;
+  if (null != numberOfTriggeredActions) {
+    executionStatus.numberOfTriggeredActions = numberOfTriggeredActions;
   }
 
   if (error) {
