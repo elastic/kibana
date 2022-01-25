@@ -35,8 +35,8 @@ export function getOperatorOptions(field: IFieldType) {
   });
 }
 
-export function validateParams(params: any, type: string, esTypes?: string[]) {
-  switch (type) {
+export function validateParams(params: any, field: IFieldType) {
+  switch (field.type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
       return Boolean(typeof params === 'string' && moment && moment.isValid());
@@ -47,7 +47,7 @@ export function validateParams(params: any, type: string, esTypes?: string[]) {
         return false;
       }
     case 'string':
-      if (esTypes?.includes(ES_FIELD_TYPES.VERSION)) {
+      if (field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) {
         return isSemverValid(params);
       }
       return true;
@@ -67,19 +67,19 @@ export function isFilterValid(
   }
   switch (operator.type) {
     case 'phrase':
-      return validateParams(params, field.type);
+      return validateParams(params, field);
     case 'phrases':
       if (!Array.isArray(params) || !params.length) {
         return false;
       }
-      return params.every((phrase) => validateParams(phrase, field.type, field.esTypes));
+      return params.every((phrase) => validateParams(phrase, field));
     case 'range':
       if (typeof params !== 'object') {
         return false;
       }
       return (
-        (!params.from || validateParams(params.from, field.type, field.esTypes)) &&
-        (!params.to || validateParams(params.to, field.type, field.esTypes))
+        (!params.from || validateParams(params.from, field)) &&
+        (!params.to || validateParams(params.to, field))
       );
     case 'exists':
       return true;
