@@ -14,6 +14,8 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiBetaBadge,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -64,9 +66,16 @@ function FormRow({
             error={isValid ? undefined : message}
             helpText={<EuiText size="xs">{row.helpText}</EuiText>}
             labelAppend={
-              <EuiText size="xs" color="subdued">
-                {row.labelAppend}
-              </EuiText>
+              row.labelAppendLink ? (
+                <EuiText size="xs">
+                  {' '}
+                  <EuiLink>{row.labelAppendLink}</EuiLink>
+                </EuiText>
+              ) : (
+                <EuiText size="xs" color="subdued">
+                  {row.labelAppend}
+                </EuiText>
+              )
             }
           >
             <FormRowSetting row={row} onChange={onChange} value={value} />
@@ -86,6 +95,7 @@ export interface SettingsSection {
   title: string;
   subtitle?: string;
   settings: SettingsRow[];
+  isBeta?: boolean;
 }
 
 interface Props {
@@ -95,13 +105,22 @@ interface Props {
 }
 
 export function SettingsForm({ settingsSection, vars, onChange }: Props) {
-  const { title, subtitle, settings } = settingsSection;
+  const { title, subtitle, settings, isBeta } = settingsSection;
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>{title}</h3>
+            <h3>
+              {title} &nbsp;
+              {isBeta && (
+                <EuiBetaBadge
+                  color="subdued"
+                  label="Beta"
+                  tooltipContent="This module is not GA. Please help us by reporting any bugs."
+                />
+              )}
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         {subtitle && (
