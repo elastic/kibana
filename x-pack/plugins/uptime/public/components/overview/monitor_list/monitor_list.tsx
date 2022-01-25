@@ -59,7 +59,7 @@ export const MonitorListComponent: ({
   setPageSize,
 }: Props) => any = ({
   filters,
-  refreshedMonitorIds,
+  refreshedMonitorIds = [],
   monitorList: { list, error, loading },
   pageSize,
   setPageSize,

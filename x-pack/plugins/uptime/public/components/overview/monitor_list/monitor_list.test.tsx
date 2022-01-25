@@ -56,7 +56,7 @@ const testFooPings: Ping[] = [
 const testFooSummary: MonitorSummary = {
   monitor_id: 'foo',
   state: {
-    monitor: { type: 'http' },
+    monitor: { type: 'http', duration: { us: 1000 } },
     summaryPings: testFooPings,
     summary: {
       up: 1,
@@ -91,7 +91,7 @@ const testBarPings: Ping[] = [
 const testBarSummary: MonitorSummary = {
   monitor_id: 'bar',
   state: {
-    monitor: { type: 'http' },
+    monitor: { type: 'http', duration: { us: 1000 } },
     summaryPings: testBarPings,
     summary: {
       up: 2,
@@ -156,6 +156,7 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
+        refreshedMonitorIds={[]}
       />
     );
     expect(await findByText(NO_DATA_MESSAGE)).toBeInTheDocument();
@@ -170,6 +171,7 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
+        refreshedMonitorIds={[]}
       />
     );
 
@@ -190,6 +192,7 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
+        refreshedMonitorIds={[]}
       />
     );
 
@@ -226,6 +229,7 @@ describe('MonitorList component', () => {
           }}
           pageSize={10}
           setPageSize={jest.fn()}
+          refreshedMonitorIds={[]}
         />
       );
 
@@ -254,6 +258,7 @@ describe('MonitorList component', () => {
             }}
             pageSize={10}
             setPageSize={jest.fn()}
+            refreshedMonitorIds={[]}
           />
         );
 
@@ -283,6 +288,7 @@ describe('MonitorList component', () => {
             }}
             pageSize={10}
             setPageSize={jest.fn()}
+            refreshedMonitorIds={[]}
           />
         );
 

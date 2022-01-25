@@ -21,7 +21,7 @@ import { TestNowResponse } from '../api';
 
 export interface MonitorList {
   loading: boolean;
-  refreshedMonitorId?: string[];
+  refreshedMonitorIds?: string[];
   isUpdating?: string[];
   list: MonitorSummariesResult;
   error?: IHttpFetchError<ResponseErrorBody>;
@@ -34,6 +34,7 @@ export const initialState: MonitorList = {
     summaries: [],
   },
   loading: false,
+  refreshedMonitorIds: [],
 };
 
 type Payload = MonitorSummariesResult &
@@ -88,7 +89,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
         loading: false,
         error: undefined,
         isUpdating: state.isUpdating?.filter((item) => item !== newSummary.monitor_id),
-        refreshedMonitorId: [...(state.refreshedMonitorId ?? []), newSummary.monitor_id],
+        refreshedMonitorIds: [...(state.refreshedMonitorIds ?? []), newSummary.monitor_id],
         list: {
           ...state.list,
           summaries: summaries.map((summary) => {
@@ -111,7 +112,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
     }),
     [String(clearRefreshedMonitorId)]: (state: MonitorList, action: Action<string>) => ({
       ...state,
-      refreshedMonitorId: (state.refreshedMonitorId ?? []).filter(
+      refreshedMonitorIds: (state.refreshedMonitorIds ?? []).filter(
         (item) => item !== action.payload
       ),
     }),
@@ -120,7 +121,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
 );
 
 export const refreshedMonitorSelector = ({ monitorList }: AppState) =>
-  monitorList.refreshedMonitorId ?? [];
+  monitorList.refreshedMonitorIds;
 
 export const isUpdatingMonitorSelector = ({ monitorList }: AppState) =>
   monitorList.isUpdating ?? [];

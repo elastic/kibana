@@ -59,6 +59,7 @@ export const mockState: AppState = {
       summaries: [],
     },
     loading: false,
+    refreshedMonitorIds: [],
   },
   monitorManagementList: {
     list: {
@@ -114,5 +115,8 @@ export const mockState: AppState = {
     blocks: {},
     cacheSize: 0,
     hitCount: [],
+  },
+  testNowRuns: {
+    testNowRuns: [],
   },
 };

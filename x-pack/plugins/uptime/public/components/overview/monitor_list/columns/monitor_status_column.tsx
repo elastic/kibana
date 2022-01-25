@@ -43,7 +43,7 @@ interface MonitorListStatusColumnProps {
   status: string;
   monitorType: string;
   timestamp: string;
-  duration: number;
+  duration?: number;
   summaryPings: Ping[];
 }
 
@@ -200,7 +200,7 @@ export const MonitorListStatusColumn = ({
               configId={configId}
               testRunId={testNowRun?.testRunId}
               monitorType={monitorType as DataStream}
-              duration={duration}
+              duration={duration ?? 0}
               stopProgressTrack={stopProgressTrack}
             />
           ) : (
@@ -239,7 +239,7 @@ export const MonitorListStatusColumn = ({
             </>
           }
         >
-          {monitorId && refreshedMonitorIds.includes(monitorId) ? (
+          {monitorId && refreshedMonitorIds?.includes(monitorId) ? (
             <EuiHighlight highlightAll={true} search={getCheckedLabel(timestamp)}>
               {getCheckedLabel(timestamp)}
             </EuiHighlight>
