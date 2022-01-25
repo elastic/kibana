@@ -1492,6 +1492,56 @@ describe('IndexPattern Data Source suggestions', () => {
       );
     });
 
+    it('should apply a custom label if given', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          label: 'testLabel',
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id3', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'count',
+                    sourceField: 'Records',
+                    label: 'testLabel',
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
     it('should apply a split by terms aggregation if it is provided', () => {
       const updatedContext = [
         {

@@ -231,7 +231,7 @@ export function insertNewColumn({
     return updateDefaultLabels(
       addOperationFn(
         layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams),
+        operationDefinition.buildColumn({ ...baseOptions, layer }),
         columnId,
         visualizationGroups,
         targetGroup
@@ -1620,8 +1620,8 @@ export function computeLayerFromContext(
   }
 
   // update the layer with the custom label and the format
-  const columnIds = Object.keys(layer.columns);
-  columnIds.forEach((columnId) => {
+  let columnIdx = 0;
+  for (const [columnId, column] of Object.entries(layer.columns)) {
     if (format) {
       layer = updateColumnParam({
         layer,
@@ -1635,14 +1635,23 @@ export function computeLayerFromContext(
         },
       });
     }
-    if (customLabel) {
+
+    // for percentiles I want to update all columns with the custom label
+    if (customLabel && column.operationType === 'percentile') {
+      layer = updateColumnLabel({
+        layer,
+        columnId,
+        customLabel,
+      });
+    } else if (customLabel && columnIdx === Object.keys(layer.columns).length - 1) {
       layer = updateColumnLabel({
         layer,
         columnId,
         customLabel,
       });
     }
-  });
+    columnIdx++;
+  }
   return layer;
 }
 

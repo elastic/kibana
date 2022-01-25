@@ -72,6 +72,8 @@ export const triggerVisualizeToLensOptions = async (
       splitFilters.push(...layer.split_filters);
     }
 
+    const palette = layer.palette as PaletteOutput;
+
     const triggerOptions: VisualizeEditorLayersContext = {
       indexPatternId,
       timeFieldName: timeField,
@@ -85,7 +87,11 @@ export const triggerVisualizeToLensOptions = async (
       ...(layer.terms_field && { splitField: layer.terms_field }),
       ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
       ...(splitFilters.length > 0 && { splitFilters }),
-      palette: (layer.palette as PaletteOutput) ?? undefined,
+      // for non supported palettes, we will use the default palette
+      palette:
+        palette.name === 'gradient' || palette.name === 'rainbow'
+          ? { name: 'default', type: 'palette' }
+          : palette,
       ...(layer.split_mode === 'terms' && {
         termsParams: {
           size: layer.terms_size ?? 10,
