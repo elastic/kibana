@@ -176,9 +176,10 @@ export interface SavedObjectsResolveImportErrorsOptions {
   createNewCopies: boolean;
 }
 
-export type CreatedObject<T extends SavedObjectAttributes> = SavedObject<T> & {
-  destinationId?: string;
-};
+export type CreatedObject<T extends SavedObjectAttributes = SavedObjectAttributes> =
+  SavedObject<T> & {
+    destinationId?: string;
+  };
 
 /**
  * A simple informative warning that will be displayed to the user.

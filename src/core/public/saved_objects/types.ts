@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsResolveResponse } from '../../server';
+import type { SavedObjectsResolveResponse, SavedObjectAttributes } from '../../server';
 import { SimpleSavedObject } from './simple_saved_object';
 
 /**
@@ -15,7 +15,9 @@ import { SimpleSavedObject } from './simple_saved_object';
  *
  * @public
  */
-export interface ResolvedSimpleSavedObject<T = unknown> {
+export interface ResolvedSimpleSavedObject<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> {
   /**
    * The saved object that was found.
    */

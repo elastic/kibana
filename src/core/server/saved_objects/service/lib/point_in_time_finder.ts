@@ -7,7 +7,11 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '../../../logging';
-import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
+import type {
+  SavedObjectsFindOptions,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from '../../types';
 import type { SavedObjectsFindResponse } from '../';
 
 type PointInTimeFinderClient = Pick<
@@ -41,12 +45,15 @@ export interface PointInTimeFinderDependencies
 /**
  * @internal
  */
-export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
+export type CreatePointInTimeFinderFn = <
+  T extends SavedObjectAttributes = SavedObjectAttributes,
+  A = unknown
+>(
   findOptions: SavedObjectsCreatePointInTimeFinderOptions
 ) => ISavedObjectsPointInTimeFinder<T, A>;
 
 /** @public */
-export interface ISavedObjectsPointInTimeFinder<T, A> {
+export interface ISavedObjectsPointInTimeFinder<T extends SavedObjectAttributes, A> {
   /**
    * An async generator which wraps calls to `savedObjectsClient.find` and
    * iterates over multiple pages of results using `_pit` and `search_after`.
@@ -70,7 +77,7 @@ export interface ISavedObjectsPointInTimeFinder<T, A> {
 /**
  * @internal
  */
-export class PointInTimeFinder<T = unknown, A = unknown>
+export class PointInTimeFinder<T extends SavedObjectAttributes = SavedObjectAttributes, A = unknown>
   implements ISavedObjectsPointInTimeFinder<T, A>
 {
   readonly #log: Logger;

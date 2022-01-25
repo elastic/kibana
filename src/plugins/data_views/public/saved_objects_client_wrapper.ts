@@ -7,7 +7,7 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
+import { SavedObjectsClient, SimpleSavedObject, SavedObjectAttributes } from 'src/core/public';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
@@ -17,7 +17,9 @@ import {
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'resolve' | 'update' | 'create' | 'delete'>;
 
-const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
+const simpleSavedObjectToSavedObject = <T extends SavedObjectAttributes>(
+  simpleSavedObject: SimpleSavedObject
+): SavedObject<T> =>
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),
@@ -25,34 +27,45 @@ const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject)
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SOClient;
+
   constructor(savedObjectClient: SOClient) {
     this.savedObjectClient = savedObjectClient;
   }
-  async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
+
+  async find<T extends SavedObjectAttributes = SavedObjectAttributes>(
+    options: SavedObjectsClientCommonFindArgs
+  ) {
     const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
     return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
   }
 
-  async get<T = unknown>(type: string, id: string) {
+  async get<T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) {
     const response = await this.savedObjectClient.resolve<T>(type, id);
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
     return simpleSavedObjectToSavedObject<T>(response.saved_object);
   }
-  async update(
+
+  async update<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
-    attributes: Record<string, any>,
+    attributes: Partial<T>,
     options: Record<string, any>
   ) {
     const response = await this.savedObjectClient.update(type, id, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    return simpleSavedObjectToSavedObject<T>(response);
   }
-  async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
+
+  async create<T extends SavedObjectAttributes = SavedObjectAttributes>(
+    type: string,
+    attributes: T,
+    options: Record<string, any>
+  ) {
     const response = await this.savedObjectClient.create(type, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    return simpleSavedObjectToSavedObject<T>(response);
   }
+
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id);
   }

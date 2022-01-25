@@ -15,7 +15,9 @@ import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
  * CoreUsageStats are collected over time while Kibana is running. This is related to CoreUsageData, which is a superset of this that also
  * includes point-in-time configuration information.
  * */
-export interface CoreUsageStats {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CoreUsageStats = {
   // Saved Objects Client APIs
   'apiCalls.savedObjectsBulkCreate.total'?: number;
   'apiCalls.savedObjectsBulkCreate.namespace.default.total'?: number;
@@ -138,7 +140,7 @@ export interface CoreUsageStats {
   'savedObjectsRepository.resolvedOutcome.conflict'?: number;
   'savedObjectsRepository.resolvedOutcome.notFound'?: number;
   'savedObjectsRepository.resolvedOutcome.total'?: number;
-}
+};
 
 /**
  * Type describing Core's usage data payload

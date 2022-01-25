@@ -114,8 +114,9 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
+export interface SavedObjectsBulkUpdateObject<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -225,7 +226,9 @@ export interface SavedObjectsCheckConflictsResponse {
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions<
+  Attributes extends SavedObjectAttributes = SavedObjectAttributes
+> extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
@@ -683,7 +686,7 @@ export class SavedObjectsClient {
    * }
    * ```
    */
-  createPointInTimeFinder<T = unknown, A = unknown>(
+  createPointInTimeFinder<T extends SavedObjectAttributes = SavedObjectAttributes, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): ISavedObjectsPointInTimeFinder<T, A> {

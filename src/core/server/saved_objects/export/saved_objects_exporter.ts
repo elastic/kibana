@@ -129,7 +129,7 @@ export class SavedObjectsExporter {
     // redact attributes that should not be exported
     const redactedObjects = includeNamespaces
       ? exportedObjects
-      : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
+      : exportedObjects.map<SavedObject>(({ namespaces, ...object }) => object);
 
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,

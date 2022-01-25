@@ -11,7 +11,7 @@ import { SavedObjectsImportFailure, CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type
-  savedObjectResults: Array<CreatedObject<unknown>>,
+  savedObjectResults: CreatedObject[],
   savedObjectsToImport: Array<SavedObject<any>>
 ) {
   const errors: SavedObjectsImportFailure[] = [];

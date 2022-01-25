@@ -7,7 +7,7 @@
  */
 
 import { KibanaRequest } from '../../http';
-import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
+import { SavedObject, SavedObjectAttributes, SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */
 export interface SavedObjectExportBaseOptions {
@@ -172,7 +172,7 @@ export interface SavedObjectsExportTransformContext {
  *
  * @public
  */
-export type SavedObjectsExportTransform<T = unknown> = (
+export type SavedObjectsExportTransform<T extends SavedObjectAttributes = SavedObjectAttributes> = (
   context: SavedObjectsExportTransformContext,
   objects: Array<SavedObject<T>>
 ) => SavedObject[] | Promise<SavedObject[]>;
