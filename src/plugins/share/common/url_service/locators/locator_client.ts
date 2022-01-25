@@ -58,7 +58,8 @@ export class LocatorClient implements ILocatorClient {
     const migrations: { [locatorId: string]: MigrateFunctionsObject } = {};
 
     for (const locator of this.locators.values()) {
-      migrations[locator.id] = locator.migrations;
+      migrations[locator.id] =
+        typeof locator.migrations === 'function' ? locator.migrations() : locator.migrations;
     }
 
     return migrations;

@@ -52,7 +52,11 @@ describe('embeddable migrations', () => {
       },
     })()?.migrations;
 
-    const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);
+    const migrations =
+      typeof embeddableMigrationVersions === 'function'
+        ? embeddableMigrationVersions()
+        : embeddableMigrationVersions || {};
+    const migratedLensDoc = migrations[migrationVersion](lensVisualizationDoc);
 
     expect(migratedLensDoc).toEqual({
       attributes: {
