@@ -200,7 +200,7 @@ export const getFormulaEquivalent = (
   metrics: Metric[],
   metaValue?: number
 ) => {
-  const aggregation = SUPPORTED_METRICS[currentMetric.type].name;
+  const aggregation = SUPPORTED_METRICS[currentMetric.type]?.name;
   let formula = null;
   switch (currentMetric.type) {
     case 'avg_bucket':
