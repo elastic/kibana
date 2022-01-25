@@ -21,7 +21,14 @@ async function fetchIndicesCall(
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     // only get specified properties in the response
-    filter_path: ['*.aliases', '*.settings.index.hidden', '*.data_stream'],
+    filter_path: [
+      '*.aliases',
+      '*.settings.index.number_of_shards',
+      '*.settings.index.number_of_replicas',
+      '*.settings.index.frozen',
+      '*.settings.index.hidden',
+      '*.data_stream',
+    ],
   });
 
   if (!Object.keys(indices).length) {
