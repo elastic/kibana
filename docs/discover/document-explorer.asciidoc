@@ -29,7 +29,7 @@ To reorder columns, do one of the following:
 
 To resize a column, drag the right edge of the column header until the column is the size that you want.
 
-Column widths are stored with a saved search.  When you reuse your saved search in a dashboard, it displays the same way as it does in Discover.
+Column widths are stored with a saved search.  When you visualize saved searches on dashboards, the saved search appears the same as in **Discover**.
 
 [float]
 [[document-explorer-sort-data]]
