@@ -22845,6 +22845,7 @@
     "xpack.reporting.panelContent.unsavedStateErrorTitle": "保存されていない作業内容",
     "xpack.reporting.pdfFooterImageDescription": "PDFのフッターに使用するカスタム画像です",
     "xpack.reporting.pdfFooterImageLabel": "PDFフッター画像",
+<<<<<<< HEAD
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage": "レポート'{reportObjectTitle}'には、スプレッドシートアプリケーションで式と解釈される可能性のある文字が含まれています。",
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle": "{reportType}には式を含めることができます",
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "レポートをダウンロード",
@@ -22861,6 +22862,17 @@
     "xpack.reporting.publicNotifier.reportLinkDescription": "今すぐダウンロードするか、後から{path}でダウンロードできます。",
     "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "'{reportObjectTitle}'の{reportType}が作成されました",
     "xpack.reporting.publicNotifier.warning.title": "{reportType}が完了しましたが、問題があります",
+=======
+    "xpack.reporting.publicNotifier.downloadReportButtonLabel": "レポートをダウンロード",
+    "xpack.reporting.publicNotifier.error.calloutTitle": "レポートジョブが失敗しました",
+    "xpack.reporting.publicNotifier.error.checkManagement": "詳細については、{path}を参照してください。",
+    "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "管理 > Kibana > レポート",
+    "xpack.reporting.publicNotifier.error.tryRefresh": "ページを更新してみてください。",
+    "xpack.reporting.publicNotifier.httpErrorMessage": "レポートジョブステータスを確認できませんでした",
+    "xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription": "レポートが最大サイズに達し、部分データが含まれています。",
+    "xpack.reporting.publicNotifier.pollingErrorMessage": "レポート通知エラー",
+    "xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel": "スタック管理 > アラートとインサイト > レポート",
+>>>>>>> 8a8a12aa7eb ([Reporting] Fix copy issue in report notifications (#123607))
     "xpack.reporting.redirectApp.errorTitle": "リダイレクトエラー",
     "xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel": "リダイレクトページエラー：",
     "xpack.reporting.registerFeature.reportingDescription": "Discover、可視化、ダッシュボードから生成されたレポートを管理します。",
