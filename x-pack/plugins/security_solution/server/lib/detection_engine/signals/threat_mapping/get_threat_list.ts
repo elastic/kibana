@@ -55,7 +55,7 @@ export const getThreatList = async ({
     )
   );
 
-  const fields = threatMapping
+  const sourceConfig = threatMapping
     ? threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat()
     : [
         {
@@ -73,8 +73,9 @@ export const getThreatList = async ({
     Record<string, estypes.AggregationsAggregate>
   >({
     body: {
+      // @ts-ignore _source can be array for source filtering
+      _source: sourceConfig,
       query: queryFilter,
-      fields,
       search_after: searchAfter,
       // @ts-expect-error is not compatible with SortCombinations
       sort: getSortWithTieBreaker({

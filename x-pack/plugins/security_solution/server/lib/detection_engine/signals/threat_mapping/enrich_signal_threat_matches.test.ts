@@ -116,14 +116,14 @@ describe('buildEnrichments', () => {
     expect(enrichments).toEqual([]);
   });
 
-  it('returns the value of the matched indicator as matched.atomic', () => {
+  it('returns the value of the matched indicator as undefined', () => {
     const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(enrichment, 'matched.atomic')).toEqual('domain_1');
+    expect(get(enrichment, 'matched.atomic')).toEqual(undefined);
   });
 
   it('does not enrich from other fields in the indicator document', () => {
@@ -235,7 +235,7 @@ describe('buildEnrichments', () => {
           reference: 'https://test.com',
         },
         matched: {
-          atomic: 'domain_1',
+          atomic: undefined,
           id: '123',
           index: 'threat-index',
           field: 'event.field',
@@ -279,7 +279,7 @@ describe('buildEnrichments', () => {
           type: 'indicator_type',
         },
         matched: {
-          atomic: 'domain_1',
+          atomic: undefined,
           id: '123',
           index: 'threat-index',
           field: 'event.field',
@@ -466,7 +466,7 @@ describe('buildEnrichments', () => {
           type: 'type_1',
         },
         matched: {
-          atomic: 'domain_1',
+          atomic: undefined,
           field: 'event.field',
           id: '123',
           index: 'threat-index',
@@ -499,7 +499,7 @@ describe('enrichSignalThreatMatches', () => {
       getNamedQueryMock({
         id: '123',
         index: 'indicator_index',
-        field: 'event.field',
+        field: 'event.domain',
         value: 'threat.indicator.domain',
       })
     );
@@ -520,7 +520,7 @@ describe('enrichSignalThreatMatches', () => {
     const signalHit = getSignalHitMock({
       _source: {
         '@timestamp': 'mocked',
-        event: { category: 'malware' },
+        event: { category: 'malware', domain: 'domain_1' },
         threat: { enrichments: [{ existing: 'indicator' }] },
       },
       matched_queries: [matchedQuery],
@@ -547,7 +547,7 @@ describe('enrichSignalThreatMatches', () => {
           atomic: 'domain_1',
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -576,7 +576,7 @@ describe('enrichSignalThreatMatches', () => {
           atomic: undefined,
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -587,7 +587,7 @@ describe('enrichSignalThreatMatches', () => {
     const signalHit = getSignalHitMock({
       _source: {
         '@timestamp': 'mocked',
-        event: { category: 'virus' },
+        event: { category: 'virus', domain: 'domain_1' },
         threat: {
           enrichments: [
             { indicator: { existing: 'indicator' } },
@@ -624,7 +624,7 @@ describe('enrichSignalThreatMatches', () => {
           atomic: 'domain_1',
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -661,11 +661,16 @@ describe('enrichSignalThreatMatches', () => {
       getNamedQueryMock({
         id: '123',
         index: 'custom_index',
-        field: 'event.field',
+        field: 'event.domain',
         value: 'custom_threat.custom_indicator.domain',
       })
     );
     const signalHit = getSignalHitMock({
+      _source: {
+        event: {
+          domain: 'domain_1',
+        },
+      },
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
@@ -686,10 +691,10 @@ describe('enrichSignalThreatMatches', () => {
           type: 'custom_type',
         },
         matched: {
-          atomic: 'custom_domain',
+          atomic: 'domain_1',
           id: '123',
           index: 'custom_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -715,10 +720,22 @@ describe('enrichSignalThreatMatches', () => {
     ];
     const signalHit = getSignalHitMock({
       _id: 'signal123',
+      _source: {
+        event: {
+          domain: 'domain_1',
+          other: 'test_val',
+        },
+      },
       matched_queries: [matchedQuery],
     });
     const otherSignalHit = getSignalHitMock({
       _id: 'signal123',
+      _source: {
+        event: {
+          domain: 'domain_1',
+          other: 'test_val',
+        },
+      },
       matched_queries: [
         encodeThreatMatchNamedQuery(
           getNamedQueryMock({
@@ -754,7 +771,7 @@ describe('enrichSignalThreatMatches', () => {
           atomic: 'domain_1',
           id: '123',
           index: 'indicator_index',
-          field: 'event.field',
+          field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
@@ -766,7 +783,7 @@ describe('enrichSignalThreatMatches', () => {
           type: 'type_2',
         },
         matched: {
-          atomic: 'domain_2',
+          atomic: 'test_val',
           id: '456',
           index: 'other_custom_index',
           field: 'event.other',
