@@ -109,6 +109,25 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
       username: kibanaServerTestUser.username,
       password: kibanaServerTestUser.password,
     },
+    // Log ES deprecations to surface these in CI
+    logging: {
+      loggers: [
+        {
+          name: 'root',
+          level: 'error',
+          appenders: ['console'],
+        },
+        {
+          name: 'elasticsearch.deprecation',
+          level: 'all',
+          appenders: ['deprecation'],
+        },
+      ],
+      appenders: {
+        deprecation: { type: 'console', layout: { type: 'json' } },
+        console: { type: 'console', layout: { type: 'pattern' } },
+      },
+    },
     // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
     ...(cliArgs.oss === false
       ? {

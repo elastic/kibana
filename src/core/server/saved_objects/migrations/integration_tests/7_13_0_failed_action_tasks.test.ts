@@ -128,6 +128,7 @@ function createRoot() {
         loggers: [
           {
             name: 'root',
+            level: 'info',
             appenders: ['file'],
           },
         ],
