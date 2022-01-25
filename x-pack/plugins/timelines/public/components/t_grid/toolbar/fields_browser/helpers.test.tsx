@@ -232,6 +232,20 @@ describe('helpers', () => {
             },
           },
         },
+        base: {
+          fields: {
+            _id: {
+              category: 'base',
+              description: 'Each document has an _id that uniquely identifies it',
+              example: 'Y-6TfmcB0WOhS6qyMv3s',
+              name: '_id',
+              type: 'string',
+              searchable: true,
+              aggregatable: false,
+              indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+            },
+          },
+        },
         cloud: {
           fields: {
             'cloud.account.id': {
