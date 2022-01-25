@@ -258,14 +258,9 @@ export const getField = (ecsData: Ecs, field: string) => {
     const paramsField = parts.slice(0, parts.length - 1).join('.');
     const params = get(paramsField, ecsData);
     const value = get(parts[parts.length - 1], params);
-    if (isEmpty(value)) {
-      return [];
-    }
     return value;
   }
   const value = get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
-  if (isEmpty(value)) {
-    return [];
-  }
+
   return value;
 };
