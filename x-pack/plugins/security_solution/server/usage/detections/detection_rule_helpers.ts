@@ -434,12 +434,13 @@ export const getDetectionRuleMetrics = async (
 
     const casesCache = cases.saved_objects.reduce((cache, { attributes: casesObject }) => {
       const ruleId = casesObject.rule.id;
-
-      const cacheCount = cache.get(ruleId);
-      if (cacheCount === undefined) {
-        cache.set(ruleId, 1);
-      } else {
-        cache.set(ruleId, cacheCount + 1);
+      if (ruleId != null) {
+        const cacheCount = cache.get(ruleId);
+        if (cacheCount === undefined) {
+          cache.set(ruleId, 1);
+        } else {
+          cache.set(ruleId, cacheCount + 1);
+        }
       }
       return cache;
     }, new Map<string, number>());
