@@ -12,6 +12,7 @@ import { PathConfigType } from '@kbn/utils';
 import { readFile, writeFile } from './fs';
 import { HttpConfigType } from '../http';
 import { Logger } from '../logging';
+import { uuidRegexp } from '../http/http_config';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
@@ -63,16 +64,24 @@ export async function resolveInstanceUuid({
 }
 
 async function readUuidFromFile(filepath: string, logger: Logger): Promise<string | undefined> {
+  const content = await readFileContent(filepath);
+
+  if (content === UUID_7_6_0_BUG) {
+    logger.debug(`UUID from 7.6.0 bug detected, ignoring file UUID`);
+    return undefined;
+  }
+
+  if (content && !content.match(uuidRegexp)) {
+    throw new Error(`${filepath} contains an invalid UUID`);
+  }
+
+  return content;
+}
+
+async function readFileContent(filepath: string): Promise<string | undefined> {
   try {
     const content = await readFile(filepath);
-    const decoded = content.toString(FILE_ENCODING);
-
-    if (decoded === UUID_7_6_0_BUG) {
-      logger.debug(`UUID from 7.6.0 bug detected, ignoring file UUID`);
-      return undefined;
-    } else {
-      return decoded;
-    }
+    return content.toString(FILE_ENCODING).trim();
   } catch (e) {
     if (e.code === 'ENOENT') {
       // non-existent uuid file is ok, we will create it.

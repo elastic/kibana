@@ -25,6 +25,7 @@ export const EVENT_FILTER_LIST = {
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `name`,
+  `description`,
   `entries.value`,
   `entries.entries.value`,
   `comments.comment`,
