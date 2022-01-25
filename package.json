@@ -777,6 +777,7 @@
     "form-data": "^4.0.0",
     "geckodriver": "^3.0.1",
     "glob-watcher": "5.0.3",
+    "got": "11.8.3",
     "gulp": "4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-brotli": "^3.0.0",
