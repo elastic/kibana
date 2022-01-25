@@ -98,21 +98,22 @@ export function TransactionDurationAlertTrigger(props: Props) {
         windowUnit: params.windowUnit as TimeUnit,
       });
       if (interval && start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/alerts/chart_preview/transaction_duration',
-          params: {
-            query: {
-              aggregationType: params.aggregationType,
-              environment: params.environment,
-              serviceName: params.serviceName,
-              transactionType: params.transactionType,
-              interval,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/alerts/chart_preview/transaction_duration',
+          {
+            params: {
+              query: {
+                aggregationType: params.aggregationType,
+                environment: params.environment,
+                serviceName: params.serviceName,
+                transactionType: params.transactionType,
+                interval,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [

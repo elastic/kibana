@@ -23,24 +23,26 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && field && value) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/page-load-distribution/breakdown',
-          params: {
-            query: {
-              start,
-              end,
-              breakdown: value,
-              uiFilters: JSON.stringify(uxUiFilters),
-              urlQuery: searchTerm,
-              ...(minP && maxP
-                ? {
-                    minPercentile: String(minP),
-                    maxPercentile: String(maxP),
-                  }
-                : {}),
+        return callApmApi(
+          'GET /internal/apm/ux/page-load-distribution/breakdown',
+          {
+            params: {
+              query: {
+                start,
+                end,
+                breakdown: value,
+                uiFilters: JSON.stringify(uxUiFilters),
+                urlQuery: searchTerm,
+                ...(minP && maxP
+                  ? {
+                      minPercentile: String(minP),
+                      maxPercentile: String(maxP),
+                    }
+                  : {}),
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [end, start, uxUiFilters, field, value, minP, maxP, searchTerm]

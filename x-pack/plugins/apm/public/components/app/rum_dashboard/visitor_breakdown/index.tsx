@@ -22,8 +22,7 @@ export function VisitorBreakdown() {
       const { serviceName } = uxUiFilters;
 
       if (start && end && serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/visitor-breakdown',
+        return callApmApi('GET /internal/apm/ux/visitor-breakdown', {
           params: {
             query: {
               start,

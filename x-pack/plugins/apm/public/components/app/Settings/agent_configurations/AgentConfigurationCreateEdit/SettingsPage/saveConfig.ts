@@ -25,8 +25,7 @@ export async function saveConfig({
   toasts: NotificationsStart['toasts'];
 }) {
   try {
-    await callApmApi({
-      endpoint: 'PUT /api/apm/settings/agent-configuration',
+    await callApmApi('PUT /api/apm/settings/agent-configuration', {
       signal: null,
       params: {
         query: { overwrite: isEditMode },

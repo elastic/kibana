@@ -75,8 +75,7 @@ async function saveApmIndices({
 }: {
   apmIndices: Record<string, string>;
 }) {
-  await callApmApi({
-    endpoint: 'POST /internal/apm/settings/apm-indices/save',
+  await callApmApi('POST /internal/apm/settings/apm-indices/save', {
     signal: null,
     params: {
       body: apmIndices,
@@ -103,9 +102,7 @@ export function ApmIndices() {
   const { data = INITIAL_STATE, refetch } = useFetcher(
     (_callApmApi) => {
       if (canSave) {
-        return _callApmApi({
-          endpoint: `GET /internal/apm/settings/apm-index-settings`,
-        });
+        return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
       }
     },
     [canSave]

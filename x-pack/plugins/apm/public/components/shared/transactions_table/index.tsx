@@ -112,21 +112,22 @@ export function TransactionsTable({
       if (!start || !end || !latencyAggregationType || !transactionType) {
         return;
       }
-      return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
-        params: {
-          path: { serviceName },
-          query: {
-            environment,
-            kuery,
-            start,
-            end,
-            transactionType,
-            latencyAggregationType,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              latencyAggregationType,
+            },
           },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
           field,
@@ -185,27 +186,28 @@ export function TransactionsTable({
         transactionType &&
         latencyAggregationType
       ) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              latencyAggregationType,
-              transactionNames: JSON.stringify(
-                transactionGroups.map(({ name }) => name).sort()
-              ),
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                transactionType,
+                latencyAggregationType,
+                transactionNames: JSON.stringify(
+                  transactionGroups.map(({ name }) => name).sort()
+                ),
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call

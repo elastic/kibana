@@ -49,8 +49,11 @@ function getDetailsFromErrorResponse(
 const createAutoAbortedAPMClient = (
   signal: AbortSignal
 ): AutoAbortedAPMClient => {
-  return ((options: Parameters<AutoAbortedAPMClient>[0]) => {
-    return callApmApi({ ...options, signal });
+  return ((endpoint, options) => {
+    return callApmApi(endpoint, {
+      ...options,
+      signal,
+    } as any);
   }) as AutoAbortedAPMClient;
 };
 

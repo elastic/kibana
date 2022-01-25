@@ -8,10 +8,12 @@ import { callApmApi } from '../services/rest/createCallApmApi';
 
 export async function hasFleetApmIntegrations() {
   try {
-    const { hasData = false } = await callApmApi({
-      endpoint: 'GET /internal/apm/fleet/has_data',
-      signal: null,
-    });
+    const { hasData = false } = await callApmApi(
+      'GET /internal/apm/fleet/has_data',
+      {
+        signal: null,
+      }
+    );
     return hasData;
   } catch (e) {
     console.error('Something went wrong while fetching apm fleet data', e);

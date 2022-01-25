@@ -45,9 +45,7 @@ export function AnomalyDetectionJobsContextProvider({
       if (!isAuthorized) {
         return;
       }
-      return callApmApi({
-        endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
-      });
+      return callApmApi(`GET /internal/apm/settings/anomaly-detection/jobs`);
     },
     [isAuthorized],
     { showToastOnError: false }

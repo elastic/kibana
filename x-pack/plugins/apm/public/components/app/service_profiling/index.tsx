@@ -37,18 +37,20 @@ export function ServiceProfiling() {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/services/{serviceName}/profiling/timeline',
-        params: {
-          path: { serviceName },
-          query: {
-            kuery,
-            start,
-            end,
-            environment,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/profiling/timeline',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              kuery,
+              start,
+              end,
+              environment,
+            },
           },
-        },
-      });
+        }
+      );
     },
     [kuery, start, end, serviceName, environment]
   );

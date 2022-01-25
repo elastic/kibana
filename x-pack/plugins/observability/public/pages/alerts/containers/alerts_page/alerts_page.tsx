@@ -140,9 +140,8 @@ function AlertsPage() {
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
   const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
-    return callObservabilityApi({
+    return callObservabilityApi('GET /api/observability/rules/alerts/dynamic_index_pattern', {
       signal,
-      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
       params: {
         query: {
           namespace: 'default',

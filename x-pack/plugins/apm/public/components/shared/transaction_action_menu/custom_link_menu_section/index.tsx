@@ -59,9 +59,8 @@ export function CustomLinkMenuSection({
 
   const { data, status, refetch } = useFetcher(
     (callApmApi) =>
-      callApmApi({
+      callApmApi('GET /internal/apm/settings/custom_links', {
         isCachable: false,
-        endpoint: 'GET /internal/apm/settings/custom_links',
         params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]

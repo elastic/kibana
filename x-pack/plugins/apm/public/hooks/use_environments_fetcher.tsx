@@ -37,8 +37,7 @@ export function useEnvironmentsFetcher({
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/environments',
+        return callApmApi('GET /internal/apm/environments', {
           params: {
             query: {
               start,

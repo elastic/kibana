@@ -63,8 +63,7 @@ function useServicesFetcher() {
   const { data = initialData, status: mainStatisticsStatus } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services',
+        return callApmApi('GET /internal/apm/services', {
           params: {
             query: {
               environment,
@@ -89,8 +88,7 @@ function useServicesFetcher() {
   const { data: comparisonData } = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/detailed_statistics',
+        return callApmApi('GET /internal/apm/services/detailed_statistics', {
           params: {
             query: {
               environment,

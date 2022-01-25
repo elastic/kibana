@@ -180,8 +180,7 @@ describe('ServiceIcons', () => {
 
   describe('details', () => {
     const callApmApi =
-      (apisMockData: Record<string, object>) =>
-      ({ endpoint }: { endpoint: string }) => {
+      (apisMockData: Record<string, object>) => (endpoint: string) => {
         return apisMockData[endpoint];
       };
     it('Shows loading spinner while fetching data', () => {

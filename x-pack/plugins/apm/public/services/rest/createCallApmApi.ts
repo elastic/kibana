@@ -6,14 +6,12 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
-import * as t from 'io-ts';
 import type {
   ClientRequestParamsOf,
   formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
   ServerRouteRepository,
-  ServerRoute,
 } from '@kbn/server-route-repository';
 // @ts-expect-error cannot find module or correspondent type declarations
 // The code and types are at separated folders on @kbn/server-route-repository
@@ -21,10 +19,9 @@ import type {
 // an error is expected here
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
-import { callApi } from './callApi';
+import { CallApi, callApi } from './callApi';
 import type {
   APMServerRouteRepository,
-  APMRouteHandlerResources,
   APIEndpoint,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
@@ -57,14 +54,7 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
 export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
   ClientRequestParamsOf<APMServerRouteRepository, TEndpoint>;
 
-export type AbstractAPMRepository = ServerRouteRepository<
-  APMRouteHandlerResources,
-  {},
-  Record<
-    string,
-    ServerRoute<string, t.Mixed | undefined, APMRouteHandlerResources, any, {}>
-  >
->;
+export type AbstractAPMRepository = ServerRouteRepository;
 
 export type AbstractAPMClient = RouteRepositoryClient<
   AbstractAPMRepository,
@@ -78,8 +68,7 @@ export let callApmApi: APMClient = () => {
 };
 
 export function createCallApmApi(core: CoreStart | CoreSetup) {
-  callApmApi = ((options) => {
-    const { endpoint, ...opts } = options;
+  callApmApi = ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
@@ -90,11 +79,11 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
     ) as ReturnType<typeof formatRequestType>;
 
     return callApi(core, {
-      ...opts,
+      ...options,
       method,
       pathname,
       body: params?.body,
       query: params?.query,
-    });
+    } as unknown as Parameters<CallApi>[1]);
   }) as APMClient;
 }

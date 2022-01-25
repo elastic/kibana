@@ -172,11 +172,12 @@ export function JobsList({
             }}
             onUpgradeClick={() => {
               if (setupState === AnomalyDetectionSetupState.UpgradeableJobs) {
-                return callApmApi({
-                  endpoint:
-                    'POST /internal/apm/settings/anomaly-detection/update_to_v3',
-                  signal: null,
-                }).then(() => {
+                return callApmApi(
+                  'POST /internal/apm/settings/anomaly-detection/update_to_v3',
+                  {
+                    signal: null,
+                  }
+                ).then(() => {
                   core.notifications.toasts.addSuccess({
                     title: i18n.translate(
                       'xpack.apm.jobsList.updateCompletedToastTitle',

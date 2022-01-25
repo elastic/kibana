@@ -32,8 +32,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /internal/apm/backends/charts/throughput',
+      return callApmApi('GET /internal/apm/backends/charts/throughput', {
         params: {
           query: {
             backendName,

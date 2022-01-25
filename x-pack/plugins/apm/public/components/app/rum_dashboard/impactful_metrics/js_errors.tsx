@@ -40,8 +40,7 @@ export function JSErrors() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/js-errors',
+        return callApmApi('GET /internal/apm/ux/js-errors', {
           params: {
             query: {
               start,

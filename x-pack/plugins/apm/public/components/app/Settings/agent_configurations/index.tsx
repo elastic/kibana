@@ -30,8 +30,7 @@ export function AgentConfigurations() {
     data = INITIAL_DATA,
     status,
   } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
+    (callApmApi) => callApmApi('GET /api/apm/settings/agent-configuration'),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );

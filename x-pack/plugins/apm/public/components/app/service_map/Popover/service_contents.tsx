@@ -67,13 +67,15 @@ export function ServiceContents({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
-          params: {
-            path: { serviceName },
-            query: { environment, start, end, offset },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/service-map/service/{serviceName}',
+          {
+            params: {
+              path: { serviceName },
+              query: { environment, start, end, offset },
+            },
+          }
+        );
       }
     },
     [environment, serviceName, start, end, offset]

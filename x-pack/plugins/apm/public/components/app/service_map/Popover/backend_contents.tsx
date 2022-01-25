@@ -54,8 +54,7 @@ export function BackendContents({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (backendName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/service-map/backend',
+        return callApmApi('GET /internal/apm/service-map/backend', {
           params: {
             query: {
               backendName,

@@ -27,8 +27,7 @@ export async function createJobs({
   toasts: NotificationsStart['toasts'];
 }) {
   try {
-    await callApmApi({
-      endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
+    await callApmApi('POST /internal/apm/settings/anomaly-detection/jobs', {
       signal: null,
       params: {
         body: { environments },

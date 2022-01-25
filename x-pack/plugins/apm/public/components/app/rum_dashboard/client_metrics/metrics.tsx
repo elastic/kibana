@@ -54,8 +54,7 @@ export function Metrics() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (uxQuery) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/client-metrics',
+        return callApmApi('GET /internal/apm/ux/client-metrics', {
           params: {
             query: {
               ...uxQuery,

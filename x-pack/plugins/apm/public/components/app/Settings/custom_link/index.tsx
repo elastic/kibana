@@ -37,9 +37,7 @@ export function CustomLinkOverview() {
   const { data, status, refetch } = useFetcher(
     async (callApmApi) => {
       if (hasValidLicense) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/settings/custom_links',
-        });
+        return callApmApi('GET /internal/apm/settings/custom_links');
       }
     },
     [hasValidLicense]
