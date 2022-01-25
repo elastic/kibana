@@ -129,7 +129,9 @@ interface BatchGetQueueEntry {
 interface BatchResolveQueueEntry {
   type: string;
   id: string;
-  resolve: <T = unknown>(value: ResolvedSimpleSavedObject<T>) => void;
+  resolve: <T extends SavedObjectAttributes = SavedObjectAttributes>(
+    value: ResolvedSimpleSavedObject<T>
+  ) => void;
   reject: (reason?: any) => void;
 }
 
@@ -504,7 +506,7 @@ export class SavedObjectsClient {
    * API is unique to the public client, which batches individual calls with `bulkResolve` under the hood. We don't throw an error in that
    * case for legacy compatibility reasons.
    */
-  public resolve = <T = unknown>(
+  public resolve = <T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string
   ): Promise<ResolvedSimpleSavedObject<T>> => {

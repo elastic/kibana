@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Serializable } from '@kbn/utility-types';
+
 /**
  * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
  *
@@ -24,7 +26,7 @@ export type SavedObjectAttributeSingle =
  *
  * @public
  */
-export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
+export type SavedObjectAttribute = Serializable;
 
 /**
  * The data for a Saved Object is stored as an object in the `attributes`
@@ -33,7 +35,7 @@ export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttri
  * @public
  */
 export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute;
+  [key: string]: Serializable;
 }
 
 /**

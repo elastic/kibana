@@ -8,7 +8,7 @@
 
 import uuidv1 from 'uuid/v1';
 import uuidv5 from 'uuid/v5';
-import { SavedObjectsFindOptions } from '../../types';
+import { SavedObjectsFindOptions, SavedObjectAttributes } from '../../types';
 import { SavedObjectsFindResponse } from '..';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
@@ -53,7 +53,7 @@ export class SavedObjectsUtils {
   /**
    * Creates an empty response for a find operation. This is only intended to be used by saved objects client wrappers.
    */
-  public static createEmptyFindResponse = <T, A>({
+  public static createEmptyFindResponse = <T extends SavedObjectAttributes, A>({
     page = FIND_DEFAULT_PAGE,
     perPage = FIND_DEFAULT_PER_PAGE,
   }: SavedObjectsFindOptions): SavedObjectsFindResponse<T, A> => ({

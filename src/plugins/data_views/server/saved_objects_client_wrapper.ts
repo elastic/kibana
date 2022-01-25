@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObject, SavedObjectAttributes } from 'src/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
@@ -15,32 +15,43 @@ import {
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;
+
   constructor(savedObjectClient: SavedObjectsClientContract) {
     this.savedObjectClient = savedObjectClient;
   }
-  async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
+
+  async find<T extends SavedObjectAttributes = SavedObjectAttributes>(
+    options: SavedObjectsClientCommonFindArgs
+  ) {
     const result = await this.savedObjectClient.find<T>(options);
     return result.saved_objects;
   }
 
-  async get<T = unknown>(type: string, id: string) {
+  async get<T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) {
     const response = await this.savedObjectClient.resolve<T>(type, id);
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
     return response.saved_object;
   }
-  async update(
+
+  async update<T extends SavedObjectAttributes = SavedObjectAttributes>(
     type: string,
     id: string,
-    attributes: Record<string, any>,
+    attributes: Partial<T>,
     options: Record<string, any>
   ) {
-    return (await this.savedObjectClient.update(type, id, attributes, options)) as SavedObject;
+    return (await this.savedObjectClient.update(type, id, attributes, options)) as SavedObject<T>;
   }
-  async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
+
+  async create<T extends SavedObjectAttributes = SavedObjectAttributes>(
+    type: string,
+    attributes: T,
+    options: Record<string, any>
+  ) {
     return await this.savedObjectClient.create(type, attributes, options);
   }
+
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id);
   }

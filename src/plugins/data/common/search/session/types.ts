@@ -10,7 +10,10 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { SearchSessionStatus } from './status';
 
 export const SEARCH_SESSION_TYPE = 'search-session';
-export interface SearchSessionSavedObjectAttributes {
+
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SearchSessionSavedObjectAttributes = {
   sessionId: string;
   /**
    * User-facing session name to be displayed in session management
@@ -76,9 +79,11 @@ export interface SearchSessionSavedObjectAttributes {
    * Version information to display warnings when trying to restore a session from a different version
    */
   version: string;
-}
+};
 
-export interface SearchSessionRequestInfo {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SearchSessionRequestInfo = {
   /**
    * ID of the async search request
    */
@@ -95,7 +100,7 @@ export interface SearchSessionRequestInfo {
    * An optional error. Set if status is set to error.
    */
   error?: string;
-}
+};
 
 export interface SearchSessionFindOptions {
   page?: number;

@@ -22,7 +22,9 @@
  *
  * @internal
  */
-export interface LegacyUrlAlias {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type LegacyUrlAlias = {
   /**
    * The original ID of the object, before it was converted.
    */
@@ -52,4 +54,4 @@ export interface LegacyUrlAlias {
    * `SavedObjectsClient.collectMultiNamespaceReferences()`.
    */
   disabled?: boolean;
-}
+};

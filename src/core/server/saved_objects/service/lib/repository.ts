@@ -2141,7 +2141,7 @@ export class SavedObjectsRepository {
    * }
    * ```
    */
-  createPointInTimeFinder<T = unknown, A = unknown>(
+  createPointInTimeFinder<T extends SavedObjectAttributes = SavedObjectAttributes, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): ISavedObjectsPointInTimeFinder<T, A> {
