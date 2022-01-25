@@ -17,7 +17,7 @@ import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
-    | 'agent-configurations'
+    | 'agent-configuration'
     | 'agent-keys'
     | 'anomaly-detection'
     | 'apm-indices'
@@ -66,7 +66,7 @@ function getTabs({
 
   const tabs: Tab[] = [
     {
-      key: 'agent-configurations',
+      key: 'agent-configuration',
       label: i18n.translate('xpack.apm.settings.agentConfig', {
         defaultMessage: 'Agent Configuration',
       }),

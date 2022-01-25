@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110898
-/* eslint-disable @kbn/eslint/no_export_all */
+import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 
-export * from './constants';
-export * from './types';
+export interface CaseViewMetricsProps {
+  metrics: CaseMetrics | null;
+  features: CaseMetricsFeature[];
+  isLoading: boolean;
+}
