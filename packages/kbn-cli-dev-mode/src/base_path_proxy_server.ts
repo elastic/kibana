@@ -8,6 +8,8 @@
 
 import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
+// import Http2 from 'http2';
+// import Wreck from '@hapi/wreck';
 import apm from 'elastic-apm-node';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
@@ -82,6 +84,14 @@ export class BasePathProxyServer {
       });
     }
 
+    // if (this.httpConfig.protocol === 'http2') {
+    //   // @ts-expect-error
+    //   serverOptions.listener = serverOptions.tls
+    //     ? Http2.createSecureServer(serverOptions.tls as TlsOptions)
+    //     : // http2 can be used between Kibana and a reverse proxy, setting TLS up is not required
+    //       Http2.createServer();
+    // }
+
     this.setupRoutes(options);
 
     await this.server.start();
@@ -125,12 +135,22 @@ export class BasePathProxyServer {
       path: '/',
     });
 
+    // const httpClient = {
+    //   request(method, uri, options, callback) {
+    //     maxSockets = options.agent.maxSockets;
+
+    //     return { statusCode: 200 };
+    //   },
+    // };
+    // TODO try to use https://github.com/szmarczak/http2-wrapper to proxy http2 requests
     this.server.route({
       handler: {
         proxy: {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
+          // // @ts-expect-error not defined
+          // httpClient,
           mapUri: async (request: Request) => {
             return {
               // Passing in this header to merge it is a workaround until this is fixed:
