@@ -23,7 +23,7 @@ export const getFailureToast = (
     title: toMountPoint(
       <FormattedMessage
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
-        defaultMessage="Could not create {reportType} report for '{reportObjectTitle}'."
+        defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
         values={{ reportType: job.jobtype, reportObjectTitle: job.title }}
       />,
       { theme$: theme.theme$ }
@@ -47,13 +47,13 @@ export const getFailureToast = (
         <p>
           <FormattedMessage
             id="xpack.reporting.publicNotifier.error.checkManagement"
-            defaultMessage="More information is available at {path}."
+            defaultMessage="Go to {path} for details."
             values={{
               path: (
                 <a href={getManagmenetLink()}>
                   <FormattedMessage
                     id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
-                    defaultMessage="Management &gt; Kibana &gt; Reporting"
+                    defaultMessage="Stack Management &gt; Kibana &gt; Reporting"
                   />
                 </a>
               ),

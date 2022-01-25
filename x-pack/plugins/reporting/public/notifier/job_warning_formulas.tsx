@@ -22,8 +22,8 @@ export const getWarningFormulasToast = (
   title: toMountPoint(
     <FormattedMessage
       id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
-      defaultMessage="{reportObjectType} report '{reportObjectTitle}' may contain formulas"
-      values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
+      defaultMessage="{reportType} may contain formulas"
+      values={{ reportType: job.jobtype }}
     />,
     { theme$: theme.theme$ }
   ),
@@ -32,7 +32,8 @@ export const getWarningFormulasToast = (
       <p>
         <FormattedMessage
           id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
-          defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
+          defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
+          values={{ reportObjectTitle: job.title }}
         />
       </p>
       <p>
