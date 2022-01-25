@@ -10,12 +10,101 @@
 
 Review important information about the {kib} 8.0.0 releases.
 
+* <<release-notes-8.0.0-rc2>>
 * <<release-notes-8.0.0-rc1>>
 * <<release-notes-8.0.0-beta1>>
 * <<release-notes-8.0.0-alpha2>>
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.0.0-rc2]]
+== {kib} 8.0.0-rc2
+
+coming::[8.0.0-rc2]
+
+For information about the {kib} 8.0.0-rc2 release, review the following information.
+
+[float]
+[[breaking-changes-8.0.0-rc2]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+[discrete]
+[[breaking-122722]]
+.Removes the ability to use `elasticsearch.username: elastic` in production
+[%collapsible]
+====
+*Details* +
+In production, you are no longer able to use the `elastic` superuser to authenticate to {es}. For more information, refer to {kibana-pull}122722[#122722].
+
+*Impact* +
+When you configure `elasticsearch.username: elastic`, {kib} fails.
+====
+  
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+<<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+ 
+[float]
+[[features-8.0.0-rc2]]
+=== Features
+{kib} 8.0.0-rc2 adds the following new and notable features.
+
+Dashboard::
+Dashboard Integration {kibana-pull}115991[#115991]
+Elastic Security::
+For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Monitoring::
+Enterprise Search Stack Monitoring {kibana-pull}114303[#114303]
+Observability::
+* Adds Agent Keys in APM settings - Create agent keys {kibana-pull}120373[#120373]
+* Adds Agent Keys in APM settings - Agent key table {kibana-pull}119543[#119543]
+* Allows users to set Download Speed, Upload Speed, and Latency for their synthetic monitors in Uptime {kibana-pull}118594[#118594]
+Platform::
+Changes saved objects management inspect view to a read-only JSON view of the whole saved object {kibana-pull}112034[#112034]
+
+[[enhancements-and-bug-fixes-v8.0.0-rc2]]
+=== Enhancements and bug fixes
+
+For detailed information about the 8.0.0-rc2 release, review the enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.0.0-rc2]]
+==== Enhancements
+Elastic Security::
+For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Security::
+Adds session cleanup audit logging {kibana-pull}122419[#122419]
+Observability::
+Make a monitor's steps details page work on mobile resolutions in Uptime {kibana-pull}122171[#122171]
+
+[float]
+[[fixes-v8.0.0-rc2]]
+==== Bug Fixes
+Alerting::
+Fixes PagerDuty timestamp validation {kibana-pull}122321[#122321]
+Dashboard::
+* Creates Explicit Diffing System {kibana-pull}121241[#121241]
+* Fixes blank panel save and display issue {kibana-pull}120815[#120815]
+* Fixes full screen error when pressing back arrow on browser {kibana-pull}118113[#118113]
+Elastic Security::
+For the Elastic Security 8.0.0-rc2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Maps::
+* Fixes Point to point and Tracks layers label properties not showing in the legend {kibana-pull}122993[#122993]
+* Fixes Color ramp UI for percent of a top term in join layer is broken {kibana-pull}122718[#122718]
+Observability::
+* Updates index pattern permission error in APM {kibana-pull}122680[#122680]
+* Honor time unit for Inventory Threshold in Metrics {kibana-pull}122294[#122294]
+* Adds locator to aid other plugins in linking properly to Uptime {kibana-pull}123004[#123004]
+* Fixes a bug in which headers would be incorrectly centered on desktop in Uptime {kibana-pull}122643[#122643]
+
 [[release-notes-8.0.0-rc1]]
 == {kib} 8.0.0-rc1
 
@@ -27,8 +116,6 @@ Review the {kib} 8.0.0-rc1 changes, then use the <<upgrade-assistant,Upgrade Ass
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking changes, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-118854]]
@@ -109,8 +196,6 @@ For more information, refer to {kibana-pull}116821[#116821] and {kibana-pull}115
 *Impact* +
 When you upgrade to 8.0.0, you are unable to use references to the deprecated fields.
 ====
-
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
