@@ -871,7 +871,7 @@
     "terser-webpack-plugin": "^4.2.3",
     "tough-cookie": "^4.0.0",
     "ts-loader": "^7.0.5",
-    "ts-morph": "^11.0.0",
+    "ts-morph": "^13.0.2",
     "tsd": "^0.13.1",
     "typescript": "4.5.3",
     "unlazy-loader": "^0.1.3",
