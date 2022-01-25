@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from '../../../../../src/core/server';
-
 import {
   AgentService,
   FleetStartContract,
@@ -15,30 +13,26 @@ import {
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 
-export type CspAppContextServiceStartContract = Partial<
+export type CspAppServicesStartContract = Partial<
   Pick<
     FleetStartContract,
     'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
   >
-> & {
-  logger: Logger;
-  registerIngestCallback?: FleetStartContract['registerExternalCallback'];
-};
+>;
 
-export class CspAppContextService {
+export class CspAppService {
   private agentService: AgentService | undefined;
   private packageService: PackageService | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
 
-  public start(dependencies: CspAppContextServiceStartContract) {
+  public start(dependencies: CspAppServicesStartContract) {
     this.agentService = dependencies.agentService;
     this.packageService = dependencies.packageService;
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 
   public getAgentService(): AgentService | undefined {
@@ -56,13 +50,4 @@ export class CspAppContextService {
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.agentPolicyService;
   }
-}
-
-/**
- * The context for Csp app.
- */
-export interface CspAppContext {
-  logger: Logger;
-  getStartServices: CoreSetup['getStartServices'];
-  service: CspAppContextService;
 }

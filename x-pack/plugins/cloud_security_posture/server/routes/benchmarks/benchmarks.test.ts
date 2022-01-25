@@ -24,7 +24,8 @@ import {
 import { createPackagePolicyMock } from '../../../../fleet/common/mocks';
 import { AgentPolicy } from '../../../../fleet/common';
 
-import { CspAppContext, CspAppContextService } from '../../lib/csp_app_context_services';
+import { CspAppService } from '../../lib/csp_app_services';
+import { CspAppContext } from '../../plugin';
 import { CspServerPluginStart, CspServerPluginStartDeps } from '../../types';
 
 function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
@@ -57,7 +58,7 @@ describe('benchmarks API', () => {
   });
 
   it('validate the API route path', async () => {
-    const cspAppContextService = new CspAppContextService();
+    const cspAppContextService = new CspAppService();
     const router = httpServiceMock.createRouter();
     // const initializerContext = coreMock.createPluginInitializerContext({});
     const coreSetup = coreMock.createSetup() as CoreSetup<
@@ -215,7 +216,11 @@ describe('test benchmarks utils', () => {
           updated_by: 'kibana',
           created_at: '2020-06-25T16:03:38.159292',
           created_by: 'kibana',
-          package: [{ id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1', name: 'endpoint-1' }],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
         },
         agent_policy: { id: 'some-uuid1', name: 'Test Policy', agents: 3 },
       });

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'kibana/server';
-import { CspAppContextService, CspAppContext } from './lib/csp_app_context_services';
+import { CspAppService } from './lib/csp_app_services';
 import type { CoreSetup, CoreStart, Plugin, Logger } from '../../../../src/core/server';
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type {
@@ -19,16 +18,11 @@ import type {
 import { defineRoutes } from './routes';
 import { initUiSettings } from './uiSettings';
 
-export const ConfigSchema = schema.object({
-  actionEnabled: schema.boolean({ defaultValue: false }),
-  savedQueries: schema.boolean({ defaultValue: true }),
-  packs: schema.boolean({ defaultValue: true }),
-});
-
-export type ConfigType = TypeOf<typeof ConfigSchema>;
-
-export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> =>
-  context.config.get<ConfigType>();
+export interface CspAppContext {
+  logger: Logger;
+  getStartServices: CoreSetup['getStartServices'];
+  service: CspAppService;
+}
 
 export class CspPlugin
   implements
@@ -43,7 +37,7 @@ export class CspPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
-  private readonly CspAppService = new CspAppContextService();
+  private readonly CspAppService = new CspAppService();
 
   public setup(
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
@@ -63,6 +57,7 @@ export class CspPlugin
 
     // Register server side APIs
     defineRoutes(router, cspContext);
+
     initUiSettings(core.uiSettings);
 
     return {};
@@ -70,12 +65,8 @@ export class CspPlugin
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
     this.logger.debug('csp: Started');
-    const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     this.CspAppService.start({
-      // fleet: plugins.fleet,
       ...plugins.fleet,
-      logger: this.logger,
-      registerIngestCallback,
     });
 
     createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser, this.logger).catch(
