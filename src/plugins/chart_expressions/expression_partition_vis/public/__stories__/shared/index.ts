@@ -7,5 +7,11 @@
  */
 
 export { data } from './data';
-export { config } from './config';
-export { argTypes, pieDonutArgTypes } from './arg_types';
+export { config, pieConfig, treemapMosaicConfig, waffleConfig } from './config';
+export {
+  argTypes,
+  pieDonutArgTypes,
+  treemapArgTypes,
+  mosaicArgTypes,
+  waffleArgTypes,
+} from './arg_types';

@@ -12,7 +12,7 @@ import { Render } from '../../../../presentation_util/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
 import { ChartTypes, RenderValue } from '../../common/types';
 import { palettes, theme, getStartDeps } from '../__mocks__';
-import { pieDonutArgTypes, pieConfig, data } from './shared';
+import { waffleArgTypes, waffleConfig, data } from './shared';
 
 const containerSize = {
   width: '700px',
@@ -40,12 +40,12 @@ const PartitionVis: ComponentStory<FC<Props>> = ({
 );
 
 export default {
-  title: 'renderers/pieVis',
+  title: 'renderers/waffleVis',
   component: PartitionVis,
-  argTypes: pieDonutArgTypes,
+  argTypes: waffleArgTypes,
 };
 
 const Default = PartitionVis.bind({});
-Default.args = { ...pieConfig, visType: ChartTypes.PIE, syncColors: false };
+Default.args = { ...waffleConfig, visType: ChartTypes.WAFFLE, syncColors: false };
 
 export { Default };

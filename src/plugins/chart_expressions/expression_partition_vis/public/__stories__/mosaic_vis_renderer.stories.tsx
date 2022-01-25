@@ -12,7 +12,7 @@ import { Render } from '../../../../presentation_util/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
 import { ChartTypes, RenderValue } from '../../common/types';
 import { palettes, theme, getStartDeps } from '../__mocks__';
-import { pieDonutArgTypes, pieConfig, data } from './shared';
+import { mosaicArgTypes, treemapMosaicConfig, data } from './shared';
 
 const containerSize = {
   width: '700px',
@@ -40,12 +40,12 @@ const PartitionVis: ComponentStory<FC<Props>> = ({
 );
 
 export default {
-  title: 'renderers/pieVis',
+  title: 'renderers/mosaicVis',
   component: PartitionVis,
-  argTypes: pieDonutArgTypes,
+  argTypes: mosaicArgTypes,
 };
 
 const Default = PartitionVis.bind({});
-Default.args = { ...pieConfig, visType: ChartTypes.PIE, syncColors: false };
+Default.args = { ...treemapMosaicConfig, visType: ChartTypes.MOSAIC, syncColors: false };
 
 export { Default };

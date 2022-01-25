@@ -37,25 +37,11 @@ export const argTypes: ArgTypes = {
     options: Object.values(Position),
     control: { type: 'select' },
   },
-  nestedLegend: {
-    name: `${visConfigName}.nestedLegend`,
-    description: 'Enable nested legend',
-    type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
-    control: { type: 'boolean' },
-  },
   truncateLegend: {
     name: `${visConfigName}.truncateLegend`,
     description: 'Truncate too long legend',
     type: { name: 'boolean', required: false },
     table: { type: { summary: 'boolean' }, defaultValue: { summary: true } },
-    control: { type: 'boolean' },
-  },
-  distinctColors: {
-    name: `${visConfigName}.distinctColors`,
-    description: 'Enable distinct colors',
-    type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
     control: { type: 'boolean' },
   },
   maxLegendLines: {
@@ -136,6 +122,13 @@ export const pieDonutArgTypes: ArgTypes = {
     options: [EmptySizeRatios.SMALL, EmptySizeRatios.MEDIUM, EmptySizeRatios.LARGE],
     control: { type: 'select' },
   },
+  distinctColors: {
+    name: `${visConfigName}.distinctColors`,
+    description: 'Enable distinct colors',
+    type: { name: 'boolean', required: false },
+    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    control: { type: 'boolean' },
+  },
   respectSourceOrder: {
     name: `${visConfigName}.respectSourceOrder`,
     description: 'Save default order of the incomming data',
@@ -148,6 +141,76 @@ export const pieDonutArgTypes: ArgTypes = {
     description: 'Start placement of slices from the second largest slice',
     type: { name: 'boolean', required: false },
     table: { type: { summary: 'boolean' }, defaultValue: { summary: true } },
+    control: { type: 'boolean' },
+  },
+  nestedLegend: {
+    name: `${visConfigName}.nestedLegend`,
+    description: 'Enable nested legend',
+    type: { name: 'boolean', required: false },
+    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    control: { type: 'boolean' },
+  },
+};
+
+export const treemapArgTypes: ArgTypes = {
+  visType: {
+    name: `visType`,
+    description: 'Type of the chart',
+    type: { name: 'string', required: false },
+    table: {
+      type: { summary: 'string' },
+      defaultValue: { summary: `${ChartTypes.TREEMAP}` },
+    },
+    control: { type: 'text', disable: true },
+  },
+  ...argTypes,
+  nestedLegend: {
+    name: `${visConfigName}.nestedLegend`,
+    description: 'Enable nested legend',
+    type: { name: 'boolean', required: false },
+    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    control: { type: 'boolean' },
+  },
+};
+
+export const mosaicArgTypes: ArgTypes = {
+  visType: {
+    name: `visType`,
+    description: 'Type of the chart',
+    type: { name: 'string', required: false },
+    table: {
+      type: { summary: 'string' },
+      defaultValue: { summary: `${ChartTypes.MOSAIC}` },
+    },
+    control: { type: 'text', disable: true },
+  },
+  ...argTypes,
+  nestedLegend: {
+    name: `${visConfigName}.nestedLegend`,
+    description: 'Enable nested legend',
+    type: { name: 'boolean', required: false },
+    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    control: { type: 'boolean' },
+  },
+};
+
+export const waffleArgTypes: ArgTypes = {
+  visType: {
+    name: `visType`,
+    description: 'Type of the chart',
+    type: { name: 'string', required: false },
+    table: {
+      type: { summary: 'string' },
+      defaultValue: { summary: `${ChartTypes.WAFFLE}` },
+    },
+    control: { type: 'text', disable: true },
+  },
+  ...argTypes,
+  showValuesInLegend: {
+    name: `${visConfigName}.nestedLegend`,
+    description: 'Enable displaying values in the legend',
+    type: { name: 'boolean', required: false },
+    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
     control: { type: 'boolean' },
   },
 };

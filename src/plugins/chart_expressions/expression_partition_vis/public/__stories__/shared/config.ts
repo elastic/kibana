@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 import { Position } from '@elastic/charts';
-import { LabelPositions, LegendDisplay, RenderValue, ValueFormats } from '../../../common/types';
+import {
+  LabelPositions,
+  LegendDisplay,
+  RenderValue,
+  PartitionVisParams,
+  ValueFormats,
+} from '../../../common/types';
 
 export const config: RenderValue['visConfig'] = {
   addTooltip: true,
   legendDisplay: LegendDisplay.HIDE,
-  nestedLegend: false,
   truncateLegend: true,
-  distinctColors: false,
   respectSourceOrder: true,
-  isDonut: false,
   legendPosition: Position.Bottom,
   maxLegendLines: 1,
-  emptySizeRatio: 0.3,
   palette: {
     type: 'palette',
     name: 'system_palette',
@@ -32,13 +34,12 @@ export const config: RenderValue['visConfig'] = {
     valuesFormat: ValueFormats.PERCENT,
     lastLevel: false,
   },
-  startFromSecondLargestSlice: true,
   dimensions: {
     metric: {
       type: 'vis_dimension',
       accessor: {
-        id: 'price',
-        name: 'price',
+        id: 'percent_uptime',
+        name: 'percent_uptime',
         meta: {
           type: 'number',
         },
@@ -48,14 +49,25 @@ export const config: RenderValue['visConfig'] = {
         params: {},
       },
     },
+  },
+};
+
+export const pieConfig: PartitionVisParams = {
+  ...config,
+  isDonut: false,
+  emptySizeRatio: 0,
+  distinctColors: false,
+  nestedLegend: false,
+  dimensions: {
+    ...config.dimensions,
     buckets: [
       {
         type: 'vis_dimension',
         accessor: {
-          id: 'cost',
-          name: 'cost',
+          id: 'project',
+          name: 'project',
           meta: {
-            type: 'number',
+            type: 'string',
           },
         },
         format: {
@@ -65,4 +77,53 @@ export const config: RenderValue['visConfig'] = {
       },
     ],
   },
+  startFromSecondLargestSlice: true,
+};
+
+export const treemapMosaicConfig: PartitionVisParams = {
+  ...config,
+  nestedLegend: false,
+  dimensions: {
+    ...config.dimensions,
+    buckets: [
+      {
+        type: 'vis_dimension',
+        accessor: {
+          id: 'project',
+          name: 'project',
+          meta: {
+            type: 'string',
+          },
+        },
+        format: {
+          id: 'string',
+          params: {},
+        },
+      },
+    ],
+  },
+};
+
+export const waffleConfig: PartitionVisParams = {
+  ...config,
+  dimensions: {
+    ...config.dimensions,
+    buckets: [
+      {
+        type: 'vis_dimension',
+        accessor: {
+          id: 'project',
+          name: 'project',
+          meta: {
+            type: 'string',
+          },
+        },
+        format: {
+          id: 'string',
+          params: {},
+        },
+      },
+    ],
+  },
+  showValuesInLegend: false,
 };
