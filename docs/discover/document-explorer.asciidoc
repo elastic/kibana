@@ -79,7 +79,7 @@ image::images/document-explorer-expand.png[Multi field sort in Document Explorer
 
 . Scan through the fields and their values. If you find a field of interest,
 click the actions icon for filters and other controls.
-. To view documents that occurred before or after the event you are looking at, click <<discover-view-surrounding-documents,Surrounding documents>>.
+. To view documents that occurred before or after the event you are looking at, click <<discover-view-surrounding-documents,**Surrounding documents**>>.
 . For direct access to a particular document, click <<discover-view-single-document,**Single document**>>.
 
 [float]
