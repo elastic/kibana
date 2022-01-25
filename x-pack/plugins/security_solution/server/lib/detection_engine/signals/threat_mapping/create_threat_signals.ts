@@ -86,6 +86,7 @@ export const createThreatSignals = async ({
     logger,
     buildRuleMessage,
     perPage,
+    threatIndicatorPath,
   });
 
   const threatEnrichment = buildThreatEnrichment({
@@ -169,6 +170,7 @@ export const createThreatSignals = async ({
       buildRuleMessage,
       logger,
       perPage,
+      threatIndicatorPath,
     });
   }
 

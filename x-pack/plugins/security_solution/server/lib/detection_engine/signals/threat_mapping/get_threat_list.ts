@@ -34,6 +34,7 @@ export const getThreatList = async ({
   listClient,
   buildRuleMessage,
   logger,
+  threatIndicatorPath,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -60,7 +61,11 @@ export const getThreatList = async ({
       query: queryFilter,
       fields: [
         {
-          field: '*',
+          field: `${threatIndicatorPath}.*`,
+          include_unmapped: true,
+        },
+        {
+          field: 'threat.feed.*',
           include_unmapped: true,
         },
       ],

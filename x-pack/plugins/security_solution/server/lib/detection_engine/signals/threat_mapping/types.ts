@@ -13,7 +13,7 @@ import type {
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
   ItemsPerSearch,
-  ThreatIndicatorPathOrUndefined,
+  ThreatIndicatorPath,
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -59,7 +59,7 @@ export interface CreateThreatSignalsOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
@@ -144,6 +144,7 @@ export interface GetThreatListOptions {
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
   threatFilters: unknown[];
+  threatIndicatorPath: ThreatIndicatorPath;
 }
 
 export interface ThreatListCountOptions {
@@ -199,7 +200,7 @@ export interface BuildThreatEnrichmentOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
 }
