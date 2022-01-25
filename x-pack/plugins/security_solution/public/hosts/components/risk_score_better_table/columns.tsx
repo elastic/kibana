@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import {
   DragEffects,
   DraggableWrapper,
@@ -16,7 +16,6 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import { DefaultDraggable } from '../../../common/components/draggables';
 import { RiskScoreBetterColumns } from './';
 
 import * as i18n from './translations';
@@ -62,12 +61,16 @@ export const getRiskScoreBetterColumns = (): RiskScoreBetterColumns => [
   {
     field: 'node.risk_score',
     name: i18n.HOST_RISK_SCORE,
-    truncateText: false,
+    truncateText: true,
     mobileOptions: { show: true },
     sortable: true,
     render: (riskScore) => {
       if (riskScore != null) {
-        return riskScore;
+        return (
+          <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
+            {riskScore.toFixed(2)}
+          </span>
+        );
       }
       return getEmptyTagValue();
     },
@@ -86,7 +89,16 @@ export const getRiskScoreBetterColumns = (): RiskScoreBetterColumns => [
     sortable: false,
     render: (risk) => {
       if (risk != null) {
-        return <HostRiskScore severity={risk} />;
+        return (
+          <HostRiskScore
+            toolTipContent={
+              <EuiLink onClick={() => {}}>
+                <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
+              </EuiLink>
+            }
+            severity={risk}
+          />
+        );
       }
       return getEmptyTagValue();
     },

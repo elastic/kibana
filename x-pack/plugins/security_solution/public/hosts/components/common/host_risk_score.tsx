@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { EuiHealth, transparentize } from '@elastic/eui';
+import { EuiHealth, transparentize, EuiPopover } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -39,15 +39,47 @@ const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundC
 export const HostRiskScore: React.FC<{
   severity: HostRiskSeverity;
   hideBackgroundColor?: boolean;
-}> = ({ severity, hideBackgroundColor = false }) => (
-  <HostRiskBadge
-    color={euiLightVars.euiColorDanger}
-    $severity={severity}
-    $hideBackgroundColor={hideBackgroundColor}
-    data-test-subj="host-risk-score"
-  >
-    <EuiHealth className="eui-alignMiddle" color={HOST_RISK_SEVERITY_COLOUR[severity]}>
-      {severity}
-    </EuiHealth>
-  </HostRiskBadge>
-);
+  toolTipContent?: React.ReactNode;
+}> = ({ severity, hideBackgroundColor = false, toolTipContent }) => {
+  const badge = (
+    <HostRiskBadge
+      color={euiLightVars.euiColorDanger}
+      $severity={severity}
+      $hideBackgroundColor={hideBackgroundColor}
+      data-test-subj="host-risk-score"
+    >
+      <EuiHealth className="eui-alignMiddle" color={HOST_RISK_SEVERITY_COLOUR[severity]}>
+        {severity}
+      </EuiHealth>
+    </HostRiskBadge>
+  );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  if (toolTipContent != null) {
+    return (
+      <EuiPopover
+        anchorPosition="downCenter"
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        onBlur={() => setIsPopoverOpen(false)}
+        onFocus={() => setIsPopoverOpen(true)}
+        onMouseOut={() => setIsPopoverOpen(false)}
+        onMouseOver={() => setIsPopoverOpen(true)}
+        button={
+          <button
+            data-test-subj="host-risk-score-button"
+            onBlur={() => setIsPopoverOpen(false)}
+            onFocus={() => setIsPopoverOpen(true)}
+            onMouseOut={() => setIsPopoverOpen(false)}
+            onMouseOver={() => setIsPopoverOpen(true)}
+            type={'button'}
+          >
+            {badge}
+          </button>
+        }
+      >
+        {toolTipContent}
+      </EuiPopover>
+    );
+  }
+  return badge;
+};

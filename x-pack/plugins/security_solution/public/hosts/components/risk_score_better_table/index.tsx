@@ -138,9 +138,6 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   const risk = (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <SeverityFilterGroup type={type} loading={loading} severityCount={severityCount} />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <SeverityBadges severityCount={severityCount} />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -154,6 +151,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
       columns={columns}
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
+      headerFilters={<SeverityFilterGroup severityCount={severityCount} type={type} />}
       headerSupplement={risk}
       headerTitle={HOSTS_BY_RISK}
       headerUnit={i18n.UNIT(totalCount)}

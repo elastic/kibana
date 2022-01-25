@@ -31,3 +31,9 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
 export const HOSTS_BY_RISK = i18n.translate('xpack.securitySolution.hostsRiskTable.hostsTitle', {
   defaultMessage: 'Hosts by risk',
 });
+
+export const VIEW_HOSTS_BY_SEVERITY = (severity: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.utilityBar.selectedAlertsTitle', {
+    values: { severity },
+    defaultMessage: 'View {severity} risk hosts',
+  });

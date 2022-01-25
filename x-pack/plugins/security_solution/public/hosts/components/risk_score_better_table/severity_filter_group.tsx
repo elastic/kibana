@@ -10,9 +10,7 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
-  EuiLoadingChart,
   EuiPopover,
-  EuiSpacer,
   FilterChecked,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -29,10 +27,9 @@ interface SeverityItems {
   checked?: FilterChecked;
 }
 export const SeverityFilterGroup: React.FC<{
-  loading: boolean;
   severityCount: SeverityCount;
   type: hostsModel.HostsType;
-}> = ({ loading, severityCount, type }) => {
+}> = ({ severityCount, type }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const dispatch = useDispatch();
@@ -160,25 +157,15 @@ export const SeverityFilterGroup: React.FC<{
         panelPaddingSize="none"
       >
         <div className="euiFilterSelect__items">
-          {!loading &&
-            items.map((item, index) => (
-              <EuiFilterSelectItem
-                checked={item.checked}
-                key={index}
-                onClick={() => updateItem(index)}
-              >
-                <HostRiskScore severity={item.risk} />
-              </EuiFilterSelectItem>
-            ))}
-          {loading && (
-            <div className="euiFilterSelect__note">
-              <div className="euiFilterSelect__noteContent">
-                <EuiLoadingChart size="m" />
-                <EuiSpacer size="xs" />
-                <p>{`Loading filters`}</p>
-              </div>
-            </div>
-          )}
+          {items.map((item, index) => (
+            <EuiFilterSelectItem
+              checked={item.checked}
+              key={index}
+              onClick={() => updateItem(index)}
+            >
+              <HostRiskScore severity={item.risk} />
+            </EuiFilterSelectItem>
+          ))}
         </div>
       </EuiPopover>
     </EuiFilterGroup>

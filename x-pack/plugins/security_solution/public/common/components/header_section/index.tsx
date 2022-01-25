@@ -39,6 +39,7 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  headerFilters?: string | React.ReactNode;
   height?: number;
   id?: string;
   isInspectDisabled?: boolean;
@@ -56,6 +57,7 @@ export interface HeaderSectionProps extends HeaderProps {
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  headerFilters,
   height,
   id,
   isInspectDisabled,
@@ -105,6 +107,8 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               />
             </EuiFlexItem>
           )}
+
+          {headerFilters && <EuiFlexItem grow={false}>{headerFilters}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
 

@@ -104,6 +104,7 @@ export interface BasicTableProps<T> {
   columns: T;
   dataTestSubj?: string;
   headerCount: number;
+  headerFilters?: string | React.ReactNode;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
@@ -144,6 +145,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   columns,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   headerCount,
+  headerFilters,
   headerSupplement,
   headerTitle,
   headerTooltip,
@@ -261,6 +263,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          headerFilters={headerFilters}
           id={id}
           split={split}
           stackHeader={stackHeader}
