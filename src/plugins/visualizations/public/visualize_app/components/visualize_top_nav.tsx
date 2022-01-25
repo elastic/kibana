@@ -64,7 +64,8 @@ const TopNav = ({
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [editInLensOptions, setEditInLensOptions] = useState<NavigateToLensOptions | null>();
-  // if the user has clicked the edit in lens button, we want to hide the badge
+  // If the user has clicked the edit in lens button, we want to hide the badge.
+  // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
     LOCAL_STORAGE_EDIT_IN_LENS_BADGE,
     false
@@ -261,7 +262,18 @@ const TopNav = ({
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       showSearchBar
       useDefaultBehaviors
-      badges={!hideTryInLensBadge ? [{ badgeText: 'Try it', color: 'accent' }] : []}
+      badges={
+        !hideTryInLensBadge
+          ? [
+              {
+                badgeText: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
+                  defaultMessage: 'Try it',
+                }),
+                color: 'accent',
+              },
+            ]
+          : []
+      }
       isBetaBadge={true}
     />
   ) : showFilterBar ? (

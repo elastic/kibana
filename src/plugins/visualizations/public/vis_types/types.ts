@@ -74,14 +74,14 @@ interface CustomEditorConfig {
   editor: string;
 }
 
-interface SplitFilters {
+interface SplitByFilters {
   color?: string;
   filter?: Query;
   id?: string;
   label?: string;
 }
 
-interface Metric {
+interface VisualizeEditorMetricContext {
   agg: string;
   fieldName: string;
   pipelineAggType?: string;
@@ -98,9 +98,9 @@ export interface VisualizeEditorLayersContext {
   termsParams?: Record<string, unknown>;
   splitField?: string;
   splitMode?: string;
-  splitFilters?: SplitFilters[];
+  splitFilters?: SplitByFilters[];
   palette?: PaletteOutput;
-  metrics: Metric[];
+  metrics: VisualizeEditorMetricContext[];
   timeInterval?: string;
   format?: string;
   label?: string;
@@ -163,6 +163,9 @@ export interface VisTypeDefinition<TVisParams> {
   readonly getSupportedTriggers?: (params?: VisParams) => string[];
   /**
    * If given, it will navigateToLens with the given viz params.
+   * Every visualization that wants to be edited also in Lens should have this function.
+   * It receives the current visualization params as a parameter and should return the correct config
+   * in order to be displayed in the Lens editor.
    */
   readonly navigateToLens?: (
     params?: VisParams
