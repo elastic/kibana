@@ -21,8 +21,13 @@ describe('interpreter/functions#mosaicVis', () => {
   const fn = functionWrapper(mosaicVisFunction());
   const context: Datatable = {
     type: 'datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    rows: [{ 'col-0-1': 0, 'col-0-2': 0, 'col-0-3': 0, 'col-0-4': 0 }],
+    columns: [
+      { id: 'col-0-1', name: 'Field 1', meta: { type: 'number' } },
+      { id: 'col-0-2', name: 'Field 2', meta: { type: 'number' } },
+      { id: 'col-0-3', name: 'Field 3', meta: { type: 'number' } },
+      { id: 'col-0-4', name: 'Field 4', meta: { type: 'number' } },
+    ],
   };
 
   const visConfig: MosaicVisConfig = {
@@ -54,6 +59,24 @@ describe('interpreter/functions#mosaicVis', () => {
         params: {},
       },
     },
+    buckets: [
+      {
+        type: 'vis_dimension',
+        accessor: 1,
+        format: {
+          id: 'number',
+          params: {},
+        },
+      },
+      {
+        type: 'vis_dimension',
+        accessor: 2,
+        format: {
+          id: 'number',
+          params: {},
+        },
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -63,6 +86,25 @@ describe('interpreter/functions#mosaicVis', () => {
   it('returns an object with the correct structure', async () => {
     const actual = await fn(context, visConfig);
     expect(actual).toMatchSnapshot();
+  });
+
+  it('throws error if provided more than 2 buckets', async () => {
+    expect(() =>
+      fn(context, {
+        ...visConfig,
+        buckets: [
+          ...(visConfig.buckets ?? []),
+          {
+            type: 'vis_dimension',
+            accessor: 3,
+            format: {
+              id: 'number',
+              params: {},
+            },
+          },
+        ],
+      })
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('logs correct datatable to inspector', async () => {

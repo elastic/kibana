@@ -9,12 +9,39 @@ Object {
         "dimensionName": "Slice size",
         "type": "number",
       },
-      "name": "Count",
+      "name": "Field 1",
+    },
+    Object {
+      "id": "col-0-2",
+      "meta": Object {
+        "dimensionName": "Slice",
+        "type": "number",
+      },
+      "name": "Field 2",
+    },
+    Object {
+      "id": "col-0-3",
+      "meta": Object {
+        "dimensionName": "Slice",
+        "type": "number",
+      },
+      "name": "Field 3",
+    },
+    Object {
+      "id": "col-0-4",
+      "meta": Object {
+        "dimensionName": undefined,
+        "type": "number",
+      },
+      "name": "Field 4",
     },
   ],
   "rows": Array [
     Object {
       "col-0-1": 0,
+      "col-0-2": 0,
+      "col-0-3": 0,
+      "col-0-4": 0,
     },
   ],
   "type": "datatable",
@@ -32,9 +59,43 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
-      "buckets": undefined,
+      "buckets": Array [
+        Object {
+          "accessor": 1,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        Object {
+          "accessor": 2,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+      ],
       "dimensions": Object {
-        "buckets": undefined,
+        "buckets": Array [
+          Object {
+            "accessor": 1,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+          Object {
+            "accessor": 2,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+        ],
         "metric": Object {
           "accessor": 0,
           "format": Object {
@@ -83,12 +144,36 @@ Object {
           "meta": Object {
             "type": "number",
           },
-          "name": "Count",
+          "name": "Field 1",
+        },
+        Object {
+          "id": "col-0-2",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 2",
+        },
+        Object {
+          "id": "col-0-3",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 3",
+        },
+        Object {
+          "id": "col-0-4",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 4",
         },
       ],
       "rows": Array [
         Object {
           "col-0-1": 0,
+          "col-0-2": 0,
+          "col-0-3": 0,
+          "col-0-4": 0,
         },
       ],
       "type": "datatable",
@@ -97,3 +182,5 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#mosaicVis throws error if provided more than 2 buckets 1`] = `"More than 2 buckets are not supported"`;

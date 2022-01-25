@@ -21,8 +21,13 @@ describe('interpreter/functions#waffleVis', () => {
   const fn = functionWrapper(waffleVisFunction());
   const context: Datatable = {
     type: 'datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    rows: [{ 'col-0-1': 0, 'col-0-2': 0, 'col-0-3': 0, 'col-0-4': 0 }],
+    columns: [
+      { id: 'col-0-1', name: 'Field 1', meta: { type: 'number' } },
+      { id: 'col-0-2', name: 'Field 2', meta: { type: 'number' } },
+      { id: 'col-0-3', name: 'Field 3', meta: { type: 'number' } },
+      { id: 'col-0-4', name: 'Field 4', meta: { type: 'number' } },
+    ],
   };
 
   const visConfig: WaffleVisConfig = {
@@ -49,6 +54,14 @@ describe('interpreter/functions#waffleVis', () => {
     metric: {
       type: 'vis_dimension',
       accessor: 0,
+      format: {
+        id: 'number',
+        params: {},
+      },
+    },
+    bucket: {
+      type: 'vis_dimension',
+      accessor: 1,
       format: {
         id: 'number',
         params: {},

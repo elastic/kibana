@@ -32,9 +32,59 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
-      "buckets": undefined,
+      "buckets": Array [
+        Object {
+          "accessor": 1,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        Object {
+          "accessor": 2,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        Object {
+          "accessor": 3,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+      ],
       "dimensions": Object {
-        "buckets": undefined,
+        "buckets": Array [
+          Object {
+            "accessor": 1,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+          Object {
+            "accessor": 2,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+          Object {
+            "accessor": 3,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+        ],
         "metric": Object {
           "accessor": 0,
           "format": Object {
@@ -114,9 +164,59 @@ Object {
     "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
-      "buckets": undefined,
+      "buckets": Array [
+        Object {
+          "accessor": 1,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        Object {
+          "accessor": 2,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        Object {
+          "accessor": 3,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+      ],
       "dimensions": Object {
-        "buckets": undefined,
+        "buckets": Array [
+          Object {
+            "accessor": 1,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+          Object {
+            "accessor": 2,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+          Object {
+            "accessor": 3,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+        ],
         "metric": Object {
           "accessor": 0,
           "format": Object {

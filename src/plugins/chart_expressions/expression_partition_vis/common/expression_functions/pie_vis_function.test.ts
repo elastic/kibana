@@ -58,6 +58,32 @@ describe('interpreter/functions#pieVis', () => {
         params: {},
       },
     },
+    buckets: [
+      {
+        type: 'vis_dimension',
+        accessor: 1,
+        format: {
+          id: 'number',
+          params: {},
+        },
+      },
+      {
+        type: 'vis_dimension',
+        accessor: 2,
+        format: {
+          id: 'number',
+          params: {},
+        },
+      },
+      {
+        type: 'vis_dimension',
+        accessor: 3,
+        format: {
+          id: 'number',
+          params: {},
+        },
+      },
+    ],
   };
 
   beforeEach(() => {
