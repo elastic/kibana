@@ -93,12 +93,12 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      this.log.info('Waiting 90s for cluster to stabilize...');
-      await new Promise((resolve) =>
-        setTimeout(() => {
-          resolve(void 0);
-        }, 90 * 1000)
-      );
+      // this.log.info('Waiting 90s for cluster to stabilize...');
+      // await new Promise((resolve) =>
+      //   setTimeout(() => {
+      //     resolve(void 0);
+      //   }, 90 * 1000)
+      // );
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
