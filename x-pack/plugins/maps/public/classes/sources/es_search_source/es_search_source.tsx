@@ -604,7 +604,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const resp = await searchSource.fetch({
       legacyHitsTotal: false,
-      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+      executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
     });
 
     const hit = _.get(resp, 'hits.hits[0]');
