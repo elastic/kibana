@@ -19,6 +19,7 @@ import {
 } from '../../../../index_data_visualizer/services/timefilter_refresh_service';
 import { JOB_FIELD_TYPES } from '../../../../../../common';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../../../../../src/plugins/ui_actions/public';
+import { APP_ID } from '../../../../../../common/constants';
 
 export function getActions(
   indexPattern: IndexPattern,
@@ -87,7 +88,7 @@ export function getActions(
             indexPatternId: indexPattern.id,
             fieldName: item.fieldName,
             contextualFields: [],
-            originatingApp: 'data_visualizer:exploreInMapsTitle',
+            originatingApp: APP_ID,
           };
           const testActions = await services?.uiActions.getTriggerCompatibleActions(
             VISUALIZE_GEO_FIELD_TRIGGER,
