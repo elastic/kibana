@@ -7,11 +7,12 @@
  */
 
 export function pick<T extends object, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K> {
-  return keys.reduce((acc, key) => {
-    if (obj.hasOwnProperty(key)) {
+  const acc = Object.create(null) as Pick<T, K>;
+  for (const key of keys) {
+    // @ts-expect-error node type declaration doesn't know about the method yet
+    if (Object.hasOwn(obj, key)) {
       acc[key] = obj[key];
     }
-
-    return acc;
-  }, {} as Pick<T, K>);
+  }
+  return acc;
 }
