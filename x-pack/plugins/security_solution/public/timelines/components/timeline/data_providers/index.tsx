@@ -6,7 +6,7 @@
  */
 
 import { rgba } from 'polished';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -93,6 +93,15 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders
   );
   const droppableId = useMemo(() => getDroppableId(timelineId), [timelineId]);
+  useEffect(() => {
+    const element = document.activeElement as HTMLInputElement;
+    if (element !== null) {
+      element.blur();
+    }
+    return () => {
+      element.blur();
+    };
+  }, []);
 
   return (
     <DropTargetDataProvidersContainer
