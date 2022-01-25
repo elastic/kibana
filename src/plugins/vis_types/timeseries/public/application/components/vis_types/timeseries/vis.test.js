@@ -153,7 +153,7 @@ describe('TimeseriesVisualization', () => {
 
       const yAxisFormattedValue = timeSeriesProps.yAxis[0].tickFormatter(value);
 
-      expect(yAxisFormattedValue).toBe(value);
+      expect(yAxisFormattedValue).toBe(`${value}`);
     });
 
     test('should return the same stringified number from yAxis formatter for byte and percent series', () => {
@@ -182,7 +182,7 @@ describe('TimeseriesVisualization', () => {
 
       expect(series[0].tickFormat(value)).toBe('500B');
       expect(series[1].tickFormat(value)).toBe('500B value');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
 
     test('should return percent formatted value from yAxis formatter and three percent formatted series with the same value templates', () => {
@@ -204,7 +204,7 @@ describe('TimeseriesVisualization', () => {
 
       expect(series[0].tickFormat(value)).toBe('500 template');
       expect(series[1].tickFormat(value)).toBe('500B template');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
 
     test('should return field formatted value for yAxis and single series with default formatter', () => {
@@ -232,7 +232,7 @@ describe('TimeseriesVisualization', () => {
       expect(series[1].tickFormat(value)).toBe('500 years');
       expect(series[2].tickFormat(value)).toBe('42 years');
       expect(series[3].tickFormat(value)).toBe('$500');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
 
     test('should return simple number from yAxis formatter and correctly formatted series values', () => {
@@ -243,7 +243,7 @@ describe('TimeseriesVisualization', () => {
       expect(series[1].tickFormat(value)).toBe('500B');
       expect(series[2].tickFormat(value)).toBe('50000%');
       expect(series[3].tickFormat(value)).toBe('$500');
-      expect(yAxis[0].tickFormatter(value)).toBe(value);
+      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
     });
   });
 });
