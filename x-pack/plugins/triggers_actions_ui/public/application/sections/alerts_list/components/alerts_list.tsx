@@ -40,9 +40,9 @@ import { useHistory } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import {
   ActionType,
-  Alert,
+  Rule,
   AlertTableItem,
-  AlertType,
+  RuleType,
   RuleTypeIndex,
   Pagination,
 } from '../../../../types';
@@ -85,6 +85,7 @@ import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
+import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 
 const ENTER_KEY = 13;
 
@@ -95,7 +96,7 @@ interface AlertTypeState {
 }
 interface AlertState {
   isLoading: boolean;
-  data: Alert[];
+  data: Rule[];
   totalItemCount: number;
 }
 
@@ -584,6 +585,36 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
+      field: 'monitoring.execution.calculated_metrics.success_ratio',
+      width: '12%',
+      name: (
+        <EuiToolTip
+          data-test-subj="alertsTableCell-successRatioTooltip"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.successRatioTitle',
+            {
+              defaultMessage: 'How often this rule executes successfully',
+            }
+          )}
+        >
+          <span>
+            Success ratio{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      sortable: true,
+      truncateText: false,
+      'data-test-subj': 'alertsTableCell-successRatio',
+      render: (value: number) => {
+        return (
+          <span data-test-subj="successRatio">
+            {value !== undefined ? getFormattedSuccessRatio(value) : 'N/A'}
+          </span>
+        );
+      },
+    },
+    {
       field: 'executionStatus.status',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
@@ -1043,7 +1074,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleType={
-            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
+            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as RuleType<string, string>
           }
           onSave={loadAlertsData}
         />
@@ -1077,12 +1108,12 @@ const noPermissionPrompt = (
   />
 );
 
-function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
+function filterAlertsById(alerts: Rule[], ids: string[]): Rule[] {
   return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(
-  alerts: Alert[],
+  alerts: Rule[],
   ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
 ) {

@@ -31,7 +31,7 @@ import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/com
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Alert, AlertType, ActionType, ActionConnector } from '../../../../types';
+import { Rule, RuleType, ActionType, ActionConnector } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -46,10 +46,11 @@ import { alertReducer } from '../../alert_form/alert_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 
 export type AlertDetailsProps = {
-  alert: Alert;
-  alertType: AlertType;
+  alert: Rule;
+  alertType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
+  refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
@@ -61,6 +62,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   unmuteAlert,
   muteAlert,
   requestRefresh,
+  refreshToken,
 }) => {
   const history = useHistory();
   const {
@@ -72,7 +74,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     http,
   } = useKibana().services;
   const [{}, dispatch] = useReducer(alertReducer, { alert });
-  const setInitialAlert = (value: Alert) => {
+  const setInitialAlert = (value: Rule) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
@@ -443,6 +445,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             {alert.enabled ? (
               <AlertsRouteWithApi
                 requestRefresh={requestRefresh}
+                refreshToken={refreshToken}
                 rule={alert}
                 ruleType={alertType}
                 readOnly={!canSaveAlert}

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { ReportViewType } from '../../types';
 
-import { useExploratoryView } from '../../contexts/exploatory_view_config';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 const SELECT_REPORT_TYPE = 'SELECT_REPORT_TYPE';
 

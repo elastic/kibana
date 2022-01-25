@@ -32,10 +32,11 @@ import { getServiceLocationsRoute } from './synthetics_service/get_service_locat
 import {
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,
-} from './synthetics_service/get_monitors';
+} from './synthetics_service/get_monitor';
 import { addSyntheticsMonitorRoute } from './synthetics_service/add_monitor';
 import { editSyntheticsMonitorRoute } from './synthetics_service/edit_monitor';
 import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monitor';
+import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -67,4 +68,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
+  runOnceSyntheticsMonitorRoute,
 ];

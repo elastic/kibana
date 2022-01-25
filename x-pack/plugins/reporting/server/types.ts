@@ -7,45 +7,35 @@
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataPluginStart } from 'src/plugins/data/server/plugin';
-import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Writable } from 'stream';
+import type { DataPluginStart } from 'src/plugins/data/server/plugin';
+import { FieldFormatsStart } from 'src/plugins/field_formats/server';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { Writable } from 'stream';
+import { IEventLogService } from '../../event_log/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { LicensingPluginStart } from '../../licensing/server';
 import type {
-  ScreenshottingStart,
   ScreenshotOptions as BaseScreenshotOptions,
+  ScreenshottingStart,
 } from '../../screenshotting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { CancellationToken } from '../common';
-import { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
-import { ReportingConfigType } from './config';
-import { ReportingCore } from './core';
-import { LevelLogger } from './lib';
-import { ReportTaskParams } from './lib/tasks';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/server';
+import type { SpacesPluginSetup } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { CancellationToken } from '../common/cancellation_token';
+import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
+import type { ReportingConfigType } from './config';
+import type { ReportingCore } from './core';
+import type { LevelLogger } from './lib';
+import type { ReportTaskParams } from './lib/tasks';
 
 /*
  * Plugin Contract
  */
-
-export interface ReportingSetupDeps {
-  licensing: LicensingPluginSetup;
-  features: FeaturesPluginSetup;
-  screenshotMode: ScreenshotModePluginSetup;
-  security?: SecurityPluginSetup;
-  spaces?: SpacesPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface ReportingStartDeps {
-  data: DataPluginStart;
-  screenshotting: ScreenshottingStart;
-  taskManager: TaskManagerStartContract;
-}
 
 export interface ReportingSetup {
   usesUiCapabilities: () => boolean;
@@ -100,6 +90,31 @@ export interface ExportTypeDefinition<
   createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
+}
+
+/*
+ * @internal
+ */
+export interface ReportingSetupDeps {
+  eventLog: IEventLogService;
+  features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+}
+
+/*
+ * @internal
+ */
+export interface ReportingStartDeps {
+  data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**

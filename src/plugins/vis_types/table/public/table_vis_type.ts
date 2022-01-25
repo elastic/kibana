@@ -62,7 +62,14 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
           defaultMessage: 'Split rows',
         }),
-        aggFilter: ['!filter', '!sampler', '!diversified_sampler', '!multi_terms'],
+        aggFilter: [
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!multi_terms',
+          '!significant_text',
+          '!rare_terms',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -72,7 +79,14 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!filter', '!sampler', '!diversified_sampler', '!multi_terms'],
+        aggFilter: [
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!multi_terms',
+          '!significant_text',
+          '!rare_terms',
+        ],
       },
     ],
   },

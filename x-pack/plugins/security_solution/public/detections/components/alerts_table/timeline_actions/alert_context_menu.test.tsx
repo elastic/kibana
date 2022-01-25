@@ -13,7 +13,19 @@ import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 
-const ecsRowData: Ecs = { _id: '1', agent: { type: ['blah'] } };
+const ecsRowData: Ecs = {
+  _id: '1',
+  agent: { type: ['blah'] },
+  kibana: {
+    alert: {
+      workflow_status: ['open'],
+      rule: {
+        parameters: {},
+        uuid: ['testId'],
+      },
+    },
+  },
+};
 
 const props = {
   ariaLabel:
@@ -47,9 +59,19 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+  })
+);
+
 const actionMenuButton = '[data-test-subj="timeline-context-menu-button"] button';
 const addToExistingCaseButton = '[data-test-subj="add-to-existing-case-action"]';
 const addToNewCaseButton = '[data-test-subj="add-to-new-case-action"]';
+const markAsOpenButton = '[data-test-subj="open-alert-status"]';
+const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
+const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 
 describe('InvestigateInResolverAction', () => {
   test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
@@ -97,5 +119,17 @@ describe('InvestigateInResolverAction', () => {
     wrapper.find(actionMenuButton).simulate('click');
     expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(false);
     expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(false);
+  });
+
+  test('it renders the correct status action buttons', () => {
+    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.active} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    wrapper.find(actionMenuButton).simulate('click');
+
+    expect(wrapper.find(markAsOpenButton).first().exists()).toEqual(false);
+    expect(wrapper.find(markAsAcknowledgedButton).first().exists()).toEqual(true);
+    expect(wrapper.find(markAsClosedButton).first().exists()).toEqual(true);
   });
 });

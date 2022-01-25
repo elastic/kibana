@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ConnectorTypes } from './api';
-import { CasesContextValue } from './ui/types';
+import { CasesContextFeatures } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -80,13 +80,19 @@ export const SUPPORTED_CONNECTORS = [
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 
-/**
- * This must be the same value that the security solution plugin uses to define the case kind when it registers the
- * feature for the 7.13 migration only.
- *
- * This variable is being also used by test files and mocks.
- */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution';
+export const OBSERVABILITY_OWNER = 'observability';
+
+export const OWNER_INFO = {
+  [SECURITY_SOLUTION_OWNER]: {
+    label: 'Security',
+    iconType: 'logoSecurity',
+  },
+  [OBSERVABILITY_OWNER]: {
+    label: 'Observability',
+    iconType: 'logoObservability',
+  },
+};
 
 /**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
@@ -110,6 +116,7 @@ export const MAX_TITLE_LENGTH = 64;
  * Cases features
  */
 
-export const DEFAULT_FEATURES: CasesContextValue['features'] = Object.freeze({
+export const DEFAULT_FEATURES: CasesContextFeatures = Object.freeze({
   alerts: { sync: true },
+  metrics: [],
 });

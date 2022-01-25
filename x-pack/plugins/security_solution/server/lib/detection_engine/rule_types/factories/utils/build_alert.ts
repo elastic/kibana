@@ -7,9 +7,12 @@
 
 import {
   ALERT_REASON,
+  ALERT_RISK_SCORE,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
@@ -20,7 +23,6 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
@@ -37,7 +39,15 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
   ALERT_ORIGINAL_EVENT,
+  ALERT_BUILDING_BLOCK_TYPE,
 } from '../../../../../../common/field_maps/field_names';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import {
+  commonParamsCamelToSnake,
+  typeSpecificCamelToSnake,
+} from '../../../schemas/rule_converters';
+import { transformTags } from '../../../routes/rules/utils';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 
 export const generateAlertId = (alert: RACAlert) => {
   return createHash('sha256')
@@ -83,19 +93,45 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
  * Builds the `kibana.alert.*` fields that are common across all alerts.
  * @param docs The parent alerts/events of the new alert to be built.
  * @param rule The rule that is generating the new alert.
+ * @param spaceId The space ID in which the rule was executed.
+ * @param reason Human readable string summarizing alert.
  */
 export const buildAlert = (
   docs: SimpleHit[],
-  rule: RulesSchema,
+  completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
-  reason: string
+  reason: string,
+  overrides?: {
+    nameOverride: string;
+    severityOverride: string;
+    riskScoreOverride: number;
+  }
 ): RACAlert => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
 
-  const { id, output_index: outputIndex, ...mappedRule } = rule;
-  mappedRule.uuid = id;
+  const { output_index: outputIndex, ...commonRuleParams } = commonParamsCamelToSnake(
+    completeRule.ruleParams
+  );
+
+  const ruleParamsSnakeCase = {
+    ...commonRuleParams,
+    ...typeSpecificCamelToSnake(completeRule.ruleParams),
+  };
+
+  const {
+    actions,
+    schedule,
+    name,
+    tags,
+    enabled,
+    createdBy,
+    updatedBy,
+    throttle,
+    createdAt,
+    updatedAt,
+  } = completeRule.ruleConfig;
 
   return {
     [TIMESTAMP]: new Date().toISOString(),
@@ -106,7 +142,25 @@ export const buildAlert = (
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
+    [ALERT_BUILDING_BLOCK_TYPE]: completeRule.ruleParams.buildingBlockType,
+    [ALERT_SEVERITY]: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
+    [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+      uuid: completeRule.alertId,
+      actions: actions.map(transformAlertToRuleAction),
+      created_at: createdAt.toISOString(),
+      created_by: createdBy ?? '',
+      enabled,
+      interval: schedule.interval,
+      name: overrides?.nameOverride ?? name,
+      tags: transformTags(tags),
+      throttle: throttle ?? undefined,
+      updated_at: updatedAt.toISOString(),
+      updated_by: updatedBy ?? '',
+      type: completeRule.ruleParams.type,
+      ...commonRuleParams,
+    }),
   } as unknown as RACAlert;
 };
 

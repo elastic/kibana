@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -22,7 +22,6 @@ import type {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { getStopsForFixedMode } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
@@ -241,9 +240,9 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const hasColoring = Boolean(
-                columnConfig.colorMode !== 'none' && columnConfig.palette?.params?.stops
-              );
+              const stops = columnConfig.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+
               return {
                 columnId: accessor,
                 triggerIcon: columnConfig.hidden
@@ -251,12 +250,7 @@ export const getDatatableVisualization = ({
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring
-                  ? getStopsForFixedMode(
-                      columnConfig.palette?.params?.stops || [],
-                      columnConfig.palette?.params?.colorStops
-                    )
-                  : undefined,
+                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
               };
             }),
           supportsMoreColumns: true,

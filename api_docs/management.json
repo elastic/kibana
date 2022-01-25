@@ -194,9 +194,7 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "Pick<Pick<",
-                  "CreateManagementItemArgs",
-                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"title\" | \"id\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\">"
+                  "RegisterManagementSectionArgs"
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
@@ -213,7 +211,7 @@
             "label": "registerApp",
             "description": [],
             "signature": [
-              "(args: Pick<",
+              "(args: Omit<",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -221,7 +219,7 @@
                 "section": "def-public.RegisterManagementAppArgs",
                 "text": "RegisterManagementAppArgs"
               },
-              ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\">) => ",
+              ", \"basePath\">) => ",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -241,7 +239,7 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "Pick<",
+                  "Omit<",
                   {
                     "pluginId": "management",
                     "scope": "public",
@@ -249,7 +247,7 @@
                     "section": "def-public.RegisterManagementAppArgs",
                     "text": "RegisterManagementAppArgs"
                   },
-                  ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\">"
+                  ", \"basePath\">"
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,

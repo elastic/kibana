@@ -139,7 +139,7 @@ describe('Detection rules, override', () => {
       getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
-        `${this.rule.riskOverride}kibana.alert.rule.risk_score`
+        `${this.rule.riskOverride}kibana.alert.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', this.rule.nameOverride);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
@@ -186,7 +186,9 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains('auditbeat');
     cy.get(ALERT_GRID_CELL).contains('critical');
     cy.get(ALERT_GRID_CELL).contains('80');

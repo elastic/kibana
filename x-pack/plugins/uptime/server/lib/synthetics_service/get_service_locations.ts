@@ -9,10 +9,16 @@ import axios from 'axios';
 import {
   ManifestLocation,
   ServiceLocations,
-} from '../../../common/runtime_types/monitor_management';
+  ServiceLocationsApiResponse,
+} from '../../../common/runtime_types';
 
-export async function getServiceLocations({ manifestUrl }: { manifestUrl: string }) {
+export async function getServiceLocations({ manifestUrl }: { manifestUrl?: string }) {
   const locations: ServiceLocations = [];
+
+  if (!manifestUrl) {
+    return { locations };
+  }
+
   try {
     const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(manifestUrl);
 
@@ -25,10 +31,10 @@ export async function getServiceLocations({ manifestUrl }: { manifestUrl: string
       });
     });
 
-    return { locations };
+    return { locations } as ServiceLocationsApiResponse;
   } catch (e) {
     return {
       locations: [],
-    };
+    } as ServiceLocationsApiResponse;
   }
 }

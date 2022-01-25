@@ -25,7 +25,6 @@ import {
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsListResponse,
-  GetTrustedAppsSummaryRequest,
   MaybeImmutable,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
@@ -195,7 +194,7 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     };
   }
 
-  async getTrustedAppsSummary(_: GetTrustedAppsSummaryRequest) {
+  async getTrustedAppsSummary() {
     return (await this.getHttpService()).get<ExceptionListSummarySchema>(
       `${EXCEPTION_LIST_URL}/summary`,
       {

@@ -1,11 +1,11 @@
 [[docker]]
 === Install {kib} with Docker
 ++++
-<titleabbrev>Install with Docker </titleabbrev>
+<titleabbrev>Install with Docker</titleabbrev>
 ++++
 
-Docker images for Kibana are available from the Elastic Docker registry. The
-base image is https://hub.docker.com/_/centos/[centos:7].
+Docker images for {kib} are available from the Elastic Docker registry. The
+base image is https://hub.docker.com/_/ubuntu[ubuntu:20.04].
 
 A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
@@ -126,9 +126,9 @@ docker rm kib-01
 
 [discrete]
 [[configuring-kibana-docker]]
-=== Configure Kibana on Docker
+=== Configure {kib} on Docker
 
-The Docker images provide several methods for configuring Kibana. The
+The Docker images provide several methods for configuring {kib}. The
 conventional approach is to provide a `kibana.yml` file as described in
 {kibana-ref}/settings.html[Configuring Kibana], but it's also possible to use
 environment variables to define settings.
@@ -137,7 +137,7 @@ environment variables to define settings.
 [[bind-mount-config]]
 ==== Bind-mounted configuration
 
-One way to configure Kibana on Docker is to provide `kibana.yml` via bind-mounting.
+One way to configure {kib} on Docker is to provide `kibana.yml` via bind-mounting.
 With `docker-compose`, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]

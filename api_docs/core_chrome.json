@@ -42,7 +42,8 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
+              "IconType",
+              " | undefined"
             ],
             "path": "src/core/public/chrome/types.ts",
             "deprecated": false
@@ -210,31 +211,14 @@
             "section": "def-public.ChromeHelpExtensionMenuCustomLink",
             "text": "ChromeHelpExtensionMenuCustomLink"
           },
-          " extends Pick<(",
-          "DisambiguateSet",
-          "<",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreChromePluginApi",
+            "section": "def-public.ChromeHelpExtensionLinkBase",
+            "text": "ChromeHelpExtensionLinkBase"
+          }
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -276,7 +260,7 @@
               "\nContent of the button (in lieu of `children`)"
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
             "deprecated": false
@@ -299,31 +283,14 @@
             "section": "def-public.ChromeHelpExtensionMenuDiscussLink",
             "text": "ChromeHelpExtensionMenuDiscussLink"
           },
-          " extends Pick<(",
-          "DisambiguateSet",
-          "<",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreChromePluginApi",
+            "section": "def-public.ChromeHelpExtensionLinkBase",
+            "text": "ChromeHelpExtensionLinkBase"
+          }
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -373,31 +340,14 @@
             "section": "def-public.ChromeHelpExtensionMenuDocumentationLink",
             "text": "ChromeHelpExtensionMenuDocumentationLink"
           },
-          " extends Pick<(",
-          "DisambiguateSet",
-          "<",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreChromePluginApi",
+            "section": "def-public.ChromeHelpExtensionLinkBase",
+            "text": "ChromeHelpExtensionLinkBase"
+          }
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -447,31 +397,14 @@
             "section": "def-public.ChromeHelpExtensionMenuGitHubLink",
             "text": "ChromeHelpExtensionMenuGitHubLink"
           },
-          " extends Pick<(",
-          "DisambiguateSet",
-          "<",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet",
-          "<",
-          "PropsForButton",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>, ",
-          "PropsForAnchor",
-          "<",
-          "CommonEuiButtonEmptyProps",
-          ", {}>> & ",
-          "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreChromePluginApi",
+            "section": "def-public.ChromeHelpExtensionLinkBase",
+            "text": "ChromeHelpExtensionLinkBase"
+          }
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -1934,7 +1867,7 @@
         "description": [],
         "signature": [
           "CommonProps",
-          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
+          " & { text: React.ReactNode; href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
@@ -1948,7 +1881,9 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ 'data-test-subj'?: string | undefined; target?: string | undefined; iconType?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; rel?: string | undefined; }"
+          "{ 'data-test-subj'?: string | undefined; target?: string | undefined; iconType?: ",
+          "IconType",
+          " | undefined; rel?: string | undefined; }"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,

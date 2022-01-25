@@ -68,6 +68,7 @@ describe('useSecurityJobs', () => {
         moduleId: '',
         processed_record_count: 582251,
         awaitingNodeAssignment: false,
+        bucketSpanSeconds: 900,
       };
 
       const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));

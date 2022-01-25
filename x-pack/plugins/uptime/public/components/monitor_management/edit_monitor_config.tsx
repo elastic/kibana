@@ -10,11 +10,12 @@ import {
   ConfigKey,
   MonitorFields,
   TLSFields,
-  PolicyConfig,
   DataStream,
-} from '../fleet_package/types';
+  ScheduleUnit,
+} from '../../../common/runtime_types';
 import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
+import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
 
 interface Props {
@@ -76,6 +77,8 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         defaultName: defaultConfig?.name || '', // TODO - figure out typing concerns for name
         defaultLocations: defaultConfig.locations,
         isEditable: true,
+        isZipUrlSourceEnabled: false,
+        allowedScheduleUnits: [ScheduleUnit.MINUTES],
       }}
       httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
       tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}

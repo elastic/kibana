@@ -9,25 +9,30 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
+import { DatatableRow } from 'src/plugins/expressions';
+import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import {
+  GaugeShapes,
+  EXPRESSION_GAUGE_NAME,
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import {
+  getGoalValue,
+  getMaxValue,
+  getMinValue,
+  getValueFromAccessor,
+  GaugeIconVertical,
+  GaugeIconHorizontal,
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
 import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
-import { LensIconChartGaugeHorizontal, LensIconChartGaugeVertical } from '../../assets/chart_gauge';
-import { applyPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../../shared_components';
+import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
-import { getGoalValue, getMaxValue, getMinValue } from './utils';
-
-import {
-  GaugeShapes,
-  GaugeArguments,
-  EXPRESSION_GAUGE_NAME,
-  GaugeVisualizationState,
-} from '../../../common/expressions/gauge_chart';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -45,14 +50,14 @@ export const isNumericDynamicMetric = (op: OperationMetadata) =>
 
 export const CHART_NAMES = {
   horizontalBullet: {
-    icon: LensIconChartGaugeHorizontal,
+    icon: GaugeIconHorizontal,
     label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
       defaultMessage: 'Gauge horizontal',
     }),
     groupLabel: groupLabelForGauge,
   },
   verticalBullet: {
-    icon: LensIconChartGaugeVertical,
+    icon: GaugeIconVertical,
     label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
       defaultMessage: 'Gauge vertical',
     }),
@@ -69,6 +74,35 @@ function computePaletteParams(params: CustomPaletteParams) {
     reverse: false, // managed at UI level
   };
 }
+
+const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+  if (!row || !state) {
+    return;
+  }
+  const minValue = getValueFromAccessor('minAccessor', row, state);
+  const maxValue = getValueFromAccessor('maxAccessor', row, state);
+  if (maxValue != null && minValue != null) {
+    if (maxValue < minValue) {
+      return {
+        invalid: true,
+        invalidMessage: i18n.translate(
+          'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
+          {
+            defaultMessage: 'Minimum value may not be greater than maximum value',
+          }
+        ),
+      };
+    }
+    if (maxValue === minValue) {
+      return {
+        invalid: true,
+        invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
+          defaultMessage: 'Minimum and maximum values may not be equal',
+        }),
+      };
+    }
+  }
+};
 
 const toExpression = (
   paletteService: PaletteRegistry,
@@ -90,8 +124,6 @@ const toExpression = (
         type: 'function',
         function: EXPRESSION_GAUGE_NAME,
         arguments: {
-          title: [attributes?.title ?? ''],
-          description: [attributes?.description ?? ''],
           metricAccessor: [state.metricAccessor ?? ''],
           minAccessor: [state.minAccessor ?? ''],
           maxAccessor: [state.maxAccessor ?? ''],
@@ -173,7 +205,6 @@ export const getGaugeVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
-        title: 'Empty Gauge chart',
         shape: GaugeShapes.horizontalBullet,
         palette: mainPalette,
         ticksPosition: 'auto',
@@ -192,8 +223,9 @@ export const getGaugeVisualization = ({
       const currentMinMax = { min: getMinValue(row, state), max: getMaxValue(row, state) };
 
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
-      palette = getStopsForFixedMode(displayStops, state?.palette?.params?.colorStops);
+      palette = displayStops.map(({ color }) => color);
     }
+    const invalidProps = checkInvalidConfiguration(row, state) || {};
 
     return {
       groups: [
@@ -238,6 +270,7 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
           suggestedValue: () => (state.metricAccessor ? getMinValue(row, state) : undefined),
+          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -253,6 +286,7 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
           suggestedValue: () => (state.metricAccessor ? getMaxValue(row, state) : undefined),
+          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -401,7 +435,7 @@ export const getGaugeVisualization = ({
     }
 
     const row = frame?.activeData?.[state.layerId]?.rows?.[0];
-    if (!row) {
+    if (!row || checkInvalidConfiguration(row, state)) {
       return [];
     }
     const metricValue = row[metricAccessor];

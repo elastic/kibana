@@ -7,11 +7,10 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
-import { JOB_STATUSES } from '../../common/constants';
-import {
+import { JOB_STATUSES, JobTypes } from '../../common/constants';
+import type {
   BaseParamsV2,
   JobId,
   ReportApiJSON,
@@ -38,6 +37,7 @@ export class Job {
   public spaceId: ReportPayload['spaceId'];
   public browserTimezone?: ReportPayload['browserTimezone'];
   public layout: ReportPayload['layout'];
+  public version: ReportPayload['version'];
 
   public jobtype: ReportSource['jobtype'];
   public created_by: ReportSource['created_by'];
@@ -68,6 +68,7 @@ export class Job {
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
     this.layout = report.payload.layout;
+    this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;
     this.started_at = report.started_at;
@@ -141,34 +142,53 @@ export class Job {
     return null;
   }
 
-  getStatus() {
-    const statusLabel = jobStatusLabelsMap.get(this.status) as string;
-    const statusTimestamp = this.getStatusTimestamp();
-
-    if (statusTimestamp) {
-      return (
-        <FormattedMessage
-          id="xpack.reporting.jobStatusDetail.statusTimestampText"
-          defaultMessage="{statusLabel} at {statusTimestamp}"
-          values={{
-            statusLabel,
-            statusTimestamp: (
-              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-            ),
-          }}
-        />
-      );
-    }
-
-    return statusLabel;
+  public get prettyStatus(): string {
+    return (
+      jobStatusLabelsMap.get(this.status) ??
+      i18n.translate('xpack.reporting.jobStatusDetail.unknownText', { defaultMessage: 'Unknown' })
+    );
   }
 
-  getStatusLabel() {
-    return (
-      <>
-        {this.getStatus()} {this.getStatusMessage()}
-      </>
-    );
+  public get canLinkToKibanaApp(): boolean {
+    return Boolean(this.locatorParams);
+  }
+
+  public get isDownloadReady(): boolean {
+    return this.status === JOB_STATUSES.COMPLETED || this.status === JOB_STATUSES.WARNINGS;
+  }
+
+  public get prettyJobTypeName(): undefined | string {
+    switch (this.jobtype as JobTypes) {
+      case 'printable_pdf':
+      case 'printable_pdf_v2':
+        return i18n.translate('xpack.reporting.jobType.pdfOutputName', {
+          defaultMessage: 'PDF',
+        });
+      case 'PNG':
+      case 'PNGV2':
+        return i18n.translate('xpack.reporting.jobType.pngOutputName', {
+          defaultMessage: 'PNG',
+        });
+      case 'csv_searchsource':
+        return i18n.translate('xpack.reporting.jobType.csvOutputName', {
+          defaultMessage: 'CSV',
+        });
+      default:
+        return undefined;
+    }
+  }
+
+  public get prettyTimeout(): string {
+    if (this.timeout == null) {
+      return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSecondsUnknown', {
+        defaultMessage: 'Unknown',
+      });
+    }
+    const seconds = this.timeout / 1000;
+    return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSeconds', {
+      defaultMessage: '{timeout} seconds',
+      values: { timeout: seconds },
+    });
   }
 
   /**

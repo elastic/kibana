@@ -17,7 +17,6 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   VERSION,
-  TAGS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
@@ -115,7 +114,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(rule.status).to.eql('succeeded');
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        expect(rule?.execution_summary?.last_execution.status).to.eql('succeeded');
       });
     });
 
@@ -285,7 +286,6 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_WORKFLOW_STATUS]: 'open',
           [SPACE_IDS]: ['default'],
           [VERSION]: fullSignal[VERSION],
-          [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },
@@ -302,13 +302,10 @@ export default ({ getService }: FtrProviderContext) => {
             false_positives: [],
             from: '1900-01-01T00:00:00.000Z',
             immutable: false,
-            index: ['auditbeat-*'],
             interval: '5m',
-            language: 'kuery',
             max_signals: 100,
             name: 'Query with a rule id',
             producer: 'siem',
-            query: '*:*',
             references: [],
             risk_score: 55,
             risk_score_mapping: [],
@@ -318,20 +315,6 @@ export default ({ getService }: FtrProviderContext) => {
             severity_mapping: [],
             tags: [],
             threat: [],
-            threat_filters: [],
-            threat_index: ['auditbeat-*'],
-            threat_mapping: [
-              {
-                entries: [
-                  {
-                    field: 'host.name',
-                    type: 'mapping',
-                    value: 'host.name',
-                  },
-                ],
-              },
-            ],
-            threat_query: 'source.ip: "188.166.120.93"',
             to: 'now',
             type: 'threat_match',
             updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
@@ -496,7 +479,9 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .query({ id })
             .expect(200);
-          expect(body.last_failure_message).to.contain(
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          expect(body?.execution_summary?.last_execution.message).to.contain(
             'execution has exceeded its allotted interval'
           );
         });

@@ -7790,6 +7790,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:enableInfrastructureView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -9258,7 +9264,9 @@
         },
         "timeseries_use_es_indices_total": {
           "type": "long",
-          "_meta": { "description": "Number of TSVB visualizations using elasticsearch indices" }
+          "_meta": {
+            "description": "Number of TSVB visualizations using elasticsearch indices"
+          }
         },
         "timeseries_table_use_aggregate_function": {
           "type": "long",

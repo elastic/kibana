@@ -7,6 +7,7 @@
 
 import { Moment } from 'moment';
 
+import { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
@@ -38,6 +39,8 @@ export interface MlSummaryJob {
   awaitingNodeAssignment: boolean;
   alertingRules?: MlAnomalyDetectionAlertRule[];
   jobTags: Record<string, string>;
+  bucketSpanSeconds: number;
+  customSettings?: MlCustomSettings;
 }
 
 export interface AuditMessage {

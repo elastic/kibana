@@ -13,7 +13,7 @@ import {
   getAlertWithInvalidatedFields,
 } from './value_validators';
 import uuid from 'uuid';
-import { Alert, IErrorObject, UserConfiguredActionConnector } from '../../types';
+import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -157,7 +157,7 @@ describe('getConnectorWithInvalidatedFields', () => {
 
 describe('getAlertWithInvalidatedFields', () => {
   test('sets to null all fields that are required but undefined in alert', () => {
-    const alert: Alert = {
+    const alert: Rule = {
       params: {},
       consumer: 'test',
       schedule: {
@@ -181,7 +181,7 @@ describe('getAlertWithInvalidatedFields', () => {
   });
 
   test('does not set to null any fields that are required and defined but invalid in alert', () => {
-    const alert: Alert = {
+    const alert: Rule = {
       name: 'test',
       id: '123',
       params: {},
@@ -203,7 +203,7 @@ describe('getAlertWithInvalidatedFields', () => {
   });
 
   test('set to null all fields that are required but undefined in alert params', () => {
-    const alert: Alert = {
+    const alert: Rule = {
       name: 'test',
       alertTypeId: '.threshold',
       id: '123',
@@ -238,7 +238,7 @@ describe('getAlertWithInvalidatedFields', () => {
   });
 
   test('does not set to null any fields that are required and defined but invalid in alert params', () => {
-    const alert: Alert = {
+    const alert: Rule = {
       name: 'test',
       alertTypeId: '.threshold',
       id: '123',
@@ -279,7 +279,7 @@ describe('getAlertWithInvalidatedFields', () => {
   });
 
   test('set to null all fields that are required but undefined in alert actions', () => {
-    const alert: Alert = {
+    const alert: Rule = {
       name: 'test',
       alertTypeId: '.threshold',
       id: '123',
@@ -324,7 +324,7 @@ describe('getAlertWithInvalidatedFields', () => {
   });
 
   test('validates multiple alert actions with the same connector id', () => {
-    const alert: Alert = {
+    const alert: Rule = {
       name: 'test',
       alertTypeId: '.threshold',
       id: '123',

@@ -21,8 +21,8 @@ import {
 } from '../../../../common/utils/formatters';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { EmptyMessage } from '../EmptyMessage';
-import { ImpactBar } from '../ImpactBar';
+import { EmptyMessage } from '../empty_message';
+import { ImpactBar } from '../impact_bar';
 import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
@@ -45,6 +45,7 @@ interface Props {
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
   compact?: boolean;
+  hidePerPageOptions?: boolean;
 }
 
 export function DependenciesTable(props: Props) {
@@ -57,6 +58,7 @@ export function DependenciesTable(props: Props) {
     nameColumnTitle,
     status,
     compact = true,
+    hidePerPageOptions = false,
   } = props;
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
@@ -210,8 +212,8 @@ export function DependenciesTable(props: Props) {
             noItemsMessage={noItemsMessage}
             initialSortField="impactValue"
             initialSortDirection="desc"
-            initialPageSize={5}
             pagination={true}
+            hidePerPageOptions={hidePerPageOptions}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

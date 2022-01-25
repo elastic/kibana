@@ -9,7 +9,6 @@
 import Url from 'url';
 
 import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
-import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
@@ -17,6 +16,7 @@ const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
 export interface GithubIssue {
   html_url: string;
   number: number;
+  node_id: string;
   title: string;
   labels: unknown[];
   body: string;
@@ -29,6 +29,7 @@ export interface GithubIssueMini {
   number: GithubIssue['number'];
   body: GithubIssue['body'];
   html_url: GithubIssue['html_url'];
+  node_id: GithubIssue['node_id'];
 }
 
 type RequestOptions = AxiosRequestConfig & {
@@ -73,70 +74,6 @@ export class GithubApi {
     return this.requestCount;
   }
 
-  private failedTestIssuesPageCache: {
-    pages: GithubIssue[][];
-    nextRequest: RequestOptions | undefined;
-  } = {
-    pages: [],
-    nextRequest: {
-      safeForDryRun: true,
-      method: 'GET',
-      url: Url.resolve(BASE_URL, 'issues'),
-      params: {
-        state: 'all',
-        per_page: '100',
-        labels: 'failed-test',
-        sort: 'updated',
-        direction: 'desc',
-      },
-    },
-  };
-
-  /**
-   * Iterate the `failed-test` issues from elastic/kibana, each response
-   * from Github is cached and subsequent calls to this method will first
-   * iterate the previous responses from Github, then start requesting
-   * more pages of issues from github until all pages have been cached.
-   *
-   * Aborting the iterator part way through will prevent unnecessary request
-   * to Github from being issued.
-   */
-  async *iterateCachedFailedTestIssues() {
-    const cache = this.failedTestIssuesPageCache;
-
-    // start from page 0, and progress forward if we have cache or a request that will load that cache page
-    for (let page = 0; page < cache.pages.length || cache.nextRequest; page++) {
-      if (page >= cache.pages.length && cache.nextRequest) {
-        const resp = await this.request<GithubIssue[]>(cache.nextRequest, []);
-        cache.pages.push(resp.data);
-
-        const link =
-          typeof resp.headers.link === 'string' ? parseLinkHeader(resp.headers.link) : undefined;
-
-        cache.nextRequest =
-          link && link.next && link.next.url
-            ? {
-                safeForDryRun: true,
-                method: 'GET',
-                url: link.next.url,
-              }
-            : undefined;
-      }
-
-      for (const issue of cache.pages[page]) {
-        yield issue;
-      }
-    }
-  }
-
-  async findFailedTestIssue(test: (issue: GithubIssue) => boolean) {
-    for await (const issue of this.iterateCachedFailedTestIssues()) {
-      if (test(issue)) {
-        return issue;
-      }
-    }
-  }
-
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {
     await this.request(
       {
@@ -179,6 +116,7 @@ export class GithubApi {
         body,
         number: 999,
         html_url: 'https://dryrun',
+        node_id: 'adflksdjf',
       }
     );
 

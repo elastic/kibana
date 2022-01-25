@@ -158,7 +158,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"left\" | \"bottom\" | \"right\""
+              "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false
@@ -805,7 +805,7 @@
         "label": "Dimension",
         "description": [],
         "signature": [
-          "Pick<",
+          "Omit<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -813,7 +813,7 @@
             "section": "def-public.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"format\" | \"label\" | \"accessor\" | \"aggType\"> & { params: {} | ",
+          ", \"params\"> & { params: {} | ",
           "DateHistogramParams",
           " | ",
           "HistogramParams",

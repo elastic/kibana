@@ -6,7 +6,7 @@
  */
 import { AlertExecutionStatus } from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
-import { Alert, AlertAction, ResolvedRule } from '../../../types';
+import { Rule, AlertAction, ResolvedRule } from '../../../types';
 
 const transformAction: RewriteRequestCase<AlertAction> = ({
   group,
@@ -30,7 +30,7 @@ const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
   ...rest,
 });
 
-export const transformAlert: RewriteRequestCase<Alert> = ({
+export const transformAlert: RewriteRequestCase<Rule> = ({
   rule_type_id: alertTypeId,
   created_by: createdBy,
   updated_by: updatedBy,

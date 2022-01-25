@@ -50,8 +50,14 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has logged in successfully.
 | `failure` | Failed login attempt (e.g. due to invalid credentials).
 
+| `user_logout`
+| `unknown` | User is logging out.
+
+| `session_cleanup`
+| `unknown` | Removing invalid or expired session.
+
 | `access_agreement_acknowledged`
-| N/A | User has acknowledged the access agreement.
+| n/a | User has acknowledged the access agreement.
 
 3+a|
 ===== Category: database

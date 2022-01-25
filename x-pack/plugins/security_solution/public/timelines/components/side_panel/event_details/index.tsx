@@ -160,7 +160,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     setIsIsolateActionSuccessBannerVisible(true);
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
-      caseDetailsRefresh.refreshUserActionsAndComments();
+      caseDetailsRefresh.refreshCase();
     }
   }, [caseDetailsRefresh]);
 

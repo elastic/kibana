@@ -40,7 +40,7 @@ export interface QueryBuilderOptions {
 // using unmapped_type avoids errors when the given field doesn't exist, and sets to the 0-value for that type
 // effectively ignoring it
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#_ignoring_unmapped_fields
-export const MetadataSortMethod: estypes.SearchSortContainer[] = [
+export const MetadataSortMethod: estypes.SortCombinations[] = [
   {
     'event.created': {
       order: 'desc',
@@ -226,7 +226,7 @@ interface BuildUnitedIndexQueryResponse {
   body: {
     query: Record<string, unknown>;
     track_total_hits: boolean;
-    sort: estypes.SearchSortContainer[];
+    sort: estypes.SortCombinations[];
   };
   from: number;
   size: number;

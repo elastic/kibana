@@ -465,6 +465,45 @@ function getPatternFiringAlertType() {
   return result;
 }
 
+function getPatternSuccessOrFailureAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()])),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
+    id: 'test.patternSuccessOrFailure',
+    name: 'Test: Succeeding or failing on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(alertExecutorOptions) {
+      const { state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= pattern.length) {
+        return { patternIndex };
+      }
+
+      if (!pattern[patternIndex]) {
+        throw new Error('Failed to execute alert type');
+      }
+
+      return {
+        patternIndex: patternIndex + 1,
+      };
+    },
+  };
+  return result;
+}
+
 function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true) {
   let globalPatternIndex = 0;
   const paramsSchema = schema.object({
@@ -506,6 +545,64 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
       return {};
+    },
+  };
+  return result;
+}
+
+function getCancellableRuleType() {
+  const paramsSchema = schema.object({
+    doLongSearch: schema.boolean(),
+    doLongPostProcessing: schema.boolean(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.cancellableRule',
+    name: 'Test: Rule That Implements Cancellation',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '3s',
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+      const doLongSearch = params.doLongSearch;
+      const doLongPostProcessing = params.doLongPostProcessing;
+
+      const aggs = doLongSearch
+        ? {
+            delay: {
+              shard_delay: {
+                value: '10s',
+              },
+            },
+          }
+        : {};
+
+      const query = {
+        index: ES_TEST_INDEX_NAME,
+        body: {
+          query: {
+            bool: {
+              filter: {
+                match_all: {},
+              },
+            },
+          },
+          ...(aggs ? { aggs } : {}),
+        },
+      };
+
+      await services.search.asCurrentUser.search(query as any);
+
+      if (doLongPostProcessing) {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+      }
+
+      if (services.shouldStopExecution()) {
+        throw new Error('execution short circuited!');
+      }
     },
   };
   return result;
@@ -626,4 +723,6 @@ export function defineAlertTypes(
   alerting.registerType(exampleAlwaysFiringAlertType);
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
+  alerting.registerType(getCancellableRuleType());
+  alerting.registerType(getPatternSuccessOrFailureAlertType());
 }

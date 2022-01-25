@@ -22,6 +22,7 @@ import type {
 } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
@@ -30,14 +31,13 @@ import type { DataVisualizerPluginStart } from '../../../../data_visualizer/publ
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
-  indexPatterns: DataViewsContract | null;
   chrome: ChromeStart | null;
   docLinks: DocLinksStart | null;
   toastNotifications: ToastsStart | null;
   overlays: OverlayStart | null;
   theme: ThemeServiceStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
-  fieldFormats: DataPublicPluginStart['fieldFormats'] | null;
+  fieldFormats: FieldFormatsStart | null;
   autocomplete: DataPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
@@ -54,7 +54,6 @@ export interface DependencyCache {
 const cache: DependencyCache = {
   timefilter: null,
   config: null,
-  indexPatterns: null,
   chrome: null,
   docLinks: null,
   toastNotifications: null,
@@ -79,7 +78,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.timefilter = deps.timefilter || null;
   cache.config = deps.config || null;
   cache.chrome = deps.chrome || null;
-  cache.indexPatterns = deps.indexPatterns || null;
   cache.docLinks = deps.docLinks || null;
   cache.toastNotifications = deps.toastNotifications || null;
   cache.overlays = deps.overlays || null;

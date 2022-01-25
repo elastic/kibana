@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  ChartColorConfiguration,
+  PaletteDefinition,
+  PaletteRegistry,
+  SeriesLayer,
+} from 'src/plugins/charts/public';
+import Color from 'color';
 import { RequiredPaletteParamTypes } from '../../../common';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components/';
 
@@ -20,4 +27,24 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   name: DEFAULT_PALETTE_NAME,
   steps: DEFAULT_COLOR_STEPS,
   maxSteps: 5,
+};
+
+export const transparentizePalettes = (palettes: PaletteRegistry) => {
+  const addAlpha = (c: string | null) => (c ? new Color(c).hex() + `80` : `000000`);
+  const transparentizePalette = (palette: PaletteDefinition<unknown>) => ({
+    ...palette,
+    getCategoricalColor: (
+      series: SeriesLayer[],
+      chartConfiguration?: ChartColorConfiguration,
+      state?: unknown
+    ) => addAlpha(palette.getCategoricalColor(series, chartConfiguration, state)),
+    getCategoricalColors: (size: number, state?: unknown): string[] =>
+      palette.getCategoricalColors(size, state).map(addAlpha),
+  });
+
+  return {
+    ...palettes,
+    get: (name: string) => transparentizePalette(palettes.get(name)),
+    getAll: () => palettes.getAll().map((singlePalette) => transparentizePalette(singlePalette)),
+  };
 };

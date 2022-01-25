@@ -10,20 +10,25 @@ import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
-import { DataStream, ScheduleUnit } from '../../fleet_package/types';
+import {
+  DataStream,
+  HTTPFields,
+  ScheduleUnit,
+  SyntheticsMonitor,
+} from '../../../../common/runtime_types';
 import { ActionBar } from './action_bar';
 
 describe('<ActionBar />', () => {
   const setMonitor = jest.spyOn(fetchers, 'setMonitor');
-  const monitor = {
+  const monitor: SyntheticsMonitor = {
     name: 'test-monitor',
     schedule: {
       unit: ScheduleUnit.MINUTES,
       number: '2',
     },
     urls: 'https://elastic.co',
-    type: DataStream.BROWSER,
-  };
+    type: DataStream.HTTP,
+  } as unknown as HTTPFields;
 
   beforeEach(() => {
     jest.clearAllMocks();

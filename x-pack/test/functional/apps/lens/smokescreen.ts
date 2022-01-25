@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -767,6 +768,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasExtensionFilter).to.be(true);
 
       await filterBar.removeFilter('extension.raw');
+    });
+
+    it('should show visual options button group for a donut chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchToVisualization('donut');
+
+      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      expect(hasVisualOptionsButton).to.be(true);
+
+      await PageObjects.lens.openVisualOptions();
+      await retry.try(async () => {
+        expect(await PageObjects.lens.hasEmptySizeRatioButtonGroup()).to.be(true);
+      });
+    });
+
+    it('should not show visual options button group for a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchToVisualization('pie');
+
+      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      expect(hasVisualOptionsButton).to.be(false);
     });
   });
 }

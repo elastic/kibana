@@ -36,6 +36,7 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
 interface GetOptions {
   type: string;
   id: string;
+  space?: string;
 }
 
 interface IndexOptions<Attributes> {
@@ -110,11 +111,13 @@ export class KbnClientSavedObjects {
    * Get an object
    */
   public async get<Attributes extends Record<string, any>>(options: GetOptions) {
-    this.log.debug('Gettings saved object: %j', options);
+    this.log.debug('Getting saved object: %j', options);
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'get saved object',
-      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
+      path: options.space
+        ? uriencode`/s/${options.space}/api/saved_objects/${options.type}/${options.id}`
+        : uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'GET',
     });
     return data;
@@ -174,7 +177,9 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request({
       description: 'delete saved object',
-      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
+      path: options.space
+        ? uriencode`/s/${options.space}/api/saved_objects/${options.type}/${options.id}`
+        : uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'DELETE',
     });
 

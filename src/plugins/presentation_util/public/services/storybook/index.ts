@@ -16,10 +16,7 @@ import { dashboardsServiceFactory } from '../stub/dashboards';
 import { labsServiceFactory } from './labs';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
-import { overlaysServiceFactory } from './overlays';
-import { controlsServiceFactory } from './controls';
 import { dataViewsServiceFactory } from './data_views';
-import { dataServiceFactory } from './data';
 
 export type { PluginServiceProviders } from '../create';
 export { PluginServiceProvider, PluginServiceRegistry } from '../create';
@@ -36,9 +33,6 @@ export const providers: PluginServiceProviders<PresentationUtilServices, Storybo
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
-  data: new PluginServiceProvider(dataServiceFactory),
-  overlays: new PluginServiceProvider(overlaysServiceFactory),
-  controls: new PluginServiceProvider(controlsServiceFactory),
   labs: new PluginServiceProvider(labsServiceFactory),
 };
 

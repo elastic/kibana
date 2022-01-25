@@ -102,7 +102,7 @@ export default {
     },
     indexPattern: {
       description:
-        '`IndexPatternBase` - index patterns used to populate field options and value autocomplete.',
+        '`DataViewBase` - index patterns used to populate field options and value autocomplete.',
       type: {
         required: true,
       },

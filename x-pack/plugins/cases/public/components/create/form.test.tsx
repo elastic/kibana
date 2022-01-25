@@ -9,6 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act, render } from '@testing-library/react';
 
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -23,6 +24,9 @@ jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
+jest.mock('../app/use_available_owners', () => ({
+  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+}));
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
@@ -32,7 +36,7 @@ const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
-  connectorId: 'none',
+  connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
 };
@@ -64,7 +68,7 @@ describe('CreateCaseForm', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useGetTagsMock.mockReturnValue({ tags: ['test'] });
     useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -90,7 +94,7 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="case-creation-form-steps"]`).exists()).toBeFalsy();
   });
 
-  it('it renders all form fields', async () => {
+  it('it renders all form fields except case selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CreateCaseForm {...casesFormProps} />
@@ -102,6 +106,22 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeFalsy();
+  });
+
+  it('renders all form fields including case selection if has permissions and no owner', async () => {
+    const wrapper = mount(
+      <MockHookWrapperComponent testProviderProps={{ owner: [] }}>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(wrapper.find(`[data-test-subj="caseTitle"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseTags"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeTruthy();
   });
 
   it('hides the sync alerts toggle', () => {

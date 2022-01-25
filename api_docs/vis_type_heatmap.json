@@ -1,0 +1,86 @@
+{
+  "id": "visTypeHeatmap",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "visTypeHeatmap",
+        "id": "def-public.heatmapVisType",
+        "type": "Function",
+        "tags": [],
+        "label": "heatmapVisType",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "HeatmapTypeProps",
+          ") => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisTypeDefinition",
+            "text": "VisTypeDefinition"
+          },
+          "<",
+          "HeatmapVisParams",
+          ">"
+        ],
+        "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeHeatmap",
+            "id": "def-public.heatmapVisType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "HeatmapTypeProps"
+            ],
+            "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "visTypeHeatmap",
+        "id": "def-common.LEGACY_HEATMAP_CHARTS_LIBRARY",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_HEATMAP_CHARTS_LIBRARY",
+        "description": [],
+        "signature": [
+          "\"visualization:visualize:legacyHeatmapChartsLibrary\""
+        ],
+        "path": "src/plugins/vis_types/heatmap/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

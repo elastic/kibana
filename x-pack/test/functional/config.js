@@ -10,6 +10,13 @@ import { resolve } from 'path';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// Docker image to use for Fleet API integration tests.
+// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
+// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
+// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:ffcbe0ba25b9bae09a671249cbb1b25af0aa1994';
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
@@ -81,11 +88,10 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       ],
     },
     uiSettings: {
@@ -485,7 +491,7 @@ export default async function ({ readConfigFile }) {
           },
         },
 
-        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        // Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
             cluster: ['manage_security', 'manage_api_key'],
@@ -516,6 +522,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_ilm'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
         },
 
         index_management_user: {

@@ -28,7 +28,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{i18n.CREATE_CASE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <CreateCase
@@ -40,6 +40,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
       </EuiModalBody>
     </EuiModal>
   ) : null;
+CreateModalComponent.displayName = 'CreateModal';
 
 export const CreateCaseModal = memo(CreateModalComponent);
 

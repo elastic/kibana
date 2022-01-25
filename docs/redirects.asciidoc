@@ -416,27 +416,32 @@ This content has moved. Refer to <<data-views-api-get>>.
 
 This content has moved. Refer to <<data-views-runtime-field-api-create>>.
 
-[role="exclude",id="index-patterns-runtime-field-api-delete]
+[role="exclude",id="index-patterns-runtime-field-api-delete"]
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-runtime-field-api-delete>>.
 
-[role="exclude",id="index-patterns-runtime-field-api-get]
+[role="exclude",id="index-patterns-runtime-field-api-get"]
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-runtime-field-api-get>>.
 
-[role="exclude",id="index-patterns-runtime-field-api-update]
+[role="exclude",id="index-patterns-runtime-field-api-update"]
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-runtime-field-api-update>>.
 
-[role="exclude",id="index-patterns-runtime-field-api-upsert]
+[role="exclude",id="index-patterns-runtime-field-api-upsert"]
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
 
-[role="exclude",id="index-patterns-api-update]
+[role="exclude",id="index-patterns-api-update"]
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-api-update>>.
+
+[role="exclude",id="xpack-kibana-role-management"]
+== Kibana role management.
+
+This content has moved. Refer to <<kibana-role-management>>.
