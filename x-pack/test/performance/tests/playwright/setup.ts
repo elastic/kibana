@@ -16,7 +16,9 @@ const headless = process.env.TEST_BROWSER_HEADLESS === '1';
 
 export default async (): Promise<ITestSetup> => {
   const browser = await playwright.chromium.launch({ headless });
-  const page = await browser.newPage();
+  const page = await browser.newPage({
+    ignoreHTTPSErrors: true,
+  });
   const client = await page.context().newCDPSession(page);
 
   await client.send('Network.clearBrowserCache');
@@ -27,6 +29,7 @@ export default async (): Promise<ITestSetup> => {
     uploadThroughput: 750_000,
     offline: false,
   });
+  await client.send('Security.setIgnoreCertificateErrors', { ignore: true });
 
   await page.route('**', (route) => route.continue());
 

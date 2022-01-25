@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import Fs from 'fs';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
@@ -30,7 +31,14 @@ export default async function ({ readConfigFile }) {
     pageObjects,
     services,
 
-    servers: commonConfig.get('servers'),
+    servers: {
+      ...commonConfig.get('servers'),
+      kibana: {
+        ...commonConfig.get('servers.kibana'),
+        protocol: 'https',
+        certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
+      },
+    },
 
     esTestCluster: {
       ...commonConfig.get('esTestCluster'),
@@ -46,6 +54,13 @@ export default async function ({ readConfigFile }) {
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.reporting.enabled=false',
+
+        '--server.ssl.enabled=true',
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+
+        // '--server.protocol=http2',
       ],
     },
 
@@ -111,6 +126,7 @@ export default async function ({ readConfigFile }) {
     },
     browser: {
       type: 'chrome',
+      acceptInsecureCerts: true,
     },
 
     security: {
