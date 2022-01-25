@@ -109,6 +109,7 @@ export function DashboardApp({
     if (!embedSettings) chrome.setIsVisible(!printMode);
   }, [chrome, printMode, embedSettings]);
 
+  const skinName = dashboardAppState.getLatestDashboardState?.().skin;
   return (
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
@@ -132,7 +133,7 @@ export function DashboardApp({
                 )}${history.location.search}`,
               })
             : null}
-          <div className="dashboardViewport">
+          <div className={`dashboardViewport dashboardViewport-${skinName}`}>
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>
         </>

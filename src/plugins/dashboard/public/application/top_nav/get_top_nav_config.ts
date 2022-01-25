@@ -43,6 +43,7 @@ export function getTopNavConfig(
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
+            getSkinsConfig(actions[TopNavIds.SKINS]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:
@@ -237,6 +238,20 @@ function getOptionsConfig(action: NavAction, disableButton?: boolean) {
       defaultMessage: 'Options',
     }),
     testId: 'dashboardOptionsButton',
+    run: action,
+  };
+}
+
+function getSkinsConfig(action: NavAction | undefined, disableButton?: boolean) {
+  return {
+    id: 'skins',
+    label: i18n.translate('dashboard.topNave.skinsButtonAriaLabel', {
+      defaultMessage: 'skins',
+    }),
+    description: i18n.translate('dashboard.topNave.skinsConfigDescription', {
+      defaultMessage: 'Skins',
+    }),
+    testId: 'skinsTopNavButton',
     run: action,
   };
 }

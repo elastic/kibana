@@ -1,0 +1,36 @@
+.dashboardViewport-matrix {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #000000 !important;
+
+  .embPanel__title {
+    background-color: #000000 !important;
+    color: #00FF41 !important;
+  }
+
+  .embPanel__content {
+    background-color: #000000 !important;
+    color: #00FF41 !important;
+  }
+
+  .lnsVisualizationContainer {
+    background-color: #000000 !important;
+    color: #00FF41 !important;
+
+    .lnsMetricExpression__title {
+      color: #003B00 !important;
+    }
+  }
+
+  canvas {
+    display: block;
+    position:absolute;
+    top:0;
+    left:0;
+  }
+
+  .dshEmptyWidget {
+    background-color: #000000;
+  }
+}

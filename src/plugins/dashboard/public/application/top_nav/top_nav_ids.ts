@@ -16,4 +16,5 @@ export const TopNavIds = {
   CLONE: 'clone',
   FULL_SCREEN: 'fullScreenMode',
   LABS: 'labs',
+  SKINS: 'skins,',
 };
