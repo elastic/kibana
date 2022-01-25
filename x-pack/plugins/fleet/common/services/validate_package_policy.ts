@@ -217,7 +217,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.required) {
-    if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
+    if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
