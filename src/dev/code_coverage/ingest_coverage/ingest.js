@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-const { Client } = require('@elastic/elasticsearch');
+const { Client, HttpConnection } = require('@elastic/elasticsearch');
 import { RESEARCH_CI_JOB_NAME } from './constants';
 import { whichIndex } from './ingest_helpers';
 import { fromNullable } from './either';
 import { always, id, flatMap, ccMark, lazyF } from './utils';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
-const client = new Client({ node });
+const client = new Client({
+  node,
+  maxRetries: 5,
+  requestTimeout: 60000,
+  Connection: HttpConnection,
+});
 const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
 
 export const ingestList = (log) => async (xs) => {
-  fromNullable(process.env.NODE_ENV).fold(bulkIngest, justLog);
+  await bulkIngest();
 
   async function bulkIngest() {
     log.verbose(`\n${ccMark} Ingesting ${xs.length} docs at a time`);
 
     const body = parseIndexes(xs);
 
-    const { body: bulkResponse } = await client.bulk({ refresh: true, body });
+    const bulkResponse = await client.bulk({ refresh: true, body });
 
     handleErrors(body, bulkResponse)(log);
-  }
-
-  function justLog() {
-    log.verbose(`\n${ccMark} Just logging first item from current (buffered) bulk list`);
-    log.verbose(`\n${ccMark} ${JSON.stringify(xs[0], null, 2)}`);
   }
 };
 
