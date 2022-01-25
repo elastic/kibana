@@ -52,6 +52,7 @@ const SELECTED_COMMAND_COLOR = 'rgb(240, 78, 152)';
 const ALERT_COMMAND_COLOR = 'rgba(189, 39, 30, 0.48)';
 
 describe('Session view', () => {
+  
   context('Rendering table empty state', () => {
     before(() => {
       cleanKibana();
@@ -70,6 +71,7 @@ describe('Session view', () => {
     });
 
     beforeEach(() => {
+      cy.clock(Date.UTC(2022,0,25),['Date']);
       loginAndNavigateToHostSessions();
     });
 
@@ -209,7 +211,7 @@ describe('Session view', () => {
 
     it('selected command is highlighted properly', () => {
       openSessionView(TEST_EVENT_ID);
-      cy.wait(10000);
+      
       // Click on 1st command and make sure that clicked command is highlighted
       cy.get(SESSION_COMMANDS)
         .eq(0)
@@ -222,8 +224,6 @@ describe('Session view', () => {
 
     it('Commands with Alerts is highlighted', () => {
       openSessionView(TEST_EVENT_ID);
-
-      cy.wait(10000)
 
       // Gets the number of Alerts we have in a session
       cy.get(PROCESS_TREE_NODE_ALERT)
@@ -259,6 +259,7 @@ describe('Session view', () => {
     });
 
     beforeEach(() => {
+      cy.clock(Date.UTC(2022,0,24),['Date']);
       loginAndNavigateToHostSessions();
     });
 
