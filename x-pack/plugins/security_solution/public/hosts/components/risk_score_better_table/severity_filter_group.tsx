@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiFilterButton,
@@ -17,9 +17,11 @@ import {
 import { useDispatch } from 'react-redux';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 import * as i18n from './translations';
-import { hostsActions, hostsModel } from '../../store';
+import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
 import { HostRiskScore } from '../common/host_risk_score';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { State } from '../../../common/store';
 
 interface SeverityItems {
   risk: HostRiskSeverity;
@@ -45,86 +47,37 @@ export const SeverityFilterGroup: React.FC<{
   const filterGroupPopoverId = useGeneratedHtmlId({
     prefix: 'filterGroupPopover',
   });
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
+    []
+  );
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, type)
+  );
 
-  const [items, setItems] = useState<SeverityItems[]>(
-    (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
-      risk: k as HostRiskSeverity,
+  const items: SeverityItems[] = useMemo(() => {
+    const checked: FilterChecked = 'on';
+    return (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
+      risk: k,
       count: severityCount[k],
-    }))
-  );
+      checked: severitySelectionRedux.includes(k) ? checked : undefined,
+    }));
+  }, [severityCount, severitySelectionRedux]);
 
-  const filterQuery = useMemo(
-    () =>
-      items.reduce(
-        (acc: HostRiskSeverity[], item) => (item.checked === 'on' ? [...acc, item.risk] : acc),
-        []
-      ),
-    [items]
-  );
-
-  useEffect(() => {
-    dispatch(
-      hostsActions.updateRiskScoreBetterFilterQuery({
-        filterQuery:
-          filterQuery.length > 0
-            ? {
-                query: {
-                  bool: {
-                    should: filterQuery.map((query) => ({
-                      match_phrase: {
-                        'risk.keyword': {
-                          query,
-                        },
-                      },
-                    })),
-                  },
-                },
-                meta: {
-                  alias: null,
-                  disabled: false,
-                  negate: false,
-                },
-              }
-            : undefined,
-        hostsType: type,
-      })
-    );
-  }, [filterQuery, dispatch, type]);
-
-  useEffect(() => {
-    setItems((prevItems) =>
-      (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
-        risk: k as HostRiskSeverity,
-        count: severityCount[k],
-        checked: prevItems.find((v) => v.risk === k)?.checked,
-      }))
-    );
-  }, [severityCount]);
-
-  const updateItem = useCallback(
-    (index: number) => {
-      if (!items[index]) {
-        return;
-      }
-
-      const newItems = [...items];
-
-      switch (newItems[index].checked) {
-        case 'on':
-          newItems[index].checked = undefined;
-          break;
-
-        case 'off':
-          newItems[index].checked = undefined;
-          break;
-
-        default:
-          newItems[index].checked = 'on';
-      }
-
-      setItems(newItems);
+  const updateSeverityFilter = useCallback(
+    (selectedSeverity: HostRiskSeverity) => {
+      const currentSelection = severitySelectionRedux ?? [];
+      const newSelection = currentSelection.includes(selectedSeverity)
+        ? currentSelection.filter((s) => s !== selectedSeverity)
+        : [...currentSelection, selectedSeverity];
+      dispatch(
+        hostsActions.updateRiskScoreBetterSeverityFilter({
+          severitySelection: newSelection,
+          hostsType: type,
+        })
+      );
     },
-    [items]
+    [dispatch, severitySelectionRedux, type]
   );
 
   const totalActiveHosts = useMemo(
@@ -160,8 +113,8 @@ export const SeverityFilterGroup: React.FC<{
           {items.map((item, index) => (
             <EuiFilterSelectItem
               checked={item.checked}
-              key={index}
-              onClick={() => updateItem(index)}
+              key={index + item.risk}
+              onClick={() => updateSeverityFilter(item.risk)}
             >
               <HostRiskScore severity={item.risk} />
             </EuiFilterSelectItem>

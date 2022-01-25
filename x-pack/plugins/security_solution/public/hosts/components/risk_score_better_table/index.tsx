@@ -24,7 +24,11 @@ import type {
   RiskScoreBetterItem,
   RiskScoreBetterSortField,
 } from '../../../../common/search_strategy';
-import { RiskScoreBetterFields, Direction } from '../../../../common/search_strategy';
+import {
+  RiskScoreBetterFields,
+  Direction,
+  HostRiskSeverity,
+} from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import { HOSTS_BY_RISK } from './translations';
@@ -130,8 +134,21 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
     },
     [dispatch, sort, type]
   );
-
-  const columns = useMemo(() => getRiskScoreBetterColumns(), []);
+  const dispatchSeverityUpdate = useCallback(
+    (s: HostRiskSeverity) => {
+      dispatch(
+        hostsActions.updateRiskScoreBetterSeverityFilter({
+          severitySelection: [s],
+          hostsType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
+  const columns = useMemo(
+    () => getRiskScoreBetterColumns({ dispatchSeverityUpdate }),
+    [dispatchSeverityUpdate]
+  );
 
   const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
 

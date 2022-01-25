@@ -25,7 +25,7 @@ import {
   RiskScoreBetterStrategyResponse,
   getHostRiskIndex,
 } from '../../../../common/search_strategy';
-import { ESQuery, ESTermQuery } from '../../../../common/typed_json';
+import { ESQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';

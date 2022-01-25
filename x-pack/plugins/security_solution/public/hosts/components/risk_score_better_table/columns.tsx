@@ -20,8 +20,13 @@ import { RiskScoreBetterColumns } from './';
 
 import * as i18n from './translations';
 import { HostRiskScore } from '../common/host_risk_score';
+import { HostRiskSeverity } from '../../../../common/search_strategy';
 
-export const getRiskScoreBetterColumns = (): RiskScoreBetterColumns => [
+export const getRiskScoreBetterColumns = ({
+  dispatchSeverityUpdate,
+}: {
+  dispatchSeverityUpdate: (s: HostRiskSeverity) => void;
+}): RiskScoreBetterColumns => [
   {
     field: 'node.host_name',
     name: i18n.HOST_NAME,
@@ -92,7 +97,7 @@ export const getRiskScoreBetterColumns = (): RiskScoreBetterColumns => [
         return (
           <HostRiskScore
             toolTipContent={
-              <EuiLink onClick={() => {}}>
+              <EuiLink onClick={() => dispatchSeverityUpdate(risk)}>
                 <EuiText size="xs">{i18n.VIEW_HOSTS_BY_SEVERITY(risk.toLowerCase())}</EuiText>
               </EuiLink>
             }

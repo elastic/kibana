@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import { EuiHealth, transparentize, EuiPopover } from '@elastic/eui';
+import { EuiHealth, transparentize } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
+import { WithHoverActions } from '../../../common/components/with_hover_actions';
 
 export const HOST_RISK_SEVERITY_COLOUR: { [k in HostRiskSeverity]: string } = {
   [HostRiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
@@ -35,11 +36,13 @@ const HostRiskBadge = styled.div<{ $severity: HostRiskSeverity; $hideBackgroundC
     `};
   `}
 `;
-
+const TooltipContainer = styled.div`
+  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
 export const HostRiskScore: React.FC<{
   severity: HostRiskSeverity;
   hideBackgroundColor?: boolean;
-  toolTipContent?: React.ReactNode;
+  toolTipContent?: JSX.Element;
 }> = ({ severity, hideBackgroundColor = false, toolTipContent }) => {
   const badge = (
     <HostRiskBadge
@@ -53,32 +56,13 @@ export const HostRiskScore: React.FC<{
       </EuiHealth>
     </HostRiskBadge>
   );
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   if (toolTipContent != null) {
     return (
-      <EuiPopover
-        anchorPosition="downCenter"
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        onBlur={() => setIsPopoverOpen(false)}
-        onFocus={() => setIsPopoverOpen(true)}
-        onMouseOut={() => setIsPopoverOpen(false)}
-        onMouseOver={() => setIsPopoverOpen(true)}
-        button={
-          <button
-            data-test-subj="host-risk-score-button"
-            onBlur={() => setIsPopoverOpen(false)}
-            onFocus={() => setIsPopoverOpen(true)}
-            onMouseOut={() => setIsPopoverOpen(false)}
-            onMouseOver={() => setIsPopoverOpen(true)}
-            type={'button'}
-          >
-            {badge}
-          </button>
-        }
-      >
-        {toolTipContent}
-      </EuiPopover>
+      <WithHoverActions
+        hoverContent={<TooltipContainer>{toolTipContent}</TooltipContainer>}
+        render={() => badge}
+      />
     );
   }
   return badge;

@@ -6,8 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type { Filter } from '@kbn/es-query';
 import {
+  HostRiskSeverity,
   HostsSortField,
   RiskScoreBetterSortField,
 } from '../../../common/search_strategy/security_solution/hosts';
@@ -43,7 +43,7 @@ export const updateRiskScoreBetterSort = actionCreator<{
   hostsType: HostsType;
 }>('UPDATE_RISK_SCORE_BETTER_SORT');
 
-export const updateRiskScoreBetterFilterQuery = actionCreator<{
-  filterQuery?: Filter;
+export const updateRiskScoreBetterSeverityFilter = actionCreator<{
+  severitySelection: HostRiskSeverity[];
   hostsType: HostsType;
-}>('UPDATE_RISK_SCORE_BETTER_SORT_FILTER_QUERY');
+}>('UPDATE_RISK_SCORE_BETTER_SEVERITY');

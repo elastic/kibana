@@ -42,6 +42,7 @@ import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
 import { filterHostData } from './navigation';
 import { hostsModel, hostsSelectors } from '../store';
+import { generateSeverityFilter } from '../store/helpers';
 import { HostsTableType } from '../store/model';
 import {
   onTimelineTabKeyPressed,
@@ -55,7 +56,6 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import * as hostSelectors from '../store/selectors';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -86,10 +86,10 @@ const HostsComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const getHostRiskScoreFilterQuerySelector = useMemo(
-    () => hostsSelectors.hostRiskScoreFilterQuerySelector(),
+    () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
     []
   );
-  const { filterQuery: hostRiskScoreFilters } = useDeepEqualSelector((state: State) =>
+  const severitySelection = useDeepEqualSelector((state: State) =>
     getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
   );
 
@@ -104,12 +104,12 @@ const HostsComponent = () => {
     }
     // TODO: Steph/host risk refactor to single tab name
     if (tabName === HostsTableType.riskScoreBetter || tabName === HostsTableType.risk) {
-      return hostRiskScoreFilters
-        ? [hostRiskScoreFilters, ...filterHostData, ...filters]
-        : [...filterHostData, ...filters];
+      const severityFilter = generateSeverityFilter(severitySelection);
+
+      return [...severityFilter, ...filterHostData, ...filters];
     }
     return filters;
-  }, [hostRiskScoreFilters, tabName, filters]);
+  }, [severitySelection, tabName, filters]);
   const narrowDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {

@@ -14,7 +14,7 @@ import {
   setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
-  updateRiskScoreBetterFilterQuery,
+  updateRiskScoreBetterSeverityFilter,
   updateRiskScoreBetterSort,
   updateTableActivePage,
   updateTableLimit,
@@ -61,6 +61,7 @@ export const initialHostsState: HostsState = {
           field: RiskScoreBetterFields.riskScore,
           direction: Direction.desc,
         },
+        severitySelection: [],
       },
       [HostsTableType.risk]: null,
     },
@@ -98,8 +99,8 @@ export const initialHostsState: HostsState = {
           field: RiskScoreBetterFields.riskScore,
           direction: Direction.desc,
         },
+        severitySelection: [],
       },
-      [HostsTableType.risk]: null,
     },
   },
 };
@@ -176,7 +177,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       },
     },
   }))
-  .case(updateRiskScoreBetterFilterQuery, (state, { filterQuery, hostsType }) => ({
+  .case(updateRiskScoreBetterSeverityFilter, (state, { severitySelection, hostsType }) => ({
     ...state,
     [hostsType]: {
       ...state[hostsType],
@@ -184,7 +185,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         ...state[hostsType].queries,
         [HostsTableType.riskScoreBetter]: {
           ...state[hostsType].queries[HostsTableType.riskScoreBetter],
-          filterQuery,
+          severitySelection,
         },
       },
     },
