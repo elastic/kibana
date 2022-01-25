@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import {
+  useGeneratedHtmlId,
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -31,12 +32,16 @@ interface Props {
 }
 
 const FormWrapperComponent: FC<Props> = ({ form, onClose, onSubmit, children, title }) => {
+  const simpleFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'BulkEditForm',
+  });
+
   const { isValid } = form;
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={title} size="s">
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={simpleFlyoutTitleId} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{title}</h2>
+          <h2 id={simpleFlyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
