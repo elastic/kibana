@@ -27,6 +27,7 @@ import { ChartGrid } from './components/chart-grid';
 import { FlameGraphContext } from './components/contexts/flamegraph';
 import { FlameGraphNavigation } from './components/flamegraph-nav';
 import { FlameGraph } from './components/flamegraph';
+import { PixiFlamechart } from './components/PixiFlamechart';
 
 import { Services } from './services';
 
@@ -77,6 +78,7 @@ function App({ fetchTopN, fetchFlamechart, fetchRawFlamechart }: Props) {
           <EuiSpacer />
           <FlameGraphContext.Provider value={pixiFlamegraph}>
             <FlameGraphNavigation getter={fetchRawFlamechart} setter={setPixiFlamegraph} />
+            <PixiFlamechart projectID={5} />
           </FlameGraphContext.Provider>
         </>
       ),
