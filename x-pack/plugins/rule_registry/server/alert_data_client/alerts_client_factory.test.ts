@@ -46,7 +46,6 @@ const fakeRequest = {
 
 const auditLogger = {
   log: jest.fn(),
-  enabled: true,
 } as jest.Mocked<AuditLogger>;
 
 describe('AlertsClientFactory', () => {

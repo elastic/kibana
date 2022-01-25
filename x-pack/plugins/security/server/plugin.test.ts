@@ -68,7 +68,6 @@ describe('Security Plugin', () => {
           "audit": Object {
             "asScoped": [Function],
             "withoutRequest": Object {
-              "enabled": false,
               "log": [Function],
             },
           },

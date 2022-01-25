@@ -264,7 +264,6 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
     const auditLogger = {
       log: jest.fn(),
-      enabled: true,
     };
 
     beforeEach(() => {
@@ -1095,7 +1094,6 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
     const auditLogger = {
       log: jest.fn(),
-      enabled: true,
     };
 
     beforeEach(() => {
@@ -2011,7 +2009,6 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
     const auditLogger = {
       log: jest.fn(),
-      enabled: true,
     };
 
     beforeEach(() => {
@@ -2148,7 +2145,6 @@ describe('Authenticator', () => {
     let mockSessionValue: SessionValue;
     const auditLogger = {
       log: jest.fn(),
-      enabled: true,
     };
 
     beforeEach(() => {
