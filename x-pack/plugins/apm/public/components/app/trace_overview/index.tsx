@@ -34,8 +34,7 @@ export function TraceOverview() {
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/traces',
+        return callApmApi('GET /internal/apm/traces', {
           params: {
             query: {
               environment,

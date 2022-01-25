@@ -65,7 +65,8 @@ describe('exception_list_client', () => {
       expect(extensionPointStorageContext.exceptionPreCreate.callback).toHaveBeenCalled();
     });
 
-    // Test client methods that use the `pipeRun()` method of the ExtensionPointStorageClient`
+    // Test client methods that use the `pipeRun()` method of the ExtensionPointStorageClient` and
+    // receive an exception item for create or update
     describe.each([
       [
         'createExceptionListItem',
@@ -109,6 +110,17 @@ describe('exception_list_client', () => {
             expect(getExtensionPointCallback()).toHaveBeenCalled();
           });
 
+          it('should error if extension point callback throws an error', async () => {
+            const error = new Error('foo');
+            const extensionCallback = getExtensionPointCallback();
+
+            extensionCallback.mockImplementation(async () => {
+              throw error;
+            });
+
+            await expect(callExceptionListClientMethod()).rejects.toBe(error);
+          });
+
           it('should validate extension point callback returned data and throw if not valid', async () => {
             const extensionPointCallback = getExtensionPointCallback();
             extensionPointCallback.mockImplementation(async (args) => {
@@ -138,6 +150,154 @@ describe('exception_list_client', () => {
               })
             );
           });
+        });
+
+        describe('and server extension points are DISABLED', () => {
+          beforeEach(() => {
+            exceptionListClient = new ExceptionListClient({
+              enableServerExtensionPoints: false,
+              savedObjectsClient: getExceptionListSavedObjectClientMock(),
+              serverExtensionsClient:
+                extensionPointStorageContext.extensionPointStorage.getClient(),
+              user: 'elastic',
+            });
+          });
+
+          it('should NOT call server extension points', async () => {
+            await callExceptionListClientMethod();
+
+            expect(getExtensionPointCallback()).not.toHaveBeenCalled();
+          });
+        });
+      }
+    );
+
+    // Test Client methods that use `pipeRun()` for executing extension points, but don't mutate it (access only)
+    describe.each([
+      [
+        'getExceptionListItem',
+        (): ReturnType<ExceptionListClient['getExceptionListItem']> => {
+          return exceptionListClient.getExceptionListItem({
+            id: '1',
+            itemId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreGetOne']['callback'] => {
+          return extensionPointStorageContext.exceptionPreGetOne.callback;
+        },
+      ],
+      [
+        'findExceptionListItem',
+        (): ReturnType<ExceptionListClient['findEndpointListItem']> => {
+          return exceptionListClient.findExceptionListItem({
+            filter: undefined,
+            listId: 'one',
+            namespaceType: 'agnostic',
+            page: 1,
+            perPage: 1,
+            sortField: 'name',
+            sortOrder: 'asc',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreSingleListFind']['callback'] => {
+          return extensionPointStorageContext.exceptionPreSingleListFind.callback;
+        },
+      ],
+      [
+        'findExceptionListsItem',
+        (): ReturnType<ExceptionListClient['findExceptionListsItem']> => {
+          return exceptionListClient.findExceptionListsItem({
+            filter: [],
+            listId: ['one'],
+            namespaceType: ['agnostic'],
+            page: 1,
+            perPage: 1,
+            sortField: 'name',
+            sortOrder: 'asc',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreMultiListFind']['callback'] => {
+          return extensionPointStorageContext.exceptionPreMultiListFind.callback;
+        },
+      ],
+      [
+        'exportExceptionListAndItems',
+        (): ReturnType<ExceptionListClient['exportExceptionListAndItems']> => {
+          return exceptionListClient.exportExceptionListAndItems({
+            id: '1',
+            listId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreExport']['callback'] => {
+          return extensionPointStorageContext.exceptionPreExport.callback;
+        },
+      ],
+      [
+        'getExceptionListSummary',
+        (): ReturnType<ExceptionListClient['getExceptionListSummary']> => {
+          return exceptionListClient.getExceptionListSummary({
+            id: '1',
+            listId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreSummary']['callback'] => {
+          return extensionPointStorageContext.exceptionPreSummary.callback;
+        },
+      ],
+      [
+        'deleteExceptionListItem',
+        (): ReturnType<ExceptionListClient['deleteExceptionListItem']> => {
+          return exceptionListClient.deleteExceptionListItem({
+            id: '1',
+            itemId: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'deleteExceptionListItemById',
+        (): ReturnType<ExceptionListClient['deleteExceptionListItemById']> => {
+          return exceptionListClient.deleteExceptionListItemById({
+            id: '1',
+            namespaceType: 'agnostic',
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
+          return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+    ])(
+      'and calling `ExceptionListClient#%s()`',
+      (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {
+        beforeEach(() => {
+          exceptionListClient = new ExceptionListClient({
+            savedObjectsClient: getExceptionListSavedObjectClientMock(),
+            serverExtensionsClient: extensionPointStorageContext.extensionPointStorage.getClient(),
+            user: 'elastic',
+          });
+        });
+
+        it('should execute extension point callbacks', async () => {
+          await callExceptionListClientMethod();
+
+          expect(getExtensionPointCallback()).toHaveBeenCalled();
+        });
+
+        it('should error if extension point callback throws an error', async () => {
+          const error = new Error('foo');
+          const extensionCallback = getExtensionPointCallback();
+
+          extensionCallback.mockImplementation(async () => {
+            throw error;
+          });
+
+          await expect(callExceptionListClientMethod()).rejects.toBe(error);
         });
 
         describe('and server extension points are DISABLED', () => {
