@@ -8,7 +8,6 @@ import { ElasticsearchClient, LoggerFactory } from 'kibana/server';
 import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { Comparator } from 'semver';
 import { LogLevel } from '@kbn/logging';
 import { RecoveredActionGroup } from '../../../../../alerting/common';
 import { InfraSource } from '../../sources';
@@ -21,11 +20,21 @@ import {
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { evaluateRule, EvaluatedRuleParams } from './lib/evaluate_rule';
 import { createFormatter } from '../../../../common/formatters';
-import { AlertStates } from './types';
+import { AlertStates, Comparator } from './types';
 import { FIRED_ACTIONS, WARNING_ACTIONS } from './metric_threshold_executor';
 
 import { configureClient } from '../../../../../../../src/core/server/elasticsearch/client';
 import { BaseLogger } from '../../../../../../../src/core/server/logging/logger';
+
+export interface IActionSchedulingInfo {
+  actionGroupId: string;
+  alertState: string;
+  group: string;
+  reason: string;
+  timestamp: number;
+  value: ReturnType<typeof mapToConditionsLookup>;
+  threshold: ReturnType<typeof mapToConditionsLookup>;
+}
 
 const scopedClient = configureClient(
   {
@@ -51,6 +60,7 @@ async function getActionsFromMetricThreshold({
   prevGroups,
   alertOnNoData,
   alertOnGroupDisappear,
+  compositeSize,
 }: {
   esClient: ElasticsearchClient;
   params: EvaluatedRuleParams;
@@ -58,8 +68,9 @@ async function getActionsFromMetricThreshold({
   prevGroups: string[];
   alertOnNoData: boolean;
   alertOnGroupDisappear?: boolean;
+  compositeSize: number;
 }) {
-  const alertResults = await evaluateRule(scopedClient, params, config, prevGroups);
+  const alertResults = await evaluateRule(scopedClient, params, config, prevGroups, compositeSize);
 
   // Because each alert result has the same group definitions, just grab the groups from the first one.
   const resultGroups = Object.keys(first(alertResults)!);
@@ -69,7 +80,7 @@ async function getActionsFromMetricThreshold({
 
   const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
 
-  const actionsToSchedule = [];
+  const actionsToSchedule: IActionSchedulingInfo[] = [];
   for (const group of groups) {
     // AND logic; all criteria must be across the threshold
     const shouldAlertFire = alertResults.every((result) =>

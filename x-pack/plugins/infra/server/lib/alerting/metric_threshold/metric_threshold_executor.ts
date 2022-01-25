@@ -7,6 +7,8 @@
 
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Piscina } from 'piscina';
+import { resolve } from 'path';
 import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
@@ -26,7 +28,7 @@ import {
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { AlertStates } from './types';
-import { getActionsFromMetricThreshold } from './worker';
+import { IActionSchedulingInfo } from './worker';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -53,6 +55,10 @@ type MetricThresholdAlertFactory = (
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlert;
+
+const pool = new Piscina({
+  filename: resolve(__dirname, 'worker.js'),
+});
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
@@ -127,13 +133,17 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
         : [];
 
-    const { groups, actionsToSchedule } = await getActionsFromMetricThreshold({
-      params,
-      config,
-      prevGroups,
-      alertOnNoData,
-      alertOnGroupDisappear,
-    });
+    const { groups, actionsToSchedule } = (await pool.run(
+      {
+        params,
+        config,
+        prevGroups,
+        alertOnNoData,
+        alertOnGroupDisappear,
+        compositeSize,
+      },
+      { name: 'getActionsFromMetricThreshold' }
+    )) as { groups: string[]; actionsToSchedule: IActionSchedulingInfo[] };
 
     actionsToSchedule.forEach(
       ({ actionGroupId, alertState, group, reason, timestamp, value, threshold }) => {
