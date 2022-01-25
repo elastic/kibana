@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { DatafeedStats, Job, MlPluginSetup } from '../../../../ml/server';
+import { MlDatafeedStats, MlJob, MlPluginSetup } from '../../../../ml/server';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 import { DetectionsMetric, MlJobMetric, MlJobsUsage, MlJobUsage } from './types';
@@ -94,14 +94,14 @@ export const getMlJobMetrics = async (
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .jobs(jobsType);
 
-      const jobDetailsCache = new Map<string, Job>();
+      const jobDetailsCache = new Map<string, MlJob>();
       jobDetails.jobs.forEach((detail) => jobDetailsCache.set(detail.job_id, detail));
 
       const datafeedStats = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .datafeedStats();
 
-      const datafeedStatsCache = new Map<string, DatafeedStats>();
+      const datafeedStatsCache = new Map<string, MlDatafeedStats>();
       datafeedStats.datafeeds.forEach((datafeedStat) =>
         datafeedStatsCache.set(`${datafeedStat.datafeed_id}`, datafeedStat)
       );
