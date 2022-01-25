@@ -7,6 +7,7 @@
  */
 
 import {
+  SavedObjectAttributes,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
@@ -132,7 +133,7 @@ export class SavedObjectLoader {
     { size = 100, fields, hasReference }: SavedObjectLoaderFindOptions
   ) {
     return this.savedObjectsClient
-      .find<Record<string, unknown>>({
+      .find<SavedObjectAttributes>({
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,

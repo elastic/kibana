@@ -9,11 +9,13 @@
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
 
-export interface CollectedUsage {
+// type required for index signature
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CollectedUsage = {
   successCount: number;
   errorCount: number;
   totalDuration: number;
-}
+};
 
 export interface ReportedUsage {
   successCount: number;
