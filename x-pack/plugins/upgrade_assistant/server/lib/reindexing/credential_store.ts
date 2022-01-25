@@ -16,10 +16,17 @@ import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 export type Credential = Record<string, any>;
 
 // Generates a stable hash for the reindex operation's current state.
-const getHash = (reindexOp: ReindexSavedObject) =>
-  createHash('sha256')
-    .update(stringify({ id: reindexOp.id, ...reindexOp.attributes }))
+const getHash = (reindexOp: ReindexSavedObject) => {
+  return createHash('sha256')
+    .update(
+      stringify({
+        id: reindexOp.id,
+        reindexTaskId: reindexOp.attributes.reindexTaskId,
+        status: reindexOp.attributes.status,
+      })
+    )
     .digest('base64');
+};
 
 // Returns a base64-encoded API key string or undefined
 const getApiKey = async ({
