@@ -34,8 +34,9 @@ interface AllRulesUtilityBarProps {
   onToggleSelectAll?: () => void;
   paginationTotal: number;
   showBulkActions: boolean;
-  isBulkActionsInProgress?: boolean;
   hasPagination?: boolean;
+  isBulkActionsInProgress?: boolean;
+  disableActions?: boolean;
 }
 
 export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
@@ -52,6 +53,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     showBulkActions = true,
     hasPagination,
     isBulkActionsInProgress,
+    disableActions,
   }) => {
     const handleGetBatchItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -121,7 +123,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && onToggleSelectAll && hasPagination && (
                   <UtilityBarAction
-                    disabled={isBulkActionsInProgress}
+                    disabled={disableActions}
                     dataTestSubj="selectAllRules"
                     iconType={isAllSelected ? 'cross' : 'pagesSelect'}
                     iconSide="left"
@@ -133,6 +135,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && (
                   <UtilityBarAction
+                    disabled={disableActions}
                     inProgress={isBulkActionsInProgress}
                     dataTestSubj="bulkActions"
                     iconSide="right"
@@ -145,7 +148,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 <UtilityBarAction
-                  disabled={isBulkActionsInProgress}
+                  disabled={disableActions}
                   dataTestSubj="refreshRulesAction"
                   iconSide="left"
                   iconType="refresh"
@@ -154,6 +157,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                   {i18n.REFRESH}
                 </UtilityBarAction>
                 <UtilityBarAction
+                  disabled={disableActions}
                   dataTestSubj="refreshSettings"
                   iconSide="right"
                   iconType="arrowDown"
