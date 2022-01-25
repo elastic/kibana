@@ -425,7 +425,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     <EuiFlyout size="l" onClose={onCancel} data-test-subj="add-exception-flyout">
       <FlyoutHeader>
         <EuiTitle>
-          <h2>{addExceptionMessage}</h2>
+          <h2 data-test-subj="exception-flyout-title">{addExceptionMessage}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <FlyoutSubtitle className="eui-textTruncate" title={ruleName}>

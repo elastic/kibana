@@ -314,7 +314,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
     <EuiFlyout size="l" onClose={onCancel} data-test-subj="edit-exception-flyout">
       <FlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 data-test-subj="exception-flyout-title">
             {exceptionListType === 'endpoint'
               ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
               : i18n.EDIT_EXCEPTION_TITLE}
