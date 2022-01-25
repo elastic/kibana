@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JOB_FIELD_TYPES } from '../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../common/constants';
 import type { IndexPatternField } from '../../../../../../../src/plugins/data/common';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
