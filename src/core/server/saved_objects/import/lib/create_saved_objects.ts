@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectsImportFailure,
+} from '../../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 import type { ImportStateMap } from './types';
 
-export interface CreateSavedObjectsParams<T> {
+export interface CreateSavedObjectsParams<T extends SavedObjectAttributes> {
   objects: Array<SavedObject<T>>;
   accumulatedErrors: SavedObjectsImportFailure[];
   savedObjectsClient: SavedObjectsClientContract;
@@ -19,7 +24,8 @@ export interface CreateSavedObjectsParams<T> {
   namespace?: string;
   overwrite?: boolean;
 }
-export interface CreateSavedObjectsResult<T> {
+
+export interface CreateSavedObjectsResult<T extends SavedObjectAttributes> {
   createdObjects: Array<CreatedObject<T>>;
   errors: SavedObjectsImportFailure[];
 }
@@ -28,7 +34,7 @@ export interface CreateSavedObjectsResult<T> {
  * This function abstracts the bulk creation of import objects. The main reason for this is that the import ID map should dictate the IDs of
  * the objects we create, and the create results should be mapped to the original IDs that consumers will be able to understand.
  */
-export const createSavedObjects = async <T>({
+export const createSavedObjects = async <T extends SavedObjectAttributes>({
   objects,
   accumulatedErrors,
   savedObjectsClient,
