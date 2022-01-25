@@ -46,8 +46,7 @@ export function Schema() {
     data = {} as FleetMigrationCheckResponse,
     status,
   } = useFetcher(
-    (callApi) =>
-      callApi({ endpoint: 'GET /internal/apm/fleet/migration_check' }),
+    (callApi) => callApi('GET /internal/apm/fleet/migration_check'),
     [],
     { preservePreviousData: false }
   );
@@ -120,10 +119,12 @@ async function getUnsupportedApmServerConfigs(
   toasts: NotificationsStart['toasts']
 ) {
   try {
-    const { unsupported } = await callApmApi({
-      endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
-      signal: null,
-    });
+    const { unsupported } = await callApmApi(
+      'GET /internal/apm/fleet/apm_server_schema/unsupported',
+      {
+        signal: null,
+      }
+    );
     return unsupported;
   } catch (error) {
     toasts.addDanger({
@@ -144,10 +145,12 @@ async function createCloudApmPackagePolicy(
 ) {
   updateLocalStorage(FETCH_STATUS.LOADING);
   try {
-    const { cloudApmPackagePolicy } = await callApmApi({
-      endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
-      signal: null,
-    });
+    const { cloudApmPackagePolicy } = await callApmApi(
+      'POST /internal/apm/fleet/cloud_apm_package_policy',
+      {
+        signal: null,
+      }
+    );
     updateLocalStorage(FETCH_STATUS.SUCCESS);
     return cloudApmPackagePolicy;
   } catch (error) {
