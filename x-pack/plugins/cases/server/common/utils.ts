@@ -258,9 +258,7 @@ export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) 
 };
 
 /**
- * Count the number of alerts for each id in the alert's references. This will result
- * in a map with entries for both the collection and the individual sub cases. So the resulting
- * size of the map will not equal the total number of sub cases.
+ * Count the number of alerts for each id in the alert's references.
  */
 export const groupTotalAlertsByID = ({
   comments,

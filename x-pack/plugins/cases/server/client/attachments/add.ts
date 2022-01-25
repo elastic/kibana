@@ -59,7 +59,7 @@ async function createCommentableCase({
 
   return new CommentableCase({
     logger,
-    collection: caseInfo,
+    caseInfo,
     caseService,
     attachmentService,
     unsecuredSavedObjectsClient,

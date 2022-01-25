@@ -14,12 +14,7 @@ import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  casesStatus,
-  useGetCasesMockState,
-  collectionCase,
-  connectorsMock,
-} from '../../containers/mock';
+import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
@@ -301,7 +296,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
-      selectedCases: [...useGetCasesMockState.data.cases, collectionCase],
+      selectedCases: [...useGetCasesMockState.data.cases, mockCase],
     });
 
     useDeleteCasesMock
@@ -336,8 +331,8 @@ describe('AllCasesListGeneric', () => {
       expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual([
         ...useGetCasesMockState.data.cases.map(({ id, title }) => ({ id, title })),
         {
-          id: collectionCase.id,
-          title: collectionCase.title,
+          id: mockCase.id,
+          title: mockCase.title,
         },
       ]);
     });

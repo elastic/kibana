@@ -78,7 +78,7 @@ describe('useUpdateComment', () => {
       const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
 
-      result.current.patchComment({ ...sampleUpdate });
+      result.current.patchComment(sampleUpdate);
       await waitForNextUpdate();
       expect(spyOnPatchComment).toBeCalledWith({
         caseId: basicCase.id,

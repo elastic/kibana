@@ -57,7 +57,7 @@ async function createCommentableCase({
   return new CommentableCase({
     attachmentService,
     caseService,
-    collection: caseInfo,
+    caseInfo,
     unsecuredSavedObjectsClient,
     logger,
     lensEmbeddableFactory,

@@ -49,7 +49,7 @@ interface NewCommentResp {
 }
 
 interface CommentableCaseParams {
-  collection: SavedObject<CaseAttributes>;
+  caseInfo: SavedObject<CaseAttributes>;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseService: CasesService;
   attachmentService: AttachmentService;
@@ -61,7 +61,7 @@ interface CommentableCaseParams {
  * This class represents a case that can have a comment attached to it.
  */
 export class CommentableCase {
-  private readonly collection: SavedObject<CaseAttributes>;
+  private readonly caseInfo: SavedObject<CaseAttributes>;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
@@ -69,14 +69,14 @@ export class CommentableCase {
   private readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor({
-    collection,
+    caseInfo,
     unsecuredSavedObjectsClient,
     caseService,
     attachmentService,
     logger,
     lensEmbeddableFactory,
   }: CommentableCaseParams) {
-    this.collection = collection;
+    this.caseInfo = caseInfo;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.caseService = caseService;
     this.attachmentService = attachmentService;
@@ -85,36 +85,23 @@ export class CommentableCase {
   }
 
   public get status(): CaseStatuses {
-    return this.collection.attributes.status;
+    return this.caseInfo.attributes.status;
   }
 
-  /**
-   * This property is used to abstract away which element is actually being acted upon in this class.
-   * If the sub case was initialized then it will be the focus of creating comments. So if you want the id
-   * of the saved object that the comment is primarily being attached to use this property.
-   *
-   * This is a little confusing because the created comment will have references to both the sub case and the
-   * collection but from the UI's perspective only the sub case really has the comment attached to it.
-   */
   public get id(): string {
-    return this.collection.id;
+    return this.caseInfo.id;
   }
 
   public get settings(): CaseSettings {
-    return this.collection.attributes.settings;
+    return this.caseInfo.attributes.settings;
   }
 
-  /**
-   * These functions break the abstraction of this class but they are needed to build the comment user action item.
-   * Another potential solution would be to implement another function that handles creating the user action in this
-   * class so that we don't need to expose these properties.
-   */
   public get caseId(): string {
-    return this.collection.id;
+    return this.caseInfo.id;
   }
 
   private get owner(): string {
-    return this.collection.attributes.owner;
+    return this.caseInfo.attributes.owner;
   }
 
   private buildRefsToCase(): SavedObjectReference[] {
@@ -122,7 +109,7 @@ export class CommentableCase {
       {
         type: CASE_SAVED_OBJECT,
         name: `associated-${CASE_SAVED_OBJECT}`,
-        id: this.collection.id,
+        id: this.caseInfo.id,
       },
     ];
   }
@@ -130,25 +117,24 @@ export class CommentableCase {
   private async update({ date, user }: { date: string; user: User }): Promise<CommentableCase> {
     try {
       const updatedCase = await this.caseService.patchCase({
-        originalCase: this.collection,
+        originalCase: this.caseInfo,
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-        caseId: this.collection.id,
+        caseId: this.caseInfo.id,
         updatedAttributes: {
           updated_at: date,
           updated_by: { ...user },
         },
-        version: this.collection.version,
+        version: this.caseInfo.version,
       });
 
-      // this will contain the updated sub case information if the sub case was defined initially
       return new CommentableCase({
-        collection: {
-          ...this.collection,
+        caseInfo: {
+          ...this.caseInfo,
           attributes: {
-            ...this.collection.attributes,
+            ...this.caseInfo.attributes,
             ...updatedCase.attributes,
           },
-          version: updatedCase.version ?? this.collection.version,
+          version: updatedCase.version ?? this.caseInfo.version,
         },
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseService: this.caseService,
@@ -284,20 +270,20 @@ export class CommentableCase {
     }
   }
 
-  private formatCollectionForEncoding(totalComment: number) {
+  private formatForEncoding(totalComment: number) {
     return {
-      id: this.collection.id,
-      version: this.collection.version ?? '0',
+      id: this.caseInfo.id,
+      version: this.caseInfo.version ?? '0',
       totalComment,
-      ...this.collection.attributes,
+      ...this.caseInfo.attributes,
     };
   }
 
   public async encode(): Promise<CaseResponse> {
     try {
-      const collectionComments = await this.caseService.getAllCaseComments({
+      const comments = await this.caseService.getAllCaseComments({
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-        id: this.collection.id,
+        id: this.caseInfo.id,
         options: {
           fields: [],
           page: 1,
@@ -305,13 +291,12 @@ export class CommentableCase {
         },
       });
 
-      const collectionTotalAlerts =
-        countAlertsForID({ comments: collectionComments, id: this.collection.id }) ?? 0;
+      const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
 
       const caseResponse = {
-        comments: flattenCommentSavedObjects(collectionComments.saved_objects),
-        totalAlerts: collectionTotalAlerts,
-        ...this.formatCollectionForEncoding(collectionComments.total),
+        comments: flattenCommentSavedObjects(comments.saved_objects),
+        totalAlerts,
+        ...this.formatForEncoding(comments.total),
       };
 
       return CaseResponseRt.encode(caseResponse);

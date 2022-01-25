@@ -209,11 +209,11 @@ export const basicCaseMetrics: CaseMetrics = {
   },
 };
 
-export const collectionCase: Case = {
+export const mockCase: Case = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
-  id: 'collection-id',
+  id: 'mock-id',
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -227,7 +227,7 @@ export const collectionCase: Case = {
   externalService: null,
   status: CaseStatuses.open,
   tags,
-  title: 'Another horrible breach in a collection!!',
+  title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
   updatedAt: basicUpdatedAt,

@@ -157,15 +157,12 @@ async function updateAlerts({
   const casesToSync = [...casesWithSyncSettingChangedToOn, ...casesWithStatusChangedAndSynced];
 
   // build a map of case id to the status it has
-  // this will have collections in it but the alerts should be associated to sub cases and not collections so it shouldn't
-  // matter.
   const casesToSyncToStatus = casesToSync.reduce((acc, { updateReq, originalCase }) => {
     acc.set(updateReq.id, updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open);
     return acc;
   }, new Map<string, CaseStatuses>());
 
-  // get all the alerts for all the alert comments for all cases and collections. Collections themselves won't have any
-  // but their sub cases could
+  // get all the alerts for all the alert comments for all cases
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
