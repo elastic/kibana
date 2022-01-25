@@ -136,21 +136,23 @@ export function ErrorGroupDetails() {
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end, groupId]
