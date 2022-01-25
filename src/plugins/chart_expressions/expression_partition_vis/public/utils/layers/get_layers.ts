@@ -51,13 +51,15 @@ export const getLayers = (
       visParams.palette
     );
   }
+
+  const sortPredicate = sortPredicateByType(chartType, visParams, visData, columns);
   return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel,
-      sortPredicate: sortPredicateByType(chartType, visParams, visData, columns, col),
+      sortPredicate,
       shape: {
         fillColor: (d) =>
           getColor(
