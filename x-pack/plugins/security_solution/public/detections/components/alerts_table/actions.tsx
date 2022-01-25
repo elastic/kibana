@@ -38,6 +38,7 @@ import {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
   UpdateAlertStatusActionProps,
+  CreateTimelineProps,
 } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
@@ -383,7 +384,11 @@ const buildEqlDataProviderOrFilter = (
   return { filters: [], dataProviders: [] };
 };
 
-const createThresholdTimeline = (ecsData: Ecs, createTimeline: Function, noteContent: string) => {
+const createThresholdTimeline = (
+  ecsData: Ecs,
+  createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
+  noteContent: string
+) => {
   const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
   const params = getField(ecsData, ALERT_RULE_PARAMETERS);
