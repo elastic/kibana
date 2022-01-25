@@ -24,16 +24,14 @@ import type {
   RiskScoreBetterItem,
   RiskScoreBetterSortField,
 } from '../../../../common/search_strategy';
-import {
-  RiskScoreBetterFields,
-  Direction,
-  HostRiskSeverity,
-} from '../../../../common/search_strategy';
+import { RiskScoreBetterFields, Direction } from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import { HOSTS_BY_RISK } from './translations';
 import { SeverityBar } from './severity_bar';
 import { SeverityBadges } from './severity_badges';
+import { SeverityFilterGroup } from './severity_filter_group';
+import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -56,7 +54,7 @@ interface RiskScoreBetterTableProps {
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
-  severityCount: { [k in HostRiskSeverity]?: number };
+  severityCount: SeverityCount;
   totalCount: number;
   type: hostsModel.HostsType;
 }
@@ -113,7 +111,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
     [type, dispatch]
   );
 
-  const onChange = useCallback(
+  const onSort = useCallback(
     (criteria: Criteria) => {
       if (criteria.sort != null) {
         const newSort: RiskScoreBetterSortField = {
@@ -136,21 +134,17 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   const columns = useMemo(() => getRiskScoreBetterColumns(), []);
 
   const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
-  const severity = {
-    [HostRiskSeverity.unknown]: 0,
-    [HostRiskSeverity.low]: 0,
-    [HostRiskSeverity.moderate]: 0,
-    [HostRiskSeverity.high]: 0,
-    [HostRiskSeverity.critical]: 0,
-    ...severityCount,
-  };
+
   const risk = (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <SeverityBadges severity={severity} />
+        <SeverityFilterGroup type={type} loading={loading} severityCount={severityCount} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <SeverityBar severity={severity} />
+        <SeverityBadges severityCount={severityCount} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <SeverityBar severityCount={severityCount} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -169,7 +163,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
       limit={limit}
       loading={loading}
       loadPage={loadPage}
-      onChange={onChange}
+      onChange={onSort}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}

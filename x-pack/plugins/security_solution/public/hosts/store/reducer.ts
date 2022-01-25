@@ -14,6 +14,7 @@ import {
   setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
+  updateRiskScoreBetterFilterQuery,
   updateRiskScoreBetterSort,
   updateTableActivePage,
   updateTableLimit,
@@ -171,6 +172,19 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         [HostsTableType.riskScoreBetter]: {
           ...state[hostsType].queries[HostsTableType.riskScoreBetter],
           sort,
+        },
+      },
+    },
+  }))
+  .case(updateRiskScoreBetterFilterQuery, (state, { filterQuery, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.riskScoreBetter]: {
+          ...state[hostsType].queries[HostsTableType.riskScoreBetter],
+          filterQuery,
         },
       },
     },

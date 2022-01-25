@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import { Direction, RiskScoreBetterSortField } from '../../../common/search_strategy';
 import { HostsFields } from '../../../common/search_strategy/security_solution';
 
@@ -36,6 +37,7 @@ export interface HostsQuery extends BasicQueryPaginated {
 
 export interface RiskScoreBetterQuery extends BasicQueryPaginated {
   sort: RiskScoreBetterSortField;
+  filterQuery?: Filter;
 }
 
 export interface Queries {

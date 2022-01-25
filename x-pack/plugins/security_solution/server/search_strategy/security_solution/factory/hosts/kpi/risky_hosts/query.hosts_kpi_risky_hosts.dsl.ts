@@ -9,22 +9,10 @@ import type { HostsKpiRiskyHostsRequestOptions } from '../../../../../../../comm
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiRiskyHostsQuery = ({
-  timerange: { from, to },
   defaultIndex,
   filterQuery,
 }: HostsKpiRiskyHostsRequestOptions) => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
+  const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
     index: defaultIndex,
@@ -34,7 +22,16 @@ export const buildHostsKpiRiskyHostsQuery = ({
     body: {
       aggs: {
         risk: {
-          terms: { field: 'risk.keyword' },
+          terms: {
+            field: 'risk.keyword',
+          },
+          aggs: {
+            unique_hosts: {
+              cardinality: {
+                field: 'host.name',
+              },
+            },
+          },
         },
       },
       query: {

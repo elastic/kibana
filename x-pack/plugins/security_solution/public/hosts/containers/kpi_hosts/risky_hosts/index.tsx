@@ -7,12 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { createFilter } from '../../../../common/containers/helpers';
 
 import {
   getHostRiskIndex,
+  HostRiskSeverity,
   HostsKpiQueries,
   RequestBasicOptions,
 } from '../../../../../common/search_strategy';
@@ -74,9 +75,25 @@ interface UseRiskyHostProps {
   to: string;
   skip?: boolean;
 }
+export type SeverityCount = {
+  [k in HostRiskSeverity]: number;
+};
 
-export const useRiskScoreKpi = ({ filterQuery, from, to, skip }: UseRiskyHostProps) => {
-  const { error, result: response, start, loading } = useRiskyHostsComplete();
+interface RiskScoreKpi {
+  // TODO: Pablo what is this error/isModuleDisabled value supposed to be??
+  error: unknown;
+  isModuleDisabled: unknown;
+  severityCount: SeverityCount;
+  loading: boolean;
+}
+
+export const useRiskScoreKpi = ({
+  filterQuery,
+  from,
+  to,
+  skip,
+}: UseRiskyHostProps): RiskScoreKpi => {
+  const { error, result, start, loading } = useRiskyHostsComplete();
   const { data, spaces } = useKibana().services;
   const isModuleDisabled = error && isIndexNotFoundError(error);
   const [spaceId, setSpaceId] = useState<string>();
@@ -98,5 +115,16 @@ export const useRiskScoreKpi = ({ filterQuery, from, to, skip }: UseRiskyHostPro
     }
   }, [data, spaceId, start, filterQuery, to, from, skip]);
 
-  return { error, response, loading, isModuleDisabled };
+  const severityCount = useMemo(
+    () => ({
+      [HostRiskSeverity.unknown]: 0,
+      [HostRiskSeverity.low]: 0,
+      [HostRiskSeverity.moderate]: 0,
+      [HostRiskSeverity.high]: 0,
+      [HostRiskSeverity.critical]: 0,
+      ...(result?.riskyHosts ?? {}),
+    }),
+    [result]
+  );
+  return { error, severityCount, loading, isModuleDisabled };
 };

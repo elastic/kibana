@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { HOST_RISK_SEVERITY_COLOUR, HostRiskScore } from '../common/host_risk_score';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
-import { DefaultDraggable } from '../../../common/components/draggables';
+import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
 
 export const SeverityBadges: React.FC<{
-  severity: { [k in HostRiskSeverity]: number };
-}> = ({ severity }) => (
+  severityCount: SeverityCount;
+}> = ({ severityCount }) => (
   <EuiFlexGroup
     justifyContent="spaceBetween"
     gutterSize="m"
@@ -24,7 +24,7 @@ export const SeverityBadges: React.FC<{
       <EuiFlexGroup gutterSize="m">
         {(Object.keys(HOST_RISK_SEVERITY_COLOUR) as HostRiskSeverity[]).map((status) => (
           <EuiFlexItem key={status} grow={false}>
-            <SeverityBadge status={status} count={severity[status] || 0} />
+            <SeverityBadge status={status} count={severityCount[status] || 0} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
@@ -38,16 +38,7 @@ const SeverityBadge: React.FC<{ status: HostRiskSeverity; count: number }> = ({
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <EuiFlexItem grow={false}>
-      <DefaultDraggable
-        id={`severity-badge-draggable-risk-${status}`}
-        isDraggable={false}
-        field={'risk.keyword'}
-        value={status}
-        hideTopN={true}
-        tooltipContent={null}
-      >
-        <HostRiskScore severity={status} />
-      </DefaultDraggable>
+      <HostRiskScore severity={status} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiNotificationBadge size="s" color="subdued">

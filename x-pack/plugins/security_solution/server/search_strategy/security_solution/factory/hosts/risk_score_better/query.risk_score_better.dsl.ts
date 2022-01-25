@@ -21,20 +21,8 @@ export const buildRiskScoreBetterQuery = ({
   filterQuery,
   pagination: { querySize },
   sort,
-  timerange: { from, to },
 }: RiskScoreBetterRequestOptions) => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
+  const filter = [...createQueryFilterClauses(filterQuery)];
 
   return {
     allow_no_indices: true,
@@ -52,7 +40,7 @@ export const buildRiskScoreBetterQuery = ({
           },
           aggs: {
             risk_score: {
-              sum: {
+              avg: {
                 field: 'risk_stats.risk_score',
               },
             },

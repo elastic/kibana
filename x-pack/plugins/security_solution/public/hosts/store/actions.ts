@@ -6,6 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import type { Filter } from '@kbn/es-query';
 import {
   HostsSortField,
   RiskScoreBetterSortField,
@@ -41,3 +42,8 @@ export const updateRiskScoreBetterSort = actionCreator<{
   sort: RiskScoreBetterSortField;
   hostsType: HostsType;
 }>('UPDATE_RISK_SCORE_BETTER_SORT');
+
+export const updateRiskScoreBetterFilterQuery = actionCreator<{
+  filterQuery?: Filter;
+  hostsType: HostsType;
+}>('UPDATE_RISK_SCORE_BETTER_SORT_FILTER_QUERY');

@@ -67,16 +67,7 @@ export const getRiskScoreBetterColumns = (): RiskScoreBetterColumns => [
     sortable: true,
     render: (riskScore) => {
       if (riskScore != null) {
-        return (
-          <DefaultDraggable
-            id={`risk-score-table-draggable-risk-${riskScore}`}
-            isDraggable={false}
-            field={'risk_stats.risk_score'}
-            value={riskScore}
-            hideTopN={true}
-            tooltipContent={null}
-          />
-        );
+        return riskScore;
       }
       return getEmptyTagValue();
     },
@@ -95,18 +86,7 @@ export const getRiskScoreBetterColumns = (): RiskScoreBetterColumns => [
     sortable: false,
     render: (risk) => {
       if (risk != null) {
-        return (
-          <DefaultDraggable
-            id={`risk-score-table-draggable-risk-${risk}`}
-            isDraggable={false}
-            field={'risk.keyword'}
-            value={risk}
-            hideTopN={true}
-            tooltipContent={null}
-          >
-            <HostRiskScore severity={risk} />
-          </DefaultDraggable>
-        );
+        return <HostRiskScore severity={risk} />;
       }
       return getEmptyTagValue();
     },

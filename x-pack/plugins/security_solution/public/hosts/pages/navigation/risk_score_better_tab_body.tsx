@@ -35,7 +35,7 @@ export const RiskScoreBetterQueryTabBody = ({
       type,
     });
 
-  const { response } = useRiskScoreKpi({
+  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
     from: startDate,
     to: endDate,
@@ -49,11 +49,11 @@ export const RiskScoreBetterQueryTabBody = ({
       id={id}
       inspect={inspect}
       isInspect={isInspected}
-      loading={loading}
+      loading={loading || isKpiLoading}
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
-      severityCount={response?.riskyHosts ?? {}}
+      severityCount={severityCount}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}

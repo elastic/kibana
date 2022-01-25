@@ -29,7 +29,7 @@ import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors } from '../../common/store';
+import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -41,7 +41,7 @@ import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
 import { filterHostData } from './navigation';
-import { hostsModel } from '../store';
+import { hostsModel, hostsSelectors } from '../store';
 import { HostsTableType } from '../store/model';
 import {
   onTimelineTabKeyPressed,
@@ -55,6 +55,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import * as hostSelectors from '../store/selectors';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -84,6 +85,13 @@ const HostsComponent = () => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const getHostRiskScoreFilterQuerySelector = useMemo(
+    () => hostsSelectors.hostRiskScoreFilterQuerySelector(),
+    []
+  );
+  const { filterQuery: hostRiskScoreFilters } = useDeepEqualSelector((state: State) =>
+    getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
+  );
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -94,8 +102,14 @@ const HostsComponent = () => {
     if (tabName === HostsTableType.alerts) {
       return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
     }
+    // TODO: Steph/host risk refactor to single tab name
+    if (tabName === HostsTableType.riskScoreBetter || tabName === HostsTableType.risk) {
+      return hostRiskScoreFilters
+        ? [hostRiskScoreFilters, ...filterHostData, ...filters]
+        : [...filterHostData, ...filters];
+    }
     return filters;
-  }, [tabName, filters]);
+  }, [hostRiskScoreFilters, tabName, filters]);
   const narrowDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -133,6 +147,7 @@ const HostsComponent = () => {
       }),
     [indexPattern, query, tabsFilters, uiSettings]
   );
+
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });

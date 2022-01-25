@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { HOST_RISK_SEVERITY_COLOUR } from '../common/host_risk_score';
+import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   &.risk-score-severity-bar {
@@ -28,15 +29,15 @@ interface PalletteObject {
 type PalletteArray = PalletteObject[];
 
 export const SeverityBar: React.FC<{
-  severity: { [k in HostRiskSeverity]: number };
-}> = ({ severity }) => {
+  severityCount: SeverityCount;
+}> = ({ severityCount }) => {
   const palette = useMemo(
     () =>
       (Object.keys(HOST_RISK_SEVERITY_COLOUR) as HostRiskSeverity[]).reduce(
         (acc: PalletteArray, status: HostRiskSeverity) => {
           const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
           const newEntry: PalletteObject = {
-            stop: previousStop + (severity[status] || 0),
+            stop: previousStop + (severityCount[status] || 0),
             color: HOST_RISK_SEVERITY_COLOUR[status],
           };
           acc.push(newEntry);
@@ -44,7 +45,7 @@ export const SeverityBar: React.FC<{
         },
         [] as PalletteArray
       ),
-    [severity]
+    [severityCount]
   );
   return (
     <StyledEuiColorPaletteDisplay

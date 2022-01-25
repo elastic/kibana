@@ -25,7 +25,7 @@ import {
   RiskScoreBetterStrategyResponse,
   getHostRiskIndex,
 } from '../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../common/typed_json';
+import { ESQuery, ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
@@ -53,7 +53,7 @@ export interface RiskScoreBetterState {
 interface UseRiskScoreBetter {
   docValueFields?: DocValueFields[];
   endDate: string;
-  filterQuery?: ESTermQuery | string;
+  filterQuery?: ESQuery | string;
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
