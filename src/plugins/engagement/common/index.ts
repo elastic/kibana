@@ -7,4 +7,3 @@
  */
 
 export const PLUGIN_ID = 'engagement';
-export const PLUGIN_NAME = 'engagement';

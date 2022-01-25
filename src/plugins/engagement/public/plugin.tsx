@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import type {
   EngagementPluginSetup,
   EngagementPluginStart,
@@ -15,18 +15,6 @@ import type {
   EngagementPluginStartDeps,
 } from './types';
 import { ServicesProvider } from './services';
-
-// TODO: remove when config starts working.
-const _config = {
-  chat: {
-    enabled: true,
-    chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
-    pocID: '53877975',
-    pocEmail: 'sergei.poluektov+drift-chat@elasticsearch.com',
-    pocJWT:
-      'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Mzg3Nzk3NSIsImV4cCI6MTY0MjUxNDc0Mn0.CcAZbD8R865UmoHGi27wKn0aH1bzkZXhX449yyDH2Vk',
-  },
-};
 
 export interface EngagementConfigType {
   chat: {
@@ -52,16 +40,15 @@ export class EngagementPlugin
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(_core: CoreSetup): EngagementPluginSetup {
+  public setup(): EngagementPluginSetup {
     return {};
   }
 
   public start(_core: CoreStart, plugins: EngagementPluginStartDeps): EngagementPluginStart {
     const { sharedUX } = plugins;
 
-    // TODO: For some reason this isn't working.
     const config = this.initializerContext.config.get<EngagementConfigType>();
-    const chat = config?.chat || _config.chat || { enabled: false };
+    const chat = config?.chat || { enabled: false };
 
     return {
       ContextProvider: ({ children }) => (

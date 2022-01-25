@@ -11,8 +11,13 @@ import { css } from '@emotion/react';
 import { useChat } from '../../services';
 
 type UseChatType =
-  | [false]
-  | [true, string, React.MutableRefObject<HTMLIFrameElement | null>, CSSProperties];
+  | { enabled: false }
+  | {
+      enabled: true;
+      src: string;
+      ref: React.MutableRefObject<HTMLIFrameElement | null>;
+      style: CSSProperties;
+    };
 
 const MESSAGE_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
@@ -25,6 +30,8 @@ const iframeStyle = css`
   display: block;
 `;
 
+// We're sending a lot of information to the frame, so this method puts together the specific
+// properties, 1/ to avoid leaking too much, and 2/ to enumerate precisely what we're sending.
 const getContext = () => {
   const { location, navigator, innerHeight, innerWidth } = window;
   const { hash, host, hostname, href, origin, pathname, port, protocol, search } = location;
@@ -56,13 +63,13 @@ const getContext = () => {
 };
 
 const useFrame = (): UseChatType => {
-  const chatRef = useRef<HTMLIFrameElement>(null);
+  const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
   const [style, setStyle] = useState<CSSProperties>({});
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent): void => {
-      const { current: chatIframe } = chatRef;
+      const { current: chatIframe } = ref;
 
       if (
         !chat.enabled ||
@@ -107,31 +114,23 @@ const useFrame = (): UseChatType => {
     };
 
     window.addEventListener('message', handleMessage);
+
     return () => window.removeEventListener('message', handleMessage);
   }, [chat, style]);
 
   if (chat.enabled) {
-    return [true, chat.chatURL, chatRef, style];
+    return { enabled: true, src: chat.chatURL, ref, style };
   }
 
-  return [false];
+  return { enabled: false };
 };
 
 export const Chat = () => {
-  const [enabled, chatUrl, chatRef, style] = useFrame();
+  const frameProps = useFrame();
 
-  if (!enabled) {
+  if (!frameProps.enabled) {
     return null;
   }
 
-  return (
-    <iframe
-      css={iframeStyle}
-      style={style}
-      data-test-id="iframe-chat"
-      ref={chatRef}
-      src={chatUrl}
-      title="engagement"
-    />
-  );
+  return <iframe css={iframeStyle} data-test-id="iframe-chat" title="engagement" {...frameProps} />;
 };

@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, Plugin, Logger } from '../../../core/server';
 
 import { EngagementPluginSetup, EngagementPluginStart } from './types';
 
@@ -23,12 +17,12 @@ export class EngagementPlugin implements Plugin<EngagementPluginSetup, Engagemen
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(_core: CoreSetup) {
+  public setup() {
     this.logger.debug('engagement: Setup');
     return {};
   }
 
-  public start(_core: CoreStart) {
+  public start() {
     this.logger.debug('engagement: Started');
     return {};
   }

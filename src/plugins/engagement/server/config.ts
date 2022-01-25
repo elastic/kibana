@@ -11,30 +11,10 @@ import { PluginConfigDescriptor } from 'kibana/server';
 
 const chatConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  chatURL: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
-  pocJWT: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
-  pocID: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
-  pocEmail: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
+  chatURL: schema.maybe(schema.string()),
+  pocJWT: schema.maybe(schema.string()),
+  pocID: schema.maybe(schema.string()),
+  pocEmail: schema.maybe(schema.string()),
 });
 
 const configSchema = schema.object({
@@ -45,4 +25,7 @@ export type EngagementConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<EngagementConfigType> = {
   schema: configSchema,
+  exposeToBrowser: {
+    chat: true,
+  },
 };
