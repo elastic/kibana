@@ -127,16 +127,17 @@ export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
     showCustomRules: false,
     showElasticRules: false,
     tags: [],
   },
+  sortingOptions = {
+    field: 'enabled',
+    order: 'desc',
+  },
   pagination = {
     page: 1,
     perPage: 20,
-    total: 0,
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
@@ -150,8 +151,8 @@ export const fetchRules = async ({
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(filterOptions.sortField),
-    sort_order: filterOptions.sortOrder,
+    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
 

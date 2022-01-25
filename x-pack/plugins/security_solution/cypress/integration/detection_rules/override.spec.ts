@@ -186,7 +186,9 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains('auditbeat');
     cy.get(ALERT_GRID_CELL).contains('critical');
     cy.get(ALERT_GRID_CELL).contains('80');

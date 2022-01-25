@@ -15,15 +15,19 @@ import { RuleSwitchComponent } from './index';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
+import { useRulesTableContextOptional } from '../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContextMock } from '../../../containers/detection_engine/rules/rules_table/__mocks__/rules_table_context';
 
 jest.mock('../../../../common/components/toasters');
 jest.mock('../../../containers/detection_engine/rules');
+jest.mock('../../../containers/detection_engine/rules/rules_table/rules_table_context');
 jest.mock('../../../pages/detection_engine/rules/all/actions');
 
 describe('RuleSwitch', () => {
   beforeEach(() => {
     (useStateToaster as jest.Mock).mockImplementation(() => [[], jest.fn()]);
     (enableRules as jest.Mock).mockResolvedValue([getRulesSchemaMock()]);
+    (useRulesTableContextOptional as jest.Mock).mockReturnValue(null);
   });
 
   afterEach(() => {
@@ -120,15 +124,11 @@ describe('RuleSwitch', () => {
     });
   });
 
-  test('it invokes "enableRulesAction" if dispatch is passed through', async () => {
+  test('it invokes "enableRulesAction" if in rules table context', async () => {
+    (useRulesTableContextOptional as jest.Mock).mockReturnValue(useRulesTableContextMock.create());
+
     const wrapper = mount(
-      <RuleSwitchComponent
-        optionLabel="rule-switch"
-        enabled
-        isDisabled={false}
-        id={'7'}
-        dispatch={jest.fn()}
-      />
+      <RuleSwitchComponent optionLabel="rule-switch" enabled isDisabled={false} id={'7'} />
     );
     wrapper.find('[data-test-subj="ruleSwitch"]').at(2).simulate('click');
 
