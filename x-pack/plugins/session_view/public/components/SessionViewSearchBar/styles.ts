@@ -22,7 +22,7 @@ export const useStyles = () => {
     return {
       pagination,
     };
-  }, []);
+  }, [euiTheme]);
 
   return cached;
 };

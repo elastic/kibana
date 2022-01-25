@@ -73,14 +73,12 @@ describe('SessionViewSearchBar component', () => {
     userEvent.click(renderResult.getByTestId('pagination-button-next'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
 
-    renderResult.rerender(
-      <SessionViewSearchBar
-        searchQuery="ls -la"
-        searchResults={mockResults}
-        setSelectedProcess={mockSetSelectedProcess}
-        setSearchQuery={mockSetSearchQuery}
-      />
-    );
+    const searchInput = renderResult.getByTestId('searchInput').querySelector('input');
+
+    if (searchInput) {
+      userEvent.type(searchInput, ' -la');
+      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
+    }
 
     // after search is changed, results index should reset to 1
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('1 of 3');

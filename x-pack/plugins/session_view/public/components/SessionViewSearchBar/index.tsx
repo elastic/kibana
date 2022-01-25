@@ -40,15 +40,6 @@ export const SessionViewSearchBar = ({
     }
   };
 
-  const onSelectResult = (index: number) => {
-    if (searchResults) {
-      const process = searchResults[index];
-
-      setSelectedProcess(process);
-      setSelectedResult(index);
-    }
-  };
-
   const renderSearchResults = () => {
     if (searchResults?.length) {
       return (
@@ -57,7 +48,7 @@ export const SessionViewSearchBar = ({
           css={styles.pagination}
           pageCount={searchResults.length}
           activePage={selectedResult}
-          onPageClick={onSelectResult}
+          onPageClick={setSelectedResult}
           compressed
         />
       );
