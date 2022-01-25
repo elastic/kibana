@@ -166,6 +166,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       if (closeFieldEditor?.current) {
         closeFieldEditor?.current();
       }
+      if (closeDataViewEditor?.current) {
+        closeDataViewEditor?.current();
+      }
     };
     return () => {
       // Make sure to close the editor when unmounting

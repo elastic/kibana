@@ -203,11 +203,14 @@ export function DiscoverLayout({
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const onDataViewCreated = (dataView: DataView) => {
-    if (dataView.id) {
-      onChangeIndexPattern(dataView.id);
-    }
-  };
+  const onDataViewCreated = useCallback(
+    (dataView: DataView) => {
+      if (dataView.id) {
+        onChangeIndexPattern(dataView.id);
+      }
+    },
+    [onChangeIndexPattern]
+  );
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
