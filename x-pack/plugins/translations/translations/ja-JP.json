@@ -5175,7 +5175,6 @@
     "visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.name": "円グラフのレガシーグラフライブラリ",
     "visTypePie.controls.truncateLabel": "切り捨て",
     "visTypePie.controls.truncateTooltip": "グラフ外に配置されたラベルの文字数。",
-    "visTypePie.editors.pie.addLegendLabel": "凡例を表示",
     "visTypePie.editors.pie.decimalSliderLabel": "割合の最大小数点桁数",
     "visTypePie.editors.pie.distinctColorsLabel": "スライスごとに異なる色を使用",
     "visTypePie.editors.pie.donutLabel": "ドーナッツ",

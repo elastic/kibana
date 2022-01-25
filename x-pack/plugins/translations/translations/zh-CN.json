@@ -5222,7 +5222,6 @@
     "visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.name": "饼图旧版图表库",
     "visTypePie.controls.truncateLabel": "截断",
     "visTypePie.controls.truncateTooltip": "标签位于图表之外的字符数。",
-    "visTypePie.editors.pie.addLegendLabel": "显示图例",
     "visTypePie.editors.pie.decimalSliderLabel": "百分比的最大小数位数",
     "visTypePie.editors.pie.distinctColorsLabel": "每个切片使用不同的颜色",
     "visTypePie.editors.pie.donutLabel": "圆环图",
