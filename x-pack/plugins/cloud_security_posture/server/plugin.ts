@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../../src/core/server';
 import { CspAppService } from './lib/csp_app_services';
-import type { CoreSetup, CoreStart, Plugin, Logger } from '../../../../src/core/server';
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type {
   CspServerPluginSetup,
@@ -40,23 +45,23 @@ export class CspPlugin
   private readonly CspAppService = new CspAppService();
 
   public setup(
-    core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
+    core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>, // TODO: check this line
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
 
-    const cspContext: CspAppContext = {
+    const cspAppContext: CspAppContext = {
       logger: this.logger,
       service: this.CspAppService,
       getStartServices: core.getStartServices,
     };
 
-    cspContext.service.getPackagePolicyService();
+    cspAppContext.service.getPackagePolicyService();
 
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, cspContext);
+    defineRoutes(router, cspAppContext);
 
     initUiSettings(core.uiSettings);
 

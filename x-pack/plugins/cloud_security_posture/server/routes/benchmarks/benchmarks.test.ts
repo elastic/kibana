@@ -60,12 +60,10 @@ describe('benchmarks API', () => {
   it('validate the API route path', async () => {
     const cspAppContextService = new CspAppService();
     const router = httpServiceMock.createRouter();
-    // const initializerContext = coreMock.createPluginInitializerContext({});
     const coreSetup = coreMock.createSetup() as CoreSetup<
       CspServerPluginStartDeps,
       CspServerPluginStart
     >;
-    // const coreStart = coreMock.createInternalStart();
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,

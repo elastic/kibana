@@ -9,7 +9,7 @@ import type { ElasticsearchClient, IRouter } from 'src/core/server';
 import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { number, UnknownRecord } from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CspAppContext } from '../../lib/csp_app_context_services';
+import { CspAppContext } from '../../plugin';
 
 import type {
   CloudPostureStats,

@@ -11,7 +11,7 @@ import { schema as rt, TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'src/core/server';
 import type { IRouter } from 'src/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CspAppContext } from '../../lib/csp_app_context_services';
+import { CspAppContext } from '../../plugin';
 import { getLatestCycleIds } from './get_latest_cycle_ids';
 import { CSP_KUBEBEAT_INDEX_NAME, FINDINGS_ROUTE_PATH } from '../../../common/constants';
 export const DEFAULT_FINDINGS_PER_PAGE = 20;

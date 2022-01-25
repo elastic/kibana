@@ -16,7 +16,7 @@ import {
 } from '../../../../fleet/server';
 import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../../../fleet/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_VANILLA_PACKAGE_NAME } from '../../../common/constants';
-import { CspAppContext } from '../../lib/csp_app_context_services';
+import { CspAppContext } from '../../plugin';
 
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
