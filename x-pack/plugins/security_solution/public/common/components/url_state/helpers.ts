@@ -192,7 +192,7 @@ export const makeMapStateToProps = () => {
           }
         : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
-    const timelineId = getTimelineIdForPathname(ownProps?.pathName, flyoutTimeline?.show);
+    const timelineId = getTimelineIdForPathname(ownProps?.currentPath, flyoutTimeline?.show);
     let detailPanel = {};
 
     if (timelineId) {

@@ -54,7 +54,7 @@ export type KeyUrlState = keyof UrlState;
 export type ValueUrlState = UrlState[keyof UrlState];
 
 export interface UrlStateProps {
-  pathName?: string;
+  currentPath?: string;
   navTabs: SecurityNav;
   indexPattern?: DataViewBase;
   mapToUrlState?: (value: string) => UrlState;

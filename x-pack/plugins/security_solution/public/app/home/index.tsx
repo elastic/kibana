@@ -50,7 +50,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
       <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
       <DragDropContextWrapper browserFields={browserFields}>
-        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} pathName={pathname} />
+        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} currentPath={pathname} />
         <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
           {children}
         </SecuritySolutionTemplateWrapper>
