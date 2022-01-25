@@ -8,51 +8,38 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { OpenSearchPanel } from './open_search_panel';
-
-jest.mock('../../../../utils/use_discover_services', () => {
-  const defaults = {
-    core: { uiSettings: {}, savedObjects: {} },
-    addBasePath: (path: string) => path,
-  };
-  let testNumber = 0;
-  return {
-    useDiscoverServices: () => {
-      testNumber++;
-
-      if (testNumber === 2) {
-        return {
-          ...defaults,
-          capabilities: {
-            savedObjectsManagement: {
-              edit: false,
-              delete: false,
-            },
-          },
-        };
-      }
-
-      return {
-        ...defaults,
-        capabilities: {
-          savedObjectsManagement: {
-            edit: true,
-          },
-        },
-      };
-    },
-  };
-});
 
 describe('OpenSearchPanel', () => {
-  test('render', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  test('render', async () => {
+    jest.doMock('../../../../utils/use_discover_services', () => ({
+      useDiscoverServices: jest.fn().mockImplementation(() => ({
+        core: { uiSettings: {}, savedObjects: {} },
+        addBasePath: (path: string) => path,
+        capabilities: { savedObjectsManagement: { edit: true } },
+      })),
+    }));
+    const { OpenSearchPanel } = await import('./open_search_panel');
+
     const component = shallow(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );
     expect(component).toMatchSnapshot();
   });
 
-  test('should not render manage searches button without permissions', () => {
+  test('should not render manage searches button without permissions', async () => {
+    jest.doMock('../../../../utils/use_discover_services', () => ({
+      useDiscoverServices: jest.fn().mockImplementation(() => ({
+        core: { uiSettings: {}, savedObjects: {} },
+        addBasePath: (path: string) => path,
+        capabilities: { savedObjectsManagement: { edit: false, delete: false } },
+      })),
+    }));
+    const { OpenSearchPanel } = await import('./open_search_panel');
+
     const component = shallow(
       <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
     );
