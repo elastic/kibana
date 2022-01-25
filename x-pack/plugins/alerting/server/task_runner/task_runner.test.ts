@@ -3550,7 +3550,7 @@ describe('Task Runner', () => {
     });
 
     const runnerResult = await taskRunner.run();
-    expect(runnerResult.schedule!.interval).toEqual('10s');
+    expect(runnerResult.schedule!.interval).toEqual(mockedTaskInstance.schedule!.interval);
   });
 
   test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
