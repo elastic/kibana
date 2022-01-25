@@ -55,8 +55,9 @@ export interface BfetchServerStart {}
 
 const streamingHeaders = {
   'Content-Type': 'application/x-ndjson',
-  Connection: 'keep-alive',
-  'Transfer-Encoding': 'chunked',
+  // TODO both shouldn't be used when http2 is enabled
+  // Connection: 'keep-alive',
+  // 'Transfer-Encoding': 'chunked',
 };
 
 export class BfetchServerPlugin
