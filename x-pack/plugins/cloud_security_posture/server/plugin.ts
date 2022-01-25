@@ -45,7 +45,7 @@ export class CspPlugin
   private readonly CspAppService = new CspAppService();
 
   public setup(
-    core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>, // TODO: check this line
+    core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
