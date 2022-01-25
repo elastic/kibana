@@ -64,6 +64,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const transactionInterval = range.interval('1s');
       const metricInterval = range.interval('30s');
 
+      const errorInterval = range.interval('5s');
+
       const multipleEnvServiceProdInstance = apm
         .service('multiple-env-service', 'production', 'go')
         .instance('multiple-env-service-production');
@@ -75,6 +77,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const metricOnlyInstance = apm
         .service('metric-only-service', 'production', 'java')
         .instance('metric-only-production');
+
+      const errorOnlyInstance = apm
+        .service('error-only-service', 'production', 'java')
+        .instance('error-only-production');
 
       const config = {
         multiple: {
@@ -132,6 +138,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .serialize(),
           ]),
+          ...errorInterval
+            .rate(1)
+            .flatMap((timestamp) => [
+              ...errorOnlyInstance.error('Foo').timestamp(timestamp).serialize(),
+            ]),
         ]);
       });
 
@@ -185,6 +196,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const serviceNames = response.body.items.map((item) => item.serviceName);
 
           expect(serviceNames).to.contain('metric-only-service');
+
+          expect(serviceNames).to.contain('error-only-service');
         });
       });
 
