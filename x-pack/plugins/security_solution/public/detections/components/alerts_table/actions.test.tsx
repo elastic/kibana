@@ -15,6 +15,7 @@ import {
   mockEcsDataWithAlert,
   mockTimelineDetails,
   mockTimelineResult,
+  mockAADEcsDataWithAlert,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
@@ -437,14 +438,53 @@ describe('alert actions', () => {
     });
 
     test('it uses original_time and threshold_result.from for threshold alerts', async () => {
-      const ecsDataMock = getThresholdDetectionAlertAADMock();
+      const ecsDataMockWithNoTemplateTimeline = getThresholdDetectionAlertAADMock({
+        ...mockAADEcsDataWithAlert,
+        kibana: {
+          alert: {
+            ...mockAADEcsDataWithAlert.kibana?.alert,
+            rule: {
+              ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+              parameters: {
+                ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+                threshold: {
+                  field: ['destination.ip'],
+                  value: 1,
+                },
+              },
+              name: ['mock threshold rule'],
+              saved_id: [],
+              type: ['threshold'],
+              uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+              timeline_id: undefined,
+              timeline_title: undefined,
+            },
+            threshold_result: {
+              count: 99,
+              from: '2021-01-10T21:11:45.839Z',
+              cardinality: [
+                {
+                  field: 'source.ip',
+                  value: 1,
+                },
+              ],
+              terms: [
+                {
+                  field: 'destination.ip',
+                  value: 1,
+                },
+              ],
+            },
+          },
+        },
+      });
 
       const expectedFrom = '2021-01-10T21:11:45.839Z';
       const expectedTo = '2021-01-10T21:12:45.839Z';
 
       await sendAlertToTimelineAction({
         createTimeline,
-        ecsData: ecsDataMock,
+        ecsData: ecsDataMockWithNoTemplateTimeline,
         updateTimelineIsLoading,
         searchStrategyClient,
       });
