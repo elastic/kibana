@@ -7,6 +7,7 @@
 
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
+import { cloudMock } from '../../../cloud/public/mocks';
 import { homePluginMock } from '../../../../../src/plugins/home/public/mocks';
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { customIntegrationsMock } from '../../../../../src/plugins/custom_integrations/public/mocks';
@@ -20,6 +21,7 @@ export const createSetupDepsMock = (): MockedFleetSetupDeps => {
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
     customIntegrations: customIntegrationsMock.createSetup(),
+    cloud: cloudMock.createSetup(),
   };
 };
 
@@ -29,5 +31,6 @@ export const createStartDepsMock = (): MockedFleetStartDeps => {
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),
     share: sharePluginMock.createStartContract(),
+    cloud: cloudMock.createStart(),
   };
 };

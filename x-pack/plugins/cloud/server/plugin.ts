@@ -12,6 +12,7 @@ import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from './utils';
 import { registerFullstoryRoute } from './routes/fullstory';
+import { registerChatRoute } from './routes/chat';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -45,6 +46,13 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       registerFullstoryRoute({
         httpResources: core.http.resources,
         packageInfo: this.context.env.packageInfo,
+      });
+    }
+
+    if (this.config.chat.enabled && this.config.chatIdentitySecret) {
+      registerChatRoute({
+        httpResources: core.http.resources,
+        chatIdentitySecret: this.config.chatIdentitySecret,
       });
     }
 

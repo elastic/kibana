@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import {
   CoreSetup,
   CoreStart,
@@ -22,10 +23,16 @@ import type {
   SecurityPluginStart,
 } from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import {
+  ELASTIC_SUPPORT_LINK,
+  CLOUD_SNAPSHOTS_PATH,
+  GET_CHAT_TOKEN_ROUTE_PATH,
+} from '../common/constants';
+import type { GetChatTokenResponseBody } from '../common/types';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
+import { ChatService, ServicesProvider } from './services';
 
 export interface CloudConfigType {
   id?: string;
@@ -38,6 +45,10 @@ export interface CloudConfigType {
     enabled: boolean;
     org_id?: string;
   };
+  chat: {
+    enabled: boolean;
+    chatURL: string;
+  };
 }
 
 interface CloudSetupDependencies {
@@ -47,6 +58,13 @@ interface CloudSetupDependencies {
 
 interface CloudStartDependencies {
   security?: SecurityPluginStart;
+}
+
+export interface CloudStart {
+  /**
+   * A React component that provides a pre-wired `React.Context` which connects components to Engagement services.
+   */
+  ContextProvider: FC<{}>;
 }
 
 export interface CloudSetup {
@@ -65,10 +83,15 @@ interface SetupFullstoryDeps extends CloudSetupDependencies {
   basePath: IBasePath;
 }
 
+interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
+  http: CoreSetup['http'];
+}
+
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
   private appSubscription?: Subscription;
+  private chatService: ChatService = { enabled: false };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -79,9 +102,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const application = core.getStartServices().then(([coreStart]) => {
       return coreStart.application;
     });
+
     this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
+    );
+
+    this.setupChat({ http: core.http, security }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up Chat: ${e.toString()}`)
     );
 
     const {
@@ -119,7 +148,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
   }
 
-  public start(coreStart: CoreStart, { security }: CloudStartDependencies) {
+  public start(coreStart: CoreStart, { security }: CloudStartDependencies): CloudStart {
     const { deployment_url: deploymentUrl, base_url: baseUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
 
@@ -147,6 +176,12 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // In the event of an unexpected error, fail *open*.
       // Cloud admin console will always perform the actual authorization checks.
       .catch(() => setLinks(true));
+
+    return {
+      ContextProvider: ({ children }) => (
+        <ServicesProvider chat={this.chatService}>{children}</ServicesProvider>
+      ),
+    };
   }
 
   public stop() {
@@ -266,6 +301,42 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       ...memoryInfo,
     });
   }
+
+  private async setupChat({ http, security }: SetupChatDeps) {
+    if (!security) {
+      return;
+    }
+
+    const { enabled, chatURL } = this.config.chat;
+
+    if (!enabled || !chatURL) {
+      return;
+    }
+
+    const user = await loadChatUser({ getCurrentUser: security.authc.getCurrentUser });
+
+    if (!user) {
+      return;
+    }
+
+    try {
+      const response = await http.get<GetChatTokenResponseBody>(GET_CHAT_TOKEN_ROUTE_PATH, {
+        query: {
+          userId: user.userID,
+        },
+      });
+
+      this.chatService = {
+        ...user,
+        enabled,
+        chatURL,
+        identityJWT: response.token,
+      };
+    } catch (error) {
+      // TODO: add logger
+      return;
+    }
+  }
 }
 
 /** @internal exported for testing */
@@ -294,6 +365,43 @@ export const loadFullStoryUserId = async ({
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
+    return undefined;
+  }
+};
+
+/** @internal exported for testing */
+export const loadChatUser = async ({
+  getCurrentUser,
+}: {
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+}) => {
+  try {
+    const currentUser = await getCurrentUser().catch(() => undefined);
+
+    if (!currentUser) {
+      return;
+    }
+
+    const { email: userEmail, username: userID } = currentUser;
+
+    // Log very defensively here so we can debug this easily if it breaks
+    if (!userID || !userEmail) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[cloud.chat] userID or userEmail not specified. User metadata: ${JSON.stringify(
+          currentUser.metadata
+        )}`
+      );
+      return;
+    }
+
+    return {
+      userID,
+      userEmail,
+    };
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`[cloud.chat] Error loading the current user: ${e.toString()}`, e);
     return undefined;
   }
 };

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { CloudStart } from '.';
+import { ServicesProvider } from '../public/services';
+
 function createSetupMock() {
   return {
     cloudId: 'mock-cloud-id',
@@ -17,6 +22,26 @@ function createSetupMock() {
   };
 }
 
+const config = {
+  chat: {
+    enabled: true,
+    chatURL: 'chat-url',
+    userID: 'user-id',
+    userEmail: 'test-user@elastic.co',
+    identityJWT: 'identity-jwt',
+  },
+};
+
+const getContextProvider: () => React.FC =
+  () =>
+  ({ children }) =>
+    <ServicesProvider {...config}>{children}</ServicesProvider>;
+
+const createStartMock = (): jest.Mocked<CloudStart> => ({
+  ContextProvider: jest.fn(getContextProvider()),
+});
+
 export const cloudMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
 };
