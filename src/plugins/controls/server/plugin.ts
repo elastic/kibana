@@ -27,7 +27,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
       controlGroupContainerPersistableStateServiceFactory(embeddable)
     );
 
-    setupOptionsListSuggestionsRoute(core, () => data.config.get());
+    setupOptionsListSuggestionsRoute(core, data.autocomplete.getAutocompleteSettings);
     return {};
   }
 

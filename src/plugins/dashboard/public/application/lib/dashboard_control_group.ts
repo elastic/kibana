@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
+import { isEmpty } from 'lodash';
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
 import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
@@ -74,10 +75,11 @@ export const syncDashboardControlGroup = async ({
       })
   );
 
+  const compareAllFilters = (a?: Filter[], b?: Filter[]) =>
+    compareFilters(a ?? [], b ?? [], COMPARE_ALL_OPTIONS);
+
   const dashboardRefetchDiff: DiffChecks = {
-    filters: (a, b) =>
-      compareFilters((a as Filter[]) ?? [], (b as Filter[]) ?? [], COMPARE_ALL_OPTIONS),
-    lastReloadRequestTime: deepEqual,
+    filters: (a, b) => compareAllFilters(a as Filter[], b as Filter[]),
     timeRange: deepEqual,
     query: deepEqual,
     viewMode: deepEqual,
@@ -130,7 +132,16 @@ export const syncDashboardControlGroup = async ({
   subscriptions.add(
     controlGroup
       .getOutput$()
-      .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
+      .pipe(
+        distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
+          compareAllFilters(filtersA, filtersB)
+        )
+      )
+      .subscribe(({ filters }) => {
+        if (!isEmpty(filters)) {
+          dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
+        }
+      })
   );
 
   return {

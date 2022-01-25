@@ -9,5 +9,4 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { ControlsPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ControlsPlugin(initializerContext);
+export const plugin = () => new ControlsPlugin();

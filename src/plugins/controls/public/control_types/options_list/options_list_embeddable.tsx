@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
@@ -76,6 +76,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   // State to be passed down to component
   private componentState: OptionsListComponentState;
   private componentStateSubject$ = new BehaviorSubject<OptionsListComponentState>({
+    invalidSelections: [],
+    validSelections: [],
     loading: true,
   });
 
@@ -90,6 +92,20 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     this.initialize();
   }
+
+  private initialize = async () => {
+    const { selectedOptions: initialSelectedOptions, ignoreParentSettings } = this.getInput();
+    if (initialSelectedOptions) {
+      await this.getCurrentDataView();
+      if (!ignoreParentSettings?.ignoreValidations) {
+        // if validations are required, defer building initial filters until after first query has returned to allow for validation
+        await this.runOptionsListQuery();
+      }
+      await this.buildFilter();
+    }
+    this.setInitializationFinished();
+    this.setupSubscriptions();
+  };
 
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
@@ -112,19 +128,53 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     );
 
     // fetch available options when input changes or when search string has changed
+    const { ignoreParentSettings } = this.getInput();
     this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe).subscribe(this.fetchAvailableOptions)
+      merge(dataFetchPipe, typeaheadPipe)
+        .pipe(skip(ignoreParentSettings?.ignoreValidations ? 0 : 1)) // if validation is enabled, skip the first input update because options list query will be run by initialize.
+        .subscribe(this.runOptionsListQuery)
     );
 
-    // build filters when selectedOptions change
+    // build filters when selectedOptions or invalidSelections change
     this.subscriptions.add(
-      this.getInput$()
+      this.componentStateSubject$
         .pipe(
-          debounceTime(400),
-          distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)),
+          debounceTime(100),
+          distinctUntilChanged((a, b) => isEqual(a.validSelections, b.validSelections)),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
         .subscribe(() => this.buildFilter())
+    );
+
+    /**
+     * when input selectedOptions changes, check all selectedOptions against the latest value of invalidSelections.
+     **/
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
+        .subscribe(({ selectedOptions: newSelectedOptions }) => {
+          if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
+            this.updateComponentState({
+              validSelections: [],
+              invalidSelections: [],
+            });
+            return;
+          }
+          const { invalidSelections } = this.componentStateSubject$.getValue();
+          const newValidSelections: string[] = [];
+          const newInvalidSelections: string[] = [];
+          for (const selectedOption of newSelectedOptions) {
+            if (invalidSelections?.includes(selectedOption)) {
+              newInvalidSelections.push(selectedOption);
+              continue;
+            }
+            newValidSelections.push(selectedOption);
+          }
+          this.updateComponentState({
+            validSelections: newValidSelections,
+            invalidSelections: newInvalidSelections,
+          });
+        })
     );
   };
 
@@ -147,7 +197,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.componentStateSubject$.next(this.componentState);
   }
 
-  private fetchAvailableOptions = async () => {
+  private runOptionsListQuery = async () => {
     this.updateComponentState({ loading: true });
     const { ignoreParentSettings, filters, fieldName, query, selectedOptions, timeRange } =
       this.getInput();
@@ -157,7 +207,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const response = await runOptionsListRequest(
+    const { suggestions, invalidSelections, totalCardinality } = await runOptionsListRequest(
       {
         field,
         dataView,
@@ -170,22 +220,40 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       this.abortController.signal
     );
 
-    this.updateComponentState({ availableOptions: response.suggestions, loading: false });
-  };
-
-  private initialize = async () => {
-    const initialSelectedOptions = this.getInput().selectedOptions;
-    if (initialSelectedOptions) {
-      await this.getCurrentDataView();
-      await this.buildFilter();
+    if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
+      this.updateComponentState({
+        availableOptions: suggestions,
+        invalidSelections: undefined,
+        validSelections: selectedOptions,
+        totalCardinality,
+        loading: false,
+      });
+      return;
     }
-    this.setInitializationFinished();
-    this.setupSubscriptions();
+
+    const valid: string[] = [];
+    const invalid: string[] = [];
+
+    for (const selectedOption of selectedOptions) {
+      if (invalidSelections?.includes(selectedOption)) {
+        invalid.push(selectedOption);
+        continue;
+      }
+      valid.push(selectedOption);
+    }
+    this.updateComponentState({
+      availableOptions: suggestions,
+      invalidSelections: invalid,
+      validSelections: valid,
+      totalCardinality,
+      loading: false,
+    });
   };
 
   private buildFilter = async () => {
-    const { fieldName, selectedOptions } = this.getInput();
-    if (!selectedOptions || selectedOptions.length === 0) {
+    const { fieldName } = this.getInput();
+    const { validSelections } = this.componentState;
+    if (!validSelections || isEmpty(validSelections)) {
       this.updateOutput({ filters: [] });
       return;
     }
@@ -195,10 +263,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     if (!field) throw fieldMissingError(fieldName);
 
     let newFilter: Filter;
-    if (selectedOptions.length === 1) {
-      newFilter = buildPhraseFilter(field, selectedOptions[0], dataView);
+    if (validSelections.length === 1) {
+      newFilter = buildPhraseFilter(field, validSelections[0], dataView);
     } else {
-      newFilter = buildPhrasesFilter(field, selectedOptions, dataView);
+      newFilter = buildPhrasesFilter(field, validSelections, dataView);
     }
 
     newFilter.meta.key = field?.name;
@@ -206,7 +274,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   reload = () => {
-    this.fetchAvailableOptions();
+    this.runOptionsListQuery();
   };
 
   public destroy = () => {

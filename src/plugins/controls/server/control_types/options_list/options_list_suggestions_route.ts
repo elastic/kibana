@@ -16,13 +16,13 @@ import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
-import { DataConfigSchema } from '../../../../data/server';
 import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
 import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
+import { PluginSetup as DataPluginSetup } from '../../../../data/server';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
-  getLatestDataConfig: () => DataConfigSchema
+  getAutocompleteSettings: DataPluginSetup['autocomplete']['getAutocompleteSettings']
 ) => {
   const router = http.createRouter();
 
@@ -125,7 +125,7 @@ export const setupOptionsListSuggestionsRoute = (
     const shardSize = 10;
     const suggestionsAgg = {
       terms: {
-        fieldName,
+        field: fieldName,
         include: `${getEscapedQuery(searchString ?? '')}.*`,
         execution_hint: executionHint,
         shard_size: shardSize,
@@ -147,16 +147,12 @@ export const setupOptionsListSuggestionsRoute = (
           }
         : undefined;
 
-    const {
-      autocomplete: {
-        valueSuggestions: { terminateAfter, timeout },
-      },
-    } = getLatestDataConfig();
+    const { terminateAfter, timeout } = getAutocompleteSettings();
 
     const body = {
       size: 0,
-      timeout: `${timeout.asMilliseconds()}ms`,
-      terminate_after: terminateAfter.asMilliseconds(),
+      timeout: `${timeout}ms`,
+      terminate_after: terminateAfter,
       query: {
         bool: {
           filter: filters,

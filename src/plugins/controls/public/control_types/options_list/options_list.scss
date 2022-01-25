@@ -22,6 +22,13 @@
   border-color: darken($euiColorLightestShade, 2%);
 }
 
+.optionsList--filterBtnInvalid {
+  color: $euiTextSubduedColor;
+  text-decoration: line-through;
+  margin-left: $euiSizeS;
+  font-weight: 300;
+}
+
 .optionsList--filterBtn {
   .euiFilterButton__text-hasNotification {
     flex-grow: 1;
