@@ -34,7 +34,7 @@ interface AllRulesUtilityBarProps {
   onToggleSelectAll?: () => void;
   paginationTotal: number;
   showBulkActions: boolean;
-  isBulkActionsInProgress: boolean;
+  isBulkActionsInProgress?: boolean;
   hasPagination?: boolean;
 }
 

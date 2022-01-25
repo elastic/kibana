@@ -13,7 +13,7 @@
  */
 
 import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { Dispatch } from 'react';
 import type { ToastsStart } from 'src/core/public';
 
@@ -318,7 +318,7 @@ export const getBatchItems = ({
   return [
     {
       id: 0,
-      title: i18n.BULK_ACTION_MENU_TITLE,
+      title: isRulesBulkEditEnabled ? i18n.BULK_ACTION_MENU_TITLE : undefined,
       items: [
         {
           key: i18n.BULK_ACTION_ENABLE,
@@ -329,6 +329,7 @@ export const getBatchItems = ({
           onClick: handleActivateAction,
           toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',
+          icon: isRulesBulkEditEnabled ? undefined : 'checkInCircleFilled',
         },
         {
           key: i18n.BULK_ACTION_DUPLICATE,
@@ -338,6 +339,7 @@ export const getBatchItems = ({
           onClick: handleDuplicateAction,
           toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',
+          icon: isRulesBulkEditEnabled ? undefined : 'crossInACircleFilled',
         },
         ...(isRulesBulkEditEnabled
           ? [
@@ -366,6 +368,7 @@ export const getBatchItems = ({
             containsLoading ||
             selectedRuleIds.length === 0,
           onClick: handleExportAction,
+          icon: isRulesBulkEditEnabled ? undefined : 'exportAction',
         },
         {
           key: i18n.BULK_ACTION_DISABLE,
@@ -376,6 +379,7 @@ export const getBatchItems = ({
           onClick: handleDeactivateActions,
           toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',
+          icon: isRulesBulkEditEnabled ? undefined : 'copy',
         },
         {
           key: i18n.BULK_ACTION_DELETE,
@@ -393,6 +397,7 @@ export const getBatchItems = ({
             ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE
             : undefined,
           toolTipPosition: 'right',
+          icon: isRulesBulkEditEnabled ? undefined : 'trash',
         },
       ],
     },

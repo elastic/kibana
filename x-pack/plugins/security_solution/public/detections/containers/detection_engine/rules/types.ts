@@ -30,8 +30,6 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
-  ruleExecutionStatus,
-  RuleExecutionStatus,
   BulkActionEditPayload,
   ruleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
