@@ -23,11 +23,11 @@ import { DefaultEmail, DynamicSettings } from '../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';
 import { certificateFormTranslations } from './translations';
 
-export type OnFieldChangeType = (
-  changedValues: Partial<Omit<DynamicSettings, 'defaultEmail'>> & {
-    defaultEmail?: Partial<DefaultEmail>;
-  }
-) => void;
+export type PartialSettings = Partial<Omit<DynamicSettings, 'defaultEmail'>> & {
+  defaultEmail?: Partial<DefaultEmail>;
+};
+
+export type OnFieldChangeType = (changedValues: PartialSettings) => void;
 
 export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
   loading,

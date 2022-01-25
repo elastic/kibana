@@ -17,6 +17,7 @@ import { IndicesForm } from '../components/settings/indices_form';
 import {
   CertificateExpirationForm,
   OnFieldChangeType,
+  PartialSettings,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
 import {
@@ -69,7 +70,7 @@ export const SettingsPage: React.FC = () => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
-  const [formFields, setFormFields] = useState<DynamicSettings | null>(
+  const [formFields, setFormFields] = useState<PartialSettings | null>(
     dss.settings ? { ...dss.settings } : null
   );
 
@@ -96,7 +97,7 @@ export const SettingsPage: React.FC = () => {
   const onApply = (event: React.FormEvent) => {
     event.preventDefault();
     if (formFields) {
-      dispatch(setDynamicSettings(formFields));
+      dispatch(setDynamicSettings(formFields as DynamicSettings));
     }
   };
 
@@ -127,13 +128,13 @@ export const SettingsPage: React.FC = () => {
               <IndicesForm
                 loading={dss.loading}
                 onChange={onChangeFormField}
-                formFields={formFields}
+                formFields={formFields as DynamicSettings}
                 fieldErrors={fieldErrors}
                 isDisabled={isFormDisabled}
               />
               <AlertDefaultsForm
                 loading={dss.loading}
-                formFields={formFields}
+                formFields={formFields as DynamicSettings}
                 onChange={onChangeFormField}
                 fieldErrors={fieldErrors}
                 isDisabled={isFormDisabled}
@@ -141,7 +142,7 @@ export const SettingsPage: React.FC = () => {
               <CertificateExpirationForm
                 loading={dss.loading}
                 onChange={onChangeFormField}
-                formFields={formFields}
+                formFields={formFields as DynamicSettings}
                 fieldErrors={fieldErrors}
                 isDisabled={isFormDisabled}
               />

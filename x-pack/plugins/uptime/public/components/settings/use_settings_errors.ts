@@ -10,12 +10,12 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { BLANK_STR, SPACE_STR } from '../../pages/translations';
 import { isValidCertVal, SettingsPageFieldErrors } from '../../pages/settings';
-import { DefaultEmail, DynamicSettings } from '../../../common/runtime_types';
 import { validateEmail } from './default_email';
 import { selectDynamicSettings } from '../../state/selectors';
+import { PartialSettings } from './certificate_form';
 
-const hasInvalidEmail = (defaultConnectors: string[], value?: DefaultEmail) => {
-  if (defaultConnectors.length === 0) {
+const hasInvalidEmail = (defaultConnectors?: string[], value?: PartialSettings['defaultEmail']) => {
+  if (!defaultConnectors || defaultConnectors.length === 0) {
     return;
   }
   if (!value || !value.to) {
@@ -35,7 +35,10 @@ const hasInvalidEmail = (defaultConnectors: string[], value?: DefaultEmail) => {
   }
 };
 
-const isEmailChanged = (prev?: DefaultEmail, next?: DefaultEmail) => {
+const isEmailChanged = (
+  prev?: PartialSettings['defaultEmail'],
+  next?: PartialSettings['defaultEmail']
+) => {
   if (!isEqual((prev?.to ?? []).sort(), (next?.to ?? []).sort())) {
     return true;
   }
@@ -47,7 +50,7 @@ const isEmailChanged = (prev?: DefaultEmail, next?: DefaultEmail) => {
   }
 };
 
-const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSettings) => {
+const isDirtyForm = (formFields: PartialSettings | null, settings?: PartialSettings) => {
   return (
     settings?.certAgeThreshold !== formFields?.certAgeThreshold ||
     settings?.certExpirationThreshold !== formFields?.certExpirationThreshold ||
@@ -58,7 +61,7 @@ const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSetti
 };
 
 export const useSettingsErrors = (
-  formFields: DynamicSettings | null
+  formFields: PartialSettings | null
 ): { errors: SettingsPageFieldErrors | null; isFormDirty: boolean } => {
   const dss = useSelector(selectDynamicSettings);
 
@@ -67,9 +70,9 @@ export const useSettingsErrors = (
   if (formFields) {
     const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
 
-    const indErrorSpace = heartbeatIndices.includes(' ') ? SPACE_STR : '';
+    const indErrorSpace = heartbeatIndices?.includes(' ') ? SPACE_STR : '';
 
-    const indError = indErrorSpace || (heartbeatIndices.match(/^\S+$/) ? '' : BLANK_STR);
+    const indError = indErrorSpace || (heartbeatIndices?.match(/^\S+$/) ? '' : BLANK_STR);
 
     const ageError = isValidCertVal(certAgeThreshold);
     const expError = isValidCertVal(certExpirationThreshold);

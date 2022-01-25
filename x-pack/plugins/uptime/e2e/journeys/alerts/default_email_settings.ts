@@ -12,12 +12,11 @@
  * 2.0.
  */
 
-import { journey, step, before, beforeAll } from '@elastic/synthetics';
+import { journey, step, before } from '@elastic/synthetics';
 import {
   assertNotText,
   assertText,
   byTestId,
-  clearSettings,
   loginToKibana,
   waitForLoadingToFinish,
 } from '../utils';
@@ -25,16 +24,6 @@ import { settingsPageProvider } from '../../page_objects/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
   const settings = settingsPageProvider({ page, kibanaUrl: params.kibanaUrl });
-
-  beforeAll(async () => {
-    await clearSettings({
-      kibanaUrl: params.kibanaUrl,
-      user: {
-        username: 'elastic',
-        password: 'changeme',
-      },
-    });
-  });
 
   before(async () => {
     await waitForLoadingToFinish({ page });
