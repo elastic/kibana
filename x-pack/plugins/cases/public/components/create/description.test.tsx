@@ -18,6 +18,8 @@ jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 describe('Description', () => {
   let globalForm: FormHook;
 
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { description: 'My description' },

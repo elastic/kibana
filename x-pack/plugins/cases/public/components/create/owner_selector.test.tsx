@@ -19,6 +19,8 @@ import { waitForComponentToPaint } from '../../common/test_utils';
 describe('Case Owner Selection', () => {
   let globalForm: FormHook;
 
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { selectedOwner: '' },

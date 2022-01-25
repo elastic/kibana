@@ -60,6 +60,8 @@ const defaultProps = {
 describe('Connector', () => {
   let globalForm: FormHook;
 
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { connectorId: connectorsMock[0].id, fields: null },

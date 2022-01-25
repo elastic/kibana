@@ -28,6 +28,8 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
+    // TODO: Fix this manually. Issue #123375
+    // eslint-disable-next-line react/display-name
     EuiFieldText: () => <input />,
   };
 });

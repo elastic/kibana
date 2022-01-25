@@ -16,6 +16,8 @@ import { schema, FormProps } from './schema';
 describe('SubmitCaseButton', () => {
   const onSubmit = jest.fn();
 
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { title: 'My title' },

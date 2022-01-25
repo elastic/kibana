@@ -25,6 +25,8 @@ describe('LocalizedDateTooltip', () => {
   const sampleContentText =
     'this content is typically the string representation of the date prop, but can be any valid react child';
 
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   const SampleContent = () => <span data-test-subj="sample-content">{sampleContentText}</span>;
 
   test('it renders the child content', () => {

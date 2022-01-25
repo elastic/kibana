@@ -14,18 +14,26 @@ import { TestProviders } from '../../common/mock';
 import { CasesRoutes } from './routes';
 
 jest.mock('../all_cases', () => ({
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   AllCases: () => <div>{'All cases'}</div>,
 }));
 
 jest.mock('../case_view', () => ({
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   CaseView: () => <div>{'Case view'}</div>,
 }));
 
 jest.mock('../create', () => ({
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   CreateCase: () => <div>{'Create case'}</div>,
 }));
 
 jest.mock('../configure_cases', () => ({
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   ConfigureCases: () => <div>{'Configure cases'}</div>,
 }));
 
