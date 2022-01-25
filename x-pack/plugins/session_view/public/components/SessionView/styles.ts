@@ -35,10 +35,17 @@ export const useStyles = ({ height = 500 }: StylesDeps) => {
       paddingLeft: padding,
     };
 
+    const pagination: CSSObject = {
+      position: 'absolute',
+      top: '8px',
+      right: '8px',
+    }
+
     return {
       processTree,
       outerPanel,
       treePanel,
+      pagination,
     };
   }, [height, euiTheme]);
 
