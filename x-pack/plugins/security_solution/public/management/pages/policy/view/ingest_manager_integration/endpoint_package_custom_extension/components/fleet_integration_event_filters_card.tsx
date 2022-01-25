@@ -88,12 +88,7 @@ export const FleetIntegrationEventFiltersCard = memo<{
       try {
         const summary = await eventFiltersApi.getSummary(parsePoliciesToKQL([policyId, 'all']));
         if (isMounted.current) {
-          setStats({
-            total: summary.total,
-            windows: 0,
-            linux: 0,
-            macos: 0,
-          });
+          setStats(summary);
         }
       } catch (error) {
         if (isMounted.current) {
