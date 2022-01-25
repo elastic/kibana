@@ -22,7 +22,7 @@ import {
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
 
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 
@@ -43,14 +43,13 @@ export const newFilterListRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath, basePath),
-
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
         defaultMessage: 'Create',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists/new', navigateToPath),
     },
   ],
 });
@@ -69,7 +68,6 @@ export const editFilterListRouteFactory = (
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists/edit', navigateToPath),
     },
   ],
 });

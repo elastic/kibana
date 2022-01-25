@@ -98,21 +98,33 @@ export async function getEnrollmentAPIKey(
  * Invalidate an api key and mark it as inactive
  * @param id
  */
-export async function deleteEnrollmentApiKey(esClient: ElasticsearchClient, id: string) {
+export async function deleteEnrollmentApiKey(
+  esClient: ElasticsearchClient,
+  id: string,
+  forceDelete = false
+) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
   await invalidateAPIKeys([enrollmentApiKey.api_key_id]);
 
-  await esClient.update({
-    index: ENROLLMENT_API_KEYS_INDEX,
-    id,
-    body: {
-      doc: {
-        active: false,
+  if (forceDelete) {
+    await esClient.delete({
+      index: ENROLLMENT_API_KEYS_INDEX,
+      id,
+      refresh: 'wait_for',
+    });
+  } else {
+    await esClient.update({
+      index: ENROLLMENT_API_KEYS_INDEX,
+      id,
+      body: {
+        doc: {
+          active: false,
+        },
       },
-    },
-    refresh: 'wait_for',
-  });
+      refresh: 'wait_for',
+    });
+  }
 }
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(

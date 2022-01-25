@@ -20,6 +20,8 @@ async function fetchIndicesCall(
   const { body: indices } = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
+    // only get specified properties in the response
+    filter_path: ['*.aliases', '*.settings.index.hidden', '*.data_stream'],
   });
 
   if (!Object.keys(indices).length) {

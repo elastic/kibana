@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiPageTemplate, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
+import { usePolicyDetailsEventFiltersNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_event_filters_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
@@ -21,7 +21,7 @@ export const PolicyEventFiltersEmptyUnassigned = memo<CommonProps>(({ policyId, 
   const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
 
-  const navigateCallback = usePolicyDetailsNavigateCallback();
+  const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const onClickPrimaryButtonHandler = useCallback(
     () =>
       navigateCallback({
