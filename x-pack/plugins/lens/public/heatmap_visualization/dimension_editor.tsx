@@ -19,7 +19,6 @@ import type { VisualizationDimensionEditorProps } from '../types';
 import {
   CustomizablePalette,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components/';
 import './dimension_editor.scss';
@@ -64,7 +63,7 @@ export function HeatmapDimensionEditor(
         <EuiFlexItem>
           <EuiColorPaletteDisplay
             data-test-subj="lnsHeatmap_dynamicColoring_palette"
-            palette={getStopsForFixedMode(displayStops, activePalette?.params?.colorStops)}
+            palette={displayStops.map(({ color }) => color)}
             type={FIXED_PROGRESSION}
             onClick={() => {
               setIsPaletteOpen(!isPaletteOpen);
@@ -93,23 +92,24 @@ export function HeatmapDimensionEditor(
             isOpen={isPaletteOpen}
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           >
-            <CustomizablePalette
-              palettes={props.paletteService}
-              activePalette={activePalette}
-              dataBounds={currentMinMax}
-              showContinuity={false}
-              setPalette={(newPalette) => {
-                // make sure to always have a list of stops
-                if (newPalette.params && !newPalette.params.stops) {
-                  newPalette.params.stops = displayStops;
-                }
-                (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
-                setState({
-                  ...state,
-                  palette: newPalette as HeatmapVisualizationState['palette'],
-                });
-              }}
-            />
+            {activePalette && (
+              <CustomizablePalette
+                palettes={props.paletteService}
+                activePalette={activePalette}
+                dataBounds={currentMinMax}
+                setPalette={(newPalette) => {
+                  // make sure to always have a list of stops
+                  if (newPalette.params && !newPalette.params.stops) {
+                    newPalette.params.stops = displayStops;
+                  }
+                  (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
+                  setState({
+                    ...state,
+                    palette: newPalette as HeatmapVisualizationState['palette'],
+                  });
+                }}
+              />
+            )}
           </PalettePanelContainer>
         </EuiFlexItem>
       </EuiFlexGroup>
