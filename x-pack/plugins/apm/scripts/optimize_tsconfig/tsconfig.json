@@ -1,9 +1,7 @@
 {
   "include": [
-    // "./x-pack/plugins/apm/server/routes/services/route.ts",
     "./x-pack/plugins/apm/**/*",
-    // "./x-pack/plugins/observability/**/*",
-    // "./x-pack/plugins/rule_registry/**/*",
+    "./x-pack/plugins/observability/**/*",
     "./typings/**/*"
   ],
   "exclude": [
