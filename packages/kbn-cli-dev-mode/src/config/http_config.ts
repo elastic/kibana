@@ -12,6 +12,9 @@ import { Duration } from 'moment';
 
 export const httpConfigSchema = schema.object(
   {
+    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+      defaultValue: 'http1',
+    }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -45,6 +48,7 @@ export const httpConfigSchema = schema.object(
 export type HttpConfigType = TypeOf<typeof httpConfigSchema>;
 
 export class HttpConfig implements IHttpConfig {
+  protocol: 'http1' | 'http2';
   basePath?: string;
   host: string;
   port: number;
@@ -57,6 +61,7 @@ export class HttpConfig implements IHttpConfig {
 
   constructor(rawConfig: HttpConfigType) {
     this.basePath = rawConfig.basePath;
+    this.protocol = rawConfig.protocol;
     this.host = rawConfig.host;
     this.port = rawConfig.port;
     this.maxPayload = rawConfig.maxPayload;

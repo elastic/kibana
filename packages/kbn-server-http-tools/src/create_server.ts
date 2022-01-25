@@ -12,7 +12,8 @@ import { ListenerOptions } from './get_listener_options';
 export function createServer(serverOptions: ServerOptions, listenerOptions: ListenerOptions) {
   const server = new Server(serverOptions);
 
-  server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
+  // TODO add a condition based on protocol version
+  // server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
   server.listener.setTimeout(listenerOptions.socketTimeout);
   server.listener.on('timeout', (socket) => {
     socket.destroy();

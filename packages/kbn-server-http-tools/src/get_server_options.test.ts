@@ -21,6 +21,7 @@ jest.mock('fs', () => {
 });
 
 const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
+  protocol: 'http1',
   host: 'localhost',
   port: 5601,
   socketTimeout: 120000,

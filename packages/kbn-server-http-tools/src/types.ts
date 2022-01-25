@@ -10,6 +10,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { Duration } from 'moment';
 
 export interface IHttpConfig {
+  protocol: 'http1' | 'http2';
   host: string;
   port: number;
   maxPayload: ByteSizeValue;

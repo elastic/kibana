@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import Http2 from 'http2';
 import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import { ServerOptions as TLSOptions } from 'https';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
@@ -69,6 +69,14 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
     };
 
     options.tls = tlsOptions;
+  }
+
+  if (config.protocol === 'http2') {
+    // @ts-expect-error
+    options.listener = options.tls
+      ? Http2.createSecureServer(options.tls as TLSOptions)
+      : // http2 can be used between Kibana and a reverse proxy, setting TLS up is not required
+        Http2.createServer();
   }
 
   return options;

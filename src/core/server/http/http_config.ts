@@ -84,6 +84,9 @@ const configSchema = schema.object(
         }
       },
     }),
+    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+      defaultValue: 'http1',
+    }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -183,6 +186,7 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
 };
 
 export class HttpConfig implements IHttpConfig {
+  public protocol: 'http1' | 'http2';
   public name: string;
   public autoListen: boolean;
   public host: string;
@@ -217,6 +221,7 @@ export class HttpConfig implements IHttpConfig {
     rawExternalUrlConfig: ExternalUrlConfig
   ) {
     this.autoListen = rawHttpConfig.autoListen;
+    this.protocol = rawHttpConfig.protocol;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;

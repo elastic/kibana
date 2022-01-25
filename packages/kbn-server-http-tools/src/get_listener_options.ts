@@ -14,8 +14,9 @@ export interface ListenerOptions {
 }
 
 export function getListenerOptions(config: IHttpConfig): ListenerOptions {
+  // @ts-expect-error TODO add a condition based on protocol version
   return {
-    keepaliveTimeout: config.keepaliveTimeout,
+    // keepaliveTimeout: config.keepaliveTimeout,
     socketTimeout: config.socketTimeout,
   };
 }
