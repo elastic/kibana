@@ -117,6 +117,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
   return (
     <EmbeddablePanel
+      hideHeader={false}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
       getActions={async (triggerId, context) => {
         const actions = await uiActions.getTriggerCompatibleActions(triggerId, context);
