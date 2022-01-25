@@ -8,34 +8,30 @@
 
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 import {
-  PieVisConfig,
-  EmptySizeRatios,
+  TreemapVisConfig,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { pieVisFunction } from './pie_vis_function';
+import { treemapVisFunction } from './treemap_vis_function';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
 import { PARTITION_LABELS_VALUE } from '../constants';
 
-describe('interpreter/functions#pieVis', () => {
-  const fn = functionWrapper(pieVisFunction());
+describe('interpreter/functions#treemapVis', () => {
+  const fn = functionWrapper(treemapVisFunction());
   const context: Datatable = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
   };
 
-  const visConfig: PieVisConfig = {
+  const visConfig: TreemapVisConfig = {
     addTooltip: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
-    isDonut: true,
-    emptySizeRatio: EmptySizeRatios.SMALL,
     nestedLegend: true,
     truncateLegend: true,
     maxLegendLines: 2,
-    distinctColors: false,
     palette: {
       type: 'system_palette',
       name: 'kibana_palette',
@@ -64,12 +60,7 @@ describe('interpreter/functions#pieVis', () => {
     jest.clearAllMocks();
   });
 
-  it('returns an object with the correct structure for pie', async () => {
-    const actual = await fn(context, { ...visConfig, isDonut: false });
-    expect(actual).toMatchSnapshot();
-  });
-
-  it('returns an object with the correct structure for donut', async () => {
+  it('returns an object with the correct structure', async () => {
     const actual = await fn(context, visConfig);
     expect(actual).toMatchSnapshot();
   });
