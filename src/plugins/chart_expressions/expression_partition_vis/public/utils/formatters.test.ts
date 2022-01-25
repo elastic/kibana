@@ -9,7 +9,7 @@
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { Datatable } from '../../../../expressions';
 import { createMockPieParams, createMockVisData } from '../mocks';
-import { generateFormatters, getAvailableFormatter } from './formatters';
+import { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
 import { BucketColumns } from '../../common/types';
 
 describe('generateFormatters', () => {
@@ -125,5 +125,62 @@ describe('getAvailableFormatter', () => {
 
     expect(formatter).toBeUndefined();
     expect(defaultFormatter).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('getFormatter', () => {
+  const visData = createMockVisData();
+
+  const preparedFormatter1 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const preparedFormatter2 = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+  const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+
+  beforeEach(() => {
+    defaultFormatter.mockClear();
+    preparedFormatter1.mockClear();
+    preparedFormatter2.mockClear();
+  });
+
+  const formatters: Record<string, any> = {
+    [visData.columns[0].id]: preparedFormatter1(),
+    [visData.columns[1].id]: preparedFormatter2(),
+  };
+
+  it('returns formatter from formatters, if meta.params are present ', () => {
+    const formatter = getFormatter(visData.columns[1], formatters, defaultFormatter);
+
+    expect(formatter).toEqual(formatters[visData.columns[1].id]);
+    expect(defaultFormatter).toHaveBeenCalledTimes(0);
+  });
+
+  it('returns formatter from defaultFormatter factory, if meta.params are not present and format is present at column', () => {
+    const column: Partial<BucketColumns> = {
+      ...visData.columns[1],
+      meta: { type: 'string' },
+      format: {
+        id: 'string',
+        params: {},
+      },
+    };
+    const formatter = getFormatter(column, formatters, defaultFormatter);
+
+    expect(formatter).not.toBeNull();
+    expect(typeof formatter).toBe('object');
+    expect(defaultFormatter).toHaveBeenCalledTimes(1);
+    expect(defaultFormatter).toHaveBeenCalledWith(column.format);
+  });
+
+  it('returns defaultFormatter, if meta.params and format are not present', () => {
+    const column: Partial<BucketColumns> = {
+      ...visData.columns[1],
+      meta: { type: 'string' },
+    };
+
+    const formatter = getFormatter(column, formatters, defaultFormatter);
+
+    expect(formatter).not.toBeNull();
+    expect(typeof formatter).toBe('object');
+    expect(defaultFormatter).toHaveBeenCalledTimes(1);
+    expect(defaultFormatter).toHaveBeenCalledWith();
   });
 });
