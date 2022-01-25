@@ -7,17 +7,17 @@
  */
 
 import React from 'react';
-import { ServicesProvider } from '../public/services';
+import { ServicesProvider, EngagementServices } from '../public/services';
 import { EngagementPluginSetup, EngagementPluginStart } from './types';
 
 // TODO: move to a storybook implementation of the service using parameters.
-const config = {
+const services: EngagementServices = {
   chat: {
     enabled: true,
     chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
-    pocID: '53877975',
-    pocEmail: 'sergei.poluektov+drift-chat@elasticsearch.com',
-    pocJWT:
+    userID: '53877975',
+    userEmail: 'test-user@elastic.co',
+    identityJWT:
       'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Mzg3Nzk3NSIsImV4cCI6MTY0MjUxNDc0Mn0.CcAZbD8R865UmoHGi27wKn0aH1bzkZXhX449yyDH2Vk',
   },
 };
@@ -25,7 +25,7 @@ const config = {
 const getEngagementContextProvider: () => React.FC =
   () =>
   ({ children }) =>
-    <ServicesProvider {...config}>{children}</ServicesProvider>;
+    <ServicesProvider {...services}>{children}</ServicesProvider>;
 
 const createEngagementPluginSetup = (): jest.Mocked<EngagementPluginSetup> => {
   const mock: jest.Mocked<EngagementPluginSetup> = {};

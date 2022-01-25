@@ -12,9 +12,6 @@ import { PluginConfigDescriptor } from 'kibana/server';
 const chatConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   chatURL: schema.maybe(schema.string()),
-  pocJWT: schema.maybe(schema.string()),
-  pocID: schema.maybe(schema.string()),
-  pocEmail: schema.maybe(schema.string()),
 });
 
 const configSchema = schema.object({

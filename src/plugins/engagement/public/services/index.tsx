@@ -8,24 +8,21 @@
 
 import React, { FC, createContext, useContext } from 'react';
 
-interface WithChat {
+interface WithoutChat {
   enabled: false;
 }
 
-interface WithoutChat {
+interface WithChat {
   enabled: true;
   chatURL: string;
-
-  // These are here for PoC purposes *only*.  They should be replaced with actual implementations
-  // as the PoC matures.
-  pocJWT: string;
-  pocID: string;
-  pocEmail: string;
+  identityJWT: string;
+  userID: string;
+  userEmail: string;
 }
 
 type ChatService = WithChat | WithoutChat;
 
-interface EngagementServices {
+export interface EngagementServices {
   chat: ChatService;
 }
 

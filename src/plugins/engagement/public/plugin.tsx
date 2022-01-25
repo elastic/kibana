@@ -14,26 +14,26 @@ import type {
   EngagementPluginSetupDeps,
   EngagementPluginStartDeps,
 } from './types';
+import type { EngagementServices } from './services';
 import { ServicesProvider } from './services';
 
 export interface EngagementConfigType {
   chat: {
     enabled: boolean;
     chatURL: string;
-
-    // These are here for PoC purposes *only*.  They should be replaced with actual implementations
-    // as the PoC matures.
-    pocJWT: string;
-    pocID: string;
-    pocEmail: string;
   };
+}
+
+interface ChatUser {
+  id: string;
+  email: string;
 }
 
 export class EngagementPlugin
   implements
     Plugin<
       EngagementPluginSetup,
-      EngagementPluginStart,
+      Promise<EngagementPluginStart>,
       EngagementPluginSetupDeps,
       EngagementPluginStartDeps
     >
@@ -44,11 +44,37 @@ export class EngagementPlugin
     return {};
   }
 
-  public start(_core: CoreStart, plugins: EngagementPluginStartDeps): EngagementPluginStart {
+  private async getChatUser(): Promise<ChatUser | null> {
+    // TODO: obtain kibana and/or cloud user information
+    return {
+      id: 'user-id',
+      email: 'test-user@elasticsearch.com',
+    }
+  }
+
+  private async getChatIdentityToken(): Promise<string | null> {
+    // TODO: fetch identity token from plugin internal endpoint
+    return 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Mzg3Nzk3NSIsImV4cCI6MTY0MjUxNDc0Mn0.CcAZbD8R865UmoHGi27wKn0aH1bzkZXhX449yyDH2Vk';
+  }
+
+  public async start(_core: CoreStart, plugins: EngagementPluginStartDeps): Promise<EngagementPluginStart> {
     const { sharedUX } = plugins;
 
+    const user = await this.getChatUser();
+
+    const chatIdentityToken = await this.getChatIdentityToken();
+
     const config = this.initializerContext.config.get<EngagementConfigType>();
-    const chat = config?.chat || { enabled: false };
+
+    let chat: EngagementServices['chat'] = { enabled: false };
+    if (config.chat.enabled && user && chatIdentityToken) {
+      chat = {
+        ...config.chat,
+        userID: user.id,
+        userEmail: user.email,
+        identityJWT: chatIdentityToken,
+      }
+    }
 
     return {
       ContextProvider: ({ children }) => (

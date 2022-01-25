@@ -85,11 +85,11 @@ const useFrame = (): UseChatType => {
       switch (message.type) {
         case MESSAGE_READY: {
           const user = {
-            id: chat.pocID,
+            id: chat.userID,
             attributes: {
-              email: chat.pocEmail,
+              email: chat.userEmail,
             },
-            jwt: chat.pocJWT,
+            jwt: chat.identityJWT,
           };
 
           chatIframe.contentWindow.postMessage(
