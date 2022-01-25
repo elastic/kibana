@@ -16,7 +16,6 @@ import {
   CaseResolveResponseRt,
   CaseResolveResponse,
   User,
-  UsersRt,
   AllTagsFindRequest,
   AllTagsFindRequestRt,
   excess,
@@ -329,34 +328,18 @@ export async function getTags(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findCases);
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.findCases
+    );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    const cases = await caseService.getTags({
+    const tags = await caseService.getTags({
       unsecuredSavedObjectsClient,
       filter,
     });
 
-    const tags = new Set<string>();
-    const mappedCases: Array<{
-      owner: string;
-      id: string;
-    }> = [];
-
-    // Gather all necessary information in one pass
-    cases.saved_objects.forEach((theCase) => {
-      theCase.attributes.tags.forEach((tag) => tags.add(tag));
-      mappedCases.push({
-        id: theCase.id,
-        owner: theCase.attributes.owner,
-      });
-    });
-
-    ensureSavedObjectsAreAuthorized(mappedCases);
-
-    return [...tags.values()];
+    return tags;
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -377,38 +360,18 @@ export async function getReporters(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getReporters);
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getReporters
+    );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
 
-    const cases = await caseService.getReporters({
+    const reporters = await caseService.getReporters({
       unsecuredSavedObjectsClient,
       filter,
     });
 
-    const reporters = new Map<string, User>();
-    const mappedCases: Array<{
-      owner: string;
-      id: string;
-    }> = [];
-
-    // Gather all necessary information in one pass
-    cases.saved_objects.forEach((theCase) => {
-      const user = theCase.attributes.created_by;
-      if (user.username != null) {
-        reporters.set(user.username, user);
-      }
-
-      mappedCases.push({
-        id: theCase.id,
-        owner: theCase.attributes.owner,
-      });
-    });
-
-    ensureSavedObjectsAreAuthorized(mappedCases);
-
-    return UsersRt.encode([...reporters.values()]);
+    return reporters;
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }
