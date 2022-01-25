@@ -193,7 +193,7 @@ export const makeMapStateToProps = () => {
         : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
     const timelineId = getTimelineIdForPathname(ownProps?.currentPath, flyoutTimeline?.show);
-    let detailPanel = {};
+    let detailPanel = null;
 
     if (timelineId) {
       const activeTimelineById =
@@ -238,24 +238,25 @@ export const makeMapStateToProps = () => {
         {}
       );
 
-    return {
-      urlState: {
-        ...searchAttr,
-        [CONSTANTS.sourcerer]: selectedPatterns,
-        [CONSTANTS.timerange]: {
-          global: {
-            [CONSTANTS.timerange]: globalTimerange,
-            linkTo: globalLinkTo,
-          },
-          timeline: {
-            [CONSTANTS.timerange]: timelineTimerange,
-            linkTo: timelineLinkTo,
-          },
+    const urlState: UrlState = {
+      ...searchAttr,
+      [CONSTANTS.sourcerer]: selectedPatterns,
+      [CONSTANTS.timerange]: {
+        global: {
+          [CONSTANTS.timerange]: globalTimerange,
+          linkTo: globalLinkTo,
         },
-        [CONSTANTS.timeline]: timeline,
-        [CONSTANTS.detailPanel]: detailPanel,
-      } as UrlState,
+        timeline: {
+          [CONSTANTS.timerange]: timelineTimerange,
+          linkTo: timelineLinkTo,
+        },
+      },
+      [CONSTANTS.timeline]: timeline,
     };
+
+    if (detailPanel != null) urlState[CONSTANTS.detailPanel] = detailPanel;
+
+    return { urlState };
   };
 
   return mapStateToProps;
