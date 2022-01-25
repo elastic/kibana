@@ -71,8 +71,7 @@ async function deleteConfig(
   toasts: NotificationsStart['toasts']
 ) {
   try {
-    await callApmApi({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration',
+    await callApmApi('DELETE /api/apm/settings/agent-configuration', {
       signal: null,
       params: {
         body: {
