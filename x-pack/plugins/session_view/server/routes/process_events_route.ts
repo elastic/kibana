@@ -72,17 +72,7 @@ export const doSearch = async (
         },
       },
       size: PROCESS_EVENTS_PER_PAGE,
-      // sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
-      sort: {
-        _script: {
-          type: 'string',
-          script: {
-            source: "if(doc.containsKey('kibana.alert.original_time')) { return doc['kibana.alert.original_time'].toString(); } else { return doc['@timestamp'].toString(); }",
-            lang: "painless"
-          },
-          order: forward ? 'asc' : 'desc'
-        } 
-      },
+      sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
       search_after: cursor ? [cursor] : undefined,
     },
   });
