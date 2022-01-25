@@ -88,6 +88,8 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
           // Don't log the metadata, only the geo data
           metadata: false,
         });
+
+      // TODO set _tableRowCount
     }
 
     const { value: batch, done } = await this._iterator.next();
@@ -107,6 +109,9 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
         results.geometryTypesMap.set(feature.geometry.type, true);
       }
       results.features.push(feature);
+
+      // Instead of tracking bytes read, which is difficult since reading from multiple binary files
+      // track size by features
       const featureChars = JSON.stringify(feature).length;
       results.bytesRead = results.bytesRead + featureChars;
     }
