@@ -18,7 +18,10 @@ import { isNamedNode } from '../tsmorph_utils';
 export const pathsOutsideScopes: { [key: string]: string } = {};
 
 export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolean {
-  return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
+  if (Node.isModifierable(node)) {
+    return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
+  }
+  return false;
 }
 
 /**
