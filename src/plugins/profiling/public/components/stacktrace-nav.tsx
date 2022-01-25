@@ -100,10 +100,13 @@ export const StackTraceNavigation = ({ fetchTopN, setTopN }) => {
       return button.id === toggleDateSelected;
     });
 
+    console.log(new Date().toISOString(), 'started payload retrieval');
     fetchTopN(topnValue[0].value, dateValue[0].value).then((response) => {
+      console.log(new Date().toISOString(), 'finished payload retrieval');
       const samples = getTopN(response);
       const series = groupSamplesByCategory(samples);
       setTopN({ samples, series });
+      console.log(new Date().toISOString(), 'updated local state');
     });
   }, [toggleTopNSelected, toggleDateSelected]);
 

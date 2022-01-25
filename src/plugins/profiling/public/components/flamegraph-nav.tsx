@@ -55,10 +55,11 @@ export const FlameGraphNavigation = ({ getter, setter }) => {
       return button.id === toggleDateSelected;
     });
 
-    console.log(new Date().toISOString(), 'started flamechart');
+    console.log(new Date().toISOString(), 'started payload retrieval');
     getter(dateValue[0].value).then((response) => {
+      console.log(new Date().toISOString(), 'finished payload retrieval');
       setter(response);
-      console.log(new Date().toISOString(), 'finished flamechart');
+      console.log(new Date().toISOString(), 'updated local state');
     });
   }, [toggleDateSelected]);
 
