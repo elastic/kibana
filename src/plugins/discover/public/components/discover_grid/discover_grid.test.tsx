@@ -51,9 +51,7 @@ function getComponent() {
     </KibanaContextProvider>
   );
 
-  const wrapper = mountWithIntl(<Proxy {...getProps()} />);
-
-  return wrapper;
+  return mountWithIntl(<Proxy {...getProps()} />);
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
