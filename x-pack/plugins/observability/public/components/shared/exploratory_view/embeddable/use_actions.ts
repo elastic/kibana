@@ -104,6 +104,7 @@ const getExploreAction = ({ href, callback }: { href: string; callback: () => vo
       callback();
       return;
     },
+    order: 50,
   };
 };
 
@@ -126,6 +127,7 @@ const getSaveAction = ({ callback }: { callback: () => void }): Action => {
       callback();
       return;
     },
+    order: 49,
   };
 };
 
@@ -148,5 +150,6 @@ const getAddToCaseAction = ({ callback }: { callback: () => void }): Action => {
       callback();
       return;
     },
+    order: 48,
   };
 };

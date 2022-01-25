@@ -133,7 +133,6 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
       showBadges={false}
       showNotifications={false}
       theme={theme}
-      hasBorder={false}
     />
   );
 };

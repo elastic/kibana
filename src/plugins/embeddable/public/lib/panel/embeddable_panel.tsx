@@ -80,7 +80,6 @@ interface Props {
   actionPredicate?: (actionId: string) => boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
   showShadow?: boolean;
-  hasBorder?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
@@ -274,7 +273,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         role="figure"
         aria-labelledby={headerId}
         hasShadow={this.props.showShadow}
-        hasBorder={false}
       >
         {!this.props.hideHeader && (
           <PanelHeader
