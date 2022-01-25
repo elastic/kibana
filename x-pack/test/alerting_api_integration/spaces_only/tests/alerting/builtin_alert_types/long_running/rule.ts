@@ -31,7 +31,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
         pattern: [true, true, true, true, true],
       });
-      const errorStatuses: Array<{ status: string; error: { message: string; reason: string } }> = [];
+      const errorStatuses: Array<{ status: string; error: { message: string; reason: string } }> =
+        [];
       // get the events we're expecting
       const events = await retry.try(async () => {
         const { body: rule } = await supertest.get(
