@@ -121,7 +121,7 @@ export const updateAlertStatusAction = async ({
 export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   if (Array.isArray(ecs)) {
     const timestamps = ecs.reduce<number[]>((acc, item) => {
-      const dateTimestamp = new Date(item.timestamp ?? '');
+      const dateTimestamp = item.timestamp ? new Date(item.timestamp) : new Date();
       if (!acc.includes(dateTimestamp.valueOf())) {
         return [...acc, dateTimestamp.valueOf()];
       }
