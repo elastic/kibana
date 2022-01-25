@@ -38,7 +38,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS]: {
     name: i18n.translate('visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsTitle', {
-      defaultMessage: 'Allow checking for failed shards in TSVB',
+      defaultMessage: 'Show TSVB request shard failures',
     }),
     value: true,
     requiresPageReload: true,
