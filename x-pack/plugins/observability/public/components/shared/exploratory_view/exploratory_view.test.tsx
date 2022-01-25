@@ -50,8 +50,6 @@ describe('ExploratoryView', () => {
 
     expect(await screen.findByText(/No series found. Please add a series./i)).toBeInTheDocument();
     expect(await screen.findByText(/Hide chart/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Refresh/i)).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: /Explore data/i })).toBeInTheDocument();
   });
 
   it('renders lens component when there is series', async () => {
