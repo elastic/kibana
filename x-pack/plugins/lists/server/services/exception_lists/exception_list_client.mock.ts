@@ -11,7 +11,7 @@ import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
-import type { SavedObjectsUpdateResponse } from 'kibana/server';
+import type { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
@@ -255,6 +255,33 @@ export const getExceptionListSavedObjectClientMock = (
     }
 
     return undefined as unknown as SavedObject;
+  });
+
+  // Mock `.find()`
+  const origFindMock = soClient.find.getMockImplementation();
+  soClient.find.mockImplementation(async (options) => {
+    if (
+      isExceptionsListSavedObjectType(Array.isArray(options.type) ? options.type[0] : options.type)
+    ) {
+      return {
+        page: 1,
+        per_page: 1,
+        saved_objects: [
+          {
+            ...getExceptionListItemSavedObject(),
+            score: 1,
+          },
+        ],
+        score: 1,
+        total: 1,
+      };
+    }
+
+    if (origFindMock) {
+      return origFindMock(options);
+    }
+
+    return undefined as unknown as SavedObjectsFindResponse;
   });
 
   return soClient;

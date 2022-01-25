@@ -83,7 +83,23 @@ describe('UsersTable', () => {
       <UsersTable {...props} accessItemKey="engines" singleUserRoleMappings={[userWithAllItems]} />
     );
 
-    expect(wrapper.find('[data-test-subj="AllItems"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="AccessItems"]').prop('children')).toEqual('All');
+  });
+
+  it('handles access items display for no items are available.', () => {
+    const userWithAllItems = {
+      ...asSingleUserRoleMapping,
+      roleMapping: {
+        ...asRoleMapping,
+        accessAllEngines: false,
+        engines: [],
+      },
+    };
+    const wrapper = mount(
+      <UsersTable {...props} accessItemKey="engines" singleUserRoleMappings={[userWithAllItems]} />
+    );
+
+    expect(wrapper.find('[data-test-subj="AccessItems"]').prop('children')).toEqual('-');
   });
 
   it('handles access items display more than 2 items', () => {
