@@ -134,3 +134,63 @@ journey('Monitor Management', async ({ page, params }: { page: Page; params: any
     await deleteMonitor();
   });
 });
+
+journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page; params: any }) => {
+  const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const basicMonitorDetails = {
+    name: 'Sample monitor',
+    location: 'US Central',
+    schedule: '@every 3m',
+    apmServiceName: 'service',
+  };
+
+  before(async () => {
+    await uptime.waitForLoadingToFinish();
+  });
+
+  step('Go to monitor-management', async () => {
+    await uptime.navigateToMonitorManagement();
+  });
+
+  step('login to Kibana', async () => {
+    await uptime.loginToKibana();
+  });
+
+  step('Check breadcrumb', async () => {
+    const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
+    expect(lastBreadcrumb).toEqual('Monitor management');
+  });
+
+  step('check breadcrumbs', async () => {
+    await uptime.clickAddMonitor();
+    const breadcrumbs = await page.$$('[data-test-subj="breadcrumb"]');
+    expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
+    const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
+    expect(lastBreadcrumb).toEqual('Add monitor');
+  });
+
+  step('create monitor http monitor', async () => {
+    const monitorDetails = {
+      ...basicMonitorDetails,
+      url: 'https://elastic.co',
+      locations: [basicMonitorDetails.location],
+    };
+    await uptime.createBasicHTTPMonitorDetails(monitorDetails);
+    const isSuccessful = await uptime.confirmAndSave();
+    expect(isSuccessful).toBeTruthy();
+  });
+
+  step('edit http monitor and check breadcrumb', async () => {
+    await uptime.editMonitor();
+    const breadcrumbs = await page.$$('[data-test-subj=breadcrumb]');
+    expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
+    const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
+    expect(lastBreadcrumb).toEqual('Edit monitor');
+  });
+
+  step('delete monitor', async () => {
+    await uptime.navigateToMonitorManagement();
+    const isSuccessful = await uptime.deleteMonitor();
+    expect(isSuccessful).toBeTruthy();
+  });
+});
