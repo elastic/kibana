@@ -24,6 +24,7 @@ describe('authorization', () => {
     request = httpServerMock.createKibanaRequest();
     mockLogger = {
       log: jest.fn(),
+      enabled: true,
     };
   });
 
