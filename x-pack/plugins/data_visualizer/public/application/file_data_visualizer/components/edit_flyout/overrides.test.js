@@ -7,7 +7,7 @@
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { FILE_FORMATS } from '../../../../../../file_upload/common/constants';
+import { FILE_FORMATS } from '../../../../../common/constants';
 
 import { Overrides } from './overrides';
 

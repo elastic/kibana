@@ -62,5 +62,6 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
     </EuiFlexGroup>
   ) : null;
 };
+FieldMappingComponent.displayName = 'FieldMapping';
 
 export const FieldMapping = React.memo(FieldMappingComponent);
