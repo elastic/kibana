@@ -43,7 +43,7 @@ The default is based on the time field, from new to old.
 [role="screenshot"]
 image::images/document-explorer-sort-data.png[Pop-up in Document Explorer for sorting columns, width="75%"]
 
-. In the pop-up, expand the dropdown menu to add more fields to the sort.
+. To add more fields, expand the dropdown menu.
 +
 By default, columns in a multi-field are sorted in the order they are added.
 This example sorts first by `order_date`, and then by `geo.country_iso_code`.
