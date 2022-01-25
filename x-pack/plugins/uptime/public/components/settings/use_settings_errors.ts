@@ -13,6 +13,7 @@ import { isValidCertVal, SettingsPageFieldErrors } from '../../pages/settings';
 import { validateEmail } from './default_email';
 import { selectDynamicSettings } from '../../state/selectors';
 import { PartialSettings } from './certificate_form';
+import { connectorsSelector } from '../../state/alerts/alerts';
 
 const hasInvalidEmail = (defaultConnectors?: string[], value?: PartialSettings['defaultEmail']) => {
   if (!defaultConnectors || defaultConnectors.length === 0) {
@@ -67,6 +68,13 @@ export const useSettingsErrors = (
 
   const isFormDirty = isDirtyForm(formFields, dss.settings);
 
+  const { data = [] } = useSelector(connectorsSelector);
+
+  const hasEmailConnector = data?.find(
+    (connector) =>
+      formFields?.defaultConnectors?.includes(connector.id) && connector.actionTypeId === '.email'
+  );
+
   if (formFields) {
     const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
 
@@ -83,7 +91,9 @@ export const useSettingsErrors = (
         heartbeatIndices: indError,
         expirationThresholdError: expError,
         ageThresholdError: ageError,
-        invalidEmail: hasInvalidEmail(formFields.defaultConnectors, formFields.defaultEmail),
+        invalidEmail: hasEmailConnector
+          ? hasInvalidEmail(formFields.defaultConnectors, formFields.defaultEmail)
+          : undefined,
       },
     };
   }
