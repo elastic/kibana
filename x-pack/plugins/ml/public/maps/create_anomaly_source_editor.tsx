@@ -11,7 +11,7 @@ import { EuiPanel } from '@elastic/eui';
 import { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelector } from './anomaly_job_selector';
 import { LayerSelector } from './layer_selector';
-import { MlAnomalyLayers } from './util';
+import { ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
 
 interface State {
   jobId?: string;
-  typicalActual?: MlAnomalyLayers;
+  typicalActual?: MlAnomalyLayersType;
 }
 
 export class CreateAnomalySourceEditor extends Component<Props, State> {
@@ -32,7 +32,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     if (this.state.jobId) {
       this.props.onSourceConfigChange({
         jobId: this.state.jobId,
-        typicalActual: this.state.typicalActual,
+        typicalActual: this.state.typicalActual || ML_ANOMALY_LAYERS.ACTUAL,
       });
     }
   }
@@ -41,7 +41,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     this._isMounted = true;
   }
 
-  private onTypicalActualChange = (typicalActual: MlAnomalyLayers) => {
+  private onTypicalActualChange = (typicalActual: MlAnomalyLayersType) => {
     if (!this._isMounted) {
       return;
     }
@@ -73,7 +73,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     const selector = this.state.jobId ? (
       <LayerSelector
         onChange={this.onTypicalActualChange}
-        typicalActual={this.state.typicalActual || 'actual'}
+        typicalActual={this.state.typicalActual || ML_ANOMALY_LAYERS.ACTUAL}
       />
     ) : null;
     return (
