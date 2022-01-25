@@ -345,9 +345,9 @@ const buildEqlDataProviderOrFilter = (
         ALERT_GROUP_ID,
         ecs.reduce<string[]>((acc, ecsData) => {
           const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
-          const alertGroupId = !Array.isArray(alertGroupIdField)
-            ? alertGroupIdField
-            : alertGroupIdField[0];
+          const alertGroupId = Array.isArray(alertGroupIdField)
+            ? alertGroupIdField[0]
+            : alertGroupIdField;
           if (!acc.includes(alertGroupId)) {
             return [...acc, alertGroupId];
           }
@@ -359,9 +359,9 @@ const buildEqlDataProviderOrFilter = (
     const ecsData = Array.isArray(ecs) ? ecs[0] : ecs;
     const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
     const queryMatchField = getFieldKey(ecsData, ALERT_GROUP_ID);
-    const alertGroupId = !Array.isArray(alertGroupIdField)
-      ? alertGroupIdField
-      : alertGroupIdField[0];
+    const alertGroupId = Array.isArray(alertGroupIdField)
+      ? alertGroupIdField[0]
+      : alertGroupIdField;
     return {
       dataProviders: [
         {
