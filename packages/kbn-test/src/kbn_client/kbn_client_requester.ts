@@ -8,9 +8,8 @@
 
 import Url from 'url';
 import Https from 'https';
-import Qs from 'querystring';
 
-import Axios, { AxiosResponse, ResponseType } from 'axios';
+import got, { Agents } from 'got';
 import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 
 const isConcliftOnGetError = (error: any) => {
@@ -67,11 +66,11 @@ export interface ReqOptions {
   path: string;
   query?: Record<string, any>;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  body?: any;
+  body?: Record<string, any> | string;
   retries?: number;
   headers?: Record<string, string>;
   ignoreErrors?: number[];
-  responseType?: ResponseType;
+  responseType?: 'text' | 'json' | 'buffer';
 }
 
 const delay = (ms: number) =>
@@ -86,16 +85,18 @@ interface Options {
 
 export class KbnClientRequester {
   private readonly url: string;
-  private readonly httpsAgent: Https.Agent | null;
+  private readonly httpsAgent: Https.Agent | undefined;
+  private ca?: Buffer[];
 
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
+    this.ca = options.certificateAuthorities;
     this.httpsAgent =
       Url.parse(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
           })
-        : null;
+        : undefined;
   }
 
   private pickUrl() {
@@ -111,35 +112,41 @@ export class KbnClientRequester {
     return Url.resolve(baseUrl, relative);
   }
 
-  async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
+  async request<T>(options: ReqOptions): Promise<{ data: T; status: number; statusText?: string }> {
     const url = this.resolveUrl(options.path);
     const description = options.description || `${options.method} ${url}`;
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
-
+    const agents: Agents = {
+      https: this.httpsAgent,
+    };
     while (true) {
       attempt += 1;
 
       try {
-        const response = await Axios.request({
+        const response = await got({
+          // TODO make configurable
+          http2: true,
+          https: {
+            certificateAuthority: this.ca,
+          },
           method: options.method,
           url,
-          data: options.body,
-          params: options.query,
+          searchParams: options.query,
           headers: {
             ...options.headers,
             'kbn-xsrf': 'kbn-client',
           },
-          httpsAgent: this.httpsAgent,
+          body: typeof options.body === 'object' ? JSON.stringify(options.body) : options.body,
+          agent: agents,
           responseType: options.responseType,
-          // work around https://github.com/axios/axios/issues/2791
-          transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
-          maxContentLength: 30000000,
-          maxBodyLength: 30000000,
-          paramsSerializer: (params) => Qs.stringify(params),
         });
 
-        return response;
+        return {
+          data: response.body as T,
+          status: response.statusCode,
+          statusText: response.statusMessage,
+        };
       } catch (error) {
         const conflictOnGet = isConcliftOnGetError(error);
         const requestedRetries = options.retries !== undefined;

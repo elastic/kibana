@@ -7,7 +7,6 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   PACKAGE_POLICY_API_ROUTES,
@@ -16,9 +15,7 @@ import {
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
 
-const fetchEndpointPolicies = (
-  kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
+const fetchEndpointPolicies = (kbnClient: KbnClient): Promise<{ data: GetPolicyListResponse }> => {
   return kbnClient.request<GetPolicyListResponse>({
     method: 'GET',
     path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
