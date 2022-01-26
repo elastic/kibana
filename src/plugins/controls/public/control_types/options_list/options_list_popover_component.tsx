@@ -14,9 +14,10 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiFormRow,
+  EuiToolTip,
   EuiSpacer,
+  EuiBadge,
   EuiIcon,
 } from '@elastic/eui';
 
@@ -30,10 +31,14 @@ export const OptionsListPopover = ({
   loading,
   searchString,
   availableOptions,
+  totalCardinality,
+  invalidSelections,
   updateSearchString,
 }: {
   searchString: string;
+  totalCardinality?: number;
   loading: OptionsListComponentState['loading'];
+  invalidSelections?: string[];
   updateSearchString: (newSearchString: string) => void;
   availableOptions: OptionsListComponentState['availableOptions'];
 }) => {
@@ -41,22 +46,56 @@ export const OptionsListPopover = ({
   const {
     useEmbeddableSelector,
     useEmbeddableDispatch,
-    actions: { selectOption, deselectOption, clearSelections, replaceSelection },
+    actions: { selectOption, deselectOption, deselectOptions, clearSelections, replaceSelection },
   } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
   const { selectedOptions, singleSelect, title } = useEmbeddableSelector((state) => state);
 
-  // track selectedOptions in a set for more efficient lookup
+  // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
+  const invalidSelectionsSet = useMemo(
+    () => new Set<string>(invalidSelections),
+    [invalidSelections]
+  );
+
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
     <>
-      <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
+      <EuiPopoverTitle className="optionsList__popoverTitle" paddingSize="s">
+        {title}
+        {invalidSelections && invalidSelections.length > 0 && (
+          <EuiToolTip content={OptionsListStrings.popover.getInvalidSelectionsTooltip()}>
+            <EuiBadge
+              color="warning"
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => dispatch(deselectOptions(invalidSelections))}
+              iconOnClickAriaLabel={OptionsListStrings.popover.getInvalidSelectionsAriaLabel()}
+            >
+              {OptionsListStrings.popover.getInvalidSelectionsTitle(invalidSelections.length)}
+            </EuiBadge>
+          </EuiToolTip>
+        )}
+      </EuiPopoverTitle>
       <div className="optionsList__actions">
         <EuiFormRow>
-          <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="spaceBetween">
+          <EuiFlexGroup
+            gutterSize="xs"
+            direction="row"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            {totalCardinality && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={OptionsListStrings.popover.getTotalCardinalityTooltip(totalCardinality)}
+                >
+                  <EuiBadge color="primary">{totalCardinality}</EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiFieldSearch
                 compressed
@@ -151,6 +190,11 @@ export const OptionsListPopover = ({
                   checked="on"
                   key={index}
                   onClick={() => dispatch(deselectOption(availableOption))}
+                  className={
+                    invalidSelectionsSet.has(availableOption)
+                      ? 'optionsList__selectionInvalid'
+                      : undefined
+                  }
                 >
                   {`${availableOption}`}
                 </EuiFilterSelectItem>

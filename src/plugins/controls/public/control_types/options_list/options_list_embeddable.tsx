@@ -196,9 +196,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private runOptionsListQuery = async () => {
     this.updateComponentState({ loading: true });
+    const dataView = await this.getCurrentDataView();
     const { ignoreParentSettings, filters, fieldName, query, selectedOptions, timeRange } =
       this.getInput();
-    const dataView = await this.getCurrentDataView();
     const field = dataView.getFieldByName(fieldName);
     if (!field) throw fieldMissingError(fieldName);
 

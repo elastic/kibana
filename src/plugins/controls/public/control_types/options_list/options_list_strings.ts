@@ -66,6 +66,25 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
         defaultMessage: 'Clear selections',
       }),
+    getTotalCardinalityTooltip: (totalOptions: number) =>
+      i18n.translate('controls.optionsList.popover.cardinalityTooltip', {
+        defaultMessage: 'There are {totalOptions} total available options.',
+        values: { totalOptions },
+      }),
+    getInvalidSelectionsTitle: (invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
+        defaultMessage: '{invalidSelectionCount} ignored',
+        values: { invalidSelectionCount },
+      }),
+    getInvalidSelectionsAriaLabel: () =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
+        defaultMessage: 'Deselect all ignored selections',
+      }),
+    getInvalidSelectionsTooltip: () =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
+        defaultMessage:
+          'One or more selections in this control have been ignored because they would filter out all documents.',
+      }),
   },
   errors: {
     getDataViewNotFoundError: (dataViewId: string) =>

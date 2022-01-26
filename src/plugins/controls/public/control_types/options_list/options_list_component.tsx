@@ -52,7 +52,7 @@ export const OptionsListComponent = ({
   );
 
   // useStateObservable to get component state from Embeddable
-  const { availableOptions, loading, invalidSelections, validSelections } =
+  const { availableOptions, loading, invalidSelections, validSelections, totalCardinality } =
     useStateObservable<OptionsListComponentState>(
       componentStateSubject,
       componentStateSubject.getValue()
@@ -91,7 +91,7 @@ export const OptionsListComponent = ({
             <span>{validSelections?.join(OptionsListStrings.summary.getSeparator())}</span>
           )}
           {invalidSelections && (
-            <span className="optionsList--filterBtnInvalid">
+            <span className="optionsList__filterInvalid">
               {invalidSelections.join(OptionsListStrings.summary.getSeparator())}
             </span>
           )}
@@ -138,8 +138,10 @@ export const OptionsListComponent = ({
         <OptionsListPopover
           loading={loading}
           searchString={searchString}
-          updateSearchString={updateSearchString}
+          totalCardinality={totalCardinality}
           availableOptions={availableOptions}
+          invalidSelections={invalidSelections}
+          updateSearchString={updateSearchString}
         />
       </EuiPopover>
     </EuiFilterGroup>
