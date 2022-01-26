@@ -17,49 +17,52 @@ import type { JobSelectionResult } from '../../components/job_selector/job_selec
  * Hook for invoking Anomaly Detection jobs selection
  * inside the ML app.
  */
-export function useJobSelection(
-  config: { singleSelection: boolean; withTimeRangeSelector: boolean } = {
-    singleSelection: false,
-    withTimeRangeSelector: true,
-  }
-) {
+export function useJobSelection() {
   const { overlays, services } = useMlKibana();
 
-  return useCallback((): Promise<JobSelectionResult> => {
-    const { uiSettings } = services;
-
-    const tzConfig = uiSettings.get('dateFormat:tz');
-    const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
-    const maps = {
-      groupsMap: getInitialGroupsMap([]),
-      jobsMap: {},
-    };
-
-    return new Promise(async (resolve, reject) => {
-      try {
-        const flyoutSession = overlays.openFlyout(
-          <KibanaContextProvider services={services}>
-            <JobSelectorFlyout
-              selectedIds={[]}
-              withTimeRangeSelector={config.withTimeRangeSelector}
-              dateFormatTz={dateFormatTz}
-              singleSelection={config.singleSelection}
-              timeseriesOnly={false}
-              onFlyoutClose={() => {
-                reject();
-                flyoutSession.close();
-              }}
-              onSelectionConfirmed={(payload) => {
-                resolve(payload);
-                flyoutSession.close();
-              }}
-              maps={maps}
-            />
-          </KibanaContextProvider>
-        );
-      } catch (error) {
-        reject(error);
+  return useCallback(
+    (
+      config: { singleSelection?: boolean; withTimeRangeSelector?: boolean } = {
+        singleSelection: false,
+        withTimeRangeSelector: true,
       }
-    });
-  }, [overlays, services]);
+    ): Promise<JobSelectionResult> => {
+      const { uiSettings } = services;
+
+      const tzConfig = uiSettings.get('dateFormat:tz');
+      const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+      const maps = {
+        groupsMap: getInitialGroupsMap([]),
+        jobsMap: {},
+      };
+
+      return new Promise(async (resolve, reject) => {
+        try {
+          const flyoutSession = overlays.openFlyout(
+            <KibanaContextProvider services={services}>
+              <JobSelectorFlyout
+                selectedIds={[]}
+                withTimeRangeSelector={config.withTimeRangeSelector}
+                dateFormatTz={dateFormatTz}
+                singleSelection={!!config.singleSelection}
+                timeseriesOnly={false}
+                onFlyoutClose={() => {
+                  reject();
+                  flyoutSession.close();
+                }}
+                onSelectionConfirmed={(payload) => {
+                  resolve(payload);
+                  flyoutSession.close();
+                }}
+                maps={maps}
+              />
+            </KibanaContextProvider>
+          );
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    [overlays, services]
+  );
 }

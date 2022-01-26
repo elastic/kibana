@@ -130,6 +130,28 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
 
+    const getJobSelectionCallback =
+      (targetPage: typeof ML_PAGES.ANOMALY_EXPLORER | typeof ML_PAGES.SINGLE_METRIC_VIEWER) =>
+      async () => {
+        const singleSelection = targetPage === ML_PAGES.SINGLE_METRIC_VIEWER;
+
+        try {
+          const { jobIds, time } = await getJobSelection({ singleSelection });
+          const path = await mlLocator!.getUrl({
+            page: targetPage,
+            pageState: {
+              ...pageState,
+              timeRange: time,
+              jobIds,
+            },
+          });
+
+          await navigateToPath(path, false);
+        } catch (e) {
+          // flyout has bene closed without selection
+        }
+      };
+
     return [
       {
         id: 'main_section',
@@ -167,23 +189,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               defaultMessage: 'Anomaly Explorer',
             }),
             disabled: disableLinks,
-            onClick: async () => {
-              try {
-                const { jobIds, time } = await getJobSelection();
-                const path = await mlLocator!.getUrl({
-                  page: ML_PAGES.ANOMALY_EXPLORER,
-                  pageState: {
-                    ...pageState,
-                    timeRange: time,
-                    jobIds,
-                  },
-                });
-
-                await navigateToPath(path, false);
-              } catch (e) {
-                // flyout has bene closed without selection
-              }
-            },
+            onClick: getJobSelectionCallback(ML_PAGES.ANOMALY_EXPLORER),
             testSubj: 'mlMainTab anomalyExplorer',
           },
           {
@@ -191,6 +197,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
               defaultMessage: 'Single Metric Viewer',
             }),
+            onClick: getJobSelectionCallback(ML_PAGES.SINGLE_METRIC_VIEWER),
             disabled: disableLinks,
           },
           {
@@ -283,16 +290,14 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     (tab: Tab) => {
       const { id, disabled, items, onClick, pathId, name, testSubj } = tab;
 
+      const onClickCallback = onClick ?? (pathId ? redirectToTab.bind(null, pathId) : undefined);
+
       return {
         id,
         name,
         isSelected: id === activeRouteId || activeRoute?.path.includes(`${pathId}/`),
         disabled,
-        onClick:
-          onClick ??
-          (() => {
-            redirectToTab(pathId!);
-          }),
+        ...(onClickCallback ? { onClick: onClickCallback } : {}),
         'data-test-subj': testSubj + (id === activeRouteId ? ' selected' : ''),
         items: items ? items.map(getTabItem) : undefined,
         forceOpen: true,
