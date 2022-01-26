@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 import { HostRiskScoreFields } from '../../../../common/search_strategy';
-import { useRiskScoreBetter } from '../../containers/risk_score_better';
+import { useHostRiskScore } from '../../containers/risk_score_better';
 import { ManageQueryComponent } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
@@ -74,7 +74,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     []
   );
 
-  const [loading, { data, refetch, inspect }] = useRiskScoreBetter({
+  const [loading, { data, refetch, inspect }] = useHostRiskScore({
     hostName,
     timerange,
     onlyLatest: false,

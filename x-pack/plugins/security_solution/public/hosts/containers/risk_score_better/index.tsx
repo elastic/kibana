@@ -59,7 +59,7 @@ export const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is Host
   typeof item.risk_stats?.risk_score === 'number' &&
   typeof item.risk === 'string';
 
-export const useRiskScoreBetter = ({
+export const useHostRiskScore = ({
   timerange,
   hostName,
   onlyLatest = true,

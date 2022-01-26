@@ -9,13 +9,13 @@ import React from 'react';
 
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
-import { useRiskScoreBetter } from '../../../hosts/containers/risk_score_better';
+import { useHostRiskScore } from '../../../hosts/containers/risk_score_better';
 export interface RiskyHostLinksProps {
   timerange: { to: string; from: string };
 }
 
 const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = ({ timerange }) => {
-  const [_, { data, isModuleEnabled }] = useRiskScoreBetter({
+  const [_, { data, isModuleEnabled }] = useHostRiskScore({
     timerange,
   });
 

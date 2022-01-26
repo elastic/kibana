@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { useRiskScoreBetter } from '../../containers/risk_score_better';
+import { useHostRiskScore } from '../../containers/risk_score_better';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
@@ -49,7 +49,7 @@ export const HostRiskScoreQueryTabBody = ({
     [activePage, limit]
   );
 
-  const [loading, { data, totalCount, inspect, isInspected, refetch }] = useRiskScoreBetter({
+  const [loading, { data, totalCount, inspect, isInspected, refetch }] = useHostRiskScore({
     timerange,
     filterQuery,
     skip,

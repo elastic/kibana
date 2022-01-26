@@ -33,7 +33,7 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useRiskScoreBetter } from '../../../../hosts/containers/risk_score_better';
+import { useHostRiskScore } from '../../../../hosts/containers/risk_score_better';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -126,7 +126,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const [hostRiskLoading, { data, isModuleEnabled }] = useRiskScoreBetter({
+  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
     hostName,
     pagination: {
       cursorStart: 0,

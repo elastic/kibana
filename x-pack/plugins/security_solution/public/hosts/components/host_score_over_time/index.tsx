@@ -28,7 +28,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-import { useRiskScoreBetter } from '../../containers/risk_score_better';
+import { useHostRiskScore } from '../../containers/risk_score_better';
 import { ManageQueryComponent } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
@@ -79,7 +79,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   );
   const theme = useTheme();
 
-  const [loading, { data, refetch, inspect }] = useRiskScoreBetter({
+  const [loading, { data, refetch, inspect }] = useHostRiskScore({
     hostName,
     onlyLatest: false,
     timerange,
