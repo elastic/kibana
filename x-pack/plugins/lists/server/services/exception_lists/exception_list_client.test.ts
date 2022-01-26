@@ -239,6 +239,7 @@ describe('exception_list_client', () => {
         'getExceptionListSummary',
         (): ReturnType<ExceptionListClient['getExceptionListSummary']> => {
           return exceptionListClient.getExceptionListSummary({
+            filter: undefined,
             id: '1',
             listId: '1',
             namespaceType: 'agnostic',
