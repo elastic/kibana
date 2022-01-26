@@ -115,6 +115,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     if (isDetailOpen) {
       return (
         <SessionViewDetailPanel
+          data-test-subj="detailsPanel"
           isDetailMounted={isDetailMounted}
           height={height}
           selectedProcess={selectedProcess}

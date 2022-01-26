@@ -10,6 +10,7 @@ import React from 'react';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionView } from './index';
+import userEvent from '@testing-library/user-event';
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -76,11 +77,23 @@ describe('SessionView component', () => {
         expect(renderResult.getByTestId('sessionViewProcessEventsSearch')).toBeTruthy();
       });
 
-      it('should show items on the list', async () => {
+      it('should show items on the list, and auto selects session leader', async () => {
         render();
         await waitForApiCall();
 
         expect(renderResult.getAllByTestId('processTreeNode')).toBeTruthy();
+
+        const selectionArea = renderResult.queryByTestId('processTreeSelectionArea');
+
+        expect(selectionArea?.parentElement?.getAttribute('data-id')).toEqual('test-entity-id');
+      });
+
+      it('should toggle detail panel visibilty when detail button clicked', async () => {
+        render();
+        await waitForApiCall();
+
+        userEvent.click(renderResult.getByTestId('sessionViewDetailPanelToggle'));
+        expect(renderResult.getByTestId('sessionViewDetailPanel')).toBeTruthy();
       });
     });
   });

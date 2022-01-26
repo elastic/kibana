@@ -32,7 +32,7 @@ export const registerProcessEventsRoute = (router: IRouter, logger: Logger) => {
   );
 };
 
-const doSearch = async (
+export const doSearch = async (
   client: ElasticsearchClient,
   sessionEntityId: string,
   cursor: string | undefined,

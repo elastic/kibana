@@ -16,6 +16,7 @@ export const useStyles = () => {
     const defaultSelectionColor = euiTheme.colors.accent;
 
     const scroller: CSSObject = {
+      position: 'relative',
       fontFamily: euiTheme.font.familyCode,
       overflow: 'auto',
       height: '100%',

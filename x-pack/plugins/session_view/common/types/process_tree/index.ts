@@ -122,6 +122,7 @@ export interface Process {
   id: string; // the process entity_id
   events: ProcessEvent[];
   children: Process[];
+  orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
@@ -133,6 +134,7 @@ export interface Process {
   getDetails(): ProcessEvent;
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
+  getChildren(hideSameGroup?: boolean): Process[];
 }
 
 export type ProcessMap = {
