@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import { Accessor, AccessorFn, GroupBy, GroupBySort, SmallMultiples } from '@elastic/charts';
+import { Accessor, AccessorFn, GroupBy, SmallMultiples } from '@elastic/charts';
 import { DatatableColumn } from '../../../../expressions/public';
-import { SplitDimensionParams } from '../../common/types';
 
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;
@@ -20,17 +19,8 @@ interface ChartSplitProps {
 const CHART_SPLIT_ID = '__pie_chart_split__';
 export const SMALL_MULTIPLES_ID = '__pie_chart_sm__';
 
-export const ChartSplit = ({
-  splitColumnAccessor,
-  splitRowAccessor,
-  splitDimension,
-}: ChartSplitProps) => {
+export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplitProps) => {
   if (!splitColumnAccessor && !splitRowAccessor) return null;
-  let sort: GroupBySort = 'alphaDesc';
-  if (splitDimension?.meta?.params?.id === 'terms') {
-    const params = splitDimension?.meta?.sourceParams?.params as SplitDimensionParams;
-    sort = params?.order === 'asc' ? 'alphaAsc' : 'alphaDesc';
-  }
 
   return (
     <>
@@ -45,7 +35,7 @@ export const ChartSplit = ({
           }
           return spec.id;
         }}
-        sort={sort}
+        sort="dataIndex"
       />
       <SmallMultiples
         id={SMALL_MULTIPLES_ID}
