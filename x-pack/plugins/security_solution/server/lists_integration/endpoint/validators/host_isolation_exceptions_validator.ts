@@ -7,6 +7,7 @@
 
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { BaseValidator } from './base_validator';
+import { EndpointArtifactExceptionValidationError } from './errors';
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
   static isHostIsolationException({ list_id: listId }: { list_id: string }): boolean {
@@ -17,7 +18,29 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateCanManageEndpointArtifacts();
   }
 
+  async validatePreSummary(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreDeleteItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreExport(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
   async validatePreSingleListFind(): Promise<void> {
     await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreMultiListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreImport(): Promise<void> {
+    throw new EndpointArtifactExceptionValidationError(
+      'Import is not supported for Endpoint artifact exceptions'
+    );
   }
 }
