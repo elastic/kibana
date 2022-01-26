@@ -226,6 +226,7 @@ export class DocLinksService {
         kibana: {
           guide: `${KIBANA_DOCS}index.html`,
           autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
+          xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
         },
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
@@ -797,6 +798,7 @@ export interface DocLinksStart {
     readonly kibana: {
       readonly guide: string;
       readonly autocompleteSuggestions: string;
+      readonly xpackSecurity: string;
     };
     readonly upgradeAssistant: {
       readonly overview: string;
