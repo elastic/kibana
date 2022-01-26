@@ -55,6 +55,7 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/delete',
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
+  'cluster:admin/transform/reset',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',

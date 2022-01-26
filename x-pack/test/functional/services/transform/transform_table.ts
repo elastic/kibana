@@ -303,6 +303,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformActionDelete');
       await testSubjects.existOrFail('transformActionDiscover');
       await testSubjects.existOrFail('transformActionEdit');
+      await testSubjects.existOrFail('transformActionReset');
 
       if (isTransformRunning) {
         await testSubjects.missingOrFail('transformActionStart');
