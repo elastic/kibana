@@ -86,6 +86,9 @@ export default function ({ getService }) {
     it('can resume after reindexing was stopped right after creating the new index', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
+      // This new index is the new soon to be created reindexed index. We create it
+      // upfront to simulate a situation in which the user restarted kibana half
+      // way through the reindex process and ended up with an extra index.
       await es.indices.create({ index: 'reindexed-v7-dummydata' });
 
       const { body } = await supertest
