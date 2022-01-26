@@ -31,5 +31,13 @@
   ],
   "ui": true,
   "server": true,
-  "requiredBundles": ["data", "dataViews", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": [
+    "data",
+    "dataViews",
+    "kibanaReact",
+    "kibanaUtils"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ]
 }

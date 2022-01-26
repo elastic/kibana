@@ -23,6 +23,17 @@ describe('summary_exception_list_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should accept an undefined for "filter"', () => {
+    const payload = getSummaryExceptionListSchemaMock();
+    delete payload.filter;
+    const decoded = summaryExceptionListSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = foldLeftRight(checked);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should accept an undefined for "id"', () => {
     const payload = getSummaryExceptionListSchemaMock();
     delete payload.id;
