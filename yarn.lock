@@ -2918,6 +2918,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/doc-links@link:bazel-bin/packages/kbn-doc-links":
+  version "0.0.0"
+  uid ""
+
 "@kbn/docs-utils@link:bazel-bin/packages/kbn-docs-utils":
   version "0.0.0"
   uid ""
@@ -5833,6 +5837,10 @@
   uid ""
 
 "@types/kbn__dev-utils@link:bazel-bin/packages/kbn-dev-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__doc-links@link:bazel-bin/packages/kbn-doc-links/npm_module_types":
   version "0.0.0"
   uid ""
 
