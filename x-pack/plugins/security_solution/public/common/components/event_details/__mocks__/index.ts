@@ -179,6 +179,18 @@ export const mockAlertDetailsData = [
     originalValue: 'Microsoft-Windows-Security-Auditing',
   },
   { category: 'log', field: 'log.level', values: ['information'], originalValue: 'information' },
+  {
+    category: 'destination',
+    field: 'destination.address',
+    values: ['google.com'],
+    originalValue: 'google.com',
+  },
+  {
+    category: 'source',
+    field: 'source.address',
+    values: ['185.156.74.3'],
+    originalValue: '185.156.74.3',
+  },
   { category: 'source', field: 'source.port', values: [0], originalValue: 0 },
   { category: 'source', field: 'source.domain', values: ['-'], originalValue: '-' },
   {
