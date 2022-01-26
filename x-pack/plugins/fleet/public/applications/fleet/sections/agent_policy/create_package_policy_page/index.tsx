@@ -378,6 +378,23 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, queryParamsPolicyId]
   );
 
+  const createAgentPolicy = useCallback(async (): Promise<string | undefined> => {
+    let policyId;
+    setFormState('LOADING');
+    const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
+    if (resp.error) {
+      setFormState('VALID');
+      throw resp.error;
+    }
+    if (resp.data) {
+      policyId = resp.data.item.id;
+      setAgentPolicy(resp.data.item);
+
+      updatePackagePolicy({ policy_id: policyId });
+    }
+    return policyId;
+  }, [newAgentPolicy, updatePackagePolicy, withSysMonitoring]);
+
   const onSubmit = useCallback(async () => {
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
@@ -387,22 +404,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       setFormState('CONFIRM');
       return;
     }
-    let policyId = '';
-    // save agent policy
+    let policyId;
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
       try {
-        setFormState('LOADING');
-        const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
-        if (resp.error) {
-          setFormState('VALID');
-          throw resp.error;
-        }
-        if (resp.data) {
-          policyId = resp.data.item.id;
-          setAgentPolicy(resp.data.item);
-
-          updatePackagePolicy({ policy_id: policyId });
-        }
+        policyId = await createAgentPolicy();
       } catch (e) {
         notifications.toasts.addError(e, {
           title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
@@ -417,7 +422,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
     const { error, data } = await savePackagePolicy({
       ...packagePolicy,
-      policy_id: policyId || packagePolicy.policy_id,
+      policy_id: policyId ?? packagePolicy.policy_id,
     });
     if (!error) {
       setSavedPackagePolicy(data!.item);
@@ -460,11 +465,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     onSaveNavigate,
     agentPolicy,
     notifications.toasts,
-    newAgentPolicy,
     packagePolicy,
-    updatePackagePolicy,
-    withSysMonitoring,
     selectedPolicyTab,
+    createAgentPolicy,
   ]);
 
   const integrationInfo = useMemo(
