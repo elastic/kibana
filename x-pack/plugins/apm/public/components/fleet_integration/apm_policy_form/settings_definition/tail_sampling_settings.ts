@@ -72,14 +72,14 @@ export function getTailSamplingSettings(): SettingsRow[] {
             }
           ),
           placeholder:
-            '- service.name: string\n         service.environment: string\n         trace.name: string\n         trace.outcome: string\n         sample_rate: number',
+            'service.name: string\nservice.environment: string\ntrace.name: string\ntrace.outcome: string\nsample_rate: number',
           labelAppendLink: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingHelpText',
             {
               defaultMessage: 'Learn more',
             }
           ),
-          // required: true,
+          required: true,
           defaultValue: 'sample_rate: 0.1',
         },
       ],
