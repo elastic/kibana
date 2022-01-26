@@ -23,7 +23,7 @@ interface AllRulesUtilityBarProps {
   isAutoRefreshOn?: boolean;
   numberSelectedItems: number;
   onGetBatchItemsPopoverContent?: (closePopover: () => void) => JSX.Element[];
-  onRefresh?: (refreshRule: boolean) => void;
+  onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
   paginationTotal: number;
