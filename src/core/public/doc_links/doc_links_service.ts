@@ -510,7 +510,7 @@ export class DocLinksService {
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-filesystem-repository.html#filesystem-repository-settings`,
           registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-source-only-repository.html#source-only-repository-settings`,
-          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.htmll#read-only-url-repository-settings`,
+          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.html#read-only-url-repository-settings`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
           restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
           searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
