@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import axios from 'axios';
 import { Task, read, downloadToDisk } from '../lib';
 
 const EPR_URL = 'https://epr-snapshot.elastic.co';
