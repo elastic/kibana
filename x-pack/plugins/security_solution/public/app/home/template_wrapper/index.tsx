@@ -93,11 +93,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
-          userHasSecuritySolutionVisible ? (
-            <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
-          ) : (
-            <></>
-          )
+          userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
         }
         paddingSize="none"
         solutionNav={solutionNav}
