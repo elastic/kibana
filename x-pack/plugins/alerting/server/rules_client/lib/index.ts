@@ -6,3 +6,4 @@
  */
 
 export { mapSortField } from './map_sort_field';
+export { validateOperationOnAttributes } from './validate_attributes';

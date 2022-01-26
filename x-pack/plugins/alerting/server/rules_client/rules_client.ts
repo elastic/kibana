@@ -72,7 +72,7 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
-import { mapSortField } from './lib';
+import { mapSortField, validateOperationOnAttributes } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { AlertInstance } from '../alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -248,6 +248,7 @@ export class RulesClient {
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
   private readonly eventLogger?: IEventLogger;
+  private readonly fieldsToExclude: Array<keyof SanitizedAlert> = ['monitoring'];
 
   constructor({
     ruleTypeRegistry,
@@ -432,9 +433,11 @@ export class RulesClient {
   public async get<Params extends AlertTypeParams = never>({
     id,
     includeLegacyId = false,
+    excludeInternalFields = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
+    excludeInternalFields?: boolean;
   }): Promise<SanitizedAlert<Params> | SanitizedRuleWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     try {
@@ -465,7 +468,8 @@ export class RulesClient {
       result.attributes.alertTypeId,
       result.attributes,
       result.references,
-      includeLegacyId
+      includeLegacyId,
+      excludeInternalFields
     );
   }
 
@@ -608,7 +612,8 @@ export class RulesClient {
 
   public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
+    excludeInternalFields = false,
+  }: { options?: FindOptions; excludeInternalFields?: boolean } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -625,6 +630,16 @@ export class RulesClient {
       throw error;
     }
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
+    const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
+    const sortField = mapSortField(options.sortField);
+    if (excludeInternalFields) {
+      validateOperationOnAttributes(
+        filterKueryNode,
+        sortField,
+        options.searchFields,
+        this.fieldsToExclude
+      );
+    }
 
     const {
       page,
@@ -633,13 +648,10 @@ export class RulesClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawRule>({
       ...options,
-      sortField: mapSortField(options.sortField),
+
       filter:
-        (authorizationFilter && options.filter
-          ? nodeBuilder.and([
-              esKuery.fromKueryExpression(options.filter),
-              authorizationFilter as KueryNode,
-            ])
+        (authorizationFilter && filterKueryNode
+          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
@@ -666,7 +678,9 @@ export class RulesClient {
         id,
         attributes.alertTypeId,
         fields ? (pick(attributes, fields) as RawRule) : attributes,
-        references
+        references,
+        false,
+        excludeInternalFields
       );
     });
 
@@ -1737,7 +1751,8 @@ export class RulesClient {
     ruleTypeId: string,
     rawRule: RawRule,
     references: SavedObjectReference[] | undefined,
-    includeLegacyId: boolean = false
+    includeLegacyId: boolean = false,
+    excludeInternalFields: boolean = false
   ): Alert | AlertWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
@@ -1748,7 +1763,8 @@ export class RulesClient {
       ruleType,
       rawRule,
       references,
-      includeLegacyId
+      includeLegacyId,
+      excludeInternalFields
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
@@ -1775,7 +1791,8 @@ export class RulesClient {
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
-    includeLegacyId: boolean = false
+    includeLegacyId: boolean = false,
+    excludeInternalFields: boolean = false
   ): PartialAlert<Params> | PartialAlertWithLegacyId<Params> {
     const rule = {
       id,
@@ -1793,6 +1810,13 @@ export class RulesClient {
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
     };
+    if (excludeInternalFields) {
+      this.fieldsToExclude.forEach((fte) => {
+        if (rule[fte]) {
+          delete rule[fte];
+        }
+      });
+    }
     return includeLegacyId
       ? ({ ...rule, legacyId } as PartialAlertWithLegacyId<Params>)
       : (rule as PartialAlert<Params>);

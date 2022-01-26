@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { BASE_ALERTING_API_PATH } from '../../constants';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { Rule, Pagination, Sorting } from '../../../types';
 import { AsApiContract } from '../../../../../actions/common';
 import { mapFiltersToKql } from './map_filters_to_kql';
@@ -45,7 +45,7 @@ export async function loadAlerts({
       total: number;
       data: Array<AsApiContract<Rule>>;
     }>
-  >(`${BASE_ALERTING_API_PATH}/rules/_find`, {
+    >(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`, {
     query: {
       page: page.index + 1,
       per_page: page.size,

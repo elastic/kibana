@@ -142,7 +142,7 @@ describe('loadAlert', () => {
       }
     `);
 
-    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${apiRule.id}`);
+    expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${apiRule.id}`);
   });
 });
 
