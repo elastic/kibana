@@ -21,12 +21,14 @@ import { MlPageHeader } from '../components/page_header';
 interface TimeSeriesExplorerPageProps {
   dateFormatTz: string;
   resizeRef?: any;
+  noSingleMetricJobsFound?: boolean;
 }
 
 export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
   children,
   dateFormatTz,
   resizeRef,
+  noSingleMetricJobsFound,
 }) => {
   const {
     services: { docLinks },
@@ -52,8 +54,14 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </MlPageHeader>
-        <JobSelector dateFormatTz={dateFormatTz} singleSelection={true} timeseriesOnly={true} />
-        <EuiHorizontalRule margin="none" />
+
+        {noSingleMetricJobsFound ? null : (
+          <>
+            <JobSelector dateFormatTz={dateFormatTz} singleSelection={true} timeseriesOnly={true} />
+            <EuiHorizontalRule margin="none" />
+          </>
+        )}
+
         <EuiSpacer size="s" />
         {children}
         <HelpMenu docLink={helpLink} />
