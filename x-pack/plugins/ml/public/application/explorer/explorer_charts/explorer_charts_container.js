@@ -6,7 +6,7 @@
  */
 import './_index.scss';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -35,6 +35,8 @@ import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_typ
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
+import { useActiveCursor } from '../../../../../../../src/plugins/charts/public';
+import { Chart, Settings } from '@elastic/charts';
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
@@ -72,6 +74,7 @@ function ExplorerChartContainer({
   recentlyAccessed,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
+  chartsService,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -92,6 +95,15 @@ function ExplorerChartContainer({
       isCancelled = true;
     };
   }, [mlLocator, series]);
+
+  const chartRef = useRef(null);
+
+  const chartTheme = chartsService.theme.useChartsTheme();
+  const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
+
+  const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
@@ -128,8 +140,15 @@ function ExplorerChartContainer({
     }
   }
 
+  console.log('chartBaseTheme', chartTheme);
   return (
     <React.Fragment>
+      <div style={{ width: 0, height: 0 }}>
+        <Chart ref={chartRef}>
+          <Settings noResults={<div />} />
+        </Chart>
+      </div>
+
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
@@ -200,6 +219,7 @@ function ExplorerChartContainer({
                   severity={severity}
                   tooltipService={tooltipService}
                   showSelectedInterval={showSelectedInterval}
+                  onPointerUpdate={handleCursorUpdate}
                 />
               )}
             </MlTooltipComponent>
@@ -216,6 +236,9 @@ function ExplorerChartContainer({
                   severity={severity}
                   tooltipService={tooltipService}
                   showSelectedInterval={showSelectedInterval}
+                  onPointerUpdate={handleCursorUpdate}
+                  chartTheme={chartTheme}
+                  // ref={chartRef}
                 />
               )}
             </MlTooltipComponent>
@@ -240,6 +263,7 @@ export const ExplorerChartsContainerUI = ({
   onSelectEntity,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
+  chartsService,
 }) => {
   const {
     services: {
@@ -298,6 +322,7 @@ export const ExplorerChartsContainerUI = ({
                 recentlyAccessed={recentlyAccessed}
                 tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                 showSelectedInterval={showSelectedInterval}
+                chartsService={chartsService}
               />
             </EuiFlexItem>
           ))}

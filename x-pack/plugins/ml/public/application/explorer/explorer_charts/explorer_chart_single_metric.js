@@ -50,6 +50,8 @@ export class ExplorerChartSingleMetric extends React.Component {
     severity: PropTypes.number.isRequired,
     tooltipService: PropTypes.object.isRequired,
     timeBuckets: PropTypes.object.isRequired,
+    onPointerUpdate: PropTypes.func.isRequired,
+    chartTheme: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -61,7 +63,14 @@ export class ExplorerChartSingleMetric extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
+    const {
+      tooManyBuckets,
+      tooltipService,
+      timeBuckets,
+      showSelectedInterval,
+      onPointerUpdate,
+      chartTheme,
+    } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -175,9 +184,51 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('y', 0)
         .attr('height', chartHeight)
         .attr('width', vizWidth)
+        .on('mouseout', function () {
+          if (onPointerUpdate) {
+            onPointerUpdate({
+              chartId: 'temp-chart-id',
+              scale: 'time',
+              smHorizontalValue: null,
+              smVerticalValue: null,
+              type: 'Out',
+              unit: undefined,
+            });
+          }
+        })
+        .on('mouseover', function () {})
+        .on('mousemove', function () {
+          const mouse = d3.mouse(this);
+
+          if (onPointerUpdate) {
+            onPointerUpdate({
+              chartId: 'temp-chart-id',
+              scale: 'time',
+              smHorizontalValue: null,
+              smVerticalValue: null,
+              type: 'Over',
+              unit: undefined,
+              x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
+            });
+          }
+
+          d3.selectAll('.ml-explorer-mouse-line').attr('d', function () {
+            //@todo
+            const ts = lineChartXScale.invert(mouse[0]);
+            const xPosition = lineChartXScale(ts);
+            return `M${xPosition},${chartHeight} ${xPosition},0`;
+          });
+        })
         .style('stroke', '#cccccc')
-        .style('fill', 'none')
+        .style('fill', 'rgba(0, 128, 0, 0)')
         .style('stroke-width', 1);
+
+      lineChartGroup
+        .append('path')
+        .attr('class', 'ml-explorer-mouse-line')
+        .style('stroke', chartTheme.crosshair.line.stroke)
+        .style('stroke-width', chartTheme.crosshair.line.strokeWidth)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash);
 
       drawLineChartAxes();
       drawLineChartHighlightedSpan();

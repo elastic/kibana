@@ -252,7 +252,11 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('width', vizWidth)
         .style('stroke', '#cccccc')
         .style('fill', 'none')
-        .style('stroke-width', 1);
+        .style('stroke-width', 1)
+        .on('mouseover', function (d) {
+          //@todo
+        })
+        .on('mouseout', () => {});
 
       drawRareChartAxes();
       drawRareChartHighlightedSpan();

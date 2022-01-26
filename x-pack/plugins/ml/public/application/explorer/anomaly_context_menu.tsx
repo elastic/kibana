@@ -39,6 +39,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       application: { capabilities },
     },
   } = useMlKibana();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
