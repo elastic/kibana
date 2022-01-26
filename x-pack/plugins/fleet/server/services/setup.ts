@@ -47,33 +47,23 @@ export interface SetupStatus {
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  // Allows for passing in config options rather than pulling from the `appContextService` - useful in tests
-  configOverride?: FleetConfigType
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, configOverride));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  configOverride?: FleetConfigType
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
 
-  let {
+  const {
     agentPolicies: policiesOrUndefined,
     packages: packagesOrUndefined,
     outputs: outputsOrUndefined,
   } = appContextService.getConfig() ?? {};
-
-  // If an override option is provided, re
-  if (configOverride) {
-    policiesOrUndefined = configOverride.agentPolicies;
-    packagesOrUndefined = configOverride.packages;
-    outputsOrUndefined = configOverride.outputs;
-  }
 
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
