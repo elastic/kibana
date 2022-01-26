@@ -1215,7 +1215,23 @@ describe('Task Runner', () => {
         },
         references: [],
       });
+      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+
       await taskRunner.run();
+
+      expect(eventLogger.logEvent.mock.calls[3][0]).toEqual(
+        expect.objectContaining({
+          kibana: expect.objectContaining({
+            alert: expect.objectContaining({
+              rule: expect.objectContaining({
+                execution: expect.objectContaining({
+                  metrics: expect.objectContaining({ number_of_triggered_actions: 1 }),
+                }),
+              }),
+            }),
+          }),
+        })
+      );
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
     }
   );
@@ -1281,6 +1297,22 @@ describe('Task Runner', () => {
         references: [],
       });
       await taskRunner.run();
+
+      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+
+      expect(eventLogger.logEvent.mock.calls[3][0]).toEqual(
+        expect.objectContaining({
+          kibana: expect.objectContaining({
+            alert: expect.objectContaining({
+              rule: expect.objectContaining({
+                execution: expect.objectContaining({
+                  metrics: expect.objectContaining({ number_of_triggered_actions: 1 }),
+                }),
+              }),
+            }),
+          }),
+        })
+      );
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
     }
   );

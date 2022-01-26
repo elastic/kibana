@@ -103,7 +103,7 @@ const createExecutionHandlerParams: jest.Mocked<
   maxEphemeralActionsPerRule: 10,
 };
 
-describe('Crate Execution Handler', () => {
+describe('Create Execution Handler', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest
@@ -121,12 +121,13 @@ describe('Crate Execution Handler', () => {
 
   test('enqueues execution per selected action', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
+    const result = await executionHandler({
       actionGroup: 'default',
       state: {},
       context: {},
       alertId: '2',
     });
+    expect(result).toHaveLength(1);
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
       createExecutionHandlerParams.request
     );
@@ -249,12 +250,13 @@ describe('Crate Execution Handler', () => {
         },
       ],
     });
-    await executionHandler({
+    const result = await executionHandler({
       actionGroup: 'default',
       state: {},
       context: {},
       alertId: '2',
     });
+    expect(result).toHaveLength(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
       id: '2',
@@ -301,13 +303,13 @@ describe('Crate Execution Handler', () => {
       ],
     });
 
-    await executionHandler({
+    const result = await executionHandler({
       actionGroup: 'default',
       state: {},
       context: {},
       alertId: '2',
     });
-
+    expect(result).toEqual([]);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
     mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
@@ -326,23 +328,25 @@ describe('Crate Execution Handler', () => {
 
   test('limits actionsPlugin.execute per action group', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
+    const result = await executionHandler({
       actionGroup: 'other-group',
       state: {},
       context: {},
       alertId: '2',
     });
+    expect(result).toEqual([]);
     expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
   });
 
   test('context attribute gets parameterized', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
+    const result = await executionHandler({
       actionGroup: 'default',
       context: { value: 'context-val' },
       state: {},
       alertId: '2',
     });
+    expect(result).toHaveLength(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -378,12 +382,13 @@ describe('Crate Execution Handler', () => {
 
   test('state attribute gets parameterized', async () => {
     const executionHandler = createExecutionHandler(createExecutionHandlerParams);
-    await executionHandler({
+    const result = await executionHandler({
       actionGroup: 'default',
       context: {},
       state: { value: 'state-val' },
       alertId: '2',
     });
+    expect(result).toHaveLength(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
