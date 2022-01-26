@@ -67,9 +67,10 @@ import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';
 
 enum TRANSFORM_ACTIONS {
+  DELETE = 'delete',
+  RESET = 'reset',
   STOP = 'stop',
   START = 'start',
-  DELETE = 'delete',
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
@@ -627,7 +628,7 @@ async function resetTransforms(
           results,
           id: transformInfo.id,
           items: transformsInfo,
-          action: TRANSFORM_ACTIONS.DELETE,
+          action: TRANSFORM_ACTIONS.RESET,
         });
       }
       results[transformId] = { transformReset: { success: false, error: e.meta.body.error } };
