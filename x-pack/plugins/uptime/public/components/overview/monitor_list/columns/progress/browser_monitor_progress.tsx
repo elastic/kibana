@@ -8,6 +8,10 @@
 import { EuiBadge, EuiProgress } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useBrowserRunOnceMonitors } from '../../../../monitor_management/test_now_mode/browser/use_browser_run_once_monitors';
+import {
+  IN_PROGRESS_LABEL,
+  PENDING_LABEL,
+} from '../../../../monitor_management/test_now_mode/test_result_header';
 
 export const BrowserMonitorProgress = ({
   configId,
@@ -26,6 +30,7 @@ export const BrowserMonitorProgress = ({
     configId,
     testRunId,
     refresh: false,
+    skipDetails: true,
   });
 
   const [startTime, setStartTime] = useState(Date.now());
@@ -57,10 +62,10 @@ export const BrowserMonitorProgress = ({
     }
   }, [journeyStarted]);
 
-  if (isUpdating) {
+  if (isUpdating || passedTime > duration) {
     return (
       <>
-        <EuiBadge>IN PROGRESS</EuiBadge>
+        <EuiBadge>{IN_PROGRESS_LABEL}</EuiBadge>
         <EuiProgress size="xs" />
       </>
     );
@@ -70,12 +75,12 @@ export const BrowserMonitorProgress = ({
     <span>
       {journeyStarted ? (
         <>
-          <EuiBadge>IN PROGRESS</EuiBadge>
+          <EuiBadge>{IN_PROGRESS_LABEL}</EuiBadge>
           <EuiProgress value={passedTime} max={duration} size="xs" />
         </>
       ) : (
         <>
-          <EuiBadge>PENDING</EuiBadge>
+          <EuiBadge>{PENDING_LABEL}</EuiBadge>
           <EuiProgress size="xs" />
         </>
       )}

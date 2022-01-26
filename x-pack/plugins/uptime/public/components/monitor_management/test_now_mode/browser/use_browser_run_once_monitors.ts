@@ -70,11 +70,13 @@ export const useBrowserEsResults = ({
 export const useBrowserRunOnceMonitors = ({
   configId,
   testRunId,
+  skipDetails = false,
   refresh = true,
 }: {
   configId: string;
   testRunId?: string;
   refresh?: boolean;
+  skipDetails?: boolean;
 }) => {
   const { refreshTimer, lastRefresh } = useTickTick(3 * 1000, refresh);
 
@@ -85,7 +87,7 @@ export const useBrowserRunOnceMonitors = ({
   const { data, loading } = useBrowserEsResults({ configId, testRunId, lastRefresh });
 
   const { data: stepListData } = useFetcher(() => {
-    if (checkGroupId) {
+    if (checkGroupId && !skipDetails) {
       return fetchJourneySteps({
         checkGroup: checkGroupId,
       });

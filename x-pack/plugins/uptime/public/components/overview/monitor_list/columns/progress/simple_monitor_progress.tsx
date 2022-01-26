@@ -8,6 +8,7 @@
 import { EuiBadge, EuiProgress } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSimpleRunOnceMonitors } from '../../../../monitor_management/test_now_mode/simple/use_simple_run_once_monitors';
+import { IN_PROGRESS_LABEL } from '../../../../monitor_management/test_now_mode/test_result_header';
 
 export const SimpleMonitorProgress = ({
   monitorId,
@@ -41,10 +42,12 @@ export const SimpleMonitorProgress = ({
     setPassedTime(Date.now() - startTime.current);
   }, [data]);
 
-  if (isUpdating) {
+  const passedTimeMicro = passedTime * 1000;
+
+  if (isUpdating || passedTimeMicro > duration) {
     return (
       <>
-        <EuiBadge>UPDATING</EuiBadge>
+        <EuiBadge>{IN_PROGRESS_LABEL}</EuiBadge>
         <EuiProgress size="xs" />
       </>
     );
@@ -52,8 +55,8 @@ export const SimpleMonitorProgress = ({
 
   return (
     <span>
-      <EuiBadge>IN PROGRESS</EuiBadge>
-      <EuiProgress value={passedTime * 1000} max={duration} size="xs" />
+      <EuiBadge>{IN_PROGRESS_LABEL}</EuiBadge>
+      <EuiProgress value={passedTimeMicro} max={duration} size="xs" />
     </span>
   );
 };
