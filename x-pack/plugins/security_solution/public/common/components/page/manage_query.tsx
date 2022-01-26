@@ -21,6 +21,9 @@ export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery
   inspect?: inputsModel.InspectQuery;
 }
 
+// TODO Make it a hook
+export const ManageQueryComponent = manageQuery(() => null);
+
 export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.ComponentClass<OwnProps & T> {

@@ -18,17 +18,19 @@ import {
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 import { HostRiskScoreFields } from '../../../../common/search_strategy';
+import { useRiskScoreBetter } from '../../containers/risk_score_better';
+import { ManageQueryComponent } from '../../../common/components/page/manage_query';
+import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
-export interface TopHostScoreContributorsProps {
+export interface TopHostScoreContributorsProps
+  extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
   hostName: string;
   from: string;
   to: string;
 }
-
 interface TableItem {
   rank: number;
   name: string;
@@ -56,6 +58,8 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
   hostName,
   from,
   to,
+  setQuery,
+  deleteQuery,
 }) => {
   const timerange = useMemo(
     () => ({
@@ -65,30 +69,30 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     [from, to]
   );
 
-  const hostRisk = useHostsRiskScore({
+  const sort = useMemo(
+    () => ({ field: HostRiskScoreFields.timestamp, direction: Direction.desc }),
+    []
+  );
+
+  const [loading, { data, refetch, inspect }] = useRiskScoreBetter({
     hostName,
     timerange,
     onlyLatest: false,
-    queryId: QUERY_ID,
-    sort: { field: HostRiskScoreFields.timestamp, direction: Direction.desc },
+    sort,
     pagination: {
       querySize: 1,
       cursorStart: 0,
-      activePage: 0,
-      fakePossibleCount: 1,
     },
   });
 
-  const result = hostRisk?.result;
-
   const items = useMemo(() => {
-    const rules = result && result.length > 0 ? result[0].risk_stats.rule_risks : [];
+    const rules = data && data.length > 0 ? data[0].risk_stats.rule_risks : [];
     return rules
       .sort((a, b) => b.rule_risk - a.rule_risk)
       .map(({ rule_name: name }, i) => ({ rank: i + 1, name }));
-  }, [result]);
+  }, [data]);
 
-  const pagination = useMemo(
+  const tablePagination = useMemo(
     () => ({
       hidePerPageOptions: true,
       pageSize: PAGE_SIZE,
@@ -99,6 +103,14 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
   return (
     <InspectButtonContainer>
+      <ManageQueryComponent
+        id={QUERY_ID}
+        loading={loading}
+        refetch={refetch}
+        setQuery={setQuery}
+        deleteQuery={deleteQuery}
+        inspect={inspect}
+      />
       <EuiPanel hasBorder data-test-subj="topHostScoreContributors">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
@@ -115,8 +127,8 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
             <EuiInMemoryTable
               items={items}
               columns={columns}
-              pagination={pagination}
-              loading={hostRisk?.loading}
+              pagination={tablePagination}
+              loading={loading}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

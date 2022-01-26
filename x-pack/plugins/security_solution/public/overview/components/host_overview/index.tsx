@@ -35,8 +35,8 @@ import {
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { HostRiskScore } from '../../../hosts/components/common/host_risk_score';
+import { useRiskScoreBetter } from '../../../hosts/containers/risk_score_better';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -80,7 +80,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const hostRisk = useHostsRiskScore({
+    const [_, { data: hostRisk, isModuleEnabled }] = useRiskScoreBetter({
       hostName,
     });
 
@@ -97,9 +97,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
-      if (hostRisk?.isModuleEnabled) {
-        const hostRiskData =
-          hostRisk.result && hostRisk.result.length > 0 ? hostRisk.result[0] : undefined;
+      if (isModuleEnabled) {
+        const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
         return [
           {
             title: i18n.HOST_RISK_SCORE,
@@ -128,7 +127,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         ];
       }
       return [undefined, undefined];
-    }, [hostRisk]);
+    }, [hostRisk, isModuleEnabled]);
 
     const column: DescriptionList[] = useMemo(
       () => [

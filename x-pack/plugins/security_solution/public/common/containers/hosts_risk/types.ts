@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import { HostsRiskScore } from '../../../../common/search_strategy';
+
 export const enum HostRiskScoreQueryId {
   DEFAULT = 'HostRiskScore',
   HOST_RISK_SCORE_OVER_TIME = 'HostRiskScoreOverTimeQuery',
   TOP_HOST_SCORE_CONTRIBUTORS = 'TopHostScoreContributorsQuery',
   OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
+  HOSTS_BY_RISK = 'HostsByRisk',
+}
+
+export interface HostRisk {
+  loading: boolean;
+  isModuleEnabled?: boolean;
+  result?: HostsRiskScore[];
 }

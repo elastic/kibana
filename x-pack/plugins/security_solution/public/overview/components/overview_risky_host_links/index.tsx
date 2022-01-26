@@ -9,26 +9,20 @@ import React from 'react';
 
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { useRiskScoreBetter } from '../../../hosts/containers/risk_score_better';
 export interface RiskyHostLinksProps {
   timerange: { to: string; from: string };
 }
 
 const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = ({ timerange }) => {
-  const hostRiskScore = useHostsRiskScore({
+  const [_, { data, isModuleEnabled }] = useRiskScoreBetter({
     timerange,
-    queryId: HostRiskScoreQueryId.OVERVIEW_RISKY_HOSTS,
   });
 
-  switch (hostRiskScore?.isModuleEnabled) {
+  switch (isModuleEnabled) {
     case true:
       return (
-        <RiskyHostsEnabledModule
-          to={timerange.to}
-          from={timerange.from}
-          hostRiskScore={hostRiskScore}
-        />
+        <RiskyHostsEnabledModule to={timerange.to} from={timerange.from} hostRiskScore={data} />
       );
     case false:
       return <RiskyHostsDisabledModule />;

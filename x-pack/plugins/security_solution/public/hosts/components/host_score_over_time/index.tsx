@@ -26,11 +26,14 @@ import { histogramDateTimeFormatter } from '../../../common/components/utils';
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { useRiskScoreBetter } from '../../containers/risk_score_better';
+import { ManageQueryComponent } from '../../../common/components/page/manage_query';
+import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
-export interface HostRiskScoreOverTimeProps {
+export interface HostRiskScoreOverTimeProps
+  extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
   hostName: string;
   from: string;
   to: string;
@@ -55,6 +58,8 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   hostName,
   from,
   to,
+  setQuery,
+  deleteQuery,
 }) => {
   const timeZone = useTimeZone();
 
@@ -74,26 +79,33 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   );
   const theme = useTheme();
 
-  const hostRisk = useHostsRiskScore({
+  const [loading, { data, refetch, inspect }] = useRiskScoreBetter({
     hostName,
     onlyLatest: false,
     timerange,
-    queryId: QUERY_ID,
   });
 
-  const data = useMemo(
+  const graphData = useMemo(
     () =>
-      hostRisk?.result
-        ?.map((result) => ({
-          x: result['@timestamp'],
-          y: result.risk_stats.risk_score,
+      data
+        ?.map((hostRisk) => ({
+          x: hostRisk['@timestamp'],
+          y: hostRisk.risk_stats.risk_score,
         }))
         .reverse() ?? [],
-    [hostRisk]
+    [data]
   );
 
   return (
     <InspectButtonContainer>
+      <ManageQueryComponent
+        id={QUERY_ID}
+        loading={loading}
+        refetch={refetch}
+        setQuery={setQuery}
+        deleteQuery={deleteQuery}
+        inspect={inspect}
+      />
       <EuiPanel hasBorder data-test-subj="hostRiskScoreOverTime">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
@@ -108,7 +120,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
             <div style={{ height: DEFAULT_CHART_HEIGHT }}>
-              {hostRisk?.loading ? (
+              {loading ? (
                 <LoadingChart size="l" data-test-subj="HostRiskScoreOverTime-loading" />
               ) : (
                 <Chart>
@@ -155,7 +167,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                     xAccessor="x"
                     yAccessors={['y']}
                     timeZone={timeZone}
-                    data={data}
+                    data={graphData}
                     tickFormat={scoreFormatter}
                   />
                   <LineAnnotation

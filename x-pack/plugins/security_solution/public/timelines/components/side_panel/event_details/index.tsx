@@ -33,7 +33,8 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostsRiskScore } from '../../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useRiskScoreBetter } from '../../../../hosts/containers/risk_score_better';
+import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -125,9 +126,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const hostRisk = useHostsRiskScore({
+  const [hostRiskLoading, { data, isModuleEnabled }] = useRiskScoreBetter({
     hostName,
+    pagination: {
+      cursorStart: 0,
+      querySize: 1,
+    },
   });
+
+  const hostRisk: HostRisk = {
+    loading: hostRiskLoading,
+    isModuleEnabled,
+    result: data,
+  };
 
   const timestamp = useMemo(
     () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),

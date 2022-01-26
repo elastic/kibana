@@ -10,8 +10,8 @@ import { EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiLink, EuiText } from '@elast
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
-import type { HostRisk } from '../../../containers/hosts_risk/use_hosts_risk_score';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
+import { HostRisk } from '../../../containers/hosts_risk/types';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;

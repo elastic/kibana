@@ -40,8 +40,4 @@ export interface RiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface RiskScoreRequestOptions extends RequestOptionsPaginated<HostRiskScoreFields> {
-  defaultIndex: string[];
-}
-
 export type RiskScoreSortField = SortField<RiskScoreFields>;

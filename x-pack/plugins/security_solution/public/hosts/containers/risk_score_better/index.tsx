@@ -7,23 +7,19 @@
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { inputsModel, State } from '../../../common/store';
+import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { hostsModel, hostsSelectors } from '../../store';
-import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
-  PageInfoPaginated,
-  DocValueFields,
   HostsQueries,
   HostsRiskScoreStrategyResponse,
   getHostRiskIndex,
   HostsRiskScore,
-  RiskScoreRequestOptions,
+  HostRiskScoreSortField,
+  HostsRiskScoreRequestOptions,
 } from '../../../../common/search_strategy';
 import { ESQuery } from '../../../../common/typed_json';
 
@@ -33,91 +29,70 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { isHostsRiskScoreHit } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 
-export const ID = 'riskScoreQuery';
-
-type LoadPage = (newActivePage: number) => void;
 export interface RiskScoreBetterState {
   data: HostsRiskScore[];
-  endDate: string;
-  id: string;
   inspect: InspectResponse;
   isInspected: boolean;
-  loadPage: LoadPage;
-  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  startDate: string;
   totalCount: number;
+  isModuleEnabled: boolean | undefined;
 }
 
 interface UseRiskScoreBetter {
-  docValueFields?: DocValueFields[];
-  endDate: string;
+  sort?: HostRiskScoreSortField;
   filterQuery?: ESQuery | string;
   skip?: boolean;
-  startDate: string;
-  type: hostsModel.HostsType;
+  timerange?: { to: string; from: string };
+  hostName?: string;
+  onlyLatest?: boolean;
+  pagination?: HostsRiskScoreRequestOptions['pagination'];
 }
 
+const isRecord = (item: unknown): item is Record<string, unknown> =>
+  typeof item === 'object' && !!item;
+
+export const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
+  isRecord(item) &&
+  isRecord(item.host) &&
+  typeof item.risk_stats?.risk_score === 'number' &&
+  typeof item.risk === 'string';
+
 export const useRiskScoreBetter = ({
-  docValueFields,
-  endDate,
+  timerange,
+  hostName,
+  onlyLatest = true,
   filterQuery,
+  sort,
   skip = false,
-  startDate,
+  pagination,
 }: UseRiskScoreBetter): [boolean, RiskScoreBetterState] => {
-  const getRiskScoreBetterSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
-  const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
-    getRiskScoreBetterSelector(state, hostsModel.HostsType.page)
-  );
+  const { querySize, cursorStart } = pagination || {};
   const { data, spaces } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [riskScoreRequest, setRiskScoreBetterRequest] = useState<RiskScoreRequestOptions | null>(
-    null
-  );
+  const [riskScoreRequest, setRiskScoreBetterRequest] =
+    useState<HostsRiskScoreRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
-  const wrappedLoadMore = useCallback(
-    (newActivePage: number) => {
-      setRiskScoreBetterRequest((prevRequest) =>
-        !prevRequest
-          ? prevRequest
-          : {
-              ...prevRequest,
-              pagination: generateTablePaginationOptions(newActivePage, limit, true),
-            }
-      );
-    },
-    [limit]
-  );
-
   const [riskScoreResponse, setRiskScoreBetterResponse] = useState<RiskScoreBetterState>({
     data: [],
-    endDate,
-    id: ID,
     inspect: {
       dsl: [],
       response: [],
     },
     isInspected: false,
-    loadPage: wrappedLoadMore,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
     refetch: refetch.current,
-    startDate,
     totalCount: -1,
+    isModuleEnabled: undefined,
   });
 
   const riskScoreSearch = useCallback(
-    (request: RiskScoreRequestOptions | null) => {
+    (request: HostsRiskScoreRequestOptions | null) => {
       if (request == null || skip) {
         return;
       }
@@ -127,7 +102,7 @@ export const useRiskScoreBetter = ({
         setLoading(true);
 
         searchSubscription.current = data.search
-          .search<RiskScoreRequestOptions, HostsRiskScoreStrategyResponse>(request, {
+          .search<HostsRiskScoreRequestOptions, HostsRiskScoreStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -144,21 +119,36 @@ export const useRiskScoreBetter = ({
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
                   totalCount: response.totalCount,
+                  isModuleEnabled: true,
                 }));
                 searchSubscription.current.unsubscribe();
+                setLoading(false);
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_RISK_SCORE);
                 searchSubscription.current.unsubscribe();
               }
             },
-            error: (msg) => {
+            error: (error) => {
               setLoading(false);
-              addError(msg, { title: i18n.FAIL_RISK_SCORE });
+              if (isIndexNotFoundError(error)) {
+                setRiskScoreBetterRequest((prevRequest) =>
+                  !prevRequest
+                    ? prevRequest
+                    : {
+                        ...prevRequest,
+                        isModuleEnabled: false,
+                      }
+                );
+
+                setLoading(false);
+              } else {
+                addError(error, { title: i18n.FAIL_RISK_SCORE });
+              }
+
               searchSubscription.current.unsubscribe();
             },
           });
-        setLoading(false);
       };
       searchSubscription.current.unsubscribe();
       abortCtrl.current.abort();
@@ -178,25 +168,22 @@ export const useRiskScoreBetter = ({
   useEffect(() => {
     if (spaceId) {
       setRiskScoreBetterRequest((prevRequest) => {
-        const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.hostsRiskScore,
-          indices: [getHostRiskIndex(spaceId)],
-          filterQuery,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        });
         const myRequest = {
           ...(prevRequest ?? {}),
-          defaultIndex: indices,
-          factoryQueryType,
-
-          docValueFields: docValueFields ?? [],
+          defaultIndex: [getHostRiskIndex(spaceId, onlyLatest)],
+          factoryQueryType: HostsQueries.hostsRiskScore,
           filterQuery: createFilter(filterQuery),
-          pagination: generateTablePaginationOptions(activePage, limit, true),
-          timerange,
+          pagination:
+            cursorStart && querySize
+              ? {
+                  cursorStart,
+                  querySize,
+                }
+              : undefined,
+          hostNames: hostName ? [hostName] : undefined,
+          timerange: timerange
+            ? { to: timerange.to, from: timerange.from, interval: '' }
+            : undefined,
           sort,
         };
 
@@ -207,14 +194,14 @@ export const useRiskScoreBetter = ({
       });
     }
   }, [
-    activePage,
-    docValueFields,
-    endDate,
     filterQuery,
     spaceId,
-    limit,
-    startDate,
+    onlyLatest,
+    timerange,
+    cursorStart,
+    querySize,
     sort,
+    hostName,
     getTransformChangesIfTheyExist,
   ]);
 
