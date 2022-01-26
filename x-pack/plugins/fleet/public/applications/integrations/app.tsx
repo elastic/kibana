@@ -63,7 +63,7 @@ export const IntegrationsAppContext: React.FC<{
     theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-    const CloudContext = startServices.cloud?.ContextProvider || EmptyContext;
+    const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
       <RedirectAppLinks application={startServices.application}>

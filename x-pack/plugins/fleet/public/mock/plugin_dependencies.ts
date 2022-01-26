@@ -13,19 +13,18 @@ import { navigationPluginMock } from '../../../../../src/plugins/navigation/publ
 import { customIntegrationsMock } from '../../../../../src/plugins/custom_integrations/public/mocks';
 import { sharePluginMock } from '../../../../../src/plugins/share/public/mocks';
 
-import type { MockedFleetSetupDeps, MockedFleetStartDeps } from './types';
-
-export const createSetupDepsMock = (): MockedFleetSetupDeps => {
+export const createSetupDepsMock = () => {
+  const cloud = cloudMock.createSetup();
   return {
     licensing: licensingMock.createSetup(),
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
     customIntegrations: customIntegrationsMock.createSetup(),
-    cloud: cloudMock.createSetup(),
+    cloud,
   };
 };
 
-export const createStartDepsMock = (): MockedFleetStartDeps => {
+export const createStartDepsMock = () => {
   return {
     data: dataPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),

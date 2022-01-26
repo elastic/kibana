@@ -38,7 +38,7 @@ const getContextProvider: () => React.FC =
     <ServicesProvider {...config}>{children}</ServicesProvider>;
 
 const createStartMock = (): jest.Mocked<CloudStart> => ({
-  ContextProvider: jest.fn(getContextProvider()),
+  CloudContextProvider: jest.fn(getContextProvider()),
 });
 
 export const cloudMock = {

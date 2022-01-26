@@ -62,9 +62,9 @@ interface CloudStartDependencies {
 
 export interface CloudStart {
   /**
-   * A React component that provides a pre-wired `React.Context` which connects components to Engagement services.
+   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  ContextProvider: FC<{}>;
+  CloudContextProvider: FC<{}>;
 }
 
 export interface CloudSetup {
@@ -178,7 +178,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       .catch(() => setLinks(true));
 
     return {
-      ContextProvider: ({ children }) => (
+      CloudContextProvider: ({ children }) => (
         <ServicesProvider chat={this.chatService}>{children}</ServicesProvider>
       ),
     };

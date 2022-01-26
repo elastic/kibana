@@ -9,8 +9,9 @@ import { PluginInitializerContext } from '../../../../src/core/public';
 import { CloudPlugin } from './plugin';
 
 export type { CloudSetup, CloudConfigType, CloudStart } from './plugin';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudPlugin(initializerContext);
 }
 
-export { Chat, LazyChat } from './components';
+export { Chat } from './components';
