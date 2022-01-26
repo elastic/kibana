@@ -11,13 +11,13 @@ import type { MockedLogger } from '@kbn/logging/target_types/mocks';
 
 import type {
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from '../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
-  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
 } from '../../../../../../src/core/server/mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
@@ -42,7 +42,7 @@ function getTest(
   mocks: {
     packageClient: PackageClient;
     esClient?: ElasticsearchClient;
-    soClient?: SavedObjectsClientContract;
+    soRepo?: ISavedObjectsRepository;
     logger?: MockedLogger;
   },
   testKey: string
@@ -64,7 +64,7 @@ function getTest(
         spyArgs: [
           {
             pkgName: 'package name',
-            savedObjectsClient: mocks.soClient,
+            savedObjectsClient: mocks.soRepo,
           },
         ],
         spyResponse: { name: 'getInstallation test' },
@@ -81,7 +81,7 @@ function getTest(
             pkgVersion: '8.0.0',
             spaceId: 'spaceId',
             esClient: mocks.esClient,
-            savedObjectsClient: mocks.soClient,
+            savedObjectsClient: mocks.soRepo,
           },
         ],
         spyResponse: { name: 'ensureInstalledPackage test' },
@@ -124,7 +124,7 @@ function getTest(
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
         spy: jest.spyOn(epmTransformsInstall, 'installTransform'),
-        spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
+        spyArgs: [pkg, paths, mocks.esClient, mocks.soRepo, mocks.logger],
         spyResponse: [
           {
             name: 'package name',
@@ -142,14 +142,14 @@ function getTest(
 describe('PackageService', () => {
   let mockPackageService: PackageService;
   let mockEsClient: ElasticsearchClient;
-  let mockSoClient: SavedObjectsClientContract;
+  let mockSoRepo: ISavedObjectsRepository;
   let mockLogger: MockedLogger;
 
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockSoClient = savedObjectsClientMock.create();
+    mockSoRepo = savedObjectsRepositoryMock.create();
     mockLogger = loggingSystemMock.createLogger();
-    mockPackageService = new PackageServiceImpl(mockEsClient, mockSoClient, mockLogger);
+    mockPackageService = new PackageServiceImpl(mockEsClient, mockSoRepo, mockLogger);
   });
 
   afterEach(() => {
@@ -176,7 +176,7 @@ describe('PackageService', () => {
         const mockClients = {
           packageClient: mockPackageService.asInternalUser,
           esClient: mockEsClient,
-          soClient: mockSoClient,
+          soRepo: mockSoRepo,
           logger: mockLogger,
         };
         const { method, args, spy, spyArgs, spyResponse } = getTest(mockClients, testKey);
@@ -193,7 +193,7 @@ describe('PackageService', () => {
       const mockClients = {
         packageClient: mockPackageService.asInternalUser,
         esClient: mockEsClient,
-        soClient: mockSoClient,
+        soRepo: mockSoRepo,
         logger: mockLogger,
       };
       const { method, args, spy, spyArgs, spyResponse } = getTest(mockClients, testKey);

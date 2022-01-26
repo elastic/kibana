@@ -19,6 +19,7 @@ import type {
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
 } from '../../../common';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
@@ -59,7 +60,7 @@ export const postEnrollmentApiKeyHandler: FleetRequestHandler<
   try {
     // validate policy id
     await agentPolicyService.get(soRepo, request.body.policy_id).catch((err) => {
-      if (soRepo.errors.isNotFoundError(err)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
       }
 

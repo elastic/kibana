@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from 'src/core/server';
 
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
@@ -22,27 +22,27 @@ import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
 
 export async function resetPreconfiguredAgentPolicies(
-  soClient: SavedObjectsClientContract,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentPolicyId?: string
 ) {
   const logger = appContextService.getLogger();
   logger.warn('Reseting Fleet preconfigured agent policies');
-  await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
-  await _deleteGhostPackagePolicies(soClient, esClient, logger);
+  await _deleteExistingData(soRepo, esClient, logger, agentPolicyId);
+  await _deleteGhostPackagePolicies(soRepo, esClient, logger);
 
-  await setupFleet(soClient, esClient);
+  await setupFleet(soRepo, esClient);
 }
 
 /**
  * Delete all package policies that are not used in any agent policies
  */
 async function _deleteGhostPackagePolicies(
-  soClient: SavedObjectsClientContract,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   logger: Logger
 ) {
-  const { items: packagePolicies } = await packagePolicyService.list(soClient, {
+  const { items: packagePolicies } = await packagePolicyService.list(soRepo, {
     perPage: SO_SEARCH_LIMIT,
   });
 
@@ -55,7 +55,7 @@ async function _deleteGhostPackagePolicies(
   );
 
   const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
-  const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
+  const agentPolicyExistsMap = (await soRepo.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (so.error && so.error.statusCode === 404) {
       acc.set(so.id, false);
     } else {
@@ -69,7 +69,7 @@ async function _deleteGhostPackagePolicies(
     (packagePolicy) => {
       if (agentPolicyExistsMap.get(packagePolicy.policy_id) === false) {
         logger.info(`Deleting ghost package policy ${packagePolicy.name} (${packagePolicy.id})`);
-        return soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
+        return soRepo.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
       }
     },
     {
@@ -79,7 +79,7 @@ async function _deleteGhostPackagePolicies(
 }
 
 async function _deleteExistingData(
-  soClient: SavedObjectsClientContract,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   logger: Logger,
   agentPolicyId?: string
@@ -87,7 +87,7 @@ async function _deleteExistingData(
   let existingPolicies: AgentPolicy[] = [];
 
   if (agentPolicyId) {
-    const policy = await agentPolicyService.get(soClient, agentPolicyId).catch((err) => {
+    const policy = await agentPolicyService.get(soRepo, agentPolicyId).catch((err) => {
       if (err.output?.statusCode === 404) {
         return undefined;
       }
@@ -101,7 +101,7 @@ async function _deleteExistingData(
     }
   } else {
     existingPolicies = (
-      await agentPolicyService.list(soClient, {
+      await agentPolicyService.list(soRepo, {
         perPage: SO_SEARCH_LIMIT,
         kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
       })
@@ -118,7 +118,7 @@ async function _deleteExistingData(
   // Delete
   if (agents.length > 0) {
     logger.info(`Force unenrolling ${agents.length} agents`);
-    await pMap(agents, (agent) => forceUnenrollAgent(soClient, esClient, agent.id), {
+    await pMap(agents, (agent) => forceUnenrollAgent(soRepo, esClient, agent.id), {
       concurrency: 20,
     });
   }
@@ -144,7 +144,7 @@ async function _deleteExistingData(
     await pMap(
       existingPolicies,
       (policy) =>
-        agentPolicyService.delete(soClient, esClient, policy.id, {
+        agentPolicyService.delete(soRepo, esClient, policy.id, {
           force: true,
           removeFleetServerDocuments: true,
         }),

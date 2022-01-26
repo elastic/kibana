@@ -20,17 +20,12 @@ import type {
   ServiceStatus,
   ElasticsearchClient,
   ISavedObjectsRepository,
-  SavedObjectsClientContract,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import {
-  DEFAULT_APP_CATEGORIES,
-  ServiceStatusLevels,
-  SavedObjectsClient,
-} from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -190,8 +185,8 @@ export class FleetPlugin
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
-
   private agentService?: AgentService;
+  private packageService?: PackageService;
   private savedObjectsRepo?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -402,7 +397,7 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
-        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+        core.savedObjects.createInternalRepository()
       ),
       agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
       agentPolicyService: {
@@ -440,17 +435,13 @@ export class FleetPlugin
 
   private setupPackageService(
     internalEsClient: ElasticsearchClient,
-    internalSoClient: SavedObjectsClientContract
+    soRepo: ISavedObjectsRepository
   ): PackageService {
     if (this.packageService) {
       return this.packageService;
     }
 
-    this.packageService = new PackageServiceImpl(
-      internalEsClient,
-      internalSoClient,
-      this.getLogger()
-    );
+    this.packageService = new PackageServiceImpl(internalEsClient, soRepo, this.getLogger());
     return this.packageService;
   }
 

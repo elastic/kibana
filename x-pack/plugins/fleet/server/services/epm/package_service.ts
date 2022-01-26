@@ -10,7 +10,7 @@
 import type {
   KibanaRequest,
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   Logger,
 } from 'kibana/server';
 
@@ -60,7 +60,7 @@ export interface PackageClient {
 export class PackageServiceImpl implements PackageService {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
-    private readonly internalSoClient: SavedObjectsClientContract,
+    private readonly soRepository: ISavedObjectsRepository,
     private readonly logger: Logger
   ) {}
 
@@ -75,21 +75,21 @@ export class PackageServiceImpl implements PackageService {
 
     return new PackageClientImpl(
       this.internalEsClient,
-      this.internalSoClient,
+      this.soRepository,
       this.logger,
       preflightCheck
     );
   }
 
   public get asInternalUser() {
-    return new PackageClientImpl(this.internalEsClient, this.internalSoClient, this.logger);
+    return new PackageClientImpl(this.internalEsClient, this.soRepository, this.logger);
   }
 }
 
 class PackageClientImpl implements PackageClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
-    private readonly internalSoClient: SavedObjectsClientContract,
+    private readonly soRepository: ISavedObjectsRepository,
     private readonly logger: Logger,
     private readonly preflightCheck?: () => void | Promise<void>
   ) {}
@@ -98,7 +98,7 @@ class PackageClientImpl implements PackageClient {
     await this.#runPreflight();
     return getInstallation({
       pkgName,
-      savedObjectsClient: this.internalSoClient,
+      savedObjectsRepo: this.soRepository,
     });
   }
 
@@ -111,7 +111,7 @@ class PackageClientImpl implements PackageClient {
     return ensureInstalledPackage({
       ...options,
       esClient: this.internalEsClient,
-      savedObjectsClient: this.internalSoClient,
+      savedObjectsRepo: this.soRepository,
     });
   }
 
@@ -151,7 +151,7 @@ class PackageClientImpl implements PackageClient {
       packageInfo,
       paths,
       this.internalEsClient,
-      this.internalSoClient,
+      this.soRepository,
       this.logger
     );
   }

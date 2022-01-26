@@ -23,7 +23,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutPreconfigurationSchema.body>
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soRepo);
   const spaceId = context.fleet.spaceId;
@@ -49,7 +49,7 @@ export const resetOnePreconfigurationHandler: FleetRequestHandler<
   undefined,
   undefined
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
@@ -65,7 +65,7 @@ export const resetPreconfigurationHandler: FleetRequestHandler<
   undefined,
   undefined
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {

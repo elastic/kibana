@@ -11,7 +11,7 @@ import { PackagePolicy } from '../../../../../../fleet/common/types/models';
 
 export const getAllEndpointPackagePolicies = async (
   packagePolicyService: PackagePolicyServiceInterface,
-  soClient: ISavedObjectsRepository
+  soRepo: ISavedObjectsRepository
 ): Promise<PackagePolicy[]> => {
   const result: PackagePolicy[] = [];
   const perPage = 1000;
@@ -19,7 +19,7 @@ export const getAllEndpointPackagePolicies = async (
   let hasMore = true;
 
   while (hasMore) {
-    const endpointPoliciesResponse = await packagePolicyService.list(soClient, {
+    const endpointPoliciesResponse = await packagePolicyService.list(soRepo, {
       perPage,
       page: page++,
       kuery: 'ingest-package-policies.package.name:endpoint',

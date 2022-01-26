@@ -6,7 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { jsonRt } from '@kbn/io-ts-utils';
 import {
   createApmArtifact,
   deleteApmArtifact,
