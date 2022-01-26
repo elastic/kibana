@@ -80,11 +80,11 @@ export const ManagedInstructions = React.memo<Props>(
     });
 
     const fleetServers = useMemo(() => {
-      const fleetServerAgentPolicies: string[] = (agentPolicies || [])
+      const fleetServerAgentPolicies: string[] = (agentPolicies ?? [])
         .filter((pol) => policyHasFleetServer(pol))
         .map((pol) => pol.id);
-      return (agents?.items || []).filter((agent) =>
-        fleetServerAgentPolicies.includes(agent.policy_id || '')
+      return (agents?.items ?? []).filter((agent) =>
+        fleetServerAgentPolicies.includes(agent.policy_id ?? '')
       );
     }, [agents, agentPolicies]);
 
