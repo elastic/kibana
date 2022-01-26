@@ -38,8 +38,7 @@ export function PageViewsTrend() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/page-view-trends',
+        return callApmApi('GET /internal/apm/ux/page-view-trends', {
           params: {
             query: {
               start,
