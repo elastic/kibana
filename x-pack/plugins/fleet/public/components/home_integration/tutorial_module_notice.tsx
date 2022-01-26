@@ -11,12 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiLink, EuiSpacer, EuiIcon } from '@elastic/eui';
 import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
 
-import { useGetPackages, useLink } from '../../hooks';
+import { useGetPackages, useLink, useStartServices } from '../../hooks';
 import { pkgKeyFromPackageInfo } from '../../services';
 import { FLEET_APM_PACKAGE } from '../../../common/constants';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();
+  const { application } = useStartServices();
   const hasIntegrationsPermissions = application.capabilities.navLinks.integrations;
   const { data: packagesData, isLoading } = useGetPackages();
 

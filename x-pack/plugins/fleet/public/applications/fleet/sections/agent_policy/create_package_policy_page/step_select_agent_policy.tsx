@@ -63,7 +63,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   // Create new agent policy flyout state
-  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
     useState<boolean>(false);
 
@@ -251,7 +251,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   <EuiFlexItem grow={false}>
                     <div>
                       <EuiLink
-                        disabled={!hasFleetWritePermissions}
+                        disabled={!hasFleetAllPrivileges}
                         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
                       >
                         <FormattedMessage

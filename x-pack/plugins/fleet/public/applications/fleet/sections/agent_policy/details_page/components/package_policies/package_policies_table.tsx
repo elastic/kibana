@@ -50,8 +50,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasWritePermissions = useAuthz().integrations.installPackages;
-  const hasReadPermissions = useAuthz().integrations.readPackageInfo;
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
 
@@ -105,7 +105,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiLink
             title={value}
-            {...(hasReadPermissions
+            {...(canReadIntegrationPolicies
               ? {
                   href: getHref('edit_integration', {
                     policyId: agentPolicy.id,
@@ -191,7 +191,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     <EuiButton
                       size="s"
                       minWidth="0"
-                      isDisabled={!hasWritePermissions}
+                      isDisabled={!canWriteIntegrationPolicies}
                       href={`${getHref('upgrade_package_policy', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,
@@ -228,7 +228,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
-              return hasWritePermissions ? (
+              return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
                   packagePolicy={packagePolicy}
@@ -245,7 +245,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy, getHref, hasWritePermissions, hasReadPermissions]
+    [agentPolicy, getHref, canWriteIntegrationPolicies, canReadIntegrationPolicies]
   );
 
   return (
@@ -267,7 +267,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiButton
                 key="addPackagePolicyButton"
                 fill
-                isDisabled={!hasWritePermissions}
+                isDisabled={!canWriteIntegrationPolicies}
                 iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {

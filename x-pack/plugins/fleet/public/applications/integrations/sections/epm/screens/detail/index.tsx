@@ -98,12 +98,13 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasFleetPermissions = useAuthz().fleet.all;
-  const hasWritePermissions = useAuthz().integrations.installPackages;
+  const canInstallPackages = useAuthz().integrations.installPackages;
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallIntegrations = hasWritePermissions && permissionCheck.data?.success;
+  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -364,7 +365,7 @@ export function Detail() {
                 content: (
                   <EuiButtonWithTooltip
                     fill
-                    isDisabled={!userCanInstallIntegrations}
+                    isDisabled={!userCanInstallPackages}
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
@@ -376,7 +377,7 @@ export function Detail() {
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
                     tooltip={
-                      !userCanInstallIntegrations
+                      !userCanInstallPackages
                         ? {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
@@ -424,7 +425,7 @@ export function Detail() {
       packageInfo,
       updateAvailable,
       packageInstallStatus,
-      userCanInstallIntegrations,
+      userCanInstallPackages,
       getHref,
       pkgkey,
       integration,
@@ -459,7 +460,7 @@ export function Detail() {
       },
     ];
 
-    if (hasWritePermissions && packageInstallStatus === InstallStatus.installed) {
+    if (canReadIntegrationPolicies && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'policies',
         name: (
@@ -495,7 +496,7 @@ export function Detail() {
       });
     }
 
-    if (hasFleetPermissions) {
+    if (canReadPackageSettings) {
       tabs.push({
         id: 'settings',
         name: (
@@ -537,8 +538,8 @@ export function Detail() {
     panel,
     getHref,
     integration,
-    hasFleetPermissions,
-    hasWritePermissions,
+    canReadIntegrationPolicies,
+    canReadPackageSettings,
     packageInstallStatus,
     CustomAssets,
     showCustomTab,
@@ -626,7 +627,7 @@ export function Detail() {
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 
-const EuiButtonWithTooltip: React.FC<
+export const EuiButtonWithTooltip: React.FC<
   EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
 > = ({ tooltip: tooltipProps, ...buttonProps }) => {
   return tooltipProps ? (

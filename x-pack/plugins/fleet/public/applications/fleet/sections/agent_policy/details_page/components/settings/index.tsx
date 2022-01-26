@@ -51,7 +51,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();
-    const hasFleetWritePermissions = useAuthz().fleet.all;
+    const hasFleetAllPrivileges = useAuthz().fleet.all;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
@@ -186,9 +186,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasFleetWritePermissions ||
-                          isLoading ||
-                          Object.keys(validation).length > 0
+                          !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
                         }
                         iconType="save"
                         color="primary"

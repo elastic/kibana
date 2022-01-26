@@ -30,7 +30,7 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   title,
   version,
 }) => {
-  const hasWritePermissions = useAuthz().integrations.installPackages;
+  const canRemovePackages = useAuthz().integrations.removePackages;
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
@@ -55,7 +55,7 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
     />
   );
 
-  return hasWritePermissions ? (
+  return canRemovePackages ? (
     <>
       <EuiButton
         iconType={'trash'}

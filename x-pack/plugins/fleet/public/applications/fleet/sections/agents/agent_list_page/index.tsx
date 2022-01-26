@@ -68,7 +68,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, agentPolicy, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
@@ -99,7 +99,7 @@ const RowActions = React.memo<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem
-        disabled={!hasFleetWritePermissions || !agent.active}
+        disabled={!hasFleetAllPrivileges || !agent.active}
         icon="trash"
         onClick={() => {
           onUnenrollClick();
@@ -152,7 +152,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
@@ -507,7 +507,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        hasFleetWritePermissions ? (
+        hasFleetAllPrivileges ? (
           <EuiButton
             fill
             iconType="plusInCircle"

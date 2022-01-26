@@ -36,7 +36,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const hasWritePermissions = useAuthz().integrations.installPackages;
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
@@ -75,7 +75,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         ]
       : []),
     <EuiContextMenuItem
-      disabled={!hasWritePermissions}
+      disabled={!canWriteIntegrationPolicies}
       icon="pencil"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
@@ -88,7 +88,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      disabled={!packagePolicy.hasUpgrade || !hasWritePermissions}
+      disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies}
       icon="refresh"
       href={upgradePackagePolicyHref}
       key="packagePolicyUpgrade"
@@ -113,7 +113,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         {(deletePackagePoliciesPrompt) => {
           return (
             <DangerEuiContextMenuItem
-              disabled={!hasWritePermissions}
+              disabled={!canWriteIntegrationPolicies}
               icon="trash"
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {

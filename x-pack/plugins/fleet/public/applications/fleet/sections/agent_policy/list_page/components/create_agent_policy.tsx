@@ -43,7 +43,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>({
     name: '',
     description: '',
@@ -115,9 +115,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiButton
             fill
             isLoading={isLoading}
-            isDisabled={
-              !hasFleetWritePermissions || isLoading || Object.keys(validation).length > 0
-            }
+            isDisabled={!hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {
