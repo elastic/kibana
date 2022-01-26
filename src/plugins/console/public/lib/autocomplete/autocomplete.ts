@@ -679,7 +679,7 @@ export default function ({
     if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
       const { position } = nonEmptyToken;
       // if not on the first line
-      if (context.rangeToReplace?.start?.lineNumber > 1) {
+      if (context.rangeToReplace && context.rangeToReplace.start?.lineNumber > 1) {
         const prevTokenLineNumber = position.lineNumber;
         const line = context.editor?.getLineValue(prevTokenLineNumber) ?? '';
         const prevLineLength = line.length;
@@ -711,6 +711,7 @@ export default function ({
       }
     }
   }
+
   function addBodyPrefixSuffixToContext(context: AutoCompleteContext) {
     // Figure out what happens next to the token to see whether it needs trailing commas etc.
 
