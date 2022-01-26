@@ -52,6 +52,7 @@ export const routes = {
         rangeTo: t.string,
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
+        alpha: jsonRt.pipe(t.boolean),
       }),
     },
     exact: true,
