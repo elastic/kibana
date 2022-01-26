@@ -31,7 +31,7 @@ export const getExceptionsPreGetOneHandler = (
     }
 
     // validate Host Isolation Exception
-    if (HostIsolationExceptionsValidator.isHostIsolationException(exceptionItem)) {
+    if (HostIsolationExceptionsValidator.isHostIsolationException(exceptionItem.list_id)) {
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request

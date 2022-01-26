@@ -10,7 +10,7 @@ import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
-  static isHostIsolationException({ list_id: listId }: { list_id: string }): boolean {
+  static isHostIsolationException(listId: string): boolean {
     return listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
   }
 

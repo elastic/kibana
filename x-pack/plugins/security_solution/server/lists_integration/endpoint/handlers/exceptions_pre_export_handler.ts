@@ -27,7 +27,7 @@ export const getExceptionsPreExportHandler = (
     }
 
     // Host Isolation Exceptions validations
-    if (HostIsolationExceptionsValidator.isHostIsolationException({ list_id: listId })) {
+    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
