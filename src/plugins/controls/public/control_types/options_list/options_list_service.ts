@@ -15,7 +15,10 @@ import { TimeRange } from '../../../../data/public';
 import { OptionsListRequestBody, OptionsListResponse } from './types';
 import { DataView, DataViewField } from '../../../../data_views/public';
 
-export type OptionsListRequest = Omit<OptionsListRequestBody, 'filters' | 'fieldName'> & {
+export type OptionsListRequest = Omit<
+  OptionsListRequestBody,
+  'filters' | 'fieldName' | 'fieldSpec'
+> & {
   timeRange?: TimeRange;
   field: DataViewField;
   dataView: DataView;
@@ -65,21 +68,15 @@ const cachedOptionsListRequest = memoize(
 );
 
 const getRequestBody = (request: OptionsListRequest): OptionsListRequestBody => {
-  const {
-    query,
-    filters,
-    dataView,
-    timeRange,
-    field: { name: fieldName },
-    ...passThroughProps
-  } = request;
+  const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
   const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
   const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
   const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
   return {
     ...passThroughProps,
     filters: esFilters,
-    fieldName,
+    fieldName: field.name,
+    fieldSpec: field.toSpec?.(),
   };
 };
 

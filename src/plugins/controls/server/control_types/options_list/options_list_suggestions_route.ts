@@ -19,6 +19,7 @@ import {
 import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
 import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
 import { PluginSetup as DataPluginSetup } from '../../../../data/server';
+import { FieldSpec, getFieldSubtypeNested } from '../../../../data_views/common';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -40,6 +41,7 @@ export const setupOptionsListSuggestionsRoute = (
           {
             fieldName: schema.string(),
             filters: schema.maybe(schema.any()),
+            fieldSpec: schema.maybe(schema.any()),
             searchString: schema.maybe(schema.string()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
           },
@@ -80,8 +82,8 @@ export const setupOptionsListSuggestionsRoute = (
     const abortController = new AbortController();
     abortedEvent$.subscribe(() => abortController.abort());
 
-    const { fieldName, searchString, selectedOptions, filters } = request;
-    const body = getOptionsListBody(fieldName, searchString, selectedOptions, filters);
+    const { fieldName, searchString, selectedOptions, filters, fieldSpec } = request;
+    const body = getOptionsListBody(fieldName, fieldSpec, searchString, selectedOptions, filters);
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
     // parse raw ES response into OptionsListSuggestionResponse
@@ -110,6 +112,7 @@ export const setupOptionsListSuggestionsRoute = (
 
   const getOptionsListBody = (
     fieldName: string,
+    fieldSpec?: FieldSpec,
     searchString?: string,
     selectedOptions?: string[],
     filters: estypes.QueryDslQueryContainer[] = []
@@ -169,20 +172,20 @@ export const setupOptionsListSuggestionsRoute = (
       },
     };
 
-    // const subTypeNested = isFieldObject(field) && getFieldSubtypeNested(field);
-    // if (isFieldObject(field) && subTypeNested) {
-    //   return {
-    //     ...body,
-    //     aggs: {
-    //       nestedSuggestions: {
-    //         nested: {
-    //           path: subTypeNested.nested.path,
-    //         },
-    //         aggs: body.aggs,
-    //       },
-    //     },
-    //   };
-    // }
+    const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
+    if (subTypeNested) {
+      return {
+        ...body,
+        aggs: {
+          nestedSuggestions: {
+            nested: {
+              path: subTypeNested.nested.path,
+            },
+            aggs: body.aggs,
+          },
+        },
+      };
+    }
 
     return body;
   };

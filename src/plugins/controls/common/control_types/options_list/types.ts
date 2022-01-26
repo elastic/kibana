@@ -7,6 +7,7 @@
  */
 
 import { BoolQuery } from '@kbn/es-query';
+import { FieldSpec } from '../../../../data_views/common';
 import { ControlInput } from '../../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
@@ -30,5 +31,6 @@ export interface OptionsListRequestBody {
   filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   searchString?: string;
+  fieldSpec?: FieldSpec;
   fieldName: string;
 }

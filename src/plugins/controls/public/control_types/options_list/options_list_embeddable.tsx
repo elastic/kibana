@@ -94,14 +94,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   }
 
   private initialize = async () => {
-    const { selectedOptions: initialSelectedOptions, ignoreParentSettings } = this.getInput();
+    const { selectedOptions: initialSelectedOptions } = this.getInput();
     if (initialSelectedOptions) {
-      await this.getCurrentDataView();
-      if (!ignoreParentSettings?.ignoreValidations) {
-        // if validations are required, defer building initial filters until after first query has returned to allow for validation
-        await this.runOptionsListQuery();
-      }
+      await this.runOptionsListQuery(); // initial query needs to be awaited if there are selected options
       await this.buildFilter();
+    } else {
+      this.runOptionsListQuery();
     }
     this.setInitializationFinished();
     this.setupSubscriptions();
@@ -128,10 +126,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     );
 
     // fetch available options when input changes or when search string has changed
-    const { ignoreParentSettings } = this.getInput();
     this.subscriptions.add(
       merge(dataFetchPipe, typeaheadPipe)
-        .pipe(skip(ignoreParentSettings?.ignoreValidations ? 0 : 1)) // if validation is enabled, skip the first input update because options list query will be run by initialize.
+        .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
         .subscribe(this.runOptionsListQuery)
     );
 

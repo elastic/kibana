@@ -11,7 +11,6 @@ import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
-import { isEmpty } from 'lodash';
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
 import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
@@ -137,10 +136,8 @@ export const syncDashboardControlGroup = async ({
           compareAllFilters(filtersA, filtersB)
         )
       )
-      .subscribe(({ filters }) => {
-        if (!isEmpty(filters)) {
-          dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
-        }
+      .subscribe(() => {
+        dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
       })
   );
 
