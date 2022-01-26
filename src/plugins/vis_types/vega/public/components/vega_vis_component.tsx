@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
@@ -55,14 +55,14 @@ export const VegaVisComponent = ({
     }
   }, [visData, renderComplete]);
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const updateChartSize = useCallback(
-    throttle(() => {
-      if (visController.current) {
-        visController.current.render(visData).then(renderComplete);
-      }
-    }, 300),
-    []
+  const updateChartSize = useMemo(
+    () =>
+      throttle(() => {
+        if (visController.current) {
+          visController.current.render(visData).then(renderComplete);
+        }
+      }, 300),
+    [renderComplete, visData]
   );
 
   return (
