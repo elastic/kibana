@@ -6,7 +6,7 @@
  */
 
 import { getPieVisualization } from './visualization';
-import type { PieVisualizationState } from '../../common/expressions';
+import { PieVisualizationState, PieChartTypes, CategoryDisplay } from '../../common';
 import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
@@ -24,7 +24,7 @@ const pieVisualization = getPieVisualization({
 
 function getExampleState(): PieVisualizationState {
   return {
-    shape: 'pie',
+    shape: PieChartTypes.PIE,
     layers: [
       {
         layerId: LAYER_ID,
@@ -32,7 +32,7 @@ function getExampleState(): PieVisualizationState {
         groups: [],
         metric: undefined,
         numberDisplay: 'percent',
-        categoryDisplay: 'default',
+        categoryDisplay: CategoryDisplay.DEFAULT,
         legendDisplay: 'default',
         nestedLegend: false,
       },
@@ -82,13 +82,13 @@ describe('pie_visualization', () => {
             layerId: LAYER_ID,
             layerType: layerTypes.DATA,
             numberDisplay: 'percent',
-            categoryDisplay: 'default',
+            categoryDisplay: CategoryDisplay.DEFAULT,
             legendDisplay: 'default',
             nestedLegend: false,
             metric: undefined,
           },
         ],
-        shape: 'donut',
+        shape: PieChartTypes.DONUT,
       };
       const setDimensionResult = pieVisualization.setDimension({
         prevState,
@@ -100,7 +100,7 @@ describe('pie_visualization', () => {
 
       expect(setDimensionResult).toEqual(
         expect.objectContaining({
-          shape: 'donut',
+          shape: PieChartTypes.DONUT,
         })
       );
     });

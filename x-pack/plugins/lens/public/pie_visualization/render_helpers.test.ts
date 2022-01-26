@@ -8,7 +8,7 @@
 import type { Datatable } from 'src/plugins/expressions/public';
 
 import { checkTableForContainsSmallValues, shouldShowValuesInLegend } from './render_helpers';
-import type { PieLayerState } from '../../common/expressions';
+import { PieLayerState, PieChartTypes } from '../../common';
 
 describe('render helpers', () => {
   describe('#checkTableForContainsSmallValues', () => {
@@ -70,23 +70,35 @@ describe('render helpers', () => {
   describe('#shouldShowValuesInLegend', () => {
     it('should firstly read the state value', () => {
       expect(
-        shouldShowValuesInLegend({ showValuesInLegend: true } as PieLayerState, 'waffle')
+        shouldShowValuesInLegend(
+          { showValuesInLegend: true } as PieLayerState,
+          PieChartTypes.WAFFLE
+        )
       ).toBeTruthy();
 
       expect(
-        shouldShowValuesInLegend({ showValuesInLegend: false } as PieLayerState, 'waffle')
+        shouldShowValuesInLegend(
+          { showValuesInLegend: false } as PieLayerState,
+          PieChartTypes.WAFFLE
+        )
       ).toBeFalsy();
     });
 
     it('should read value from meta in case of value in state is undefined', () => {
       expect(
-        shouldShowValuesInLegend({ showValuesInLegend: undefined } as PieLayerState, 'waffle')
+        shouldShowValuesInLegend(
+          { showValuesInLegend: undefined } as PieLayerState,
+          PieChartTypes.WAFFLE
+        )
       ).toBeTruthy();
 
-      expect(shouldShowValuesInLegend({} as PieLayerState, 'waffle')).toBeTruthy();
+      expect(shouldShowValuesInLegend({} as PieLayerState, PieChartTypes.WAFFLE)).toBeTruthy();
 
       expect(
-        shouldShowValuesInLegend({ showValuesInLegend: undefined } as PieLayerState, 'pie')
+        shouldShowValuesInLegend(
+          { showValuesInLegend: undefined } as PieLayerState,
+          PieChartTypes.PIE
+        )
       ).toBeFalsy();
     });
   });

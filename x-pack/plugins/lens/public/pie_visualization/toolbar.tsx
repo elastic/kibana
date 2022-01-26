@@ -20,7 +20,7 @@ import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
+import { PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';

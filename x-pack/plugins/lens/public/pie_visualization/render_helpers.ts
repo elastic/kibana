@@ -6,7 +6,7 @@
  */
 
 import type { Datatable } from 'src/plugins/expressions/public';
-import type { PieChartTypes, PieLayerState } from '../../common/expressions/pie_chart/types';
+import type { PieChartTypes, PieLayerState } from '../../common';
 import { PartitionChartsMeta } from './partition_charts_meta';
 
 export const isPartitionShape = (shape: PieChartTypes | string) =>

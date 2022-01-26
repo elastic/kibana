@@ -12,6 +12,7 @@ import type {
 } from '../../../../src/plugins/field_formats/common';
 import type { Datatable } from '../../../../src/plugins/expressions/common';
 import type { PaletteContinuity } from '../../../../src/plugins/charts/common';
+import type { PaletteOutput } from '../../../../src/plugins/charts/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -71,3 +72,43 @@ export type LayerType = 'data' | 'referenceLine';
 
 // Shared by XY Chart and Heatmap as for now
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+
+export enum PieChartTypes {
+  PIE = 'pie',
+  DONUT = 'donut',
+  TREEMAP = 'treemap',
+  MOSAIC = 'mosaic',
+  WAFFLE = 'waffle',
+}
+
+export enum CategoryDisplay {
+  DEFAULT = 'default',
+  INSIDE = 'inside',
+  HIDE = 'hide',
+}
+
+export interface SharedPieLayerState {
+  groups: string[];
+  metric?: string;
+  numberDisplay: 'hidden' | 'percent' | 'value';
+  categoryDisplay: CategoryDisplay;
+  legendDisplay: 'default' | 'show' | 'hide';
+  legendPosition?: 'left' | 'right' | 'top' | 'bottom';
+  showValuesInLegend?: boolean;
+  nestedLegend?: boolean;
+  percentDecimals?: number;
+  emptySizeRatio?: number;
+  legendMaxLines?: number;
+  truncateLegend?: boolean;
+}
+
+export type PieLayerState = SharedPieLayerState & {
+  layerId: string;
+  layerType: LayerType;
+};
+
+export interface PieVisualizationState {
+  shape: PieChartTypes;
+  layers: PieLayerState[];
+  palette?: PaletteOutput;
+}

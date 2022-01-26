@@ -15,9 +15,7 @@ import { LensIconChartTreemap } from '../assets/chart_treemap';
 import { LensIconChartMosaic } from '../assets/chart_mosaic';
 import { LensIconChartWaffle } from '../assets/chart_waffle';
 import { EMPTY_SIZE_RATIOS } from './constants';
-
-import type { SharedPieLayerState } from '../../common/expressions';
-import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
+import { CategoryDisplay, PieChartTypes, SharedPieLayerState } from '../../common';
 import type { DatatableColumn } from '../../../../../src/plugins/expressions';
 
 interface PartitionChartMeta {
@@ -62,19 +60,19 @@ const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
 
 const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
-    value: 'default',
+    value: CategoryDisplay.DEFAULT,
     inputDisplay: i18n.translate('xpack.lens.pieChart.showCategoriesLabel', {
       defaultMessage: 'Inside or outside',
     }),
   },
   {
-    value: 'inside',
+    value: CategoryDisplay.INSIDE,
     inputDisplay: i18n.translate('xpack.lens.pieChart.fitInsideOnlyLabel', {
       defaultMessage: 'Inside only',
     }),
   },
   {
-    value: 'hide',
+    value: CategoryDisplay.HIDE,
     inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
       defaultMessage: 'Hide labels',
     }),
@@ -83,13 +81,13 @@ const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] =
 
 const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
-    value: 'default',
+    value: CategoryDisplay.DEFAULT,
     inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
       defaultMessage: 'Show labels',
     }),
   },
   {
-    value: 'hide',
+    value: CategoryDisplay.HIDE,
     inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
       defaultMessage: 'Hide labels',
     }),

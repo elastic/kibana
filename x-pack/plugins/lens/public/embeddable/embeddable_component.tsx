@@ -23,7 +23,8 @@ import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
 import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState, MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/expressions';
+import type { PieVisualizationState } from '../../common';
 import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
 
 type LensAttributes<TVisType, TVisState> = Omit<
