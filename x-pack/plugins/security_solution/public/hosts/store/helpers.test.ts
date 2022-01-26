@@ -36,8 +36,7 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.risk]: null,
-      [HostsTableType.riskScoreBetter]: {
+      [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -46,7 +45,6 @@ export const mockHostsState: HostsModel = {
         },
         severitySelection: [],
       },
-      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -74,8 +72,7 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.risk]: null,
-      [HostsTableType.riskScoreBetter]: {
+      [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -84,7 +81,6 @@ export const mockHostsState: HostsModel = {
         },
         severitySelection: [],
       },
-      [HostsTableType.risk]: null,
     },
   },
 };

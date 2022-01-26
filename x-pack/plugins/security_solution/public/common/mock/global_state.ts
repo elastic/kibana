@@ -84,8 +84,7 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
-        hostRisk: null,
-        riskScoreBetter: {
+        hostRisk: {
           activePage: 0,
           limit: 10,
           sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
@@ -106,8 +105,7 @@ export const mockGlobalState: State = {
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
-        hostRisk: null,
-        riskScoreBetter: {
+        hostRisk: {
           activePage: 0,
           limit: 10,
           sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },

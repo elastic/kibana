@@ -9,10 +9,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { HostRiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useHostRiskScore } from '../../containers/host_risk_score';
 
-jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
-const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
+jest.mock('../../containers/host_risk_score');
+const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {
   it('renders', () => {
@@ -30,7 +30,7 @@ describe('Host Risk Flyout', () => {
   });
 
   it('renders loader when HostsRiskScore is laoding', () => {
-    useHostsRiskScoreMock.mockReturnValueOnce({
+    useHostRiskScoreMock.mockReturnValueOnce({
       loading: true,
       isModuleEnabled: true,
       result: [],

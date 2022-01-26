@@ -22,12 +22,12 @@ import {
 } from '../../../common/mock';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
-const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
+jest.mock('../../../hosts/containers/host_risk_score');
+const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
 const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
@@ -51,7 +51,7 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders enabled module view if module is enabled', () => {
-    useHostsRiskScoreMock.mockReturnValueOnce({
+    useHostRiskScoreMock.mockReturnValueOnce({
       loading: false,
       isModuleEnabled: true,
       result: [],
@@ -76,7 +76,7 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders disabled module view if module is disabled', () => {
-    useHostsRiskScoreMock.mockReturnValueOnce({
+    useHostRiskScoreMock.mockReturnValueOnce({
       loading: false,
       isModuleEnabled: false,
       result: [],

@@ -36,7 +36,7 @@ import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { HostRiskScore } from '../../../hosts/components/common/host_risk_score';
-import { useHostRiskScore } from '../../../hosts/containers/risk_score_better';
+import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel

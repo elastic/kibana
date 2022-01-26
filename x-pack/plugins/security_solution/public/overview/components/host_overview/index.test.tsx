@@ -12,12 +12,12 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from './index';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 
-jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score', () => ({
-  useHostsRiskScore: jest.fn().mockReturnValue({
+jest.mock('../../../hosts/containers/host_risk_score', () => ({
+  useHostRiskScore: jest.fn().mockReturnValue({
     result: [],
     isModuleEnabled: false,
     loading: true,
@@ -74,7 +74,7 @@ describe('Host Summary Component', () => {
       const risk = 'very high hos risk';
       const riskScore = 9999999;
 
-      (useHostsRiskScore as jest.Mock).mockReturnValue({
+      (useHostRiskScore as jest.Mock).mockReturnValue({
         result: [
           {
             host: {

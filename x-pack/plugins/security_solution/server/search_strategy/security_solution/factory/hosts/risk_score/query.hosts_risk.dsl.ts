@@ -9,7 +9,6 @@ import {
   Direction,
   HostsRiskScoreRequestOptions,
   HostRiskScoreFields,
-  SortField,
   HostRiskScoreSortField,
 } from '../../../../../../common/search_strategy';
 
@@ -54,7 +53,6 @@ export const buildHostsRiskScoreQuery = ({
     size: querySize,
     from: cursorStart,
     body: {
-      // ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       query: { bool: { filter } },
       sort: [getQueryOrder(sort)],
     },

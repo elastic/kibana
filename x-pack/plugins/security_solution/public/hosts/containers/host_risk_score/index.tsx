@@ -31,7 +31,7 @@ import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 
-export interface RiskScoreBetterState {
+export interface HostRiskScoreState {
   data: HostsRiskScore[];
   inspect: InspectResponse;
   isInspected: boolean;
@@ -40,7 +40,7 @@ export interface RiskScoreBetterState {
   isModuleEnabled: boolean | undefined;
 }
 
-interface UseRiskScoreBetter {
+interface UseHostRiskScore {
   sort?: HostRiskScoreSortField;
   filterQuery?: ESQuery | string;
   skip?: boolean;
@@ -67,19 +67,20 @@ export const useHostRiskScore = ({
   sort,
   skip = false,
   pagination,
-}: UseRiskScoreBetter): [boolean, RiskScoreBetterState] => {
+}: UseHostRiskScore): [boolean, HostRiskScoreState] => {
   const { querySize, cursorStart } = pagination || {};
   const { data, spaces } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [riskScoreRequest, setRiskScoreBetterRequest] =
-    useState<HostsRiskScoreRequestOptions | null>(null);
+  const [riskScoreRequest, setHostRiskScoreRequest] = useState<HostsRiskScoreRequestOptions | null>(
+    null
+  );
   const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
-  const [riskScoreResponse, setRiskScoreBetterResponse] = useState<RiskScoreBetterState>({
+  const [riskScoreResponse, setHostRiskScoreResponse] = useState<HostRiskScoreState>({
     data: [],
     inspect: {
       dsl: [],
@@ -111,7 +112,7 @@ export const useHostRiskScore = ({
               if (isCompleteResponse(response)) {
                 const hits = response?.rawResponse?.hits?.hits;
 
-                setRiskScoreBetterResponse((prevResponse) => ({
+                setHostRiskScoreResponse((prevResponse) => ({
                   ...prevResponse,
                   data: isHostsRiskScoreHit(hits?.[0]?._source)
                     ? (hits?.map((hit) => hit._source) as HostsRiskScore[])
@@ -132,7 +133,7 @@ export const useHostRiskScore = ({
             error: (error) => {
               setLoading(false);
               if (isIndexNotFoundError(error)) {
-                setRiskScoreBetterRequest((prevRequest) =>
+                setHostRiskScoreRequest((prevRequest) =>
                   !prevRequest
                     ? prevRequest
                     : {
@@ -167,7 +168,7 @@ export const useHostRiskScore = ({
 
   useEffect(() => {
     if (spaceId) {
-      setRiskScoreBetterRequest((prevRequest) => {
+      setHostRiskScoreRequest((prevRequest) => {
         const myRequest = {
           ...(prevRequest ?? {}),
           defaultIndex: [getHostRiskIndex(spaceId, onlyLatest)],

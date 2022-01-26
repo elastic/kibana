@@ -33,7 +33,7 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostRiskScore } from '../../../../hosts/containers/risk_score_better';
+import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
 import { HostRisk } from '../../../../common/containers/hosts_risk/types';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`

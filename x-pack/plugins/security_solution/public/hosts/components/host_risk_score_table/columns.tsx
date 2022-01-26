@@ -35,7 +35,7 @@ export const getHostRiskScoreColumns = ({
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
-        const id = escapeDataProviderId(`risk-score-better-table-hostName-${hostName}`);
+        const id = escapeDataProviderId(`host-risk-score-table-hostName-${hostName}`);
         return (
           <DraggableWrapper
             key={id}

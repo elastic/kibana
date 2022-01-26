@@ -9,7 +9,7 @@ import React from 'react';
 
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
-import { useHostRiskScore } from '../../../hosts/containers/risk_score_better';
+import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
 export interface RiskyHostLinksProps {
   timerange: { to: string; from: string };
 }

@@ -80,9 +80,8 @@ export type SeverityCount = {
 };
 
 interface RiskScoreKpi {
-  // TODO: Pablo what is this error/isModuleDisabled value supposed to be??
   error: unknown;
-  isModuleDisabled: unknown;
+  isModuleDisabled: boolean;
   severityCount: SeverityCount;
   loading: boolean;
 }
@@ -95,7 +94,7 @@ export const useRiskScoreKpi = ({
 }: UseRiskyHostProps): RiskScoreKpi => {
   const { error, result, start, loading } = useRiskyHostsComplete();
   const { data, spaces } = useKibana().services;
-  const isModuleDisabled = error && isIndexNotFoundError(error);
+  const isModuleDisabled = !!error && isIndexNotFoundError(error);
   const [spaceId, setSpaceId] = useState<string>();
 
   useEffect(() => {

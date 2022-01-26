@@ -28,7 +28,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-import { useHostRiskScore } from '../../containers/risk_score_better';
+import { useHostRiskScore } from '../../containers/host_risk_score';
 import { ManageQueryComponent } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
