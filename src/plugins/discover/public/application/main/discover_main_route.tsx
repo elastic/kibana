@@ -60,29 +60,23 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     core.application.navigateToApp('kibanaOverview', { path: '#' });
   }, [core.application]);
 
-  useEffect(() => {
-    const fetchIsNewKibanaInstance = async () => {
-      const hasUserIndexPattern = await data.dataViews.hasUserDataView().catch(() => true);
-
-      if (!hasUserIndexPattern) {
-        navigateToOverview();
-      }
-    };
-
-    fetchIsNewKibanaInstance();
-  }, [data.dataViews, navigateToOverview]);
+  const checkForDataViews = useCallback(async () => {
+    const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
+    if (!hasUserDataView) {
+      navigateToOverview();
+    }
+    const defaultDataView = await data.dataViews.getDefaultDataView();
+    if (!defaultDataView) {
+      navigateToOverview();
+    }
+  }, [navigateToOverview, data.dataViews]);
 
   useEffect(() => {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
       try {
-        const defaultDataView = await data.dataViews.getDefaultDataView();
-        const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
-        if (!defaultDataView || !hasUserDataView) {
-          navigateToOverview();
-          return;
-        }
+        await checkForDataViews();
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
@@ -165,8 +159,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     services,
     toastNotifications,
     core.theme,
-    data.dataViews,
-    navigateToOverview,
+    checkForDataViews,
   ]);
 
   useEffect(() => {
