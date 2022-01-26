@@ -8,6 +8,7 @@ import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
@@ -111,6 +112,7 @@ export class TaskRunner<
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
 
@@ -129,6 +131,7 @@ export class TaskRunner<
   ) {
     this.context = context;
     this.logger = context.logger;
+    this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
@@ -258,6 +261,18 @@ export class TaskRunner<
     return !this.context.cancelAlertsOnRuleTimeout || !this.ruleType.cancelAlertsOnRuleTimeout;
   }
 
+  private countUsageOfActionExecutionAfterRuleCancellation() {
+    if (this.cancelled && this.usageCounter) {
+      if (this.context.cancelAlertsOnRuleTimeout && this.ruleType.cancelAlertsOnRuleTimeout) {
+        // Increment usage counter for skipped actions
+        this.usageCounter.incrementCounter({
+          counterName: `alertsSkippedDueToRuleExecutionTimeout_${this.ruleType.id}`,
+          incrementBy: 1,
+        });
+      }
+    }
+  }
+
   async executeAlert(
     alertId: string,
     alert: AlertInstance<InstanceState, InstanceContext>,
@@ -380,6 +395,7 @@ export class TaskRunner<
       event.error.message = err.message;
       event.event = event.event || {};
       event.event.outcome = 'failure';
+
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, err);
     }
 
@@ -485,6 +501,12 @@ export class TaskRunner<
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
         );
+        // Usage counter for telemetry
+        // This keeps track of how many times action executions were skipped after rule
+        // execution completed successfully after the execution timeout
+        // This can occur when rule executors do not short circuit execution in response
+        // to timeout
+        this.countUsageOfActionExecutionAfterRuleCancellation();
       }
     }
 
