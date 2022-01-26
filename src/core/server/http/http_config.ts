@@ -180,7 +180,7 @@ export type HttpConfigType = TypeOf<typeof configSchema>;
 export const config: ServiceConfigDescriptor<HttpConfigType> = {
   path: 'server' as const,
   schema: configSchema,
-  deprecations: ({ rename }) => [rename('maxPayloadBytes', 'maxPayload')],
+  deprecations: ({ rename }) => [rename('maxPayloadBytes', 'maxPayload', { level: 'warning' })],
 };
 
 export class HttpConfig implements IHttpConfig {

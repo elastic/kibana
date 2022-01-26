@@ -14,30 +14,38 @@ import { ConfigSchema, ConfigType } from './schema';
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.reporting.capture.networkPolicy', 'xpack.screenshotting.networkPolicy'),
+    renameFromRoot('xpack.reporting.capture.networkPolicy', 'xpack.screenshotting.networkPolicy', {
+      level: 'warning',
+    }),
     renameFromRoot(
       'xpack.reporting.capture.browser.autoDownload',
-      'xpack.screenshotting.browser.autoDownload'
+      'xpack.screenshotting.browser.autoDownload',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.reporting.capture.browser.chromium.inspect',
-      'xpack.screenshotting.browser.chromium.inspect'
+      'xpack.screenshotting.browser.chromium.inspect',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.reporting.capture.browser.chromium.disableSandbox',
-      'xpack.screenshotting.browser.chromium.disableSandbox'
+      'xpack.screenshotting.browser.chromium.disableSandbox',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.reporting.capture.browser.chromium.proxy.enabled',
-      'xpack.screenshotting.browser.chromium.proxy.enabled'
+      'xpack.screenshotting.browser.chromium.proxy.enabled',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.reporting.capture.browser.chromium.proxy.server',
-      'xpack.screenshotting.browser.chromium.proxy.server'
+      'xpack.screenshotting.browser.chromium.proxy.server',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.reporting.capture.browser.chromium.proxy.bypass',
-      'xpack.screenshotting.browser.chromium.proxy.bypass'
+      'xpack.screenshotting.browser.chromium.proxy.bypass',
+      { level: 'warning' }
     ),
   ],
   exposeToUsage: {
