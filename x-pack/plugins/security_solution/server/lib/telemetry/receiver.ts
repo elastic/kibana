@@ -313,7 +313,7 @@ export class TelemetryReceiver {
                 bool: {
                   filter: {
                     terms: {
-                      'alert.params.immutable': [true],
+                      'alert.params.immutable': ['true'],
                     },
                   },
                 },
