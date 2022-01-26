@@ -192,7 +192,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             pathId: ML_PAGES.ANOMALY_EXPLORER,
-            onClick: getJobSelectionCallback(ML_PAGES.ANOMALY_EXPLORER),
             testSubj: 'mlMainTab anomalyExplorer',
           },
           {
