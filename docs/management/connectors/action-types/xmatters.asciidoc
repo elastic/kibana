@@ -1,0 +1,99 @@
+[role="xpack"]
+[[xmatters-action-type]]
+=== xMatters connector and action
+++++
+<titleabbrev>xMatters</titleabbrev>
+++++
+
+The xMatters connector uses https://github.com/axios/axios[axios] to send a POST request to a xMatters workflow trigger.
+
+[float]
+[[xmatters-connector-configuration]]
+==== Connector configuration
+
+xMatters connectors have the following configuration properties.
+
+Name::      The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+URL::                 The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Headers::                                                                                                         A set of key-value pairs sent as headers with the request.
+Require authentication::                                                                    If true, a username and password for login type authentication must be provided.
+Username::                                                                                                                           Username for HTTP basic authentication.
+Password::                                                                                                                           Password for HTTP basic authentication.
+
+[float]
+[[xmatters-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-xmatters-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-xmatters:
+   name: preconfigured-xmatters-connector-type
+   actionTypeId: .xmatters
+   config:
+     url: https://test.host
+     headers:
+       testheader: testvalue
+   secrets:
+     user: testuser
+     password: passwordkeystorevalue
+--
+
+Config defines information for the connector type.
+
+`url`:: A URL string that corresponds to *URL*.
+`headers`:: A record<string, string> that corresponds to *Headers*.
+`hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+
+Secrets defines sensitive information for the connector type.
+
+`user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
+`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+
+[float]
+[[define-xmatters-ui]]
+==== Define connector in Stack Management
+
+Define xMatters connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-connector.png[xMatters connector]
+
+Test xMatters action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-params-test.png[xMatters params test]
+
+[float]
+[[xmatters-action-configuration]]
+==== Action configuration
+
+xMatters actions have the following properties.
+
+alertActionGroupName: Name of the alert action group that scheduled actions for the alert.
+alertId:                                                         	 Unique ID of the alert.
+alertName:                                                              Name of the alert.
+date:                                                 Date the alert scheduled the action.
+severity:                                                           Severity of the alert.
+spaceId:                                          Unique ID of the alert space in Elastic.
+tags:                   Comma-separated list of tags for the alert as provided by Elastic.
+
+Here is an example set of inputs:
+--
+{
+  "alertActionGroupName": "{{alertActionGroupName}}",
+  "alertId": "{{alertId}}",
+  "alertName": "{{alertName}}",
+  "date": "{{date}}",
+  ...
+}
+--
+
+Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
+their values escaped, so that the final JSON will be valid (escaping double quote characters).
+For more information on Mustache template variables, refer to <<defining-rules-actions-details>>.
