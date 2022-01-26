@@ -311,10 +311,7 @@ describe('When using the Trusted App Form', () => {
         policies: ['123'],
       };
       render();
-      expect(
-        renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
-          .textContent
-      ).toEqual('Loading options');
+      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
     });
   });
 
