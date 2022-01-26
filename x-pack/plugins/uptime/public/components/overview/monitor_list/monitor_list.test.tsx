@@ -129,11 +129,11 @@ describe('MonitorList component', () => {
   };
 
   beforeEach(() => {
-    const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
-    useDispatchSpy.mockReturnValue(jest.fn());
-
-    const useSelectorSpy = jest.spyOn(redux, 'useSelector');
-    useSelectorSpy.mockReturnValue(true);
+    // const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
+    // useDispatchSpy.mockReturnValue(jest.fn());
+    //
+    // const useSelectorSpy = jest.spyOn(redux, 'useSelector');
+    // useSelectorSpy.mockReturnValue(true);
 
     localStorageMock = {
       getItem: jest.fn().mockImplementation(() => '25'),
