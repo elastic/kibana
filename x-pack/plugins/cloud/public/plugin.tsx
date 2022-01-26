@@ -303,13 +303,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   private async setupChat({ http, security }: SetupChatDeps) {
-    if (!security) {
-      return;
-    }
-
     const { enabled, chatURL } = this.config.chat;
 
-    if (!enabled || !chatURL) {
+    if (!security || !enabled || !chatURL) {
       return;
     }
 
