@@ -32,8 +32,8 @@ export const checkIfSeriesHaveSameFormatters = (
     }
     uniqFormatters.add(
       JSON.stringify({
+        // requirement: in the case of using TSVB formatters, we do not need to check the value_template, just formatter!
         formatter: seriesGroup.formatter,
-        value_template: seriesGroup.value_template,
       })
     );
   });
