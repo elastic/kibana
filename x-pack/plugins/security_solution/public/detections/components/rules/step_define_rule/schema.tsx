@@ -86,20 +86,15 @@ export const schema: FormSchema<DefineStepRule> = {
           const [{ value, path, formData }] = args;
           const { query, filters } = value as FieldValueQueryBar;
           const needsValidation = !isMlRule(formData.ruleType);
-          const errorMessage = isEqlRule(formData.ruleType)
-            ? EQL_QUERY_REQUIRED
-            : CUSTOM_QUERY_REQUIRED;
           if (!needsValidation) {
-            return;
+            return undefined;
           }
-
-          return isEmpty(query.query as string) && isEmpty(filters)
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path,
-                message: errorMessage,
-              }
-            : undefined;
+          const isFieldEmpty = isEmpty(query.query as string) && isEmpty(filters);
+          if (!isFieldEmpty) {
+            return undefined;
+          }
+          const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
+          return { code: 'ERR_FIELD_MISSING', path, message };
         },
       },
       {
