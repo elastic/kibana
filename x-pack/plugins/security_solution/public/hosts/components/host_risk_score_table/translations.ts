@@ -32,6 +32,14 @@ export const HOSTS_BY_RISK = i18n.translate('xpack.securitySolution.hostsRiskTab
   defaultMessage: 'Hosts by risk',
 });
 
+export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsRiskTable.hostsTableTitle',
+  {
+    defaultMessage:
+      'This table is not affected by the time filter on the page. Shown is the latest calculated risk score and risk severity for each host.',
+  }
+);
+
 export const VIEW_HOSTS_BY_SEVERITY = (severity: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.utilityBar.selectedAlertsTitle', {
     values: { severity },

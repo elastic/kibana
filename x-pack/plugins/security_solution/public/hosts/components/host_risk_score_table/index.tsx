@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import {
   Columns,
   Criteria,
@@ -26,11 +26,12 @@ import type {
 import { HostRiskScoreFields, HostRiskSeverity } from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
-import { HOSTS_BY_RISK } from './translations';
+import * as i18nHosts from './translations';
 import { SeverityBar } from './severity_bar';
 import { SeverityBadges } from './severity_badges';
 import { SeverityFilterGroup } from './severity_filter_group';
 import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
+import { HOST_RISK_TABLE_TOOLTIP } from './translations';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -143,6 +144,20 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+
+  const headerTitle = (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>{i18nHosts.HOSTS_BY_RISK}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          content={i18nHosts.HOST_RISK_TABLE_TOOLTIP}
+          position="right"
+          size="m"
+          type="iInCircle"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
   return (
     <PaginatedTable
       activePage={activePage}
@@ -151,7 +166,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       headerCount={totalCount}
       headerFilters={<SeverityFilterGroup severityCount={severityCount} type={type} />}
       headerSupplement={risk}
-      headerTitle={HOSTS_BY_RISK}
+      headerTitle={headerTitle}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}
