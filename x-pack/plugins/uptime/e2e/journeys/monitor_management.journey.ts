@@ -134,7 +134,7 @@ const createMonitorJourney = ({
       if (isRemote) {
         step('view results in overview page', async () => {
           await uptime.navigateToOverviewPage();
-          await page.waitForSelector(`text=${monitorName}`, { timeout: 120 * 1000 });
+          await page.waitForSelector(`text=${monitorName}`, { timeout: 160 * 1000 });
         });
       }
     }
