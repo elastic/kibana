@@ -357,24 +357,11 @@ describe('Integration', () => {
         autoCompleteSet: ['facets', 'query', 'size'],
       },
       {
-        name: 'prefix comma, beginning of line',
-        cursor: { lineNumber: 7, column: 1 },
-        initialValue: '',
-        addTemplate: true,
-        prefixToAdd: '',
-        suffixToAdd: '',
-        rangeToReplace: {
-          start: { lineNumber: 7, column: 1 },
-          end: { lineNumber: 7, column: 1 },
-        },
-        autoCompleteSet: ['facets', 'query', 'size'],
-      },
-      {
         name: 'prefix comma, end of line',
         cursor: { lineNumber: 6, column: 15 },
         initialValue: '',
         addTemplate: true,
-        prefixToAdd: '',
+        prefixToAdd: ', ',
         suffixToAdd: '',
         rangeToReplace: {
           start: { lineNumber: 6, column: 15 },

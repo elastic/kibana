@@ -776,13 +776,14 @@ export default function ({
             // go back to the end of the previous line
             context.rangeToReplace = {
               start: { lineNumber: prevTokenLineNumber, column: prevLineLength + 1 },
-              end: { ...context.rangeToReplace.end }
+              end: { ...context.rangeToReplace.end },
             };
             const linesToEnter = context.rangeToReplace.end.lineNumber - prevTokenLineNumber;
             const spacesToFill = linesToEnter > 0 ? startColumn - 1 : 1;
             // add a comma at the end of the previous line, a new line and indentation
             context.prefixToAdd = ',' + '\n'.repeat(linesToEnter) + ' '.repeat(spacesToFill);
           }
+        }
     }
 
     return context;
