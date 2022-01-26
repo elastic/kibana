@@ -25,6 +25,8 @@ export interface Tab {
   testSubj?: string;
   pathId?: MlLocatorParams['page'];
   onClick?: () => Promise<void>;
+  /** Indicates if item should be marked as active with nested routes */
+  highlightNestedRoutes?: boolean;
 }
 
 interface TabData {
@@ -210,6 +212,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab settings',
+            highlightNestedRoutes: true,
           },
         ],
       },
@@ -291,14 +294,16 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {
-      const { id, disabled, items, onClick, pathId, name, testSubj } = tab;
+      const { id, disabled, items, onClick, pathId, name, testSubj, highlightNestedRoutes } = tab;
 
       const onClickCallback = onClick ?? (pathId ? redirectToTab.bind(null, pathId) : undefined);
 
       return {
         id,
         name,
-        isSelected: `/${pathId}` === activeRoute?.path || activeRoute?.path.includes(`${pathId}/`),
+        isSelected:
+          `/${pathId}` === activeRoute?.path ||
+          (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`)),
         disabled,
         ...(onClickCallback ? { onClick: onClickCallback } : {}),
         'data-test-subj': testSubj + (id === activeRouteId ? ' selected' : ''),

@@ -6,13 +6,14 @@
  */
 
 import React, { FC } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { Page } from '../../../trained_models';
+import { ModelsList } from '../../../trained_models/models_management';
+import { MlPageHeader } from '../../../components/page_header';
 
 export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -39,7 +40,13 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   );
   return (
     <PageLoader context={context}>
-      <Page />
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.modelManagement.trainedModelsHeader"
+          defaultMessage="Trained Models"
+        />
+      </MlPageHeader>
+      <ModelsList />
     </PageLoader>
   );
 };

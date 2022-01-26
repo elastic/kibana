@@ -6,14 +6,14 @@
  */
 
 import React, { FC } from 'react';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
-
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { Page } from '../../../trained_models';
+import { NodesList } from '../../../trained_models/nodes_overview';
+import { MlPageHeader } from '../../../components/page_header';
 
 export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -39,7 +39,13 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
   return (
     <PageLoader context={context}>
-      <Page />
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.modelManagement.nodesOverviewHeader"
+          defaultMessage="Nodes Overview"
+        />
+      </MlPageHeader>
+      <NodesList />
     </PageLoader>
   );
 };
