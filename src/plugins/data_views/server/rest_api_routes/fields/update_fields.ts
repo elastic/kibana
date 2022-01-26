@@ -81,20 +81,22 @@ export const updateFields = async ({
 };
 
 interface FieldUpdateType {
-  customLabel?: string;
-  count?: number;
-  format?: SerializedFieldFormat<FieldFormatParams>;
+  customLabel?: string | null;
+  count?: number | null;
+  format?: SerializedFieldFormat<FieldFormatParams> | null;
 }
 
 const fieldUpdateSchema = schema.object({
   customLabel: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: 1_000,
-    })
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 1_000,
+      })
+    )
   ),
-  count: schema.maybe(schema.maybe(schema.number())),
-  format: schema.maybe(schema.maybe(serializedFieldFormatSchema)),
+  count: schema.maybe(schema.nullable(schema.number())),
+  format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
 });
 
 const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
