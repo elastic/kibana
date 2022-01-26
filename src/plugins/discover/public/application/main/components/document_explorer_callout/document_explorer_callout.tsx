@@ -71,7 +71,7 @@ export const DocumentExplorerCallout = () => {
 
 function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="discover.docExplorerCallout.headerMessage"
