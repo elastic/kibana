@@ -24,7 +24,7 @@ export const useCustomRulesCount = (): UseCustomRulesCount => {
     try {
       setIsLoading(true);
       const res = await fetchRules({
-        pagination: { perPage: 1, page: 1, total: 0 },
+        pagination: { perPage: 1, page: 1 },
         filterOptions: { ...filterOptions, showCustomRules: true },
         signal: abortController.signal,
       });
