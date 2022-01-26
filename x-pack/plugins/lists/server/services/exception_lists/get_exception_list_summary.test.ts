@@ -37,7 +37,7 @@ describe('get_exception_list_summary', () => {
         page: 1,
         per_page: 0,
         saved_objects: [],
-        total: 7,
+        total: 10,
       };
       savedObjectsClient.find.mockResolvedValue(savedObject);
 
@@ -68,7 +68,7 @@ describe('get_exception_list_summary', () => {
         page: 1,
         per_page: 0,
         saved_objects: [],
-        total: 7,
+        total: 3,
       };
       savedObjectsClient.find.mockResolvedValue(savedObject);
 

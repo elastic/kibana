@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type {
   ExceptionListSummarySchema,
   FilterOrUndefined,
@@ -63,6 +62,10 @@ export const getExceptionListSummary = async ({
     }
   }
 
+  // only pick the items in the list and not the list definition
+  const itemTypeFilter = `${savedObjectType}.attributes.type: "simple"`;
+  const adjustedFilter = filter ? `(${filter}) AND ${itemTypeFilter}` : itemTypeFilter;
+
   const savedObject = await savedObjectsClient.find<ExceptionListSoSchema, ByOsAggType>({
     aggs: {
       by_os: {
@@ -71,7 +74,7 @@ export const getExceptionListSummary = async ({
         },
       },
     },
-    filter,
+    filter: adjustedFilter,
     perPage: 0,
     search: finalListId,
     searchFields: ['list_id'],
@@ -88,12 +91,7 @@ export const getExceptionListSummary = async ({
     (acc, item: ByOsAggBucketType) => ({
       ...acc,
       [item.key]: item.doc_count,
-      total:
-        // Do not add up the items by OS if host isolation exception
-        // As each host exception entry applies to all OSs
-        listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
-          ? item.doc_count
-          : acc.total + item.doc_count,
+      total: savedObject.total,
     }),
     { linux: 0, macos: 0, total: 0, windows: 0 }
   );
