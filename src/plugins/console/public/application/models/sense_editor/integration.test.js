@@ -364,7 +364,7 @@ describe('Integration', () => {
         prefixToAdd: ', ',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { lineNumber: 6, column: 15 },
+          start: { lineNumber: 6, column: 13 },
           end: { lineNumber: 6, column: 15 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
