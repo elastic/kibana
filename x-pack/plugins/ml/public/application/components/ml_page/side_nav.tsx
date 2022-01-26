@@ -268,6 +268,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         }),
         disabled: false,
         pathId: ML_PAGES.DATA_VISUALIZER,
+        testSubj: 'mlMainTab dataVisualizer',
         items: [
           {
             id: 'filedatavisualizer',
