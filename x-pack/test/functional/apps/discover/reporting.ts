@@ -85,6 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         const sharedURL = await PageObjects.share.getSharedUrl();
 
+        // eslint-disable-next-line no-console
+        console.log(1);
+
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openCsvReportingPanel();
         const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
@@ -93,12 +96,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await postUrl.click();
         const reportURL = decodeURIComponent(await browser.getClipboardValue());
 
+        // eslint-disable-next-line no-console
+        console.log(2);
+
         const timeFiltersNumberInReportURL =
           reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
 
+        // eslint-disable-next-line no-console
+        console.log(3, timeFiltersNumberInReportURL, timeFiltersNumberInSharedURL);
+
         expect(timeFiltersNumberInSharedURL).to.be(1);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
+
+        // eslint-disable-next-line no-console
+        console.log(4);
 
         expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
@@ -106,6 +118,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
           )
         ).to.be(true);
+
+        // eslint-disable-next-line no-console
+        console.log(5);
       });
 
       it('generates a report from a new search with data: default', async () => {
