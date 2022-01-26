@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
@@ -147,6 +147,9 @@ export const createStartServicesMock = (
     fleet,
     ml: {
       locator,
+    },
+    theme: {
+      theme$: themeServiceMock.createTheme$(),
     },
   } as unknown as StartServices;
 };
