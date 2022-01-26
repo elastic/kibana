@@ -181,13 +181,14 @@ export class ScreenshotObservableHandler {
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
       mergeMap((itemsCount) => {
-        // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
+        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
         const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
-        return forkJoin([
-          driver.setViewport(viewport, this.logger),
-          waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout),
-        ]);
+        return driver
+          .setViewport(viewport, this.logger)
+          .then(() =>
+            waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout)
+          );
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
