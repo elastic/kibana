@@ -671,6 +671,50 @@ export default function ({
     }
   }
 
+  function addCommaToPrefixOnAutocomplete(
+    nonEmptyToken: Token | null,
+    context: AutoCompleteContext,
+    charsToSkipOnSameLine: number = 1
+  ) {
+    if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
+      const { position } = nonEmptyToken;
+      if (
+        // if not on the first line
+        context.rangeToReplace &&
+        context.rangeToReplace.start &&
+        context.rangeToReplace.start.lineNumber > 1
+      ) {
+        const prevTokenLineNumber = position.lineNumber;
+        const line = context.editor?.getLineValue(prevTokenLineNumber) ?? '';
+        const prevLineLength = line.length;
+        const linesToEnter = context.rangeToReplace.end.lineNumber - prevTokenLineNumber;
+
+        const isTheSameLine = linesToEnter === 0;
+        let startColumn = prevLineLength + 1;
+        let spaces = context.rangeToReplace.start.column - 1;
+
+        if (isTheSameLine) {
+          // prevent last char line from replacing
+          startColumn = position.column + charsToSkipOnSameLine;
+          // one char for pasted " and one for ,
+          spaces = context.rangeToReplace.end.column - startColumn - 2;
+        }
+
+        // go back to the end of the previous line
+        context.rangeToReplace = {
+          start: { lineNumber: prevTokenLineNumber, column: startColumn },
+          end: { ...context.rangeToReplace.end },
+        };
+
+        spaces = spaces >= 0 ? spaces : 0;
+        const spacesToEnter = isTheSameLine ? (spaces === 0 ? 1 : spaces) : spaces;
+        const newLineChars = '\n'.repeat(linesToEnter >= 0 ? linesToEnter : 0);
+        const whitespaceChars = ' '.repeat(spacesToEnter);
+        // add a comma at the end of the previous line, a new line and indentation
+        context.prefixToAdd = `,${newLineChars}${whitespaceChars}`;
+      }
+    }
+  }
   function addBodyPrefixSuffixToContext(context: AutoCompleteContext) {
     // Figure out what happens next to the token to see whether it needs trailing commas etc.
 
@@ -760,30 +804,15 @@ export default function ({
       case 'punctuation.colon':
       case 'method':
         break;
+      case 'string':
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length ?? 1);
+        break;
+      case 'punctuation.end_triple_quote':
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, 3);
+        break;
       default:
-        if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
-          const { position } = nonEmptyToken;
-          if (
-            // if not on the first line
-            context.rangeToReplace &&
-            context.rangeToReplace.start &&
-            context.rangeToReplace.start.lineNumber > 1
-          ) {
-            const startColumn = context.rangeToReplace.start.column;
-            const prevTokenLineNumber = position.lineNumber;
-            const prevLineLength = context.editor?.getLineValue(prevTokenLineNumber).length ?? 0;
-
-            // go back to the end of the previous line
-            context.rangeToReplace = {
-              start: { lineNumber: prevTokenLineNumber, column: prevLineLength + 1 },
-              end: { ...context.rangeToReplace.end },
-            };
-            const linesToEnter = context.rangeToReplace.end.lineNumber - prevTokenLineNumber;
-            const spacesToFill = linesToEnter > 0 ? startColumn - 1 : 1;
-            // add a comma at the end of the previous line, a new line and indentation
-            context.prefixToAdd = ',' + '\n'.repeat(linesToEnter) + ' '.repeat(spacesToFill);
-          }
-        }
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context);
+        break;
     }
 
     return context;
