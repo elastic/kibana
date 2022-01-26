@@ -9,24 +9,24 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '../../../../../alerting/common';
 import { AlertType, PluginSetupContract } from '../../../../../alerting/server';
+import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
+import { InfraBackendLibs } from '../../infra_types';
+import {
+  alertStateActionVariableDescription,
+  groupActionVariableDescription,
+  metricActionVariableDescription,
+  reasonActionVariableDescription,
+  thresholdActionVariableDescription,
+  timestampActionVariableDescription,
+  valueActionVariableDescription,
+} from '../common/messages';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   WARNING_ACTIONS,
 } from './metric_threshold_executor';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
-import { InfraBackendLibs } from '../../infra_types';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
-import {
-  groupActionVariableDescription,
-  alertStateActionVariableDescription,
-  reasonActionVariableDescription,
-  timestampActionVariableDescription,
-  valueActionVariableDescription,
-  metricActionVariableDescription,
-  thresholdActionVariableDescription,
-} from '../common/messages';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS

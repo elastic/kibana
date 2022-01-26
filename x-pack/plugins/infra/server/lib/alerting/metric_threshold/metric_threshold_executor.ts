@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { first, isEqual, last } from 'lodash';
+import moment from 'moment';
 import {
   ActionGroupIdsOf,
-  RecoveredActionGroup,
-  AlertInstanceState,
   AlertInstanceContext,
+  AlertInstanceState,
+  RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { AlertTypeState, AlertInstance } from '../../../../../alerting/server';
+import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
-  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
-import { createFormatter } from '../../../../common/formatters';
-import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
 
 export type MetricThresholdAlertTypeParams = Record<string, any>;

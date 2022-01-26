@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import { mapValues, last, first } from 'lodash';
-import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import { first, last, mapValues } from 'lodash';
+import moment from 'moment';
 import {
+  Comparator,
+  InventoryMetricConditions,
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../common/alerting/metrics';
 import {
-  InfraDatabaseSearchResponse,
-  CallWithRequestParams,
-} from '../../adapters/framework/adapter_types';
-import { Comparator, InventoryMetricConditions } from './types';
+  InfraTimerangeInput,
+  SnapshotCustomMetricInput,
+  SnapshotRequest,
+} from '../../../../common/http_api/snapshot_api';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
-import { InfraSource } from '../../sources';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
+import {
+  CallWithRequestParams,
+  InfraDatabaseSearchResponse,
+} from '../../adapters/framework/adapter_types';
+import { InfraSource } from '../../sources';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
 type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean[];

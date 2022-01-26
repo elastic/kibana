@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import * as mocks from './test_mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
-  alertsMock,
-  AlertServicesMock,
   AlertInstanceMock,
+  AlertServicesMock,
+  alertsMock,
 } from '../../../../../alerting/server/mocks';
 import { LifecycleAlertServices } from '../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/server/utils/create_lifecycle_rule_executor_mock';
-import { InfraSources } from '../../sources';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
 import {
   Aggregators,
   Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from './types';
+} from '../../../../common/alerting/metrics';
+import { InfraSources } from '../../sources';
+import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import * as mocks from './test_mocks';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;

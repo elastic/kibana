@@ -6,18 +6,18 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  Aggregators,
+  Comparator,
+  CountMetricExpressionParams,
+  NonCountMetricExpressionParams,
+} from '../../../../plugins/infra/common/alerting/metrics';
 import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   evaluateAlert,
   EvaluatedAlertParams,
 } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_alert';
-import {
-  Aggregators,
-  CountMetricExpressionParams,
-  NonCountMetricExpressionParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-import { Comparator } from '../../../../plugins/infra/server/lib/alerting/common/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const { gauge, rate } = DATES['alert-test-data'];

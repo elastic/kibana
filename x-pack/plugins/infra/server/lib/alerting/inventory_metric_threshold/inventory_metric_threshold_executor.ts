@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
+import { first, get, last } from 'lodash';
 import moment from 'moment';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates } from './types';
 import {
-  ActionGroupIdsOf,
   ActionGroup,
+  ActionGroupIdsOf,
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
 import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
-  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
 
