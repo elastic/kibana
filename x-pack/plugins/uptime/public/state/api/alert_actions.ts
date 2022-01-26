@@ -142,7 +142,7 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
       {
         monitorName: '{{state.monitorName}}',
         monitorUrl: '{{{state.monitorUrl}}}',
-        statusMessage: '{{state.statusMessage}}',
+        statusMessage: '{{{state.statusMessage}}}',
         latestErrorMessage: '{{{state.latestErrorMessage}}}',
         observerLocation: '{{state.observerLocation}}',
       },
