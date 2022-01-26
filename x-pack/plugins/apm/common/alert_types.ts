@@ -7,11 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
+import * as moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
 import type { AsDuration, AsPercent } from '../../observability/common';
 import type { ActionGroup } from '../../alerting/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
 
+momentDurationFormatSetup(moment);
 export const APM_SERVER_FEATURE_ID = 'apm';
+
+const getInterval = (windowSize: number, windowUnit: string): string => {
+  switch (windowUnit) {
+    case 's':
+      return moment.duration(windowSize, 'seconds').format('s [sec]');
+    case 'm':
+      return moment.duration(windowSize, 'minutes').format('m [min]');
+    case 'h':
+      return moment.duration(windowSize, 'hours').format('h [hr]');
+    case 'd':
+      return moment.duration(windowSize, 'days').format('d [day]');
+    default:
+      return `${windowSize} ${windowUnit}`;
+  }
+};
 
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
@@ -33,17 +51,22 @@ export function formatErrorCountReason({
   threshold,
   measured,
   serviceName,
+  windowSize,
+  windowUnit,
 }: {
   threshold: number;
   measured: number;
   serviceName: string;
+  windowSize: number;
+  windowUnit: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    defaultMessage: `Error count is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
     values: {
       threshold,
       measured,
       serviceName,
+      interval: getInterval(windowSize, windowUnit),
     },
   });
 }
@@ -53,18 +76,31 @@ export function formatTransactionDurationReason({
   measured,
   serviceName,
   asDuration,
+  aggregationType,
+  windowSize,
+  windowUnit,
 }: {
   threshold: number;
   measured: number;
   serviceName: string;
   asDuration: AsDuration;
+  aggregationType: string;
+  windowSize: number;
+  windowUnit: string;
 }) {
+  let aggregationTypeFormatted =
+    aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
+  if (aggregationTypeFormatted === 'Avg')
+    aggregationTypeFormatted = aggregationTypeFormatted + '.';
+
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
-    defaultMessage: `Latency is above {threshold} (current value is {measured}) for {serviceName}`,
+    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
       serviceName,
+      aggregationType: aggregationTypeFormatted,
+      interval: getInterval(windowSize, windowUnit),
     },
   });
 }
@@ -74,18 +110,23 @@ export function formatTransactionErrorRateReason({
   measured,
   serviceName,
   asPercent,
+  windowSize,
+  windowUnit,
 }: {
   threshold: number;
   measured: number;
   serviceName: string;
   asPercent: AsPercent;
+  windowSize: number;
+  windowUnit: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    defaultMessage: `Failed transactions is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
       serviceName,
+      interval: getInterval(windowSize, windowUnit),
     },
   });
 }
@@ -94,19 +135,24 @@ export function formatTransactionDurationAnomalyReason({
   serviceName,
   severityLevel,
   measured,
+  windowSize,
+  windowUnit,
 }: {
   serviceName: string;
   severityLevel: string;
   measured: number;
+  windowSize: number;
+  windowUnit: string;
 }) {
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
         measured,
+        interval: getInterval(windowSize, windowUnit),
       },
     }
   );

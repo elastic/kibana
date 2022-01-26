@@ -84,6 +84,22 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const defaultValueInitialized = useRef(false);
 
   useEffect(() => {
+    const handleSelectedOptions = (selection: string[], label: string) => {
+      const agentOptions = find(['label', label], options);
+
+      if (agentOptions) {
+        const defaultOptions = agentOptions.options?.filter((option) => {
+          if (option.key) {
+            return selection.includes(option.key);
+          }
+        });
+
+        if (defaultOptions?.length) {
+          setSelectedOptions(defaultOptions);
+          defaultValueInitialized.current = true;
+        }
+      }
+    };
     if (agentSelection && !defaultValueInitialized.current && options.length) {
       if (agentSelection.allAgentsSelected) {
         const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
@@ -95,35 +111,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       }
 
       if (agentSelection.policiesSelected.length) {
-        const policyOptions = find(['label', AGENT_POLICY_LABEL], options);
-
-        if (policyOptions) {
-          const defaultOptions = policyOptions.options?.filter((option) =>
-            // @ts-expect-error update types
-            agentSelection.policiesSelected.includes(option.key)
-          );
-
-          if (defaultOptions?.length) {
-            setSelectedOptions(defaultOptions);
-            defaultValueInitialized.current = true;
-          }
-        }
+        handleSelectedOptions(agentSelection.policiesSelected, AGENT_POLICY_LABEL);
       }
 
       if (agentSelection.agents.length) {
-        const agentOptions = find(['label', AGENT_SELECTION_LABEL], options);
-
-        if (agentOptions) {
-          const defaultOptions = agentOptions.options?.filter((option) =>
-            // @ts-expect-error update types
-            agentSelection.agents.includes(option.key)
-          );
-
-          if (defaultOptions?.length) {
-            setSelectedOptions(defaultOptions);
-            defaultValueInitialized.current = true;
-          }
-        }
+        handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }
   }, [agentSelection, options, selectedOptions]);

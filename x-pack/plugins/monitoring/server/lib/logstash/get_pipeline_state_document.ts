@@ -9,20 +9,29 @@ import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export async function getPipelineStateDocument({
   req,
-  logstashIndexPattern,
   clusterUuid,
   pipelineId,
   version,
 }: {
   req: LegacyRequest;
-  logstashIndexPattern: string;
   clusterUuid: string;
   pipelineId: string;
   version: PipelineVersion;
 }) {
+  const dataset = 'node';
+  const type = 'logstash_state';
+  const moduleType = 'logstash';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
   const { callWithRequest } = req.server.plugins?.elasticsearch.getCluster('monitoring');
   const filters = [
     { term: { 'logstash_state.pipeline.id': pipelineId } },
@@ -35,14 +44,16 @@ export async function getPipelineStateDocument({
     // This is important because a user may pick a very narrow time picker window. If we were to use a start/end value
     // that could result in us being unable to render the graph
     // Use the logstash_stats documents to determine whether the instance is up/down
-    type: 'logstash_state',
+    type,
+    dsDataset: `${moduleType}.${dataset}`,
+    metricset: dataset,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,
   });
 
   const params = {
-    index: logstashIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     body: {
