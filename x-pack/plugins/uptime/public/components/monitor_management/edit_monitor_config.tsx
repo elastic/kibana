@@ -77,7 +77,7 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         defaultMonitorType: monitorType,
         defaultName: defaultConfig?.[ConfigKey.NAME] || '', // TODO - figure out typing concerns for name
         defaultNamespace: defaultConfig?.[ConfigKey.NAMESPACE] || DEFAULT_NAMESPACE_STRING,
-        defaultLocations: defaultConfig.locations,
+        defaultLocations: defaultConfig[ConfigKey.LOCATIONS],
         isEditable: true,
         isZipUrlSourceEnabled: false,
         allowedScheduleUnits: [ScheduleUnit.MINUTES],
