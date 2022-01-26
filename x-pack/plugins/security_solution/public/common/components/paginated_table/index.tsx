@@ -39,7 +39,7 @@ import {
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
-import { RiskScoreBetterColumns } from '../../../hosts/components/risk_score_better_table';
+import { HostRiskScoreColumns } from '../../../hosts/components/risk_score_better_table';
 
 import { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
@@ -90,7 +90,7 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
-  | RiskScoreBetterColumns
+  | HostRiskScoreColumns
   | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns

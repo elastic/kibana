@@ -9,12 +9,12 @@ import React from 'react';
 import { useRiskScoreBetter } from '../../containers/risk_score_better';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { RiskScoreBetterTable } from '../../components/risk_score_better_table';
+import { HostRiskScoreTable } from '../../components/risk_score_better_table';
 import { useRiskScoreKpi } from '../../containers/kpi_hosts/risky_hosts';
 
-const RiskScoreBetterTableManage = manageQuery(RiskScoreBetterTable);
+const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
-export const RiskScoreBetterQueryTabBody = ({
+export const HostRiskScoreQueryTabBody = ({
   deleteQuery,
   docValueFields,
   endDate,
@@ -41,7 +41,7 @@ export const RiskScoreBetterQueryTabBody = ({
   });
 
   return (
-    <RiskScoreBetterTableManage
+    <HostRiskScoreTableManage
       deleteQuery={deleteQuery}
       data={data}
       id={id}
@@ -58,4 +58,4 @@ export const RiskScoreBetterQueryTabBody = ({
   );
 };
 
-RiskScoreBetterQueryTabBody.displayName = 'RiskScoreBetterQueryTabBody';
+HostRiskScoreQueryTabBody.displayName = 'HostRiskScoreQueryTabBody';

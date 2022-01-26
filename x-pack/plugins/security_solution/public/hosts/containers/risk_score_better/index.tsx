@@ -20,7 +20,7 @@ import {
   PageInfoPaginated,
   DocValueFields,
   HostsQueries,
-  RiskScoreBetterStrategyResponse,
+  HostsRiskScoreStrategyResponse,
   getHostRiskIndex,
   HostsRiskScore,
   RiskScoreRequestOptions,
@@ -67,7 +67,7 @@ export const useRiskScoreBetter = ({
   skip = false,
   startDate,
 }: UseRiskScoreBetter): [boolean, RiskScoreBetterState] => {
-  const getRiskScoreBetterSelector = useMemo(() => hostsSelectors.riskScoreBetterSelector(), []);
+  const getRiskScoreBetterSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getRiskScoreBetterSelector(state, hostsModel.HostsType.page)
   );
@@ -127,7 +127,7 @@ export const useRiskScoreBetter = ({
         setLoading(true);
 
         searchSubscription.current = data.search
-          .search<RiskScoreRequestOptions, RiskScoreBetterStrategyResponse>(request, {
+          .search<RiskScoreRequestOptions, HostsRiskScoreStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })

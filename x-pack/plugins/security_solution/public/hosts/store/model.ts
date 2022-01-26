@@ -25,7 +25,6 @@ export enum HostsTableType {
   anomalies = 'anomalies',
   alerts = 'externalAlerts',
   risk = 'hostRisk',
-  riskScoreBetter = 'riskScoreBetter',
 }
 
 export interface BasicQueryPaginated {
@@ -38,7 +37,7 @@ export interface HostsQuery extends BasicQueryPaginated {
   sortField: HostsFields;
 }
 
-export interface RiskScoreBetterQuery extends BasicQueryPaginated {
+export interface HostRiskScoreQuery extends BasicQueryPaginated {
   sort: HostRiskScoreSortField;
   severitySelection: HostRiskSeverity[];
 }
@@ -50,7 +49,7 @@ export interface Queries {
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
-  [HostsTableType.risk]: null | undefined;
+  [HostsTableType.risk]: HostRiskScoreQuery;
 }
 
 export interface GenericHostsModel {

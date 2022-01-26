@@ -17,7 +17,7 @@ import {
 } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { getRiskScoreBetterColumns } from './columns';
+import { getHostRiskScoreColumns } from './columns';
 import type {
   HostsRiskScore,
   HostRiskScoreItem,
@@ -45,7 +45,7 @@ export const rowItems: ItemsPerRow[] = [
 
 const tableType = hostsModel.HostsTableType.risk;
 
-interface RiskScoreBetterTableProps {
+interface HostRiskScoreTableProps {
   data: HostsRiskScore[];
   id: string;
   isInspect: boolean;
@@ -56,13 +56,13 @@ interface RiskScoreBetterTableProps {
   type: hostsModel.HostsType;
 }
 
-export type RiskScoreBetterColumns = [
+export type HostRiskScoreColumns = [
   Columns<HostRiskScoreItem[HostRiskScoreFields.hostName]>,
   Columns<HostRiskScoreItem[HostRiskScoreFields.riskScore]>,
   Columns<HostRiskScoreItem[HostRiskScoreFields.risk]>
 ];
 
-const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
+const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   data,
   id,
   isInspect,
@@ -73,9 +73,9 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getRiskScoreBetterSelector = useMemo(() => hostsSelectors.riskScoreBetterSelector(), []);
+  const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
-    getRiskScoreBetterSelector(state, hostsModel.HostsType.page)
+    getHostRiskScoreSelector(state, hostsModel.HostsType.page)
   );
   const updateLimitPagination = useCallback(
     (newLimit) =>
@@ -107,7 +107,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
         const newSort = criteria.sort;
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           dispatch(
-            hostsActions.updateRiskScoreBetterSort({
+            hostsActions.updateHostRiskScoreSort({
               sort: newSort as HostRiskScoreSortField,
               hostsType: type,
             })
@@ -120,7 +120,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   const dispatchSeverityUpdate = useCallback(
     (s: HostRiskSeverity) => {
       dispatch(
-        hostsActions.updateRiskScoreBetterSeverityFilter({
+        hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: [s],
           hostsType: type,
         })
@@ -129,7 +129,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
     [dispatch, type]
   );
   const columns = useMemo(
-    () => getRiskScoreBetterColumns({ dispatchSeverityUpdate }),
+    () => getHostRiskScoreColumns({ dispatchSeverityUpdate }),
     [dispatchSeverityUpdate]
   );
 
@@ -172,8 +172,8 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   );
 };
 
-RiskScoreBetterTableComponent.displayName = 'RiskScoreBetterTableComponent';
+HostRiskScoreTableComponent.displayName = 'HostRiskScoreTableComponent';
 
-export const RiskScoreBetterTable = React.memo(RiskScoreBetterTableComponent);
+export const HostRiskScoreTable = React.memo(HostRiskScoreTableComponent);
 
-RiskScoreBetterTable.displayName = 'RiskScoreBetterTable';
+HostRiskScoreTable.displayName = 'HostRiskScoreTable';

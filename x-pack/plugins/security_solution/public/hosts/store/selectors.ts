@@ -21,7 +21,7 @@ export const authenticationsSelector = () =>
 export const hostsSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.hosts]);
 
-export const riskScoreBetterSelector = () =>
+export const hostRiskScoreSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.risk]);
 
 export const hostRiskScoreSeverityFilterSelector = () =>

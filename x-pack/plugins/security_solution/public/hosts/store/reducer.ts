@@ -14,8 +14,8 @@ import {
   setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
-  updateRiskScoreBetterSeverityFilter,
-  updateRiskScoreBetterSort,
+  updateHostRiskScoreSeverityFilter,
+  updateHostRiskScoreSort,
   updateTableActivePage,
   updateTableLimit,
 } from './actions';
@@ -161,7 +161,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       },
     },
   }))
-  .case(updateRiskScoreBetterSort, (state, { sort, hostsType }) => ({
+  .case(updateHostRiskScoreSort, (state, { sort, hostsType }) => ({
     ...state,
     [hostsType]: {
       ...state[hostsType],
@@ -174,7 +174,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       },
     },
   }))
-  .case(updateRiskScoreBetterSeverityFilter, (state, { severitySelection, hostsType }) => ({
+  .case(updateHostRiskScoreSeverityFilter, (state, { severitySelection, hostsType }) => ({
     ...state,
     [hostsType]: {
       ...state[hostsType],

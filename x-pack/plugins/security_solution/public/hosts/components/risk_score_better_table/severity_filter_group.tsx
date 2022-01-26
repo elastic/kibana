@@ -71,7 +71,7 @@ export const SeverityFilterGroup: React.FC<{
         ? currentSelection.filter((s) => s !== selectedSeverity)
         : [...currentSelection, selectedSeverity];
       dispatch(
-        hostsActions.updateRiskScoreBetterSeverityFilter({
+        hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: newSelection,
           hostsType: type,
         })

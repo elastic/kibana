@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import {
   HostRiskSeverity,
   HostsSortField,
-  RiskScoreBetterSortField,
+  HostRiskScoreSortField,
 } from '../../../common/search_strategy/security_solution/hosts';
 
 import { HostsTableType, HostsType } from './model';
@@ -38,12 +38,12 @@ export const updateHostsSort = actionCreator<{
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
 
-export const updateRiskScoreBetterSort = actionCreator<{
-  sort: RiskScoreBetterSortField;
+export const updateHostRiskScoreSort = actionCreator<{
+  sort: HostRiskScoreSortField;
   hostsType: HostsType;
-}>('UPDATE_RISK_SCORE_BETTER_SORT');
+}>('UPDATE_HOST_RISK_SCORE_SORT');
 
-export const updateRiskScoreBetterSeverityFilter = actionCreator<{
+export const updateHostRiskScoreSeverityFilter = actionCreator<{
   severitySelection: HostRiskSeverity[];
   hostsType: HostsType;
-}>('UPDATE_RISK_SCORE_BETTER_SEVERITY');
+}>('UPDATE_HOST_RISK_SCORE_SEVERITY');

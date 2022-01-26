@@ -16,17 +16,17 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import { RiskScoreBetterColumns } from './';
+import { HostRiskScoreColumns } from './';
 
 import * as i18n from './translations';
 import { HostRiskScore } from '../common/host_risk_score';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 
-export const getRiskScoreBetterColumns = ({
+export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
 }: {
   dispatchSeverityUpdate: (s: HostRiskSeverity) => void;
-}): RiskScoreBetterColumns => [
+}): HostRiskScoreColumns => [
   {
     field: 'host.name',
     name: i18n.HOST_NAME,
