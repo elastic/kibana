@@ -151,5 +151,7 @@ const convertHost = (host: string): { url: URL } => {
   };
 };
 
-const getDurationAsMs = (duration: number | Duration) =>
-  typeof duration === 'number' ? duration : duration.asMilliseconds();
+export const getDurationAsMs = (duration: number | Duration) => {
+  console.log(JSON.stringify(duration));
+  return typeof duration === 'number' ? duration : duration.asMilliseconds();
+};

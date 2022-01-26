@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { Headers } from '../http/router';
-import { KibanaRequest } from '../http';
+import { IAuthHeadersStorage, KibanaRequest } from '../http';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
@@ -100,6 +100,16 @@ export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
 export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
   status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
+  getCreateClusterClientParams: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => {
+    config: ElasticsearchClientConfig;
+    loggerContext: string;
+    type: string;
+    authHeaders: IAuthHeadersStorage | undefined;
+    executionContext: string | undefined;
+  };
 }
 
 /**

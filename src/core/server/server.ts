@@ -56,6 +56,7 @@ import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import { WorkerThreadsService } from './worker_threads/worker_threads_service';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -82,6 +83,7 @@ export class Server {
   private readonly deprecations: DeprecationsService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
+  private readonly workerThreadsService: WorkerThreadsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -120,6 +122,7 @@ export class Server {
     this.deprecations = new DeprecationsService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
+    this.workerThreadsService = new WorkerThreadsService();
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -214,6 +217,10 @@ export class Server {
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
       executionContext: executionContextSetup,
+    });
+
+    const workerThreadsServiceSetup = await this.workerThreadsService.setup({
+      elasticsearch: elasticsearchServiceSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });

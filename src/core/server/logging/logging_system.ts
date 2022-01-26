@@ -34,7 +34,7 @@ export class LoggingSystem implements LoggerFactory {
   /** The fully computed configuration extended by context-specific configurations set programmatically */
   private computedConfig?: LoggingConfig;
   private readonly appenders: Map<string, DisposableAppender> = new Map();
-  private readonly bufferAppender = new BufferAppender();
+  public readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
 
