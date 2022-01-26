@@ -38,17 +38,14 @@ export class WorkerThreadsService
       filename: path.resolve(__dirname, 'worker.js'),
       workerData: elasticsearch.getCreateClusterClientParams('worker_thtread'),
     });
-    console.log(await this.piscina.run({ string: 'hello' }, { name: 'setup' }));
     return {};
   }
   public start() {
+    // example of running a worker task
+    console.log(await this.piscina.run({ string: 'hello' }, { name: 'myWorkerTask' }));
     return {
-      run: async <T, U>({ name, args, abortSignal }: RunOptions<T>) => {
-        if (name in ['setup', 'start', 'stop']) {
-          throw new Error("you can't call the worker lifecycle methods");
-        }
-        return this.piscina!.run(args, { name, signal: abortSignal }) as Promise<U>;
-      },
+      run: async <T, U>({ name, args, abortSignal }: RunOptions<T>) =>
+        this.piscina!.run(args, { name, signal: abortSignal }) as Promise<U>,
     };
   }
   public stop() {

@@ -9,11 +9,10 @@ import { workerData } from 'worker_threads';
 import { ClusterClient } from '../elasticsearch/client';
 import { LoggingSystem } from '../logging';
 
-let client;
+let client: ClusterClient;
 
 export function initialize(): { [key: string]: () => unknown } {
   const { config, loggerContext, type, authHeaders, executionContext } = workerData;
-  console.log(loggerContext);
   const loggingSystem = new LoggingSystem();
   const logger = loggingSystem.asLoggerFactory();
   // TODO create a StreamingAppender and share writable stream with all workers
@@ -28,9 +27,10 @@ export function initialize(): { [key: string]: () => unknown } {
   });
 
   return {
-    setup: () => {
-      return 'I was setup';
+    myWorkerTask: async () => {
+      const results = await client.asInternalUser.search({ index: '.kibana' });
+      console.log(JSON.stringify(results));
+      return JSON.stringify(results);
     },
-    stop: () => {},
   };
 }
