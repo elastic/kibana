@@ -630,6 +630,12 @@ export const VisualizationWrapper = ({
         onData$={onData$}
         inspectorAdapters={lensInspector.adapters}
         renderMode="edit"
+        executionContext={{
+          type: 'lens',
+          name: '',
+          id: '',
+          description: '',
+        }}
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);
           const visibleErrorMessages = errorsFromRequest.length

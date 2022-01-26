@@ -143,7 +143,8 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     },
   },
   fn(data, args, handlers) {
-    if (handlers?.inspectorAdapters?.tables) {
+    // as in lens we've already calling logDatatable for heatmap we shouldn't do it here
+    if (handlers?.inspectorAdapters?.tables && handlers?.getExecutionContext?.()?.type !== 'lens') {
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {
         prepareHeatmapLogTable(
