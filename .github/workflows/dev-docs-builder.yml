@@ -6,6 +6,7 @@ on:
       - '**.docnav.json'
       - '**.png'
       - '**.gif'
+      - '**.json'
     types: [closed, opened, synchronize, reopened]
 
 jobs:
@@ -56,7 +57,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p ${{ github.workspace }}/wordlake-dev/${{ github.event.repository.name }}
-          rsync --ignore-missing-args -zavpm --include='*.docnav.json' --include='*.mdx' --include='*.png' --include='*.gif' --include='*/' --exclude='*' ${{ github.workspace }}/temp/ ${{ github.workspace }}/wordlake-dev/${{ github.event.repository.name }}/ 
+          rsync --ignore-missing-args -zavpm --include='*.docnav.json' --include='*.json' --include='*.mdx' --include='*.png' --include='*.gif' --include='*/' --exclude='*' ${{ github.workspace }}/temp/ ${{ github.workspace }}/wordlake-dev/${{ github.event.repository.name }}/ 
 
       - name: Generate preview
         if: github.event.pull_request.merged == false
