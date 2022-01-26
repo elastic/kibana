@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import {
   CoreSetup,
+  CoreStart,
   PluginInitializerContext,
   Plugin,
   PluginConfigDescriptor,
@@ -207,6 +208,10 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
     } as InfraPluginSetup;
   }
 
-  start() {}
+  start(core: CoreStart) {
+    core.workerThreads.run({ name: 'myWorkerTask', args: {} }).then((result) => {
+      this.logger.info('worker task says: ' + result);
+    });
+  }
   stop() {}
 }

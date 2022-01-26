@@ -21,7 +21,7 @@ export interface WorkerThreadsServiceSetup {}
 export interface RunOptions<T> {
   name: string;
   args: T;
-  abortSignal: AbortSignal;
+  abortSignal?: AbortSignal;
 }
 
 export interface WorkerThreadsServiceStart {
@@ -40,9 +40,7 @@ export class WorkerThreadsService
     });
     return {};
   }
-  public start() {
-    // example of running a worker task
-    console.log(await this.piscina.run({ string: 'hello' }, { name: 'myWorkerTask' }));
+  public async start() {
     return {
       run: async <T, U>({ name, args, abortSignal }: RunOptions<T>) =>
         this.piscina!.run(args, { name, signal: abortSignal }) as Promise<U>,

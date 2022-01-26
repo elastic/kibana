@@ -219,8 +219,9 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const workerThreadsServiceSetup = await this.workerThreadsService.setup({
+    await this.workerThreadsService.setup({
       elasticsearch: elasticsearchServiceSetup,
+      // TODO pass in logging dependency
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -311,6 +312,7 @@ export class Server {
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();
+    const workerThreadsServiceStart = await this.workerThreadsService.start();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
@@ -333,6 +335,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
+      workerThreads: workerThreadsServiceStart,
     };
 
     await this.plugins.start(this.coreStart);

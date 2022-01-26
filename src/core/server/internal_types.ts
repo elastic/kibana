@@ -44,6 +44,7 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
+import { WorkerThreadsServiceStart } from './worker_threads/worker_threads_service';
 
 /** @internal */
 export interface InternalCorePreboot {
@@ -89,6 +90,7 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
+  workerThreads: WorkerThreadsServiceStart;
 }
 
 /**
