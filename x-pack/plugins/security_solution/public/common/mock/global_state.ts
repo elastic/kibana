@@ -16,7 +16,7 @@ import {
   RiskScoreFields,
   HostRulesFields,
   HostTacticsFields,
-  RiskScoreBetterFields,
+  HostRiskScoreFields,
 } from '../../../common/search_strategy';
 import { State } from '../store';
 
@@ -88,7 +88,7 @@ export const mockGlobalState: State = {
         riskScoreBetter: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreBetterFields.riskScore, direction: Direction.desc },
+          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },
@@ -110,7 +110,7 @@ export const mockGlobalState: State = {
         riskScoreBetter: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreBetterFields.riskScore, direction: Direction.desc },
+          sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
       },

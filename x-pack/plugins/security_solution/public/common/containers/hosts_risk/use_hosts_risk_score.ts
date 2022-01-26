@@ -16,8 +16,9 @@ import {
   getHostRiskIndex,
   HostsRiskScore,
   PaginationInputPaginated,
-  RiskScoreBetterFields,
+  HostRiskScoreFields,
   SortField,
+  HostRiskScoreSortField,
 } from '../../../../common/search_strategy';
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
@@ -57,7 +58,7 @@ export const useHostsRiskScore = ({
   onlyLatest?: boolean;
   queryId?: HostRiskScoreQueryId;
   pagination?: PaginationInputPaginated;
-  sort?: SortField<RiskScoreBetterFields>;
+  sort?: HostRiskScoreSortField;
   filterQuery?: ESQuery | string | undefined;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');

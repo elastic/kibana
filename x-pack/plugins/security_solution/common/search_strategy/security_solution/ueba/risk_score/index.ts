@@ -9,7 +9,7 @@ import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data
 
 import { RiskScoreItem, RiskScoreFields } from '../common';
 import { CursorType, Hit, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
-import { RequestOptionsPaginated, RiskScoreBetterFields } from '../..';
+import { RequestOptionsPaginated, HostRiskScoreFields } from '../..';
 
 export interface RiskScoreHit extends Hit {
   _source: {
@@ -40,7 +40,7 @@ export interface RiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface RiskScoreRequestOptions extends RequestOptionsPaginated<RiskScoreBetterFields> {
+export interface RiskScoreRequestOptions extends RequestOptionsPaginated<HostRiskScoreFields> {
   defaultIndex: string[];
 }
 

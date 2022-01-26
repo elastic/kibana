@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes, RiskScoreBetterFields } from '../..';
+import { FactoryQueryTypes, HostRiskScoreFields } from '../..';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
@@ -24,7 +24,7 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
     cursorStart: number;
     querySize: number;
   };
-  sort?: RiskScoreBetterSortField;
+  sort?: HostRiskScoreSortField;
   filterQuery?: ESQuery | string | undefined;
 }
 
@@ -54,4 +54,4 @@ export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): s
   return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
-export type RiskScoreBetterSortField = SortField<RiskScoreBetterFields>;
+export type HostRiskScoreSortField = SortField<HostRiskScoreFields>;

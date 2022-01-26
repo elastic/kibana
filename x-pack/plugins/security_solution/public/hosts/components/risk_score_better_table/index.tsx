@@ -20,10 +20,10 @@ import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getRiskScoreBetterColumns } from './columns';
 import type {
   HostsRiskScore,
-  RiskScoreBetterItem,
+  HostRiskScoreItem,
   RiskScoreBetterSortField,
 } from '../../../../common/search_strategy';
-import { RiskScoreBetterFields, HostRiskSeverity } from '../../../../common/search_strategy';
+import { HostRiskScoreFields, HostRiskSeverity } from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import { HOSTS_BY_RISK } from './translations';
@@ -57,9 +57,9 @@ interface RiskScoreBetterTableProps {
 }
 
 export type RiskScoreBetterColumns = [
-  Columns<RiskScoreBetterItem[RiskScoreBetterFields.hostName]>,
-  Columns<RiskScoreBetterItem[RiskScoreBetterFields.riskScore]>,
-  Columns<RiskScoreBetterItem[RiskScoreBetterFields.risk]>
+  Columns<HostRiskScoreItem[HostRiskScoreFields.hostName]>,
+  Columns<HostRiskScoreItem[HostRiskScoreFields.riskScore]>,
+  Columns<HostRiskScoreItem[HostRiskScoreFields.risk]>
 ];
 
 const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({

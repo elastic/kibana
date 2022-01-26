@@ -8,8 +8,9 @@
 import {
   Direction,
   HostsRiskScoreRequestOptions,
-  RiskScoreBetterFields,
+  HostRiskScoreFields,
   SortField,
+  HostRiskScoreSortField,
 } from '../../../../../../common/search_strategy';
 
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -62,15 +63,15 @@ export const buildHostsRiskScoreQuery = ({
   return dslQuery;
 };
 
-const getQueryOrder = (sort?: SortField<RiskScoreBetterFields>) => {
+const getQueryOrder = (sort?: HostRiskScoreSortField) => {
   if (!sort) {
     return {
       '@timestamp': Direction.desc,
     };
   }
 
-  if (sort.field === RiskScoreBetterFields.risk) {
-    return { [`${RiskScoreBetterFields.risk}.keyword`]: sort.direction };
+  if (sort.field === HostRiskScoreFields.risk) {
+    return { [`${HostRiskScoreFields.risk}.keyword`]: sort.direction };
   }
 
   return { [sort.field]: sort.direction };

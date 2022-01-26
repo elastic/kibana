@@ -128,7 +128,7 @@ export interface HostHit extends Hit {
 
 export type HostHits = Hits<number, HostHit>;
 
-export const enum RiskScoreBetterFields {
+export const enum HostRiskScoreFields {
   timestamp = '@timestamp',
   hostName = 'host.name',
   riskScore = 'risk_stats.risk_score',
@@ -137,11 +137,11 @@ export const enum RiskScoreBetterFields {
   // ruleRisks = 'rule_risks',
 }
 
-export interface RiskScoreBetterItem {
+export interface HostRiskScoreItem {
   _id?: Maybe<string>;
-  [RiskScoreBetterFields.hostName]: Maybe<string>;
-  [RiskScoreBetterFields.risk]: Maybe<HostRiskSeverity>;
-  [RiskScoreBetterFields.riskScore]: Maybe<number>;
+  [HostRiskScoreFields.hostName]: Maybe<string>;
+  [HostRiskScoreFields.risk]: Maybe<HostRiskSeverity>;
+  [HostRiskScoreFields.riskScore]: Maybe<number>;
   // TODO: Steph/Host Risk
-  // [RiskScoreBetterFields.ruleRisks]: Maybe<RuleRisk[]>;
+  // [HostRiskScoreFields.ruleRisks]: Maybe<RuleRisk[]>;
 }
