@@ -20,6 +20,7 @@ import { initPlugin as initResilient } from './resilient_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
+import { initPlugin as initXmatters } from './xmatters_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -32,6 +33,7 @@ export enum ExternalServiceSimulator {
   RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
   MS_EXCHANGE = 'exchange',
+  XMATTERS = 'xmatters',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -57,6 +59,16 @@ export async function getWebhookServer(): Promise<http.Server> {
 
 export async function getHttpsWebhookServer(): Promise<https.Server> {
   const { httpsServer } = await initWebhook();
+  return httpsServer;
+}
+
+export async function getXmattersServer(): Promise<http.Server> {
+  const { httpServer } = await initXmatters();
+  return httpServer;
+}
+
+export async function getHttpsXmattersServer(): Promise<https.Server> {
+  const { httpsServer } = await initXmatters();
   return httpsServer;
 }
 
