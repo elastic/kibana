@@ -140,10 +140,6 @@ export class GeoFilePicker extends Component<Props, State> {
           defaultMessage: 'Max size: {maxFileSize}',
           values: { maxFileSize: getMaxBytesFormatted() },
         })}
-        <br />
-        {i18n.translate('xpack.fileUpload.geoFilePicker.acceptedCoordinateSystem', {
-          defaultMessage: 'Coordinates must be in EPSG:4326 coordinate reference system.',
-        })}
       </span>
     );
   }
