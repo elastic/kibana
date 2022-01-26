@@ -1,36 +1,166 @@
+$matrixBackgroundColor: #000000;
+$matrixTextColor: #00FF41;
+$matrixColorSecondary: #008F11;
+$matrixColorTernary: #003B00;
+
 .dashboardViewport-matrix {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #000000 !important;
+  background-color: $matrixBackgroundColor !important;
+  font: 15pt monospace !important;
 
   .embPanel__title {
-    background-color: #000000 !important;
-    color: #00FF41 !important;
+    background-color: $matrixBackgroundColor !important;
+    color: $matrixTextColor !important;
   }
 
   .embPanel__content {
-    background-color: #000000 !important;
-    color: #00FF41 !important;
+    background-color: $matrixBackgroundColor !important;
+    color: $matrixTextColor !important;
+    border: 1px solid $matrixColorSecondary;
+    border-radius: 2px;
+  }
+
+  .embPanel__optionsMenuPopover {
+    border: 1px solid $matrixColorSecondary;
+    border-radius: 2px;
+    background-color: $matrixBackgroundColor;
   }
 
   .lnsVisualizationContainer {
-    background-color: #000000 !important;
-    color: #00FF41 !important;
+    background-color: $matrixBackgroundColor!important;
+    color: $matrixTextColor !important;
 
     .lnsMetricExpression__title {
-      color: #003B00 !important;
+      color: $matrixColorSecondary !important;
     }
   }
 
   canvas {
-    display: block;
-    position:absolute;
-    top:0;
-    left:0;
+    background-color: $matrixBackgroundColor !important;
+  }
+
+  .euiFieldText {
+    background-color: $matrixBackgroundColor !important;
+    color: $matrixTextColor;
+    &:disabled {
+      color: $matrixColorSecondary !important;
+    }
+  }
+
+  input::placeholder {
+    color: $matrixColorSecondary !important;
+  }
+
+  .euiPanel {
+    background-color: $matrixBackgroundColor;
+  }
+
+  .euiDataGridRowCell {
+    background-color: $matrixBackgroundColor;
+    color: $matrixTextColor;
+    border-right-color: $matrixColorTernary;
+    border-left-color: $matrixColorTernary;
+  }
+
+  .euiDataGridHeaderCell {
+    background-color: $matrixBackgroundColor;
+    color: $matrixTextColor;
+  }
+
+  .euiDataGrid__content {
+    background-color: $matrixBackgroundColor !important;
+    color: $matrixTextColor !important;
+  }
+
+  .embPanel__optionsMenuButton {
+    svg {
+      fill: $matrixTextColor;
+    }
+  }
+
+  .euiFormLabel {
+    color: $matrixTextColor;
+  }
+
+  .euiComboBox__inputWrap {
+    background-color: $matrixBackgroundColor !important;
+    .euiComboBoxPlaceholder {
+      color: $matrixColorTernary;
+    }
+  }
+
+  .euiFormControl {
+    input {
+      color: $matrixColorSecondary;
+    }
+  }
+
+  .euiFormControlLayout {
+    border: 1px solid $matrixColorTernary !important;
+    border-radius: 6px;
+    box-sizing: content-box;
+    input {
+      background-color: $matrixBackgroundColor;
+      color: $matrixTextColor;
+    }
+  }
+
+  .euiButton {
+    color: 1px solid $matrixColorTernary;
+    background-color: rgba(0, 59, 0, .6) !important;
+  }
+
+  .euiButtonIcon {
+    svg {
+      fill: $matrixTextColor;
+    }
+  }
+
+  .euiTitle {
+    color: $matrixTextColor;
+  }
+
+  .euiButton__content {
+    color: $matrixTextColor;
+  }
+
+  .euiButtonEmpty {
+    color: $matrixTextColor;
+    background-color: rgba(0, 59, 0, .6) !important;
+    &:disabled {
+      color: $matrixColorSecondary;
+    }
+  }
+
+  .euiRangeTicks {
+    input {
+      background-color: $matrixColorTernary;
+    }
+  }
+
+  .euiRangeHighlight {
+    background-color: $matrixTextColor;
   }
 
   .dshEmptyWidget {
-    background-color: #000000;
+    background-color: $matrixBackgroundColor !important;
   }
+
+  .euiPagination__compressedText {
+    color: $matrixTextColor;
+  }
+}
+
+.euiComboBoxOptionsList {
+  background-color: $matrixBackgroundColor !important;
+}
+
+.euiComboBoxOption__content {
+  color: $matrixTextColor !important;
+}
+
+.euiFilterSelectItem {
+  border-color: #003B00 !important;
 }

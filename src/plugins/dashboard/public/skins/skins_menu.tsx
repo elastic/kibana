@@ -34,6 +34,14 @@ export const SkinsMenu = (props: SkinsMenuProps) => {
             props.onClose();
           },
         },
+        {
+          name: 'Purple Haze',
+          icon: 'apps',
+          onClick: () => {
+            onSelected('purple-haze');
+            props.onClose();
+          },
+        },
       ],
     },
   ];

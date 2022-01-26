@@ -347,15 +347,15 @@ export function DashboardTopNav({
     toasts,
   ]);
 
-  const matrix = (canvas) => {
+  const matrix = (canvas: HTMLCanvasElement, cols: number, ypos: number[]) => {
     const w = canvas.width;
     const h = canvas.height;
-    const cols = Math.floor(w / 20) + 1;
-    const ypos = Array(cols).fill(0);
+
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     ctx.fillStyle = '#0001';
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(canvas.clientLeft, canvas.clientTop, w, h);
 
     // Set color to green and font to 15pt monospace in the drawing context
     ctx.fillStyle = '#0f0';
@@ -371,29 +371,35 @@ export function DashboardTopNav({
       // render the character at (x, y)
       ctx.fillText(text, x, y);
 
-      // randomly reset the end of the column if it's at least 100px high
-      if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
-      // otherwise just move the y coordinate for the column 20px down,
-      else ypos[ind] = y + 20;
+      ypos[ind] = y + 20;
     });
   };
 
   const applyAdditionalStyle = useCallback((name: string) => {
     if (name === 'matrix') {
-      const canvas = document.getElementsByTagName('canvas').item(0);
-      const ctx = canvas.getContext('2d');
+      const canvasElements = document.getElementsByTagName('canvas');
+      for (let i = 0; i < canvasElements.length; i++) {
+        const canvas = canvasElements.item(i) as HTMLCanvasElement;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-      // set the width and height of the canvas
-      const w = (canvas.width = document.body.offsetWidth);
-      const h = (canvas.height = document.body.offsetHeight);
+        // set the width and height of the canvas
+        const w = canvas.width; // document.body.offsetWidth);
+        const h = canvas.height; // document.body.offsetHeight);
 
-      // draw a black rectangle of width and height same as that of the canvas
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, w, h);
+        // draw a black rectangle of width and height same as that of the canvas
+        ctx.fillStyle = '#000';
+        ctx.fillRect(canvas.clientLeft, canvas.clientTop, w, h);
 
-      setInterval(() => {
-        matrix(canvas);
-      }, 50);
+        const cols = Math.floor(w / 20) + 1;
+        const ypos = Array(cols).fill(30);
+
+        setInterval(() => {
+          matrix(canvas, cols, ypos);
+        }, 50);
+
+        ctx.clearRect(canvas.clientLeft, canvas.clientTop, w, h);
+      }
     }
   }, []);
 
