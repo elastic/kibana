@@ -55,26 +55,27 @@ export const getThreatList = async ({
     )
   );
 
-  const sourceConfig = threatMapping
-    ? threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat()
-    : [
-        {
-          field: `${threatIndicatorPath}.*`,
-          include_unmapped: true,
-        },
-        {
-          field: 'threat.feed.*',
-          include_unmapped: true,
-        },
-      ];
+  const conditionalConfig: {
+    _source?: string[] | boolean;
+    fields?: string[];
+  } = {};
+
+  if (threatMapping) {
+    const requiredFieldsForThreatMatching = threatMapping
+      .map((mapping) => mapping.entries.map((item) => item.value))
+      .flat();
+    conditionalConfig.fields = requiredFieldsForThreatMatching;
+    conditionalConfig._source = false;
+  } else {
+    conditionalConfig._source = [`${threatIndicatorPath}.*`, 'threat.feed.*'];
+  }
 
   const { body: response } = await esClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
     body: {
-      // @ts-ignore _source can be array for source filtering
-      _source: sourceConfig,
+      ...conditionalConfig,
       query: queryFilter,
       search_after: searchAfter,
       // @ts-expect-error is not compatible with SortCombinations
