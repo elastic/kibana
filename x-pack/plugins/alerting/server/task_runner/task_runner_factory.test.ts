@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
@@ -22,7 +23,8 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
-
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
@@ -86,6 +88,7 @@ describe('Task Runner Factory', () => {
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
     executionContext,
+    usageCounter: mockUsageCounter,
   };
 
   beforeEach(() => {
