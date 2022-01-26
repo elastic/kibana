@@ -25,7 +25,6 @@ import { initUiSettings } from './uiSettings';
 
 export interface CspAppContext {
   logger: Logger;
-  getStartServices: CoreSetup['getStartServices'];
   service: CspAppService;
 }
 
@@ -53,10 +52,7 @@ export class CspPlugin
     const cspAppContext: CspAppContext = {
       logger: this.logger,
       service: this.CspAppService,
-      getStartServices: core.getStartServices,
     };
-
-    cspAppContext.service.getPackagePolicyService();
 
     const router = core.http.createRouter();
 

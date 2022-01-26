@@ -7,18 +7,17 @@
 
 import {
   AgentService,
-  FleetStartContract,
   PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 
-export type CspAppServicesStartContract = Partial<
-  Pick<
-    FleetStartContract,
-    'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
-  >
->;
+export interface CspAppServiceDependencies {
+  packageService: PackageService;
+  agentService: AgentService;
+  packagePolicyService: PackagePolicyServiceInterface;
+  agentPolicyService: AgentPolicyServiceInterface;
+}
 
 export class CspAppService {
   private agentService: AgentService | undefined;
@@ -26,7 +25,7 @@ export class CspAppService {
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
 
-  public start(dependencies: CspAppServicesStartContract) {
+  public start(dependencies: CspAppServiceDependencies) {
     this.agentService = dependencies.agentService;
     this.packageService = dependencies.packageService;
     this.packagePolicyService = dependencies.packagePolicyService;

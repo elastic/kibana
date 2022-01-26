@@ -9,6 +9,7 @@ import {
   defineGetBenchmarksRoute,
   benchmarksInputSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getPackagePolicies,
   getAgentPolicies,
   addRunningAgentToAgentPolicy,
@@ -51,23 +52,16 @@ describe('benchmarks API', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
-  });
-
-  beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('validate the API route path', async () => {
     const router = httpServiceMock.createRouter();
     const cspAppContextService = new CspAppService();
-    const coreSetup = coreMock.createSetup() as CoreSetup<
-      CspServerPluginStartDeps,
-      CspServerPluginStart
-    >;
+
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      getStartServices: coreSetup.getStartServices,
     };
     defineGetBenchmarksRoute(router, cspContext);
 
@@ -127,7 +121,7 @@ describe('benchmarks API', () => {
 
         expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
           expect.objectContaining({
-            kuery: 'ingest-package-policies.package.name:myPackage',
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
             page: 1,
             perPage: 100,
           })

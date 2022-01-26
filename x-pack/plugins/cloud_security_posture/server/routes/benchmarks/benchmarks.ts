@@ -18,6 +18,7 @@ import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../
 import { BENCHMARKS_ROUTE_PATH, CIS_VANILLA_PACKAGE_NAME } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 
+// TODO: use the same method from common/ once PR 106 is merged
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
@@ -39,7 +40,8 @@ export interface Benchmark {
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
 }
 
-export const DEFAULT_BENCHMARKS_PER_PAGE = 1000;
+export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
+export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
 export const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
@@ -52,7 +54,7 @@ export const getPackagePolicies = async (
   }
 
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
-    kuery: `ingest-package-policies.package.name:${packageName}`,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`,
     page: queryParams.page,
     perPage: queryParams.per_page,
   })) ?? { items: [] as PackagePolicy[] };
@@ -101,14 +103,14 @@ export const createBenchmarkEntry = (
   packagePolicy: PackagePolicy
 ): Benchmark => ({
   package_policy: {
-    id: packagePolicy?.id,
-    name: packagePolicy?.name,
-    policy_id: packagePolicy?.policy_id,
-    namespace: packagePolicy?.namespace,
-    updated_at: packagePolicy?.updated_at,
-    updated_by: packagePolicy?.updated_by,
-    created_at: packagePolicy?.created_at,
-    created_by: packagePolicy?.created_by,
+    id: packagePolicy.id,
+    name: packagePolicy.name,
+    policy_id: packagePolicy.policy_id,
+    namespace: packagePolicy.namespace,
+    updated_at: packagePolicy.updated_at,
+    updated_by: packagePolicy.updated_by,
+    created_at: packagePolicy.created_at,
+    created_by: packagePolicy.created_by,
     package: packagePolicy.package
       ? {
           name: packagePolicy.package.name,

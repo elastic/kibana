@@ -27,7 +27,5 @@ export interface CspServerPluginSetupDeps {
 export interface CspServerPluginStartDeps {
   // required
   data: DataPluginStart;
-
-  // optional
   fleet: FleetStartContract;
 }
