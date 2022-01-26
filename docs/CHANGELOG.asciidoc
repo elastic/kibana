@@ -8,15 +8,16 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 7.16.x releases.
+Review important information about the {kib} 7.17.x releases.
 
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
-* <<release-notes-7.16.3>>
-* <<release-notes-7.16.2>>
-* <<release-notes-7.16.1>>
-* <<release-notes-7.16.0>>
+* <<release-notes-7.17.0>>
+//* <<release-notes-7.16.3>>
+//* <<release-notes-7.16.2>>
+//* <<release-notes-7.16.1>>
+//* <<release-notes-7.16.0>>
 //* <<release-notes-7.15.2>>
 //* <<release-notes-7.15.1>>
 //* <<release-notes-7.15.0>>
@@ -70,6 +71,97 @@ Review important information about the {kib} 7.16.x releases.
 
 --
 
+[[release-notes-7.17.0]]
+== {kib} 7.17.0
+
+coming::[7.17.0]
+
+Review the following information about the 7.17.0 release.
+
+[float]
+[[breaking-changes-v7.17.0]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.0 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancements-and-bug-fixes-v7.17.0]]
+=== Enhancements and bug fixes
+
+For detailed information about the 7.17.0 release, review the enhancements and bug fixes.
+
+[float]
+[[enhancement-v7.17.0]]
+==== Enhancements
+Elastic Security::
+For the Elastic Security 7.17.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Allow users to not render suggestions in *Lens* {kibana-pull}115946[#115946]
+* Avoid to compute over time suggestion for expensive configurations in *Lens* {kibana-pull}115932[#115932]
+Monitoring::
+Adds telemetry stats for legacy notifications system {kibana-pull}122472[#122472]
+Operations::
+Replaces CentOS base image with Ubuntu {kibana-pull}118928[#118928]
+Platform::
+* Response logs emitted by the elasticsearch service include the size of the response body {kibana-pull}123173[#123173]
+* Adds event loop delay histogram percentiles to `metrics.ops` logger message and meta field {kibana-pull}120451[#120451]
+* Displays event loop delay metrics in the Status page to assist with performance monitoring {kibana-pull}121052[#121052]
+
+[float]
+[[fixes-v7.17.0]]
+==== Bug Fixes
+Alerting::
+Fixes call to update index alias to hidden {kibana-pull}122882[#122882]
+Canvas::
+* Fixes an issue where a workpad element was breaking after changing the expression from expression editor and resizing {kibana-pull}122154[#122154]
+* Repeat image bug with image height fixed {kibana-pull}121497[#121497]
+Discover::
+* Fixes saved search hidden chart can't be opened when returning to Discover {kibana-pull}122745[#122745]
+* Fixes page up and down navigation in classic table {kibana-pull}122742[#122742]
+* Fixes context view for document ids containing special characters {kibana-pull}122737[#122737]
+* Adds {kib} services provider for embeddable {kibana-pull}121621[#121621]
+Elastic Security::
+For the Elastic Security 7.17.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Fixes y-axis visibility for Percentile aggregation in XY charts {kibana-pull}122162[#122162]
+* Runs the migration correctly for the drop last bucket in *TSVB* {kibana-pull}121734[#121734]
+* Fixes percentage mode behavior when multiple metrics are placed on the same axis in XY charts {kibana-pull}121610[#121610]
+* "Bucket script" and "Series Agg" should be active for "timerange" mode in *TSVB* {kibana-pull}121301[#121301]
+Machine Learning::
+Fixes Anomaly detection's custom url with special characters {kibana-pull}121411[#121411]
+Management::
+* Fixes runtime field validations not supporting special script types {kibana-pull}122469[#122469]
+* Allows fields named `_timestamp` to be non-date types {kibana-pull}121772[#121772]
+Maps::
+Fixes map application crashes when leaving map while drawing filter {kibana-pull}122353[#122353]
+Monitoring::
+Fixes telemetry for cases attached to alerts to work across spaces {kibana-pull}122477[#122477]
+Observability::
+* Fixes Uptime alerting fly outs within alerting app {kibana-pull}123031[#123031]
+* Overview link to Exploratory View should not filter by monitor in Uptime {kibana-pull}122907[#122907]
+* Adds a global filter to exploratory view when there is only one series in Uptime {kibana-pull}122301[#122301]
+* Fixes a problem in which the exploratory view would crash if no date ranges were selected in Uptime {kibana-pull}122163[#122163]
+* Fixes a bug where the monitor step details would send more requests than necessary in Uptime {kibana-pull}121889[#121889]
+* Drop requests for overview page data when filter not initialized in Uptime {kibana-pull}120031[#120031]
+* Restores default chart `timezone` to `'local'` in XY charts {kibana-pull}123264[#123264]
+Security::
+* Adds tooltip for usernames on API Key management page {kibana-pull}122488[#122488]
+* Kibana now shows a more helpful error message when the browser prevents it from using cookies {kibana-pull}120944[#120944]
+
+For information about the features introduced in 7.17.0, refer to <<whats-new,What's new in 7.17>>.
+
+/////
 [[release-notes-7.16.3]]
 == {kib} 7.16.3
 
@@ -186,8 +278,6 @@ For information about the {kib} 7.16.0 release, review the following information
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.16.0, review the breaking changes, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
       
 [discrete]
 [[breaking-112523]]
@@ -256,8 +346,6 @@ Queries in the updated packs are scheduled for the same agent policy as the orig
 scheduled query group. Action IDs for scheduled queries in a pack have the 
 format `pack_<pack_name>_<query ID>`. 
 ====
-      
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-7.16.0]]
@@ -598,7 +686,6 @@ Reporting::
 Security::
 * Adds custom error message when receiving 401 response to avoid confusion with Kibana session timeout {kibana-pull}113460[#113460]
 
-/////
 [[release-notes-7.15.2]]
 == {kib} 7.15.2
 
@@ -784,8 +871,6 @@ Disable metrics powered transactions with `xpack.apm.searchAggregatedTransaction
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.15.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-osquery]]
 .New scheduled query action ID format for Osquery Manager
@@ -815,8 +900,6 @@ If you have changed the default {kibana-ref}/advanced-options.html#kibana-visual
 
 . Deselect *Legacy charts library*.
 ====
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-7.15.0]]
