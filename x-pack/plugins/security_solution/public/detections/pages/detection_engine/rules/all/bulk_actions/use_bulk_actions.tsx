@@ -70,7 +70,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { reFetchRules, setLoadingRules, updateRules },
+    actions: { reFetchRules, setLoadingRules, updateRules, setIsRefreshOn },
   } = rulesTableContext;
 
   return useCallback(
@@ -209,42 +209,47 @@ export const useBulkActions = ({
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
-        closePopover();
-
-        const customSelectedRuleIds = selectedRules
-          .filter((rule) => rule.immutable === false)
-          .map((rule) => rule.id);
-        let customRulesCount = customSelectedRuleIds.length;
-
-        if (isAllSelected) {
-          const res = await fetchCustomRulesCount(filterOptions);
-          customRulesCount = res.customRulesCount;
-        }
-
-        if ((await confirmBulkEdit()) === false) {
-          // User has cancelled edit action
-          return;
-        }
-
         let longEditWarningToast: Toast;
         let isBulkEditFinished = false;
         try {
+          // disabling auto-refresh so user's selected rules won't disappear after table refresh
+          setIsRefreshOn(false);
+          closePopover();
+
+          const customSelectedRuleIds = selectedRules
+            .filter((rule) => rule.immutable === false)
+            .map((rule) => rule.id);
+          let customRulesCount = customSelectedRuleIds.length;
+
+          if (isAllSelected) {
+            const res = await fetchCustomRulesCount(filterOptions);
+            customRulesCount = res.customRulesCount;
+          }
+
+          // User has cancelled edit action or there are no custom rules to proceed
+          if ((await confirmBulkEdit()) === false) {
+            setIsRefreshOn(true);
+            return;
+          }
+
           const editPayload = await completeBulkEditForm(bulkEditActionType);
           if (editPayload == null) {
             throw Error('Bulk edit payload is empty');
           }
 
           // show warning toast only if bulk edit action exceeds 5s
+          // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
           setTimeout(() => {
-            if (!isBulkEditFinished) {
-              longEditWarningToast = toastsApi.addWarning(
-                {
-                  title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
-                  text: i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount),
-                },
-                { toastLifeTimeMs: 5 * 60 * 1000 }
-              );
+            if (isBulkEditFinished) {
+              return;
             }
+            longEditWarningToast = toastsApi.addWarning(
+              {
+                title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
+                text: i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount),
+              },
+              { toastLifeTimeMs: 10 * 60 * 1000 }
+            );
           }, 5 * 1000);
           const hideWarningToast = () => {
             if (longEditWarningToast) {
@@ -269,7 +274,7 @@ export const useBulkActions = ({
             onError: (error: HTTPError) => {
               hideWarningToast();
               // if response doesn't have number of failed rules, it means the whole bulk action failed
-              // and generel error toast will be shown. Otherwise - error toast for partial failure
+              // and general error toast will be shown. Otherwise - error toast for partial failure
               const failedRulesCount = (error?.body as BulkActionPartialErrorResponseSchema)
                 ?.attributes?.rules?.failed;
 
@@ -314,6 +319,7 @@ export const useBulkActions = ({
         } catch (e) {
           // user has cancelled form or error has occured
         } finally {
+          setIsRefreshOn(true);
           isBulkEditFinished = true;
         }
       };
@@ -479,6 +485,7 @@ export const useBulkActions = ({
       fetchCustomRulesCount,
       confirmBulkEdit,
       reFetchTags,
+      setIsRefreshOn,
     ]
   );
 };

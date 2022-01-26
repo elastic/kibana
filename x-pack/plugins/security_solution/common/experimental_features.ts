@@ -22,7 +22,7 @@ export const allowedExperimentalValues = Object.freeze({
   riskyHostsEnabled: false,
   securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
-  rulesBulkEditEnabled: false,
+  rulesBulkEditEnabled: true,
   policyListEnabled: false,
 });
 
