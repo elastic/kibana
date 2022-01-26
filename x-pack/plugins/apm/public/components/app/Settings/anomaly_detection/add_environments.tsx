@@ -49,9 +49,7 @@ export function AddEnvironments({
   const { toasts } = notifications;
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) =>
-      callApmApi({
-        endpoint: `GET /internal/apm/settings/anomaly-detection/environments`,
-      }),
+      callApmApi(`GET /internal/apm/settings/anomaly-detection/environments`),
     [],
     { preservePreviousData: false }
   );
