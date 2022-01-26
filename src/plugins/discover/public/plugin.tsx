@@ -237,7 +237,8 @@ export class DiscoverPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      Component: (props) => {
+      component: (props) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const services = useDiscoverServices();
         const DocView = services.uiSettings.get(DOC_TABLE_LEGACY)
           ? DocViewerLegacyTable
@@ -261,7 +262,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      Component: ({ hit, indexPattern }) => (
+      component: ({ hit, indexPattern }) => (
         <React.Suspense
           fallback={
             <DeferredSpinner>
@@ -414,8 +415,7 @@ export class DiscoverPlugin
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 
-    const services = buildServices(core, plugins, this.initializerContext);
-    injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
+    injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {
       urlGenerator: this.urlGenerator,

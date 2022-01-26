@@ -47,12 +47,12 @@ export interface BaseDocViewInput {
 
 export interface RenderDocViewInput extends BaseDocViewInput {
   render: DocViewRenderFn;
-  Component?: undefined;
+  component?: undefined;
   directive?: undefined;
 }
 
 interface ComponentDocViewInput extends BaseDocViewInput {
-  Component: DocViewerComponent;
+  component: DocViewerComponent;
   render?: undefined;
   directive?: undefined;
 }
