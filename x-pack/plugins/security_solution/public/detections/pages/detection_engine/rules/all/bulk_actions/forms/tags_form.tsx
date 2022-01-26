@@ -44,7 +44,6 @@ const schema: FormSchema<TagsFormData> = {
   tags: {
     fieldsToValidateOnChange: ['tags'],
     type: FIELD_TYPES.COMBO_BOX,
-    helpText: i18n.BULK_EDIT_FLYOUT_FORM_TAGS_HELP_TEXT,
     validations: [
       {
         validator: fieldValidators.emptyField(i18n.BULK_EDIT_FLYOUT_FORM_TAGS_REQUIRED_ERROR),
@@ -63,10 +62,12 @@ const getFormConfig = (editAction: TagsEditActions) =>
   editAction === BulkActionEditType.add_tags
     ? {
         tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL,
+        tagsHelpText: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_HELP_TEXT,
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_TITLE,
       }
     : {
         tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_LABEL,
+        tagsHelpText: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_HELP_TEXT,
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE,
       };
 
@@ -82,7 +83,7 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props
     defaultValue: initialFormData,
     schema,
   });
-  const formConfig = getFormConfig(editAction);
+  const { tagsLabel, tagsHelpText, formTitle } = getFormConfig(editAction);
 
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
 
@@ -101,15 +102,10 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props
   };
 
   return (
-    <BulkEditFormWrapper
-      form={form}
-      onClose={onClose}
-      onSubmit={handleSubmit}
-      title={formConfig.formTitle}
-    >
+    <BulkEditFormWrapper form={form} onClose={onClose} onSubmit={handleSubmit} title={formTitle}>
       <CommonUseField
         path="tags"
-        config={{ ...schema.tags, label: formConfig.tagsLabel }}
+        config={{ ...schema.tags, label: tagsLabel, helpText: tagsHelpText }}
         componentProps={{
           idAria: 'detectionEngineBulkEditTags',
           'data-test-subj': 'detectionEngineBulkEditTags',
