@@ -238,25 +238,24 @@ export const makeMapStateToProps = () => {
         {}
       );
 
-    const urlState: UrlState = {
-      ...searchAttr,
-      [CONSTANTS.sourcerer]: selectedPatterns,
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: globalTimerange,
-          linkTo: globalLinkTo,
+    return {
+      urlState: {
+        ...searchAttr,
+        [CONSTANTS.sourcerer]: selectedPatterns,
+        [CONSTANTS.timerange]: {
+          global: {
+            [CONSTANTS.timerange]: globalTimerange,
+            linkTo: globalLinkTo,
+          },
+          timeline: {
+            [CONSTANTS.timerange]: timelineTimerange,
+            linkTo: timelineLinkTo,
+          },
         },
-        timeline: {
-          [CONSTANTS.timerange]: timelineTimerange,
-          linkTo: timelineLinkTo,
-        },
+        [CONSTANTS.timeline]: timeline,
+        ...(detailPanel != null ? { [CONSTANTS.detailPanel]: detailPanel } : undefined),
       },
-      [CONSTANTS.timeline]: timeline,
     };
-
-    if (detailPanel != null) urlState[CONSTANTS.detailPanel] = detailPanel;
-
-    return { urlState };
   };
 
   return mapStateToProps;

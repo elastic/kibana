@@ -45,7 +45,7 @@ describe('useInitializeDetailPanel', () => {
   });
 
   describe('detail panel is not set', () => {
-    test('should return an undefined detail panel', () => {
+    test('should return null', () => {
       (useLocation as jest.Mock).mockReturnValue({
         search: '',
       });
@@ -55,7 +55,7 @@ describe('useInitializeDetailPanel', () => {
   });
 
   describe('detail panel is set', () => {
-    test('should return an undefined detail panel', () => {
+    test('should return an event detail panel', () => {
       (useLocation as jest.Mock).mockReturnValue({
         search:
           '?detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)',
