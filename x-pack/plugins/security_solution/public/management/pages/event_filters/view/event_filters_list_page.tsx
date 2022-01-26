@@ -293,7 +293,7 @@ export const EventFiltersListPage = memo(() => {
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
-              defaultMessage: 'Search on the fields below: name, comments, value',
+              defaultMessage: 'Search on the fields below: name, description, comments, value',
             })}
             hasPolicyFilter
             policyList={policiesRequest.data?.items}

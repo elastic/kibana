@@ -167,7 +167,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.eventFilters.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, comments, value',
+            defaultMessage: 'Search on the fields below: name, description, comments, value',
           }
         )}
         defaultValue={urlParams.filter}

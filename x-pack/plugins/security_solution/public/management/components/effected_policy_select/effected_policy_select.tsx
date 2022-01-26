@@ -28,6 +28,7 @@ import { LinkToApp } from '../../../common/components/endpoint/link_to_app';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { useAppUrl } from '../../../common/lib/kibana/hooks';
+import { Loader } from '../../../common/components/loader';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
@@ -84,6 +85,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     isGlobal,
     isPlatinumPlus,
     description,
+    isLoading = false,
     onChange,
     listProps,
     options,
@@ -219,28 +221,33 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
                 onChange={handleGlobalButtonChange}
                 color="primary"
+                isFullWidth
+                data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
               />
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        {!isGlobal && (
-          <EuiFormRow fullWidth>
-            <StyledEuiSelectable>
-              <EuiSelectable<OptionPolicyData>
-                {...otherSelectableProps}
-                options={selectableOptions}
-                listProps={listProps || DEFAULT_LIST_PROPS}
-                onChange={handleOnPolicySelectChange}
-                searchProps={SEARCH_PROPS}
-                searchable={true}
-                data-test-subj={getTestId('policiesSelectable')}
-              >
-                {listBuilderCallback}
-              </EuiSelectable>
-            </StyledEuiSelectable>
-          </EuiFormRow>
-        )}
+        {!isGlobal &&
+          (isLoading ? (
+            <Loader size="l" data-test-subj={getTestId('policiesLoader')} />
+          ) : (
+            <EuiFormRow fullWidth>
+              <StyledEuiSelectable>
+                <EuiSelectable<OptionPolicyData>
+                  {...otherSelectableProps}
+                  options={selectableOptions}
+                  listProps={listProps || DEFAULT_LIST_PROPS}
+                  onChange={handleOnPolicySelectChange}
+                  searchProps={SEARCH_PROPS}
+                  searchable={true}
+                  data-test-subj={getTestId('policiesSelectable')}
+                >
+                  {listBuilderCallback}
+                </EuiSelectable>
+              </StyledEuiSelectable>
+            </EuiFormRow>
+          ))}
       </EffectivePolicyFormContainer>
     );
   }
