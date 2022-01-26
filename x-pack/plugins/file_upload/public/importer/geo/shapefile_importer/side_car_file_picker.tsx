@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component }  from 'react';
+import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 
@@ -32,15 +32,17 @@ export class SideCarFilePicker extends Component<Props, State> {
   };
 
   _isSideCarFileValid(sideCarFile: File) {
-    return getFileNameWithoutExt(this.props.shapefileName) === getFileNameWithoutExt(sideCarFile.name);
+    return (
+      getFileNameWithoutExt(this.props.shapefileName) === getFileNameWithoutExt(sideCarFile.name)
+    );
   }
 
   _getSideCarFileNameError() {
     return i18n.translate('xpack.fileUpload.shapefile.sideCarFilePicker.error', {
       defaultMessage: '{ext} expected to be {shapefileName}{ext}',
       values: {
-        ext:  this.props.ext, 
-        shapefileName: getFileNameWithoutExt(this.props.shapefileName)
+        ext: this.props.ext,
+        shapefileName: getFileNameWithoutExt(this.props.shapefileName),
       },
     });
   }
@@ -57,22 +59,22 @@ export class SideCarFilePicker extends Component<Props, State> {
       this.setState({ error: this._getSideCarFileNameError(), isInvalid: true });
       return;
     }
-    
+
     this.setState({ error: '', isInvalid: false });
     this.props.onSelect(file);
-  }
+  };
 
   render() {
     return (
-      <EuiFormRow
-        isInvalid={this.state.isInvalid}
-        error={this.state.error}
-      >
+      <EuiFormRow isInvalid={this.state.isInvalid} error={this.state.error}>
         <EuiFilePicker
-          initialPromptText={i18n.translate('xpack.fileUpload.shapefile.sideCarFilePicker.promptText', {
-            defaultMessage: `Select '{ext}' file`,
-            values: { ext: this.props.ext }
-          })}
+          initialPromptText={i18n.translate(
+            'xpack.fileUpload.shapefile.sideCarFilePicker.promptText',
+            {
+              defaultMessage: `Select '{ext}' file`,
+              values: { ext: this.props.ext },
+            }
+          )}
           onChange={this._onSelect}
           accept={this.props.ext}
           display="default"

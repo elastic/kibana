@@ -8,10 +8,7 @@
 import React from 'react';
 import { Feature } from 'geojson';
 import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
-import {
-  _BrowserFileSystem as BrowserFileSystem,
-  loadInBatches,
-} from '@loaders.gl/core';
+import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
 import type { ImportFailure } from '../../../../common/types';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
@@ -24,14 +21,14 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
   private _prjFile: File | null = null;
   private _shxFile: File | null = null;
   private _iterator?: Iterator<unknown>;
-  
+
   public canPreview() {
-     return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
+    return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
   }
 
   public renderEditor(onChange: () => void) {
-    return !this.canPreview()
-      ?  <ShapefileEditor
+    return !this.canPreview() ? (
+      <ShapefileEditor
         shapefileName={this._getFile().name}
         onDbfSelect={(file) => {
           this._dbfFile = file;
@@ -46,14 +43,14 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
           onChange();
         }}
       />
-      : null;
+    ) : null;
   }
 
   private async _setTableRowCount() {
     if (!this._dbfFile) {
       return;
     }
-    
+
     // read header from dbf file to get number of records in data file
     const dbfIterator = await loadInBatches(this._dbfFile, DBFLoader, {
       metadata: false,
@@ -93,22 +90,19 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
         this._prjFile,
         this._shxFile,
       ]);
-      this._iterator = await loadInBatches(
-        this._getFile().name,
-        ShapefileLoader,
-        {
-          fetch: fileSystem.fetch,
-          // Reproject shapefiles to WGS84
-          gis: { reproject: true, _targetCrs: "EPSG:4326" },
-          // Only parse the X & Y coordinates. Other coords not supported by Elasticsearch.
-          shp: { _maxDimensions: 2 },
-          metadata: false,
-        });
+      this._iterator = await loadInBatches(this._getFile().name, ShapefileLoader, {
+        fetch: fileSystem.fetch,
+        // Reproject shapefiles to WGS84
+        gis: { reproject: true, _targetCrs: 'EPSG:4326' },
+        // Only parse the X & Y coordinates. Other coords not supported by Elasticsearch.
+        shp: { _maxDimensions: 2 },
+        metadata: false,
+      });
       await this._setTableRowCount();
     }
 
     const { value: batch, done } = await this._iterator.next();
-    
+
     if (!this._getIsActive() || done) {
       results.hasNext = false;
       return results;

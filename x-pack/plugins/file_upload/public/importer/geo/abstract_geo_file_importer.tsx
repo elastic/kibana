@@ -266,11 +266,15 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       });
       this._invalidFeatures = [...this._invalidFeatures, ...results.invalidFeatures];
       this._totalBytesRead = this._totalBytesRead + results.bytesRead;
-      this._totalFeaturesRead = this._totalFeaturesRead + results.features.length + results.invalidFeatures.length;
+      this._totalFeaturesRead =
+        this._totalFeaturesRead + results.features.length + results.invalidFeatures.length;
     }
   }
 
-  protected _readNext(prevFeaturesRead: number, prevBytesRead: number): Promise<{
+  protected _readNext(
+    prevFeaturesRead: number,
+    prevBytesRead: number
+  ): Promise<{
     bytesRead: number;
     features: Feature[];
     geometryTypesMap: Map<string, boolean>;

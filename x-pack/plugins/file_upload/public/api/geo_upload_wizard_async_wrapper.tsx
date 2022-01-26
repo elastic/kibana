@@ -13,10 +13,7 @@ interface State {
   GeoUploadWizard: React.ComponentType<FileUploadComponentProps> | null;
 }
 
-export class GeoUploadWizardAsyncWrapper extends React.Component<
-  FileUploadComponentProps,
-  State
-> {
+export class GeoUploadWizardAsyncWrapper extends React.Component<FileUploadComponentProps, State> {
   state: State = {
     GeoUploadWizard: null,
   };
@@ -39,10 +36,6 @@ export class GeoUploadWizardAsyncWrapper extends React.Component<
 
   render() {
     const { GeoUploadWizard } = this.state;
-    return GeoUploadWizard ? (
-      <GeoUploadWizard {...this.props} />
-    ) : (
-      <EuiLoadingContent lines={3} />
-    );
+    return GeoUploadWizard ? <GeoUploadWizard {...this.props} /> : <EuiLoadingContent lines={3} />;
   }
 }
