@@ -6,7 +6,8 @@
   }
 }
 
-.euiTableRow {
+.euiTableRow,
+.euiDataGridRow {
   &:hover,
   &:focus-within,
   &[class*='-isActive'] {
@@ -15,6 +16,7 @@
     }
   }
 }
+
 
 /**
  * 1. Only visually hide the action, so that it's still accessible to screen readers.
