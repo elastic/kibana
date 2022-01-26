@@ -6,13 +6,13 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { registerAlertsUsageCollector } from './alerts_usage_collector';
+import { registerAlertingUsageCollector } from './alerting_usage_collector';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 const taskManagerStart = taskManagerMock.createStart();
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('registerAlertsUsageCollector', () => {
+describe('registerAlertingUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('registerAlertsUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    registerAlertsUsageCollector(
+    registerAlertingUsageCollector(
       usageCollectionMock as UsageCollectionSetup,
       new Promise(() => taskManagerStart)
     );
@@ -31,7 +31,7 @@ describe('registerAlertsUsageCollector', () => {
   });
 
   it('should call makeUsageCollector with type = alerts', () => {
-    registerAlertsUsageCollector(
+    registerAlertingUsageCollector(
       usageCollectionMock as UsageCollectionSetup,
       new Promise(() => taskManagerStart)
     );

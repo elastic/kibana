@@ -8,12 +8,12 @@
 import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '../../../task_manager/server';
-import { AlertsUsage } from './types';
+import { AlertingUsage } from './types';
 
-const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
+const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
   DYNAMIC_KEY: { type: 'long' },
-  // Known alerts (searching the use of the alerts API `registerType`:
+  // Known rule types (searching the use of the rules API `registerType`:
   // Built-in
   '__index-threshold': { type: 'long' },
   '__es-query': { type: 'long' },
@@ -39,6 +39,12 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   // Security Solution
   siem__signals: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   siem__notifications: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__eqlRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__indicatorRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__mlRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__queryRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__savedQueryRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
+  siem__thresholdRule: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   // Uptime
   xpack__uptime__alerts__monitorStatus: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   xpack__uptime__alerts__tls: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
@@ -50,7 +56,7 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
-const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_per_day'] =
+const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
     DYNAMIC_KEY: { type: 'long' },
@@ -60,7 +66,7 @@ const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failur
     unknown: { type: 'long' },
   };
 
-const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
+const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
     DYNAMIC_KEY: byTypeSchema,
@@ -70,11 +76,11 @@ const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_
     unknown: byTypeSchema,
   };
 
-export function createAlertsUsageCollector(
+export function createAlertingUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  return usageCollection.makeUsageCollector<AlertsUsage>({
+  return usageCollection.makeUsageCollector<AlertingUsage>({
     type: 'alerts',
     isReady: async () => {
       await taskManager;
@@ -84,7 +90,7 @@ export function createAlertsUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const { runs, ...state } = get(doc, 'state') as AlertsUsage & { runs: number };
+        const { runs, ...state } = get(doc, 'state') as AlertingUsage & { runs: number };
 
         return {
           ...state,
@@ -127,6 +133,8 @@ export function createAlertsUsageCollector(
           count_rules_executions_failured_per_day: 0,
           count_rules_executions_failured_by_reason_per_day: {},
           count_rules_executions_failured_by_reason_by_type_per_day: {},
+          count_rules_executions_timeouts_per_day: 0,
+          count_rules_executions_timeouts_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
         };
@@ -169,6 +177,8 @@ export function createAlertsUsageCollector(
       count_rules_executions_failured_per_day: { type: 'long' },
       count_rules_executions_failured_by_reason_per_day: byReasonSchema,
       count_rules_executions_failured_by_reason_by_type_per_day: byReasonSchemaByType,
+      count_rules_executions_timeouts_per_day: { type: 'long' },
+      count_rules_executions_timeouts_by_type_per_day: byTypeSchema,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
     },
@@ -194,10 +204,10 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   return null;
 }
 
-export function registerAlertsUsageCollector(
+export function registerAlertingUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  const collector = createAlertsUsageCollector(usageCollection, taskManager);
+  const collector = createAlertingUsageCollector(usageCollection, taskManager);
   usageCollection.registerCollector(collector);
 }

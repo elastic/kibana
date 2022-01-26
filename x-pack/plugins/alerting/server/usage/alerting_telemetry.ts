@@ -6,15 +6,15 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { AlertsUsage } from './types';
+import { AlertingUsage } from './types';
 
-const alertTypeMetric = {
+const ruleTypeMetric = {
   scripted_metric: {
     init_script: 'state.ruleTypes = [:]; state.namespaces = [:]',
     map_script: `
-      String alertType = doc['alert.alertTypeId'].value;
+      String ruleType = doc['alert.alertTypeId'].value;
       String namespace = doc['namespaces'] !== null && doc['namespaces'].size() > 0 ? doc['namespaces'].value : 'default';
-      state.ruleTypes.put(alertType, state.ruleTypes.containsKey(alertType) ? state.ruleTypes.get(alertType) + 1 : 1);
+      state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
       if (state.namespaces.containsKey(namespace) === false) {
         state.namespaces.put(namespace, 1);
       }
@@ -38,7 +38,7 @@ const alertTypeMetric = {
   },
 };
 
-const ruleTypeExecutionsMetric = {
+const ruleTypeExecutionsWithDurationMetric = {
   scripted_metric: {
     init_script: 'state.ruleTypes = [:]; state.ruleTypesDuration = [:];',
     map_script: `
@@ -46,6 +46,32 @@ const ruleTypeExecutionsMetric = {
       long duration = doc['event.duration'].value / (1000 * 1000); 
       state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
       state.ruleTypesDuration.put(ruleType, state.ruleTypesDuration.containsKey(ruleType) ? state.ruleTypesDuration.get(ruleType) + duration : duration);
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
+const ruleTypeExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.ruleTypes = [:]',
+    map_script: `
+      String ruleType = doc['rule.category'].value;
+      state.ruleTypes.put(ruleType, state.ruleTypes.containsKey(ruleType) ? state.ruleTypes.get(ruleType) + 1 : 1);
     `,
     // Combine script is executed per cluster, but we already have a key-value pair per cluster.
     // Despite docs that say this is optional, this script can't be blank.
@@ -99,10 +125,10 @@ const ruleTypeFailureExecutionsMetric = {
 
 export async function getTotalCountAggregations(
   esClient: ElasticsearchClient,
-  kibanaInex: string
+  kibanaIndex: string
 ): Promise<
   Pick<
-    AlertsUsage,
+    AlertingUsage,
     | 'count_total'
     | 'count_by_type'
     | 'throttle_time'
@@ -114,7 +140,7 @@ export async function getTotalCountAggregations(
   >
 > {
   const { body: results } = await esClient.search({
-    index: kibanaInex,
+    index: kibanaIndex,
     body: {
       size: 0,
       query: {
@@ -210,7 +236,7 @@ export async function getTotalCountAggregations(
         },
       },
       aggs: {
-        byAlertTypeId: alertTypeMetric,
+        byRuleTypeId: ruleTypeMetric,
         max_throttle_time: { max: { field: 'alert_throttle' } },
         min_throttle_time: { min: { field: 'alert_throttle' } },
         avg_throttle_time: { avg: { field: 'alert_throttle' } },
@@ -225,7 +251,7 @@ export async function getTotalCountAggregations(
   });
 
   const aggregations = results.aggregations as {
-    byAlertTypeId: { value: { ruleTypes: Record<string, string> } };
+    byRuleTypeId: { value: { ruleTypes: Record<string, string> } };
     max_throttle_time: { value: number };
     min_throttle_time: { value: number };
     avg_throttle_time: { value: number };
@@ -237,23 +263,15 @@ export async function getTotalCountAggregations(
     avg_actions_count: { value: number };
   };
 
-  const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
+  const totalRulesCount = Object.keys(aggregations.byRuleTypeId.value.ruleTypes).reduce(
     (total: number, key: string) =>
-      parseInt(aggregations.byAlertTypeId.value.ruleTypes[key], 10) + total,
+      parseInt(aggregations.byRuleTypeId.value.ruleTypes[key], 10) + total,
     0
   );
 
   return {
-    count_total: totalAlertsCount,
-    count_by_type: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
-      // ES DSL aggregations are returned as `any` by esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.ruleTypes[key],
-      }),
-      {}
-    ),
+    count_total: totalRulesCount,
+    count_by_type: replaceDotSymbolsInRuleTypeIds(aggregations.byRuleTypeId.value.ruleTypes),
     throttle_time: {
       min: `${aggregations.min_throttle_time.value}s`,
       avg: `${aggregations.avg_throttle_time.value}s`,
@@ -283,9 +301,9 @@ export async function getTotalCountAggregations(
   };
 }
 
-export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaInex: string) {
+export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIndex: string) {
   const { body: searchResult } = await esClient.search({
-    index: kibanaInex,
+    index: kibanaIndex,
     size: 0,
     body: {
       query: {
@@ -294,41 +312,26 @@ export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIn
         },
       },
       aggs: {
-        byAlertTypeId: alertTypeMetric,
+        byRuleTypeId: ruleTypeMetric,
       },
     },
   });
 
   const aggregations = searchResult.aggregations as {
-    byAlertTypeId: {
+    byRuleTypeId: {
       value: { ruleTypes: Record<string, string>; namespaces: Record<string, string> };
     };
   };
 
   return {
-    countTotal: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
+    countTotal: Object.keys(aggregations.byRuleTypeId.value.ruleTypes).reduce(
       (total: number, key: string) =>
-        parseInt(aggregations.byAlertTypeId.value.ruleTypes[key], 10) + total,
+        parseInt(aggregations.byRuleTypeId.value.ruleTypes[key], 10) + total,
       0
     ),
-    countByType: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
-      // ES DSL aggregations are returned as `any` by esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.ruleTypes[key],
-      }),
-      {}
-    ),
-    countNamespaces: Object.keys(aggregations.byAlertTypeId.value.namespaces).length,
+    countByType: replaceDotSymbolsInRuleTypeIds(aggregations.byRuleTypeId.value.ruleTypes),
+    countNamespaces: Object.keys(aggregations.byRuleTypeId.value.namespaces).length,
   };
-}
-
-function replaceFirstAndLastDotSymbols(strToReplace: string) {
-  const hasFirstSymbolDot = strToReplace.startsWith('.');
-  const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
-  const hasLastSymbolDot = strToReplace.endsWith('.');
-  return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
 export async function getExecutionsPerDayCount(
@@ -363,7 +366,7 @@ export async function getExecutionsPerDayCount(
         },
       },
       aggs: {
-        byRuleTypeId: ruleTypeExecutionsMetric,
+        byRuleTypeId: ruleTypeExecutionsWithDurationMetric,
         failuresByReason: ruleTypeFailureExecutionsMetric,
         avgDuration: { avg: { field: 'event.duration' } },
       },
@@ -392,15 +395,8 @@ export async function getExecutionsPerDayCount(
         parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10) + total,
       0
     ),
-    countByType: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
-      // ES DSL aggregations are returned as `any` by esClient.search
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [replaceFirstAndLastDotSymbols(key)]:
-          executionsAggregations.byRuleTypeId.value.ruleTypes[key],
-      }),
-      {}
+    countByType: replaceDotSymbolsInRuleTypeIds(
+      executionsAggregations.byRuleTypeId.value.ruleTypes
     ),
     countTotalFailures: Object.keys(
       executionFailuresAggregations.failuresByReason.value.reasons
@@ -426,7 +422,7 @@ export async function getExecutionsPerDayCount(
         );
         return {
           ...obj,
-          [replaceFirstAndLastDotSymbols(reason)]: countByRuleTypes,
+          [replaceDotSymbols(reason)]: countByRuleTypes,
         };
       },
       {}
@@ -438,8 +434,9 @@ export async function getExecutionsPerDayCount(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]:
-          executionFailuresAggregations.failuresByReason.value.reasons[key],
+        [key]: replaceDotSymbolsInRuleTypeIds(
+          executionFailuresAggregations.failuresByReason.value.reasons[key]
+        ),
       }),
       {}
     ),
@@ -449,7 +446,7 @@ export async function getExecutionsPerDayCount(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: Math.round(
+        [replaceDotSymbols(key)]: Math.round(
           executionsAggregations.byRuleTypeId.value.ruleTypesDuration[key] /
             parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10)
         ),
@@ -457,4 +454,70 @@ export async function getExecutionsPerDayCount(
       {}
     ),
   };
+}
+
+export async function getExecutionTimeoutsPerDayCount(
+  esClient: ElasticsearchClient,
+  eventLogIndex: string
+) {
+  const { body: searchResult } = await esClient.search({
+    index: eventLogIndex,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: { 'event.action': 'execute-timeout' },
+                },
+                {
+                  term: { 'event.provider': 'alerting' },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-1d',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      aggs: {
+        byRuleTypeId: ruleTypeExecutionsMetric,
+      },
+    },
+  });
+
+  const executionsAggregations = searchResult.aggregations as {
+    byRuleTypeId: {
+      value: { ruleTypes: Record<string, string>; ruleTypesDuration: Record<string, number> };
+    };
+  };
+
+  return {
+    countTotal: Object.keys(executionsAggregations.byRuleTypeId.value.ruleTypes).reduce(
+      (total: number, key: string) =>
+        parseInt(executionsAggregations.byRuleTypeId.value.ruleTypes[key], 10) + total,
+      0
+    ),
+    countByType: replaceDotSymbolsInRuleTypeIds(
+      executionsAggregations.byRuleTypeId.value.ruleTypes
+    ),
+  };
+}
+
+function replaceDotSymbols(strToReplace: string) {
+  return strToReplace.replaceAll('.', '__');
+}
+
+function replaceDotSymbolsInRuleTypeIds(ruleTypeIdObj: Record<string, string>) {
+  return Object.keys(ruleTypeIdObj).reduce(
+    (obj, key) => ({ ...obj, [replaceDotSymbols(key)]: ruleTypeIdObj[key] }),
+    {}
+  );
 }

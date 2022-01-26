@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
-} from './alerts_telemetry';
+  getExecutionTimeoutsPerDayCount,
+} from './alerting_telemetry';
 
-describe('alerts telemetry', () => {
-  test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
+describe('alerting telemetry', () => {
+  test('getTotalCountInUse should replace "." symbols with "__" in rule types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockReturnValue(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
-          byAlertTypeId: {
+          byRuleTypeId: {
             value: {
               ruleTypes: {
                 '.index-threshold': 2,
@@ -47,8 +50,8 @@ describe('alerts telemetry', () => {
 Object {
   "countByType": Object {
     "__index-threshold": 2,
-    "document.test__": 1,
-    "logs.alert.document.count": 1,
+    "document__test__": 1,
+    "logs__alert__document__count": 1,
   },
   "countNamespaces": 1,
   "countTotal": 4,
@@ -62,7 +65,7 @@ Object {
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
-          byAlertTypeId: {
+          byRuleTypeId: {
             value: {
               ruleTypes: {
                 '.index-threshold': 2,
@@ -100,8 +103,8 @@ Object {
   },
   "count_by_type": Object {
     "__index-threshold": 2,
-    "document.test__": 1,
-    "logs.alert.document.count": 1,
+    "document__test__": 1,
+    "logs__alert__document__count": 1,
   },
   "count_rules_namespaces": 0,
   "count_total": 4,
@@ -129,7 +132,7 @@ Object {
 `);
   });
 
-  test('getTotalExecutionsCount should return execution aggregations for total count, count by rule type and number of failed executions', async () => {
+  test('getExecutionsPerDayCount should return execution aggregations for total count, count by rule type and number of failed executions', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockReturnValue(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
@@ -176,26 +179,62 @@ Object {
       avgExecutionTime: 0,
       avgExecutionTimeByType: {
         '__index-threshold': 1043934,
-        'document.test__': 17687687,
-        'logs.alert.document.count': 1675765,
+        document__test__: 17687687,
+        logs__alert__document__count: 1675765,
       },
       countByType: {
         '__index-threshold': 2,
-        'document.test__': 1,
-        'logs.alert.document.count': 1,
+        document__test__: 1,
+        logs__alert__document__count: 1,
       },
       countFailuresByReason: {
         unknown: 4,
       },
       countFailuresByReasonByType: {
         unknown: {
-          '.index-threshold': 2,
-          'document.test.': 1,
-          'logs.alert.document.count': 1,
+          '__index-threshold': 2,
+          document__test__: 1,
+          logs__alert__document__count: 1,
         },
       },
       countTotal: 4,
       countTotalFailures: 4,
+    });
+  });
+
+  test('getExecutionTimeoutsPerDayCount should return execution aggregations for total timeout count and count by rule type', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          byRuleTypeId: {
+            value: {
+              ruleTypes: {
+                '.index-threshold': 2,
+                'logs.alert.document.count': 1,
+                'document.test.': 1,
+              },
+            },
+          },
+        },
+        hits: {
+          hits: [],
+        },
+      })
+    );
+
+    const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toStrictEqual({
+      countTotal: 4,
+      countByType: {
+        '__index-threshold': 2,
+        document__test__: 1,
+        logs__alert__document__count: 1,
+      },
     });
   });
 });
