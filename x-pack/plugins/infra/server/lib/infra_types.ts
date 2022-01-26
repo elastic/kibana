@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from 'kibana/server';
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
 import { InfraConfig } from '../types';
 import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
@@ -31,4 +32,5 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
+  getWorkerThreads: () => Promise<CoreStart['workerThreads']>;
 }
