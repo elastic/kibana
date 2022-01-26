@@ -455,7 +455,7 @@ Example: `https`
 |======
 
 [[xpack-security-ecs-audit-correlation]]
-==== Correlating audit events
+==== Correlating ECS audit events
 
 Audit events can be correlated in two ways:
 
