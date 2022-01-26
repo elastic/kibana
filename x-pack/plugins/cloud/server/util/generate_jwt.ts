@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import jwt from 'jsonwebtoken';
 
 export const generateSignedJwt = (userId: string, secret: string): string => {
