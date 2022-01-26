@@ -25,13 +25,14 @@ import type { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
-import { getInvalidFieldMessage } from '../helpers';
+import { getInvalidFieldMessage, isColumnOfType } from '../helpers';
 import { FieldInputs, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
 import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
+import type { IndexPattern, IndexPatternField } from '../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
@@ -70,6 +71,16 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
   });
 }
 
+function isScriptedField(field: IndexPatternField): boolean;
+function isScriptedField(fieldName: string, indexPattern: IndexPattern): boolean;
+function isScriptedField(fieldName: string | IndexPatternField, indexPattern?: IndexPattern) {
+  if (typeof fieldName === 'string') {
+    const field = indexPattern?.getFieldByName(fieldName);
+    return field && field.scripted;
+  }
+  return fieldName.scripted;
+}
+
 const idPrefix = htmlIdGenerator()();
 const DEFAULT_SIZE = 3;
 // Elasticsearch limit
@@ -84,8 +95,67 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   }),
   priority: 3, // Higher than any metric
   input: 'field',
-  canAddNewField: (column) => {
-    return (column.params?.secondaryFields?.length ?? 0) < MAX_MULTI_FIELDS_SIZE;
+  getCurrentFields: (targetColumn) => {
+    return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
+  },
+  getParamsForMultipleFields: ({ targetColumn, sourceColumn, field, indexPattern }) => {
+    const secondaryFields = new Set<string>();
+    if (targetColumn.params?.secondaryFields?.length) {
+      targetColumn.params.secondaryFields.forEach((fieldName) => {
+        if (!isScriptedField(fieldName, indexPattern)) {
+          secondaryFields.add(fieldName);
+        }
+      });
+    }
+    if (sourceColumn && 'sourceField' in sourceColumn && sourceColumn?.sourceField) {
+      if (!isScriptedField(sourceColumn.sourceField, indexPattern)) {
+        secondaryFields.add(sourceColumn.sourceField);
+      }
+    }
+    if (sourceColumn && isColumnOfType<TermsIndexPatternColumn>('terms', sourceColumn)) {
+      if (sourceColumn?.params?.secondaryFields?.length) {
+        sourceColumn.params.secondaryFields.forEach((fieldName) => {
+          if (!isScriptedField(fieldName, indexPattern)) {
+            secondaryFields.add(fieldName);
+          }
+        });
+      }
+    }
+    if (field && !isScriptedField(field)) {
+      secondaryFields.add(field.name);
+    }
+    return {
+      secondaryFields: [...secondaryFields].filter((f) => targetColumn.sourceField !== f),
+    };
+  },
+  canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
+    // first step: collect the fields from the targetColumn
+    const originalTerms = new Set([
+      targetColumn.sourceField,
+      ...(targetColumn.params?.secondaryFields ?? []),
+    ]);
+    // now check how many fields can be added
+    let counter = field && !isScriptedField(field) && !originalTerms.has(field.name) ? 1 : 0;
+    if (sourceColumn) {
+      if ('sourceField' in sourceColumn) {
+        counter +=
+          !isScriptedField(sourceColumn.sourceField, indexPattern) &&
+          !originalTerms.has(sourceColumn.sourceField)
+            ? 1
+            : 0;
+        if (isColumnOfType<TermsIndexPatternColumn>('terms', sourceColumn)) {
+          counter +=
+            sourceColumn.params.secondaryFields?.filter((f) => {
+              return !isScriptedField(f, indexPattern) && !originalTerms.has(f);
+            }).length ?? 0;
+        }
+      }
+    }
+    // reject when there are no new fields to add
+    if (!counter) {
+      return false;
+    }
+    return counter + (targetColumn.params?.secondaryFields?.length ?? 0) <= MAX_MULTI_FIELDS_SIZE;
   },
   getDefaultVisualSettings: (column) => ({
     truncateText: Boolean(!column.params?.secondaryFields?.length),
@@ -96,7 +166,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
-      return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
+      return {
+        dataType: type as DataType,
+        isBucketed: true,
+        scale: 'ordinal',
+      };
     }
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
@@ -206,16 +280,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       column.params.secondaryFields?.length,
       column.params.orderBy.type === 'rare'
     ),
-  onFieldChange: (oldColumn, field) => {
-    // reset the secondary fields
-    const newParams = { ...oldColumn.params, secondaryFields: undefined };
+  onFieldChange: (oldColumn, field, params) => {
+    const newParams = {
+      ...oldColumn.params,
+      secondaryFields: undefined,
+      ...(params as Partial<TermsIndexPatternColumn['params']>),
+    };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
     }
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: ofName(field.displayName, 0, newParams.orderBy.type === 'rare'),
+      label: ofName(
+        field.displayName,
+        newParams.secondaryFields?.length,
+        newParams.orderBy.type === 'rare'
+      ),
       sourceField: field.name,
       params: newParams,
     };

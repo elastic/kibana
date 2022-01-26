@@ -28,14 +28,16 @@ export function TraceLink() {
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
       if (traceId) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
-          params: {
-            path: {
-              traceId,
+        return callApmApi(
+          'GET /internal/apm/traces/{traceId}/root_transaction',
+          {
+            params: {
+              path: {
+                traceId,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [traceId]

@@ -6,15 +6,21 @@
  */
 
 import React from 'react';
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
-import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
+import {
+  createKibanaContextProviderMock,
+  createStartServicesMock,
+} from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
+import { StartServices } from '../../types';
 
 interface Props {
   children: React.ReactNode;
@@ -22,6 +28,7 @@ interface Props {
   features?: CasesFeatures;
   owner?: string[];
 }
+type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
@@ -43,8 +50,46 @@ const TestProvidersComponent: React.FC<Props> = ({
     </I18nProvider>
   );
 };
+TestProvidersComponent.displayName = 'TestProviders';
 
 export const TestProviders = React.memo(TestProvidersComponent);
+
+export interface AppMockRenderer {
+  render: UiRender;
+  coreStart: StartServices;
+}
+
+export const createAppMockRenderer = ({
+  features,
+  owner = [SECURITY_SOLUTION_OWNER],
+  userCanCrud = true,
+}: {
+  features?: CasesFeatures;
+  owner?: string[];
+  userCanCrud?: boolean;
+} = {}): AppMockRenderer => {
+  const services = createStartServicesMock();
+
+  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+        </ThemeProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  const render: UiRender = (ui, options) => {
+    return reactRender(ui, {
+      wrapper: AppWrapper as React.ComponentType,
+      ...options,
+    });
+  };
+  return {
+    coreStart: services,
+    render,
+  };
+};
 
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
   path: 'path',
