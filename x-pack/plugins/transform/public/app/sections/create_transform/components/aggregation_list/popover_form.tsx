@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiCodeBlock,
   EuiComboBox,
+  EuiFieldNumber,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -77,6 +78,11 @@ function parsePercentsInput(inputValue: string | undefined) {
   return [];
 }
 
+// Input string should only include comma separated numbers
+function isValidPercentsInput(inputValue: string) {
+  return /^[0-9]+(,[0-9]+)*$/.test(inputValue);
+}
+
 function getDefaultSize(defaultData: PivotAggsConfig): number | undefined {
   if (isPivotAggsConfigTerms(defaultData)) {
     return defaultData.size;
@@ -84,11 +90,16 @@ function getDefaultSize(defaultData: PivotAggsConfig): number | undefined {
 }
 
 function parseSizeInput(inputValue: string | undefined) {
-  if (inputValue !== undefined) {
+  if (inputValue !== undefined && isValidSizeInput(inputValue)) {
     return parseInt(inputValue, 10);
   }
 
   return TERMS_AGG_DEFAULT_SIZE;
+}
+
+// Input string should only include numbers
+function isValidSizeInput(inputValue: string) {
+  return /^\d+$/.test(inputValue);
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
@@ -101,7 +112,9 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   );
 
   const [percents, setPercents] = useState(getDefaultPercents(defaultData));
+  const [validPercents, setValidPercents] = useState(agg === PIVOT_SUPPORTED_AGGS.PERCENTILES);
   const [size, setSize] = useState(getDefaultSize(defaultData));
+  const [validSize, setValidSize] = useState(agg === PIVOT_SUPPORTED_AGGS.TERMS);
 
   const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
 
@@ -142,10 +155,12 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   function updatePercents(inputValue: string) {
     setPercents(parsePercentsInput(inputValue));
+    setValidPercents(isValidPercentsInput(inputValue));
   }
 
   function updateSize(inputValue: string) {
     setSize(parseSizeInput(inputValue));
+    setValidSize(isValidSizeInput(inputValue));
   }
 
   function getUpdatedItem(): PivotAggsConfig {
@@ -234,15 +249,10 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     percentsText = percents.toString();
   }
 
-  const validPercents =
-    agg === PIVOT_SUPPORTED_AGGS.PERCENTILES && parsePercentsInput(percentsText).length > 0;
-
   let sizeText;
   if (size !== undefined) {
     sizeText = size.toString();
   }
-
-  const validSize = agg === PIVOT_SUPPORTED_AGGS.TERMS && parseSizeInput(sizeText) > 0;
 
   let formValid = validAggName;
   if (formValid && agg === PIVOT_SUPPORTED_AGGS.PERCENTILES) {
@@ -381,7 +391,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           }
           isInvalid={!validSize}
         >
-          <EuiFieldText defaultValue={sizeText} onChange={(e) => updateSize(e.target.value)} />
+          <EuiFieldNumber defaultValue={sizeText} onChange={(e) => updateSize(e.target.value)} />
         </EuiFormRow>
       )}
       {isUnsupportedAgg && (
