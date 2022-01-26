@@ -8,7 +8,6 @@
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { getUsageCollection } from '../kibana_services';
 import { APP_ID } from '../../common/constants';
 
@@ -50,7 +49,7 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     const usageCollection = getUsageCollection();
     usageCollection?.reportUiCounter(
       APP_ID,
-      METRIC_TYPE.CLICK,
+      'visualize_geo_field',
       context.originatingApp
         ? `visualize_geo_field_${context.originatingApp}`
         : `visualize_geo_field`

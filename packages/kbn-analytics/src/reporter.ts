@@ -7,13 +7,7 @@
  */
 
 import { wrapArray } from './util';
-import {
-  Metric,
-  createUiCounterMetric,
-  trackUsageAgent,
-  UiCounterMetricType,
-  ApplicationUsageMetric,
-} from './metrics';
+import { Metric, createUiCounterMetric, trackUsageAgent, ApplicationUsageMetric } from './metrics';
 
 import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
@@ -77,7 +71,7 @@ export class Reporter {
 
   public reportUiCounter = (
     appName: string,
-    type: UiCounterMetricType,
+    type: string,
     eventNames: string | string[],
     count?: number
   ) => {
