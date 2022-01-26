@@ -15,7 +15,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { DataView, DataViewField, IndexPatternAttributes } from '../../../../../../data/common';
+import { DataView, IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
@@ -77,7 +77,7 @@ function getProps(indexPattern: DataView, wasSidebarClosed?: boolean): DiscoverL
 
   const availableFields$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as DataViewField[],
+    fields: [] as string[],
   }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({

@@ -35,7 +35,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
-  fieldsToFetch?: DataViewField[];
+  fieldsToFetch?: string[];
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;

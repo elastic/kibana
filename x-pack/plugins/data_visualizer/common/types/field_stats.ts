@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
 import { isPopulatedObject } from '../utils/object_utils';
-import { DataViewField, IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
+import { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { TimeBucketsInterval } from '../services/time_buckets';
 
 export interface FieldData {
@@ -209,7 +209,7 @@ export interface OverallStatsSearchStrategyParams {
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   aggregatableFields: string[];
   nonAggregatableFields: string[];
-  fieldsToFetch?: DataViewField[];
+  fieldsToFetch?: string[];
 }
 
 export interface FieldStatsSearchStrategyReturnBase {

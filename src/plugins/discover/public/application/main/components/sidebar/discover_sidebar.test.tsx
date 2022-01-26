@@ -15,7 +15,7 @@ import realHits from '../../../../__fixtures__/real_hits.js';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { DataViewField, flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
@@ -54,7 +54,7 @@ function getCompProps(): DiscoverSidebarProps {
   }
   const availableFields$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as DataViewField[],
+    fields: [] as string[],
   }) as AvailableFields$;
 
   return {

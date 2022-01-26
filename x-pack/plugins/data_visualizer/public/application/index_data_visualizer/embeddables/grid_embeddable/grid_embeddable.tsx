@@ -28,7 +28,6 @@ import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
 import {
-  DataViewField,
   IndexPattern,
   IndexPatternField,
   Query,
@@ -60,7 +59,7 @@ export interface DataVisualizerGridInput {
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
-  fieldsToFetch?: DataViewField[];
+  fieldsToFetch?: string[];
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;

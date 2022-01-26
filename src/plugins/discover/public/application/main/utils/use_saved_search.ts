@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { DataViewField, ISearchSource } from '../../../../../data/common';
+import { ISearchSource } from '../../../../../data/common';
 import { GetStateReturn } from '../services/discover_state';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
@@ -81,7 +81,7 @@ export interface DataChartsMessage extends DataMsg {
 }
 
 export interface DataAvailableFieldsMsg extends DataMsg {
-  fields?: DataViewField[];
+  fields?: string[];
 }
 
 /**

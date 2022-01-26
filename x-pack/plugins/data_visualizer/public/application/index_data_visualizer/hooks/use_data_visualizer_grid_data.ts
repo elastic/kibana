@@ -174,9 +174,11 @@ export const useDataVisualizerGridData = (
       const aggregatableFields: string[] = [];
       const nonAggregatableFields: string[] = [];
 
-      const fields = fieldsToFetch ?? currentIndexPattern.fields;
-
+      const fields = currentIndexPattern.fields;
       fields?.forEach((field) => {
+        if (fieldsToFetch && !fieldsToFetch.includes(field.name)) {
+          return;
+        }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
         if (!OMIT_FIELDS.includes(fieldName)) {
           if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
@@ -186,7 +188,6 @@ export const useDataVisualizerGridData = (
           }
         }
       });
-
       return {
         earliest,
         latest,

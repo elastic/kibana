@@ -15,7 +15,7 @@ import realHits from '../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DataViewField, flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -97,7 +97,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     }) as DataDocuments$,
     availableFields$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
-      fields: [] as DataViewField[],
+      fields: [] as string[],
     }) as AvailableFields$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
