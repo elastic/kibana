@@ -91,16 +91,17 @@ export const getValueForContinuity = (
     if (checkIsMaxContinuity(continuity)) {
       value = Number.POSITIVE_INFINITY;
     } else {
-      value =
+      value = roundValue(
         colorRanges[colorRanges.length - 1].start > max
           ? colorRanges[colorRanges.length - 1].start + 1
-          : max;
+          : max
+      );
     }
   } else {
     if (checkIsMinContinuity(continuity)) {
       value = Number.NEGATIVE_INFINITY;
     } else {
-      value = colorRanges[0].end < min ? colorRanges[0].end - 1 : min;
+      value = roundValue(colorRanges[0].end < min ? colorRanges[0].end - 1 : min);
     }
   }
 
