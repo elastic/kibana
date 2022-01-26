@@ -806,7 +806,7 @@ export default function ({
         break;
       case 'string':
       case 'punctuation.end_triple_quote':
-        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length ?? 1);
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length);
         break;
       default:
         addCommaToPrefixOnAutocomplete(nonEmptyToken, context);
