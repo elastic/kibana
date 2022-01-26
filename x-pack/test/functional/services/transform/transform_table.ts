@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-type TransformRowActionName = 'Clone' | 'Delete' | 'Edit' | 'Start' | 'Stop' | 'Discover';
+type TransformRowActionName = 'Clone' | 'Delete' | 'Discover' | 'Edit' | 'Reset' | 'Start' | 'Stop';
 
 export function TransformTableProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
@@ -364,6 +364,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('transformDeleteModal', { timeout: 60 * 1000 });
     }
 
+    public async assertTransformResetModalExists() {
+      await testSubjects.existOrFail('transformResetModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformResetModalNotExists() {
+      await testSubjects.missingOrFail('transformResetModal', { timeout: 60 * 1000 });
+    }
+
     public async assertTransformStartModalExists() {
       await testSubjects.existOrFail('transformStartModal', { timeout: 60 * 1000 });
     }
@@ -377,6 +385,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         await this.assertTransformDeleteModalExists();
         await testSubjects.click('transformDeleteModal > confirmModalConfirmButton');
         await this.assertTransformDeleteModalNotExists();
+      });
+    }
+
+    public async confirmResetTransform() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertTransformResetModalExists();
+        await testSubjects.click('transformResetModal > confirmModalConfirmButton');
+        await this.assertTransformResetModalNotExists();
       });
     }
 
