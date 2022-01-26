@@ -197,6 +197,9 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('jobs_summary', function () {
+    // FAILING Kibana 7.17 + ES 8.1 compatibility tests: https://github.com/elastic/kibana/issues/123851
+    this.onlyEsVersion('<8.1');
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
