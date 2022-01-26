@@ -24965,7 +24965,6 @@
     "xpack.snapshotRestore.repositoryForm.commonFields.maxSnapshotBytesTitle": "1 秒間の最高スナップショットバイト数",
     "xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesMessage": "レポジトリタイプ「{type}」はサポートされていません。",
     "xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesTitle": "不明なレポジトリタイプ",
-    "xpack.snapshotRestore.repositoryForm.fields.cloudTypeDescription": "Elasticsearch はカスタムレポジトリ用のコアプラグインを提供します。{docLink}",
     "xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription": "Elasticsearch はファイルシステムと読み取り専用の URL レポジトリをサポートします。他のタイプにはプラグインが必要です。{docLink}",
     "xpack.snapshotRestore.repositoryForm.fields.nameDescription": "レポジトリの固有の名前です。",
     "xpack.snapshotRestore.repositoryForm.fields.nameDescriptionTitle": "レポジトリ名",

@@ -25393,7 +25393,6 @@
     "xpack.snapshotRestore.repositoryForm.commonFields.maxSnapshotBytesTitle": "每秒最大快照字节数",
     "xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesMessage": "存储库类型“{type}”不受支持。",
     "xpack.snapshotRestore.repositoryForm.errorUnknownRepositoryTypesTitle": "未知的存储库类型",
-    "xpack.snapshotRestore.repositoryForm.fields.cloudTypeDescription": "Elasticsearch 为定制存储库提供核心插件。{docLink}",
     "xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription": "Elasticsearch 支持文件系统和只读 URL 存储库。其他类型需要插件。{docLink}",
     "xpack.snapshotRestore.repositoryForm.fields.nameDescription": "存储库的唯一名称。",
     "xpack.snapshotRestore.repositoryForm.fields.nameDescriptionTitle": "存储库名称",
