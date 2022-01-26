@@ -19,6 +19,7 @@ const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   index: 'deprecated_settings',
   body: {
     settings: {
+      // @ts-expect-error setting is removed in 8.0
       'translog.retention.size': '1b',
       'translog.retention.age': '5m',
       'index.soft_deletes.enabled': true,
