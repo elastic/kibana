@@ -158,7 +158,7 @@ Platform::
 Displays event loop delay metrics in the Status page to assist with performance monitoring {kibana-pull}121052[#121052]
 Security::
 * Adds tooltip for usernames on API Key management page {kibana-pull}122488[#122488]
-* Detects cookies on login page {kibana-pull}120944[#120944]
+* Kibana now shows a more helpful error message when the browser prevents it from using cookies {kibana-pull}120944[#120944]
 
 For information about the features introduced in 7.17.0, refer to <<whats-new,What's new in 7.17>>.
 
