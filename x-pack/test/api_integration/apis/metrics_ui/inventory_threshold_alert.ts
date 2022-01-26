@@ -10,15 +10,15 @@ import { convertToKibanaClient } from '@kbn/test';
 import {
   Comparator,
   InventoryMetricConditions,
-} from '../../../../plugins/infra/server/lib/alerting/inventory_metric_threshold/types';
-import { InfraSource } from '../../../../plugins/infra/server/lib/sources';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
-import { evaluateCondition } from '../../../../plugins/infra/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
+} from '../../../../plugins/infra/common/alerting/metrics';
 import {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../plugins/infra/common/inventory_models/types';
+import { evaluateCondition } from '../../../../plugins/infra/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
+import { InfraSource } from '../../../../plugins/infra/server/lib/sources';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { DATES } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

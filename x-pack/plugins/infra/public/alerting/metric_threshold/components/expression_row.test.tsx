@@ -6,12 +6,11 @@
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { MetricExpression } from '../types';
 import React from 'react';
-import { ExpressionRow } from './expression_row';
 import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
+import { Comparator } from '../../../../common/alerting/metrics';
+import { MetricExpression } from '../types';
+import { ExpressionRow } from './expression_row';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({

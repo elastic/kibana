@@ -4,35 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiHealth,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiHealth,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
-import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
+import React, { useCallback, useMemo, useState } from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
-  WhenExpression,
+  builtInComparators,
+  IErrorObject,
   OfExpression,
   ThresholdExpression,
+  WhenExpression,
 } from '../../../../../triggers_actions_ui/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { IErrorObject } from '../../../../../triggers_actions_ui/public';
-import { MetricExpression, AGGREGATION_TYPES } from '../types';
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-import { builtInComparators } from '../../../../../triggers_actions_ui/public';
+import { Comparator } from '../../../../common/alerting/metrics';
+import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { AGGREGATION_TYPES, MetricExpression } from '../types';
 
 const customComparators = {
   ...builtInComparators,
