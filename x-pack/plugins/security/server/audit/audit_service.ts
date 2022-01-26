@@ -49,14 +49,6 @@ export interface AuditLogger {
    * ```
    */
   log: (event: AuditEvent | undefined) => void;
-
-  /**
-   * Indicates whether audit logging is enabled or not.
-   *
-   * Useful for skipping resource-intense operations that don't need to be performed when audit
-   * logging is disabled.
-   */
-  readonly enabled: boolean;
 }
 
 export interface AuditServiceSetup {
@@ -130,8 +122,7 @@ export class AuditService {
     );
 
     // Record feature usage at a regular interval if enabled and license allows
-    const enabled = !!(config.enabled && config.appender);
-    if (enabled) {
+    if (config.enabled && config.appender) {
       license.features$.subscribe((features) => {
         clearInterval(this.usageIntervalId!);
         if (features.allowAuditLogging) {
@@ -178,7 +169,6 @@ export class AuditService {
           trace: { id: request.id },
         });
       },
-      enabled,
     });
 
     http.registerOnPostAuth((request, response, t) => {
@@ -190,7 +180,7 @@ export class AuditService {
 
     return {
       asScoped,
-      withoutRequest: { log, enabled },
+      withoutRequest: { log },
     };
   }
 
