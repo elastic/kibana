@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   getLatencyChartSelector,
   LatencyChartsResponse,
 } from './latency_chart_selectors';
-
-const theme = {
-  eui: {
-    euiColorVis1: 'blue',
-    euiColorVis5: 'red',
-    euiColorVis7: 'black',
-    euiColorVis9: 'yellow',
-    euiColorMediumShade: 'green',
-  },
-} as EuiTheme;
 
 const latencyChartData = {
   currentPeriod: {
@@ -36,7 +25,7 @@ const latencyChartData = {
 describe('getLatencyChartSelector', () => {
   describe('without anomaly', () => {
     it('returns default values when data is undefined', () => {
-      const latencyChart = getLatencyChartSelector({ theme });
+      const latencyChart = getLatencyChartSelector({});
       expect(latencyChart).toEqual({
         currentPeriod: undefined,
         previousPeriod: undefined,
@@ -46,7 +35,6 @@ describe('getLatencyChartSelector', () => {
     it('returns average timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.avg,
       });
       expect(latencyTimeseries).toEqual({
@@ -55,11 +43,11 @@ describe('getLatencyChartSelector', () => {
           data: [{ x: 1, y: 10 }],
           legendValue: '1 μs',
           type: 'linemark',
-          color: 'blue',
+          color: '#6092c0',
         },
 
         previousPeriod: {
-          color: 'green',
+          color: '#b0c9e0',
           data: [{ x: 1, y: 10 }],
           type: 'area',
           title: 'Previous period',
@@ -70,7 +58,6 @@ describe('getLatencyChartSelector', () => {
     it('returns 95th percentile timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.p95,
       });
       expect(latencyTimeseries).toEqual({
@@ -79,12 +66,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '95th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: 'red',
+          color: '#6092c0',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: 'green',
+          color: '#b0c9e0',
           title: 'Previous period',
         },
       });
@@ -93,7 +80,6 @@ describe('getLatencyChartSelector', () => {
     it('returns 99th percentile timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.p99,
       });
 
@@ -103,12 +89,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '99th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: 'black',
+          color: '#6092c0',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: 'green',
+          color: '#b0c9e0',
           title: 'Previous period',
         },
       });
@@ -119,7 +105,6 @@ describe('getLatencyChartSelector', () => {
     it('returns latency time series and anomaly timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.p99,
       });
       expect(latencyTimeseries).toEqual({
@@ -128,12 +113,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '99th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: 'black',
+          color: '#6092c0',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: 'green',
+          color: '#b0c9e0',
           title: 'Previous period',
         },
       });

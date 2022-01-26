@@ -82,7 +82,8 @@ describe('ServiceList', () => {
         expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
         expect(renderedColumns[4]).toMatchInlineSnapshot(`
           <ListMetric
-            color="euiColorVis1"
+            color="#6092c0"
+            comparisonSeriesColor="#b0c9e0"
             hideSeries={false}
             valueLabel="0 ms"
           />
@@ -107,7 +108,8 @@ describe('ServiceList', () => {
         expect(renderedColumns.length).toEqual(5);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
           <ListMetric
-            color="euiColorVis1"
+            color="#6092c0"
+            comparisonSeriesColor="#b0c9e0"
             hideSeries={true}
             valueLabel="0 ms"
           />
@@ -140,7 +142,8 @@ describe('ServiceList', () => {
           `);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
             <ListMetric
-              color="euiColorVis1"
+              color="#6092c0"
+              comparisonSeriesColor="#b0c9e0"
               hideSeries={false}
               valueLabel="0 ms"
             />
@@ -175,7 +178,8 @@ describe('ServiceList', () => {
           expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
           expect(renderedColumns[4]).toMatchInlineSnapshot(`
             <ListMetric
-              color="euiColorVis1"
+              color="#6092c0"
+              comparisonSeriesColor="#b0c9e0"
               hideSeries={false}
               valueLabel="0 ms"
             />

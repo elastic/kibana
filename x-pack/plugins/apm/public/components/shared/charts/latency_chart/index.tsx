@@ -16,7 +16,6 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -29,6 +28,7 @@ import { getComparisonChartTheme } from '../../time_comparison/get_time_range_co
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
+import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 
 interface Props {
   height?: number;
@@ -47,8 +47,10 @@ function filterNil<T>(value: T | null | undefined): value is T {
 
 export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
-  const theme = useTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+
+  const { previousPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
+
+  const comparisonChartTheme = getComparisonChartTheme(previousPeriodColor);
   const { urlParams } = useLegacyUrlParams();
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();

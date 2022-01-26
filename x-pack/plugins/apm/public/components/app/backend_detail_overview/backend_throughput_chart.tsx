@@ -12,19 +12,23 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { useTheme } from '../../../hooks/use_theme';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
 
 export function BackendThroughputChart({ height }: { height: number }) {
-  const theme = useTheme();
-
   const {
     query: { backendName, rangeFrom, rangeTo, kuery, environment },
   } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset, comparisonChartTheme } = useComparison();
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
+  );
+  const { offset, comparisonChartTheme } = useComparison(previousPeriodColor);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -55,7 +59,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis0,
+        color: currentPeriodColor,
         title: i18n.translate('xpack.apm.backendThroughputChart.chartTitle', {
           defaultMessage: 'Throughput',
         }),
@@ -66,7 +70,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
       specs.push({
         data: data.comparisonTimeseries,
         type: 'area',
-        color: theme.eui.euiColorMediumShade,
+        color: previousPeriodColor,
         title: i18n.translate(
           'xpack.apm.backendThroughputChart.previousPeriodLabel',
           { defaultMessage: 'Previous period' }
@@ -75,7 +79,7 @@ export function BackendThroughputChart({ height }: { height: number }) {
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis0, theme.eui.euiColorMediumShade]);
+  }, [data, currentPeriodColor, previousPeriodColor]);
 
   return (
     <TimeseriesChart

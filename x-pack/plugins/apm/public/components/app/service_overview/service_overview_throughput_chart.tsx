@@ -22,13 +22,16 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
-import { useTheme } from '../../../hooks/use_theme';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import {
   getComparisonChartTheme,
   getTimeRangeComparison,
 } from '../../shared/time_comparison/get_time_range_comparison';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -44,8 +47,6 @@ export function ServiceOverviewThroughputChart({
   kuery: string;
   transactionName?: string;
 }) {
-  const theme = useTheme();
-
   const {
     urlParams: { comparisonEnabled, comparisonType },
   } = useLegacyUrlParams();
@@ -63,7 +64,11 @@ export function ServiceOverviewThroughputChart({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { transactionType, serviceName } = useApmServiceContext();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
+  );
+  const comparisonChartTheme = getComparisonChartTheme(previousPeriodColor);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -113,7 +118,7 @@ export function ServiceOverviewThroughputChart({
     {
       data: data.currentPeriod,
       type: 'linemark',
-      color: theme.eui.euiColorVis0,
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
         defaultMessage: 'Throughput',
       }),
@@ -123,7 +128,7 @@ export function ServiceOverviewThroughputChart({
           {
             data: data.previousPeriod,
             type: 'area',
-            color: theme.eui.euiColorMediumShade,
+            color: previousPeriodColor,
             title: i18n.translate(
               'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
               { defaultMessage: 'Previous period' }
