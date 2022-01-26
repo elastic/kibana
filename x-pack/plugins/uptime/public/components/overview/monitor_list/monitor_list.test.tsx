@@ -16,7 +16,6 @@ import {
   MonitorSummary,
 } from '../../../../common/runtime_types';
 import { MonitorListComponent, noItemsMessage } from './monitor_list';
-import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError, ResponseErrorBody } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
