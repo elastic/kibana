@@ -3,7 +3,7 @@
 exports[`get_signals_template backwards compatibility mappings for version 45 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 1,
+    "aliases_version": 2,
     "version": 45,
   },
   "properties": Object {
@@ -29,6 +29,14 @@ Object {
     },
     "kibana.alert.depth": Object {
       "path": "signal.depth",
+      "type": "alias",
+    },
+    "kibana.alert.group.id": Object {
+      "path": "signal.group.id",
+      "type": "alias",
+    },
+    "kibana.alert.group.index": Object {
+      "path": "signal.group.index",
       "type": "alias",
     },
     "kibana.alert.original_event.action": Object {
@@ -159,16 +167,8 @@ Object {
       "path": "signal.rule.immutable",
       "type": "alias",
     },
-    "kibana.alert.rule.index": Object {
-      "path": "signal.rule.index",
-      "type": "alias",
-    },
     "kibana.alert.rule.interval": Object {
       "path": "signal.rule.interval",
-      "type": "alias",
-    },
-    "kibana.alert.rule.language": Object {
-      "path": "signal.rule.language",
       "type": "alias",
     },
     "kibana.alert.rule.license": Object {
@@ -187,10 +187,6 @@ Object {
       "path": "signal.rule.note",
       "type": "alias",
     },
-    "kibana.alert.rule.query": Object {
-      "path": "signal.rule.query",
-      "type": "alias",
-    },
     "kibana.alert.rule.references": Object {
       "path": "signal.rule.references",
       "type": "alias",
@@ -201,10 +197,6 @@ Object {
     },
     "kibana.alert.rule.rule_name_override": Object {
       "path": "signal.rule.rule_name_override",
-      "type": "alias",
-    },
-    "kibana.alert.rule.saved_id": Object {
-      "path": "signal.rule.saved_id",
       "type": "alias",
     },
     "kibana.alert.rule.tags": Object {
@@ -251,48 +243,16 @@ Object {
       "path": "signal.rule.threat.technique.subtechnique.reference",
       "type": "alias",
     },
-    "kibana.alert.rule.threat_index": Object {
-      "path": "signal.rule.threat_index",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_indicator_path": Object {
-      "path": "signal.rule.threat_indicator_path",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_language": Object {
-      "path": "signal.rule.threat_language",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_mapping.entries.field": Object {
-      "path": "signal.rule.threat_mapping.entries.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_mapping.entries.type": Object {
-      "path": "signal.rule.threat_mapping.entries.type",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_mapping.entries.value": Object {
-      "path": "signal.rule.threat_mapping.entries.value",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threat_query": Object {
-      "path": "signal.rule.threat_query",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threshold.field": Object {
-      "path": "signal.rule.threshold.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.threshold.value": Object {
-      "path": "signal.rule.threshold.value",
-      "type": "alias",
-    },
     "kibana.alert.rule.timeline_id": Object {
       "path": "signal.rule.timeline_id",
       "type": "alias",
     },
     "kibana.alert.rule.timeline_title": Object {
       "path": "signal.rule.timeline_title",
+      "type": "alias",
+    },
+    "kibana.alert.rule.timestamp_override": Object {
+      "path": "signal.rule.timestamp_override",
       "type": "alias",
     },
     "kibana.alert.rule.to": Object {
@@ -519,6 +479,9 @@ Object {
               },
               "type": "object",
             },
+            "timestamp_override": Object {
+              "type": "keyword",
+            },
           },
           "type": "object",
         },
@@ -570,7 +533,7 @@ Object {
 exports[`get_signals_template backwards compatibility mappings for version 57 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 1,
+    "aliases_version": 2,
     "version": 57,
   },
 }
@@ -589,7 +552,7 @@ Object {
     },
     "mappings": Object {
       "_meta": Object {
-        "aliases_version": 1,
+        "aliases_version": 2,
         "version": 67,
       },
       "dynamic": false,
@@ -2291,6 +2254,14 @@ Object {
           "path": "signal.depth",
           "type": "alias",
         },
+        "kibana.alert.group.id": Object {
+          "path": "signal.group.id",
+          "type": "alias",
+        },
+        "kibana.alert.group.index": Object {
+          "path": "signal.group.index",
+          "type": "alias",
+        },
         "kibana.alert.original_event.action": Object {
           "path": "signal.original_event.action",
           "type": "alias",
@@ -2419,16 +2390,8 @@ Object {
           "path": "signal.rule.immutable",
           "type": "alias",
         },
-        "kibana.alert.rule.index": Object {
-          "path": "signal.rule.index",
-          "type": "alias",
-        },
         "kibana.alert.rule.interval": Object {
           "path": "signal.rule.interval",
-          "type": "alias",
-        },
-        "kibana.alert.rule.language": Object {
-          "path": "signal.rule.language",
           "type": "alias",
         },
         "kibana.alert.rule.license": Object {
@@ -2447,10 +2410,6 @@ Object {
           "path": "signal.rule.note",
           "type": "alias",
         },
-        "kibana.alert.rule.query": Object {
-          "path": "signal.rule.query",
-          "type": "alias",
-        },
         "kibana.alert.rule.references": Object {
           "path": "signal.rule.references",
           "type": "alias",
@@ -2461,10 +2420,6 @@ Object {
         },
         "kibana.alert.rule.rule_name_override": Object {
           "path": "signal.rule.rule_name_override",
-          "type": "alias",
-        },
-        "kibana.alert.rule.saved_id": Object {
-          "path": "signal.rule.saved_id",
           "type": "alias",
         },
         "kibana.alert.rule.tags": Object {
@@ -2511,48 +2466,16 @@ Object {
           "path": "signal.rule.threat.technique.subtechnique.reference",
           "type": "alias",
         },
-        "kibana.alert.rule.threat_index": Object {
-          "path": "signal.rule.threat_index",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_indicator_path": Object {
-          "path": "signal.rule.threat_indicator_path",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_language": Object {
-          "path": "signal.rule.threat_language",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_mapping.entries.field": Object {
-          "path": "signal.rule.threat_mapping.entries.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_mapping.entries.type": Object {
-          "path": "signal.rule.threat_mapping.entries.type",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_mapping.entries.value": Object {
-          "path": "signal.rule.threat_mapping.entries.value",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threat_query": Object {
-          "path": "signal.rule.threat_query",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threshold.field": Object {
-          "path": "signal.rule.threshold.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.threshold.value": Object {
-          "path": "signal.rule.threshold.value",
-          "type": "alias",
-        },
         "kibana.alert.rule.timeline_id": Object {
           "path": "signal.rule.timeline_id",
           "type": "alias",
         },
         "kibana.alert.rule.timeline_title": Object {
           "path": "signal.rule.timeline_title",
+          "type": "alias",
+        },
+        "kibana.alert.rule.timestamp_override": Object {
+          "path": "signal.rule.timestamp_override",
           "type": "alias",
         },
         "kibana.alert.rule.to": Object {
@@ -4240,6 +4163,13 @@ Object {
                 },
                 "enabled": Object {
                   "type": "keyword",
+                },
+                "execution": Object {
+                  "properties": Object {
+                    "uuid": Object {
+                      "type": "keyword",
+                    },
+                  },
                 },
                 "false_positives": Object {
                   "type": "keyword",

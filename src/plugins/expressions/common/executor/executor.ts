@@ -241,6 +241,61 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return ast;
   }
 
+  private walkAstAndTransform(
+    ast: ExpressionAstExpression,
+    transform: (
+      fn: ExpressionFunction,
+      ast: ExpressionAstFunction
+    ) => ExpressionAstFunction | ExpressionAstExpression
+  ): ExpressionAstExpression {
+    let additionalFunctions = 0;
+    return (
+      ast.chain.reduce<ExpressionAstExpression>(
+        (newAst: ExpressionAstExpression, funcAst: ExpressionAstFunction, index: number) => {
+          const realIndex = index + additionalFunctions;
+          const { function: fnName, arguments: fnArgs } = funcAst;
+          const fn = getByAlias(this.getFunctions(), fnName);
+          if (!fn) {
+            return newAst;
+          }
+
+          // if any of arguments are expressions we should migrate those first
+          funcAst.arguments = mapValues(fnArgs, (asts) =>
+            asts.map((arg) =>
+              arg != null && typeof arg === 'object'
+                ? this.walkAstAndTransform(arg, transform)
+                : arg
+            )
+          );
+
+          const transformedFn = transform(fn, funcAst);
+          if (transformedFn.type === 'function') {
+            const prevChain = realIndex > 0 ? newAst.chain.slice(0, realIndex) : [];
+            const nextChain = newAst.chain.slice(realIndex + 1);
+            return {
+              ...newAst,
+              chain: [...prevChain, transformedFn, ...nextChain],
+            };
+          }
+
+          if (transformedFn.type === 'expression') {
+            const { chain } = transformedFn;
+            const prevChain = realIndex > 0 ? newAst.chain.slice(0, realIndex) : [];
+            const nextChain = newAst.chain.slice(realIndex + 1);
+            additionalFunctions += chain.length - 1;
+            return {
+              ...newAst,
+              chain: [...prevChain, ...chain, ...nextChain],
+            };
+          }
+
+          return newAst;
+        },
+        ast
+      ) ?? ast
+    );
+  }
+
   public inject(ast: ExpressionAstExpression, references: SavedObjectReference[]) {
     let linkId = 0;
     return this.walkAst(cloneDeep(ast), (fn, link) => {
@@ -296,14 +351,14 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   private migrate(ast: SerializableRecord, version: string) {
-    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      if (!fn.migrations[version]) {
-        return;
+    return this.walkAstAndTransform(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      const migrations =
+        typeof fn.migrations === 'function' ? fn.migrations() : fn.migrations || {};
+      if (!migrations[version]) {
+        return link;
       }
 
-      ({ arguments: link.arguments, type: link.type } = fn.migrations[version](
-        link
-      ) as ExpressionAstFunction);
+      return migrations[version](link) as ExpressionAstExpression;
     });
   }
 

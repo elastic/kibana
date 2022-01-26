@@ -107,6 +107,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return Object.keys(this.getInput().panels).length;
   };
 
+  public async getPanelTitles(): Promise<string[]> {
+    const titles: string[] = [];
+    const ids: string[] = Object.keys(this.getInput().panels);
+    for (const panelId of ids) {
+      await this.untilEmbeddableLoaded(panelId);
+      const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(panelId);
+      const title = child.getTitle();
+      if (title) {
+        titles.push(title);
+      }
+    }
+    return titles;
+  }
+
   constructor(
     initialInput: DashboardContainerInput,
     private readonly services: DashboardContainerServices,
@@ -263,12 +277,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
+    const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
+      'labs:dashboard:dashboardControls'
+    );
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <KibanaThemeProvider theme$={this.services.theme.theme$}>
             <this.services.presentationUtil.ContextProvider>
-              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+              <DashboardViewport
+                controlsEnabled={controlsEnabled}
+                container={this}
+                controlGroup={this.controlGroup}
+              />
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>

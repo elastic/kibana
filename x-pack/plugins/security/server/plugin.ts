@@ -242,6 +242,7 @@ export class SecurityPlugin
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
     this.authenticationService.setup({
       http: core.http,
+      elasticsearch: core.elasticsearch,
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
@@ -310,9 +311,7 @@ export class SecurityPlugin
     });
 
     return Object.freeze<SecurityPluginSetup>({
-      audit: {
-        asScoped: this.auditSetup.asScoped,
-      },
+      audit: this.auditSetup,
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
       authz: {
         actions: this.authorizationSetup.actions,
@@ -347,6 +346,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
+      auditLogger: this.auditSetup!.withoutRequest,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),

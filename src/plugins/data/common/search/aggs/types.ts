@@ -68,6 +68,7 @@ import {
   AggParamsSum,
   AggParamsTerms,
   AggParamsMultiTerms,
+  AggParamsRareTerms,
   AggParamsTopHit,
   aggPercentileRanks,
   aggPercentiles,
@@ -78,6 +79,7 @@ import {
   aggSum,
   aggTerms,
   aggMultiTerms,
+  aggRareTerms,
   aggTopHit,
   AggTypesRegistry,
   AggTypesRegistrySetup,
@@ -166,6 +168,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
+  [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
@@ -209,6 +212,7 @@ export interface AggFunctionsMapping {
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
   aggMultiTerms: ReturnType<typeof aggMultiTerms>;
+  aggRareTerms: ReturnType<typeof aggRareTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
   aggBucketAvg: ReturnType<typeof aggBucketAvg>;
   aggBucketMax: ReturnType<typeof aggBucketMax>;

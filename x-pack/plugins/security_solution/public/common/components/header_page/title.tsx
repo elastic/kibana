@@ -21,12 +21,14 @@ StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-` as unknown as typeof EuiBadge;
+  margin-left: 10px;
+`;
 Badge.displayName = 'Badge';
 
 const Header = styled.h1`
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-gap: 12px;
+  grid-auto-flow: column;
 `;
 Header.displayName = 'Header';
 
