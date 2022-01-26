@@ -94,6 +94,6 @@ export async function initRoutes(core: CoreSetup, logger: Logger): Promise<void>
     }
   );
 
-  initMVTRoutes({ router, logger });
+  initMVTRoutes({ router, logger, core });
   initIndexingRoutes({ router, logger, dataPlugin });
 }

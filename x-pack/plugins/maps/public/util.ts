@@ -7,9 +7,10 @@
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from 'kibana/public';
-import { APP_ID, FONTS_API_PATH } from '../common/constants';
+import { FONTS_API_PATH } from '../common/constants';
 import { getHttp, getTilemap, getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
+import { makeExecutionContext } from '../common/execution_context';
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();
@@ -62,11 +63,5 @@ export function makePublicExecutionContext(
   id: string,
   description?: string
 ): KibanaExecutionContext {
-  return {
-    name: APP_ID,
-    type: 'application',
-    id,
-    description: description || '',
-    url: window.location.pathname,
-  };
+  return makeExecutionContext(id, window.location.pathname, description);
 }
