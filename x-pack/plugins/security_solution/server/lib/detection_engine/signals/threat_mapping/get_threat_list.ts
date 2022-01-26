@@ -61,10 +61,9 @@ export const getThreatList = async ({
   } = {};
 
   if (threatMapping) {
-    const requiredFieldsForThreatMatching = threatMapping
+    conditionalConfig.fields = threatMapping
       .map((mapping) => mapping.entries.map((item) => item.value))
       .flat();
-    conditionalConfig.fields = requiredFieldsForThreatMatching;
     conditionalConfig._source = false;
   } else {
     conditionalConfig._source = [`${threatIndicatorPath}.*`, 'threat.feed.*'];
