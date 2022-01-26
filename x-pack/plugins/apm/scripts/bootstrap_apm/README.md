@@ -1,6 +1,6 @@
 # Getting started
 
-A script for creating an elastic stack deployment on a remote cluster using `ecctl` and generating APM data using apm-sythtrace tool.
+A script for creating an elastic stack deployment on a remote cluster using `ecctl` and generating APM data using [apm-synthtrace](https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace) tool.
 
 ## Prerequisites for running the script
 
@@ -11,7 +11,7 @@ A script for creating an elastic stack deployment on a remote cluster using `ecc
 
 ## Configuration
 
-Update the following configuration with your own credentials and store it your home directory `$HOME/.ecctl/config.json`
+Update the following configuration with your own credentials and store it in your home directory `$HOME/.ecctl/config.json`
 
 ```
 $HOME/.ecctl/config.json
@@ -40,7 +40,7 @@ The following options are supported:
 | `-r` | Region | `gcp-us-central1`
 | `-p` | Hardware profile | gcp-cpu-optimized`
 
-The script will try to bootstrap automatically a remote cluster with the following settings and it will use [packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts](01_simple_trace.ts) to generate data
+The script will try to bootstrap automatically a remote cluster with the following settings and it will use [01_simple_trace.ts](https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts) to generate data
 
 | Setting            | Description                                                       | Default                    |
 | ------------------ | ----------------------------------------------------------------- | -------------------------- |
