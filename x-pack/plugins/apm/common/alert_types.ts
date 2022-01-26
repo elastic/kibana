@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
-
 import type {
   AsDuration,
   AsPercent,
@@ -16,6 +15,7 @@ import type {
 import type { ActionGroup } from '../../alerting/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
 import { formatDurationFromTimeUnitChar } from '../../observability/common';
+
 export const APM_SERVER_FEATURE_ID = 'apm';
 
 export enum AlertType {
