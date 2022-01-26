@@ -33,7 +33,7 @@ interface ProcessTreeDeps {
 
   // currently selected process
   selectedProcess?: Process | null;
-  onProcessSelected?: (process: Process) => void;
+  onProcessSelected: (process: Process) => void;
 }
 
 export const ProcessTree = ({
@@ -117,8 +117,10 @@ export const ProcessTree = ({
   useLayoutEffect(() => {
     if (selectedProcess) {
       selectProcess(selectedProcess);
+    } else {
+      onProcessSelected(sessionLeader);
     }
-  }, [selectedProcess, selectProcess]);
+  }, [selectedProcess, selectProcess, onProcessSelected, sessionLeader]);
 
   useEffect(() => {
     if (searchResults.length > 0) {

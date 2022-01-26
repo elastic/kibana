@@ -40,9 +40,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   const styles = useStyles({ height });
 
   const onProcessSelected = (process: Process) => {
-    if (selectedProcess !== process) {
-      setSelectedProcess(process);
-    }
+    setSelectedProcess(process);
   };
 
   const { onSearch, searchQuery } = useSearchQuery();
@@ -128,11 +126,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             paddingSize="none"
             css={styles.detailPanel}
           >
-            <SessionViewDetailPanel
-              height={height}
-              selectedProcess={selectedProcess}
-              setIsDetailOpen={setIsDetailOpen}
-            />
+            <SessionViewDetailPanel height={height} selectedProcess={selectedProcess} />
           </EuiResizablePanel>
         </>
       );

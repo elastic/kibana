@@ -4,158 +4,86 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, ReactNode } from 'react';
-import MonacoEditor from 'react-monaco-editor';
-import { partition } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiTabs, EuiTab } from '@elastic/eui';
-import { EventKind, Process } from '../../../common/types/process_tree';
-import { useStyles } from './styles';
+import React, { useState, ReactNode } from 'react';
+import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
+import { Process } from '../../../common/types/process_tree';
+import { getDetailPanelProcess } from './helpers';
+import { DetailPanelProcessTab } from '../DetailPanelProcessTab';
 
 interface SessionViewDetailPanelDeps {
   height?: number;
   selectedProcess: Process | null;
-  setIsDetailOpen(isDetailOpen: boolean): void;
   session?: any;
 }
 
-interface ProcessDetailTabData {
-  id: string | number;
+interface EuiTabProps {
+  id: string;
   name: string;
   content: ReactNode;
-  kind: string;
+  disabled?: boolean;
+  append?: ReactNode;
+  prepend?: ReactNode;
 }
 
 /**
  * Detail panel in the session view.
  */
-export const SessionViewDetailPanel = ({
-  height,
-  selectedProcess,
-  setIsDetailOpen,
-}: SessionViewDetailPanelDeps) => {
-  const [selectedCommandTab, setSelectedCommandTab] = useState<string | number>('');
-  const [commandTabs, setCommandTabs] = useState<ProcessDetailTabData[]>([]);
-  const [selectedAlertTab, setSelectedAlertTab] = useState<string | number>('');
-  const [alertTabs, setAlertTabs] = useState<ProcessDetailTabData[]>([]);
+export const SessionViewDetailPanel = ({ height, selectedProcess }: SessionViewDetailPanelDeps) => {
+  const [selectedTabId, setSelectedTabId] = useState('process');
+  const processDetail = getDetailPanelProcess(selectedProcess);
+  if (!selectedProcess) {
+    return <span>Please select a process</span>;
+  }
 
-  const styles = useStyles({ height });
-
-  useEffect(() => {
-    const selectedProcessEvents = (selectedProcess?.events || []).map((processEvent, idx) => ({
-      id: `${processEvent?.event.action}-${idx + 1}` || `event-${idx + 1}`,
-      name: `${processEvent?.event.action}-${idx + 1}` || `event-${idx + 1}`,
-      content: (
-        <div>
-          <MonacoEditor
-            height={400}
-            language="json"
-            options={{
-              lineNumbers: 'on',
-              readOnly: true,
-            }}
-            value={JSON.stringify(processEvent || {}, null, 4)}
-          />
-          <EuiSpacer size="xxl" />
-        </div>
+  const tabs: EuiTabProps[] = [
+    {
+      id: 'process',
+      name: 'Process',
+      content: <DetailPanelProcessTab processDetail={processDetail} />,
+    },
+    {
+      id: 'host',
+      name: 'Host',
+      content: null,
+    },
+    {
+      id: 'alerts',
+      disabled: true,
+      name: 'Alerts',
+      append: (
+        <EuiNotificationBadge className="eui-alignCenter" size="m">
+          10
+        </EuiNotificationBadge>
       ),
-      kind: processEvent?.event.kind,
-    }));
+      content: null,
+    },
+  ];
 
-    const [processCommandTabs, processAlertTabs] = partition(selectedProcessEvents, {
-      kind: EventKind.event,
-    });
-
-    setCommandTabs(processCommandTabs);
-    setSelectedCommandTab(processCommandTabs[0]?.id || '');
-    setAlertTabs(processAlertTabs);
-    setSelectedAlertTab(processAlertTabs[0]?.id || '');
-  }, [selectedProcess]);
-
-  const renderSelectedProcessCommandDetail = () => {
-    if (selectedProcess) {
-      return (
-        <div data-test-subj="sessionViewDetailPanelCommandDetail">
-          <EuiTitle size="s">
-            <span>
-              <FormattedMessage
-                id="xpack.sessionView.commandDetail"
-                defaultMessage="Command detail"
-              />
-            </span>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiTabs>
-            {commandTabs.map((tab, idx) => (
-              <EuiTab
-                key={idx}
-                onClick={() => setSelectedCommandTab(tab.id)}
-                isSelected={tab.id === selectedCommandTab}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiSpacer size="xxl" />
-          {commandTabs.find((tab) => tab.id === selectedCommandTab)?.content}
-        </div>
-      );
-    }
+  const onSelectedTabChanged = (id: string) => {
+    setSelectedTabId(id);
   };
 
-  const renderSelectedProcessAlertDetail = () => {
-    if (selectedProcess && selectedProcess.hasAlerts()) {
-      return (
-        <div data-test-subj="sessionViewDetailPanelAlertDetail">
-          <EuiTitle size="s">
-            <span>
-              <FormattedMessage id="xpack.sessionView.alertDetail" defaultMessage="Alert detail" />
-            </span>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiTabs>
-            {alertTabs.map((tab, idx) => (
-              <EuiTab
-                key={idx}
-                onClick={() => setSelectedAlertTab(tab.id)}
-                isSelected={tab.id === selectedAlertTab}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiSpacer size="xxl" />
-          {alertTabs.find((tab) => tab.id === selectedAlertTab)?.content}
-        </div>
-      );
-    }
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        key={index}
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        disabled={tab.disabled}
+        prepend={tab.prepend}
+        append={tab.append}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
   };
 
   return (
     <>
-      {renderSelectedProcessCommandDetail()}
-      <div data-test-subj="sessionViewDetailPanelSessionDetail">
-        <EuiTitle size="s">
-          <span>
-            <FormattedMessage
-              id="xpack.sessionView.sessionDetail"
-              defaultMessage="Session detail"
-            />
-          </span>
-        </EuiTitle>
-        {/* Add session detail */}
-      </div>
-      <EuiSpacer size="xxl" />
-      <div data-test-subj="sessionViewDetailPanelServerDetail">
-        <EuiTitle size="s">
-          <span>
-            <FormattedMessage id="xpack.sessionView.serverDetail" defaultMessage="Server detail" />
-          </span>
-        </EuiTitle>
-        {/* Add server detail */}
-      </div>
-      <EuiSpacer size="xxl" />
-      {renderSelectedProcessAlertDetail()}
+      <EuiTabs size="l" expand>
+        {renderTabs()}
+      </EuiTabs>
+      {tabs.find((obj) => obj.id === selectedTabId)?.content}
     </>
   );
 };

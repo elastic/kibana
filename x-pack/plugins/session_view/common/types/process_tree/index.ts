@@ -33,6 +33,15 @@ export interface ProcessEventResults {
   events: any[];
 }
 
+export type EntryMetaType =
+  | 'init'
+  | 'sshd'
+  | 'ssm'
+  | 'kubelet'
+  | 'teleport'
+  | 'terminal'
+  | 'console';
+
 export interface ProcessFields {
   args: string[];
   args_count: number;
@@ -47,6 +56,14 @@ export interface ProcessFields {
   start: Date;
   end?: Date;
   exit_code?: number;
+  entry_meta?: EntryMeta;
+}
+
+export interface EntryMeta {
+  type: EntryMetaType;
+  source: {
+    ip: string;
+  };
 }
 
 export interface ProcessSelf extends ProcessFields {

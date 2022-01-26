@@ -14,3 +14,29 @@ export interface SessionViewConfigType {
 export type SessionViewServices = CoreStart & {
   timelines: TimelinesUIStart;
 };
+
+export interface DetailPanelProcess {
+  id: string;
+  start: Date;
+  end: Date;
+  exit_code: string;
+  user: string;
+  args: string[];
+  executable: string[][];
+  pid: number;
+  entryLeader: DetailPanelProcessLeader;
+  sessionLeader: DetailPanelProcessLeader;
+  groupLeader: DetailPanelProcessLeader;
+  parent: DetailPanelProcessLeader;
+}
+
+export interface DetailPanelProcessLeader {
+  id: string;
+  start: Date;
+  entryMetaType: string;
+  userName: string;
+  interactive: boolean;
+  pid: number;
+  entryMetaSourceIp: string;
+  executable: string;
+}
