@@ -815,7 +815,7 @@ export class ExceptionListClient {
 
   /**
    * Import exception lists parent containers and items as array
-   * @params exceptionsToImport {stream} array of lists and items
+   * @params exceptionsToImport {array} array of lists and items
    * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
    * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
    * @return {ImportExceptionsResponseSchema} summary of imported count and errors
