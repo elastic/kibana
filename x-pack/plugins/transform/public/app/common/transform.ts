@@ -20,6 +20,9 @@ export function isTransformIdValid(transformId: TransformId) {
   return /^[a-z0-9](?:[a-z0-9_\-\.]*[a-z0-9])?$/g.test(transformId);
 }
 
+export const TRANSFORM_ERROR_TYPE = {
+  DANGLING_TASK: 'dangling_task',
+} as const;
 export enum REFRESH_TRANSFORM_LIST_STATE {
   ERROR = 'error',
   IDLE = 'idle',
