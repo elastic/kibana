@@ -1,8 +1,9 @@
 [[whats-new]]
-== What's new in 8.0
+== What's new in {minor-version}
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes>>. 
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>.
 
 coming[8.0.0]
 
@@ -10,5 +11,80 @@ coming[8.0.0]
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+=== Index patterns are now data views
+By renaming index patterns to data views, we’re laying a foundation for building
+many exciting features over the next year and beyond. Your data views will work
+exactly as index patterns did in previous releases.
+
+[float]
+=== Vector tile support now GA
+
+Vector tile drawing of {es} data is generally available in *Maps* .
+Enjoy faster performance and smooth navigation of your data at scale.
+Read more about this feature.
+
+[role="screenshot"]
+image::images/highlights-maps.png[Three vector tile examples in Maps]
+
+[float]
+=== Desaturated basemaps are the default
+
+The default basemaps in light and dark themes now use
+the more understated desaturated basemap. This gives your data the most
+visual attention in *Maps*.
+
+[float]
+=== Discover has field statistics (beta)
+
+Enable the new {kibana-ref}/field-statistics.html[*Field statistics*] view
+for a summary of all fields (or just selected fields) in your data.
+You'll find interesting fields to visualize and learn more about the shape of your data.
+The *Field statistics* view
+is similar to the Index Data Visualizerin {ml-app}.
+
+[role="screenshot"]
+image::images/highlights-discover.gif[Fields statistics view in Discover]
+
+[float]
+=== Multi-layered time axis redesigned
+The time axis was upgraded across {kib} to solve key readability and
+formatting issues. This redesign affects *Lens*, *TSVB*,
+aggregation-based visualizations, and *Discover*.
+This multi-layered format enables you to creating easier to understand visualizations from your data
+
+[role="screenshot"]
+image::images/highlights-time-axis.gif[Upgraded time axis]
+
+[float]
+=== Lens heatmaps supports values mode
+
+Enable *Show* on labels in the editor toolbar and,
+when there’s room, a responsive data label will appear in each heatmap cell.
+
+[role="screenshot"]
+image::images/highlights-lens.png[Show pop-up on heatmap cell]
+
+[float]
+=== Canvas editing toolbar renovated
+This redesign brings a set of edit controls in *Canvas*,
+similar to what you see in *Dashboard*.
+Use this toolbar to quickly access the *Visualization Library* and
+create elements and visualizations.
+
+[role="screenshot"]
+image::images/highlights-canvas.png[Editing toolbar in Canvas]
+
+Canvas also now has these two features similar to *Dashboard*.
+
+* You can now create embedded visualizations in your *Canvas* workpads. Just like in *Dashboard*,
+promote favorites to the *Visualization Library* for re-use.
+
+* Editing a visualization from *Canvas* will return you to *Canvas*s when you
+click *Save and close* &mdash; just like in *Dashboard*. Fewer clicks to author
+and edit existing presentations.
+
+
 
 // end::notable-highlights[]
