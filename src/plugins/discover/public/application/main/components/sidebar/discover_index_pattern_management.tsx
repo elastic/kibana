@@ -7,7 +7,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiHorizontalRule,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../../build_services';
 import { DataView } from '../../../../../../data/common';
@@ -106,6 +112,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
               defaultMessage: 'Manage data view fields',
             })}
           </EuiContextMenuItem>,
+          <EuiHorizontalRule style={{ margin: '0px' }} />,
           <EuiContextMenuItem
             key="new"
             icon="indexSettings"
