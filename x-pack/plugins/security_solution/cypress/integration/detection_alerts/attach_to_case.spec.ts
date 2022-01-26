@@ -8,11 +8,7 @@
 import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
-import {
-  expandFirstAlertActions,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
+import { expandFirstAlertActions } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -32,8 +28,6 @@ describe('Alerts timeline', () => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);

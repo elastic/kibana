@@ -152,21 +152,6 @@ export const waitForAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };
 
-export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({
-    url: '/api/detection_engine/index',
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status !== 200) {
-      cy.request({
-        method: 'POST',
-        url: `/api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'create-signals-index' },
-      });
-    }
-  });
-};
-
 export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('exist');
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
