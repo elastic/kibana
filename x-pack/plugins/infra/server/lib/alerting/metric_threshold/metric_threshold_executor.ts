@@ -147,7 +147,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const groups = [...new Set([...prevGroups, ...resultGroups])];
 
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
-
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -286,6 +285,8 @@ const formatAlertResult = <AlertResult>(
     comparator: Comparator;
     warningThreshold?: number[];
     warningComparator?: Comparator;
+    timeSize: number;
+    timeUnit: string;
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {

@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import {
+  formatDurationFromTimeUnitChar,
+  TimeUnitChar,
+} from '../../../../../observability/common/utils/formatters/duration';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
   'xpack.infra.metrics.alerting.threshold.documentCount',
@@ -114,16 +118,19 @@ export const buildFiredAlertReason: (alertResult: {
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
+  timeSize: number;
+  timeUnit: TimeUnitChar;
+}) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {currentValue} in the last 5 mins for {group}. Alert when {comparator} {threshold}%.',
+      '{metric} is {currentValue} in the last {duration} for {group}. Alert when {comparator} {threshold}.',
     values: {
       group,
       metric,
       comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
       threshold: thresholdToI18n(threshold),
       currentValue,
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),
     },
   });
 

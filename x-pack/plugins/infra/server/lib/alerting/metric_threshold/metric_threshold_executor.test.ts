@@ -343,10 +343,10 @@ describe('The metric threshold alert type', () => {
       expect(reasons.length).toBe(2);
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('current value is 1');
-      expect(reasons[1]).toContain('current value is 3');
-      expect(reasons[0]).toContain('threshold of 1');
-      expect(reasons[1]).toContain('threshold of 3');
+      expect(reasons[0]).toContain('is 1');
+      expect(reasons[1]).toContain('is 3');
+      expect(reasons[0]).toContain('Alert when equal to 1%');
+      expect(reasons[1]).toContain('Alert when equal to 3%');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -714,8 +714,8 @@ describe('The metric threshold alert type', () => {
       await execute();
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toContain('current value is 100%');
-      expect(action.reason).toContain('threshold of 75%');
+      expect(action.reason).toContain('is 100%');
+      expect(action.reason).toContain('Alert when greater than 75%');
       expect(action.threshold.condition0[0]).toBe('75%');
       expect(action.value.condition0).toBe('100%');
     });
