@@ -15,8 +15,7 @@ import {
   addRunningAgentToAgentPolicy,
   createBenchmarkEntry,
 } from './benchmarks';
-import { CoreSetup, SavedObjectsClientContract } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   createMockAgentPolicyService,
   createMockAgentService,
@@ -27,7 +26,6 @@ import { AgentPolicy } from '../../../../fleet/common';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
-import { CspServerPluginStart, CspServerPluginStartDeps } from '../../types';
 
 function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
   return {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup } from 'kibana/server';
 import {
   elasticsearchClientMock,
   ElasticsearchClientMock,
@@ -12,16 +11,9 @@ import {
 } from 'src/core/server/elasticsearch/client/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from 'src/core/server/http/router/request';
-import {
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from 'src/core/server/mocks';
-import { CspServerPluginStart } from '../..';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
-import { CspServerPluginStartDeps } from '../../types';
 import {
   defineFindingsIndexRoute,
   findingsInputSchema,
@@ -52,14 +44,10 @@ describe('findings API', () => {
   it('validate the API route path', async () => {
     const router = httpServiceMock.createRouter();
     const cspAppContextService = new CspAppService();
-    const coreSetup = coreMock.createSetup() as CoreSetup<
-      CspServerPluginStartDeps,
-      CspServerPluginStart
-    >;
+
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      getStartServices: coreSetup.getStartServices,
     };
     defineFindingsIndexRoute(router, cspContext);
 
@@ -151,14 +139,10 @@ describe('findings API', () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
-      const coreSetup = coreMock.createSetup() as CoreSetup<
-        CspServerPluginStartDeps,
-        CspServerPluginStart
-      >;
+
       const cspContext: CspAppContext = {
         logger,
         service: cspAppContextService,
-        getStartServices: coreSetup.getStartServices,
       };
       defineFindingsIndexRoute(router, cspContext);
 
@@ -209,14 +193,10 @@ describe('findings API', () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
-      const coreSetup = coreMock.createSetup() as CoreSetup<
-        CspServerPluginStartDeps,
-        CspServerPluginStart
-      >;
+
       const cspContext: CspAppContext = {
         logger,
         service: cspAppContextService,
-        getStartServices: coreSetup.getStartServices,
       };
       defineFindingsIndexRoute(router, cspContext);
 
@@ -244,14 +224,10 @@ describe('findings API', () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
-      const coreSetup = coreMock.createSetup() as CoreSetup<
-        CspServerPluginStartDeps,
-        CspServerPluginStart
-      >;
+
       const cspContext: CspAppContext = {
         logger,
         service: cspAppContextService,
-        getStartServices: coreSetup.getStartServices,
       };
       defineFindingsIndexRoute(router, cspContext);
 
@@ -280,14 +256,10 @@ describe('findings API', () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
-      const coreSetup = coreMock.createSetup() as CoreSetup<
-        CspServerPluginStartDeps,
-        CspServerPluginStart
-      >;
+
       const cspContext: CspAppContext = {
         logger,
         service: cspAppContextService,
-        getStartServices: coreSetup.getStartServices,
       };
       defineFindingsIndexRoute(router, cspContext);
 
@@ -316,14 +288,10 @@ describe('findings API', () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
-      const coreSetup = coreMock.createSetup() as CoreSetup<
-        CspServerPluginStartDeps,
-        CspServerPluginStart
-      >;
+
       const cspContext: CspAppContext = {
         logger,
         service: cspAppContextService,
-        getStartServices: coreSetup.getStartServices,
       };
       defineFindingsIndexRoute(router, cspContext);
 
@@ -353,14 +321,10 @@ describe('findings API', () => {
       const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
       const router = httpServiceMock.createRouter();
       const cspAppContextService = new CspAppService();
-      const coreSetup = coreMock.createSetup() as CoreSetup<
-        CspServerPluginStartDeps,
-        CspServerPluginStart
-      >;
+
       const cspContext: CspAppContext = {
         logger,
         service: cspAppContextService,
-        getStartServices: coreSetup.getStartServices,
       };
       defineFindingsIndexRoute(router, cspContext);
 
