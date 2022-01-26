@@ -57,7 +57,7 @@ export const ResetActionModal: FC<ResetAction> = ({
               count={1}
               action={i18n.translate(
                 'xpack.transform.transformList.resetManagedTransformDescription',
-                { defaultMessage: 'deleting' }
+                { defaultMessage: 'resetting' }
               )}
             />
             <EuiSpacer />
