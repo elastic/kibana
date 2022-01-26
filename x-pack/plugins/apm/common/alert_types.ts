@@ -7,29 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
-import * as moment from 'moment';
-import momentDurationFormatSetup from 'moment-duration-format';
-import type { AsDuration, AsPercent } from '../../observability/common';
+
+import type {
+  AsDuration,
+  AsPercent,
+  TimeUnitChar,
+} from '../../observability/common';
 import type { ActionGroup } from '../../alerting/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
-
-momentDurationFormatSetup(moment);
+import { formatDurationFromTimeUnitChar } from '../../observability/common';
 export const APM_SERVER_FEATURE_ID = 'apm';
-
-const getInterval = (windowSize: number, windowUnit: string): string => {
-  switch (windowUnit) {
-    case 's':
-      return moment.duration(windowSize, 'seconds').format('s [sec]');
-    case 'm':
-      return moment.duration(windowSize, 'minutes').format('m [min]');
-    case 'h':
-      return moment.duration(windowSize, 'hours').format('h [hr]');
-    case 'd':
-      return moment.duration(windowSize, 'days').format('d [day]');
-    default:
-      return `${windowSize} ${windowUnit}`;
-  }
-};
 
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
@@ -66,7 +53,10 @@ export function formatErrorCountReason({
       threshold,
       measured,
       serviceName,
-      interval: getInterval(windowSize, windowUnit),
+      interval: formatDurationFromTimeUnitChar(
+        windowSize,
+        windowUnit as TimeUnitChar
+      ),
     },
   });
 }
@@ -100,7 +90,10 @@ export function formatTransactionDurationReason({
       measured: asDuration(measured),
       serviceName,
       aggregationType: aggregationTypeFormatted,
-      interval: getInterval(windowSize, windowUnit),
+      interval: formatDurationFromTimeUnitChar(
+        windowSize,
+        windowUnit as TimeUnitChar
+      ),
     },
   });
 }
@@ -126,7 +119,10 @@ export function formatTransactionErrorRateReason({
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
       serviceName,
-      interval: getInterval(windowSize, windowUnit),
+      interval: formatDurationFromTimeUnitChar(
+        windowSize,
+        windowUnit as TimeUnitChar
+      ),
     },
   });
 }
@@ -152,7 +148,10 @@ export function formatTransactionDurationAnomalyReason({
         serviceName,
         severityLevel,
         measured,
-        interval: getInterval(windowSize, windowUnit),
+        interval: formatDurationFromTimeUnitChar(
+          windowSize,
+          windowUnit as TimeUnitChar
+        ),
       },
     }
   );
