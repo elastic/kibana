@@ -49,13 +49,6 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
   ...req,
 });
 
-/**
- * The fields for creating a collection style case.
- */
-export const postCollectionReq: CasePostRequest = {
-  ...postCaseReq,
-};
-
 export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
   type: CommentType.user,
