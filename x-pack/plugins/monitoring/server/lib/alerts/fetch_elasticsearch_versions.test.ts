@@ -11,6 +11,18 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchElasticsearchVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
@@ -45,7 +57,7 @@ describe('fetchElasticsearchVersions', () => {
       } as estypes.SearchResponse)
     );
 
-    const result = await fetchElasticsearchVersions(esClient, clusters, index, size);
+    const result = await fetchElasticsearchVersions(esClient, clusters, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,

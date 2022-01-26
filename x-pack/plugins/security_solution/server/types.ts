@@ -15,7 +15,7 @@ import type { IRuleDataService } from '../../rule_registry/server';
 
 import { AppClient } from './client';
 import { ConfigType } from './config';
-import { IRuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/types';
+import { IRuleExecutionLogClient } from './lib/detection_engine/rule_execution_log';
 import { FrameworkRequest } from './lib/framework';
 import { EndpointAuthz } from '../common/endpoint/types/authz';
 

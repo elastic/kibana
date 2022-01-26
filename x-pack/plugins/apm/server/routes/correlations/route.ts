@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { isActivePlatinumLicense } from '../../../common/license_check';
 
@@ -26,7 +26,6 @@ import { fetchFieldsStats } from './queries/field_stats/get_fields_stats';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
@@ -49,7 +48,7 @@ const fieldCandidatesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ fieldCandidates: string[] }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -87,7 +86,14 @@ const fieldStatsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    stats: Array<
+      import('./../../../common/correlations/field_stats_types').FieldStats
+    >;
+    errors: any[];
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -132,7 +138,11 @@ const fieldValueStatsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../common/correlations/field_stats_types').TopValuesStats
+  > => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -176,7 +186,14 @@ const fieldValuePairsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    fieldValuePairs: Array<
+      import('./../../../common/correlations/types').FieldValuePair
+    >;
+    errors: any[];
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -225,7 +242,15 @@ const significantCorrelationsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    latencyCorrelations: Array<
+      import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation
+    >;
+    ccsWarning: boolean;
+    totalDocCount: number;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -271,7 +296,14 @@ const pValuesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    failedTransactionsCorrelations: Array<
+      import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation
+    >;
+    ccsWarning: boolean;
+  }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -294,10 +326,11 @@ const pValuesRoute = createApmServerRoute({
   },
 });
 
-export const correlationsRouteRepository = createApmServerRouteRepository()
-  .add(pValuesRoute)
-  .add(fieldCandidatesRoute)
-  .add(fieldStatsRoute)
-  .add(fieldValueStatsRoute)
-  .add(fieldValuePairsRoute)
-  .add(significantCorrelationsRoute);
+export const correlationsRouteRepository = {
+  ...pValuesRoute,
+  ...fieldCandidatesRoute,
+  ...fieldStatsRoute,
+  ...fieldValueStatsRoute,
+  ...fieldValuePairsRoute,
+  ...significantCorrelationsRoute,
+};
