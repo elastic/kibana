@@ -18,6 +18,7 @@ import {
   getExceptionListClientMock,
   getExceptionListSavedObjectClientMock,
   getUpdateExceptionListItemOptionsMock,
+  toReadable,
 } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
@@ -270,6 +271,32 @@ describe('exception_list_client', () => {
         },
         (): ExtensionPointStorageContextMock['exceptionPreDelete']['callback'] => {
           return extensionPointStorageContext.exceptionPreDelete.callback;
+        },
+      ],
+      [
+        'importExceptionListAndItems',
+        (): ReturnType<ExceptionListClient['importExceptionListAndItems']> => {
+          return exceptionListClient.importExceptionListAndItems({
+            exceptionsToImport: toReadable([getExceptionListItemSchemaMock()]),
+            maxExceptionsImportSize: 10_000,
+            overwrite: true,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreImport']['callback'] => {
+          return extensionPointStorageContext.exceptionPreImport.callback;
+        },
+      ],
+      [
+        'importExceptionListAndItemsAsArray',
+        (): ReturnType<ExceptionListClient['importExceptionListAndItemsAsArray']> => {
+          return exceptionListClient.importExceptionListAndItemsAsArray({
+            exceptionsToImport: [getExceptionListItemSchemaMock()],
+            maxExceptionsImportSize: 10_000,
+            overwrite: true,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreImport']['callback'] => {
+          return extensionPointStorageContext.exceptionPreImport.callback;
         },
       ],
     ])(
