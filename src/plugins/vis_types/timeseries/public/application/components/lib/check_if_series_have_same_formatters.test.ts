@@ -26,7 +26,7 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     expect(result).toBe(true);
   });
 
-  it('should return false for the different value_template series formatters', () => {
+  it('should return true for the different value_template series formatters', () => {
     const seriesModel = [
       {
         formatter: DATA_FORMATTERS.PERCENT,
@@ -39,7 +39,7 @@ describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
     ] as Series[];
     const result = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap);
 
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
   it('should return true for the same field formatters', () => {

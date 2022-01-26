@@ -173,18 +173,6 @@ describe('TimeseriesVisualization', () => {
       expect(yAxis[0].tickFormatter(value)).toBe('500B');
     });
 
-    test('should return simple number from yAxis formatter and different values from the same byte formatters, but with different value templates', () => {
-      const timeSeriesProps = setupTimeSeriesProps(
-        ['byte', 'byte'],
-        ['{{value}}', '{{value}} value']
-      );
-      const { series, yAxis } = timeSeriesProps;
-
-      expect(series[0].tickFormat(value)).toBe('500B');
-      expect(series[1].tickFormat(value)).toBe('500B value');
-      expect(yAxis[0].tickFormatter(value)).toBe(`${value}`);
-    });
-
     test('should return percent formatted value from yAxis formatter and three percent formatted series with the same value templates', () => {
       const timeSeriesProps = setupTimeSeriesProps(['percent', 'percent', 'percent']);
 
