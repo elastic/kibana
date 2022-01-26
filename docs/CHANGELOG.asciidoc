@@ -74,8 +74,6 @@ Review important information about the {kib} 7.17.x releases.
 [[release-notes-7.17.0]]
 == {kib} 7.17.0
 
-coming::[7.17.0]
-
 Review the following information about the 7.17.0 release.
 
 [float]
