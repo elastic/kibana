@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -49,6 +50,9 @@ const StyledEuiSelectable = styled.div`
 const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
+  .euiButtonGroupButton {
+    padding-right: ${(props) => props.theme.eui.paddingSizes.l};
+  }
 `;
 
 const EffectivePolicyFormContainer = styled.div`
@@ -104,7 +108,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
-          iconType: isGlobal ? 'checkInCircleFilled' : '',
+          iconType: isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('global'),
         },
         {
@@ -112,7 +116,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
-          iconType: !isGlobal ? 'checkInCircleFilled' : '',
+          iconType: !isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('perPolicy'),
         },
       ],
@@ -221,7 +225,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
                 onChange={handleGlobalButtonChange}
                 color="primary"
-                isFullWidth
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
               />
             </EuiFormRow>
