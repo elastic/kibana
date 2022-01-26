@@ -15,7 +15,14 @@ export class SpanGenerator implements SpanIterable {
   constructor(
     private readonly interval: Interval,
     private readonly dataGenerator: Array<(interval: Interval) => Generator<ApmFields>>
-  ) {}
+  ) {
+    this._order = interval.from > interval.to ? 'desc' : 'asc';
+  }
+
+  private readonly _order: 'desc' | 'asc';
+  order() {
+    return this._order;
+  }
 
   toArray(): ApmFields[] {
     return Array.from(this);

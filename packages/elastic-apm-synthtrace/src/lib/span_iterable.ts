@@ -10,13 +10,23 @@ import { ApmFields } from './apm/apm_fields';
 import { SpanGeneratorsUnion } from './span_generators_union';
 
 export interface SpanIterable extends Iterable<ApmFields>, AsyncIterable<ApmFields> {
+  order(): 'desc' | 'asc';
+
   toArray(): ApmFields[];
 
   concat(...iterables: SpanIterable[]): SpanGeneratorsUnion;
 }
 
 export class SpanArrayIterable implements SpanIterable {
-  constructor(private fields: ApmFields[]) {}
+  constructor(private fields: ApmFields[]) {
+    const timestamps = fields.filter((f) => f['@timestamp']).map((f) => f['@timestamp']!);
+    this._order = timestamps.length > 1 ? (timestamps[0] > timestamps[1] ? 'desc' : 'asc') : 'asc';
+  }
+
+  private readonly _order: 'desc' | 'asc';
+  order() {
+    return this._order;
+  }
 
   async *[Symbol.asyncIterator](): AsyncIterator<ApmFields> {
     return this.fields[Symbol.iterator]();

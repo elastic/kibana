@@ -9,6 +9,7 @@ import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
 import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
+import { StreamProcessor } from '../../lib/stream_processor';
 
 export async function startHistoricalDataUpload(
   esClient: ApmSynthtraceEsClient,
@@ -28,6 +29,24 @@ export async function startHistoricalDataUpload(
   logger.info(`Generating data from ${from} to ${to}`);
 
   const events = logger.perf('generate_scenario', () => generate({ from, to }));
+
+  if (runOptions.dryRun) {
+    const maxDocs = runOptions.maxDocs;
+    const stream = new StreamProcessor({
+      processors: StreamProcessor.apmProcessors,
+      maxSourceEvents: maxDocs,
+      logger,
+    }).streamToDocument(StreamProcessor.toDocument, events);
+    logger.perf('enumerate_scenario', () => {
+      // @ts-ignore
+      // We just want to enumerate
+      let yielded = 0;
+      for (const _ of stream) {
+        yielded++;
+      }
+    });
+    return;
+  }
 
   const clientWorkers = runOptions.clientWorkers;
   await logger.perf('index_scenario', () =>

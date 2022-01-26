@@ -15,6 +15,7 @@ import { getBreakdownMetrics } from './apm/processors/get_breakdown_metrics';
 import { parseInterval } from './interval';
 import { dedot } from './utils/dedot';
 import { ApmElasticsearchOutputWriteTargets } from './apm/utils/get_apm_write_targets';
+import { Logger } from './utils/create_logger';
 
 export interface StreamProcessorOptions {
   processors: Array<(events: ApmFields[]) => ApmFields[]>;
@@ -22,6 +23,7 @@ export interface StreamProcessorOptions {
   maxBufferSize?: number;
   // the maximum source events to process, not the maximum documents outputted by the processor
   maxSourceEvents?: number;
+  logger?: Logger;
 }
 
 export class StreamProcessor {
@@ -41,45 +43,79 @@ export class StreamProcessor {
 
   // TODO move away from chunking and feed this data one by one to processors
   *stream(...eventSources: SpanIterable[]) {
+    const maxBufferSize = this.options.maxBufferSize ?? 10000;
+    const maxSourceEvents = this.options.maxSourceEvents;
     let localBuffer = [];
     let flushAfter: number | null = null;
     let sourceEventsYielded = 0;
     for (const eventSource of eventSources) {
+      const order = eventSource.order();
+      this.options.logger?.info(`order: ${order}`);
       for (const event of eventSource) {
         const eventDate = event['@timestamp'] as number;
         localBuffer.push(event);
-        if (flushAfter === null && eventDate !== null)
-          flushAfter = moment(eventDate).add(this.intervalAmount, this.intervalUnit).valueOf();
+        if (flushAfter === null && eventDate !== null) {
+          flushAfter = this.calculateFlushAfter(eventDate, order);
+        }
 
         yield StreamProcessor.enrich(event);
         sourceEventsYielded++;
-        if (this.options.maxSourceEvents && sourceEventsYielded >= this.options.maxSourceEvents) {
+        if (maxSourceEvents && sourceEventsYielded % (maxSourceEvents / 10) === 0) {
+          this.options.logger?.info(`Yielded ${sourceEventsYielded} events`);
+        }
+        if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
           // yielded the maximum source events, we still want the local buffer to generate derivative documents
           break;
         }
         if (
-          (flushAfter !== null && eventDate > flushAfter) ||
-          localBuffer.length === (this.options.maxBufferSize ?? 10000)
+          localBuffer.length === maxBufferSize ||
+          (flushAfter != null &&
+            ((order === 'asc' && eventDate > flushAfter) ||
+              (order === 'desc' && eventDate < flushAfter)))
         ) {
+          const e = new Date(eventDate).toISOString();
+          const f = new Date(flushAfter!).toISOString();
+          this.options.logger?.debug(
+            `flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
+          );
           for (const processor of this.options.processors) {
             yield* processor(localBuffer).map(StreamProcessor.enrich);
           }
           localBuffer = [];
-          flushAfter = moment(flushAfter).add(this.intervalAmount, this.intervalUnit).valueOf();
+          flushAfter = this.calculateFlushAfter(flushAfter, order);
         }
       }
-      if (this.options.maxSourceEvents && sourceEventsYielded >= this.options.maxSourceEvents) {
+      if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
+        this.options.logger?.info(`Yielded maximum number of documents: ${maxSourceEvents}`);
         break;
       }
     }
     if (localBuffer.length > 0) {
+      this.options.logger?.info(`Processing remaining buffer: ${localBuffer.length} items left`);
       for (const processor of this.options.processors) {
         yield* processor(localBuffer).map(StreamProcessor.enrich);
       }
     }
   }
+
+  private calculateFlushAfter(eventDate: number | null, order: 'asc' | 'desc') {
+    if (order === 'desc') {
+      return moment(eventDate).subtract(this.intervalAmount, this.intervalUnit).valueOf();
+    } else {
+      return moment(eventDate).add(this.intervalAmount, this.intervalUnit).valueOf();
+    }
+  }
+
   async *streamAsync(...eventSources: SpanIterable[]): AsyncIterator<ApmFields> {
     yield* this.stream(...eventSources);
+  }
+  *streamToDocument<TDocument>(
+    map: (d: ApmFields) => TDocument,
+    ...eventSources: SpanIterable[]
+  ): Generator<ApmFields> {
+    for (const apmFields of this.stream(...eventSources)) {
+      yield map(apmFields);
+    }
   }
   async *streamToDocumentAsync<TDocument>(
     map: (d: ApmFields) => TDocument,

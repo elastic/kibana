@@ -52,6 +52,10 @@ function options(y: Argv) {
       description: 'Generate and index data continuously',
       boolean: true,
     })
+    .option('--dryRun', {
+      description: 'Enumerates the stream without sending events to Elasticsearch ',
+      boolean: true,
+    })
     .option('maxDocs', {
       description:
         'The maximum number of documents we are allowed to generate, should be multiple of 10.000',
@@ -124,7 +128,12 @@ yargs(process.argv.slice(2))
 
     const live = argv.live;
 
-    let forceDataStreams = false;
+    const forceDataStreams = !!runOptions.cloudId;
+    const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
+    if (runOptions.dryRun) {
+      await startHistoricalDataUpload(esClient, logger, runOptions, from, to);
+      return;
+    }
     if (runOptions.cloudId) {
       const kibanaClient = new ApmSynthtraceKibanaClient(logger);
       await kibanaClient.migrateCloudToManagedApm(
@@ -132,9 +141,7 @@ yargs(process.argv.slice(2))
         runOptions.username,
         runOptions.password
       );
-      forceDataStreams = true;
     }
-    const esClient = new ApmSynthtraceEsClient(client, logger, forceDataStreams);
 
     if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
       await esClient.updateComponentTemplates(runOptions.numShards);

@@ -59,7 +59,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'batchSize',
       'writeTarget',
       'numShards',
-      'scenarioOpts'
+      'scenarioOpts',
+      'dryRun'
     ),
     intervalInMs,
     bucketSizeInMs,

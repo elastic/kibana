@@ -20,10 +20,10 @@ export function parseInterval(interval: string): [number, string] {
 
 export class Interval implements Iterable<number> {
   constructor(
-    private readonly from: Date,
-    private readonly to: Date,
-    private readonly interval: string,
-    private readonly yieldRate: number = 1
+    public readonly from: Date,
+    public readonly to: Date,
+    public readonly interval: string,
+    public readonly yieldRate: number = 1
   ) {
     [this.intervalAmount, this.intervalUnit] = parseInterval(interval);
   }

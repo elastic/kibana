@@ -10,9 +10,18 @@ import { ApmFields } from './apm/apm_fields';
 import { SpanIterable } from './span_iterable';
 
 export class SpanGeneratorsUnion implements SpanIterable {
-  constructor(private readonly dataGenerators: SpanIterable[]) {}
+  constructor(private readonly dataGenerators: SpanIterable[]) {
+    const orders = new Set<'desc' | 'asc'>(dataGenerators.map((d) => d.order()));
+    if (orders.size > 1) throw Error('Can only combine intervals with the same order()');
+    this._order = orders.has('asc') ? 'asc' : 'desc';
+  }
 
   static empty: SpanGeneratorsUnion = new SpanGeneratorsUnion([]);
+
+  private readonly _order: 'desc' | 'asc';
+  order() {
+    return this._order;
+  }
 
   toArray(): ApmFields[] {
     return Array.from(this);
