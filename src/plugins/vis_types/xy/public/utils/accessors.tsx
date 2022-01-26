@@ -86,7 +86,7 @@ export const getSafeId = (columnId?: number | string | null) => {
   if (!isMultiValueId) {
     return id;
   }
-  const baseId = id.substring(0, Math.max(id.indexOf('['), id.indexOf('.')));
+  const baseId = id.substring(0, id.indexOf('[') !== -1 ? id.indexOf('[') : id.indexOf('.'));
   return baseId;
 };
 
