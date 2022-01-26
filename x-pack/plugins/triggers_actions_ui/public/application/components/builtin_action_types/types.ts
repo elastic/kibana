@@ -141,7 +141,6 @@ export enum XmattersSeverityOptions {
 }
 
 export interface XmattersActionParams {
-  alertActionGroup: string;
   alertActionGroupName: string;
   alertId: string;
   alertInstanceId: string;

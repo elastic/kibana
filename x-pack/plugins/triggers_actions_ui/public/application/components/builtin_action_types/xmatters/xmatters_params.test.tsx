@@ -13,7 +13,6 @@ import XmattersParamsFields from './xmatters_params';
 describe('XmattersParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
-      alertActionGroup: 'small',
       alertActionGroupName: 'Small t-shirt',
       alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
       alertName: 'Test xMatters',
@@ -41,7 +40,6 @@ describe('XmattersParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="alertActionGroupInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertActionGroupNameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertIdInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="alertNameInput"]').length > 0).toBeTruthy();
@@ -50,9 +48,6 @@ describe('XmattersParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="spaceIdInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="tagsInput"]').length > 0).toBeTruthy();
 
-    expect(
-      wrapper.find('[data-test-subj="alertActionGroupInput"]').first().prop('value')
-    ).toStrictEqual('small');
     expect(
       wrapper.find('[data-test-subj="alertActionGroupNameInput"]').first().prop('value')
     ).toStrictEqual('');
