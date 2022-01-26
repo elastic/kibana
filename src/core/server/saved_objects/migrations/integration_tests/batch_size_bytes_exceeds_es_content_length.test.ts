@@ -20,9 +20,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-// un-skip after https://github.com/elastic/kibana/issues/116111
-// dataArchive not compatible with ES 8.0+
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
