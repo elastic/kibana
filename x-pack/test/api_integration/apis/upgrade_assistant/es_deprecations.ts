@@ -61,7 +61,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('index setting deprecation', () => {
+      // Only applicable on 7.x
+      describe.skip('index setting deprecation', () => {
         before(async () => {
           try {
             // Create index that will trigger deprecation warning
