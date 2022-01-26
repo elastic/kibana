@@ -1,66 +1,67 @@
-// import React from 'react';
-// import { Enz } from 'enzyme'
-import { useDataInit } from './index'
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
-const mountReactHook = (hook: () => any) => {
-  // const Component = ({ children }: any) => children(hook());
-  const componentHook = {};
-  let componentMount;
+import React from 'react';
 
-  // act(() => {
-  //   componentMount = Enzyme.shallow(
-  //     <Component>
-  //       {(hookValues: any) => {
-  //         Object.assign(componentHook, hookValues);
-  //         return null;
-  //       }}
-  //     </Component>
-  //   );
-  // });
-  return { componentMount, componentHook };
-};
+jest.mock('../../contexts', () => ({
+  useEditorActionContext: jest.fn(),
+  useServicesContext: jest.fn(),
+}));
 
-describe('useDataInit Hook', () => {
-  let setupComponent;
-  let hook: { loading?: any; getData?: any; error?: any; done?: any; };
+import { renderHook } from '@testing-library/react-hooks';
+import { ContextValue, useEditorActionContext, useServicesContext } from '../../contexts';
+import { serviceContextMock } from '../../contexts/services_context.mock';
 
-  beforeEach(() => {
-    setupComponent = mountReactHook(useDataInit); // Mount a Component with our hook
-    hook = setupComponent.componentHook;
+import { useDataInit } from './use_data_init';
+
+const wait = (period: number) => new Promise((res) => setTimeout(res, period));
+
+describe('useDataInit', () => {
+  let mockContextValue: ContextValue;
+  let dispatch: (...args: unknown[]) => void;
+  let useStateMock: (...args: unknown[]) => [any, jest.Mock];
+  let setStateMock: jest.Mock;
+  const mockedObject = { mocked: true };
+
+  beforeAll(() => {
+    setStateMock = jest.fn();
+    useStateMock = (state: any) => [state, setStateMock];
+    mockContextValue = serviceContextMock.create();
+    dispatch = jest.fn();
+    (useEditorActionContext as jest.Mock).mockReturnValue(dispatch);
+    (useServicesContext as jest.Mock).mockReturnValue({
+      ...mockContextValue,
+      services: {
+        ...mockContextValue.services,
+        objectStorageClient: {
+          text: {
+            findAll: jest.fn(() => []),
+            create: jest.fn((data: any) => mockedObject),
+          },
+        },
+      },
+    });
   });
 
-  it('sets loading to true before getting a data', async () => {
-    expect(hook.loading).toEqual(false);
-
-    await act(async () => { // perform changes within our component
-      hook.getData();
-    });
-
-    expect(hook.loading).toEqual(true); // assert the values change correctly
-
-    await act(async () => {
-      await wait(); // wait for the promise to resolve and next mount
-    });
-
-    expect(hook.loading).toEqual(false); // reassert against our values
+  afterEach(()=> {
+    jest.resetAllMocks();
   });
 
-  it('sets a new error', async () => {
-    expect(hook.error).toEqual(undefined);
+  it('calls dispatch with new objects, if no texts are provided.', async () => {
+    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
 
-    await act(async () => {
-      hook.getData();
-      await wait();
+    const { result } = renderHook(() => useDataInit(), {});
+
+    await wait(0);
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'setCurrentTextObject',
+      payload: mockedObject
     });
-
-    expect(hook.done).not.toEqual(undefined);
   });
 });
-
-function act(arg0: () => void) {
-  throw new Error('Function not implemented.');
-}
-
-function wait() {
-  throw new Error('Function not implemented.');
-}
