@@ -1,0 +1,27 @@
+[
+  {
+    "name": "apm",
+    "version": "8.1.0-dev2",
+    "checksum": "d8e493b78fd60faa90bdd05ceb326f3f133795bc66771cecd7b98bf6fcec210dd673927c799fed8e83312a86739e05e8f1bc9a740efecd9416293b6e1fbe7868"
+  },
+  {
+    "name": "elastic_agent",
+    "version": "1.3.0",
+    "checksum": "3207badd78ba38bbdb25ce283986fa3cbc19459ad38a787323af73510edb6fdf4d6d388afd8c431316e915cb1faa9f5125ff4d27a229947eea477254302f8ba8"
+  },
+  {
+    "name": "endpoint",
+    "version": "1.4.1",
+    "checksum": "47e476279697da268b174e27cab8a7a6b0d31b6272daf8b8ab46bfed2125f0fcd95e78146ffc89dfe550205ac0dad0bbf7476a4b10fcb0bb837b3c3111a690b4"
+  },
+  {
+    "name": "fleet_server",
+    "version": "1.1.1",
+    "checksum": "2f1b49661128f089be5a0b285e0c8838bace9714649cd36b3d94ba075f5cc360dd743e9b9d8fc10670195cf9a5e8a48dca03becef717eab61b126e415e1d786c"
+  },
+  {
+    "name": "synthetics",
+    "version": "0.8.0",
+    "checksum": "9adf0c9b1c72cc4c2108f445a7b936992480502c49757879e280a234d5ab0b96ed67b7e33d7817365fc338e00b09b4ac6fd3e819fa8a81ab3dcf5cf72ad3fa7b"
+  }
+]

@@ -84,6 +84,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CleanTypescript);
     await run(Tasks.CleanExtraFilesFromModules);
     await run(Tasks.CleanEmptyFolders);
+    await run(Tasks.BundleFleetPackages);
   }
 
   /**
