@@ -9,6 +9,7 @@
 import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import type { Toast } from '../../../../../../../../../../src/core/public';
 import {
   BulkAction,
   BulkActionEditType,
@@ -225,7 +226,7 @@ export const useBulkActions = ({
           return;
         }
 
-        let longEditWarningToast;
+        let longEditWarningToast: Toast;
         let isBulkEditFinished = false;
         try {
           const editPayload = await completeBulkEditForm(bulkEditActionType);
@@ -245,6 +246,11 @@ export const useBulkActions = ({
               );
             }
           }, 5 * 1000);
+          const hideWarningToast = () => {
+            if (longEditWarningToast) {
+              toastsApi.remove(longEditWarningToast);
+            }
+          };
 
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
@@ -254,12 +260,14 @@ export const useBulkActions = ({
             toastsApi,
             payload: { edit: [editPayload] },
             onSuccess: () => {
+              hideWarningToast();
               toastsApi.addSuccess({
                 title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
                 text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(customRulesCount),
               });
             },
             onError: (error: HTTPError) => {
+              hideWarningToast();
               // if response doesn't have number of failed rules, it means the whole bulk action failed
               // and generel error toast will be shown. Otherwise - error toast for partial failure
               const failedRulesCount = (error?.body as BulkActionPartialErrorResponseSchema)
@@ -307,9 +315,6 @@ export const useBulkActions = ({
           // user has cancelled form or error has occured
         } finally {
           isBulkEditFinished = true;
-          if (longEditWarningToast) {
-            toastsApi.remove(longEditWarningToast);
-          }
         }
       };
 

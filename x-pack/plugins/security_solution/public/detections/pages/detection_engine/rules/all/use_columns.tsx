@@ -58,8 +58,7 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
 
   const loadingIds = useMemo(
-    () =>
-      loadingRulesAction === 'enable' || loadingRulesAction === 'disable' ? loadingRuleIds : [],
+    () => (['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '') ? loadingRuleIds : []),
     [loadingRuleIds, loadingRulesAction]
   );
 
