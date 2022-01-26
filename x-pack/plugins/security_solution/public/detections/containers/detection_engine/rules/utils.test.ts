@@ -12,8 +12,6 @@ import { convertRulesFilterToKQL } from './utils';
 describe('convertRulesFilterToKQL', () => {
   const filterOptions: FilterOptions = {
     filter: '',
-    sortField: 'name',
-    sortOrder: 'asc',
     showCustomRules: false,
     showElasticRules: false,
     tags: [],

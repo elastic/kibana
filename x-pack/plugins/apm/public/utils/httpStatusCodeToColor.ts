@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 const { euiColorDarkShade, euiColorWarning } = theme;
 
 export const errorColor = '#c23c2b';

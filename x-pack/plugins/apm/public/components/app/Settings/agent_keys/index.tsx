@@ -44,9 +44,7 @@ export function AgentKeys() {
     status: privilegesStatus,
   } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /internal/apm/agent_keys/privileges',
-      });
+      return callApmApi('GET /internal/apm/agent_keys/privileges');
     },
     [],
     { showToastOnError: false }
@@ -59,9 +57,7 @@ export function AgentKeys() {
   } = useFetcher(
     (callApmApi) => {
       if (areApiKeysEnabled && canManage) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/agent_keys',
-        });
+        return callApmApi('GET /internal/apm/agent_keys');
       }
     },
     [areApiKeysEnabled, canManage],

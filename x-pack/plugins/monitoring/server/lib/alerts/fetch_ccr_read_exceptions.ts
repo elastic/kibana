@@ -8,17 +8,26 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
 
 export async function fetchCCRReadExceptions(
   esClient: ElasticsearchClient,
-  index: string,
   startMs: number,
   endMs: number,
   size: number,
   filterQuery?: string
 ): Promise<CCRReadExceptionsStats[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'ccr',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations.remote_clusters.buckets'],
     body: {
       size: 0,
@@ -35,11 +44,7 @@ export async function fetchCCRReadExceptions(
                 },
               },
             },
-            {
-              term: {
-                type: 'ccr_stats',
-              },
-            },
+            createDatasetFilter('ccr_stats', 'elasticsearch.ccr'),
             {
               range: {
                 timestamp: {
