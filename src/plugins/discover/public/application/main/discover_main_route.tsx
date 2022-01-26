@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo, useCallback } from 'react';
 import { History } from 'history';
 import { useParams } from 'react-router-dom';
 
@@ -54,27 +54,33 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
   >([]);
-  const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const { id } = useParams<DiscoverLandingParams>();
+
+  const navigateToOverview = useCallback(() => {
+    core.application.navigateToApp('kibanaOverview', { path: '#' });
+  }, [core.application]);
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
-      const hasUserIndexPattern = await data.indexPatterns.hasUserDataView().catch(() => true);
+      const hasUserIndexPattern = await data.dataViews.hasUserDataView().catch(() => true);
 
-      setNewKibanaInstance(!hasUserIndexPattern);
+      if (!hasUserIndexPattern) {
+        navigateToOverview();
+      }
     };
 
     fetchIsNewKibanaInstance();
-  }, [data.indexPatterns]);
+  }, [data.dataViews, navigateToOverview]);
 
   useEffect(() => {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
       try {
-        const defaultIndexPattern = await data.dataViews.getDefaultDataView();
-        if (!defaultIndexPattern) {
-          setNewKibanaInstance(true);
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
+        if (!defaultDataView || !hasUserDataView) {
+          navigateToOverview();
           return;
         }
         const { appStateContainer } = getState({ history, uiSettings: config });
@@ -160,6 +166,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     toastNotifications,
     core.theme,
     data.dataViews,
+    navigateToOverview,
   ]);
 
   useEffect(() => {
@@ -172,10 +179,6 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   if (error) {
     return <DiscoverError error={error} />;
-  }
-
-  if (isNewKibanaInstance) {
-    core.application.navigateToApp('kibanaOverview', { path: '#' });
   }
 
   if (!indexPattern || !savedSearch) {
