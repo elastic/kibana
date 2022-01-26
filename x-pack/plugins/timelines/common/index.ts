@@ -74,6 +74,8 @@ export type {
   TimelineKpiStrategyResponse,
   TotalValue,
   PaginationInputPaginated,
+  EqlSearchResponse,
+  BaseHit,
 } from './search_strategy';
 
 export {
