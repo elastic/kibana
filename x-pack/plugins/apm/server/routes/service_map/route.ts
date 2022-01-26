@@ -16,7 +16,6 @@ import { getServiceMap } from './get_service_map';
 import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { environmentRt, offsetRt, rangeRt } from '../default_api_types';
 
 const serviceMapRoute = createApmServerRoute({
@@ -31,7 +30,57 @@ const serviceMapRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    elements: Array<
+      | import('./../../../common/service_map').ConnectionElement
+      | {
+          data: {
+            id: string;
+            'span.type': string;
+            label: string;
+            groupedConnections: Array<
+              | {
+                  'service.name': string;
+                  'service.environment': string | null;
+                  'agent.name': string;
+                  serviceAnomalyStats?:
+                    | import('./../../../common/anomaly_detection/index').ServiceAnomalyStats
+                    | undefined;
+                  label: string | undefined;
+                  id?: string | undefined;
+                  parent?: string | undefined;
+                  position?:
+                    | import('./../../../../../../node_modules/@types/cytoscape/index').Position
+                    | undefined;
+                }
+              | {
+                  'span.destination.service.resource': string;
+                  'span.type': string;
+                  'span.subtype': string;
+                  label: string | undefined;
+                  id?: string | undefined;
+                  parent?: string | undefined;
+                  position?:
+                    | import('./../../../../../../node_modules/@types/cytoscape/index').Position
+                    | undefined;
+                }
+              | {
+                  id: string;
+                  source: string | undefined;
+                  target: string | undefined;
+                  label: string | undefined;
+                  bidirectional?: boolean | undefined;
+                  isInverseEdge?: boolean | undefined;
+                }
+              | undefined
+            >;
+          };
+        }
+      | { data: { id: string; source: string; target: string } }
+    >;
+  }> => {
     const { config, context, params, logger } = resources;
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
@@ -78,7 +127,14 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     query: t.intersection([environmentRt, rangeRt, offsetRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentPeriod: import('./../../../common/service_map').NodeStats;
+    previousPeriod:
+      | import('./../../../common/service_map').NodeStats
+      | undefined;
+  }> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
@@ -133,7 +189,14 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentPeriod: import('./../../../common/service_map').NodeStats;
+    previousPeriod:
+      | import('./../../../common/service_map').NodeStats
+      | undefined;
+  }> => {
     const { config, context, params } = resources;
 
     if (!config.serviceMapEnabled) {
@@ -161,7 +224,8 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
   },
 });
 
-export const serviceMapRouteRepository = createApmServerRouteRepository()
-  .add(serviceMapRoute)
-  .add(serviceMapServiceNodeRoute)
-  .add(serviceMapBackendNodeRoute);
+export const serviceMapRouteRepository = {
+  ...serviceMapRoute,
+  ...serviceMapServiceNodeRoute,
+  ...serviceMapBackendNodeRoute,
+};
