@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract, SavedObjectsServiceStart } from 'kibana/server';
+import { KibanaRequest, ISavedObjectsRepository, SavedObjectsServiceStart } from 'kibana/server';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -13,7 +13,7 @@ import type {
   PackagePolicyServiceInterface,
   PackageClient,
 } from '../../../../../fleet/server';
-import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
+import { createReadonlySoRepository } from '../../utils/create_readonly_so_repository';
 
 export interface EndpointFleetServicesFactoryInterface {
   asScoped(req: KibanaRequest): EndpointScopedFleetServicesInterface;
@@ -63,7 +63,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packagePolicy,
 
       asScoped: this.asScoped.bind(this),
-      internalReadonlySoClient: createInternalReadonlySoClient(this.savedObjectsStart),
+      readonlySoRepository: createReadonlySoRepository(this.savedObjectsStart),
     };
   }
 }
@@ -92,7 +92,7 @@ export interface EndpointInternalFleetServicesInterface extends EndpointFleetSer
   asScoped: EndpointFleetServicesFactoryInterface['asScoped'];
 
   /**
-   * An internal SO client (readonly) that can be used with the Fleet services that require it
+   * A read-only SO repository that can be used with the Fleet services that require it
    */
-  internalReadonlySoClient: SavedObjectsClientContract;
+  readonlySoRepository: ISavedObjectsRepository;
 }

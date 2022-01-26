@@ -7,26 +7,26 @@
 
 import {
   savedObjectsServiceMock,
-  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
 } from '../../../../../../src/core/server/mocks';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ISavedObjectsRepository } from 'kibana/server';
 import {
-  createInternalReadonlySoClient,
-  InternalReadonlySoClientMethodNotAllowedError,
-} from './create_internal_readonly_so_client';
+  createReadonlySoRepository,
+  ReadonlySoRepositoryMethodNotAllowedError,
+} from './create_readonly_so_repository';
 
-describe('When using the `createInternalReadonlySoClient`', () => {
-  let realSoClientMock: ReturnType<typeof savedObjectsClientMock.create>;
-  let readonlySoClient: ReturnType<typeof createInternalReadonlySoClient>;
+describe('When using the `createReadonlySoRepository`', () => {
+  let realSoRepoMock: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let readonlySoRepo: ReturnType<typeof createReadonlySoRepository>;
 
   beforeEach(() => {
     const soStartContract = savedObjectsServiceMock.createStartContract();
-    realSoClientMock = savedObjectsClientMock.create();
-    soStartContract.getScopedClient.mockReturnValue(realSoClientMock);
-    readonlySoClient = createInternalReadonlySoClient(soStartContract);
+    realSoRepoMock = savedObjectsRepositoryMock.create();
+    soStartContract.createInternalRepository.mockReturnValue(realSoRepoMock);
+    readonlySoRepo = createReadonlySoRepository(soStartContract);
   });
 
-  it.each<keyof SavedObjectsClientContract>([
+  it.each<keyof ISavedObjectsRepository>([
     'get',
     'bulkGet',
     'checkConflicts',
@@ -34,10 +34,10 @@ describe('When using the `createInternalReadonlySoClient`', () => {
     'find',
     'resolve',
   ])('should allow usage of %s() method', (methodName) => {
-    expect(() => readonlySoClient[methodName]).not.toThrow();
+    expect(() => readonlySoRepo[methodName]).not.toThrow();
   });
 
-  it.each<keyof SavedObjectsClientContract>([
+  it.each<keyof ISavedObjectsRepository>([
     'bulkCreate',
     'bulkUpdate',
     'create',
@@ -49,8 +49,6 @@ describe('When using the `createInternalReadonlySoClient`', () => {
     'update',
     'updateObjectsSpaces',
   ])('should throw if usage of %s() is attempted', (methodName) => {
-    expect(() => readonlySoClient[methodName]).toThrow(
-      InternalReadonlySoClientMethodNotAllowedError
-    );
+    expect(() => readonlySoRepo[methodName]).toThrow(ReadonlySoRepositoryMethodNotAllowedError);
   });
 });

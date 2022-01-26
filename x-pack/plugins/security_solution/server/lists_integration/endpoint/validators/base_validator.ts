@@ -107,7 +107,7 @@ export class BaseValidator {
    */
   protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const { packagePolicy, internalReadonlySoClient } =
+      const { packagePolicy, readonlySoRepository } =
         this.endpointAppContext.getInternalFleetServices();
       const policyIds = getPolicyIdsFromArtifact(item);
 
@@ -115,7 +115,7 @@ export class BaseValidator {
         return;
       }
 
-      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds);
+      const policiesFromFleet = await packagePolicy.getByIDs(readonlySoRepository, policyIds);
 
       if (!policiesFromFleet) {
         throw new EndpointArtifactExceptionValidationError(
