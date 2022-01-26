@@ -11,4 +11,4 @@ export * from './hosts_query_tab_body';
 export * from './uncommon_process_query_tab_body';
 export * from './alerts_query_tab_body';
 export * from './host_risk_tab_body';
-export * from './risk_score_better_tab_body';
+export * from './host_risk_score_tab_body';

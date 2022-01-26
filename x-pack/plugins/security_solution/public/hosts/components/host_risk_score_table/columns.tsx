@@ -16,7 +16,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import { HostRiskScoreColumns } from './';
+import { HostRiskScoreColumns } from '.';
 
 import * as i18n from './translations';
 import { HostRiskScore } from '../common/host_risk_score';
