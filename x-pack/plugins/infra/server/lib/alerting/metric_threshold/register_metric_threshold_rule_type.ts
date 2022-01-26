@@ -48,6 +48,9 @@ export async function registerMetricThresholdRuleType(
     warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
 
+  const workerThreads = await libs.getWorkerThreads();
+  workerThreads.run({ name: 'metricThresholdTask', args: {} });
+
   const nonCountCriterion = schema.object({
     ...baseCriterion,
     metric: schema.string(),
