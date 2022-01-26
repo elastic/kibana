@@ -14,7 +14,7 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kib
 import { isFullLicense } from '../../license';
 import { ML_APP_NAME } from '../../../../common/constants/app';
 import type { MlRoute } from '../../routing';
-import { useJobSelection } from '../../contexts/ml/use_job_selection';
+import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
 export interface Tab {
@@ -125,7 +125,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     [pageState]
   );
 
-  const getJobSelection = useJobSelection();
+  const getJobSelection = useJobSelectionFlyout();
 
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;

@@ -17,7 +17,7 @@ import type { JobSelectionResult } from '../../components/job_selector/job_selec
  * Hook for invoking Anomaly Detection jobs selection
  * inside the ML app.
  */
-export function useJobSelection() {
+export function useJobSelectionFlyout() {
   const { overlays, services } = useMlKibana();
 
   return useCallback(
