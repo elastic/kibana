@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Feature } from 'geojson';
+// @ts-expect-error
 import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
 import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
 import type { ImportFailure } from '../../../../common/types';
@@ -20,7 +21,7 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
   private _dbfFile: File | null = null;
   private _prjFile: File | null = null;
   private _shxFile: File | null = null;
-  private _iterator?: Iterator<unknown>;
+  private _iterator?: Iterator<{ data: Feature[] }>;
 
   public canPreview() {
     return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
@@ -52,11 +53,11 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     }
 
     // read header from dbf file to get number of records in data file
-    const dbfIterator = await loadInBatches(this._dbfFile, DBFLoader, {
+    const dbfIterator = (await loadInBatches(this._dbfFile, DBFLoader, {
       metadata: false,
       dbf: { encoding: 'latin1' },
-    });
-    const { value, done } = await dbfIterator.next();
+    })) as unknown as Iterator<{ nRecords: number }>;
+    const { value } = await dbfIterator.next();
     if (value.nRecords && typeof value.nRecords === 'number') {
       this._tableRowCount = value.nRecords;
     }
@@ -84,20 +85,25 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     };
 
     if (this._iterator === undefined) {
-      const fileSystem = new BrowserFileSystem([
-        this._getFile(),
-        this._dbfFile,
-        this._prjFile,
-        this._shxFile,
-      ]);
-      this._iterator = await loadInBatches(this._getFile().name, ShapefileLoader, {
+      const sideCarFiles: File[] = [];
+      if (this._dbfFile) {
+        sideCarFiles.push(this._dbfFile);
+      }
+      if (this._prjFile) {
+        sideCarFiles.push(this._prjFile);
+      }
+      if (this._shxFile) {
+        sideCarFiles.push(this._shxFile);
+      }
+      const fileSystem = new BrowserFileSystem([this._getFile(), ...sideCarFiles]);
+      this._iterator = (await loadInBatches(this._getFile().name, ShapefileLoader, {
         fetch: fileSystem.fetch,
         // Reproject shapefiles to WGS84
         gis: { reproject: true, _targetCrs: 'EPSG:4326' },
         // Only parse the X & Y coordinates. Other coords not supported by Elasticsearch.
         shp: { _maxDimensions: 2 },
         metadata: false,
-      });
+      })) as unknown as Iterator<{ data: Feature[] }>;
       await this._setTableRowCount();
     }
 
@@ -109,7 +115,7 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     }
 
     for (let i = 0; i < batch.data.length; i++) {
-      const feature = batch.data[i] as Feature;
+      const feature = batch.data[i];
       if (!results.geometryTypesMap.has(feature.geometry.type)) {
         results.geometryTypesMap.set(feature.geometry.type, true);
       }

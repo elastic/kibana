@@ -48,7 +48,7 @@ export class SideCarFilePicker extends Component<Props, State> {
   }
 
   _onSelect = (files: FileList | null) => {
-    if (files.length === 0) {
+    if (!files || files.length === 0) {
       this.setState({ error: '', isInvalid: false });
       this.props.onSelect(null);
       return;
