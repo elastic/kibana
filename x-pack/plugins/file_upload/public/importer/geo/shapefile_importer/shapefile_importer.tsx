@@ -26,12 +26,13 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
   private _iterator?: Iterator<unknown>;
   
   public canPreview() {
-    return this._hasAllFiles();
+     return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
   }
 
   public renderEditor(onChange: () => void) {
-    return !this._hasAllFiles()
+    return !this.canPreview()
       ?  <ShapefileEditor
+        shapefileName={this._getFile().name}
         onDbfSelect={(file) => {
           this._dbfFile = file;
           onChange();
@@ -46,10 +47,6 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
         }}
       />
       : null;
-  }
-
-  private _hasAllFiles() {
-    return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
   }
 
   private async _setTableRowCount() {
