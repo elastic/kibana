@@ -30,6 +30,9 @@ import {
 import { Direction } from '../../../../common/search_strategy';
 import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { HostsTableType } from '../../store/model';
+import { useKibana } from '../../../common/lib/kibana';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -80,10 +83,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
+  const { navigateToApp } = useKibana().services.application;
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
   );
+
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
@@ -129,9 +134,25 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
+  const dispatchSeverityUpdate = useCallback(
+    (s: HostRiskSeverity) => {
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [s],
+          hostsType: type,
+        })
+      );
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.hosts,
+        path: HostsTableType.risk,
+      });
+    },
+    [dispatch, navigateToApp, type]
+  );
+
   const hostsColumns = useMemo(
-    () => getHostsColumns(riskyHostsFeatureEnabled),
-    [riskyHostsFeatureEnabled]
+    () => getHostsColumns(riskyHostsFeatureEnabled, dispatchSeverityUpdate),
+    [dispatchSeverityUpdate, riskyHostsFeatureEnabled]
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
