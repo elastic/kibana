@@ -55,24 +55,25 @@ export function useTransactionLatencyChartsFetcher({
         transactionType &&
         latencyAggregationType
       ) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              latencyAggregationType,
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                transactionName,
+                latencyAggregationType,
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [
