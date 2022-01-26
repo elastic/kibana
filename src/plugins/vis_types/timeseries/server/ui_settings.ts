@@ -41,11 +41,10 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       defaultMessage: 'Show TSVB request shard failures',
     }),
     value: true,
-    requiresPageReload: true,
     description: i18n.translate(
       'visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsText',
       {
-        defaultMessage: 'Allows you to switch the response check to failed shards in TSVB.',
+        defaultMessage: 'Show warning message for partial data in TSVB charts if the request succeeds for some shards but fails for others.',
       }
     ),
     schema: schema.boolean(),
