@@ -154,6 +154,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
@@ -240,6 +241,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
