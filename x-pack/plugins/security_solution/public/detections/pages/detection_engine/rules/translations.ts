@@ -303,7 +303,7 @@ export const BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
-      'Select the default index pattern of Elasticsearch indices from the dropdown where you would like update rules to run. You can also add custom index patterns and hit Enter in this form field.',
+      'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
   }
 );
 

@@ -139,7 +139,7 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onClose, onConfirm
       )}
       {overwrite && (
         <EuiFormRow>
-          <EuiCallOut color="warning">
+          <EuiCallOut color="warning" size="s">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setIndexPatternsWarningCallout"
               defaultMessage="You’re about to overwrite index patterns for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
