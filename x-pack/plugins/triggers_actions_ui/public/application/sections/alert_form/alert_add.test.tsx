@@ -64,8 +64,7 @@ export const TestExpression: FunctionComponent<any> = () => {
   );
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/g
-describe.skip('alert_add', () => {
+describe('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(
