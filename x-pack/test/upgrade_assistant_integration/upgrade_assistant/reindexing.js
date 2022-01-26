@@ -86,17 +86,17 @@ export default function ({ getService }) {
     it('can resume after reindexing was stopped right after creating the new index', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
-      await es.indices.create({ index: 'reindexed-v7-6.0-data' });
+      await es.indices.create({ index: 'reindexed-v7-dummydata' });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/6.0-data`)
+        .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal('6.0-data');
+      expect(body.indexName).to.equal('dummydata');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete('6.0-data');
+      const lastState = await waitForReindexToComplete('dummydata');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
