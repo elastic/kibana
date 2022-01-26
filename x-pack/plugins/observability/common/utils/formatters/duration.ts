@@ -218,7 +218,7 @@ export function asMillisecondDuration(value: Maybe<number>) {
 
 export type TimeUnitChar = 's' | 'm' | 'h' | 'd';
 
-export const formateDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
+export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
   const sForPlural = time !== 0 && time > 1 ? 's' : ''; // Negative values are not taken into account
   switch (unit) {
     case 's':

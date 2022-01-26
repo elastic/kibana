@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-
 import {
   asDuration,
   asTransactionRate,
   toMicroseconds,
   asMillisecondDuration,
-  formateDurationFromTimeUnitChar,
+  formatDurationFromTimeUnitChar,
 } from './duration';
-
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -135,36 +133,36 @@ describe('duration formatters', () => {
     });
   });
 
-  describe('formateDurationFromTimeUnitChar', () => {
+  describe('formatDurationFromTimeUnitChar', () => {
     it('Convert "s" to "secs".', () => {
-      expect(formateDurationFromTimeUnitChar(30, 's')).toEqual('30 secs');
+      expect(formatDurationFromTimeUnitChar(30, 's')).toEqual('30 secs');
     });
     it('Convert "s" to "sec."', () => {
-      expect(formateDurationFromTimeUnitChar(1, 's')).toEqual('1 sec');
+      expect(formatDurationFromTimeUnitChar(1, 's')).toEqual('1 sec');
     });
 
     it('Convert "m" to "mins".', () => {
-      expect(formateDurationFromTimeUnitChar(10, 'm')).toEqual('10 mins');
+      expect(formatDurationFromTimeUnitChar(10, 'm')).toEqual('10 mins');
     });
 
     it('Convert "m" to "min."', () => {
-      expect(formateDurationFromTimeUnitChar(1, 'm')).toEqual('1 min');
+      expect(formatDurationFromTimeUnitChar(1, 'm')).toEqual('1 min');
     });
 
     it('Convert "h" to "hrs."', () => {
-      expect(formateDurationFromTimeUnitChar(5, 'h')).toEqual('5 hrs');
+      expect(formatDurationFromTimeUnitChar(5, 'h')).toEqual('5 hrs');
     });
 
     it('Convert "h" to "hr"', () => {
-      expect(formateDurationFromTimeUnitChar(1, 'h')).toEqual('1 hr');
+      expect(formatDurationFromTimeUnitChar(1, 'h')).toEqual('1 hr');
     });
 
     it('Convert "d" to "days"', () => {
-      expect(formateDurationFromTimeUnitChar(2, 'd')).toEqual('2 days');
+      expect(formatDurationFromTimeUnitChar(2, 'd')).toEqual('2 days');
     });
 
     it('Convert "d" to "day"', () => {
-      expect(formateDurationFromTimeUnitChar(1, 'd')).toEqual('1 day');
+      expect(formatDurationFromTimeUnitChar(1, 'd')).toEqual('1 day');
     });
   });
 });

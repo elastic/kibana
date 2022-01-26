@@ -7,7 +7,7 @@
 
 export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
 
-export { formateDurationFromTimeUnitChar } from './utils/formatters';
+export { formatDurationFromTimeUnitChar } from './utils/formatters';
 
 export {
   enableInspectEsQueries,
