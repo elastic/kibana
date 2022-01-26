@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
