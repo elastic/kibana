@@ -223,7 +223,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         },
       }
     ),
-    value: false,
+    value: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
