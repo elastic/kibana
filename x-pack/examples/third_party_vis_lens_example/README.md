@@ -7,7 +7,7 @@ This example shows how to register a visualization to Lens which lives along the
 The following parts can be seen in this example:
 * Registering the visualization type so it shows up in the Lens editor along with custom edit UI and hooks to update state on user interactions (add dimension, delete dimension).
 * Registering the used expression functions and expression renderers to actually render the expression into a DOM element.
-* Providing a sample migration on the Kibana server which allows to update existing stored visualizations and change their state.
+* Providing a sample migration on the Kibana server which allows to update existing stored visualizations and change their state on Kibana upgrade / import of old saved objects.
 
 
 To test the migration, you can import the following ndjson file via saved object import (requires installed logs sample data):
