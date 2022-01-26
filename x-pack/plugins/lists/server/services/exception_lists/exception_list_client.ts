@@ -17,6 +17,7 @@ import {
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
   ExtensionPointStorageClientInterface,
@@ -69,15 +70,16 @@ import {
 } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import {
-  importExceptionsAsArray,
-  importExceptionsAsStream,
-} from './import_exception_list_and_items';
+import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
   validateData,
 } from './utils';
+import {
+  createExceptionsStreamFromNdjson,
+  exceptionsChecksFromArray,
+} from './utils/import/create_exceptions_stream_logic';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -788,9 +790,23 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptionsAsStream({
+    // validation of import and sorting of lists and items
+    const readStream = createExceptionsStreamFromNdjson(maxExceptionsImportSize);
+    const [parsedObjects] = await createPromiseFromStreams<PromiseFromStreams[]>([
       exceptionsToImport,
-      maxExceptionsImportSize,
+      ...readStream,
+    ]);
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreImport',
+        parsedObjects,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return importExceptions({
+      exceptions: parsedObjects,
       overwrite,
       savedObjectsClient,
       user,
@@ -799,7 +815,7 @@ export class ExceptionListClient {
 
   /**
    * Import exception lists parent containers and items as array
-   * @params exceptionsToImport {stream} array of lists and items
+   * @params exceptionsToImport {array} array of lists and items
    * @params maxExceptionsImportSize {number} the max number of lists and items to import, defaults to 10,000
    * @params overwrite {boolean} whether or not to overwrite an exception list with imported list if a matching list_id found
    * @return {ImportExceptionsResponseSchema} summary of imported count and errors
@@ -811,9 +827,19 @@ export class ExceptionListClient {
   }: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
-    return importExceptionsAsArray({
-      exceptionsToImport,
-      maxExceptionsImportSize,
+    // validation of import and sorting of lists and items
+    const parsedObjects = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreImport',
+        parsedObjects,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return importExceptions({
+      exceptions: parsedObjects,
       overwrite,
       savedObjectsClient,
       user,
