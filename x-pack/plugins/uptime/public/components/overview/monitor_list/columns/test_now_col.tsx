@@ -24,7 +24,7 @@ export const TestNowColumn = ({
   const testNowRun = useSelector(testNowRunSelector(configId));
 
   if (!configId) {
-    return null;
+    return <>--</>;
   }
 
   const testNowClick = () => {
