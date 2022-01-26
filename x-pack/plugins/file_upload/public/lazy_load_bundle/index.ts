@@ -33,7 +33,7 @@ export interface FileUploadComponentProps {
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 
 export interface LazyLoadedFileUploadModules {
-  JsonUploadAndParse: React.ComponentType<FileUploadComponentProps>;
+  GeoUploadWizard: React.ComponentType<FileUploadComponentProps>;
   IndexNameForm: React.ComponentType<IndexNameFormProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter | undefined;
   getHttp: () => HttpStart;
@@ -46,9 +46,9 @@ export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
 
   loadModulesPromise = new Promise(async (resolve, reject) => {
     try {
-      const { JsonUploadAndParse, importerFactory, IndexNameForm } = await import('./lazy');
+      const { GeoUploadWizard, importerFactory, IndexNameForm } = await import('./lazy');
       resolve({
-        JsonUploadAndParse,
+        GeoUploadWizard,
         importerFactory,
         getHttp,
         IndexNameForm,

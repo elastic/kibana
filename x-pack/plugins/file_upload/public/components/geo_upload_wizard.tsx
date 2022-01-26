@@ -25,7 +25,7 @@ enum PHASE {
 }
 
 function getWritingToIndexMsg(progress: number) {
-  return i18n.translate('xpack.fileUpload.jsonUploadAndParse.writingToIndex', {
+  return i18n.translate('xpack.fileUpload.geoUploadWizard.writingToIndex', {
     defaultMessage: 'Writing to index: {progress}% complete',
     values: { progress },
   });
@@ -42,7 +42,7 @@ interface State {
   phase: PHASE;
 }
 
-export class JsonUploadAndParse extends Component<FileUploadComponentProps, State> {
+export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
   private _geoFileImporter?: GeoFileImporter;
   private _isMounted = false;
 
@@ -115,7 +115,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
       processors: [],
     };
     this.setState({
-      importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted', {
+      importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingStarted', {
         defaultMessage: 'Creating index: {indexName}',
         values: { indexName: this.state.indexName },
       }),
@@ -165,7 +165,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     if (!importResults.success) {
       this.setState({
         importResults,
-        importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingError', {
+        importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingError', {
           defaultMessage: 'Data indexing error',
         }),
         phase: PHASE.COMPLETE,
@@ -179,7 +179,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     //
     this.setState({
       importResults,
-      importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.creatingIndexPattern', {
+      importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.creatingIndexPattern', {
         defaultMessage: 'Creating data view: {indexName}',
         values: { indexName: this.state.indexName },
       }),
@@ -213,7 +213,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     } catch (error) {
       if (this._isMounted) {
         this.setState({
-          importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.indexPatternError', {
+          importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.indexPatternError', {
             defaultMessage: 'Unable to create data view',
           }),
           phase: PHASE.COMPLETE,

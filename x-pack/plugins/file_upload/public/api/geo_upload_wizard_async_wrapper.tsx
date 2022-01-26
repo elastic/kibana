@@ -10,15 +10,15 @@ import { EuiLoadingContent } from '@elastic/eui';
 import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
-  JsonUploadAndParse: React.ComponentType<FileUploadComponentProps> | null;
+  GeoUploadWizard: React.ComponentType<FileUploadComponentProps> | null;
 }
 
-export class JsonUploadAndParseAsyncWrapper extends React.Component<
+export class GeoUploadWizardAsyncWrapper extends React.Component<
   FileUploadComponentProps,
   State
 > {
   state: State = {
-    JsonUploadAndParse: null,
+    GeoUploadWizard: null,
   };
   private _isMounted = false;
 
@@ -27,7 +27,7 @@ export class JsonUploadAndParseAsyncWrapper extends React.Component<
     lazyLoadModules().then((modules) => {
       if (this._isMounted) {
         this.setState({
-          JsonUploadAndParse: modules.JsonUploadAndParse,
+          GeoUploadWizard: modules.GeoUploadWizard,
         });
       }
     });
@@ -38,9 +38,9 @@ export class JsonUploadAndParseAsyncWrapper extends React.Component<
   }
 
   render() {
-    const { JsonUploadAndParse } = this.state;
-    return JsonUploadAndParse ? (
-      <JsonUploadAndParse {...this.props} />
+    const { GeoUploadWizard } = this.state;
+    return GeoUploadWizard ? (
+      <GeoUploadWizard {...this.props} />
     ) : (
       <EuiLoadingContent lines={3} />
     );
