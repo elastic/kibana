@@ -13,6 +13,7 @@ import {
   Dispatch,
   PayloadAction,
 } from '@reduxjs/toolkit';
+import { PropsWithChildren } from 'react';
 import { TypedUseSelectorHook } from 'react-redux';
 import {
   EmbeddableInput,
@@ -35,6 +36,10 @@ export interface ReduxEmbeddableWrapperProps<InputType extends EmbeddableInput =
   diffInput?: (a: InputType, b: InputType) => Partial<InputType>;
 }
 
+export type ReduxEmbeddableWrapperPropsWithChildren<
+  InputType extends EmbeddableInput = EmbeddableInput
+> = PropsWithChildren<ReduxEmbeddableWrapperProps<InputType>>;
+
 /**
  * This context allows components underneath the redux embeddable wrapper to get access to the actions, selector, dispatch, and containerActions.
  */
@@ -47,6 +52,7 @@ export interface ReduxEmbeddableContextServices<
       Parameters<ReducerType[Property]>[1]['payload']
     >;
   } & { updateEmbeddableReduxState: ActionCreatorWithPayload<Partial<InputType>> };
+  ReduxEmbeddableStoreProvider: React.FC<PropsWithChildren<{}>>;
   useEmbeddableSelector: TypedUseSelectorHook<InputType>;
   useEmbeddableDispatch: () => Dispatch<AnyAction>;
 }

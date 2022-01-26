@@ -39,17 +39,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  private configureExecutor(core: CoreSetup) {
-    const { executor } = this.expressions;
-
-    executor.extendContext({
-      environment: 'client',
-    });
-  }
-
   public setup(core: CoreSetup): ExpressionsSetup {
-    this.configureExecutor(core);
-
     const { expressions } = this;
     const { renderers } = expressions;
 

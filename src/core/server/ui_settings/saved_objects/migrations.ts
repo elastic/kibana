@@ -89,6 +89,8 @@ export const migrations = {
             'telemetry:optIn',
             'xPackMonitoring:allowReport',
             'theme:version',
+            // owner: Team:AppServices
+            'courier:batchSearches',
           ].includes(key)
             ? {
                 ...acc,
@@ -115,6 +117,16 @@ export const migrations = {
           return {
             ...acc,
             'format:defaultTypeMap': JSON.stringify(updated, null, 2),
+          };
+        } else if (key === 'securitySolution:rulesTableRefresh') {
+          const initial = JSON.parse(doc.attributes[key]);
+          const updated = {
+            on: initial.on,
+            value: initial.value,
+          };
+          return {
+            ...acc,
+            [key]: JSON.stringify(updated, null, 2),
           };
         } else {
           return {

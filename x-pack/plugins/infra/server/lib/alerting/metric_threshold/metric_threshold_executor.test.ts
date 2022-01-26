@@ -51,6 +51,7 @@ const initialRuleState: TestRuleState = {
 
 const mockOptions = {
   alertId: '',
+  executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
   state: {
@@ -747,6 +748,14 @@ describe('The metric threshold alert type', () => {
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
+  alerting: {
+    inventory_threshold: {
+      group_by_page_size: 100,
+    },
+    metric_threshold: {
+      group_by_page_size: 100,
+    },
+  },
   inventory: {
     compositeSize: 2000,
   },

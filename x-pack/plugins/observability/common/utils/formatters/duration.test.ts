@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+
 import {
   asDuration,
   asTransactionRate,
@@ -12,6 +13,7 @@ import {
   asMillisecondDuration,
   formateDurationFromTimeUnitChar,
 } from './duration';
+
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -46,10 +48,88 @@ describe('duration formatters', () => {
     });
   });
 
+  describe('asTransactionRate', () => {
+    it.each([
+      [Infinity, 'N/A'],
+      [-Infinity, 'N/A'],
+      [null, 'N/A'],
+      [undefined, 'N/A'],
+      [NaN, 'N/A'],
+    ])(
+      'displays the not available label when the number is not finite',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [0, '0 tpm'],
+      [0.005, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is positive and less than 1',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [1, '1.0 tpm'],
+      [10, '10.0 tpm'],
+      [100, '100.0 tpm'],
+      [1000, '1,000.0 tpm'],
+      [1000000, '1,000,000.0 tpm'],
+    ])(
+      'displays the correct label when the number is a positive integer and has zero decimals',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [1.23, '1.2 tpm'],
+      [12.34, '12.3 tpm'],
+      [123.45, '123.5 tpm'],
+      [1234.56, '1,234.6 tpm'],
+      [1234567.89, '1,234,567.9 tpm'],
+    ])(
+      'displays the correct label when the number is positive and has decimal part',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [-1, '< 0.1 tpm'],
+      [-10, '< 0.1 tpm'],
+      [-100, '< 0.1 tpm'],
+      [-1000, '< 0.1 tpm'],
+      [-1000000, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is a negative integer and has zero decimals',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [-1.23, '< 0.1 tpm'],
+      [-12.34, '< 0.1 tpm'],
+      [-123.45, '< 0.1 tpm'],
+      [-1234.56, '< 0.1 tpm'],
+      [-1234567.89, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is negative and has decimal part',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+  });
+
   describe('asMilliseconds', () => {
     it('converts to formatted decimal milliseconds', () => {
       expect(asMillisecondDuration(0)).toEqual('0 ms');
     });
+
     it('formats correctly with undefined values', () => {
       expect(asMillisecondDuration(undefined)).toEqual('N/A');
     });

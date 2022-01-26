@@ -258,7 +258,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
         value = parseInt(percentageNumber.toString(), 10) / 100;
       }
-      return metricFormatter.convert(value);
+      return `${metricFormatter.convert(value) ?? ''}`;
     };
 
     const { colors, ranges } = computeColorRanges(
@@ -269,8 +269,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     );
 
     // adds a very small number to the max value to make sure the max value will be included
+    const smattering = 0.00001;
     const endValue =
-      paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
+      (paletteParams?.range === 'number' ? paletteParams.rangeMax : max) + smattering;
+
     const overwriteColors = uiState?.get('vis.colors') ?? null;
 
     const bands = ranges.map((start, index, array) => {
@@ -415,7 +417,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         name: yAxisColumn?.name ?? '',
         ...(yAxisColumn
           ? {
-              formatter: (v: number | string) => formatFactory(yAxisColumn.meta.params).convert(v),
+              formatter: (v: number | string) =>
+                `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`,
             }
           : {}),
       },
@@ -424,7 +427,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         // eui color subdued
         textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
         padding: xAxisColumn?.name ? 8 : 0,
-        formatter: (v: number | string) => xValuesFormatter.convert(v),
+        formatter: (v: number | string) => `${xValuesFormatter.convert(v) ?? ''}`,
         name: xAxisColumn?.name ?? '',
       },
       brushMask: {

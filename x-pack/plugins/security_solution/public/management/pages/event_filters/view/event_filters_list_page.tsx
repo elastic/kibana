@@ -45,6 +45,7 @@ import {
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 import { SearchExceptions } from '../../../components/search_exceptions';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ABOUT_EVENT_FILTERS } from './translations';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
@@ -52,6 +53,7 @@ import { useToasts } from '../../../../common/lib/kibana';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
+import { useMemoizedRouteState } from '../../../common/hooks';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -103,6 +105,20 @@ export const EventFiltersListPage = memo(() => {
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
 
+  const memoizedRouteState = useMemoizedRouteState(routeState);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+  }, [memoizedRouteState]);
+
   // load the list of policies
   const policiesRequest = useGetEndpointSpecificPolicies({
     onError: (err) => {
@@ -140,13 +156,6 @@ export const EventFiltersListPage = memo(() => {
       });
     }
   }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
-
-  const backButton = useMemo(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...routeState} />;
-    }
-    return null;
-  }, [routeState]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -193,7 +202,6 @@ export const EventFiltersListPage = memo(() => {
       cachedCardProps[eventFilter.id] = {
         item: eventFilter as AnyArtifact,
         policies: artifactCardPolicies,
-        hideDescription: true,
         'data-test-subj': 'eventFilterCard',
         actions: [
           {
@@ -241,7 +249,7 @@ export const EventFiltersListPage = memo(() => {
 
   return (
     <AdministrationListPage
-      headerBackComponent={backButton}
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
@@ -283,7 +291,7 @@ export const EventFiltersListPage = memo(() => {
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
-              defaultMessage: 'Search on the fields below: name, comments, value',
+              defaultMessage: 'Search on the fields below: name, description, comments, value',
             })}
             hasPolicyFilter
             policyList={policiesRequest.data?.items}
@@ -313,7 +321,11 @@ export const EventFiltersListPage = memo(() => {
         data-test-subj="eventFiltersContent"
         noItemsMessage={
           !doesDataExist && (
-            <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
+            <EventFiltersListEmptyState
+              onAdd={handleAddButtonClick}
+              isAddDisabled={showFlyout}
+              backComponent={backButtonEmptyComponent}
+            />
           )
         }
       />
