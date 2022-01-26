@@ -104,6 +104,8 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
+      getCreateClusterClientParams: (type, clientConfig) =>
+        this.getCreateClusterClientParams(type, config, clientConfig),
     };
   }
 
@@ -169,5 +171,20 @@ export class ElasticsearchService
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
     });
+  }
+
+  private getCreateClusterClientParams(
+    type: string,
+    baseConfig: ElasticsearchConfig,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) {
+    const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
+    return {
+      config: config.toJSON(),
+      loggerContext: 'elasticsearch',
+      type,
+      authHeaders: undefined, // TODO probably need shared memory to keep this synced between kibana and worker ?
+      executionContext: 'unknownId;kibana:worker_thread', // TODO build a task specific execution context
+    };
   }
 }

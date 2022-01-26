@@ -14,6 +14,7 @@ import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
+import { getDurationAsMs } from './client/client_config';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -412,6 +413,28 @@ export class ElasticsearchConfig {
       verificationMode,
     };
   }
+
+  public toJSON() {
+    return {
+      ignoreVersionMismatch: this.ignoreVersionMismatch,
+      apiVersion: this.apiVersion,
+      hosts: this.hosts,
+      requestHeadersWhitelist: this.requestHeadersWhitelist,
+      pingTimeout: getDurationAsMs(this.pingTimeout),
+      requestTimeout: getDurationAsMs(this.requestTimeout),
+      shardTimeout: getDurationAsMs(this.shardTimeout),
+      sniffOnStart: this.sniffOnStart,
+      sniffOnConnectionFault: this.sniffOnConnectionFault,
+      sniffInterval: this.sniffInterval,
+      healthCheckDelay: getDurationAsMs(this.healthCheckDelay),
+      username: this.username,
+      password: this.password,
+      serviceAccountToken: this.serviceAccountToken,
+      customHeaders: this.customHeaders,
+      skipStartupConnectionCheck: this.skipStartupConnectionCheck,
+      ssl: this.ssl,
+    };
+  }
 }
 
 const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
@@ -442,7 +465,7 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
   } else {
     if (rawConfig.ssl.key) {
       key = readFile(rawConfig.ssl.key);
-      keyPassphrase = rawConfig.ssl.keyPassphrase;
+      this.ssl.keyPassphrase;
     }
     if (rawConfig.ssl.certificate) {
       certificate = readFile(rawConfig.ssl.certificate);

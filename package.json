@@ -315,6 +315,7 @@
     "papaparse": "^5.2.0",
     "pdfmake": "^0.2.4",
     "peggy": "^1.2.0",
+    "piscina": "^3.2.0",
     "pluralize": "3.1.0",
     "pngjs": "^3.4.0",
     "polished": "^3.7.2",
