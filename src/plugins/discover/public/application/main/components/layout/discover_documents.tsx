@@ -33,6 +33,7 @@ import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
+import { DocumentExplorerCallout } from '../document_explorer_callout';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -128,22 +129,25 @@ function DiscoverDocumentsComponent({
         </h2>
       </EuiScreenReaderOnly>
       {isLegacy && rows && rows.length && (
-        <DocTableInfiniteMemoized
-          columns={columns}
-          indexPattern={indexPattern}
-          rows={rows}
-          sort={state.sort || []}
-          isLoading={isLoading}
-          searchDescription={savedSearch.description}
-          sharedItemTitle={savedSearch.title}
-          onAddColumn={onAddColumn}
-          onFilter={onAddFilter as DocViewFilterFn}
-          onMoveColumn={onMoveColumn}
-          onRemoveColumn={onRemoveColumn}
-          onSort={onSort}
-          useNewFieldsApi={useNewFieldsApi}
-          dataTestSubj="discoverDocTable"
-        />
+        <>
+          <DocumentExplorerCallout />
+          <DocTableInfiniteMemoized
+            columns={columns}
+            indexPattern={indexPattern}
+            rows={rows}
+            sort={state.sort || []}
+            isLoading={isLoading}
+            searchDescription={savedSearch.description}
+            sharedItemTitle={savedSearch.title}
+            onAddColumn={onAddColumn}
+            onFilter={onAddFilter as DocViewFilterFn}
+            onMoveColumn={onMoveColumn}
+            onRemoveColumn={onRemoveColumn}
+            onSort={onSort}
+            useNewFieldsApi={useNewFieldsApi}
+            dataTestSubj="discoverDocTable"
+          />
+        </>
       )}
       {!isLegacy && (
         <div className="dscDiscoverGrid">
