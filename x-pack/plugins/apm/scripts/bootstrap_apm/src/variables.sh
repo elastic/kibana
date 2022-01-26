@@ -9,3 +9,5 @@ export HARDWARE_PROFILE='gcp-cpu-optimized'
 
 export KB_ROOT='../../../../../../'
 export ES_TARGET=${ES_TARGET-}
+
+export ECCTL_CONFIG=$HOME/.ecctl/config.json

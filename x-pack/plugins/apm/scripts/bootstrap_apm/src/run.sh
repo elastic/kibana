@@ -5,11 +5,6 @@ cd "$scriptdir"
 source variables.sh
 source utils/logger.sh
 
-if ! [ -x "$(command -v ecctl)" ]; then
-  echo -e "${RED}ERROR: ${NC}ecctl not found.${NC}"
-  exit 1
-fi
-
 helpFunction()
 {
    echo ""
@@ -18,8 +13,18 @@ helpFunction()
    echo -e "\t-n Deployment name"
    echo -e "\t-r Region"
    echo -e "\t-p Hardware profile"
-   exit 1 # Exit script after printing help
+   exit 0 # Exit script after printing help
 }
+
+if ! [ -x "$(command -v ecctl)" ]; then
+  show_msg "[ERROR] ecctl not found. Download it here: https://www.elastic.co/downloads/ecctl " 4
+  exit 1
+fi
+
+if ! test -f "$ECCTL_CONFIG"; then
+   show_msg "[ERROR] Configuration file $ECCTL_CONFIG is missing." 4
+   exit 1
+fi
 
 while getopts ":v:n:r:p:" opt
 do
@@ -40,9 +45,8 @@ show_msg "[INFO] Creating your deployment ${DEPLOYMENT_NAME}. Please hold, it ta
 
 $(head -n 1 output.txt)
 
-show_msg "[INFO] Deployment status: Being created 👷‍♀️" 
-
 if [ -n "$DEPLOYMENT_ID" ]; then 
+   show_msg "[INFO] Deployment status: Being created 👷‍♀️" 
    `ecctl deployment show $DEPLOYMENT_ID --format "export ES_TARGET=https://elastic:$ES_PASS@{{(index .Resources.Elasticsearch 0).Info.Metadata.AliasedEndpoint}}:{{(index .Resources.Elasticsearch 0).Info.Metadata.Ports.HTTPS}} export KBN_TARGET=https://elastic:$ES_PASS@{{(index .Resources.Kibana 0).Info.Metadata.AliasedEndpoint}}:{{(index .Resources.Kibana 0).Info.Metadata.Ports.HTTPS}}"`;
 else 
    show_msg "[ERROR] DEPLOYMENT_ID is required" 4
@@ -52,7 +56,7 @@ show_msg "[SUCCESS] Deployment status: Completed ✅" 1
 
 cd $KB_ROOT;
 
-if [ -n "$KBN_TARGET"] || [ -n "$ES_TARGET" ]; then 
+if [ -n "$KBN_TARGET" ] || [ -n "$ES_TARGET" ]; then 
    show_msg "[SUCCESS] Kibana target ${KBN_TARGET}" 1
    show_msg "[SUCCESS] Elasticsearch target ${ES_TARGET}" 1
    show_msg "[INFO] Start creating APM mappings" 
@@ -65,10 +69,9 @@ fi
 
 if [ -n "$ES_TARGET" ]; then 
    show_msg "[SUCCESS] Elasticsearch target ${ES_TARGET}" 1
-   show_msg "[INFO] Start generate synthetic APM data"
+   show_msg "[INFO] Starting to generate synthetic APM data"
    node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=$ES_TARGET
-   show_msg "[SUCCESS] Succesfully APM data ✅"
+   show_msg "[SUCCESS] Succesfully generated APM data ✅" 1
 else 
    show_msg "[ERROR] ES_TARGET is required" 4
 fi
-

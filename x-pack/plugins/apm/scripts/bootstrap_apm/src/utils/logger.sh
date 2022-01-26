@@ -24,5 +24,4 @@ function show_msg {
       *)
          echo -e "\033[0;36m${msg}\033[0m" ;;
   esac
-  
 }
