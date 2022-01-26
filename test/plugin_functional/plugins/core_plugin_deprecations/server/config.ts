@@ -23,6 +23,7 @@ const configSecretDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
   if (get(settings, 'corePluginDeprecations.secret') !== 42) {
     addDeprecation({
       configPath: 'corePluginDeprecations.secret',
+      level: 'critical',
       documentationUrl: 'config-secret-doc-url',
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret ' +
@@ -40,8 +41,8 @@ const configSecretDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
   deprecations: ({ rename, unused }) => [
-    rename('oldProperty', 'newProperty'),
-    unused('noLongerUsed'),
+    rename('oldProperty', 'newProperty', { level: 'warning' }),
+    unused('noLongerUsed', { level: 'warning' }),
     configSecretDeprecation,
   ],
 };

@@ -32,11 +32,13 @@ export interface LinkPreviewProps {
 
 const fetchTransaction = debounce(
   async (filters: Filter[], callback: (transaction: Transaction) => void) => {
-    const transaction = await callApmApi({
-      signal: null,
-      endpoint: 'GET /internal/apm/settings/custom_links/transaction',
-      params: { query: convertFiltersToQuery(filters) },
-    });
+    const transaction = await callApmApi(
+      'GET /internal/apm/settings/custom_links/transaction',
+      {
+        signal: null,
+        params: { query: convertFiltersToQuery(filters) },
+      }
+    );
     callback(transaction);
   },
   1000
