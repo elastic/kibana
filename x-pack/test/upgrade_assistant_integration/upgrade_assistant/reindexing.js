@@ -83,6 +83,52 @@ export default function ({ getService }) {
       });
     });
 
+    it('can resume after reindexing was stopped right after creating the new index', async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+
+      const test = await es.get({
+        index: '.kibana',
+        id: 'upgrade-assistant-reindex-operation:91211210-7ea5-11ec-80b5-ebe81f06ed12',
+      });
+      console.log(test);
+
+      await es.update({
+        index: '.kibana',
+        id: 'upgrade-assistant-reindex-operation:91211210-7ea5-11ec-80b5-ebe81f06ed12',
+        body: {
+          'upgrade-assistant-reindex-operation': {
+            indexName: 'dummydata',
+            newIndexName: 'reindexed-v7-dummydata',
+            status: 2,
+            lastCompletedStep: 20,
+            locked: '2022-01-26T12:09:50+01:00',
+            reindexTaskId: null,
+            reindexTaskPercComplete: null,
+            errorMessage: 'Error: Index could not be created',
+            runningReindexCount: null,
+          },
+          type: 'upgrade-assistant-reindex-operation',
+        },
+      });
+
+      const { body } = await supertest
+        .post('/api/upgrade_assistant/reindex/dummydata')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(body.indexName).to.equal('dummydata');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('dummydata');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName,
+      });
+    });
+
     it('should update any aliases', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
