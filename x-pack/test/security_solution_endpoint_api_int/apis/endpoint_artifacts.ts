@@ -211,6 +211,17 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('and user DOES NOT have authorization to manage endpoint security', () => {
+        // Define a new array that includes the prior set from above, plus additional API calls that
+        // only have Authz validations setup
+        const allTrustedAppApiCalls: TrustedAppApiCallsInterface = [
+          ...trustedAppApiCalls,
+          {
+            method: 'get',
+            path: EXCEPTION_LIST_ITEM_URL,
+            getBody: () => {},
+          },
+        ];
+
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
