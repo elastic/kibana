@@ -117,7 +117,7 @@ export const buildFiredAlertReason: (alertResult: {
 }) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {currentValue}% in the last 5 mins for {group}. Alert when {comparator} {threshold}%.',
+      '{metric} is {currentValue} in the last 5 mins for {group}. Alert when {comparator} {threshold}%.',
     values: {
       group,
       metric,
@@ -135,7 +135,7 @@ export const buildRecoveredAlertReason: (alertResult: {
   currentValue: number | string;
 }) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
-    defaultMessage: '{metric} is now {currentValue}% for {group} ({comparator} {threshold}%).',
+    defaultMessage: '{metric} is now {currentValue} for {group} ({comparator} {threshold}%).',
     values: {
       metric,
       comparator: recoveredComparatorToI18n(
