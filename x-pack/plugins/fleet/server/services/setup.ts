@@ -10,11 +10,7 @@ import { compact } from 'lodash';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
-import type {
-  DefaultPackagesInstallationError,
-  PreconfigurationError,
-  FleetConfigType,
-} from '../../common';
+import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
 import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
 import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
