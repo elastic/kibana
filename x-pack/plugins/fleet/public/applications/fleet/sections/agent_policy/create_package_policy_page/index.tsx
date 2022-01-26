@@ -404,11 +404,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           updatePackagePolicy({ policy_id: policyId });
         }
       } catch (e) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+        notifications.toasts.addError(e, {
+          title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
             defaultMessage: 'Unable to create agent policy',
-          })
-        );
+          }),
+        });
         return;
       }
     }

@@ -51,6 +51,10 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
+  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
     name: agentPolicyName,
     description: '',
@@ -69,10 +73,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
     [setNewAgentPolicy, newAgentPolicy]
   );
 
-  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy);
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const createAgentPolicy = useCallback(async () => {
     try {

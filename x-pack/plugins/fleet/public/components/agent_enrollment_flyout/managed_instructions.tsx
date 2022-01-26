@@ -25,6 +25,8 @@ import { FleetServerRequirementPage } from '../../applications/fleet/sections/ag
 
 import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
 
+import { FLEET_SERVER_PACKAGE } from '../../constants';
+
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
@@ -173,11 +175,13 @@ export const ManagedInstructions = React.memo<Props>(
       );
     }
 
+    const showFleetMissingRequirements =
+      fleetServers.length === 0 ||
+      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
+
     return (
       <>
-        {(fleetStatus.missingRequirements?.length === 1 &&
-          fleetStatus.missingRequirements[0] === 'fleet_server') ||
-        fleetServers.length === 0 ? (
+        {showFleetMissingRequirements ? (
           <FleetServerMissingRequirements />
         ) : (
           <DefaultMissingRequirements />
