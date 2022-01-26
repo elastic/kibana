@@ -55,16 +55,6 @@ ts_config(
   ],
 )
 
-ts_config(
-  name = "tsconfig_browser",
-  src = "tsconfig.browser.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.browser.json",
-    "//:tsconfig.browser_bazel.json",
-  ],
-)
-
 ts_project(
   name = "tsc_types",
   args = ['--pretty'],

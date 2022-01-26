@@ -45,6 +45,13 @@ jsts_transpiler(
   build_pkg_name = package_name(),
 )
 
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
