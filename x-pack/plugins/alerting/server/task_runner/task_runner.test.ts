@@ -688,9 +688,10 @@ describe('Task Runner', () => {
             name: 'rule-name',
             ruleset: 'alerts',
           },
-        });
-        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      }
+        },
+      });
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    }
   );
 
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
@@ -957,23 +958,23 @@ describe('Task Runner', () => {
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
-        const logger = customTaskRunnerFactoryInitializerParams.logger;
-        expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
-        expect(logger.debug).nthCalledWith(
-          2,
-          `rule test:1: 'rule-name' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
-        );
-        expect(logger.debug).nthCalledWith(
-          3,
-          `skipping scheduling of actions for '2' in rule test:1: 'rule-name': rule is muted`
-        );
-        expect(logger.debug).nthCalledWith(
-          4,
-          'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
-        );
-        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      }
+      const logger = customTaskRunnerFactoryInitializerParams.logger;
+      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+      expect(logger.debug).nthCalledWith(
+        2,
+        `rule test:1: 'rule-name' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
+      );
+      expect(logger.debug).nthCalledWith(
+        3,
+        `skipping scheduling of actions for '2' in rule test:1: 'rule-name': rule is muted`
+      );
+      expect(logger.debug).nthCalledWith(
+        4,
+        'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      );
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    }
   );
 
   test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert alert state does not change', async () => {
@@ -1644,8 +1645,8 @@ describe('Task Runner', () => {
         ],
       ]
     `);
-        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      }
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    }
   );
 
   test.each(ephemeralTestParams)(
@@ -2050,8 +2051,8 @@ describe('Task Runner', () => {
         },
       ]
     `);
-        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      }
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    }
   );
 
   test.each(ephemeralTestParams)(
@@ -2141,13 +2142,13 @@ describe('Task Runner', () => {
         `ruleExecutionStatus for test:${alertId}: {"numberOfTriggeredActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
       );
 
-        const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
-        expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
-        expect(enqueueFunction).toHaveBeenCalledTimes(2);
-        expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
-        expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
-        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      }
+      const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+      expect(enqueueFunction).toHaveBeenCalledTimes(2);
+      expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
+      expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    }
   );
 
   test.each(ephemeralTestParams)(
@@ -2277,8 +2278,8 @@ describe('Task Runner', () => {
         },
       ]
     `);
-        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-      }
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    }
   );
 
   test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
