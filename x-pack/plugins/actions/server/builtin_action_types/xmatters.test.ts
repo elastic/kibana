@@ -210,7 +210,6 @@ describe('params validation', () => {
 
   test('params validation passes when a valid parameters are provided', () => {
     const params: Record<string, string> = {
-      alertActionGroup: 'small',
       alertActionGroupName: 'Small t-shirt',
       alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
       alertName: 'Test xMatters',
@@ -259,7 +258,6 @@ describe('execute()', () => {
       config,
       secrets: { user: 'abc', password: '123' },
       params: {
-        alertActionGroup: 'small',
         alertActionGroupName: 'Small t-shirt',
         alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
         alertName: 'Test xMatters',
@@ -291,7 +289,6 @@ describe('execute()', () => {
           "isUriAllowed": [MockFunction],
         },
         "data": Object {
-          "alertActionGroup": "small",
           "alertActionGroupName": "Small t-shirt",
           "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
           "alertName": "Test xMatters",
@@ -349,7 +346,6 @@ describe('execute()', () => {
       config,
       secrets: { user: 'abc', password: '123' },
       params: {
-        alertActionGroup: 'small',
         alertActionGroupName: 'Small t-shirt',
         alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
         alertName: 'Test xMatters',
@@ -379,7 +375,6 @@ describe('execute()', () => {
       config,
       secrets,
       params: {
-        alertActionGroup: 'small',
         alertActionGroupName: 'Small t-shirt',
         alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
         alertName: 'Test xMatters',
@@ -407,7 +402,6 @@ describe('execute()', () => {
           "isUriAllowed": [MockFunction],
         },
         "data": Object {
-          "alertActionGroup": "small",
           "alertActionGroupName": "Small t-shirt",
           "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
           "alertName": "Test xMatters",

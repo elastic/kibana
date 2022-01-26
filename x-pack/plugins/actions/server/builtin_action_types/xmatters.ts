@@ -61,7 +61,6 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  alertActionGroup: schema.maybe(schema.string()),
   alertActionGroupName: schema.string(),
   alertId: schema.string(),
   alertName: schema.maybe(schema.string()),
@@ -299,7 +298,6 @@ function retryResultSeconds(
 }
 
 interface XmattersPayload {
-  alertActionGroup?: string;
   alertActionGroupName: string;
   alertId: string;
   alertName?: string;
@@ -311,7 +309,6 @@ interface XmattersPayload {
 
 function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
   const data: XmattersPayload = {
-    alertActionGroup: params.alertActionGroup,
     alertActionGroupName: params.alertActionGroupName,
     alertId: params.alertId,
     alertName: params.alertName,
