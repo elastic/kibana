@@ -117,7 +117,7 @@ export const buildFiredAlertReason: (alertResult: {
 }) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
+      '{metric} is {currentValue}% in the last 5 mins for {group}. Alert when {comparator} {threshold}.',
     values: {
       group,
       metric,
