@@ -54,11 +54,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         indexPatternFieldEditor?.openEditor({
           ctx: { indexPattern: dataView },
-          onSave: (field: DataViewField) => {
+          onSave: async (field: DataViewField) => {
             // Fetch the updated list of fields
-            indexFieldsSearch(selectedDataViewId);
+            await indexFieldsSearch(selectedDataViewId);
 
-            // Add the new field to the event table
+            // Add the new field to the event table, after waiting for browserFields to be stored
             dispatch(
               upsertColumn({
                 column: {

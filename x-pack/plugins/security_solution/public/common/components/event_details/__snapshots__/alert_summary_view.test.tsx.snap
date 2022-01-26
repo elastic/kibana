@@ -33,23 +33,23 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
   display: flex;
 }
 
-.c2:focus-within .timelines__hoverActionButton,
-.c2:focus-within .securitySolution__hoverActionButton {
+.c3:focus-within .timelines__hoverActionButton,
+.c3:focus-within .securitySolution__hoverActionButton {
   opacity: 1;
 }
 
-.c2:hover .timelines__hoverActionButton,
-.c2:hover .securitySolution__hoverActionButton {
+.c3:hover .timelines__hoverActionButton,
+.c3:hover .securitySolution__hoverActionButton {
   opacity: 1;
 }
 
-.c2 .timelines__hoverActionButton,
-.c2 .securitySolution__hoverActionButton {
+.c3 .timelines__hoverActionButton,
+.c3 .securitySolution__hoverActionButton {
   opacity: 0;
 }
 
-.c2 .timelines__hoverActionButton:focus,
-.c2 .securitySolution__hoverActionButton:focus {
+.c3 .timelines__hoverActionButton:focus,
+.c3 .securitySolution__hoverActionButton:focus {
   opacity: 1;
 }
 
@@ -140,20 +140,32 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                 data-test-subj="event-field-kibana.alert.workflow_status"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  <div
-                    class="euiText euiText--extraSmall"
+                  <button
+                    class="euiLink euiLink--primary"
+                    data-test-subj="host-details-button"
+                    type="button"
                   >
+<<<<<<< HEAD
                     open
                   </div>
+=======
+                    <span
+                      class="c2"
+                      data-test-subj="draggable-truncatable-content"
+                    >
+                      windows-native
+                    </span>
+                  </button>
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -171,10 +183,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
+<<<<<<< HEAD
                     data-test-subj="more-actions-kibana.alert.workflow_status"
                     field="kibana.alert.workflow_status"
                     items="[object Object],[object Object]"
                     value="open"
+=======
+                    data-test-subj="more-actions-host.name"
+                    field="host.name"
+                    items="[object Object],[object Object],[object Object]"
+                    value="windows-native"
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                   >
                     Overflow button
                   </div>
@@ -282,20 +301,25 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                 data-test-subj="event-field-kibana.alert.rule.name"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  <div
-                    class="euiText euiText--extraSmall"
+                  <span
+                    data-test-subj="formatted-field-user.name"
                   >
+<<<<<<< HEAD
                     xxx
                   </div>
+=======
+                    administrator
+                  </span>
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -313,10 +337,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
+<<<<<<< HEAD
                     data-test-subj="more-actions-kibana.alert.rule.name"
                     field="kibana.alert.rule.name"
                     items="[object Object]"
                     value="xxx"
+=======
+                    data-test-subj="more-actions-user.name"
+                    field="user.name"
+                    items="[object Object],[object Object],[object Object]"
+                    value="administrator"
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                   >
                     Overflow button
                   </div>
@@ -366,7 +397,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -396,9 +427,108 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             </div>
           </td>
         </tr>
+<<<<<<< HEAD
         <tr
           class="euiTableRow"
         >
+=======
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`AlertSummaryView Memory event code renders additional summary rows 1`] = `
+.c0 .euiTableHeaderCell,
+.c0 .euiTableRowCell {
+  border: none;
+}
+
+.c0 .euiTableHeaderCell .euiTableCellContent {
+  padding: 0;
+}
+
+.c0 .flyoutOverviewDescription .hoverActions-active .timelines__hoverActionButton,
+.c0 .flyoutOverviewDescription .hoverActions-active .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
+.c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
+}
+
+.c2,
+.c2 * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c3:focus-within .timelines__hoverActionButton,
+.c3:focus-within .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c3:hover .timelines__hoverActionButton,
+.c3:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c3 .timelines__hoverActionButton,
+.c3 .securitySolution__hoverActionButton {
+  opacity: 0;
+}
+
+.c3 .timelines__hoverActionButton:focus,
+.c3 .securitySolution__hoverActionButton:focus {
+  opacity: 1;
+}
+
+<div
+  class="euiBasicTable c0"
+  data-test-subj="summary-view"
+>
+  <div>
+    <div
+      class="euiTableHeaderMobile"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+      </div>
+    </div>
+    <table
+      class="euiTable euiTable--compressed euiTable--responsive"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiScreenReaderOnly euiTableCaption"
+      />
+      <thead>
+        <tr>
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
           <td
             class="euiTableRowCell"
             style="width: 220px;"
@@ -1187,20 +1317,27 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                 data-test-subj="event-field-host.name"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  <div
-                    class="euiText euiText--extraSmall"
+                  <button
+                    class="euiLink euiLink--primary"
+                    data-test-subj="host-details-button"
+                    type="button"
                   >
-                    windows-native
-                  </div>
+                    <span
+                      class="c2"
+                      data-test-subj="draggable-truncatable-content"
+                    >
+                      windows-native
+                    </span>
+                  </button>
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -1220,7 +1357,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <div
                     data-test-subj="more-actions-host.name"
                     field="host.name"
-                    items="[object Object]"
+                    items="[object Object],[object Object],[object Object]"
                     value="windows-native"
                   >
                     Overflow button
@@ -1258,20 +1395,20 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                 data-test-subj="event-field-user.name"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  <div
-                    class="euiText euiText--extraSmall"
+                  <span
+                    data-test-subj="formatted-field-user.name"
                   >
                     administrator
-                  </div>
+                  </span>
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -1291,7 +1428,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <div
                     data-test-subj="more-actions-user.name"
                     field="user.name"
-                    items="[object Object]"
+                    items="[object Object],[object Object],[object Object]"
                     value="administrator"
                   >
                     Overflow button
@@ -1348,7 +1485,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
