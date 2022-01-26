@@ -8,12 +8,8 @@
 // @ts-ignore
 export { ElasticsearchMetric } from './elasticsearch/classes';
 // @ts-ignore
-export {
-  KibanaClusterMetric,
-  KibanaMetric,
-  KibanaClusterRuleMetric,
-  KibanaClusterActionMetric,
-} from './kibana/classes';
+// eslint-disable-next-line prettier/prettier
+export { KibanaClusterMetric, KibanaMetric, KibanaClusterRuleMetric, KibanaClusterActionMetric, } from './kibana/classes';
 export type { ApmMetricFields } from './apm/classes';
 export { ApmMetric, ApmClusterMetric } from './apm/classes';
 // @ts-ignore
