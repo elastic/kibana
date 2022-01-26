@@ -18,13 +18,13 @@ export const PreferenceFormattedDate = React.memo<{
   dateFormat?: string;
   value: Date;
   stripMs?: boolean;
-}>(
-  /* eslint-disable-next-line react-hooks/rules-of-hooks */
-  ({ value, dateFormat = useDateFormat() }, stripMs = false) => {
-    const finalDateFormat = stripMs ? dateFormat.replace(/\.?SSS/, '') : dateFormat;
-    return <>{moment.tz(value, useTimeZone()).format(finalDateFormat)}</>;
-  }
-);
+}>(({ value, dateFormat, stripMs = false }) => {
+  const systemDateFormat = useDateFormat();
+  const toUseDateFormat = dateFormat ? dateFormat : systemDateFormat;
+  const strippedDateFormat =
+    toUseDateFormat && stripMs ? toUseDateFormat.replace(/\.?SSS/, '') : toUseDateFormat;
+  return <>{moment.tz(value, useTimeZone()).format(strippedDateFormat)}</>;
+});
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
 

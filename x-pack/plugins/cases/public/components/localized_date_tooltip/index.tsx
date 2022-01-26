@@ -6,8 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import React from 'react';
 import { useTimeZone } from '../../common/lib/kibana';
 

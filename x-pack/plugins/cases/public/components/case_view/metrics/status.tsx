@@ -118,6 +118,7 @@ const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
     <FormattedRelativePreferenceDate
       data-test-subj={'case-metrics-lifespan-creation-date'}
       value={date}
+      stripMs={true}
     />
   );
 });
