@@ -154,7 +154,9 @@ describe('getSeries', () => {
         agg: 'differences',
         fieldName: 'day_of_week_i',
         isFullReference: true,
-        params: {},
+        params: {
+          timeScale: 'm',
+        },
         pipelineAggType: 'max',
       },
     ]);
