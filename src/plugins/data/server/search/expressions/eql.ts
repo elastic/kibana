@@ -31,15 +31,21 @@ export function getEql({
 }) {
   return getEqlFn({
     getStartDependencies: async (getKibanaRequest: any) => {
-      const [core, , { search }] = await getStartServices();
-      if (!getKibanaRequest || !getKibanaRequest()) {
-        throw new Error('TODO: add text');
+      const [core, , { search, indexPatterns }] = await getStartServices();
+      const request = getKibanaRequest?.();
+      if (request) {
+        throw new Error('missing dependencies');
       }
-      const request = getKibanaRequest();
       const savedObjectsClient = core.savedObjects.getScopedClient(request);
+      const dataViews = await indexPatterns.dataViewsServiceFactory(
+        savedObjectsClient,
+        core.elasticsearch.client.asScoped(request).asCurrentUser,
+        request
+      );
       return {
         uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
         search: search.asScoped(request).search,
+        dataViews,
       };
     },
   });

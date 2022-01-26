@@ -32,10 +32,11 @@ export function getEql({
 }) {
   return getEqlFn({
     getStartDependencies: async () => {
-      const [core, , { search }] = await getStartServices();
+      const [core, , { search, indexPatterns }] = await getStartServices();
       return {
         uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
         search: search.search,
+        dataViews: indexPatterns,
       };
     },
   });

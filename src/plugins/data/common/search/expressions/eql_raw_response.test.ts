@@ -126,7 +126,7 @@ describe('eqlRawResponse', () => {
           },
         },
       };
-      const result = eqlRawResponse.to!.datatable(response, {});
+      const result = eqlRawResponse.to?.datatable(response, {});
       expect(result).toMatchSnapshot();
     });
   });

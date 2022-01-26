@@ -20,7 +20,7 @@ import {
   EqlSearchStrategyRequest,
 } from '..';
 import { getEsQueryConfig } from '../../es_query';
-import { UiSettingsCommon } from '../..';
+import { DataViewsContract, UiSettingsCommon } from '../..';
 import { EqlRawResponse } from './eql_raw_response';
 
 const name = 'eql';
@@ -45,6 +45,7 @@ export type EqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
 interface EqlStartDependencies {
   search: ISearchGeneric;
   uiSettingsClient: UiSettingsCommon;
+  dataViews: DataViewsContract;
 }
 
 export const getEqlFn = ({
@@ -92,25 +93,25 @@ export const getEqlFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { search, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
+      const { search, uiSettingsClient, dataViews } = await getStartDependencies(getKibanaRequest);
 
-      const dsl: EqlSearchRequest['body'] = {
+      const dsl = {
         query: args.query,
         size: args.size,
-        // @ts-ignore
         fields: args.field,
-      };
+      } as unknown as Required<EqlSearchRequest>['body'];
 
       if (input) {
+        const dataview = args.index ? await dataViews.get(args.index) : undefined;
         const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
         const query = buildEsQuery(
-          undefined, //        args.index,
+          dataview,
           input.query || [],
           input.filters || [],
           esQueryConfigs
         );
 
-        dsl!.filter = query;
+        dsl.filter = query;
       }
 
       if (!inspectorAdapters.requests) {

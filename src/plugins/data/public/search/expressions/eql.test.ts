@@ -43,9 +43,7 @@ describe('eql', () => {
         },
       },
     ];
-    getStartServices = jest
-      .fn()
-      .mockResolvedValue(new Promise((resolve) => resolve(startDependencies)));
+    getStartServices = jest.fn().mockResolvedValue(startDependencies);
     eql = getEql({ getStartServices });
   });
 

@@ -41,8 +41,8 @@ interface EqlResponseBody {
 const flatten = (obj: Record<string, unknown>) => {
   // @ts-ignore
   const _flatten = (o: Record<string, unknown>, path: string[] = []) => {
-    return [].concat(
-      ...Object.keys(o).map((k: string) => {
+    return Object.keys(o)
+      .map((k: string) => {
         if (typeof o[k] === 'object' && o[k] !== null && !Array.isArray(o[k])) {
           return _flatten(o[k] as Record<string, unknown>, [...path, k]);
         } else {
@@ -50,7 +50,7 @@ const flatten = (obj: Record<string, unknown>) => {
           return { [key]: o[k] };
         }
       })
-    );
+      .flat();
   };
 
   return Object.assign({}, ..._flatten(obj));
@@ -60,7 +60,7 @@ const parseEventDocs = (events: EqlReponseEvent[]) => {
   return events
     .map((hit) => hit.fields || hit._source)
     .filter((hit) => hit)
-    .map((event) => flatten(event as Record<string, any>));
+    .map((event) => flatten(event as Record<string, unknown>));
 };
 
 const parseResponse = (hits: EqlResponseBody['hits']) => {
