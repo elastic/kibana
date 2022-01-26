@@ -14,7 +14,6 @@ import {
   EuiLoadingContent,
   EuiProgress,
 } from '@elastic/eui';
-
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { partition } from 'lodash/fp';
 
@@ -25,7 +24,6 @@ import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
-
 import {
   CreatePreBuiltRules,
   FilterOptions,
@@ -37,22 +35,17 @@ import { useAsyncConfirmation } from '../../../../containers/detection_engine/ru
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
-
-import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
-import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
-
-import { useBulkActions } from './bulk_actions/use_bulk_actions';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
-
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesUtilityBar } from './utility_bar';
-
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../../common/constants';
-
+import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
 import { useCustomRulesCount } from './bulk_actions/use_custom_rules_count';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
-import { useTags } from '../../../../containers/detection_engine/rules/use_tags';
+import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
+import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
+import { useBulkActions } from './bulk_actions/use_bulk_actions';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -391,7 +384,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
-              isBulkActionsInProgress={isCustomRulesCountLoading || loadingRulesAction != null}
+              isBulkActionInProgress={isCustomRulesCountLoading || loadingRulesAction != null}
               disableActions={loadingRulesAction != null}
               showBulkActions
             />

@@ -327,7 +327,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
     });
 
-    it('should edit rule by its id in ids param', async () => {
+    it('should bulk update rule by id', async () => {
       const ruleId = 'ruleId';
       const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
       const timelineTitle = 'Test timeline';
