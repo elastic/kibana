@@ -116,6 +116,7 @@ Replaces CentOS base image with Ubuntu {kibana-pull}118928[#118928]
 Platform::
 * Response logs emitted by the elasticsearch service include the size of the response body {kibana-pull}123173[#123173]
 * Adds event loop delay histogram percentiles to `metrics.ops` logger message and meta field {kibana-pull}120451[#120451]
+* Displays event loop delay metrics in the Status page to assist with performance monitoring {kibana-pull}121052[#121052]
 
 [float]
 [[fixes-v7.17.0]]
@@ -133,7 +134,6 @@ Discover::
 Elastic Security::
 For the Elastic Security 7.17.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Lens & Visualizations::
-* Restores default chart `timezone` to `'local'` in XY charts {kibana-pull}123264[#123264]
 * Fixes y-axis visibility for Percentile aggregation in XY charts {kibana-pull}122162[#122162]
 * Runs the migration correctly for the drop last bucket in *TSVB* {kibana-pull}121734[#121734]
 * Fixes percentage mode behavior when multiple metrics are placed on the same axis in XY charts {kibana-pull}121610[#121610]
@@ -154,8 +154,7 @@ Observability::
 * Fixes a problem in which the exploratory view would crash if no date ranges were selected in Uptime {kibana-pull}122163[#122163]
 * Fixes a bug where the monitor step details would send more requests than necessary in Uptime {kibana-pull}121889[#121889]
 * Drop requests for overview page data when filter not initialized in Uptime {kibana-pull}120031[#120031]
-Platform::
-Displays event loop delay metrics in the Status page to assist with performance monitoring {kibana-pull}121052[#121052]
+* Restores default chart `timezone` to `'local'` in XY charts {kibana-pull}123264[#123264]
 Security::
 * Adds tooltip for usernames on API Key management page {kibana-pull}122488[#122488]
 * Detects cookies on login page {kibana-pull}120944[#120944]
