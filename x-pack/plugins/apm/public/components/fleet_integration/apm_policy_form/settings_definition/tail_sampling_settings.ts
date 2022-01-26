@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { OPTIONAL_LABEL } from '../settings_form/utils';
-import { SettingsRow } from '../typings';
+import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
+import { PackagePolicyVars, SettingsRow } from '../typings';
 
 const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
@@ -44,6 +44,12 @@ export function getTailSamplingSettings(): SettingsRow[] {
                 'Interval for syncronisation between multiple APM Servers. Should be in the order of tens of seconds or low minutes.',
             }
           ),
+          placeholder: i18n.translate(
+            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingIntervalPlaceholder',
+            {
+              defaultMessage: '1m',
+            }
+          ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
         },
@@ -66,16 +72,28 @@ export function getTailSamplingSettings(): SettingsRow[] {
             }
           ),
           placeholder:
-            'policies:\n       - service.name: string\n         service.environment: string\n         trace.name: string\n         trace.outcome: string\n         sample_rate: number',
+            '- service.name: string\n         service.environment: string\n         trace.name: string\n         trace.outcome: string\n         sample_rate: number',
           labelAppendLink: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingHelpText',
             {
               defaultMessage: 'Learn more',
             }
           ),
-          required: true,
+          // required: true,
+          defaultValue: 'sample_rate: 0.1',
         },
       ],
     },
   ];
+}
+
+export function isTailBasedSamplingValid(
+  newVars: PackagePolicyVars,
+  tailSamplingSettings: SettingsRow[]
+) {
+  // only validates TBS when its flag is enabled
+  return (
+    !newVars[TAIL_SAMPLING_ENABLED_KEY].value ||
+    isSettingsFormValid(tailSamplingSettings, newVars)
+  );
 }
