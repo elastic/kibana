@@ -5,70 +5,57 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import {
   EuiBasicTable,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
-  EuiConfirmModal,
-  EuiWindowEvent,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { debounce } from 'lodash/fp';
-import { History } from 'history';
-
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { AllRulesTabs } from '.';
+import { HeaderSection } from '../../../../../common/components/header_section';
+import { Loader } from '../../../../../common/components/loader';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
 import {
-  useRulesTable,
   CreatePreBuiltRules,
   FilterOptions,
-  RulesSortingFields,
   Rule,
+  RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
-
-import { FormatUrl } from '../../../../../common/components/link_to';
-import { HeaderSection } from '../../../../../common/components/header_section';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { useStateToaster } from '../../../../../common/components/toasters';
-import { Loader } from '../../../../../common/components/loader';
-import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
+import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
+import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
-import { getBatchItems } from './batch_actions';
-import { getRulesColumns, getMonitoringColumns } from './columns';
+import { useBulkActions } from './use_bulk_actions';
+import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
-import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
-import { AllRulesTabs } from '.';
-import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
-import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
-import { useBoolState } from '../../../../../common/hooks/use_bool_state';
-import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
 interface RulesTableProps {
-  history: History;
-  formatUrl: FormatUrl;
   createPrePackagedRules: CreatePreBuiltRules | null;
   hasPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  refetchPrePackagedRulesStatus: () => Promise<void>;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
   selectedTab: AllRulesTabs;
+  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
 }
+
+const NO_ITEMS_MESSAGE = (
+  <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
+);
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -80,109 +67,54 @@ interface RulesTableProps {
  */
 export const RulesTables = React.memo<RulesTableProps>(
   ({
-    history,
-    formatUrl,
     createPrePackagedRules,
     hasPermissions,
     loading,
     loadingCreatePrePackagedRules,
-    refetchPrePackagedRulesStatus,
     rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
-    setRefreshRulesData,
     selectedTab,
+    setRefreshRulesData,
   }) => {
-    const docLinks = useKibana().services.docLinks;
-    const [initLoading, setInitLoading] = useState(true);
-
-    const {
-      services: {
-        application: {
-          capabilities: { actions },
-        },
-        timelines,
-      },
-    } = useKibana();
-
+    const { timelines } = useKibana().services;
     const tableRef = useRef<EuiBasicTable>(null);
+    const rulesTableContext = useRulesTableContext();
 
-    const [defaultAutoRefreshSetting] = useUiSetting$<{
-      on: boolean;
-      value: number;
-      idleTimeout: number;
-    }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
-
-    const rulesTable = useRulesTable({
-      initialStateOverride: {
-        isRefreshOn: defaultAutoRefreshSetting.on,
+    const {
+      state: {
+        rules,
+        filterOptions,
+        isActionInProgress,
+        isAllSelected,
+        isFetched,
+        isFetching,
+        isLoading,
+        isRefetching,
+        isRefreshOn,
+        lastUpdated,
+        loadingRuleIds,
+        pagination,
+        selectedRuleIds,
+        sortingOptions,
       },
-    });
-
-    const {
-      filterOptions,
-      loadingRuleIds,
-      loadingRulesAction,
-      pagination,
-      rules,
-      selectedRuleIds,
-      lastUpdated,
-      showIdleModal,
-      isRefreshOn,
-      isRefreshing,
-      isAllSelected,
-    } = rulesTable.state;
-
-    const {
-      dispatch,
-      updateOptions,
-      setShowIdleModal,
-      setLastRefreshDate,
-      setAutoRefreshOn,
-      setIsRefreshing,
-      reFetchRules,
-    } = rulesTable;
-
-    const [, dispatchToaster] = useStateToaster();
-    const mlCapabilities = useMlCapabilities();
-    const { navigateToApp } = useKibana().services.application;
-
-    // TODO: Refactor license check + hasMlAdminPermissions to common check
-    const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-
-    const isLoadingRules = loadingRulesAction === 'load';
-    const isLoadingAnActionOnRule = useMemo(() => {
-      if (
-        loadingRuleIds.length > 0 &&
-        (loadingRulesAction === 'disable' || loadingRulesAction === 'enable')
-      ) {
-        return false;
-      } else if (loadingRuleIds.length > 0) {
-        return true;
-      }
-      return false;
-    }, [loadingRuleIds, loadingRulesAction]);
-
-    const sorting = useMemo(
-      () => ({
-        sort: {
-          field: filterOptions.sortField,
-          direction: filterOptions.sortOrder,
-        },
-      }),
-      [filterOptions]
-    );
+      actions: {
+        reFetchRules,
+        setFilterOptions,
+        setIsAllSelected,
+        setIsRefreshOn,
+        setPage,
+        setPerPage,
+        setSelectedRuleIds,
+        setSortingOptions,
+      },
+    } = rulesTableContext;
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
       rulesNotInstalled,
       rulesNotUpdated
-    );
-
-    const hasActionsPrivileges = useMemo(
-      () => (isBoolean(actions.show) ? actions.show : true),
-      [actions]
     );
 
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
@@ -196,41 +128,11 @@ export const RulesTables = React.memo<RulesTableProps>(
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
 
-    const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void): JSX.Element[] => {
-        return getBatchItems({
-          isAllSelected,
-          closePopover,
-          dispatch,
-          dispatchToaster,
-          hasMlPermissions,
-          hasActionsPrivileges,
-          loadingRuleIds,
-          selectedRuleIds,
-          reFetchRules,
-          refetchPrePackagedRulesStatus,
-          rules,
-          filterQuery: convertRulesFilterToKQL(filterOptions),
-          confirmDeletion,
-          selectedItemsCount,
-        });
-      },
-      [
-        isAllSelected,
-        dispatch,
-        dispatchToaster,
-        hasMlPermissions,
-        loadingRuleIds,
-        reFetchRules,
-        refetchPrePackagedRulesStatus,
-        rules,
-        selectedRuleIds,
-        hasActionsPrivileges,
-        filterOptions,
-        confirmDeletion,
-        selectedItemsCount,
-      ]
-    );
+    const getBatchItemsPopoverContent = useBulkActions({
+      filterQuery: convertRulesFilterToKQL(filterOptions),
+      confirmDeletion,
+      selectedItemsCount,
+    });
 
     const paginationMemo = useMemo(
       () => ({
@@ -244,84 +146,47 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilter: Partial<FilterOptions>) => {
-        updateOptions(newFilter, { page: 1 });
+        setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+        setPage(1);
+        setSelectedRuleIds([]);
+        setIsAllSelected(false);
       },
-      [updateOptions]
+      [setFilterOptions, setIsAllSelected, setPage, setSelectedRuleIds]
     );
 
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
-        updateOptions(
-          {
-            sortField: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
-            sortOrder: sort?.direction ?? 'desc',
-          },
-          { page: page.index + 1, perPage: page.size }
-        );
-        setLastRefreshDate();
+        setSortingOptions({
+          field: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
+          order: sort?.direction ?? 'desc',
+        });
+        setPage(page.index + 1);
+        setPerPage(page.size);
       },
-      [updateOptions, setLastRefreshDate]
+      [setPage, setPerPage, setSortingOptions]
     );
 
-    const [rulesColumns, monitoringColumns] = useMemo(() => {
-      const props = {
-        dispatch,
-        formatUrl,
-        hasMlPermissions,
-        hasPermissions,
-        loadingRuleIds:
-          loadingRulesAction != null &&
-          (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
-            ? loadingRuleIds
-            : [],
-        navigateToApp,
-        hasReadActionsPrivileges: hasActionsPrivileges,
-        dispatchToaster,
-        history,
-        reFetchRules,
-        refetchPrePackagedRulesStatus,
-        docLinks,
-      };
-      return [getRulesColumns(props), getMonitoringColumns(props)];
-    }, [
-      dispatch,
-      dispatchToaster,
-      formatUrl,
-      refetchPrePackagedRulesStatus,
-      hasActionsPrivileges,
-      hasPermissions,
-      hasMlPermissions,
-      history,
-      loadingRuleIds,
-      loadingRulesAction,
-      navigateToApp,
-      reFetchRules,
-      docLinks,
-    ]);
+    const rulesColumns = useRulesColumns({ hasPermissions });
+    const monitoringColumns = useMonitoringColumns({ hasPermissions });
 
     useEffect(() => {
-      setRefreshRulesData(reFetchRules);
+      setRefreshRulesData(async () => {
+        await reFetchRules();
+      });
     }, [reFetchRules, setRefreshRulesData]);
-
-    useEffect(() => {
-      if (initLoading && !loading && !isLoadingRules) {
-        setInitLoading(false);
-      }
-    }, [initLoading, loading, isLoadingRules]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
         await createPrePackagedRules();
         await reFetchRules();
-        await refetchPrePackagedRulesStatus();
       }
-    }, [createPrePackagedRules, reFetchRules, refetchPrePackagedRulesStatus]);
+    }, [createPrePackagedRules, reFetchRules]);
 
     const isSelectAllCalled = useRef(false);
 
     // Synchronize selectedRuleIds with EuiBasicTable's selected rows
     useValueChanged((ruleIds) => {
-      if (tableRef.current?.changeSelection != null) {
+      if (tableRef.current != null) {
         tableRef.current.setSelection(rules.filter((rule) => ruleIds.includes(rule.id)));
       }
     }, selectedRuleIds);
@@ -342,96 +207,33 @@ export const RulesTables = React.memo<RulesTableProps>(
           if (isSelectAllCalled.current) {
             isSelectAllCalled.current = false;
           } else {
-            dispatch({ type: 'selectedRuleIds', ids: selected.map(({ id }) => id) });
+            setSelectedRuleIds(selected.map(({ id }) => id));
+            setIsAllSelected(false);
           }
         },
       }),
-      [loadingRuleIds, dispatch]
+      [loadingRuleIds, setIsAllSelected, setSelectedRuleIds]
     );
 
     const toggleSelectAll = useCallback(() => {
       isSelectAllCalled.current = true;
-      dispatch({ type: 'setIsAllSelected', isAllSelected: !isAllSelected });
-    }, [dispatch, isAllSelected]);
-
-    const refreshTable = useCallback(
-      async (mode: 'auto' | 'manual' = 'manual'): Promise<void> => {
-        if (isLoadingAnActionOnRule) {
-          return;
-        }
-
-        const isAutoRefresh = mode === 'auto';
-        if (isAutoRefresh) {
-          setIsRefreshing(true);
-        }
-
-        await reFetchRules();
-        await refetchPrePackagedRulesStatus();
-        setLastRefreshDate();
-
-        if (isAutoRefresh) {
-          setIsRefreshing(false);
-        }
-      },
-      [
-        isLoadingAnActionOnRule,
-        setIsRefreshing,
-        reFetchRules,
-        refetchPrePackagedRulesStatus,
-        setLastRefreshDate,
-      ]
-    );
-
-    const handleAutoRefresh = useCallback(async (): Promise<void> => {
-      await refreshTable('auto');
-    }, [refreshTable]);
-
-    const handleManualRefresh = useCallback(async (): Promise<void> => {
-      await refreshTable();
-    }, [refreshTable]);
-
-    const handleResetIdleTimer = useCallback((): void => {
-      if (isRefreshOn) {
-        setShowIdleModal(true);
-        setAutoRefreshOn(false);
-      }
-    }, [setShowIdleModal, setAutoRefreshOn, isRefreshOn]);
-
-    const debounceResetIdleTimer = useMemo(() => {
-      return debounce(defaultAutoRefreshSetting.idleTimeout, handleResetIdleTimer);
-    }, [handleResetIdleTimer, defaultAutoRefreshSetting.idleTimeout]);
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        if (isRefreshOn) {
-          handleAutoRefresh();
-        }
-      }, defaultAutoRefreshSetting.value);
-
-      return () => {
-        clearInterval(interval);
-      };
-    }, [isRefreshOn, handleAutoRefresh, defaultAutoRefreshSetting.value]);
-
-    const handleIdleModalContinue = useCallback((): void => {
-      setShowIdleModal(false);
-      handleAutoRefresh();
-      setAutoRefreshOn(true);
-    }, [setShowIdleModal, setAutoRefreshOn, handleAutoRefresh]);
+      setIsAllSelected(!isAllSelected);
+      setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
+    }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
     const handleAutoRefreshSwitch = useCallback(
       (refreshOn: boolean) => {
         if (refreshOn) {
-          handleAutoRefresh();
+          reFetchRules();
         }
-        setAutoRefreshOn(refreshOn);
+        setIsRefreshOn(refreshOn);
       },
-      [setAutoRefreshOn, handleAutoRefresh]
+      [setIsRefreshOn, reFetchRules]
     );
 
     const shouldShowRulesTable = useMemo(
-      (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading,
-      [initLoading, rulesCustomInstalled, rulesInstalled]
+      (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !isLoading,
+      [isLoading, rulesCustomInstalled, rulesInstalled]
     );
 
     const shouldShowPrepackagedRulesPrompt = useMemo(
@@ -439,8 +241,8 @@ export const RulesTables = React.memo<RulesTableProps>(
         rulesCustomInstalled != null &&
         rulesCustomInstalled === 0 &&
         prePackagedRuleStatus === 'ruleNotInstalled' &&
-        !initLoading,
-      [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
+        !isLoading,
+      [isLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
     const tableProps =
@@ -453,13 +255,7 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     return (
       <>
-        <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
-        <EuiWindowEvent event="mousedown" handler={debounceResetIdleTimer} />
-        <EuiWindowEvent event="click" handler={debounceResetIdleTimer} />
-        <EuiWindowEvent event="keydown" handler={debounceResetIdleTimer} />
-        <EuiWindowEvent event="scroll" handler={debounceResetIdleTimer} />
-        <EuiWindowEvent event="load" handler={debounceResetIdleTimer} />
-        {!initLoading && (loading || isLoadingRules || isLoadingAnActionOnRule) && isRefreshing && (
+        {isFetched && isRefetching && (
           <EuiProgress
             data-test-subj="loadingRulesInfoProgress"
             size="xs"
@@ -467,12 +263,15 @@ export const RulesTables = React.memo<RulesTableProps>(
             color="accent"
           />
         )}
+        {((!isFetched && isRefetching) || isActionInProgress) && (
+          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+        )}
         <HeaderSection
           split
           growLeftSplit={false}
           title={i18n.ALL_RULES}
           subtitle={timelines.getLastUpdated({
-            showUpdating: loading || isLoadingRules,
+            showUpdating: loading || isFetching,
             updatedAt: lastUpdated,
           })}
         >
@@ -485,9 +284,6 @@ export const RulesTables = React.memo<RulesTableProps>(
             />
           )}
         </HeaderSection>
-        {!initLoading &&
-          (loading || isLoadingRules || isLoadingAnActionOnRule) &&
-          !isRefreshing && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
         {shouldShowPrepackagedRulesPrompt && (
           <PrePackagedRulesPrompt
             createPrePackagedRules={handleCreatePrePackagedRules}
@@ -495,20 +291,8 @@ export const RulesTables = React.memo<RulesTableProps>(
             userHasPermissions={hasPermissions}
           />
         )}
-        {initLoading && (
+        {isLoading && (
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-        )}
-        {showIdleModal && (
-          <EuiConfirmModal
-            title={i18n.REFRESH_PROMPT_TITLE}
-            onCancel={handleIdleModalContinue}
-            onConfirm={handleIdleModalContinue}
-            confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
-            defaultFocusedButton="confirm"
-            data-test-subj="allRulesIdleModal"
-          >
-            <p>{i18n.REFRESH_PROMPT_BODY}</p>
-          </EuiConfirmModal>
         )}
         {isDeleteConfirmationVisible && (
           <EuiConfirmModal
@@ -532,7 +316,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               paginationTotal={pagination.total ?? 0}
               numberSelectedItems={selectedItemsCount}
               onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
-              onRefresh={handleManualRefresh}
+              onRefresh={reFetchRules}
               isAutoRefreshOn={isRefreshOn}
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
@@ -543,18 +327,18 @@ export const RulesTables = React.memo<RulesTableProps>(
               itemId="id"
               items={rules}
               isSelectable={hasPermissions}
-              noItemsMessage={
-                <EuiEmptyPrompt
-                  title={<h3>{i18n.NO_RULES}</h3>}
-                  titleSize="xs"
-                  body={i18n.NO_RULES_BODY}
-                />
-              }
+              noItemsMessage={NO_ITEMS_MESSAGE}
               onChange={tableOnChangeCallback}
               pagination={paginationMemo}
               ref={tableRef}
               selection={euiBasicTableSelectionProps}
-              sorting={sorting}
+              sorting={{
+                sort: {
+                  // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                  field: sortingOptions.field as keyof Rule,
+                  direction: sortingOptions.order,
+                },
+              }}
               {...tableProps}
             />
           </>

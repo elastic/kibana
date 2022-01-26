@@ -35,18 +35,20 @@ export function ServiceLogs() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/infrastructure',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end]
