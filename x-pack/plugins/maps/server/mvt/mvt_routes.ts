@@ -60,7 +60,7 @@ export function initMVTRoutes({
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const gzippedTile = await getEsTile({
-        path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
         context,
@@ -108,6 +108,7 @@ export function initMVTRoutes({
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const gzipTileStream = await getEsGridTile({
+        url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
         context,
