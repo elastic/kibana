@@ -9,6 +9,7 @@
 import React, { useCallback } from 'react';
 import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '../../../../../../../../../../src/core/public';
 import {
@@ -66,7 +67,7 @@ export const useBulkActions = ({
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { api: toastsApi } = useAppToasts();
   const isRulesBulkEditEnabled = useIsExperimentalFeatureEnabled('rulesBulkEditEnabled');
-
+  const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
@@ -322,12 +323,16 @@ export const useBulkActions = ({
           }
 
           isBulkEditFinished = true;
-          await Promise.allSettled([reFetchRules(), resolveTagsRefetch(bulkEditActionType)]);
+          if (getIsMounted()) {
+            await Promise.allSettled([reFetchRules(), resolveTagsRefetch(bulkEditActionType)]);
+          }
         } catch (e) {
           // user has cancelled form or error has occured
         } finally {
           isBulkEditFinished = true;
-          setIsRefreshOn(true);
+          if (getIsMounted()) {
+            setIsRefreshOn(true);
+          }
         }
       };
 
@@ -493,6 +498,7 @@ export const useBulkActions = ({
       confirmBulkEdit,
       resolveTagsRefetch,
       setIsRefreshOn,
+      getIsMounted,
     ]
   );
 };
