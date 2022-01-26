@@ -11,17 +11,17 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
 
 import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public';
-import { useLink, useAuthz, useStartServices } from '../../hooks';
+import { useLink, useStartServices } from '../../hooks';
 
 const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
   const { getHref } = useLink();
   const { application } = useStartServices();
-  const hasFleetWritePermissions = useAuthz().fleet.all;
+  const hasIntegrationsPermissions = application.capabilities.navLinks.integrations;
   const [noticeState] = useState({
     settingsDataLoaded: false,
   });
 
-  return hasFleetWritePermissions && noticeState.settingsDataLoaded ? (
+  return hasIntegrationsPermissions && noticeState.settingsDataLoaded ? (
     <RedirectAppLinks application={application}>
       <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('integrations')}>
         <FormattedMessage
