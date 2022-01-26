@@ -82,6 +82,7 @@ export type {
 };
 
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import { WorkerThreadsServiceStart } from './worker_threads';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
@@ -565,6 +566,8 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** {@link WorkerThreadsServiceStart} */
+  workerThreads: WorkerThreadsServiceStart;
 }
 
 export type {

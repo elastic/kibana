@@ -5,3 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+export { WorkerThreadsService } from './worker_threads_service';
+export type {
+  WorkerThreadsServiceSetup,
+  WorkerThreadsServiceStart,
+} from './worker_threads_service';

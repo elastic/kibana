@@ -29,7 +29,6 @@ export function initialize(): { [key: string]: () => unknown } {
   return {
     myWorkerTask: async () => {
       const results = await client.asInternalUser.search({ index: '.kibana' });
-      console.log(JSON.stringify(results));
       return JSON.stringify(results);
     },
   };

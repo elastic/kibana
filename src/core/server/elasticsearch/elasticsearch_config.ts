@@ -465,7 +465,7 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
   } else {
     if (rawConfig.ssl.key) {
       key = readFile(rawConfig.ssl.key);
-      this.ssl.keyPassphrase;
+      keyPassphrase = rawConfig.ssl.keyPassphrase;
     }
     if (rawConfig.ssl.certificate) {
       certificate = readFile(rawConfig.ssl.certificate);
