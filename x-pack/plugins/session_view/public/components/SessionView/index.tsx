@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import {
-  EuiSearchBar,
   EuiEmptyPrompt,
   EuiButton,
   EuiSplitPanel,
@@ -18,8 +17,9 @@ import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
+import { SessionViewSearchBar } from '../SessionViewSearchBar';
 import { useStyles } from './styles';
-import { useSearchQuery, useFetchSessionViewProcessEvents } from './hooks';
+import { useFetchSessionViewProcessEvents } from './hooks';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
@@ -44,7 +44,8 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     }
   };
 
-  const { onSearch, searchQuery } = useSearchQuery();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults ] = useState<Process[] | null>(null);
 
   const {
     data,
@@ -105,6 +106,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
             fetchPreviousPage={fetchPreviousPage}
+            setSearchResults={setSearchResults}
           />
         </div>
       );
@@ -139,8 +141,13 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="sessionViewProcessEventsSearch">
-          <EuiSearchBar query={searchQuery} onChange={onSearch} />
+        <EuiFlexItem data-test-subj="sessionViewProcessEventsSearch" css={{ position: 'relative' }}>
+          <SessionViewSearchBar 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            setSelectedProcess={setSelectedProcess} 
+            searchResults={searchResults} 
+          />          
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
