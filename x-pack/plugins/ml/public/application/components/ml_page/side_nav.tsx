@@ -14,7 +14,6 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kib
 import { isFullLicense } from '../../license';
 import { ML_APP_NAME } from '../../../../common/constants/app';
 import type { MlRoute } from '../../routing';
-import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
 export interface Tab {
@@ -127,32 +126,8 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     [pageState]
   );
 
-  const getJobSelection = useJobSelectionFlyout();
-
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
-
-    const getJobSelectionCallback =
-      (targetPage: typeof ML_PAGES.ANOMALY_EXPLORER | typeof ML_PAGES.SINGLE_METRIC_VIEWER) =>
-      async () => {
-        const singleSelection = targetPage === ML_PAGES.SINGLE_METRIC_VIEWER;
-
-        try {
-          const { jobIds, time } = await getJobSelection({ singleSelection });
-          const path = await mlLocator!.getUrl({
-            page: targetPage,
-            pageState: {
-              ...pageState,
-              timeRange: time,
-              jobIds,
-            },
-          });
-
-          await navigateToPath(path, false);
-        } catch (e) {
-          // flyout has bene closed without selection
-        }
-      };
 
     return [
       {
@@ -200,7 +175,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               defaultMessage: 'Single Metric Viewer',
             }),
             pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
-            onClick: getJobSelectionCallback(ML_PAGES.SINGLE_METRIC_VIEWER),
             disabled: disableLinks,
           },
           {
