@@ -55,7 +55,7 @@ exports.NativeRealm = class NativeRealm {
 
   async clusterReady() {
     return await this._autoRetry({ maxAttempts: 10 }, async () => {
-      const { status } = await this._client.cluster.health({});
+      const { status } = await this._client.cluster.health();
       if (status === 'red') {
         throw new Error(`not ready, cluster health is ${status}`);
       }
