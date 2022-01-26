@@ -32,7 +32,7 @@ export const ServicesProvider: FC<CloudServices> = ({ children, ...services }) =
 );
 
 /**
- * React hook for accessing the pre-wired `EngagementServices`.
+ * React hook for accessing the pre-wired `CloudServices`.
  */
 export function useServices() {
   return useContext(ServicesContext);

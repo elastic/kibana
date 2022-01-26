@@ -14,10 +14,11 @@ const services: CloudServices = {
   chat: {
     enabled: true,
     chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
-    userID: '53877975',
+    userID: 'user-id',
     userEmail: 'test-user@elastic.co',
-    identityJWT:
-      'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Mzg3Nzk3NSIsImV4cCI6MTY0MjUxNDc0Mn0.CcAZbD8R865UmoHGi27wKn0aH1bzkZXhX449yyDH2Vk',
+    // this doesn't affect chat appearance,
+    // but a user identity in Drift only
+    identityJWT: 'identity-jwt',
   },
 };
 

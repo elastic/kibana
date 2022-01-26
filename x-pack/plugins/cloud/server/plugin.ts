@@ -7,6 +7,7 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import type { SecurityPluginSetup } from '../../security/server';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
@@ -16,6 +17,7 @@ import { registerChatRoute } from './routes/chat';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface CloudSetup {
@@ -37,7 +39,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.config = this.context.config.get<CloudConfigType>();
   }
 
-  public setup(core: CoreSetup, { usageCollection }: PluginsSetup) {
+  public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup) {
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
@@ -51,8 +53,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     if (this.config.chat.enabled && this.config.chatIdentitySecret) {
       registerChatRoute({
-        httpResources: core.http.resources,
+        router: core.http.createRouter(),
         chatIdentitySecret: this.config.chatIdentitySecret,
+        security,
       });
     }
 

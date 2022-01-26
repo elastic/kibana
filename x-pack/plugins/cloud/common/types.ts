@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export interface GetChatTokenResponseBody {
+export interface GetChatUserDataResponseBody {
   token: string;
+  email: string;
+  id: string;
 }

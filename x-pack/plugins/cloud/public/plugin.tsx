@@ -26,9 +26,9 @@ import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
   ELASTIC_SUPPORT_LINK,
   CLOUD_SNAPSHOTS_PATH,
-  GET_CHAT_TOKEN_ROUTE_PATH,
+  GET_CHAT_USER_DATA_ROUTE_PATH,
 } from '../common/constants';
-import type { GetChatTokenResponseBody } from '../common/types';
+import type { GetChatUserDataResponseBody } from '../common/types';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
@@ -313,29 +313,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       return;
     }
 
-    const user = await loadChatUser({ getCurrentUser: security.authc.getCurrentUser });
+    const chatUserData = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
 
-    if (!user) {
-      return;
-    }
-
-    try {
-      const response = await http.get<GetChatTokenResponseBody>(GET_CHAT_TOKEN_ROUTE_PATH, {
-        query: {
-          userId: user.userID,
-        },
-      });
-
-      this.chatService = {
-        ...user,
-        enabled,
-        chatURL,
-        identityJWT: response.token,
-      };
-    } catch (error) {
-      // TODO: add logger
-      return;
-    }
+    this.chatService = {
+      enabled,
+      chatURL,
+      userEmail: chatUserData.email,
+      userID: chatUserData.id,
+      identityJWT: chatUserData.token,
+    };
   }
 }
 
@@ -365,43 +351,6 @@ export const loadFullStoryUserId = async ({
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
-    return undefined;
-  }
-};
-
-/** @internal exported for testing */
-export const loadChatUser = async ({
-  getCurrentUser,
-}: {
-  getCurrentUser: () => Promise<AuthenticatedUser>;
-}) => {
-  try {
-    const currentUser = await getCurrentUser().catch(() => undefined);
-
-    if (!currentUser) {
-      return;
-    }
-
-    const { email: userEmail, username: userID } = currentUser;
-
-    // Log very defensively here so we can debug this easily if it breaks
-    if (!userID || !userEmail) {
-      // eslint-disable-next-line no-console
-      console.debug(
-        `[cloud.chat] userID or userEmail not specified. User metadata: ${JSON.stringify(
-          currentUser.metadata
-        )}`
-      );
-      return;
-    }
-
-    return {
-      userID,
-      userEmail,
-    };
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`[cloud.chat] Error loading the current user: ${e.toString()}`, e);
     return undefined;
   }
 };

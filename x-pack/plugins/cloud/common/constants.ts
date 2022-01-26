@@ -6,7 +6,7 @@
  */
 
 export const ELASTIC_SUPPORT_LINK = 'https://cloud.elastic.co/support';
-export const GET_CHAT_TOKEN_ROUTE_PATH = '/internal/engagement/chat_token';
+export const GET_CHAT_USER_DATA_ROUTE_PATH = '/internal/cloud/chat_user';
 
 /**
  * This is the page for managing your snapshots on Cloud.
