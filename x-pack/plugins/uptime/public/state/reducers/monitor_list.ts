@@ -120,8 +120,9 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
   initialState
 );
 
-export const refreshedMonitorSelector = ({ monitorList }: AppState) =>
-  monitorList.refreshedMonitorIds ?? [];
+export const refreshedMonitorSelector = ({ monitorList }: AppState) => {
+  return monitorList.refreshedMonitorIds ?? [];
+};
 
 export const isUpdatingMonitorSelector = ({ monitorList }: AppState) =>
   monitorList.isUpdating ?? [];

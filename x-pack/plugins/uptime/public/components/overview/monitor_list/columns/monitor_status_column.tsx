@@ -239,7 +239,7 @@ export const MonitorListStatusColumn = ({
             </>
           }
         >
-          {monitorId && refreshedMonitorIds?.includes(monitorId) ? (
+          {monitorId && refreshedMonitorIds?.includes?.(monitorId) ? (
             <EuiHighlight highlightAll={true} search={getCheckedLabel(timestamp)}>
               {getCheckedLabel(timestamp)}
             </EuiHighlight>
