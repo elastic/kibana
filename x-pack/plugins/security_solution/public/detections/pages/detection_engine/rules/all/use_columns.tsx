@@ -65,7 +65,7 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   return useMemo(
     () => ({
       field: 'enabled',
-      name: i18n.COLUMN_ACTIVATE,
+      name: i18n.COLUMN_ENABLE,
       render: (_, rule: Rule) => (
         <EuiToolTip
           position="top"

@@ -26,7 +26,7 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
           showBulkActions
@@ -48,7 +48,7 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
           showBulkActions={false}
@@ -71,7 +71,7 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
           showBulkActions
@@ -90,7 +90,7 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
           showBulkActions
@@ -110,7 +110,7 @@ describe('AllRules', () => {
           onRefresh={mockRefresh}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
           showBulkActions
@@ -132,7 +132,7 @@ describe('AllRules', () => {
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
-          onGetBatchItemsPopoverContent={jest.fn()}
+          onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
           showBulkActions

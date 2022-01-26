@@ -412,7 +412,7 @@ export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}',
+      defaultMessage: 'Error enabling {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -421,7 +421,7 @@ export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
     {
       values: { totalRules },
-      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}',
+      defaultMessage: 'Error disabling {totalRules, plural, =1 {rule} other {rules}}',
     }
   );
 
@@ -633,10 +633,10 @@ export const COLUMN_SEE_ALL_POPOVER = i18n.translate(
   }
 );
 
-export const COLUMN_ACTIVATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.activateTitle',
+export const COLUMN_ENABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
-    defaultMessage: 'Activated',
+    defaultMessage: 'Enabled',
   }
 );
 

@@ -171,7 +171,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       return partition(predicate, selectedRuleIds);
     }, [rules, selectedRuleIds]);
 
-    const getBatchItemsPopoverContent = useBulkActions({
+    const getBulkItemsPopoverContent = useBulkActions({
       filterOptions,
       confirmDeletion,
       confirmBulkEdit,
@@ -385,7 +385,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               hasPagination={hasPagination}
               paginationTotal={pagination.total ?? 0}
               numberSelectedItems={selectedItemsCount}
-              onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
+              onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
               onRefresh={reFetchRules}
               isAutoRefreshOn={isRefreshOn}
               onRefreshSwitch={handleAutoRefreshSwitch}

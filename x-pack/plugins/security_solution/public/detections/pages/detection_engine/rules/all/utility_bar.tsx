@@ -28,7 +28,7 @@ interface AllRulesUtilityBarProps {
   isAllSelected?: boolean;
   isAutoRefreshOn?: boolean;
   numberSelectedItems: number;
-  onGetBatchItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
+  onGetBulkItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
   onRefresh?: () => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
@@ -45,7 +45,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isAllSelected,
     isAutoRefreshOn,
     numberSelectedItems,
-    onGetBatchItemsPopoverContent,
+    onGetBulkItemsPopoverContent,
     onRefresh,
     onRefreshSwitch,
     onToggleSelectAll,
@@ -55,20 +55,20 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionsInProgress,
     disableActions,
   }) => {
-    const handleGetBatchItemsPopoverContent = useCallback(
+    const handleGetBuIktemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
-        if (onGetBatchItemsPopoverContent != null) {
+        if (onGetBulkItemsPopoverContent != null) {
           return (
             <EuiContextMenu
               initialPanelId={0}
-              panels={onGetBatchItemsPopoverContent(closePopover)}
+              panels={onGetBulkItemsPopoverContent(closePopover)}
             />
           );
         } else {
           return null;
         }
       },
-      [onGetBatchItemsPopoverContent]
+      [onGetBulkItemsPopoverContent]
     );
 
     const handleAutoRefreshSwitch = useCallback(
@@ -141,7 +141,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                     iconSide="right"
                     iconType="arrowDown"
                     popoverPanelPaddingSize="none"
-                    popoverContent={handleGetBatchItemsPopoverContent}
+                    popoverContent={handleGetBuIktemsPopoverContent}
                   >
                     {i18n.BATCH_ACTIONS}
                   </UtilityBarAction>
