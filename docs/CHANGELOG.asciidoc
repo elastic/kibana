@@ -157,7 +157,7 @@ Observability::
 * Restores default chart `timezone` to `'local'` in XY charts {kibana-pull}123264[#123264]
 Security::
 * Adds tooltip for usernames on API Key management page {kibana-pull}122488[#122488]
-* Detects cookies on login page {kibana-pull}120944[#120944]
+* Kibana now shows a more helpful error message when the browser prevents it from using cookies {kibana-pull}120944[#120944]
 
 For information about the features introduced in 7.17.0, refer to <<whats-new,What's new in 7.17>>.
 
@@ -871,8 +871,6 @@ Disable metrics powered transactions with `xpack.apm.searchAggregatedTransaction
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.15.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-osquery]]
 .New scheduled query action ID format for Osquery Manager
@@ -902,8 +900,6 @@ If you have changed the default {kibana-ref}/advanced-options.html#kibana-visual
 
 . Deselect *Legacy charts library*.
 ====
-
-// end::notable-breaking-changes[]
 
 [float]
 [[deprecations-7.15.0]]

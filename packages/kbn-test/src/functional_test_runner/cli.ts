@@ -35,6 +35,11 @@ export function runFtrCli() {
   const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
+      const esVersion = flags['es-version'] || undefined; // convert "" to undefined
+      if (esVersion !== undefined && typeof esVersion !== 'string') {
+        throw createFlagError('expected --es-version to be a string');
+      }
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
         makeAbsolutePath(flags.config as string),
@@ -57,7 +62,8 @@ export function runFtrCli() {
           },
           updateBaselines: flags.updateBaselines || flags.u,
           updateSnapshots: flags.updateSnapshots || flags.u,
-        }
+        },
+        esVersion
       );
 
       let teardownRun = false;
@@ -123,6 +129,7 @@ export function runFtrCli() {
           'include-tag',
           'exclude-tag',
           'kibana-install-dir',
+          'es-version',
         ],
         boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'updateSnapshots', 'u'],
         default: {
@@ -133,6 +140,7 @@ export function runFtrCli() {
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
+          --es-version       the elasticsearch version, formatted as "x.y.z"
           --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only
                                suites which have one of the passed include-tag tags will be executed.
                                When combined with the --exclude-tag flag both conditions must be met
