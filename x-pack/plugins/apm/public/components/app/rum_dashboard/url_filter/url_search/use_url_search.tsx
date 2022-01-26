@@ -37,8 +37,7 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
   return useFetcher(
     (callApmApi) => {
       if (uxQuery && popoverIsOpen) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/url-search',
+        return callApmApi('GET /internal/apm/ux/url-search', {
           params: {
             query: {
               ...uxQuery,
