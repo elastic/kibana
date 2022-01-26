@@ -156,7 +156,7 @@ describe('HeatmapComponent', function () {
       expect(component.find(Heatmap).prop('colorScale')).toEqual({
         bands: [
           { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
-          { color: 'rgb(112, 38, 231)', end: 150, start: 0 },
+          { color: 'rgb(112, 38, 231)', end: 150.00001, start: 0 },
         ],
         type: 'bands',
       });
