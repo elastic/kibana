@@ -36,8 +36,6 @@ const routes = [
   defaultRoutes.registerManageDefaultDataViewRouteLegacy,
   deleteRoutes.registerDeleteDataViewRoute,
   deleteRoutes.registerDeleteDataViewRouteLegacy,
-  deleteRoutes.registerDeleteDataViewRoute,
-  deleteRoutes.registerDeleteDataViewRouteLegacy,
   getRoutes.registerGetDataViewRoute,
   getRoutes.registerGetDataViewRouteLegacy,
   hasRoutes.registerHasUserDataViewRoute,
