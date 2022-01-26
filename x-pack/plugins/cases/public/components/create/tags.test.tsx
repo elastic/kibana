@@ -24,8 +24,6 @@ const useGetTagsMock = useGetTags as jest.Mock;
 describe('Tags', () => {
   let globalForm: FormHook;
 
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },

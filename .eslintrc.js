@@ -1072,6 +1072,7 @@ module.exports = {
     },
     {
       files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
