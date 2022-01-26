@@ -18,6 +18,9 @@ const mockClient = {
   xpack: {
     info: jest.fn(),
   },
+  cluster: {
+    health: jest.fn(),
+  },
   security: {
     changePassword: jest.fn(),
     getUser: jest.fn(),
@@ -47,6 +50,12 @@ function mockXPackInfo(available, enabled) {
       },
     },
   }));
+}
+
+function mockClusterStatus(status) {
+  mockClient.cluster.health.mockImplementation(() => {
+    return status;
+  });
 }
 
 describe('isSecurityEnabled', () => {
@@ -95,6 +104,7 @@ describe('isSecurityEnabled', () => {
 describe('setPasswords', () => {
   it('uses provided passwords', async () => {
     mockXPackInfo(true, true);
+    mockClusterStatus('green');
 
     mockClient.security.getUser.mockImplementation(() => ({
       kibana_system: {
