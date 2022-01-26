@@ -1000,7 +1000,7 @@
             "id": "def-public.InterfaceWithIndexSignature.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: { foo: string; }",
+            "label": "[key: string]: { foo: string; }",
             "description": [],
             "signature": [
               "[key: string]:  { foo: string; }"
