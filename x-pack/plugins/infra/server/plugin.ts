@@ -209,10 +209,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart) {
-    core.workerThreads.run({ name: 'myWorkerTask', args: {} }).then((result) => {
-      this.logger.info('worker task says: ' + result);
-    });
-  }
+  start() {}
+
   stop() {}
 }
