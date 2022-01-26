@@ -9,7 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import './_index.scss';
 
 import { Dictionary } from '../../../../common/types/common';
@@ -139,21 +139,30 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            wrap
-            responsive={false}
-            gutterSize="xs"
-            alignItems="center"
-            data-test-subj="mlJobSelectionBadges"
-          >
-            <IdBadges
-              limit={BADGE_LIMIT}
-              maps={maps}
-              onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
-              selectedIds={selectedIds}
-              showAllBarBadges={showAllBarBadges}
-            />
-          </EuiFlexGroup>
+          {selectedIds.length > 0 ? (
+            <EuiFlexGroup
+              wrap
+              responsive={false}
+              gutterSize="xs"
+              alignItems="center"
+              data-test-subj="mlJobSelectionBadges"
+            >
+              <IdBadges
+                limit={BADGE_LIMIT}
+                maps={maps}
+                onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
+                selectedIds={selectedIds}
+                showAllBarBadges={showAllBarBadges}
+              />
+            </EuiFlexGroup>
+          ) : (
+            <span>
+              <FormattedMessage
+                id={'xpack.ml.jobSelector.noJobsSelectedLabel'}
+                defaultMessage="No jobs selected"
+              />
+            </span>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -197,8 +206,8 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   }
 
   return (
-    <div className="mlJobSelectorBar">
-      {selectedIds.length > 0 && renderJobSelectionBar()}
+    <div>
+      {renderJobSelectionBar()}
       {renderFlyout()}
     </div>
   );

@@ -75,15 +75,19 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
   useEffect(() => {
     // if there are no valid ids, ask the user to provide job selection with the flyout
     if (validIds.length === 0 && jobs.length > 0) {
-      getJobSelection({ singleSelection: false }).then(({ jobIds, time }) => {
-        const mlGlobalState = globalState?.ml || {};
-        mlGlobalState.jobIds = jobIds;
+      getJobSelection({ singleSelection: false })
+        .then(({ jobIds, time }) => {
+          const mlGlobalState = globalState?.ml || {};
+          mlGlobalState.jobIds = jobIds;
 
-        setGlobalState({
-          ...{ ml: mlGlobalState },
-          ...(time !== undefined ? { time } : {}),
+          setGlobalState({
+            ...{ ml: mlGlobalState },
+            ...(time !== undefined ? { time } : {}),
+          });
+        })
+        .catch(() => {
+          // flyout closed without selection
         });
-      });
     }
   }, [jobs, validIds, setGlobalState, globalState?.ml]);
 
