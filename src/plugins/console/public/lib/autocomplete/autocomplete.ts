@@ -678,12 +678,8 @@ export default function ({
   ) {
     if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
       const { position } = nonEmptyToken;
-      if (
-        // if not on the first line
-        context.rangeToReplace &&
-        context.rangeToReplace.start &&
-        context.rangeToReplace.start.lineNumber > 1
-      ) {
+      // if not on the first line
+      if (context.rangeToReplace?.start?.lineNumber > 1) {
         const prevTokenLineNumber = position.lineNumber;
         const line = context.editor?.getLineValue(prevTokenLineNumber) ?? '';
         const prevLineLength = line.length;
