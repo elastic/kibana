@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import type { Toast } from '../../../../../../../../../../src/core/public';
 import {
   BulkAction,
   BulkActionEditType,
@@ -223,7 +224,7 @@ export const useBulkActions = ({
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
-        let longEditWarningToast;
+        let longEditWarningToast: Toast;
         let isBulkEditFinished = false;
         try {
           // disabling auto-refresh so user's selected rules won't disappear after table refresh
@@ -265,6 +266,11 @@ export const useBulkActions = ({
               { toastLifeTimeMs: 10 * 60 * 1000 }
             );
           }, 5 * 1000);
+          const hideWarningToast = () => {
+            if (longEditWarningToast) {
+              toastsApi.remove(longEditWarningToast);
+            }
+          };
 
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
@@ -274,12 +280,15 @@ export const useBulkActions = ({
             toastsApi,
             payload: { edit: [editPayload] },
             onSuccess: () => {
+              hideWarningToast();
               toastsApi.addSuccess({
                 title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
                 text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(customRulesCount),
               });
             },
             onError: (error: HTTPError) => {
+              hideWarningToast();
+
               // if response doesn't have number of failed rules, it means the whole bulk action failed
               // and general error toast will be shown. Otherwise - error toast for partial failure
               const failedRulesCount = (error?.body as BulkActionPartialErrorResponseSchema)
@@ -312,15 +321,13 @@ export const useBulkActions = ({
             await rulesBulkAction.byIds(customSelectedRuleIds);
           }
 
+          isBulkEditFinished = true;
           await Promise.allSettled([reFetchRules(), resolveTagsRefetch(bulkEditActionType)]);
         } catch (e) {
           // user has cancelled form or error has occured
         } finally {
-          if (longEditWarningToast) {
-            toastsApi.remove(longEditWarningToast);
-          }
-          setIsRefreshOn(true);
           isBulkEditFinished = true;
+          setIsRefreshOn(true);
         }
       };
 
