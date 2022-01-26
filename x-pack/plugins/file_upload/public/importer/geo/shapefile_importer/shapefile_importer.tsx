@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Feature } from 'geojson';
-import { ShapefileLoader } from '@loaders.gl/shapefile';
+import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
 import {
   _BrowserFileSystem as BrowserFileSystem,
   loadInBatches,
@@ -48,6 +48,22 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     );
   }
 
+  private async _setTableRowCount() {
+    if (!this._dbfFile) {
+      return;
+    }
+    
+    // read header from dbf file to get number of records in data file
+    const dbfIterator = await loadInBatches(this._dbfFile, DBFLoader, {
+      metadata: false,
+      dbf: { encoding: 'latin1' },
+    });
+    const { value, done } = await dbfIterator.next();
+    if (value.nRecords && typeof value.nRecords === 'number') {
+      this._tableRowCount = value.nRecords;
+    }
+  }
+
   protected _getProgress(featuresProcessed: number, bytesProcessed: number) {
     if (this._tableRowCount === null || this._tableRowCount === 0) {
       return 0;
@@ -85,19 +101,13 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
           gis: { reproject: true, _targetCrs: "EPSG:4326" },
           // Only parse the X & Y coordinates. Other coords not supported by Elasticsearch.
           shp: { _maxDimensions: 2 },
-          // Don't log the metadata, only the geo data
           metadata: false,
         });
-
-      // TODO set _tableRowCount
+      await this._setTableRowCount();
     }
 
     const { value: batch, done } = await this._iterator.next();
-    console.log(this._iterator);
-
-    console.log(batch);
-    console.log(done);
-
+    
     if (!this._getIsActive() || done) {
       results.hasNext = false;
       return results;
