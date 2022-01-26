@@ -1794,13 +1794,6 @@
             "entity_id": {
               "type": "keyword"
             },
-            "entry": {
-              "properties": {
-                "entity_id": {
-                  "type": "keyword"
-                }
-              }
-            },
             "executable": {
               "type": "keyword"
             },
