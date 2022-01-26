@@ -47,6 +47,11 @@ export const computeParentSeries = (
   meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
+  const supportedTimeScales = ['1s', '1m', '1h', '1d'];
+  let timeScale;
+  if (currentMetric.unit && supportedTimeScales.includes(currentMetric.unit)) {
+    timeScale = currentMetric.unit.replace('1', '');
+  }
   return [
     {
       agg: aggregationMap.name,
@@ -56,6 +61,7 @@ export const computeParentSeries = (
         subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
       params: {
         ...(currentMetric.window && { window: currentMetric.window }),
+        ...(timeScale && { timeScale }),
         ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
       },
     },
