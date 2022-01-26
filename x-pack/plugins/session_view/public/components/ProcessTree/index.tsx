@@ -34,6 +34,7 @@ interface ProcessTreeDeps {
   // currently selected process
   selectedProcess?: Process | null;
   onProcessSelected?: (process: Process) => void;
+  setSearchResults?: (results: Process[]) => void;
 }
 
 export const ProcessTree = ({
@@ -48,10 +49,11 @@ export const ProcessTree = ({
   searchQuery,
   selectedProcess,
   onProcessSelected,
+  setSearchResults,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
-  const { sessionLeader, processMap } = useProcessTree({
+  const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
     searchQuery,
@@ -59,6 +61,12 @@ export const ProcessTree = ({
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const selectionAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (setSearchResults) {
+      setSearchResults(searchResults);
+    }
+  }, [searchResults, setSearchResults]);
 
   useScroll({
     div: scrollerRef.current,
