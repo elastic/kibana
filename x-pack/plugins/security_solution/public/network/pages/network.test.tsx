@@ -70,8 +70,41 @@ const mockProps = {
   capabilitiesFetched: true,
   hasMlUserPermissions: true,
 };
+
+const mockMapVisibility = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+            maps: mockMapVisibility(),
+          },
+        },
+        storage: {
+          get: () => true,
+        },
+      },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+  };
+});
+
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Network page - rendering', () => {
+  beforeAll(() => {
+    mockMapVisibility.mockReturnValue({ show: true });
+  });
   test('it renders the Setup Instructions text when no index is available', () => {
     mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
@@ -104,6 +137,41 @@ describe('Network page - rendering', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
     });
+  });
+
+  test('it renders the network map if user has permissions', () => {
+    mockUseSourcererDataView.mockReturnValue({
+      selectedPatterns: [],
+      indicesExist: true,
+      indexPattern: {},
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <Network {...mockProps} />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="conditional-embeddable-map"]').exists()).toBe(true);
+  });
+
+  test('it does not render the network map if user does not have permissions', () => {
+    mockMapVisibility.mockReturnValue({ show: false });
+    mockUseSourcererDataView.mockReturnValue({
+      selectedPatterns: [],
+      indicesExist: true,
+      indexPattern: {},
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <Network {...mockProps} />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="conditional-embeddable-map"]').exists()).toBe(false);
   });
 
   test('it should add the new filters after init', async () => {

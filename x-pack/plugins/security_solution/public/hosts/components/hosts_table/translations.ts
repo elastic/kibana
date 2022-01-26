@@ -40,6 +40,13 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
   }
 );
 
+export const OS_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.osLastSeenToolTip',
+  {
+    defaultMessage: 'Last observed operating system',
+  }
+);
+
 export const OS = i18n.translate('xpack.securitySolution.hostsTable.osTitle', {
   defaultMessage: 'Operating system',
 });
