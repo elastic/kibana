@@ -10,14 +10,14 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
-import { default as ReactExpressionRenderer } from './react_expression_renderer';
-import { ExpressionLoader } from './loader';
+import { ReactExpressionRenderer } from './react_expression_renderer';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../common';
-import { RenderErrorHandlerFnType, ExpressionRendererEvent } from './types';
+import { IInterpreterRenderHandlers } from '../../common';
+import { ExpressionLoader } from '../loader';
+import { RenderErrorHandlerFnType, ExpressionRendererEvent } from '../types';
 
-jest.mock('./loader', () => {
+jest.mock('../loader', () => {
   return {
     ExpressionLoader: jest.fn().mockImplementation(() => {
       return {};
@@ -103,7 +103,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('waits for debounce period if specified', () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('modern');
 
     const refreshSubject = new Subject();
     const loaderUpdate = jest.fn();
@@ -136,7 +136,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('should not update twice immediately after rendering', () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('modern');
 
     const refreshSubject = new Subject();
     const loaderUpdate = jest.fn();
@@ -165,7 +165,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('waits for debounce period on other loader option change if specified', () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('modern');
 
     const refreshSubject = new Subject();
     const loaderUpdate = jest.fn();
