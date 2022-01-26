@@ -102,8 +102,8 @@ const HostsComponent = () => {
     if (tabName === HostsTableType.alerts) {
       return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
     }
-    // TODO: Steph/host risk refactor to single tab name
-    if (tabName === HostsTableType.riskScoreBetter || tabName === HostsTableType.risk) {
+
+    if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
       return [...severityFilter, ...filterHostData, ...filters];

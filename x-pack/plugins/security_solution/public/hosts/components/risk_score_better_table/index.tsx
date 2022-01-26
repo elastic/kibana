@@ -21,7 +21,7 @@ import { getRiskScoreBetterColumns } from './columns';
 import type {
   HostsRiskScore,
   HostRiskScoreItem,
-  RiskScoreBetterSortField,
+  HostRiskScoreSortField,
 } from '../../../../common/search_strategy';
 import { HostRiskScoreFields, HostRiskSeverity } from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
@@ -43,7 +43,7 @@ export const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const tableType = hostsModel.HostsTableType.riskScoreBetter;
+const tableType = hostsModel.HostsTableType.risk;
 
 interface RiskScoreBetterTableProps {
   data: HostsRiskScore[];
@@ -108,7 +108,7 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           dispatch(
             hostsActions.updateRiskScoreBetterSort({
-              sort: newSort as RiskScoreBetterSortField,
+              sort: newSort as HostRiskScoreSortField,
               hostsType: type,
             })
           );

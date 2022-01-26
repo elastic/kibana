@@ -8,7 +8,7 @@
 import {
   Direction,
   HostRiskSeverity,
-  RiskScoreBetterSortField,
+  HostRiskScoreSortField,
 } from '../../../common/search_strategy';
 import { HostsFields } from '../../../common/search_strategy/security_solution';
 
@@ -39,7 +39,7 @@ export interface HostsQuery extends BasicQueryPaginated {
 }
 
 export interface RiskScoreBetterQuery extends BasicQueryPaginated {
-  sort: RiskScoreBetterSortField;
+  sort: HostRiskScoreSortField;
   severitySelection: HostRiskSeverity[];
 }
 
@@ -51,7 +51,6 @@ export interface Queries {
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
   [HostsTableType.risk]: null | undefined;
-  [HostsTableType.riskScoreBetter]: RiskScoreBetterQuery;
 }
 
 export interface GenericHostsModel {

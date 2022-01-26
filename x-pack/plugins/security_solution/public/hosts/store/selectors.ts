@@ -22,13 +22,10 @@ export const hostsSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.hosts]);
 
 export const riskScoreBetterSelector = () =>
-  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.riskScoreBetter]);
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.risk]);
 
 export const hostRiskScoreSeverityFilterSelector = () =>
-  createSelector(
-    selectHosts,
-    (hosts) => hosts.queries[HostsTableType.riskScoreBetter].severitySelection
-  );
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.risk].severitySelection);
 
 export const eventsSelector = () => createSelector(selectHosts, (hosts) => hosts.queries.events);
 

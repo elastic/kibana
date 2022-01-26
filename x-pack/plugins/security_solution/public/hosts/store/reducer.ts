@@ -53,8 +53,7 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.risk]: null,
-      [HostsTableType.riskScoreBetter]: {
+      [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -63,7 +62,6 @@ export const initialHostsState: HostsState = {
         },
         severitySelection: [],
       },
-      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -91,8 +89,7 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.risk]: null,
-      [HostsTableType.riskScoreBetter]: {
+      [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
@@ -170,8 +167,8 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        [HostsTableType.riskScoreBetter]: {
-          ...state[hostsType].queries[HostsTableType.riskScoreBetter],
+        [HostsTableType.risk]: {
+          ...state[hostsType].queries[HostsTableType.risk],
           sort,
         },
       },
@@ -183,8 +180,8 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        [HostsTableType.riskScoreBetter]: {
-          ...state[hostsType].queries[HostsTableType.riskScoreBetter],
+        [HostsTableType.risk]: {
+          ...state[hostsType].queries[HostsTableType.risk],
           severitySelection,
           activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
