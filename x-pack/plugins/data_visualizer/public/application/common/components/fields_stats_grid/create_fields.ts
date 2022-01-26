@@ -8,7 +8,7 @@
 import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
 import { FileBasedFieldVisConfig } from '../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import { roundToDecimalPlace } from '../utils';
 
 export function createFields(results: FindFileStructureResponse) {

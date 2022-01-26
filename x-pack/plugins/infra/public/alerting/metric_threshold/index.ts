@@ -7,15 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { validateMetricThreshold } from './components/validation';
-import { formatReason } from './rule_data_formatters';
 import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/metric_threshold/types';
+} from '../../../common/alerting/metrics';
+import { validateMetricThreshold } from './components/validation';
+import { formatReason } from './rule_data_formatters';
 
 interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
