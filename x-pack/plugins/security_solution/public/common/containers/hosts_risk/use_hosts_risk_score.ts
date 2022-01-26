@@ -12,18 +12,25 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { inputsActions } from '../../store/actions';
 import { isIndexNotFoundError } from '../../utils/exceptions';
-import { Direction, getHostRiskIndex, HostsRiskScore } from '../../../../common/search_strategy';
+import {
+  getHostRiskIndex,
+  HostsRiskScore,
+  PaginationInputPaginated,
+  RiskScoreBetterFields,
+  SortField,
+} from '../../../../common/search_strategy';
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { HostRiskScoreQueryId } from './types';
+import { ESQuery } from '../../../../common/typed_json';
 
 const noop = () => {};
 
 const isRecord = (item: unknown): item is Record<string, unknown> =>
   typeof item === 'object' && !!item;
 
-const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
+export const isHostsRiskScoreHit = (item: Partial<HostsRiskScore>): item is HostsRiskScore =>
   isRecord(item) &&
   isRecord(item.host) &&
   typeof item.risk_stats?.risk_score === 'number' &&
@@ -41,15 +48,17 @@ export const useHostsRiskScore = ({
   onlyLatest = true,
   // Provide this parameter when using query inspector to identify the query.
   queryId = HostRiskScoreQueryId.DEFAULT,
-  sortOrder,
-  limit,
+  sort,
+  pagination,
+  filterQuery,
 }: {
   timerange?: { to: string; from: string };
   hostName?: string;
   onlyLatest?: boolean;
   queryId?: HostRiskScoreQueryId;
-  limit?: number;
-  sortOrder?: Direction;
+  pagination?: PaginationInputPaginated;
+  sort?: SortField<RiskScoreBetterFields>;
+  filterQuery?: ESQuery | string | undefined;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
@@ -114,8 +123,9 @@ export const useHostsRiskScore = ({
           hostNames: hostName ? [hostName] : undefined,
           defaultIndex: [getHostRiskIndex(space.id, onlyLatest)],
           onlyLatest,
-          sortOrder,
-          limit,
+          sort,
+          pagination,
+          filterQuery,
         });
       });
     }
@@ -127,8 +137,9 @@ export const useHostsRiskScore = ({
     onlyLatest,
     riskyHostsFeatureEnabled,
     spaces,
-    sortOrder,
-    limit,
+    filterQuery,
+    pagination,
+    sort,
   ]);
 
   if ((!hostName && !timerange) || !riskyHostsFeatureEnabled) {

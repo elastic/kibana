@@ -17,13 +17,13 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
-  RiskScoreBetterEdges,
   PageInfoPaginated,
   DocValueFields,
   HostsQueries,
-  RiskScoreBetterRequestOptions,
   RiskScoreBetterStrategyResponse,
   getHostRiskIndex,
+  HostsRiskScore,
+  RiskScoreRequestOptions,
 } from '../../../../common/search_strategy';
 import { ESQuery } from '../../../../common/typed_json';
 
@@ -33,12 +33,13 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { isHostsRiskScoreHit } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 
 export const ID = 'riskScoreQuery';
 
 type LoadPage = (newActivePage: number) => void;
 export interface RiskScoreBetterState {
-  data: RiskScoreBetterEdges[];
+  data: HostsRiskScore[];
   endDate: string;
   id: string;
   inspect: InspectResponse;
@@ -75,8 +76,9 @@ export const useRiskScoreBetter = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [riskScoreRequest, setRiskScoreBetterRequest] =
-    useState<RiskScoreBetterRequestOptions | null>(null);
+  const [riskScoreRequest, setRiskScoreBetterRequest] = useState<RiskScoreRequestOptions | null>(
+    null
+  );
   const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
@@ -87,7 +89,7 @@ export const useRiskScoreBetter = ({
           ? prevRequest
           : {
               ...prevRequest,
-              pagination: generateTablePaginationOptions(newActivePage, limit),
+              pagination: generateTablePaginationOptions(newActivePage, limit, true),
             }
       );
     },
@@ -115,7 +117,7 @@ export const useRiskScoreBetter = ({
   });
 
   const riskScoreSearch = useCallback(
-    (request: RiskScoreBetterRequestOptions | null) => {
+    (request: RiskScoreRequestOptions | null) => {
       if (request == null || skip) {
         return;
       }
@@ -125,18 +127,21 @@ export const useRiskScoreBetter = ({
         setLoading(true);
 
         searchSubscription.current = data.search
-          .search<RiskScoreBetterRequestOptions, RiskScoreBetterStrategyResponse>(request, {
+          .search<RiskScoreRequestOptions, RiskScoreBetterStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
+                const hits = response?.rawResponse?.hits?.hits;
+
                 setRiskScoreBetterResponse((prevResponse) => ({
                   ...prevResponse,
-                  data: response.edges,
+                  data: isHostsRiskScoreHit(hits?.[0]?._source)
+                    ? (hits?.map((hit) => hit._source) as HostsRiskScore[])
+                    : [],
                   inspect: getInspectResponse(response, prevResponse.inspect),
-                  pageInfo: response.pageInfo,
                   refetch: refetch.current,
                   totalCount: response.totalCount,
                 }));
@@ -174,7 +179,7 @@ export const useRiskScoreBetter = ({
     if (spaceId) {
       setRiskScoreBetterRequest((prevRequest) => {
         const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.riskScoreBetter,
+          factoryQueryType: HostsQueries.hostsRiskScore,
           indices: [getHostRiskIndex(spaceId)],
           filterQuery,
           timerange: {
@@ -186,13 +191,15 @@ export const useRiskScoreBetter = ({
         const myRequest = {
           ...(prevRequest ?? {}),
           defaultIndex: indices,
-          docValueFields: docValueFields ?? [],
           factoryQueryType,
+
+          docValueFields: docValueFields ?? [],
           filterQuery: createFilter(filterQuery),
-          pagination: generateTablePaginationOptions(activePage, limit),
+          pagination: generateTablePaginationOptions(activePage, limit, true),
           timerange,
           sort,
         };
+
         if (!deepEqual(prevRequest, myRequest)) {
           return myRequest;
         }

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes } from '../..';
+import { FactoryQueryTypes, RiskScoreBetterFields } from '../..';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
-import { Direction, Inspect, Maybe, TimerangeInput } from '../../../common';
+import { ESQuery } from '../../../../typed_json';
+import { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
@@ -19,12 +20,17 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   hostNames?: string[];
   timerange?: TimerangeInput;
   onlyLatest?: boolean;
-  limit?: number;
-  sortOrder?: Direction.asc | Direction.desc;
+  pagination?: {
+    cursorStart: number;
+    querySize: number;
+  };
+  sort?: RiskScoreBetterSortField;
+  filterQuery?: ESQuery | string | undefined;
 }
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
+  totalCount: number;
 }
 
 export interface HostsRiskScore {
@@ -47,3 +53,5 @@ export interface RuleRisk {
 export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
   return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
+
+export type RiskScoreBetterSortField = SortField<RiskScoreBetterFields>;

@@ -28,7 +28,7 @@ export const getRiskScoreBetterColumns = ({
   dispatchSeverityUpdate: (s: HostRiskSeverity) => void;
 }): RiskScoreBetterColumns => [
   {
-    field: 'node.host_name',
+    field: 'host.name',
     name: i18n.HOST_NAME,
     truncateText: false,
     mobileOptions: { show: true },
@@ -64,7 +64,7 @@ export const getRiskScoreBetterColumns = ({
     },
   },
   {
-    field: 'node.risk_score',
+    field: 'risk_stats.risk_score',
     name: i18n.HOST_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -81,7 +81,7 @@ export const getRiskScoreBetterColumns = ({
     },
   },
   {
-    field: 'node.risk',
+    field: 'risk',
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>
@@ -91,7 +91,7 @@ export const getRiskScoreBetterColumns = ({
     ),
     truncateText: false,
     mobileOptions: { show: true },
-    sortable: false,
+    sortable: true,
     render: (risk) => {
       if (risk != null) {
         return (

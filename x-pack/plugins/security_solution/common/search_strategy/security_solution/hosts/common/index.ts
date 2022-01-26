@@ -129,8 +129,9 @@ export interface HostHit extends Hit {
 export type HostHits = Hits<number, HostHit>;
 
 export const enum RiskScoreBetterFields {
-  hostName = 'host_name',
-  riskScore = 'risk_score',
+  timestamp = '@timestamp',
+  hostName = 'host.name',
+  riskScore = 'risk_stats.risk_score',
   risk = 'risk',
   // TODO: Steph/Host Risk
   // ruleRisks = 'rule_risks',

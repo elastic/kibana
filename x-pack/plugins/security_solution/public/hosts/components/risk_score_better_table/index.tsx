@@ -14,21 +14,16 @@ import {
   Criteria,
   ItemsPerRow,
   PaginatedTable,
-  SortingBasicTable,
 } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getRiskScoreBetterColumns } from './columns';
 import type {
-  RiskScoreBetterEdges,
+  HostsRiskScore,
   RiskScoreBetterItem,
   RiskScoreBetterSortField,
 } from '../../../../common/search_strategy';
-import {
-  RiskScoreBetterFields,
-  Direction,
-  HostRiskSeverity,
-} from '../../../../common/search_strategy';
+import { RiskScoreBetterFields, HostRiskSeverity } from '../../../../common/search_strategy';
 import { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import { HOSTS_BY_RISK } from './translations';
@@ -51,37 +46,28 @@ export const rowItems: ItemsPerRow[] = [
 const tableType = hostsModel.HostsTableType.riskScoreBetter;
 
 interface RiskScoreBetterTableProps {
-  data: RiskScoreBetterEdges[];
-  fakeTotalCount: number;
+  data: HostsRiskScore[];
   id: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
-  showMorePagesIndicator: boolean;
   severityCount: SeverityCount;
   totalCount: number;
   type: hostsModel.HostsType;
 }
 
 export type RiskScoreBetterColumns = [
-  Columns<RiskScoreBetterItem['host_name']>,
-  Columns<RiskScoreBetterItem['risk_score']>,
-  Columns<RiskScoreBetterItem['risk']>
+  Columns<RiskScoreBetterItem[RiskScoreBetterFields.hostName]>,
+  Columns<RiskScoreBetterItem[RiskScoreBetterFields.riskScore]>,
+  Columns<RiskScoreBetterItem[RiskScoreBetterFields.risk]>
 ];
-
-const getSorting = (sortField: RiskScoreBetterFields, direction: Direction): SortingBasicTable => ({
-  field: getNodeField(sortField),
-  direction,
-});
 
 const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   data,
-  fakeTotalCount,
   id,
   isInspect,
   loading,
   loadPage,
-  showMorePagesIndicator,
   severityCount,
   totalCount,
   type,
@@ -118,14 +104,11 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
   const onSort = useCallback(
     (criteria: Criteria) => {
       if (criteria.sort != null) {
-        const newSort: RiskScoreBetterSortField = {
-          field: getSortField(criteria.sort.field),
-          direction: criteria.sort.direction as Direction,
-        };
+        const newSort = criteria.sort;
         if (newSort.direction !== sort.direction || newSort.field !== sort.field) {
           dispatch(
             hostsActions.updateRiskScoreBetterSort({
-              sort: newSort,
+              sort: newSort as RiskScoreBetterSortField,
               hostsType: type,
             })
           );
@@ -149,8 +132,6 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
     () => getRiskScoreBetterColumns({ dispatchSeverityUpdate }),
     [dispatchSeverityUpdate]
   );
-
-  const sorting = useMemo(() => getSorting(sort.field, sort.direction), [sort]);
 
   const risk = (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -180,11 +161,11 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
       loadPage={loadPage}
       onChange={onSort}
       pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      sorting={sorting}
+      showMorePagesIndicator={false}
+      sorting={sort}
       split={true}
       stackHeader={true}
-      totalCount={fakeTotalCount}
+      totalCount={totalCount}
       updateLimitPagination={updateLimitPagination}
       updateActivePage={updateActivePage}
     />
@@ -192,21 +173,6 @@ const RiskScoreBetterTableComponent: React.FC<RiskScoreBetterTableProps> = ({
 };
 
 RiskScoreBetterTableComponent.displayName = 'RiskScoreBetterTableComponent';
-
-const getSortField = (field: string): RiskScoreBetterFields => {
-  switch (field) {
-    case `node.${RiskScoreBetterFields.hostName}`:
-      return RiskScoreBetterFields.hostName;
-    case `node.${RiskScoreBetterFields.risk}`:
-      return RiskScoreBetterFields.risk;
-    case `node.${RiskScoreBetterFields.riskScore}`:
-      return RiskScoreBetterFields.riskScore;
-    default:
-      return RiskScoreBetterFields.riskScore;
-  }
-};
-
-const getNodeField = (field: RiskScoreBetterFields): string => `node.${field}`;
 
 export const RiskScoreBetterTable = React.memo(RiskScoreBetterTableComponent);
 

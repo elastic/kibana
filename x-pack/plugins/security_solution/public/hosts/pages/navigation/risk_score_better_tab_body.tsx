@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { useRiskScoreBetter } from '../../containers/risk_score_better';
 import { HostsComponentsQueryProps } from './types';
@@ -25,7 +24,7 @@ export const RiskScoreBetterQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
-  const [loading, { data, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
+  const [loading, { data, totalCount, loadPage, id, inspect, isInspected, refetch }] =
     useRiskScoreBetter({
       docValueFields,
       endDate,
@@ -45,7 +44,6 @@ export const RiskScoreBetterQueryTabBody = ({
     <RiskScoreBetterTableManage
       deleteQuery={deleteQuery}
       data={data}
-      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       id={id}
       inspect={inspect}
       isInspect={isInspected}
@@ -54,7 +52,6 @@ export const RiskScoreBetterQueryTabBody = ({
       refetch={refetch}
       setQuery={setQuery}
       severityCount={severityCount}
-      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
     />

@@ -30,8 +30,6 @@ import {
   HostFirstLastSeenRequestOptions,
   HostsRiskScoreStrategyResponse,
   HostsRiskScoreRequestOptions,
-  RiskScoreBetterStrategyResponse,
-  RiskScoreBetterRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -135,8 +133,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends UebaQueries.riskScore
   ? RiskScoreStrategyResponse
-  : T extends HostsQueries.riskScoreBetter
-  ? RiskScoreBetterStrategyResponse
   : T extends HostsQueries.hostsRiskScore
   ? HostsRiskScoreStrategyResponse
   : T extends UebaQueries.hostRules
@@ -199,8 +195,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsRequestOptions
   : T extends HostsQueries.hostsRiskScore
   ? HostsRiskScoreRequestOptions
-  : T extends HostsQueries.riskScoreBetter
-  ? RiskScoreBetterRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview

@@ -21,6 +21,7 @@ import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { RiskScoreBetterFields } from '../../../../common/search_strategy';
 
 export interface TopHostScoreContributorsProps {
   hostName: string;
@@ -69,8 +70,13 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     timerange,
     onlyLatest: false,
     queryId: QUERY_ID,
-    limit: 1,
-    sortOrder: Direction.desc,
+    sort: { field: RiskScoreBetterFields.timestamp, direction: Direction.desc },
+    pagination: {
+      querySize: 1,
+      cursorStart: 0,
+      activePage: 0,
+      fakePossibleCount: 1,
+    },
   });
 
   const result = hostRisk?.result;
