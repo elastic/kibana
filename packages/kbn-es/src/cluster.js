@@ -308,14 +308,6 @@ exports.Cluster = class Cluster {
       }
     });
 
-    const clusterReady = first(this._process.stdout, (data) => {
-      const match = data.toString('utf8').match(/current\.health=\"(YELLOW|GREEN)\"/);
-
-      if (match) {
-        return match[1];
-      }
-    });
-
     // once the http port is available setup the native realm
     this._nativeRealmSetup = httpPort.then(async (port) => {
       if (skipNativeRealmSetup) {
@@ -330,7 +322,7 @@ exports.Cluster = class Cluster {
         elasticPassword: options.password,
         ssl: this._ssl,
       });
-      await clusterReady.then(() => nativeRealm.setPasswords(options));
+      await nativeRealm.setPasswords(options);
     });
 
     let reportSent = false;
