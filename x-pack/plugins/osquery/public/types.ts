@@ -20,9 +20,10 @@ import { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
+
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
-  osqueryMenuItem: (agentId: string, onClick: () => void) => Element[];
+  osqueryMenuItem: (props: { agentId: string; onClick: () => void }) => React.ReactElement;
 }
 
 export interface AppPluginStartDependencies {

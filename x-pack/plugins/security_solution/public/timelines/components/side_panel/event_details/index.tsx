@@ -148,8 +148,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const OsqueryLiveQuery = useMemo(() => osquery.OsqueryAction, [osquery]);
-
   const backToAlertDetailsLink = useCallback(
     (primaryText) => {
       return (
@@ -204,7 +202,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const renderFlyoutBody = useMemo(() => {
     switch (isActivePanel) {
       case ACTIVE_PANEL.OSQUERY:
-        return <OsqueryLiveQuery agentId={agentId} formType={'steps'} />;
+        return osquery?.OsqueryAction?.({ agentId, formType: 'steps' });
+      // return <OsqueryLiveQuery agentId={agentId} formType={'steps'} />;
       case ACTIVE_PANEL.HOST_ISOLATION:
         return (
           <HostIsolationPanel
@@ -232,7 +231,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         );
     }
   }, [
-    OsqueryLiveQuery,
     agentId,
     browserFields,
     detailsData,
@@ -245,6 +243,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     isDraggable,
     isolateAction,
     loading,
+    osquery,
     rawEventData,
     showAlertDetails,
     timelineId,

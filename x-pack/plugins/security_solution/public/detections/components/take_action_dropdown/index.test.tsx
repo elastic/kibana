@@ -73,6 +73,7 @@ describe('take action dropdown', () => {
     onAddIsolationStatusClick: jest.fn(),
     refetch: jest.fn(),
     timelineId: TimelineId.active,
+    handlePanelChange: jest.fn(),
   };
 
   beforeAll(() => {

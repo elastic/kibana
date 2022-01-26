@@ -11,13 +11,8 @@ interface IProps {
   agentId: string;
 }
 
-export const useOsqueryActions = ({ onClick, agentId }: IProps) => {
-  const {
-    osquery: { osqueryMenuItem },
-  } = useKibana().services;
+export const useOsqueryActionItems = ({ onClick, agentId }: IProps) => {
+  const { osquery } = useKibana().services;
 
-  const osqueryActions = osqueryMenuItem({ onClick, agentId });
-  return {
-    osqueryActions,
-  };
+  return osquery ? [osquery.osqueryMenuItem({ agentId, onClick })] : [];
 };

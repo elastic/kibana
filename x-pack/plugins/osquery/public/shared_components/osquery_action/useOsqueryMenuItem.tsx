@@ -35,7 +35,7 @@ export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
     })();
   }, [agentId, http]);
 
-  const osqueryActions: React.ReactElement[] = [
+  return (
     <EuiContextMenuItem
       key="osquery-action-item"
       data-test-subj="osquery-action-item"
@@ -43,7 +43,6 @@ export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
       disabled={!isAvailable}
     >
       {ACTION_OSQUERY}
-    </EuiContextMenuItem>,
-  ];
-  return osqueryActions;
+    </EuiContextMenuItem>
+  );
 };

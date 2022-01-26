@@ -23,7 +23,7 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
-import { useOsqueryActions } from '../alerts_table/timeline_actions/use_osquery_actions';
+import { useOsqueryActionItems } from '../alerts_table/timeline_actions/use_osquery_action_items';
 import { ACTIVE_PANEL } from '../../../timelines/components/side_panel/event_details';
 
 interface ActionsData {
@@ -171,7 +171,7 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
-    const { osqueryActions } = useOsqueryActions({
+    const osqueryActionItem = useOsqueryActionItems({
       onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
       agentId,
     });
@@ -205,7 +205,7 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
-        ...osqueryActions,
+        ...osqueryActionItem,
         ...investigateInTimelineActionItems,
       ],
       [
@@ -213,7 +213,7 @@ export const TakeActionDropdown = React.memo(
         alertsActionItems,
         addToCaseActionItems,
         hostIsolationActionItems,
-        osqueryActions,
+        osqueryActionItem,
         investigateInTimelineActionItems,
       ]
     );
