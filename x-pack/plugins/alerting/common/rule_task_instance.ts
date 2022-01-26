@@ -17,13 +17,15 @@ const actionSchema = t.partial({
 });
 
 export const ruleStateSchema = t.partial({
-  triggeredActions: t.array(actionSchema),
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
+export type RuleTaskStateWithActions = RuleTaskState & {
+  triggeredActions: Array<t.TypeOf<typeof actionSchema>>;
+};
 
 export const ruleParamsSchema = t.intersection([
   t.type({

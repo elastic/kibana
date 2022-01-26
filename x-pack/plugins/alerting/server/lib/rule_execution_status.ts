@@ -6,12 +6,12 @@
  */
 
 import { Logger } from 'src/core/server';
-import { RuleTaskState, AlertExecutionStatus, RawRuleExecutionStatus } from '../types';
+import { AlertExecutionStatus, RawRuleExecutionStatus, RuleTaskStateWithActions } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { AlertExecutionStatuses } from '../../common';
 
-export function executionStatusFromState(state: RuleTaskState): AlertExecutionStatus {
+export function executionStatusFromState(state: RuleTaskStateWithActions): AlertExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
   return {
     numberOfTriggeredActions: state.triggeredActions?.length ?? 0,
@@ -32,14 +32,12 @@ export function executionStatusFromError(error: Error): AlertExecutionStatus {
 }
 
 export function ruleExecutionStatusToRaw({
-  numberOfTriggeredActions,
   lastExecutionDate,
   lastDuration,
   status,
   error,
 }: AlertExecutionStatus): RawRuleExecutionStatus {
   return {
-    numberOfTriggeredActions: numberOfTriggeredActions ?? 0,
     lastExecutionDate: lastExecutionDate.toISOString(),
     lastDuration: lastDuration ?? 0,
     status,

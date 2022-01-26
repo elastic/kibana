@@ -6,7 +6,7 @@
  */
 import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Dictionary, pickBy, mapValues, without, cloneDeep, concat, set } from 'lodash';
+import { Dictionary, pickBy, mapValues, without, cloneDeep, concat, set, omit } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import uuid from 'uuid';
 import { addSpaceIdToPath } from '../../../spaces/server';
@@ -37,6 +37,7 @@ import {
   RuleMonitoring,
   RawRuleExecutionStatus,
   AlertAction,
+  RuleTaskStateWithActions,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -75,6 +76,12 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
     },
   },
 });
+
+interface RuleTaskRunResultWithActions {
+  state: RuleTaskStateWithActions;
+  monitoring: RuleMonitoring | undefined;
+  schedule: IntervalSchedule | undefined;
+}
 
 interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -280,7 +287,7 @@ export class TaskRunner<
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
     event: Event
-  ): Promise<RuleTaskState> {
+  ): Promise<RuleTaskStateWithActions> {
     const {
       alertTypeId,
       consumer,
@@ -531,7 +538,9 @@ export class TaskRunner<
     return this.executeAlerts(services, rule, validatedParams, executionHandler, spaceId, event);
   }
 
-  async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleTaskRunResult, Error>> {
+  async loadRuleAttributesAndRun(
+    event: Event
+  ): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
@@ -590,7 +599,7 @@ export class TaskRunner<
     }
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleTaskState, Error>(
+      state: await promiseResult<RuleTaskStateWithActions, Error>(
         this.validateAndExecuteRule(services, apiKey, rule, event)
       ),
       schedule: asOk(
@@ -664,9 +673,10 @@ export class TaskRunner<
       resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
-    const executionStatus: AlertExecutionStatus = map(
+
+    const executionStatus = map<RuleTaskStateWithActions, ElasticsearchError, AlertExecutionStatus>(
       state,
-      (ruleTaskState: RuleTaskState) => executionStatusFromState(ruleTaskState),
+      (ruleTaskState) => executionStatusFromState(ruleTaskState),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
 
@@ -735,15 +745,20 @@ export class TaskRunner<
       });
     }
 
+    const transformStateForTaskState = (
+      stateWithActions: RuleTaskStateWithActions
+    ): RuleTaskState => {
+      return {
+        ...omit(stateWithActions, 'triggeredActions'),
+        previousStartedAt: startedAt,
+      };
+    };
+
     return {
-      state: map<RuleTaskState, ElasticsearchError, RuleTaskState>(
+      state: map<RuleTaskStateWithActions, ElasticsearchError, RuleTaskState>(
         state,
-        (stateUpdates: RuleTaskState) => {
-          return {
-            ...stateUpdates,
-            previousStartedAt: startedAt,
-          };
-        },
+        (stateWithActions: RuleTaskStateWithActions) =>
+          transformStateForTaskState(stateWithActions),
         (err: ElasticsearchError) => {
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
@@ -1170,8 +1185,8 @@ function logActiveAndRecoveredAlerts<
  * so that we can treat each field independantly
  */
 async function errorAsRuleTaskRunResult(
-  future: Promise<Resultable<RuleTaskRunResult, Error>>
-): Promise<Resultable<RuleTaskRunResult, Error>> {
+  future: Promise<Resultable<RuleTaskRunResultWithActions, Error>>
+): Promise<Resultable<RuleTaskRunResultWithActions, Error>> {
   try {
     return await future;
   } catch (e) {

@@ -248,7 +248,6 @@ describe('Task Runner', () => {
                                       "alertInstances": Object {},
                                       "alertTypeState": undefined,
                                       "previousStartedAt": 1970-01-01T00:00:00.000Z,
-                                      "triggeredActions": Array [],
                                     },
                                   }
                   `);
@@ -384,7 +383,6 @@ describe('Task Runner', () => {
           error: null,
           lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
-          numberOfTriggeredActions: 0,
           status: 'ok',
         },
       },
@@ -2660,7 +2658,6 @@ describe('Task Runner', () => {
           "alertInstances": Object {},
           "alertTypeState": undefined,
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "triggeredActions": Array [],
         },
       }
     `);
@@ -4855,7 +4852,6 @@ describe('Task Runner', () => {
                                       "alertInstances": Object {},
                                       "alertTypeState": undefined,
                                       "previousStartedAt": 1970-01-01T00:00:00.000Z,
-                                      "triggeredActions": Array [],
                                     },
                                   }
                   `);
@@ -4991,7 +4987,6 @@ describe('Task Runner', () => {
           error: null,
           lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
-          numberOfTriggeredActions: 0,
           status: 'ok',
         },
       },
@@ -5133,7 +5128,6 @@ describe('Task Runner', () => {
                                         "alertInstances": Object {},
                                         "alertTypeState": undefined,
                                         "previousStartedAt": 1970-01-01T00:00:00.000Z,
-                                        "triggeredActions": Array [],
                                       },
                                     }
                     `);

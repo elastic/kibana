@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { AlertExecutionStatusErrorReasons } from '../types';
+import { AlertAction, AlertExecutionStatusErrorReasons, RuleTaskStateWithActions } from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,
@@ -24,7 +24,7 @@ describe('RuleExecutionStatus', () => {
 
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const status = executionStatusFromState({});
+      const status = executionStatusFromState({} as RuleTaskStateWithActions);
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
@@ -32,7 +32,7 @@ describe('RuleExecutionStatus', () => {
     });
 
     test('task state with no instances', () => {
-      const status = executionStatusFromState({ alertInstances: {} });
+      const status = executionStatusFromState({ alertInstances: {}, triggeredActions: [] });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('ok');
@@ -40,7 +40,7 @@ describe('RuleExecutionStatus', () => {
     });
 
     test('task state with one instance', () => {
-      const status = executionStatusFromState({ alertInstances: { a: {} } });
+      const status = executionStatusFromState({ alertInstances: { a: {} }, triggeredActions: [] });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.numberOfTriggeredActions).toBe(0);
       expect(status.status).toBe('active');
@@ -49,7 +49,7 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with numberOfTriggeredActions', () => {
       const status = executionStatusFromState({
-        triggeredActions: [{ group: '1' }],
+        triggeredActions: [{ group: '1' } as AlertAction],
         alertInstances: { a: {} },
       });
       checkDateIsNearNow(status.lastExecutionDate);
@@ -97,7 +97,6 @@ describe('RuleExecutionStatus', () => {
           "error": null,
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-          "numberOfTriggeredActions": 0,
           "status": "ok",
         }
       `);
@@ -113,7 +112,6 @@ describe('RuleExecutionStatus', () => {
           },
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-          "numberOfTriggeredActions": 0,
           "status": "ok",
         }
       `);
@@ -126,7 +124,6 @@ describe('RuleExecutionStatus', () => {
         "error": null,
         "lastDuration": 1234,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-        "numberOfTriggeredActions": 0,
         "status": "ok",
       }
     `);
@@ -140,7 +137,6 @@ describe('RuleExecutionStatus', () => {
         "error": null,
         "lastDuration": 0,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
-        "numberOfTriggeredActions": 5,
         "status": "ok",
       }
     `);
