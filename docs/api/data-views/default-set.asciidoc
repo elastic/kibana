@@ -7,6 +7,7 @@
 experimental[] Set a default data view ID. Kibana UI will use the default data view unless user picks a different one. 
 The API doesn't validate if given `data_view_id` is a valid id. 
 
+[float]
 [[data-views-api-default-set-request]]
 ==== Request
 
@@ -14,12 +15,14 @@ The API doesn't validate if given `data_view_id` is a valid id.
 
 `POST <kibana host>:<port>/s/<space_id>/api/data_views/default`
 
+[float]
 [[data-views-api-default-set-params]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[float]
 [[data-views-api-default-set-body]]
 ==== Request body
 
@@ -28,12 +31,14 @@ The API doesn't validate if given `data_view_id` is a valid id.
 `force`:: (Optional, boolean) Updates existing default data view id. The default is `false`.
 
 
+[float]
 [[data-views-api-default-set-codes]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
+[float]
 [[data-views-api-default-set-example]]
 ==== Example
 
@@ -86,6 +91,7 @@ The API returns:
 [discrete]
 === Set default data view API (deprecated)
 
+[float]
 [[data-views-api-default-set-request-deprecated]]
 ==== Request
 
@@ -93,12 +99,14 @@ The API returns:
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
 
+[float]
 [[data-views-api-default-set-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[float]
 [[data-views-api-default-set-body-deprecated]]
 ==== Request body
 
@@ -107,12 +115,14 @@ The API returns:
 `force`:: (Optional, boolean) Updates existing default data view id. The default is `false`.
 
 
+[float]
 [[data-views-api-default-set-codes-deprecated]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
+[float]
 [[data-views-api-default-set-example-deprecated]]
 ==== Example
 

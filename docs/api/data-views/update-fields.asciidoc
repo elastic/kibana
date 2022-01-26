@@ -8,6 +8,7 @@ experimental[] Update fields presentation metadata, such as `count`,
 `customLabel`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
 
+[float]
 [[data-views-fields-api-update-request]]
 ==== Request
 
@@ -15,6 +16,7 @@ are merged with persisted metadata. To remove existing metadata, specify `null` 
 
 `POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>/fields`
 
+[float]
 [[data-views-fields-api-update-path-params]]
 ==== Path parameters
 
@@ -24,6 +26,7 @@ are merged with persisted metadata. To remove existing metadata, specify `null` 
 `id`::
 (Required, string) The ID of the data view fields you want to update.
 
+[float]
 [[data-views-fields-api-update-request-body]]
 ==== Request body
 
@@ -31,12 +34,14 @@ are merged with persisted metadata. To remove existing metadata, specify `null` 
 (Required, object) the field object
 
 
+[float]
 [[data-views-fields-api-update-errors-codes]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
+[float]
 [[data-views-fields-api-update-example]]
 ==== Examples
 
@@ -102,6 +107,7 @@ The endpoint returns the updated data view object:
 [discrete]
 === Update data view fields API (deprecated)
 
+[float]
 [[data-views-fields-api-update-deprecated]]
 ==== Request
 
@@ -109,6 +115,7 @@ The endpoint returns the updated data view object:
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>/fields`
 
+[float]
 [[data-views-fields-api-update-path-params-deprecated]]
 ==== Path parameters
 
@@ -118,6 +125,7 @@ The endpoint returns the updated data view object:
 `id`::
 (Required, string) The ID of the data view fields you want to update.
 
+[float]
 [[data-views-fields-api-update-request-body-deprecated]]
 ==== Request body
 
@@ -125,12 +133,14 @@ The endpoint returns the updated data view object:
 (Required, object) the field object
 
 
+[float]
 [[data-views-fields-api-update-errors-codes-deprecated]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
+[float]
 [[data-views-fields-api-update-example-deprecated]]
 ==== Examples
 

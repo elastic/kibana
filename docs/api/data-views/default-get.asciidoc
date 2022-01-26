@@ -6,6 +6,7 @@
 
 experimental[] Retrieve a default data view ID. Kibana UI uses the default data view unless user picks a different one.
 
+[float]
 [[data-views-api-default-get-request]]
 ==== Request
 
@@ -13,18 +14,21 @@ experimental[] Retrieve a default data view ID. Kibana UI uses the default data 
 
 `GET <kibana host>:<port>/s/<space_id>/api/data_views/default`
 
+[float]
 [[data-views-api-default-get-params]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[float]
 [[data-views-api-default-get-codes]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
+[float]
 [[data-views-api-default-get-example]]
 ==== Example
 
@@ -58,6 +62,7 @@ In case there is no default data view, the API returns:
 [discrete]
 === Get default data view API (deprecated)
 
+[float]
 [[data-views-api-default-get-request-deprecated]]
 ==== Request
 
@@ -65,18 +70,21 @@ In case there is no default data view, the API returns:
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
 
+[float]
 [[data-views-api-default-get-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[float]
 [[data-views-api-default-get-codes-deprecated]]
 ==== Response code
 
 `200`::
 Indicates a successful call.
 
+[float]
 [[data-views-api-default-get-example-deprecated]]
 ==== Example
 

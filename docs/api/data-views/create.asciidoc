@@ -104,6 +104,7 @@ The API returns the data view object:
 [discrete]
 === Create data view API (deprecated)
 
+[float]
 [[data-views-api-create-request-deprecated]]
 ==== Request
 
@@ -111,12 +112,14 @@ The API returns the data view object:
 
 `POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern`
 
+[float]
 [[data-views-api-create-path-params-deprecated]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[float]
 [[data-views-api-create-body-params-deprecated]]
 ==== Request body
 
@@ -128,12 +131,14 @@ the data view is stored. The default is `false`.
 
 `index_pattern`:: (Required, object) The data view object. All fields are optional.
 
+[float]
 [[data-views-api-create-request-codes-deprecated]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
+[float]
 [[data-views-api-create-example-deprecated]]
 ==== Examples
 
