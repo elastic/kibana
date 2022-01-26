@@ -655,6 +655,9 @@ describe('Task Runner', () => {
         event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
         kibana: {
           alert: {
+            alerting: {
+              status: 'active',
+            },
             rule: {
               execution: {
                 uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -662,9 +665,6 @@ describe('Task Runner', () => {
                   number_of_triggered_actions: 1,
                 },
               },
-            },
-            alerting: {
-              status: 'active',
             },
             task: {
               schedule_delay: 0,
@@ -1131,6 +1131,9 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alert": Object {
+                "alerting": Object {
+                  "status": "active",
+                },
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
@@ -1139,9 +1142,6 @@ describe('Task Runner', () => {
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
-              },
-              "alerting": Object {
-                "status": "active",
               },
               "saved_objects": Array [
                 Object {
@@ -1607,6 +1607,9 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alert": Object {
+                "alerting": Object {
+                  "status": "active",
+                },
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
@@ -1615,9 +1618,6 @@ describe('Task Runner', () => {
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
-              },
-              "alerting": Object {
-                "status": "active",
               },
               "saved_objects": Array [
                 Object {
@@ -1984,6 +1984,9 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alert": Object {
+                "alerting": Object {
+                  "status": "active",
+                },
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
@@ -1992,9 +1995,6 @@ describe('Task Runner', () => {
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
-              },
-              "alerting": Object {
-                "status": "active",
               },
               "saved_objects": Array [
                 Object {
@@ -2499,6 +2499,9 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alert": Object {
+                "alerting": Object {
+                  "status": "active",
+                },
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
@@ -2507,9 +2510,6 @@ describe('Task Runner', () => {
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
-              },
-              "alerting": Object {
-                "status": "active",
               },
               "saved_objects": Array [
                 Object {
@@ -3892,6 +3892,9 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alert": Object {
+                "alerting": Object {
+                  "status": "active",
+                },
                 "rule": Object {
                   "execution": Object {
                     "metrics": Object {
@@ -3900,9 +3903,6 @@ describe('Task Runner', () => {
                     "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
-              },
-              "alerting": Object {
-                "status": "active",
               },
               "saved_objects": Array [
                 Object {

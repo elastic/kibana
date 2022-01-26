@@ -1331,6 +1331,8 @@ instanceStateValue: true
       },
     ]);
 
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
+
     expect(event?.rule).to.eql({
       id: alertId,
       license: 'basic',
