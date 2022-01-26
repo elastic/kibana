@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { defaultConfig } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
+
+module.exports = defaultConfig;

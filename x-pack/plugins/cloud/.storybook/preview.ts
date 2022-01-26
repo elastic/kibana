@@ -6,6 +6,6 @@
  */
 
 import { addDecorator } from '@storybook/react';
-import { getEngagementContextDecorator } from './decorator';
+import { getCloudContextDecorator } from './decorator';
 
-addDecorator(getEngagementContextDecorator);
+addDecorator(getCloudContextDecorator);

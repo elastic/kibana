@@ -131,5 +131,5 @@ export const Chat = () => {
     return null;
   }
 
-  return <iframe css={iframeStyle} data-test-id="iframe-chat" title="engagement" {...frameProps} />;
+  return <iframe css={iframeStyle} data-test-id="iframe-chat" title="chat" {...frameProps} />;
 };

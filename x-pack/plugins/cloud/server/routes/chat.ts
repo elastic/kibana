@@ -15,40 +15,48 @@ export const registerChatRoute = ({
   router,
   chatIdentitySecret,
   security,
+  isDev,
 }: {
   router: IRouter;
   chatIdentitySecret: string;
   security?: SecurityPluginSetup;
+  isDev?: boolean;
 }) => {
   router.get(
     {
       path: GET_CHAT_USER_DATA_ROUTE_PATH,
       validate: {},
     },
-    async (context, request, response) => {
+    async (_context, request, response) => {
       if (!security) {
         return response.customError({
           statusCode: 500,
         });
       }
 
-      const user = await security.authc.getCurrentUser(request);
-      let { email: userEmail, username: userID } = user || {};
-      // TODO: this is for testing purpose, cz a user in local env
-      // doesn't have an email
-      userEmail = userEmail || `test+${userID}@elasticsearch.com`;
+      const user = security.authc.getCurrentUser(request);
+      let { email: userEmail, username: userId } = user || {};
 
-      if (!userEmail || !userID) {
+      if (isDev) {
+        if (!userId) {
+          userId = 'first.last';
+        }
+        if (!userEmail) {
+          userEmail = userEmail || `test+${userId}@elasticsearch.com`;
+        }
+      }
+
+      if (!userEmail || !userId) {
         return response.badRequest({
           body: 'User has no email or username',
         });
       }
 
-      const token = generateSignedJwt(userID, chatIdentitySecret);
+      const token = generateSignedJwt(userId, chatIdentitySecret);
       const body: GetChatUserDataResponseBody = {
         token,
         email: userEmail,
-        id: userID,
+        id: userId,
       };
       return response.ok({ body });
     }

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getEngagementContextDecorator, getEngagementContextProvider } from './decorator';
+export { getCloudContextDecorator, getCloudContextProvider } from './decorator';

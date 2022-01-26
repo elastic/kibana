@@ -22,12 +22,12 @@ const services: CloudServices = {
   },
 };
 
-export const getEngagementContextDecorator: DecoratorFn = (storyFn) => {
-  const EngagementProvider = getEngagementContextProvider();
-  return <EngagementProvider>{storyFn()}</EngagementProvider>;
-};
-
-export const getEngagementContextProvider: () => React.FC =
+export const getCloudContextProvider: () => React.FC =
   () =>
   ({ children }) =>
     <ServicesProvider {...services}>{children}</ServicesProvider>;
+
+export const getCloudContextDecorator: DecoratorFn = (storyFn) => {
+  const CloudContextProvider = getCloudContextProvider();
+  return <CloudContextProvider>{storyFn()}</CloudContextProvider>;
+};

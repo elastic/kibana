@@ -33,10 +33,12 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
   private readonly config: CloudConfigType;
+  private isDev: boolean;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config = this.context.config.get<CloudConfigType>();
+    this.isDev = this.context.env.mode.dev;
   }
 
   public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup) {
@@ -56,6 +58,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         router: core.http.createRouter(),
         chatIdentitySecret: this.config.chatIdentitySecret,
         security,
+        isDev: this.isDev,
       });
     }
 
