@@ -12,10 +12,10 @@ import { Filter } from '@kbn/es-query';
 
 describe('embeddable migrations', () => {
   test('should have all saved object migrations versions (>7.13.0)', () => {
-    const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
+    const savedObjectMigrationVersions = Object.keys(getAllMigrations({}, {})).filter((version) => {
       return semverGte(version, '7.13.1');
     });
-    const embeddableMigrationVersions = makeLensEmbeddableFactory({})()?.migrations;
+    const embeddableMigrationVersions = makeLensEmbeddableFactory({}, {})()?.migrations;
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
         Object.keys(embeddableMigrationVersions).sort()
@@ -43,14 +43,17 @@ describe('embeddable migrations', () => {
       },
     };
 
-    const embeddableMigrationVersions = makeLensEmbeddableFactory({
-      [migrationVersion]: (filters: Filter[]) => {
-        return filters.map((filterState) => ({
-          ...filterState,
-          migrated: true,
-        }));
+    const embeddableMigrationVersions = makeLensEmbeddableFactory(
+      {
+        [migrationVersion]: (filters: Filter[]) => {
+          return filters.map((filterState) => ({
+            ...filterState,
+            migrated: true,
+          }));
+        },
       },
-    })()?.migrations;
+      {}
+    )()?.migrations;
 
     const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);
 
@@ -67,6 +70,60 @@ describe('embeddable migrations', () => {
               migrated: true,
             },
           ],
+        },
+      },
+    });
+  });
+
+  test('should properly apply a custom visualization migration', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { oldState: true },
+        },
+      },
+    };
+
+    const migrationFn = jest.fn((oldState: { oldState: boolean }) => ({
+      newState: oldState.oldState,
+    }));
+
+    const embeddableMigrationVersions = makeLensEmbeddableFactory(
+      {},
+      {
+        abc: () => ({
+          [migrationVersion]: migrationFn,
+        }),
+      }
+    )()?.migrations;
+
+    const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);
+    const otherLensDoc = embeddableMigrationVersions?.[migrationVersion]({
+      ...lensVisualizationDoc,
+      attributes: {
+        ...lensVisualizationDoc.attributes,
+        visualizationType: 'def',
+      },
+    });
+
+    expect(migrationFn).toHaveBeenCalledTimes(1);
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { newState: true },
+        },
+      },
+    });
+    expect(otherLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'def',
+        state: {
+          visualization: { oldState: true },
         },
       },
     });

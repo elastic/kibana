@@ -18,7 +18,7 @@ import { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
-  const migrations = getAllMigrations({});
+  const migrations = getAllMigrations({}, {});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 
@@ -1533,14 +1533,17 @@ describe('Lens migrations', () => {
       },
     };
 
-    const migrationFunctionsObject = getAllMigrations({
-      [migrationVersion]: (filters: Filter[]) => {
-        return filters.map((filterState) => ({
-          ...filterState,
-          migrated: true,
-        }));
+    const migrationFunctionsObject = getAllMigrations(
+      {
+        [migrationVersion]: (filters: Filter[]) => {
+          return filters.map((filterState) => ({
+            ...filterState,
+            migrated: true,
+          }));
+        },
       },
-    });
+      {}
+    );
 
     const migratedLensDoc = migrationFunctionsObject[migrationVersion](
       lensVisualizationDoc as SavedObjectUnsanitizedDoc,
@@ -1560,6 +1563,65 @@ describe('Lens migrations', () => {
               migrated: true,
             },
           ],
+        },
+      },
+    });
+  });
+
+  test('should properly apply a custom visualization migration', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { oldState: true },
+        },
+      },
+    };
+
+    const migrationFn = jest.fn((oldState: { oldState: boolean }) => ({
+      newState: oldState.oldState,
+    }));
+
+    const migrationFunctionsObject = getAllMigrations(
+      {},
+      {
+        abc: () => ({
+          [migrationVersion]: migrationFn,
+        }),
+      }
+    );
+    const migratedLensDoc = migrationFunctionsObject[migrationVersion](
+      lensVisualizationDoc as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+    const otherLensDoc = migrationFunctionsObject[migrationVersion](
+      {
+        ...lensVisualizationDoc,
+        attributes: {
+          ...lensVisualizationDoc.attributes,
+          visualizationType: 'def',
+        },
+      } as SavedObjectUnsanitizedDoc,
+      {} as SavedObjectMigrationContext
+    );
+
+    expect(migrationFn).toHaveBeenCalledTimes(1);
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'abc',
+        state: {
+          visualization: { newState: true },
+        },
+      },
+    });
+    expect(otherLensDoc).toEqual({
+      attributes: {
+        visualizationType: 'def',
+        state: {
+          visualization: { oldState: true },
         },
       },
     });

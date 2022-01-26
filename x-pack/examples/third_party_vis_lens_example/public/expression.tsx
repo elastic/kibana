@@ -14,7 +14,7 @@ import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../src/plugins/expressions/public';
-import { RotatingNumberState } from './types';
+import { RotatingNumberState } from '../common/types';
 import { FormatFactory } from '../../../../src/plugins/field_formats/common';
 
 export const getRotatingNumberRenderer = (
