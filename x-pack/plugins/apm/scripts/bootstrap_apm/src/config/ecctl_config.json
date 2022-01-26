@@ -1,0 +1,8 @@
+{
+  "host": "https://staging.found.no",
+  "api_key": "API_KEY",
+  "region": "us-west-2",
+  "output": "text",
+  "timeout": 30000000000,
+  "insecure": true
+}
