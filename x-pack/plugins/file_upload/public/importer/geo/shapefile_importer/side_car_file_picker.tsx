@@ -9,9 +9,12 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 
-function getFileNameWithoutExt(fileName: string) {
-  const split = fileName.split('.');
-  return split.length ? split[0] : fileName;
+export function getFileNameWithoutExt(fileName: string) {
+  const splits = fileName.split('.');
+  if (splits.length > 1) {
+    splits.pop();
+  }
+  return splits.join('.');
 }
 
 interface Props {
