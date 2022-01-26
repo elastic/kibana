@@ -13,7 +13,10 @@ import {
   getRUMSettings,
   isRUMFormValid,
 } from './settings_definition/rum_settings';
-import { getTailSamplingSettings } from './settings_definition/tail_sampling_settings';
+import {
+  getTailSamplingSettings,
+  isTailBasedSamplingValid,
+} from './settings_definition/tail_sampling_settings';
 import {
   getTLSSettings,
   isTLSFormValid,
@@ -60,7 +63,8 @@ export function APMPolicyForm({
       isSettingsFormValid(apmSettings, newVars) &&
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
-      isSettingsFormValid(agentAuthorizationSettings, newVars);
+      isSettingsFormValid(agentAuthorizationSettings, newVars) &&
+      isTailBasedSamplingValid(newVars, tailSamplingSettings);
 
     updateAPMPolicy(newVars, isFormValid);
   }
