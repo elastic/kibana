@@ -20,9 +20,9 @@ yarn es snapshot
 *Note: Elasticsearch will be available on http://localhost:9200*
 
 
-**Start Kibana**
+**Customizing `config/kibana.dev.yml`**
 
-Create a `kibana.dev.yml` file with the following content. 
+Create or update `kibana.dev.yml` file with the following content:
 
 ```
 elasticsearch.hosts: http://localhost:9200
@@ -69,9 +69,9 @@ cd apm-integration-testing/
 ./scripts/compose.py start master --all --no-kibana
 ```
 
-### Connect Kibana to Elasticsearch
+**Customizing `config/kibana.dev.yml`**
 
-Update `config/kibana.dev.yml` with:
+Create or update `kibana.dev.yml` file with the following content: 
 
 ```yml
 elasticsearch.hosts: http://localhost:9200
