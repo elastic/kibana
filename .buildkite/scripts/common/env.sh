@@ -101,8 +101,8 @@ export DISABLE_BOOTSTRAP_VALIDATION=true
 
 export TEST_KIBANA_HOST=localhost
 export TEST_KIBANA_PORT=6101
-export TEST_KIBANA_URL="http://elastic:changeme@localhost:6101"
-export TEST_ES_URL="http://elastic:changeme@localhost:6102"
+export TEST_KIBANA_URL="http://system_indices_superuser:changeme@localhost:6101"
+export TEST_ES_URL="http://system_indices_superuser:changeme@localhost:6102"
 export TEST_ES_TRANSPORT_PORT=6301-6309
 export TEST_CORS_SERVER_PORT=6106
 export ALERTING_PROXY_PORT=6105
