@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { getServiceNodeIds } from './get_service_node_ids';
 import { createApmApiClient } from '../../common/apm_api_supertest';
 

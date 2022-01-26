@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { pick, sum } from 'lodash';
 import url from 'url';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 
