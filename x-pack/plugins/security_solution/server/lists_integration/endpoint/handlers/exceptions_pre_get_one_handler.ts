@@ -35,7 +35,7 @@ export const getExceptionsPreGetOneHandler = (
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
-      ).validatePreGetOneItem(exceptionItem);
+      ).validatePreGetOneItem();
 
       return data;
     }

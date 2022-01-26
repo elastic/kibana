@@ -6,7 +6,6 @@
  */
 
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { BaseValidator } from './base_validator';
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
@@ -14,8 +13,11 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     return listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
   }
 
-  async validatePreGetOneItem(item: ExceptionListItemSchema): Promise<ExceptionListItemSchema> {
+  async validatePreGetOneItem(): Promise<void> {
     await this.validateCanManageEndpointArtifacts();
-    return item;
+  }
+
+  async validatePreSingleListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
   }
 }
