@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 import { groupBy, isEqual } from 'lodash';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
@@ -33,6 +33,7 @@ import { SavedQueriesItem } from './saved_queries_item';
 import { FilterExpressionItem } from './filter_expression_item';
 
 import { UI_SETTINGS } from '../../../common';
+import { AddFilterModal } from '../query_string_input/add_filter_modal';
 
 interface Props {
   filters: Filter[];
@@ -51,6 +52,7 @@ interface Props {
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  const [isEditFilterPopoverOpen, setIsEditFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
@@ -64,6 +66,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+  const onEditFilterClick = () => setIsEditFilterPopoverOpen(!isEditFilterPopoverOpen);
 
   function renderItems() {
     return props.filters.map((filter, i) => {
@@ -106,10 +109,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
-          onClick={() => {}}
+          onClick={() => { }}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
+          onEditFilterClick={onEditFilterClick}
         />
       );
       GroupBadge.push(badge);
@@ -164,6 +168,32 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             </div>
           </EuiFlexItem>
         </EuiPopover>
+      </EuiFlexItem>
+    );
+  }
+
+  function renderEditFilter() {
+    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+    const [indexPattern] = props?.indexPatterns || [];
+    const index = indexPattern && indexPattern.id;
+    const newFilter = buildEmptyFilter(isPinned, index);
+
+
+    return (
+      <EuiFlexItem grow={false}>
+        {isEditFilterPopoverOpen && (
+          <AddFilterModal
+            onCancel={onEditFilterClick}
+            filter={newFilter}
+            indexPatterns={props.indexPatterns!}
+            onSubmit={onEditFilterClick}
+            onMultipleFiltersSubmit={onEditFilterClick}
+            applySavedQueries={onEditFilterClick}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            savedQueryManagement={undefined}
+            initialAddFilterMode={undefined}
+          />
+        )}
       </EuiFlexItem>
     );
   }
@@ -313,6 +343,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           {renderSelectedSavedQueries()}
           {props.multipleFilters.length === 0 && renderItems()}
           {/* {renderAddFilter()} */}
+          {renderEditFilter()}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

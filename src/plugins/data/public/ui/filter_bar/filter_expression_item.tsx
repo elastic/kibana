@@ -46,6 +46,7 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
+  onEditFilterClick: () => void;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -56,6 +57,7 @@ export const FilterExpressionItem: FC<Props> = ({
   groupId,
   filtersGroupsCount,
   onUpdate,
+  onEditFilterClick
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   function handleBadgeClick() {
@@ -65,6 +67,16 @@ export const FilterExpressionItem: FC<Props> = ({
     //   setIsPopoverOpen(!isPopoverOpen);
     // }
     setIsPopoverOpen(!isPopoverOpen);
+  }
+
+  function onEdit() {
+    // const multipleUpdatedFilters = groupedFilters?.map((filter: Filter) => {
+    //   return { ...filter, groupId: filtersGroupsCount + 1 };
+    // });
+    // const finalFilters = [...multipleUpdatedFilters, ...groupedFilters];
+    // onUpdate?.(finalFilters, groupId, false);
+
+    onEditFilterClick();
   }
 
   function onDuplicate() {
@@ -96,7 +108,10 @@ export const FilterExpressionItem: FC<Props> = ({
           defaultMessage: `Edit`,
         }),
         icon: 'pencil',
-        panel: 1,
+        onClick: () => {
+          setIsPopoverOpen(false);
+          onEdit();
+        },
         'data-test-subj': 'editFilter',
       },
       {
