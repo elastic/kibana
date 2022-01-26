@@ -205,7 +205,9 @@ export function ColorRangeItem({
           compressed
           fullWidth={true}
           isInvalid={!isValid}
-          value={mode !== 'auto' ? localValue : ''}
+          value={
+            mode !== 'auto' && localValue !== undefined && isFinite(localValue) ? localValue : ''
+          }
           disabled={isDisabled}
           onChange={onValueChange}
           placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
