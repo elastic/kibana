@@ -11793,7 +11793,6 @@
     "xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage": "“名称”必填",
     "xpack.fleet.packagePolicyValidation.quoteStringErrorMessage": "以特殊 YAML 字符（* 或 &amp;）开头的字符串需要使用双引号引起。",
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "“{fieldName}”必填",
-    "xpack.fleet.permissionDeniedErrorMessage": "您无权访问 Fleet。Fleet 需要 {roleName} 权限。",
     "xpack.fleet.permissionDeniedErrorTitle": "权限被拒绝",
     "xpack.fleet.permissionsRequestErrorMessageDescription": "检查 Fleet 权限时遇到问题",
     "xpack.fleet.permissionsRequestErrorMessageTitle": "无法检查权限",

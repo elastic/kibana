@@ -11669,7 +11669,6 @@
     "xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage": "名前が必要です",
     "xpack.fleet.packagePolicyValidation.quoteStringErrorMessage": "*や&amp;などの特殊YAML文字で始まる文字列は二重引用符で囲む必要があります。",
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName}が必要です",
-    "xpack.fleet.permissionDeniedErrorMessage": "Fleet へのアクセスが許可されていません。Fleet には{roleName}権限が必要です。",
     "xpack.fleet.permissionDeniedErrorTitle": "パーミッションが拒否されました",
     "xpack.fleet.permissionsRequestErrorMessageDescription": "Fleet アクセス権の確認中に問題が発生しました",
     "xpack.fleet.permissionsRequestErrorMessageTitle": "アクセス権を確認できません",
