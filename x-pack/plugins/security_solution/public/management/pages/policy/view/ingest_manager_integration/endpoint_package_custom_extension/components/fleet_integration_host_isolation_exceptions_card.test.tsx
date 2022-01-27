@@ -50,10 +50,10 @@ describe('Fleet host isolation exceptions card filters card', () => {
       const renderResult = renderComponent();
 
       await waitFor(() => {
-        expect(getHostIsolationExceptionSummaryMock).toHaveBeenCalledWith({
-          http: mockedContext.coreStart.http,
-          filter: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
-        });
+        expect(getHostIsolationExceptionSummaryMock).toHaveBeenCalledWith(
+          mockedContext.coreStart.http,
+          `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
+        );
       });
 
       expect(

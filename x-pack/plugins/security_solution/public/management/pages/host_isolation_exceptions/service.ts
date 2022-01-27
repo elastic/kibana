@@ -129,13 +129,10 @@ export async function updateOneHostIsolationExceptionItem(
     body: JSON.stringify(entry),
   });
 }
-export async function getHostIsolationExceptionSummary({
-  http,
-  filter,
-}: {
-  http: HttpStart;
-  filter?: string;
-}): Promise<ExceptionListSummarySchema> {
+export async function getHostIsolationExceptionSummary(
+  http: HttpStart,
+  filter?: string
+): Promise<ExceptionListSummarySchema> {
   return http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
     query: {
       filter,

@@ -86,10 +86,10 @@ export const FleetIntegrationHostIsolationExceptionsCard = memo<{
     isMounted.current = true;
     const fetchStats = async () => {
       try {
-        const summary = await getHostIsolationExceptionSummary({
+        const summary = await getHostIsolationExceptionSummary(
           http,
-          filter: parsePoliciesToKQL([policyId, 'all']),
-        });
+          parsePoliciesToKQL([policyId, 'all'])
+        );
         if (isMounted.current) {
           setStats(summary);
         }
