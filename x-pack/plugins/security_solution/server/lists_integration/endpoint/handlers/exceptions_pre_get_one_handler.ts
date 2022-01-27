@@ -14,6 +14,9 @@ export const getExceptionsPreGetOneHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreGetOneItemServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
+    // / FIXME: remove once this PR is merged: https://github.com/elastic/kibana/pull/123885
+    return data;
+
     if (data.namespaceType !== 'agnostic') {
       return data;
     }

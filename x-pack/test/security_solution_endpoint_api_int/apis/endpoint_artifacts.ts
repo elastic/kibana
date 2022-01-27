@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -60,16 +60,20 @@ export default function ({ getService }: FtrProviderContext) {
       };
     };
 
+    it('should return 400 for import of endpoint exceptions', async () => {
+      expect(true).to.be(false);
+    });
+
     describe('and accessing trusted apps', () => {
       const exceptionsGenerator = new ExceptionsListItemGenerator();
       let trustedAppData: ArtifactTestData;
 
-      type TrustedAppApiCallsInterface = Array<{
+      type TrustedAppApiCallsInterface<BodyReturnType = unknown> = Array<{
         method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         path: string;
         // The body just needs to have the properties we care about in the tests. This should cover most
         // mocks used for testing that support different interfaces
-        getBody: () => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
+        getBody: () => BodyReturnType;
       }>;
 
       beforeEach(async () => {
@@ -84,7 +88,9 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      const trustedAppApiCalls: TrustedAppApiCallsInterface = [
+      const trustedAppApiCalls: TrustedAppApiCallsInterface<
+        Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>
+      > = [
         {
           method: 'post',
           path: EXCEPTION_LIST_ITEM_URL,
@@ -217,12 +223,32 @@ export default function ({ getService }: FtrProviderContext) {
           ...trustedAppApiCalls,
           {
             method: 'get',
-            path: EXCEPTION_LIST_ITEM_URL,
-            getBody: () => {},
+            path: `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
+            getBody: () => undefined,
+          },
+          {
+            method: 'get',
+            path: `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
+            getBody: () => undefined,
+          },
+          {
+            method: 'delete',
+            path: `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
+            getBody: () => undefined,
+          },
+          {
+            method: 'post',
+            path: `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
+            getBody: () => undefined,
+          },
+          {
+            method: 'get',
+            path: `${EXCEPTION_LIST_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
+            getBody: () => undefined,
           },
         ];
 
-        for (const trustedAppApiCall of trustedAppApiCalls) {
+        for (const trustedAppApiCall of allTrustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLES.detections_admin, 'changeme')
