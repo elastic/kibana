@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_REPOSITORY_TYPES,
-  REPOSITORY_PLUGINS_MAP,
-  REPOSITORY_TYPES,
-} from '../../../common';
+import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
@@ -290,8 +286,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
-      const dataNodePlugins = ['repository-s3', 'repository-azure'];
-      const masterNodePlugins = ['repository-azure'];
+      const dataNodePlugins = ['repository-hdfs'];
+      const masterNodePlugins: string[] = [];
       const mockEsResponse = {
         nodes: {
           dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
@@ -300,7 +296,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       };
       nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, REPOSITORY_TYPES.azure];
+      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });

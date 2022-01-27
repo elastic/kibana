@@ -29,7 +29,7 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
-import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
+import { CUSTOM_PALETTE } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
@@ -205,10 +205,7 @@ export const getHeatmapVisualization = ({
                   ? {
                       columnId: state.valueAccessor,
                       triggerIcon: 'colorBy',
-                      palette: getStopsForFixedMode(
-                        displayStops,
-                        activePalette?.params?.colorStops
-                      ),
+                      palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
@@ -317,6 +314,11 @@ export const getHeatmapVisualization = ({
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
+            lastRangeIsRightOpen: [
+              state.palette?.params?.continuity
+                ? ['above', 'all'].includes(state.palette.params.continuity)
+                : true,
+            ],
             palette: state.palette?.params
               ? [
                   paletteService
