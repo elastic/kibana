@@ -11,6 +11,7 @@ import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
 } from '../../../../../observability/common/utils/formatters/duration';
+import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
   'xpack.infra.metrics.alerting.threshold.documentCount',
@@ -112,6 +113,8 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
   });
 };
 
+const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? 'all hosts' : group);
+
 export const buildFiredAlertReason: (alertResult: {
   group: string;
   metric: string;
@@ -125,9 +128,9 @@ export const buildFiredAlertReason: (alertResult: {
     defaultMessage:
       '{metric} is {currentValue} in the last {duration} for {group}. Alert when {comparator} {threshold}.',
     values: {
-      group,
+      group: formatGroup(group),
       metric,
-      comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
+      comparator,
       threshold: thresholdToI18n(threshold),
       currentValue,
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),
