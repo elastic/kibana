@@ -128,7 +128,6 @@ export const fetchNumericFieldsStats = (
     .search<IKibanaSearchRequest, IKibanaSearchResponse>({ params: request }, options)
     .pipe(
       catchError((e) => {
-        // @todo: kick off another requests individually
         return of({
           fields,
           error: extractErrorProperties(e),

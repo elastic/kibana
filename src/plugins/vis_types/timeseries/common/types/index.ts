@@ -11,7 +11,15 @@ import { IndexPattern, Query } from '../../../../data/common';
 import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType } from './panel_model';
-export type { TimeseriesVisData, PanelData, SeriesData, TableData } from './vis_data';
+export type {
+  TimeseriesVisData,
+  PanelData,
+  SeriesData,
+  TableData,
+  DataResponseMeta,
+  TrackedEsSearches,
+  PanelSeries,
+} from './vis_data';
 
 export interface FetchedIndexPattern {
   indexPattern: IndexPattern | undefined | null;
