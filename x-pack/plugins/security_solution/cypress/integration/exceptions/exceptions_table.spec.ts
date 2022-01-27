@@ -14,7 +14,6 @@ import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
-import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -28,8 +27,8 @@ import {
   goToExceptionsTab,
 } from '../../tasks/rule_details';
 
-import { ALERTS_URL, EXCEPTIONS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../urls/navigation';
+import { cleanKibana, reload } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
@@ -47,10 +46,9 @@ import { createExceptionList } from '../../tasks/api_calls/exceptions';
 describe('Exceptions Table', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule(getNewRule());
-    goToManageAlertsDetectionRules();
+    reload();
     goToRuleDetails();
 
     cy.get(RULE_STATUS).should('have.text', '—');
