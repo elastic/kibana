@@ -47,9 +47,9 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       let finalScript = metrics[mathMetricIdx].script;
 
       const variables = metrics[mathMetricIdx].variables;
-
+      // supportedTimeScales.includes(currentMetric.unit)
       const layerMetricsArray = metrics;
-      if (!finalScript || !variables || finalScript.includes('_interval')) return null;
+      if (!finalScript || !variables) return null;
 
       // create the script
       for (let layerMetricIdx = 0; layerMetricIdx < layerMetricsArray.length; layerMetricIdx++) {
@@ -71,10 +71,11 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
         } else {
           const script = getFormulaEquivalent(currentMetric, layerMetricsArray);
           const variable = variables.find((v) => v.field === currentMetric.id);
-          if (!script || !variable) return null;
-          finalScript = finalScript?.replace(`params.${variable.name}`, script);
+          if (!script) return null;
+          finalScript = finalScript?.replace(`params.${variable?.name}`, script);
         }
       }
+      if (finalScript.includes('params')) return null;
       metricsArray = getFormulaSeries(finalScript);
       break;
     }
