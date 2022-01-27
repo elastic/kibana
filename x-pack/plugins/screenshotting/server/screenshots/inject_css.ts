@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
 import apm from 'elastic-apm-node';
@@ -22,11 +21,7 @@ export const injectCustomCss = async (
   layout: Layout
 ): Promise<void> => {
   const span = apm.startSpan('inject_css', 'correction');
-  logger.debug(
-    i18n.translate('xpack.screenshotting.screencapture.injectingCss', {
-      defaultMessage: 'injecting custom css',
-    })
-  );
+  logger.debug('injecting custom css');
 
   const filePath = layout.getCssOverridesPath();
   if (!filePath) {
@@ -50,10 +45,7 @@ export const injectCustomCss = async (
   } catch (err) {
     logger.error(err);
     throw new Error(
-      i18n.translate('xpack.screenshotting.screencapture.injectCss', {
-        defaultMessage: `An error occurred when trying to update Kibana CSS for reporting. {error}`,
-        values: { error: err },
-      })
+      `An error occurred when trying to update Kibana CSS for reporting. ${err.message}`
     );
   }
 

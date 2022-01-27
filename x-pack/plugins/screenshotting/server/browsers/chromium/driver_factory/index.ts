@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
 import del from 'del';
@@ -259,10 +258,7 @@ export class HeadlessChromiumDriverFactory {
     const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
       map((err) => {
         logger.warn(
-          i18n.translate('xpack.screenshotting.browsers.chromium.pageErrorDetected', {
-            defaultMessage: `Reporting encountered an uncaught error on the page that will be ignored: {err}`,
-            values: { err: err.toString() },
-          })
+          `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
         );
       })
     );
@@ -304,12 +300,7 @@ export class HeadlessChromiumDriverFactory {
   getPageExit(browser: Browser, page: Page) {
     const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
       mergeMap((err) => {
-        return Rx.throwError(
-          i18n.translate('xpack.screenshotting.browsers.chromium.errorDetected', {
-            defaultMessage: 'Reporting encountered an error: {err}',
-            values: { err: err.toString() },
-          })
-        );
+        return Rx.throwError(`Reporting encountered an error: ${err.toString()}`);
       })
     );
 
@@ -337,9 +328,7 @@ export class HeadlessChromiumDriverFactory {
     const exit$ = Rx.fromEvent(browserProcess, 'exit').pipe(
       map((code) => {
         this.logger.error(`Browser exited abnormally, received code: ${code}`);
-        return i18n.translate('xpack.screenshotting.diagnostic.browserCrashed', {
-          defaultMessage: `Browser exited abnormally during startup`,
-        });
+        return `Browser exited abnormally during startup`;
       })
     );
 
@@ -347,9 +336,7 @@ export class HeadlessChromiumDriverFactory {
       map((err) => {
         this.logger.error(`Browser process threw an error on startup`);
         this.logger.error(err as string | Error);
-        return i18n.translate('xpack.screenshotting.diagnostic.browserErrored', {
-          defaultMessage: `Browser process threw an error on startup`,
-        });
+        return `Browser process threw an error on startup`;
       })
     );
 

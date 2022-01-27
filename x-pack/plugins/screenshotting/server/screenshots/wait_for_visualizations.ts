@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
 import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
@@ -46,12 +45,7 @@ export const waitForVisualizations = async (
   const span = apm.startSpan('wait_for_visualizations', 'wait');
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
-  logger.debug(
-    i18n.translate('xpack.screenshotting.screencapture.waitingForRenderedElements', {
-      defaultMessage: `waiting for {itemsCount} rendered elements to be in the DOM`,
-      values: { itemsCount: toEqual },
-    })
-  );
+  logger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {
     await browser.waitFor({
@@ -64,10 +58,7 @@ export const waitForVisualizations = async (
   } catch (err) {
     logger.error(err);
     throw new Error(
-      i18n.translate('xpack.screenshotting.screencapture.couldntFinishRendering', {
-        defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. {error}`,
-        values: { count: toEqual, error: err },
-      })
+      `An error occurred when trying to wait for ${toEqual} visualizations to finish rendering. ${err.message}`
     );
   }
 
