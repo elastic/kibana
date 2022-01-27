@@ -65,7 +65,7 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
-export type EleasticsearchClientService = {
+export type ElasticsearchClientService = {
   /**
    * @deprecated Usage of "search" is deprecated because the queries do not abort when cancelling the rule execution, use services.search instead. (https://github.com/elastic/kibana/issues/111259).
    */
@@ -73,8 +73,8 @@ export type EleasticsearchClientService = {
 } & Omit<ElasticsearchClient, 'search'>;
 
 export interface ScopedClusterClientService extends IScopedClusterClient {
-  asInternalUser: EleasticsearchClientService;
-  asCurrentUser: EleasticsearchClientService;
+  asInternalUser: ElasticsearchClientService;
+  asCurrentUser: ElasticsearchClientService;
 }
 
 export interface Services {
