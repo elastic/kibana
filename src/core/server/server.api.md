@@ -19,6 +19,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
+import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
@@ -445,6 +446,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
     // (undocumented)
+    docLinks: DocLinksServiceSetup;
+    // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     executionContext: ExecutionContextSetup;
@@ -474,6 +477,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // (undocumented)
+    docLinks: DocLinksServiceStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -859,6 +864,19 @@ export interface DiscoveredPlugin {
     readonly requiredPlugins: readonly PluginName[];
     readonly type: PluginType;
 }
+
+// @public (undocumented)
+export interface DocLinksServiceSetup {
+    // (undocumented)
+    readonly elasticWebsiteUrl: string;
+    // (undocumented)
+    readonly links: DocLinks;
+    // (undocumented)
+    readonly version: string;
+}
+
+// @public (undocumented)
+export type DocLinksServiceStart = DocLinksServiceSetup;
 
 export { Ecs }
 
