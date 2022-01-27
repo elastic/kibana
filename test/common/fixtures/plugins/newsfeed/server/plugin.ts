@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { PluginInitializerContext } from 'kibana/public';
+import type { CoreSetup, Plugin } from 'kibana/server';
+import type { PluginInitializerContext } from 'kibana/server';
 
 export class NewsFeedSimulatorPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
