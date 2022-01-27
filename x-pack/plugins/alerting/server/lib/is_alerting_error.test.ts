@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAlertSavedObjectNotFoundError } from './is_alert_not_found_error';
+import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
 import { ErrorWithReason } from './error_with_reason';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import uuid from 'uuid';
@@ -29,5 +29,26 @@ describe('isAlertSavedObjectNotFoundError', () => {
   test('identifies SavedObjects Not Found errors wrapped in an ErrorWithReason', () => {
     const error = new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, errorSONF);
     expect(isAlertSavedObjectNotFoundError(error, id)).toBe(true);
+  });
+});
+
+describe('isEsUnavailableError', () => {
+  const id = uuid.v4();
+  const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', id);
+
+  test('identifies es unavailable errors', () => {
+    // ensure the error created by SO parses as a string with the format we expect
+    expect(`${errorSONF}`.includes(`alert/${id}`)).toBe(true);
+
+    expect(isEsUnavailableError(errorSONF, id)).toBe(true);
+  });
+
+  test('identifies generic errors', () => {
+    expect(isEsUnavailableError(new Error(`not found`), id)).toBe(false);
+  });
+
+  test('identifies es unavailable errors wrapped in an ErrorWithReason', () => {
+    const error = new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, errorSONF);
+    expect(isEsUnavailableError(error, id)).toBe(true);
   });
 });

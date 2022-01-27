@@ -3557,6 +3557,62 @@ describe('Task Runner', () => {
     });
   });
 
+  test('reschedules for next schedule interval if es connectivity error encountered and schedule interval is less than connectivity retry', async () => {
+    rulesClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.schedule!.interval).toEqual(mockedTaskInstance.schedule!.interval);
+  });
+
+  test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
+    rulesClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      ruleType,
+      {
+        ...mockedTaskInstance,
+        schedule: {
+          interval: '1d',
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult.schedule!.interval).toEqual('5m');
+  });
+
   test('correctly logs warning when Alert Task Runner throws due to failing to fetch the alert in a space', async () => {
     rulesClient.get.mockImplementation(() => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
