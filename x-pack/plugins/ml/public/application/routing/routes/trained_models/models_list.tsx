@@ -7,6 +7,8 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -40,13 +42,34 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   );
   return (
     <PageLoader context={context}>
-      <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.modelManagement.trainedModelsHeader"
-          defaultMessage="Trained Models"
-        />
-      </MlPageHeader>
       <ModelsList />
+      <MlPageHeader>
+        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.modelManagement.trainedModelsHeader"
+              defaultMessage="Trained Models"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
+                defaultMessage: 'Experimental',
+              })}
+              size="m"
+              color="hollow"
+              tooltipContent={i18n.translate(
+                'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
+                {
+                  defaultMessage:
+                    "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
+                }
+              )}
+              tooltipPosition={'right'}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </MlPageHeader>
     </PageLoader>
   );
 };
