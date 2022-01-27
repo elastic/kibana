@@ -30,7 +30,7 @@ export function registerFlameChartPixiRoute(router: IRouter<DataRequestHandlerCo
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/flamechart_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: src } });
+      return response.ok({ body: src });
     }
   );
 }
