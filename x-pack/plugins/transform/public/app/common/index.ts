@@ -39,7 +39,9 @@ export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
   isPivotAggsConfigPercentiles,
+  isPivotAggsConfigTerms,
   PERCENTILES_AGG_DEFAULT_PERCENTS,
+  TERMS_AGG_DEFAULT_SIZE,
   pivotAggsFieldSupport,
 } from './pivot_aggs';
 export type {
