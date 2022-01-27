@@ -11,7 +11,7 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/serv
 
 export const getExceptionsPreImportHandler =
   (): ExceptionsListPreImportServerExtension['callback'] => {
-    return async ({ data, context: { request } }) => {
+    return async ({ data }) => {
       const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
         if ('list_id' in item) {
           return ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(item.list_id);

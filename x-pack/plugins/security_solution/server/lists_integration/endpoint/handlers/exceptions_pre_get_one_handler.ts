@@ -13,17 +13,13 @@ import { HostIsolationExceptionsValidator } from '../validators/host_isolation_e
 export const getExceptionsPreGetOneHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreGetOneItemServerExtension['callback'] => {
-  return async function ({ data, context: { request } }) {
-    // / FIXME: remove once this PR is merged: https://github.com/elastic/kibana/pull/123885
-    return data;
-
+  return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
     }
 
-    const exceptionItem: ExceptionListItemSchema | null = await endpointAppContextService
-      .getExceptionListsClient()
-      .getExceptionListItem({
+    const exceptionItem: ExceptionListItemSchema | null =
+      await exceptionListClient.getExceptionListItem({
         id: data.id,
         itemId: data.itemId,
         namespaceType: data.namespaceType,

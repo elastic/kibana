@@ -12,14 +12,12 @@ import { HostIsolationExceptionsValidator } from '../validators/host_isolation_e
 export const getExceptionsPreExportHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreExportServerExtension['callback'] => {
-  return async function ({ data, context: { request } }) {
+  return async function ({ data, context: { request, exceptionListClient } }) {
     const { listId: maybeListId, id } = data;
     let listId: string | null | undefined = maybeListId;
 
     if (!listId && id) {
-      listId =
-        (await endpointAppContextService.getExceptionListsClient().getExceptionList(data))
-          ?.list_id ?? null;
+      listId = (await exceptionListClient.getExceptionList(data))?.list_id ?? null;
     }
 
     if (!listId) {

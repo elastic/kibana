@@ -15,18 +15,19 @@ import { TrustedAppValidator } from '../validators';
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreUpdateItemServerExtension['callback'] => {
-  return async function ({ data, context: { request } }): Promise<UpdateExceptionListItemOptions> {
+  return async function ({
+    data,
+    context: { request, exceptionListClient },
+  }): Promise<UpdateExceptionListItemOptions> {
     if (data.namespaceType !== 'agnostic') {
       return data;
     }
 
-    const currentSavedItem = await endpointAppContextService
-      .getExceptionListsClient()
-      .getExceptionListItem({
-        id: data.id,
-        itemId: data.itemId,
-        namespaceType: data.namespaceType,
-      });
+    const currentSavedItem = await exceptionListClient.getExceptionListItem({
+      id: data.id,
+      itemId: data.itemId,
+      namespaceType: data.namespaceType,
+    });
 
     // We don't want to `throw` here because we don't know for sure that the item is one we care about.
     // So we just return the data and the Lists plugin will likely error out because it can't find the item

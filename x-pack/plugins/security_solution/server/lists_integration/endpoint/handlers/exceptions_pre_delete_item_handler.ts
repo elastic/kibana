@@ -6,11 +6,11 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreDeleteItemServerExtension } from '../../../../../lists/server';
 
 export const getExceptionsPreDeleteItemHandler = (
   endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreDeleteItem' })['callback'] => {
+): ExceptionsListPreDeleteItemServerExtension['callback'] => {
   return async function ({ data }) {
     // Individual validators here
 
