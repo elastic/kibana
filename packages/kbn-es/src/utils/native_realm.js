@@ -56,7 +56,18 @@ exports.NativeRealm = class NativeRealm {
     });
   }
 
+  async clusterReady() {
+    return await this._autoRetry({ maxAttempts: 10 }, async () => {
+      const { status } = await this._client.cluster.health();
+      if (status === 'red') {
+        throw new Error(`not ready, cluster health is ${status}`);
+      }
+    });
+  }
+
   async setPasswords(options) {
+    await this.clusterReady();
+
     if (!(await this.isSecurityEnabled())) {
       this._log.info('security is not enabled, unable to set native realm passwords');
       return;
@@ -104,7 +115,7 @@ exports.NativeRealm = class NativeRealm {
   }
 
   async _autoRetry(opts, fn) {
-    const { attempt = 1, maxAttempts = 3 } = opts;
+    const { attempt = 1, maxAttempts = 3, sleep = 1000 } = opts;
 
     try {
       return await fn(attempt);
@@ -115,7 +126,7 @@ exports.NativeRealm = class NativeRealm {
 
       const sec = 1.5 * attempt;
       this._log.warning(`assuming ES isn't initialized completely, trying again in ${sec} seconds`);
-      await new Promise((resolve) => setTimeout(resolve, sec * 1000));
+      await new Promise((resolve) => setTimeout(resolve, sleep));
 
       const nextOpts = {
         ...opts,
