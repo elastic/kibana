@@ -8,10 +8,14 @@
 
 import './discover_sidebar.scss';
 import { throttle } from 'lodash';
+import classNames from 'classnames';
 import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
+  EuiCallOut,
+  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
@@ -19,7 +23,11 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
   EuiPageSideBar,
+  EuiPopover,
+  EuiPopoverTitle,
   useResizeObserver,
+  EuiBasicTable,
+  EuiToken,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
@@ -114,6 +122,15 @@ export function DiscoverSidebarComponent({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isCalloutOpen, setIsCalloutOpen] = useState(true);
+
+  const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+  const closeCallout = () => {
+    setIsCalloutOpen(false);
+    setIsPopoverOpen(false);
+  };
 
   useEffect(() => {
     if (documents) {
@@ -310,6 +327,74 @@ export function DiscoverSidebarComponent({
     );
   }
 
+  const calloutClasses = classNames('dscLearnCallout', { hide: !isCalloutOpen });
+  const callout = (
+    <EuiCallOut className={calloutClasses} size="s" title="">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem>
+          <EuiButtonEmpty className="dscLearnBtn" size="xs" onClick={onButtonClick}>
+            Learn about field types
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon color="primary" size="s" iconType="cross" onClick={closeCallout} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCallOut>
+  );
+
+  const columnsSidebar = [
+    {
+      field: 'type',
+      name: 'Icon',
+      width: '40px',
+      render: (name) => <EuiToken iconType={name} />,
+    },
+    {
+      field: 'dataType',
+      name: 'Data type',
+      width: '70px',
+    },
+    {
+      field: 'description',
+      name: 'Description',
+    },
+  ];
+
+  const items = [
+    {
+      id: 0,
+      dataType: 'text',
+      type: 'tokenString',
+      description: 'Full text such as the body of an email or a product description.',
+    },
+    {
+      id: 1,
+      dataType: 'number',
+      type: 'tokenNumber',
+      description: 'Long, integer, short, byte, double, and float values.',
+    },
+    {
+      id: 2,
+      dataType: 'keyword',
+      type: 'tokenKeyword',
+      description:
+        'Structured content such as an ID, email address, hostname, status code, or tag.',
+    },
+    {
+      id: 3,
+      dataType: 'date',
+      type: 'tokenDate',
+      description: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
+    },
+    {
+      id: 4,
+      dataType: 'geo_point',
+      type: 'tokenGeo',
+      description: 'Latitude and longitude points.',
+    },
+  ];
+
   return (
     <EuiPageSideBar
       className="dscSidebar"
@@ -441,6 +526,27 @@ export function DiscoverSidebarComponent({
                     </EuiNotificationBadge>
                   }
                 >
+                  <EuiSpacer size="xs" />
+                  <EuiPopover
+                    anchorPosition="rightDown"
+                    display="block"
+                    button={callout}
+                    isOpen={isPopoverOpen}
+                    panelPaddingSize="m"
+                    closePopover={closePopover}
+                  >
+                    <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
+                    <EuiBasicTable
+                      style={{ width: 350 }}
+                      tableCaption="Description of field types"
+                      items={items}
+                      compressed={true}
+                      rowHeader="firstName"
+                      columns={columnsSidebar}
+                    />
+                    <EuiSpacer size="s" />
+                  </EuiPopover>
+
                   <EuiSpacer size="s" />
                   {popularFields.length > 0 && (
                     <>
