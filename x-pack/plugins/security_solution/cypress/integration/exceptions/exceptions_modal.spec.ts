@@ -9,7 +9,6 @@ import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
-import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -32,8 +31,8 @@ import {
   EXCEPTION_FIELD_LIST,
 } from '../../screens/exceptions';
 
-import { ALERTS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { cleanKibana, reload } from '../../tasks/common';
 
 // NOTE: You might look at these tests and feel they're overkill,
 // but the exceptions modal has a lot of logic making it difficult
@@ -43,10 +42,9 @@ import { cleanKibana } from '../../tasks/common';
 describe('Exceptions modal', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule(getNewRule());
-    goToManageAlertsDetectionRules();
+    reload();
     goToRuleDetails();
 
     cy.get(RULE_STATUS).should('have.text', '—');

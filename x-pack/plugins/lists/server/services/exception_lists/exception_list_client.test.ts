@@ -12,12 +12,14 @@ import {
   createExtensionPointStorageMock,
 } from '../extension_points/extension_point_storage.mock';
 import type { ExtensionPointCallbackDataArgument } from '../extension_points';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 
 import {
   getCreateExceptionListItemOptionsMock,
   getExceptionListClientMock,
   getExceptionListSavedObjectClientMock,
   getUpdateExceptionListItemOptionsMock,
+  toReadable,
 } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
@@ -48,13 +50,16 @@ describe('exception_list_client', () => {
   describe('server extension points execution', () => {
     let extensionPointStorageContext: ExtensionPointStorageContextMock;
     let exceptionListClient: ExceptionListClient;
+    let kibanaRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
     beforeEach(() => {
       extensionPointStorageContext = createExtensionPointStorageMock();
+      kibanaRequest = httpServerMock.createKibanaRequest();
     });
 
     it('should initialize class instance with `enableServerExtensionPoints` enabled by default', async () => {
       exceptionListClient = new ExceptionListClient({
+        request: kibanaRequest,
         savedObjectsClient: getExceptionListSavedObjectClientMock(),
         serverExtensionsClient: extensionPointStorageContext.extensionPointStorage.getClient(),
         user: 'elastic',
@@ -97,6 +102,7 @@ describe('exception_list_client', () => {
         describe('and server extension points are enabled', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
+              request: kibanaRequest,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),
@@ -108,6 +114,15 @@ describe('exception_list_client', () => {
             await callExceptionListClientMethod();
 
             expect(getExtensionPointCallback()).toHaveBeenCalled();
+          });
+
+          it('should provide `context` object to extension point callbacks', async () => {
+            await callExceptionListClientMethod();
+
+            expect(getExtensionPointCallback().mock.calls[0][0].context).toEqual({
+              exceptionListClient: expect.any(ExceptionListClient),
+              request: kibanaRequest,
+            });
           });
 
           it('should error if extension point callback throws an error', async () => {
@@ -156,6 +171,7 @@ describe('exception_list_client', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
               enableServerExtensionPoints: false,
+              request: kibanaRequest,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),
@@ -238,6 +254,7 @@ describe('exception_list_client', () => {
         'getExceptionListSummary',
         (): ReturnType<ExceptionListClient['getExceptionListSummary']> => {
           return exceptionListClient.getExceptionListSummary({
+            filter: undefined,
             id: '1',
             listId: '1',
             namespaceType: 'agnostic',
@@ -272,11 +289,38 @@ describe('exception_list_client', () => {
           return extensionPointStorageContext.exceptionPreDelete.callback;
         },
       ],
+      [
+        'importExceptionListAndItems',
+        (): ReturnType<ExceptionListClient['importExceptionListAndItems']> => {
+          return exceptionListClient.importExceptionListAndItems({
+            exceptionsToImport: toReadable([getExceptionListItemSchemaMock()]),
+            maxExceptionsImportSize: 10_000,
+            overwrite: true,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreImport']['callback'] => {
+          return extensionPointStorageContext.exceptionPreImport.callback;
+        },
+      ],
+      [
+        'importExceptionListAndItemsAsArray',
+        (): ReturnType<ExceptionListClient['importExceptionListAndItemsAsArray']> => {
+          return exceptionListClient.importExceptionListAndItemsAsArray({
+            exceptionsToImport: [getExceptionListItemSchemaMock()],
+            maxExceptionsImportSize: 10_000,
+            overwrite: true,
+          });
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreImport']['callback'] => {
+          return extensionPointStorageContext.exceptionPreImport.callback;
+        },
+      ],
     ])(
       'and calling `ExceptionListClient#%s()`',
       (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {
         beforeEach(() => {
           exceptionListClient = new ExceptionListClient({
+            request: kibanaRequest,
             savedObjectsClient: getExceptionListSavedObjectClientMock(),
             serverExtensionsClient: extensionPointStorageContext.extensionPointStorage.getClient(),
             user: 'elastic',
@@ -287,6 +331,15 @@ describe('exception_list_client', () => {
           await callExceptionListClientMethod();
 
           expect(getExtensionPointCallback()).toHaveBeenCalled();
+        });
+
+        it('should provide `context` object to extension point callbacks', async () => {
+          await callExceptionListClientMethod();
+
+          expect(getExtensionPointCallback().mock.calls[0][0].context).toEqual({
+            exceptionListClient: expect.any(ExceptionListClient),
+            request: kibanaRequest,
+          });
         });
 
         it('should error if extension point callback throws an error', async () => {
@@ -304,6 +357,7 @@ describe('exception_list_client', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
               enableServerExtensionPoints: false,
+              request: kibanaRequest,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),
