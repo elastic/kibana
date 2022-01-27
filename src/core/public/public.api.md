@@ -484,7 +484,8 @@ export interface DocLinksStart {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
         readonly upgrade: {
-            readonly upgradingElasticStack: string;
+            readonly upgradingStackOnPrem: string;
+            readonly upgradingStackOnCloud: string;
         };
         readonly apm: {
             readonly kibanaSettings: string;
