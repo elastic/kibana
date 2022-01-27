@@ -19,6 +19,7 @@ import { serviceContextMock } from '../../contexts/services_context.mock';
 
 import { useDataInit } from './use_data_init';
 
+type UseStateMock = (...args: unknown[]) => [any, jest.Mock];
 const wait = (period: number) => new Promise((res) => setTimeout(res, period));
 
 describe('useDataInit', () => {
@@ -103,5 +104,30 @@ describe('useDataInit', () => {
       type: 'setCurrentTextObject',
       payload: mockObj,
     });
+  });
+
+  it('call retry function', async () => {
+    const setErrorMock = jest.fn();
+    const useErrorMock: UseStateMock = (state: any) => [state, setErrorMock];
+
+    const setDoneMock = jest.fn();
+    const useDoneMock: UseStateMock = (state: any) => [state, setDoneMock];
+
+    const setRetryTokenMock = jest.fn();
+    const useRetryTokenMock: UseStateMock = (state: any) => [state, setRetryTokenMock];
+
+    jest
+      .spyOn(React, 'useState')
+      .mockImplementationOnce(useErrorMock)
+      .mockImplementationOnce(useDoneMock)
+      .mockImplementationOnce(useRetryTokenMock);
+
+    const { result } = renderHook(() => useDataInit(), {});
+
+    result.current.retry();
+
+    expect(setErrorMock).toHaveBeenCalledWith(null);
+    expect(setDoneMock).toHaveBeenCalledWith(false);
+    expect(setRetryTokenMock).toHaveBeenCalledWith({});
   });
 });
