@@ -1,5 +1,6 @@
 {
   "name": "@kbn/interpreter",
+  "author": "App Services",
   "main": "./target_node/index.js",
   "browser": "./target_web/index.js",
   "version": "1.0.0",
