@@ -27227,7 +27227,6 @@
     "xpack.upgradeAssistant.overview.pageDescription": "次のバージョンのElasticをお待ちください。",
     "xpack.upgradeAssistant.overview.pageTitle": "アップグレードアシスタント",
     "xpack.upgradeAssistant.overview.snapshotRestoreLink": "スナップショットの作成",
-    "xpack.upgradeAssistant.overview.systemIndices.body": "アップグレード前に、システム情報が格納されたインデックスを移行します。",
     "xpack.upgradeAssistant.overview.systemIndices.errorLabel": "移行失敗",
     "xpack.upgradeAssistant.overview.systemIndices.featureNameTableColumn": "機能",
     "xpack.upgradeAssistant.overview.systemIndices.flyoutCloseButtonLabel": "閉じる",
