@@ -37,6 +37,7 @@ import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '../../../../../../../src/plugins/charts/public';
 import { Chart, Settings } from '@elastic/charts';
+import { useObservable } from 'react-use';
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
@@ -105,6 +106,8 @@ function ExplorerChartContainer({
     isDateHistogram: true,
   });
 
+  const cursor = useObservable(chartsService.activeCursor.activeCursor$)?.cursor;
+
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
       addItemToRecentlyAccessed(
@@ -140,7 +143,6 @@ function ExplorerChartContainer({
     }
   }
 
-  console.log('chartBaseTheme', chartTheme);
   return (
     <React.Fragment>
       <div style={{ width: 0, height: 0 }}>
@@ -238,7 +240,7 @@ function ExplorerChartContainer({
                   showSelectedInterval={showSelectedInterval}
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
-                  // ref={chartRef}
+                  cursor={cursor}
                 />
               )}
             </MlTooltipComponent>

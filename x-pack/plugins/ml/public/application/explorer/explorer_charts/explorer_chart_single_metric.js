@@ -52,6 +52,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
+    cursor: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -70,6 +71,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       showSelectedInterval,
       onPointerUpdate,
       chartTheme,
+      cursor,
     } = this.props;
 
     const element = this.rootNode;
@@ -211,24 +213,32 @@ export class ExplorerChartSingleMetric extends React.Component {
               x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
             });
           }
-
-          d3.selectAll('.ml-explorer-mouse-line').attr('d', function () {
-            //@todo
-            const ts = lineChartXScale.invert(mouse[0]);
-            const xPosition = lineChartXScale(ts);
-            return `M${xPosition},${chartHeight} ${xPosition},0`;
-          });
         })
         .style('stroke', '#cccccc')
         .style('fill', 'rgba(0, 128, 0, 0)')
         .style('stroke-width', 1);
 
-      lineChartGroup
+      const cursorMouseLine = lineChartGroup
+        .append('g')
+        .attr('class', 'cursor-line')
+        .selectAll('.ml-explorer-mouse-line')
+        .data(cursor && cursor.type === 'Over' ? [cursor.x] : []);
+
+      cursorMouseLine.exit().remove();
+
+      cursorMouseLine
+        .enter()
         .append('path')
         .attr('class', 'ml-explorer-mouse-line')
-        .style('stroke', chartTheme.crosshair.line.stroke)
-        .style('stroke-width', chartTheme.crosshair.line.strokeWidth)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash);
+        .attr('d', (ts) => {
+          // console.log('ts', ts);
+          // return 'M402.9999995959596,170 402.9999995959596,0';
+
+          const xPosition = lineChartXScale(ts);
+          return `M${xPosition},${chartHeight} ${xPosition},0`;
+        })
+        .style('stroke', 'black')
+        .style('stroke-width', '1px');
 
       drawLineChartAxes();
       drawLineChartHighlightedSpan();
