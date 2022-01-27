@@ -52,7 +52,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
                             },
                             {
                               range: {
-                                TimeStamp: {
+                                '@timestamp': {
                                   gte: timeFrom,
                                   lt: timeTo,
                                   format: 'epoch_second',
@@ -107,7 +107,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
                         },
                         {
                           range: {
-                            TimeStamp: {
+                            '@timestamp': {
                               gte: timeFrom,
                               lt: timeTo,
                               format: 'epoch_second',
@@ -121,7 +121,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
                   aggs: {
                     histogram: {
                       auto_date_histogram: {
-                        field: 'TimeStamp',
+                        field: '@timestamp',
                         buckets: 100,
                       },
                       aggs: {
