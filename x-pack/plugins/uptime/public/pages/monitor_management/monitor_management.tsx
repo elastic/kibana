@@ -5,37 +5,71 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../../observability/public';
+import { ConfigKey } from '../../../common/runtime_types';
 import { getMonitors } from '../../state/actions';
 import { monitorManagementListSelector } from '../../state/selectors';
-import { MonitorManagementList } from '../../components/monitor_management/monitor_list/monitor_list';
+import {
+  MonitorManagementList,
+  MonitorManagementListPageState,
+} from '../../components/monitor_management/monitor_list/monitor_list';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const MonitorManagementPage: React.FC = () => {
-  const [refresh, setRefresh] = useState(true);
-  const [pageIndex, setPageIndex] = useState(1); // saved objects page index is base 1
-  const [pageSize, setPageSize] = useState(10); // saved objects page index is base 1
+  const [pageState, dispatchPageAction] = useReducer<
+    typeof monitorManagementPageReducer,
+    MonitorManagementListPageState
+  >(monitorManagementPageReducer, {
+    pageIndex: 1, // saved objects page index is base 1
+    pageSize: 10,
+    sortOrder: 'asc',
+    sortField: ConfigKey.NAME,
+  });
+
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
   useMonitorManagementBreadcrumbs();
   const dispatch = useDispatch();
   const monitorList = useSelector(monitorManagementListSelector);
 
+  const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementPageState;
+
   useEffect(() => {
-    if (refresh) {
-      dispatch(getMonitors({ page: pageIndex, perPage: pageSize }));
-      setRefresh(false);
-    }
-  }, [dispatch, refresh, pageIndex, pageSize]);
+    dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
+  }, [dispatch, pageIndex, pageSize, sortField, sortOrder]);
 
   return (
     <MonitorManagementList
+      pageState={pageState}
       monitorList={monitorList}
-      setPageSize={setPageSize}
-      setPageIndex={setPageIndex}
-      setRefresh={setRefresh}
+      onPageStateChange={(state) => dispatchPageAction({ type: 'update', payload: state })}
+      onUpdate={() => dispatchPageAction({ type: 'refresh' })}
     />
   );
+};
+
+type MonitorManagementPageAction =
+  | {
+      type: 'update';
+      payload: MonitorManagementListPageState;
+    }
+  | { type: 'refresh' };
+
+const monitorManagementPageReducer: Reducer<
+  MonitorManagementPageState,
+  MonitorManagementPageAction
+> = (state: MonitorManagementPageState, action: MonitorManagementPageAction) => {
+  switch (action.type) {
+    case 'update':
+      return {
+        ...state,
+        ...action.payload,
+      };
+    case 'refresh':
+      return { ...state };
+    default:
+      throw new Error(`Action "${action.type}" not recognizable`);
+  }
 };

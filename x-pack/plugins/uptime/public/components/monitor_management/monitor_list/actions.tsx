@@ -15,11 +15,11 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 
 interface Props {
   id: string;
-  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  onUpdate: React.Dispatch<React.SetStateAction<boolean>>;
   isDisabled?: boolean;
 }
 
-export const Actions = ({ id, setRefresh, isDisabled }: Props) => {
+export const Actions = ({ id, onUpdate, isDisabled }: Props) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { basePath } = useContext(UptimeSettingsContext);
 
@@ -46,13 +46,13 @@ export const Actions = ({ id, setRefresh, isDisabled }: Props) => {
         toastLifeTimeMs: 3000,
       });
     } else if (status === FETCH_STATUS.SUCCESS) {
-      setRefresh(true);
+      onUpdate();
       notifications.toasts.success({
         title: <p data-test-subj="uptimeDeleteMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>,
         toastLifeTimeMs: 3000,
       });
     }
-  }, [setIsDeleting, setRefresh, notifications.toasts, status]);
+  }, [setIsDeleting, onUpdate, notifications.toasts, status]);
 
   // TODO: Add popovers to icons
   return (
