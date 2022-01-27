@@ -33,7 +33,7 @@ interface GetRuntimeFieldArgs {
   name: string;
 }
 
-const getRuntimeField = async ({
+export const getRuntimeField = async ({
   dataViewsService,
   usageCollection,
   counterName,

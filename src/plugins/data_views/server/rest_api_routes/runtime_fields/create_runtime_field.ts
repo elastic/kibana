@@ -34,7 +34,7 @@ interface CreateRuntimeFieldArgs {
   runtimeField: RuntimeField;
 }
 
-const createRuntimeField = async ({
+export const createRuntimeField = async ({
   dataViewsService,
   usageCollection,
   counterName,
@@ -51,13 +51,10 @@ const createRuntimeField = async ({
 
   dataView.addRuntimeField(name, runtimeField);
 
-  const addedField = dataView.fields.getByName(name);
-  if (!addedField) throw new Error(`Could not create a field [name = ${name}].`);
-
-  await dataViewsService.updateSavedObject(dataView);
-
   const field = dataView.fields.getByName(name);
   if (!field) throw new Error(`Could not create a field [name = ${name}].`);
+
+  await dataViewsService.updateSavedObject(dataView);
 
   return { dataView, field };
 };

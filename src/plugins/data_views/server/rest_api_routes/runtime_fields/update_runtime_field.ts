@@ -35,7 +35,7 @@ interface UpdateRuntimeFieldArgs {
   runtimeField: Partial<RuntimeField>;
 }
 
-const updateRuntimeField = async ({
+export const updateRuntimeField = async ({
   dataViewsService,
   usageCollection,
   counterName,

@@ -26,7 +26,7 @@ interface DeleteRuntimeFieldArgs {
   name: string;
 }
 
-const deleteRuntimeField = async ({
+export const deleteRuntimeField = async ({
   dataViewsService,
   usageCollection,
   counterName,

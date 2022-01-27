@@ -34,7 +34,7 @@ interface PutRuntimeFieldArgs {
   runtimeField: RuntimeField;
 }
 
-const putRuntimeField = async ({
+export const putRuntimeField = async ({
   dataViewsService,
   usageCollection,
   counterName,
