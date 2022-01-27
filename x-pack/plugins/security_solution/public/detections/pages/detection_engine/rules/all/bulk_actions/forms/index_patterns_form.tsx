@@ -75,14 +75,19 @@ const getFormConfig = (editAction: IndexPatternsEditActions) =>
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_TITLE,
       };
 
-interface Props {
+interface IndexPatternsFormProps {
   editAction: IndexPatternsEditActions;
   rulesCount: number;
   onClose: () => void;
   onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
 }
 
-const IndexPatternsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props) => {
+const IndexPatternsFormComponent = ({
+  editAction,
+  rulesCount,
+  onClose,
+  onConfirm,
+}: IndexPatternsFormProps) => {
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,

@@ -71,7 +71,7 @@ const getFormConfig = (editAction: TagsEditActions) =>
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE,
       };
 
-interface Props {
+interface TagsFormProps {
   editAction: TagsEditActions;
   rulesCount: number;
   onClose: () => void;
@@ -79,7 +79,7 @@ interface Props {
   tags: string[];
 }
 
-const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }: Props) => {
+const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }: TagsFormProps) => {
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,

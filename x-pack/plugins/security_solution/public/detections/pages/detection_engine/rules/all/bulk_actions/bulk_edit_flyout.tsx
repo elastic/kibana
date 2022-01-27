@@ -15,7 +15,7 @@ import {
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';
 
-interface Props {
+interface BulkEditFlyoutProps {
   onClose: () => void;
   onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
   editAction: BulkActionEditType;
@@ -23,7 +23,7 @@ interface Props {
   tags: string[];
 }
 
-const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: Props) => {
+const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: BulkEditFlyoutProps) => {
   switch (editAction) {
     case BulkActionEditType.add_index_patterns:
     case BulkActionEditType.delete_index_patterns:

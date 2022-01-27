@@ -33,10 +33,10 @@ interface AllRulesUtilityBarProps {
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
   paginationTotal: number;
-  showBulkActions: boolean;
+  hasBulkActions: boolean;
   hasPagination?: boolean;
   isBulkActionInProgress?: boolean;
-  disableActions?: boolean;
+  hasDisabledActions?: boolean;
 }
 
 export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
@@ -50,10 +50,10 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     onRefreshSwitch,
     onToggleSelectAll,
     paginationTotal,
-    showBulkActions = true,
+    hasBulkActions = true,
     hasPagination,
     isBulkActionInProgress,
-    disableActions,
+    hasDisabledActions,
   }) => {
     const handleGetBuIktemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -103,7 +103,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            {showBulkActions ? (
+            {hasBulkActions ? (
               <UtilityBarText dataTestSubj="showingRules">
                 {i18n.SHOWING_RULES(paginationTotal)}
               </UtilityBarText>
@@ -114,7 +114,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             )}
           </UtilityBarGroup>
 
-          {showBulkActions ? (
+          {hasBulkActions ? (
             <>
               <UtilityBarGroup data-test-subj="tableBulkActions">
                 <UtilityBarText dataTestSubj="selectedRules">
@@ -123,7 +123,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && onToggleSelectAll && hasPagination && (
                   <UtilityBarAction
-                    disabled={disableActions}
+                    disabled={hasDisabledActions}
                     dataTestSubj="selectAllRules"
                     iconType={isAllSelected ? 'cross' : 'pagesSelect'}
                     iconSide="left"
@@ -135,7 +135,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
 
                 {canBulkEdit && (
                   <UtilityBarAction
-                    disabled={disableActions}
+                    disabled={hasDisabledActions}
                     inProgress={isBulkActionInProgress}
                     dataTestSubj="bulkActions"
                     iconSide="right"
@@ -148,7 +148,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 <UtilityBarAction
-                  disabled={disableActions}
+                  disabled={hasDisabledActions}
                   dataTestSubj="refreshRulesAction"
                   iconSide="left"
                   iconType="refresh"
@@ -157,7 +157,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                   {i18n.REFRESH}
                 </UtilityBarAction>
                 <UtilityBarAction
-                  disabled={disableActions}
+                  disabled={hasDisabledActions}
                   dataTestSubj="refreshSettings"
                   iconSide="right"
                   iconType="arrowDown"

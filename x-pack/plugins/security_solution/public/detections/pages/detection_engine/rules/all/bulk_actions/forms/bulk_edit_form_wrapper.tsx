@@ -23,7 +23,7 @@ import { Form, FormHook } from '../../../../../../../shared_imports';
 
 import * as i18n from '../../../translations';
 
-interface Props {
+interface BulkEditFormWrapperProps {
   onClose: () => void;
   onSubmit: () => void;
   title: string;
@@ -31,7 +31,13 @@ interface Props {
   children: React.ReactNode;
 }
 
-const FormWrapperComponent: FC<Props> = ({ form, onClose, onSubmit, children, title }) => {
+const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
+  form,
+  onClose,
+  onSubmit,
+  children,
+  title,
+}) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'BulkEditForm',
   });
@@ -65,6 +71,6 @@ const FormWrapperComponent: FC<Props> = ({ form, onClose, onSubmit, children, ti
   );
 };
 
-export const BulkEditFormWrapper = React.memo(FormWrapperComponent);
+export const BulkEditFormWrapper = React.memo(BulkEditFormWrapperComponent);
 
 BulkEditFormWrapper.displayName = 'BulkEditFormWrapper';

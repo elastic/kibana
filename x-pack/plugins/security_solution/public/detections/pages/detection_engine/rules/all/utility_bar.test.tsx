@@ -29,7 +29,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -40,7 +40,7 @@ describe('AllRules', () => {
     );
   });
 
-  it('does not render total selected and bulk actions when "showBulkActions" is false', () => {
+  it('does not render total selected and bulk actions when "hasBulkActions" is false', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
@@ -51,7 +51,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions={false}
+          hasBulkActions={false}
         />
       </ThemeProvider>
     );
@@ -74,7 +74,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -93,7 +93,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -113,7 +113,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={jest.fn()}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );
@@ -135,7 +135,7 @@ describe('AllRules', () => {
           onGetBulkItemsPopoverContent={jest.fn()}
           isAutoRefreshOn={true}
           onRefreshSwitch={mockSwitch}
-          showBulkActions
+          hasBulkActions
         />
       </ThemeProvider>
     );

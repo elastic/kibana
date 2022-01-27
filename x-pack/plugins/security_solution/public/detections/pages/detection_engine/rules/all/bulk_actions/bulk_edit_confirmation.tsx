@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from '../../translations';
 
-interface Props {
+interface BulkEditConfirmationProps {
   customRulesCount: number;
   elasticRulesCount: number;
   onCancel: () => void;
@@ -22,10 +22,15 @@ const BulkEditConfirmationComponent = ({
   onConfirm,
   customRulesCount,
   elasticRulesCount,
-}: Props) => {
+}: BulkEditConfirmationProps) => {
+  useEffect(() => {
+    if (elasticRulesCount === 0) {
+      setTimeout(onConfirm, 0);
+    }
+  }, [elasticRulesCount, onConfirm]);
+
   // proceed straight to edit flyout if there is no Elastic rules
   if (elasticRulesCount === 0) {
-    setTimeout(onConfirm, 0);
     return null;
   }
 

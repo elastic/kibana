@@ -49,7 +49,7 @@ import {
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
-export const activateRule = (rulePosition: number) => {
+export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
 };
 
@@ -191,7 +191,7 @@ export const confirmRulesDelete = () => {
   cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
 };
 
-export const sortByActivatedRules = () => {
+export const sortByEnabledRules = () => {
   cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
   cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
 };

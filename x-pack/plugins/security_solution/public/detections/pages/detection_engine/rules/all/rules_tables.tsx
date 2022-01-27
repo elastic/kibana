@@ -386,8 +386,8 @@ export const RulesTables = React.memo<RulesTableProps>(
               isAllSelected={isAllSelected}
               onToggleSelectAll={toggleSelectAll}
               isBulkActionInProgress={isCustomRulesCountLoading || loadingRulesAction != null}
-              disableActions={loadingRulesAction != null}
-              showBulkActions
+              hasDisabledActions={loadingRulesAction != null}
+              hasBulkActions
             />
             <EuiBasicTable
               itemId="id"
