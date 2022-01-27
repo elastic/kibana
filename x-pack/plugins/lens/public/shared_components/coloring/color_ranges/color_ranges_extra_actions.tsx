@@ -40,12 +40,12 @@ export function ColorRangesExtraActions({
     dispatch({ type: 'reversePalette', payload: { dataBounds, palettes } });
   }, [dispatch, dataBounds, palettes]);
 
-  const onDistributeEqually = useCallback(() => {
+  const onDistributeValues = useCallback(() => {
     dispatch({ type: 'distributeEqually', payload: { dataBounds, palettes } });
   }, [dataBounds, dispatch, palettes]);
 
   return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={true}>
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={false}>
       <EuiFlexItem grow={false}>
         <TooltipWrapper
           tooltipContent={i18n.translate(
@@ -59,13 +59,13 @@ export function ColorRangesExtraActions({
           delay="regular"
         >
           <EuiButtonEmpty
-            data-test-subj={`lnsPalettePanel_dynamicColoring_addColorRange`}
+            data-test-subj={`lnsPalettePanel_dynamicColoring_addColor`}
             iconType="plusInCircle"
             color="primary"
             aria-label={i18n.translate(
-              'xpack.lens.dynamicColoring.customPalette.addColorRangeAriaLabel',
+              'xpack.lens.dynamicColoring.customPalette.addColorAriaLabel',
               {
-                defaultMessage: 'Add color range',
+                defaultMessage: 'Add color',
               }
             )}
             size="xs"
@@ -74,8 +74,8 @@ export function ColorRangesExtraActions({
             onClick={onAddColorRange}
           >
             <FormattedMessage
-              id="xpack.lens.dynamicColoring.customPalette.addColorRange"
-              defaultMessage="Add color range"
+              id="xpack.lens.dynamicColoring.customPalette.addColor"
+              defaultMessage="Add color"
             />
           </EuiButtonEmpty>
         </TooltipWrapper>
@@ -101,23 +101,23 @@ export function ColorRangesExtraActions({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj={`lnsPalettePanel_dynamicColoring_distributeEqually`}
+          data-test-subj={`lnsPalettePanel_dynamicColoring_distributeValues`}
           iconType={DistributeEquallyIcon}
           color="primary"
           aria-label={i18n.translate(
-            'xpack.lens.dynamicColoring.customPalette.distributeEquallyAriaLabel',
+            'xpack.lens.dynamicColoring.customPalette.distributeValuesAriaLabel',
             {
-              defaultMessage: 'Distribute equally',
+              defaultMessage: 'Distribute values',
             }
           )}
           size="xs"
           flush="left"
           disabled={shouldDisableDistribute}
-          onClick={onDistributeEqually}
+          onClick={onDistributeValues}
         >
           <FormattedMessage
-            id="xpack.lens.dynamicColoring.customPalette.distributeEqually"
-            defaultMessage="Distribute equally"
+            id="xpack.lens.dynamicColoring.customPalette.distributeValues"
+            defaultMessage="Distribute values"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

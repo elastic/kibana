@@ -14,18 +14,18 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ColorRangesContext } from './color_ranges_context';
 
 const extraActionSelectors = {
-  addColorRange: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColorRange"]',
+  addColor: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColor"]',
   reverseColors: '[data-test-subj^="lnsPalettePanel_dynamicColoring_reverseColors"]',
-  distributeEqually: '[data-test-subj="lnsPalettePanel_dynamicColoring_distributeEqually"]',
+  distributeValues: '[data-test-subj="lnsPalettePanel_dynamicColoring_distributeValues"]',
 };
 
 const pageObjects = {
   getAddColorRangeButton: (component: ReactWrapper) =>
-    component.find(extraActionSelectors.addColorRange).first(),
+    component.find(extraActionSelectors.addColor).first(),
   reverseColors: (component: ReactWrapper) =>
     component.find(extraActionSelectors.reverseColors).first(),
-  distributeEqually: (component: ReactWrapper) =>
-    component.find(extraActionSelectors.distributeEqually).first(),
+  distributeValues: (component: ReactWrapper) =>
+    component.find(extraActionSelectors.distributeValues).first(),
 };
 
 function renderColorRanges(props: ColorRangesProps) {
@@ -153,13 +153,13 @@ describe('Color Ranges', () => {
     const component = renderColorRanges(props);
 
     act(() => {
-      pageObjects.distributeEqually(component).simulate('click');
+      pageObjects.distributeValues(component).simulate('click');
     });
 
     component.update();
 
     expect(dispatch).toHaveBeenCalledWith({
-      type: 'distributeEqually',
+      type: 'distributeValues',
       payload: { dataBounds: { min: 0, max: 100 }, palettes: {} },
     });
   });
