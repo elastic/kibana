@@ -127,8 +127,12 @@ export function ColorRangeItem({
     (e: FocusEvent<HTMLDivElement>) => {
       const prevStartValue = colorRanges[index - 1]?.start ?? Number.NEGATIVE_INFINITY;
       const nextStartValue = colorRanges[index + 1]?.start ?? Number.POSITIVE_INFINITY;
+      const lastEndValue = colorRanges[colorRanges.length - 1]?.end ?? Number.POSITIVE_INFINITY;
 
-      const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
+      const shouldSort =
+        colorRange.start > nextStartValue ||
+        prevStartValue > colorRange.start ||
+        (!isLast && colorRange.start > lastEndValue);
       const isFocusStillInContent =
         (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
 

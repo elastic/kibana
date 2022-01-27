@@ -25,15 +25,20 @@ export const isLastItem = (accessor: ColorRangeAccessor) => accessor === 'end';
  * @internal
  */
 export const sortColorRanges = (colorRanges: ColorRange[]) => {
-  const maxValue = colorRanges[colorRanges.length - 1].end;
+  const lastRange = colorRanges[colorRanges.length - 1];
 
-  return [...colorRanges]
+  return [...colorRanges, { start: lastRange.end, color: lastRange.color }]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
-    .map((newColorRange, i, array) => ({
-      color: newColorRange.color,
-      start: newColorRange.start,
-      end: i !== array.length - 1 ? array[i + 1].start : maxValue,
-    }));
+    .reduce((sortedColorRange, newColorRange, i, array) => {
+      if (i !== array.length - 1) {
+        sortedColorRange.push({
+          color: newColorRange.color,
+          start: newColorRange.start,
+          end: array[i + 1].start,
+        });
+      }
+      return sortedColorRange;
+    }, [] as ColorRange[]);
 };
 
 /**
