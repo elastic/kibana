@@ -5,13 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiSplitPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiSplitPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
@@ -22,7 +16,7 @@ import { useStyles } from './styles';
 import { useFetchSessionViewProcessEvents } from './hooks';
 
 interface SessionViewDeps {
-  // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
+  // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
   height?: number;
   jumpToEvent?: ProcessEvent;
@@ -45,7 +39,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
   };
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults ] = useState<Process[] | null>(null);
+  const [searchResults, setSearchResults] = useState<Process[] | null>(null);
 
   const {
     data,
@@ -142,12 +136,12 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     <>
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="sessionViewProcessEventsSearch" css={{ position: 'relative' }}>
-          <SessionViewSearchBar 
+          <SessionViewSearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            setSelectedProcess={setSelectedProcess} 
-            searchResults={searchResults} 
-          />          
+            setSelectedProcess={setSelectedProcess}
+            searchResults={searchResults}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton

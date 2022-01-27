@@ -28,7 +28,7 @@ export const registerRecentSessionRoute = (router: IRouter) => {
         body: {
           query: {
             match: {
-              'process.entry.interactive': true,
+              'process.entry_leader.interactive': true,
             },
           },
           size: 1,

@@ -33,27 +33,37 @@ export interface ProcessEventResults {
   events: any[];
 }
 
+export interface Teletype {
+  descriptor: number;
+  type: string;
+  char_device: {
+    major: number;
+    minor: number;
+  };
+}
+
 export interface ProcessFields {
+  entity_id: string;
   args: string[];
   args_count: number;
-  entity_id: string;
+  command_line: string;
   executable: string;
-  interactive: boolean;
   name: string;
+  interactive: boolean;
   working_directory: string;
   pid: number;
-  pgid: number;
-  user: User;
   start: Date;
   end?: Date;
+  user: User;
   exit_code?: number;
+  tty: Teletype;
 }
 
 export interface ProcessSelf extends ProcessFields {
   parent: ProcessFields;
-  session: ProcessFields;
-  entry: ProcessFields;
-  last_user_entered?: ProcessFields;
+  session_leader: ProcessFields;
+  entry_leader: ProcessFields;
+  group_leader: ProcessFields;
 }
 
 export interface ProcessEventHost {
@@ -69,7 +79,6 @@ export interface ProcessEventHost {
     kernel: string;
     name: string;
     platform: string;
-    type: string;
     version: string;
   };
 }
