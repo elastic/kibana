@@ -24,7 +24,6 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   CoreSetup,
   CoreStart,
-  HttpFetchError,
   IHttpFetchError,
   ThemeServiceSetup,
   ToastsSetup,
