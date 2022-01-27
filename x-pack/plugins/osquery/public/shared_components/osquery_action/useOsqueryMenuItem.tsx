@@ -35,12 +35,14 @@ export const useOsqueryMenuItem = ({ agentId, onClick }: IProps) => {
     })();
   }, [agentId, http]);
 
+  if (!isAvailable) {
+    return <></>;
+  }
   return (
     <EuiContextMenuItem
       key="osquery-action-item"
       data-test-subj="osquery-action-item"
       onClick={onClick}
-      disabled={!isAvailable}
     >
       {ACTION_OSQUERY}
     </EuiContextMenuItem>

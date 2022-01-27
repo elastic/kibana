@@ -37,5 +37,5 @@ export const RETURN_TO_ALERT_DETAILS = i18n.translate(
 );
 
 export const RUN_OSQUERY = i18n.translate('xpack.securitySolution.endpoint.osquery.runOsquery', {
-  defaultMessage: 'RUN OSQUERY',
+  defaultMessage: 'Run Osquery',
 });
