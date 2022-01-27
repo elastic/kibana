@@ -20,12 +20,12 @@ import { OTHER_CATEGORY } from '../es_query_builder';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
 import type { GeoContainmentParams } from '../alert_type';
 
-const alertInstanceFactory =
+const alertFactory =
   (contextKeys: unknown[], testAlertActionArr: unknown[]) => (instanceId: string) => {
     const alertInstance = alertsMock.createAlertFactory<
       GeoContainmentInstanceState,
       GeoContainmentInstanceContext
-    >();
+    >.create();
     alertInstance.scheduleActions.mockImplementation(
       (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
         // Check subset of alert for comparison to expected results
@@ -253,7 +253,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -278,7 +278,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -317,7 +317,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -340,7 +340,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -373,7 +373,7 @@ describe('geo_containment', () => {
       getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -410,7 +410,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -442,7 +442,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory.create(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -514,7 +514,7 @@ describe('geo_containment', () => {
     const alertServicesWithSearchMock: AlertServicesMock = {
       ...alertsMock.createAlertServices(),
       // @ts-ignore
-      alertInstanceFactory: alertInstanceFactory(contextKeys, testAlertActionArr),
+      alertFactory: alertFactory.create(contextKeys, testAlertActionArr),
       scopedClusterClient: {
         asCurrentUser: {
           // @ts-ignore

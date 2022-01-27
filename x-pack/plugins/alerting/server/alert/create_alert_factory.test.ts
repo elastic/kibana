@@ -19,7 +19,7 @@ afterAll(() => clock.restore());
 
 test('creates new alerts for ones not passed in', () => {
   const alertFactory = createAlertFactory({});
-  const result = alertFactory('1');
+  const result = alertFactory.create('1');
   expect(result).toMatchInlineSnapshot(`
             Object {
               "meta": Object {},
@@ -36,7 +36,7 @@ test('reuses existing alerts', () => {
   const alertFactory = createAlertFactory({
     '1': alert,
   });
-  const result = alertFactory('1');
+  const result = alertFactory.create('1');
   expect(result).toMatchInlineSnapshot(`
     Object {
       "meta": Object {
@@ -55,7 +55,7 @@ test('reuses existing alerts', () => {
 test('mutates given alerts', () => {
   const alerts = {};
   const alertFactory = createAlertFactory(alerts);
-  alertFactory('1');
+  alertFactory.create('1');
   expect(alerts).toMatchInlineSnapshot(`
             Object {
               "1": Object {

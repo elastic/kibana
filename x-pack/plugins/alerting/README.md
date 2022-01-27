@@ -40,8 +40,6 @@ Table of Contents
 
 > References to `rule` and `rule type` entities are still named `AlertType` within the codebase.
 
-> References to `alert` and `alert factory` entities are still named `AlertInstance` and `alertInstanceFactory` within the codebase.
-
 **Rule Type**: A function that takes parameters and executes actions on alerts.
 
 **Rule**: A configuration that defines a schedule, a rule type w/ parameters, state information and actions.
@@ -113,7 +111,7 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |---|---|
 |services.scopedClusterClient|This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).|
-|services.alertInstanceFactory(id)|This [alert factory](#alert-factory) creates alerts and must be used in order to execute actions. The id you give to the alert factory is a unique identifier for the alert.|
+|services.alertFactory.create(id)|This [alert factory](#alert-factory) creates alerts and must be used in order to schedule action execution. The id you give to the alert factory create fn() is a unique identifier for the alert.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
 |services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|
@@ -310,7 +308,7 @@ const myRuleType: RuleType<
 			// scenario the provided server will be used. Also, this ID will be 
 			// used to make `getState()` return previous state, if any, on 
 			// matching identifiers.
-			const alert = services.alertInstanceFactory(server);
+			const alert = services.alertFactory.create(server);
 
 			// State from the last execution. This will exist if an alert was
 			// created and executed in the previous execution
@@ -731,13 +729,13 @@ Query:
 
 ## Alert Factory
 
-**alertInstanceFactory(id)**
+**alertFactory.create(id)**
 
-One service passed in to each rule type is the alert factory. This factory creates alerts and must be used in order to execute actions. The `id` you give to the alert factory is the unique identifier for the alert (e.g. the server identifier if the alert is about servers). The alert factory will use this identifier to retrieve the state of previous alerts with the same `id`. These alerts support persisting state between rule executions, but will clear out once the alert stops firing.
+One service passed in to each rule type is the alert factory. This factory creates alerts and must be used in order to schedule action execution. The `id` you give to the alert factory create fn() is the unique identifier for the alert (e.g. the server identifier if the alert is about servers). The alert factory will use this identifier to retrieve the state of previous alerts with the same `id`. These alerts support persisting state between rule executions, but will clear out once the alert stops firing.
 
 Note that the `id` only needs to be unique **within the scope of a specific rule**, not unique across all rules or rule types. For example, Rule 1 and Rule 2 can both create an alert with an `id` of `"a"` without conflicting with one another. But if Rule 1 creates 2 alerts, then they must be differentiated with `id`s of `"a"` and `"b"`.
 
-This factory returns an instance of `AlertInstance`. The `AlertInstance` class has the following methods. Note that we have removed the methods that you shouldn't touch.
+This factory returns an instance of `Alert`. The `Alert` class has the following methods. Note that we have removed the methods that you shouldn't touch.
 
 |Method|Description|
 |---|---|
@@ -781,7 +779,8 @@ The templating engine is [mustache]. General definition for the [mustache variab
 The following code would be within a rule type. As you can see `cpuUsage` will replace the state of the alert and `server` is the context for the alert to execute. The difference between the two is that `cpuUsage` will be accessible at the next execution.
 
 ```
-alertInstanceFactory('server_1')
+alertFactory
+  .create('server_1')
   .replaceState({
     cpuUsage: 80,
   })

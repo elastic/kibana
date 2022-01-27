@@ -113,10 +113,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
-  async executor({
-    services: { alertInstanceFactory, scopedClusterClient, savedObjectsClient },
-    state,
-  }) {
+  async executor({ services: { alertFactory, scopedClusterClient, savedObjectsClient }, state }) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
     const uptimeEsClient = createUptimeESClient({
@@ -156,7 +153,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
           'd'
         )
         .valueOf();
-      const alertInstance: TLSAlertInstance = alertInstanceFactory(TLS_LEGACY.id);
+      const alertInstance: TLSAlertInstance = alertFactory.create(TLS_LEGACY.id);
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
       alertInstance.replaceState({
         ...updateState(state, foundCerts),

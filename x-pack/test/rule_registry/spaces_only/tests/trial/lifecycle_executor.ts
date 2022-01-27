@@ -177,7 +177,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           producer: 'observability.test',
         },
         services: {
-          alertInstanceFactory: sinon.stub(),
+          alertFactory.create: sinon.stub(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
       } as unknown as RuleExecutorOptions<

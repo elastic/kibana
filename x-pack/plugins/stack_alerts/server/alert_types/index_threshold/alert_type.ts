@@ -134,7 +134,7 @@ export function getAlertType(
     options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId, name, services, params } = options;
-    const { alertInstanceFactory, search } = services;
+    const { alertFactory, search } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -208,7 +208,7 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = alertInstanceFactory(instanceId);
+      const alertInstance = alertFactory.create(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }

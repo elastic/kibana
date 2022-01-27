@@ -54,8 +54,8 @@ export const alwaysFiringAlertType: RuleType<
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {
-      services
-        .alertInstanceFactory(instance.id)
+      services.alertFactory
+        .create(instance.id)
         .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
         .scheduleActions('default');
     });

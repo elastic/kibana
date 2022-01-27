@@ -331,6 +331,8 @@ export class TaskRunner<
     const eventLogger = this.context.eventLogger;
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
+    const recoveryContext: Record<string, InstanceContext> = {};
+
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
       const ctx = {
@@ -348,11 +350,17 @@ export class TaskRunner<
           executionId: this.executionId,
           services: {
             ...services,
-            alertInstanceFactory: createAlertFactory<
+            alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >(alerts),
+            >({
+              alerts,
+              shouldProvideRecoveryUtils: ruleType.doesSetRecoveryContext ?? false,
+              originalAlertIds,
+              getRecoveredAlertIds,
+              recoveryContext,
+            }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
             search: createAbortableEsClientFactory({

@@ -32,7 +32,7 @@ describe('Transaction duration anomaly alert', () => {
         services.scopedClusterClient.asCurrentUser.search
       ).not.toHaveBeenCalled();
 
-      expect(services.alertInstanceFactory).not.toHaveBeenCalled();
+      expect(services.alertFactory.create).not.toHaveBeenCalled();
     });
 
     it('ml jobs are not available', async () => {
@@ -59,7 +59,7 @@ describe('Transaction duration anomaly alert', () => {
         services.scopedClusterClient.asCurrentUser.search
       ).not.toHaveBeenCalled();
 
-      expect(services.alertInstanceFactory).not.toHaveBeenCalled();
+      expect(services.alertFactory.create).not.toHaveBeenCalled();
     });
 
     it('anomaly is less than threshold', async () => {
@@ -110,7 +110,7 @@ describe('Transaction duration anomaly alert', () => {
       expect(
         services.scopedClusterClient.asCurrentUser.search
       ).not.toHaveBeenCalled();
-      expect(services.alertInstanceFactory).not.toHaveBeenCalled();
+      expect(services.alertFactory.create).not.toHaveBeenCalled();
     });
   });
 
@@ -183,9 +183,9 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(services.alertInstanceFactory).toHaveBeenCalledTimes(1);
+      expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
-      expect(services.alertInstanceFactory).toHaveBeenCalledWith(
+      expect(services.alertFactory.create).toHaveBeenCalledWith(
         'apm.transaction_duration_anomaly_foo_development_type-foo'
       );
 

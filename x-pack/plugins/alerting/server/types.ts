@@ -74,7 +74,15 @@ export interface AlertServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > extends Services {
-  alertInstanceFactory: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+  alertFactory: {
+    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+    done: () => {
+      recoveryUtils?: {
+        getRecoveredAlertIds: () => string[];
+        setRecoveryContext: (id: string, context: InstanceContext) => void;
+      };
+    };
+  };
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   search: IAbortableClusterClient;

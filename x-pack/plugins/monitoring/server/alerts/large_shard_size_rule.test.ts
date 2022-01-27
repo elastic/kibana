@@ -96,7 +96,7 @@ describe('LargeShardSizeRule', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
+        alertFactory.create: jest.fn().mockImplementation(() => {
           return {
             replaceState,
             scheduleActions,

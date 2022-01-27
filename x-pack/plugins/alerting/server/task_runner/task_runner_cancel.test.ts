@@ -356,7 +356,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -390,7 +390,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -424,7 +424,7 @@ describe('Task Runner Cancel', () => {
         AlertInstanceContext,
         string
       >) => {
-        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
     const taskRunner = new TaskRunner(
