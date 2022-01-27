@@ -56,7 +56,7 @@ export const useResetTransforms = () => {
       if (results.hasOwnProperty(transformId)) {
         const status = results[transformId];
 
-        // if we are only deleting one transform, show the success toast messages
+        // if we are only resetting one transform, show the success toast messages
         if (!isBulk && status.transformReset) {
           if (status.transformReset?.success) {
             toastNotifications.addSuccess(
