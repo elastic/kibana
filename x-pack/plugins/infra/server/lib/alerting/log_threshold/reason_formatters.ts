@@ -6,28 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import * as moment from 'moment';
-import momentDurationFormatSetup from 'moment-duration-format';
-momentDurationFormatSetup(moment);
-
 import {
   Comparator,
   ComparatorToi18nMap,
   TimeUnit,
 } from '../../../../common/alerting/logs/log_threshold/types';
 
-const getDuration = (timeSize: number, timeUnit: TimeUnit): string => {
-  switch (timeUnit) {
-    case 's':
-      return moment.duration(timeSize, 'seconds').format('s [sec]');
-    case 'm':
-      return moment.duration(timeSize, 'minutes').format('m [min]');
-    case 'h':
-      return moment.duration(timeSize, 'hours').format('h [hr]');
-    case 'd':
-      return moment.duration(timeSize, 'days').format('d [day]');
-  }
-};
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../../observability/common';
 
 export const getReasonMessageForUngroupedCountAlert = (
   actualCount: number,
@@ -43,7 +28,7 @@ export const getReasonMessageForUngroupedCountAlert = (
       actualCount,
       expectedCount,
       translatedComparator: ComparatorToi18nMap[comparator],
-      duration: getDuration(timeSize, timeUnit),
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
 
@@ -63,7 +48,7 @@ export const getReasonMessageForGroupedCountAlert = (
       expectedCount,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
-      duration: getDuration(timeSize, timeUnit),
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
 
@@ -81,7 +66,7 @@ export const getReasonMessageForUngroupedRatioAlert = (
       actualRatio,
       expectedRatio,
       translatedComparator: ComparatorToi18nMap[comparator],
-      duration: getDuration(timeSize, timeUnit),
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
 
@@ -101,6 +86,6 @@ export const getReasonMessageForGroupedRatioAlert = (
       expectedRatio,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
-      duration: getDuration(timeSize, timeUnit),
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
