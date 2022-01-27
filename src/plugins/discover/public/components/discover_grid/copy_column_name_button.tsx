@@ -7,29 +7,30 @@
  */
 
 import React from 'react';
-import { EuiListGroupItemProps } from '@elastic/eui';
+import { EuiCopy, EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function buildCopyColumnNameButton(columnName: string) {
+  let copy: () => void;
   const copyToClipBoardButton: EuiListGroupItemProps = {
     size: 'xs',
     label: (
-      <FormattedMessage
-        id="discover.grid.copyToClipBoardButton"
-        defaultMessage="Copy to clipboard"
-      />
+      <EuiCopy textToCopy={columnName}>
+        {(copyCallback) => (
+          <span ref={() => (copy = copyCallback)}>
+            <FormattedMessage
+              id="discover.grid.copyToClipBoardButton"
+              defaultMessage="Copy to clipboard"
+            />
+          </span>
+        )}
+      </EuiCopy>
     ),
     iconType: 'copyClipboard',
     iconProps: {
       size: 'm',
     },
-    onClick: async () => {
-      if (window.navigator?.clipboard) {
-        await window.navigator.clipboard.writeText(columnName);
-        return;
-      }
-      throw new Error('Could not copy to clipboard!');
-    },
+    onClick: () => copy(),
   };
 
   return copyToClipBoardButton;
