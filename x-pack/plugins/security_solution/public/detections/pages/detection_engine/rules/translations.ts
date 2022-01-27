@@ -242,6 +242,13 @@ export const BULK_EDIT_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
     }
   );
 
+export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastNotifyButtonLabel',
+  {
+    defaultMessage: `Notify me when it's completed`,
+  }
+);
+
 export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
   {

@@ -7,11 +7,18 @@
 /* eslint-disable complexity */
 
 import React, { useCallback } from 'react';
-import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import {
+  EuiTextColor,
+  EuiContextMenuPanelDescriptor,
+  EuiFlexGroup,
+  EuiButton,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
 import type { Toast } from '../../../../../../../../../../src/core/public';
+import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
 import {
   BulkAction,
   BulkActionEditType,
@@ -225,7 +232,7 @@ export const useBulkActions = ({
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
-        let longEditWarningToast: Toast;
+        let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
         try {
           // disabling auto-refresh so user's selected rules won't disappear after table refresh
@@ -253,25 +260,38 @@ export const useBulkActions = ({
             throw Error('Bulk edit payload is empty');
           }
 
+          const hideWarningToast = () => {
+            if (longTimeWarningToast) {
+              toastsApi.remove(longTimeWarningToast);
+            }
+          };
+
           // show warning toast only if bulk edit action exceeds 5s
           // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
           setTimeout(() => {
             if (isBulkEditFinished) {
               return;
             }
-            longEditWarningToast = toastsApi.addWarning(
+            longTimeWarningToast = toastsApi.addWarning(
               {
                 title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
-                text: i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount),
+                text: mountReactNode(
+                  <>
+                    <p>{i18n.BULK_EDIT_WARNING_TOAST_DESCRIPTION(customRulesCount)}</p>
+                    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiButton color="warning" size="s" onClick={hideWarningToast}>
+                          {i18n.BULK_EDIT_WARNING_TOAST_NOTIFY}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                ),
+                iconType: undefined,
               },
               { toastLifeTimeMs: 10 * 60 * 1000 }
             );
           }, 5 * 1000);
-          const hideWarningToast = () => {
-            if (longEditWarningToast) {
-              toastsApi.remove(longEditWarningToast);
-            }
-          };
 
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
@@ -285,6 +305,7 @@ export const useBulkActions = ({
               toastsApi.addSuccess({
                 title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
                 text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(customRulesCount),
+                iconType: undefined,
               });
             },
             onError: (error: HTTPError) => {
