@@ -59,8 +59,8 @@ const BulkEditConfirmationComponent = ({
     >
       <FormattedMessage
         id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDescription"
-        defaultMessage="You are about to edit {elasticRulesCount, plural, =1 {# Elastic rule} other {# Elastic rules}}, the update action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you’ve selected."
-        values={{ elasticRulesCount, customRulesCount }}
+        defaultMessage="The update action will only be applied to {customRulesCount, plural, =1 {# Custom rule} other {# Custom rules}} you’ve selected."
+        values={{ customRulesCount }}
       />
     </EuiConfirmModal>
   );

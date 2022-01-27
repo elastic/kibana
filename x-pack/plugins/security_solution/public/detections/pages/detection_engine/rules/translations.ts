@@ -228,7 +228,7 @@ export const BULK_EDIT_SUCCESS_TOAST_DESCRIPTION = (rulesCount: number) =>
 export const BULK_EDIT_WARNING_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle',
   {
-    defaultMessage: 'Rule updates is still work in progress',
+    defaultMessage: 'Rule updates are currently in progress',
   }
 );
 
@@ -238,26 +238,23 @@ export const BULK_EDIT_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        '{rulesCount, plural, =1 {# rule update is} other {# rules update are}} in progress.',
+        '{rulesCount, plural, =1 {# rule update is} other {# rules update are}} updating.',
     }
   );
 
-export const BULK_EDIT_ERROR_TOAST_TITLE = (rulesCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
-    {
-      values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update',
-    }
-  );
+export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
+  {
+    defaultMessage: 'Rule updates failed',
+  }
+);
 
 export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
     {
       values: { rulesCount },
-      defaultMessage:
-        'There {rulesCount, plural, =1 {is # rule is} other {are # rules are}} failed to update the actions you’ve applied.',
+      defaultMessage: '{rulesCount, plural, =1 {is # rule} other {are # rules}} failed to update.',
     }
   );
 
@@ -299,11 +296,19 @@ export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
+export const BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addIndexPatternsComboboxHelpText',
   {
     defaultMessage:
       'Select default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText',
+  {
+    defaultMessage:
+      'Delete default index patterns of Elasticsearch indices from the dropdown. You can add custom index patterns and hit Enter to begin a new one.',
   }
 );
 

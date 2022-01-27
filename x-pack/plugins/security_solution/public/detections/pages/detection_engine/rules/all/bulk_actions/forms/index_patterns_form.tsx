@@ -46,7 +46,6 @@ const schema: FormSchema<IndexPatternsFormData> = {
   index: {
     fieldsToValidateOnChange: ['index'],
     type: FIELD_TYPES.COMBO_BOX,
-    helpText: i18n.BULK_EDIT_FLYOUT_FORM_INDEX_PATTERNS_HELP_TEXT,
     validations: [
       {
         validator: fieldValidators.emptyField(
@@ -67,10 +66,12 @@ const getFormConfig = (editAction: IndexPatternsEditActions) =>
   editAction === BulkActionEditType.add_index_patterns
     ? {
         indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_LABEL,
+        indexHelpText: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_HELP_TEXT,
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_ADD_INDEX_PATTERNS_TITLE,
       }
     : {
         indexLabel: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_LABEL,
+        indexHelpText: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_HELP_TEXT,
         formTitle: i18n.BULK_EDIT_FLYOUT_FORM_DELETE_INDEX_PATTERNS_TITLE,
       };
 
@@ -87,7 +88,7 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onClose, onConfirm
     schema,
   });
 
-  const formConfig = getFormConfig(editAction);
+  const { indexHelpText, indexLabel, formTitle } = getFormConfig(editAction);
 
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
   const { uiSettings } = useKibana().services;
@@ -108,15 +109,10 @@ const IndexPatternsFormComponent = ({ editAction, rulesCount, onClose, onConfirm
   };
 
   return (
-    <BulkEditFormWrapper
-      form={form}
-      onClose={onClose}
-      onSubmit={handleSubmit}
-      title={formConfig.formTitle}
-    >
+    <BulkEditFormWrapper form={form} onClose={onClose} onSubmit={handleSubmit} title={formTitle}>
       <CommonUseField
         path="index"
-        config={{ ...schema.index, label: formConfig.indexLabel }}
+        config={{ ...schema.index, label: indexLabel, helpText: indexHelpText }}
         componentProps={{
           idAria: 'detectionEngineBulkEditIndexPatterns',
           'data-test-subj': 'detectionEngineBulkEditIndexPatterns',

@@ -301,7 +301,7 @@ export const useBulkActions = ({
                 try {
                   error.stack = JSON.stringify(error.body, null, 2);
                   toastsApi.addError(error, {
-                    title: i18n.BULK_EDIT_ERROR_TOAST_TITLE(failedRulesCount),
+                    title: i18n.BULK_EDIT_ERROR_TOAST_TITLE,
                     toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCIRPTION(failedRulesCount),
                   });
                 } catch (e) {
