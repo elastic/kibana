@@ -92,8 +92,8 @@ function startOsqueryCypress(context: FtrProviderContext, cypressCommand: string
           // eslint-disable-next-line @typescript-eslint/naming-convention
           CYPRESS_configport: config.get('servers.kibana.port'),
           CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-          CYPRESS_ELASTICSEARCH_USERNAME: 'system_indices_superuser',
-          CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+          CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.kibana.username'),
+          CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.kibana.password'),
           CYPRESS_KIBANA_URL: Url.format({
             protocol: config.get('servers.kibana.protocol'),
             hostname: config.get('servers.kibana.hostname'),
