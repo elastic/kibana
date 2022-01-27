@@ -34,7 +34,7 @@ export function getEql({
     getStartDependencies: async () => {
       const [core, , { search, indexPatterns }] = await getStartServices();
       return {
-        uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
+        uiSettingsClient: core.uiSettings as unknown as UiSettingsCommon,
         search: search.search,
         dataViews: indexPatterns,
       };

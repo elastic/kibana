@@ -63,21 +63,17 @@ export type EqlRawResponseExpressionTypeDefinition = ExpressionTypeDefinition<
   EqlRawResponse
 >;
 
-const flatten = (obj: Record<string, unknown>) => {
-  const _flatten = (o: Record<string, unknown>, path: string[] = []): unknown[] => {
-    return Object.keys(o)
-      .map((k: string) => {
-        if (typeof o[k] === 'object' && o[k] !== null && !Array.isArray(o[k])) {
-          return _flatten(o[k] as Record<string, unknown>, [...path, k]);
-        } else {
-          const key = [...path, k].join('.');
-          return { [key]: o[k] };
-        }
-      })
-      .flat();
-  };
+const flatten = (o: Record<string, unknown>, path: string[] = []): unknown[] => {
+  return Object.keys(o)
+    .map((k: string) => {
+      if (typeof o[k] === 'object' && o[k] !== null && !Array.isArray(o[k])) {
+        return flatten(o[k] as Record<string, unknown>, [...path, k]);
+      }
 
-  return Object.assign({}, ..._flatten(obj));
+      const key = [...path, k].join('.');
+      return { [key]: o[k] };
+    })
+    .flat();
 };
 
 const parseEventDocs = (events: Array<BaseHit<unknown>>, joinKeys?: unknown[]) => {
