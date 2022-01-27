@@ -24,12 +24,11 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
-  FieldRequestConfig,
   JOB_FIELD_TYPES,
-  JobFieldType,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
-} from '../../../../common';
+} from '../../../../common/constants';
+import type { FieldRequestConfig, JobFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
@@ -57,7 +56,7 @@ export const useDataVisualizerGridData = (
   const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
-  const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
+  const searchSessionId = input.sessionId;
 
   const {
     currentSavedSearch,
@@ -117,13 +116,6 @@ export const useDataVisualizerGridData = (
     }),
     lastRefresh,
   ]);
-
-  useEffect(() => {
-    const currentSearchSessionId = data.search?.session?.getSessionId();
-    if (currentSearchSessionId !== undefined) {
-      setSearchSessionId(currentSearchSessionId);
-    }
-  }, [data]);
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({

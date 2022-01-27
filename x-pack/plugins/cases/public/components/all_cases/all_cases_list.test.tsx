@@ -47,6 +47,9 @@ jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../app/use_available_owners', () => ({
+  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+}));
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -778,6 +781,36 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(doRefresh).toHaveBeenCalled();
+  });
+
+  it('shows Solution column if there are no set owners', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders owner={[]}>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeTruthy();
+    });
+  });
+
+  it('hides Solution column if there is a set owner', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeFalsy();
+    });
   });
 
   it('should deselect cases when refreshing', async () => {

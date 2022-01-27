@@ -238,7 +238,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const getUxDataHelper = async () => {
       const { fetchUxOverviewDate, hasRumData } = await import(
-        './components/app/RumDashboard/ux_overview_fetchers'
+        './components/app/rum_dashboard/ux_overview_fetchers'
       );
       const { createCallApmApi } = await import(
         './services/rest/createCallApmApi'

@@ -138,6 +138,14 @@ export type {
   ElasticsearchConfigPreboot,
   ElasticsearchErrorDetails,
   PollEsNodesVersionOptions,
+  UnauthorizedErrorHandlerOptions,
+  UnauthorizedErrorHandlerResultRetryParams,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
+  UnauthorizedErrorHandlerResult,
+  UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandler,
+  UnauthorizedError,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
@@ -363,6 +371,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectsValidationMap,
+  SavedObjectsValidationSpec,
 } from './saved_objects';
 
 export type {

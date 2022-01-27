@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
+import { chunk, intersection } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getHttp } from '../kibana_services';
-import {
+import { MB } from '../../common/constants';
+import type {
   ImportDoc,
   ImportFailure,
   ImportResponse,
   Mappings,
   Settings,
   IngestPipeline,
-  MB,
-} from '../../common';
+} from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
+import { isPopulatedObject } from '../../common/utils';
 
 const CHUNK_SIZE = 5000;
+const REDUCED_CHUNK_SIZE = 100;
 export const MAX_CHUNK_CHAR_COUNT = 1000000;
 export const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
 
 export abstract class Importer implements IImporter {
   protected _docArray: ImportDoc[] = [];
+  private _chunkSize = CHUNK_SIZE;
 
   public read(data: ArrayBuffer) {
     const decoder = new TextDecoder();
@@ -66,6 +69,12 @@ export abstract class Importer implements IImporter {
   ) {
     updatePipelineTimezone(pipeline);
 
+    if (pipelineContainsSpecialProcessors(pipeline)) {
+      // pipeline contains processors which we know are slow
+      // so reduce the chunk size significantly to avoid timeouts
+      this._chunkSize = REDUCED_CHUNK_SIZE;
+    }
+
     // if no pipeline has been supplied,
     // send an empty object
     const ingestPipeline =
@@ -101,7 +110,7 @@ export abstract class Importer implements IImporter {
       };
     }
 
-    const chunks = createDocumentChunks(this._docArray);
+    const chunks = createDocumentChunks(this._docArray, this._chunkSize);
 
     const ingestPipeline = {
       id: pipelineId,
@@ -153,11 +162,11 @@ export abstract class Importer implements IImporter {
         console.error(resp);
         success = false;
         error = resp.error;
-        populateFailures(resp, failures, i);
+        populateFailures(resp, failures, i, this._chunkSize);
         break;
       }
 
-      populateFailures(resp, failures, i);
+      populateFailures(resp, failures, i, this._chunkSize);
     }
 
     const result: ImportResults = {
@@ -176,13 +185,18 @@ export abstract class Importer implements IImporter {
   }
 }
 
-function populateFailures(error: ImportResponse, failures: ImportFailure[], chunkCount: number) {
+function populateFailures(
+  error: ImportResponse,
+  failures: ImportFailure[],
+  chunkCount: number,
+  chunkSize: number
+) {
   if (error.failures && error.failures.length) {
     // update the item value to include the chunk count
     // e.g. item 3 in chunk 2 is actually item 20003
     for (let f = 0; f < error.failures.length; f++) {
       const failure = error.failures[f];
-      failure.item = failure.item + CHUNK_SIZE * chunkCount;
+      failure.item = failure.item + chunkSize * chunkCount;
     }
     failures.push(...error.failures);
   }
@@ -207,10 +221,10 @@ function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
   }
 }
 
-function createDocumentChunks(docArray: ImportDoc[]) {
+function createDocumentChunks(docArray: ImportDoc[], chunkSize: number) {
   const chunks: ImportDoc[][] = [];
-  // chop docArray into 5000 doc chunks
-  const tempChunks = chunk(docArray, CHUNK_SIZE);
+  // chop docArray into chunks
+  const tempChunks = chunk(docArray, chunkSize);
 
   // loop over tempChunks and check that the total character length
   // for each chunk is within the MAX_CHUNK_CHAR_COUNT.
@@ -234,6 +248,24 @@ function createDocumentChunks(docArray: ImportDoc[]) {
     }
   }
   return chunks;
+}
+
+function pipelineContainsSpecialProcessors(pipeline: IngestPipeline) {
+  const findKeys = (obj: object) => {
+    // return all nested keys in the pipeline
+    const keys: string[] = [];
+    Object.entries(obj).forEach(([key, val]) => {
+      keys.push(key);
+      if (isPopulatedObject(val)) {
+        keys.push(...findKeys(val));
+      }
+    });
+    return keys;
+  };
+  const keys = findKeys(pipeline);
+
+  const specialProcessors = ['inference', 'enrich'];
+  return intersection(specialProcessors, keys).length !== 0;
 }
 
 export function callImportRoute({

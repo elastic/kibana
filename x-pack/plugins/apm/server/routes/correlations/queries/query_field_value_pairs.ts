@@ -39,12 +39,21 @@ export const getTermsAggRequest = (
   },
 });
 
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{
+    key: string;
+    key_as_string?: string;
+  }>;
+}
+
 const fetchTransactionDurationFieldTerms = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
   fieldName: string
 ): Promise<FieldValuePair[]> => {
-  const resp = await esClient.search(getTermsAggRequest(params, fieldName));
+  const resp = await esClient.search<unknown, { attribute_terms: Aggs }>(
+    getTermsAggRequest(params, fieldName)
+  );
 
   if (resp.body.aggregations === undefined) {
     throw new Error(
@@ -52,13 +61,7 @@ const fetchTransactionDurationFieldTerms = async (
     );
   }
 
-  const buckets = (
-    resp.body.aggregations
-      .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
-      key: string;
-      key_as_string?: string;
-    }>
-  )?.buckets;
+  const buckets = resp.body.aggregations.attribute_terms?.buckets;
   if (buckets?.length >= 1) {
     return buckets.map((d) => ({
       fieldName,

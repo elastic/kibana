@@ -15,9 +15,10 @@ import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/p
 import { SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';
 
-export const parseRelativeDate = (date: string, options = {}) => {
+export const parseRelativeDate = (date: string, options = {}): Moment | void => {
   return DateMath.parse(date, options)!;
 };
+
 export function DateRangePicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const { firstSeries, setSeries, reportType } = useSeriesStorage();
   const dateFormat = useUiSetting<string>('dateFormat');

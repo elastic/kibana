@@ -22,6 +22,7 @@ export type {
   AgentClient,
   ESIndexPatternService,
   PackageService,
+  PackageClient,
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
@@ -95,6 +96,7 @@ export const config: PluginConfigDescriptor = {
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
+      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
     }),
   }),
 };

@@ -85,6 +85,20 @@ export const getTransactionDurationCorrelationRequest = (
   };
 };
 
+interface LatencyRange extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: unknown[];
+}
+interface Correlation extends estypes.AggregationsRateAggregate {
+  value: number;
+}
+interface Aggs {
+  latency_ranges: LatencyRange;
+  transaction_duration_correlation: Correlation;
+  ks_test: {
+    less: number | null;
+  };
+}
+
 export const fetchTransactionDurationCorrelation = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
@@ -98,7 +112,7 @@ export const fetchTransactionDurationCorrelation = async (
   correlation: number | null;
   ksTest: number | null;
 }> => {
-  const resp = await esClient.search<ResponseHit>(
+  const resp = await esClient.search<ResponseHit, Aggs>(
     getTransactionDurationCorrelationRequest(
       params,
       expectations,
@@ -116,15 +130,8 @@ export const fetchTransactionDurationCorrelation = async (
   }
 
   const result = {
-    ranges: (
-      resp.body.aggregations
-        .latency_ranges as estypes.AggregationsMultiBucketAggregate
-    ).buckets,
-    correlation: (
-      resp.body.aggregations
-        .transaction_duration_correlation as estypes.AggregationsValueAggregate
-    ).value,
-    // @ts-ignore
+    ranges: resp.body.aggregations.latency_ranges.buckets,
+    correlation: resp.body.aggregations.transaction_duration_correlation.value,
     ksTest: resp.body.aggregations.ks_test.less,
   };
   return result;

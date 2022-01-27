@@ -6,9 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OBSERVABILITY_OWNER } from '../../../common/constants';
 
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useAvailableCasesOwners } from './use_available_owners';
 

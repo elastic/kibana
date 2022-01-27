@@ -70,6 +70,13 @@ describe('UrlFormat', () => {
         '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;">'
       );
+
+      const url2 = new UrlFormat({ type: 'img', width: '123not a number' });
+
+      expect(url2.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:123px; max-height:none;">'
+      );
     });
 
     test('only accepts valid numbers for height', () => {
@@ -78,6 +85,13 @@ describe('UrlFormat', () => {
       expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
         '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;">'
+      );
+
+      const url2 = new UrlFormat({ type: 'img', height: '123not a number' });
+
+      expect(url2.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
+          'style="width:auto; height:auto; max-width:none; max-height:123px;">'
       );
     });
   });

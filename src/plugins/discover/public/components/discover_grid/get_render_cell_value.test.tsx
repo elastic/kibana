@@ -35,7 +35,6 @@ const rowsSource: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: { bytes: 100, extension: '.gz' },
     highlight: {
@@ -48,7 +47,6 @@ const rowsFields: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { bytes: [100], extension: ['.gz'] },
@@ -62,7 +60,6 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { 'object.value': [100], extension: ['.gz'] },
@@ -91,6 +88,50 @@ describe('Discover grid cell rendering', function () {
         rowIndex={0}
         columnId="bytes"
         isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+  });
+
+  it('renders bytes column correctly using _source when details is true', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsSource,
+      rowsSource.map(flatten),
+      false,
+      [],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="bytes"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+  });
+
+  it('renders bytes column correctly using fields when details is true', () => {
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFields,
+      rowsFields.map(flatten),
+      false,
+      [],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="bytes"
+        isDetails={true}
         isExpanded={false}
         isExpandable={true}
         setCellProps={jest.fn()}
@@ -202,7 +243,6 @@ describe('Discover grid cell rendering', function () {
               "bytes": 100,
               "extension": ".gz",
             },
-            "_type": "test",
             "highlight": Object {
               "extension": Array [
                 "@kibana-highlighted-field.gz@/kibana-highlighted-field",
@@ -397,7 +437,6 @@ describe('Discover grid cell rendering', function () {
             "_index": "test",
             "_score": 1,
             "_source": undefined,
-            "_type": "test",
             "fields": Object {
               "bytes": Array [
                 100,
@@ -519,13 +558,16 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <span>
-        {
-        "object.value": [
-          100
-        ]
-      }
-      </span>
+      <JsonCodeEditor
+        json={
+          Object {
+            "object.value": Array [
+              100,
+            ],
+          }
+        }
+        width={370}
+      />
     `);
   });
 
@@ -604,5 +646,72 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
+  });
+
+  it('renders unmapped fields correctly', () => {
+    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const rowsFieldsUnmapped: ElasticSearchHit[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { unmapped: ['.gz'] },
+        highlight: {
+          extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
+        },
+      },
+    ];
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rowsFieldsUnmapped,
+      rowsFieldsUnmapped.map(flatten),
+      true,
+      ['unmapped'],
+      100
+    );
+    const component = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="unmapped"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
+          }
+        }
+      />
+    `);
+
+    const componentWithDetails = shallow(
+      <DiscoverGridCellValue
+        rowIndex={0}
+        columnId="unmapped"
+        isDetails={true}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithDetails).toMatchInlineSnapshot(`
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
+          }
+        }
+      />
+    `);
   });
 });

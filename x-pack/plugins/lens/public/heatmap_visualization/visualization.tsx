@@ -29,7 +29,7 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
-import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
+import { CUSTOM_PALETTE } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
@@ -205,10 +205,7 @@ export const getHeatmapVisualization = ({
                   ? {
                       columnId: state.valueAccessor,
                       triggerIcon: 'colorBy',
-                      palette: getStopsForFixedMode(
-                        displayStops,
-                        activePalette?.params?.colorStops
-                      ),
+                      palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
@@ -317,6 +314,11 @@ export const getHeatmapVisualization = ({
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
+            lastRangeIsRightOpen: [
+              state.palette?.params?.continuity
+                ? ['above', 'all'].includes(state.palette.params.continuity)
+                : true,
+            ],
             palette: state.palette?.params
               ? [
                   paletteService
@@ -356,18 +358,10 @@ export const getHeatmapVisualization = ({
                       strokeColor: state.gridConfig.strokeColor
                         ? [state.gridConfig.strokeColor]
                         : [],
-                      cellHeight: state.gridConfig.cellHeight ? [state.gridConfig.cellHeight] : [],
-                      cellWidth: state.gridConfig.cellWidth ? [state.gridConfig.cellWidth] : [],
                       // cells
                       isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
                       // Y-axis
                       isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
-                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
-                        ? [state.gridConfig.yAxisLabelWidth]
-                        : [],
-                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
-                        ? [state.gridConfig.yAxisLabelColor]
-                        : [],
                       // X-axis
                       isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
                         ? [state.gridConfig.isXAxisLabelVisible]

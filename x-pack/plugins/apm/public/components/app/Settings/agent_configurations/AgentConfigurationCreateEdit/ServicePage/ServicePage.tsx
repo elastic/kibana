@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './FormRowSelect';
-import { APMLink } from '../../../../../shared/Links/apm/APMLink';
+import { APMLink } from '../../../../../shared/links/apm/apm_link';
 
 interface Props {
   newConfig: AgentConfigurationIntake;
@@ -28,8 +28,7 @@ interface Props {
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const { data: serviceNamesData, status: serviceNamesStatus } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /api/apm/settings/agent-configuration/services',
+      return callApmApi('GET /api/apm/settings/agent-configuration/services', {
         isCachable: true,
       });
     },
@@ -41,12 +40,14 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const { data: environmentsData, status: environmentsStatus } = useFetcher(
     (callApmApi) => {
       if (newConfig.service.name) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/settings/agent-configuration/environments',
-          params: {
-            query: { serviceName: omitAllOption(newConfig.service.name) },
-          },
-        });
+        return callApmApi(
+          'GET /api/apm/settings/agent-configuration/environments',
+          {
+            params: {
+              query: { serviceName: omitAllOption(newConfig.service.name) },
+            },
+          }
+        );
       }
     },
     [newConfig.service.name],
@@ -63,10 +64,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         return;
       }
 
-      const { agentName } = await callApmApi({
-        endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
-        params: { query: { serviceName } },
-      });
+      const { agentName } = await callApmApi(
+        'GET /api/apm/settings/agent-configuration/agent_name',
+        {
+          params: { query: { serviceName } },
+        }
+      );
 
       setNewConfig((prev) => ({ ...prev, agent_name: agentName }));
     },

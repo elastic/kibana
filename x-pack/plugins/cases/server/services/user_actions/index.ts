@@ -11,11 +11,13 @@ import {
   Logger,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsClientContract,
   SavedObjectsFindResponse,
-  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KueryNode } from '@kbn/es-query';
 import {
   isConnectorUserAction,
   isPushedUserAction,
@@ -50,9 +52,10 @@ import {
   SUB_CASE_REF_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
-import { isTwoArraysDifference } from '../../client/utils';
+import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client/utils';
 import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
+import { defaultSortField } from '../../common/utils';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -378,6 +381,137 @@ export class CaseUserActionService {
       throw error;
     }
   }
+
+  public async findStatusChanges({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    caseId: string;
+    filter?: KueryNode;
+  }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
+    try {
+      this.log.debug('Attempting to find status changes');
+
+      const updateActionFilter = buildFilter({
+        filters: Actions.update,
+        field: 'action',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const statusChangeFilter = buildFilter({
+        filters: ActionTypes.status,
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
+
+      const finder =
+        unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+          {
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: defaultSortField,
+            sortOrder: 'asc',
+            filter: combinedFilters,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
+      for await (const findResults of finder.find()) {
+        userActions = userActions.concat(
+          findResults.saved_objects.map((so) => transformToExternalModel(so))
+        );
+      }
+
+      return userActions;
+    } catch (error) {
+      this.log.error(`Error finding status changes: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getUniqueConnectors({
+    caseId,
+    filter,
+    unsecuredSavedObjectsClient,
+  }: {
+    caseId: string;
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    filter?: KueryNode;
+  }): Promise<Array<{ id: string }>> {
+    try {
+      this.log.debug(`Attempting to count connectors for case id ${caseId}`);
+      const connectorsFilter = buildFilter({
+        filters: [ActionTypes.connector, ActionTypes.create_case],
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([connectorsFilter, filter]);
+
+      const response = await unsecuredSavedObjectsClient.find<
+        CaseUserActionAttributesWithoutConnectorId,
+        { references: { connectors: { ids: { buckets: Array<{ key: string }> } } } }
+      >({
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCountConnectorsAggs(),
+        filter: combinedFilter,
+      });
+
+      return (
+        response.aggregations?.references?.connectors?.ids?.buckets?.map(({ key }) => ({
+          id: key,
+        })) ?? []
+      );
+    } catch (error) {
+      this.log.error(`Error while counting connectors for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  private buildCountConnectorsAggs(
+    /**
+     * It is high unlikely for a user to have more than
+     * 100 connectors attached to a case
+     */
+    size: number = 100
+  ): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      references: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          connectors: {
+            filter: {
+              term: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
+              },
+            },
+            aggregations: {
+              ids: {
+                terms: {
+                  field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+                  size,
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
 }
 
 export function transformFindResponseToExternalModel(
@@ -393,8 +527,8 @@ export function transformFindResponseToExternalModel(
 }
 
 function transformToExternalModel(
-  userAction: SavedObjectsFindResult<CaseUserActionAttributesWithoutConnectorId>
-): SavedObjectsFindResult<CaseUserActionResponse> {
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
+): SavedObject<CaseUserActionResponse> {
   const { references } = userAction;
 
   const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
@@ -417,7 +551,7 @@ function transformToExternalModel(
 }
 
 const addReferenceIdToPayload = (
-  userAction: SavedObjectsFindResult<CaseUserActionAttributes>
+  userAction: SavedObject<CaseUserActionAttributes>
 ): CaseUserActionAttributes['payload'] => {
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
@@ -444,7 +578,7 @@ const addReferenceIdToPayload = (
 };
 
 function getConnectorIdFromReferences(
-  userAction: SavedObjectsFindResult<CaseUserActionAttributes>
+  userAction: SavedObject<CaseUserActionAttributes>
 ): string | null {
   const { references } = userAction;
 
