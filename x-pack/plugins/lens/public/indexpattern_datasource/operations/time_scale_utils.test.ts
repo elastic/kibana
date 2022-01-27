@@ -99,7 +99,7 @@ describe('time scale utils', () => {
   describe('adjustTimeScaleOnOtherColumnChange', () => {
     const baseColumn: GenericIndexPatternColumn = {
       operationType: 'count',
-      sourceField: 'Records',
+      sourceField: '___records___',
       label: 'Count of records per second',
       dataType: 'number',
       isBucketed: false,

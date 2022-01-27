@@ -265,7 +265,7 @@ describe('formula', () => {
           previousColumn: {
             ...layer.columns.col1,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             filter: {
               language: 'lucene',
               query: `*`,

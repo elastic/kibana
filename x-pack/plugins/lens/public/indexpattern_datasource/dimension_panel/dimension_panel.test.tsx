@@ -481,7 +481,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             dataType: 'number',
             isBucketed: false,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
       />
@@ -991,7 +991,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
-      expect(newColumnState.sourceField).toEqual('Records');
+      expect(newColumnState.sourceField).toEqual('___records___');
     });
 
     it('should indicate document and field compatibility with selected document operation', () => {
@@ -1004,7 +1004,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               isBucketed: false,
               label: '',
               operationType: 'count',
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
           })}
           columnId="col2"
@@ -1090,7 +1090,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1320,7 +1320,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1337,7 +1337,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
@@ -1524,7 +1524,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
           } as GenericIndexPatternColumn,
         }),
@@ -1871,7 +1871,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: '',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
         columnId={'col2'}
