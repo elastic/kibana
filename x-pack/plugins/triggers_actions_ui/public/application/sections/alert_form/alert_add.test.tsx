@@ -47,11 +47,6 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const delay = (wait: number = 1000) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, wait);
-  });
-
 export const TestExpression: FunctionComponent<any> = () => {
   return (
     <EuiFormLabel>
@@ -178,7 +173,6 @@ describe('alert_add', () => {
   it('renders alert add flyout', async () => {
     const onClose = jest.fn();
     await setup({}, onClose);
-    await delay(1000);
 
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
@@ -207,8 +201,6 @@ describe('alert_add', () => {
       },
       onClose
     );
-
-    await delay(1000);
 
     expect(wrapper.find('input#alertName').props().value).toBe('Simple status alert');
 
@@ -248,7 +240,6 @@ describe('alert_add', () => {
 
   it('should enforce any default inteval', async () => {
     await setup({ alertTypeId: 'my-alert-type' }, jest.fn(), '3h');
-    await delay(1000);
 
     // Wait for handlers to fire
     await act(async () => {
