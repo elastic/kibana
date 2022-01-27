@@ -108,7 +108,7 @@ export class SearchInterceptor {
     });
 
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
-    //this.bFetchDisabled = deps.uiSettings.get(UI);
+    // this.bFetchDisabled = deps.uiSettings.get(UI);
 
     this.uiSettingsSub = deps.uiSettings
       .get$(UI_SETTINGS.SEARCH_TIMEOUT)
