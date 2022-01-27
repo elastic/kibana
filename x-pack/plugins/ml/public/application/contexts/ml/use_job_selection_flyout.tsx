@@ -24,9 +24,14 @@ export function useJobSelectionFlyout() {
 
   return useCallback(
     (
-      config: { singleSelection?: boolean; withTimeRangeSelector?: boolean } = {
+      config: {
+        singleSelection?: boolean;
+        withTimeRangeSelector?: boolean;
+        timeseriesOnly?: boolean;
+      } = {
         singleSelection: false,
         withTimeRangeSelector: true,
+        timeseriesOnly: false,
       }
     ): Promise<JobSelectionResult> => {
       const { uiSettings } = services;
@@ -47,7 +52,7 @@ export function useJobSelectionFlyout() {
                 withTimeRangeSelector={config.withTimeRangeSelector}
                 dateFormatTz={dateFormatTz}
                 singleSelection={!!config.singleSelection}
-                timeseriesOnly={false}
+                timeseriesOnly={!!config.timeseriesOnly}
                 onFlyoutClose={() => {
                   reject();
                   flyoutSession.close();

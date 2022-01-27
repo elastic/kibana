@@ -101,7 +101,7 @@ export function validateJobSelection(
     // no jobs were loaded from the URL.
     // Ask the user to select one.
 
-    getJobSelection({ singleSelection: true })
+    getJobSelection({ singleSelection: true, timeseriesOnly: true })
       .then(({ jobIds, time }) => {
         setGlobalState({
           ...{ ml: { jobIds } },
