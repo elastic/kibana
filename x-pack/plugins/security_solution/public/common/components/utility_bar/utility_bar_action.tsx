@@ -14,9 +14,9 @@ import { BarAction } from './styles';
 
 const LoadingButtonEmpty = styled(EuiButtonEmpty)`
   ${({ theme }) => css`
-    &&& {
+    &.euiButtonEmpty.euiButtonEmpty--xSmall {
       height: ${theme.eui.euiSize};
-      .euiButtonContent {
+      .euiButtonEmpty__content {
         padding: 0;
       }
     }
