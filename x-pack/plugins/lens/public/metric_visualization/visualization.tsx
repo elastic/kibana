@@ -19,7 +19,7 @@ import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricConfig, MetricState } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, getStopsForFixedMode, shiftPalette } from '../shared_components';
+import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 
 const toExpression = (
@@ -146,11 +146,7 @@ export const getMetricVisualization = ({
                 {
                   columnId: props.state.accessor,
                   triggerIcon: hasColoring ? 'colorBy' : undefined,
-                  palette: hasColoring
-                    ? props.state.palette?.params?.name === CUSTOM_PALETTE
-                      ? getStopsForFixedMode(stops, props.state.palette?.params.colorStops)
-                      : stops.map(({ color }) => color)
-                    : undefined,
+                  palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
             : [],
