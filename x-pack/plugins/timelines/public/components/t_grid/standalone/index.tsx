@@ -197,20 +197,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     [indexPatternsLoading, combinedQueries, start, end]
   );
 
-  const fields = useMemo(() => {
-    const fieldsToQuery = [
-      ...columnsHeader.reduce<string[]>(
-        (acc, c) => (c.linkField != null ? [...acc, c.id, c.linkField] : [...acc, c.id]),
-        []
-      ),
-      ...(queryFields ?? []),
-    ];
-    if (!fieldsToQuery.includes('*')) {
-      fieldsToQuery.push('*');
-    }
-    return fieldsToQuery;
-  }, [columnsHeader, queryFields]);
-
   const sortField = useMemo(
     () =>
       sortStore.map(({ columnId, columnType, sortDirection }) => ({
@@ -228,7 +214,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     docValueFields: [],
     entityType,
     excludeEcsData: true,
-    fields,
+    fields: ['*'],
     filterQuery: combinedQueries?.filterQuery,
     id: STANDALONE_ID,
     indexNames,
