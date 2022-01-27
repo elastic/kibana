@@ -40,6 +40,7 @@ export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const portalNode = useMemo(() => createPortalNode(), []);
     const {
+      theme,
       http: {
         basePath: { prepend },
       },
@@ -58,7 +59,7 @@ export const GlobalHeader = React.memo(
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
-        const mount = toMountPoint(<OutPortal node={portalNode} />);
+        const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$: theme.theme$ });
         return mount(element);
       });
 
@@ -66,7 +67,7 @@ export const GlobalHeader = React.memo(
         portalNode.unmount();
         setHeaderActionMenu(undefined);
       };
-    }, [portalNode, setHeaderActionMenu]);
+    }, [portalNode, setHeaderActionMenu, theme.theme$]);
 
     return (
       <InPortal node={portalNode}>

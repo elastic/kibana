@@ -8,11 +8,15 @@
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { isErrorWithReason } from './error_with_reason';
 
-export function isAlertSavedObjectNotFoundError(err: Error, alertId: string) {
+export function isAlertSavedObjectNotFoundError(err: Error, ruleId: string) {
   // if this is an error with a reason, the actual error needs to be extracted
   const actualError = isErrorWithReason(err) ? err.error : err;
 
-  return (
-    SavedObjectsErrorHelpers.isNotFoundError(actualError) && `${actualError}`.includes(alertId)
-  );
+  return SavedObjectsErrorHelpers.isNotFoundError(actualError) && `${actualError}`.includes(ruleId);
+}
+
+export function isEsUnavailableError(err: Error, ruleId: string) {
+  // if this is an error with a reason, the actual error needs to be extracted
+  const actualError = isErrorWithReason(err) ? err.error : err;
+  return SavedObjectsErrorHelpers.isEsUnavailableError(actualError);
 }

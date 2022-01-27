@@ -42,7 +42,7 @@ import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
-import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
+import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
@@ -52,6 +52,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   WithoutReservedActionGroups,
+  parseDuration,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -62,6 +63,7 @@ import {
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
+const CONNECTIVITY_RETRY_INTERVAL = '5m';
 const MONITORING_HISTORY_LIMIT = 200;
 
 // 1,000,000 nanoseconds in 1 millisecond
@@ -773,7 +775,18 @@ export class TaskRunner<
           );
           throwUnrecoverableError(error);
         }
-        return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
+
+        let retryInterval = taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL;
+
+        // Set retry interval smaller for ES connectivity errors
+        if (isEsUnavailableError(error, ruleId)) {
+          retryInterval =
+            parseDuration(retryInterval) > parseDuration(CONNECTIVITY_RETRY_INTERVAL)
+              ? CONNECTIVITY_RETRY_INTERVAL
+              : retryInterval;
+        }
+
+        return { interval: retryInterval };
       }),
       monitoring: ruleMonitoring,
     };
