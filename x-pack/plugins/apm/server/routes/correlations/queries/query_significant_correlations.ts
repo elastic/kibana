@@ -77,7 +77,7 @@ export const fetchSignificantCorrelations = async (
     )
   );
 
-  let fallbackResult: LatencyCorrelation | null = null;
+  let fallbackResult: LatencyCorrelation | undefined;
   const latencyCorrelations: LatencyCorrelation[] = [];
 
   fulfilled.forEach((d: LatencyCorrelation | undefined) => {
@@ -85,7 +85,7 @@ export const fetchSignificantCorrelations = async (
     if (Array.isArray(d.histogram)) {
       latencyCorrelations.push(d);
     } else {
-      if (fallbackResult === null) {
+      if (!fallbackResult) {
         fallbackResult = d;
       } else {
         if (

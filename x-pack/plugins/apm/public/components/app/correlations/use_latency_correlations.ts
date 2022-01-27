@@ -199,8 +199,8 @@ export function useLatencyCorrelations() {
           responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
         } else {
-          // Rank the fallback results
-
+          // If there's no correlation results that matches the criteria
+          // Consider the fallback results
           if (significantCorrelations.fallbackResult) {
             fallbackResults.push(significantCorrelations.fallbackResult);
           }
@@ -220,14 +220,12 @@ export function useLatencyCorrelations() {
         }
       }
 
-      const sortedFallbackResults = fallbackResults.sort(
-        (a, b) => b.correlation - a.correlation
-      );
+      if (latencyCorrelations.length === 0 && fallbackResults.length > 0) {
+        // Rank the fallback results and show at least one value
+        const sortedFallbackResults = fallbackResults.sort(
+          (a, b) => b.correlation - a.correlation
+        );
 
-      if (
-        latencyCorrelations.length === 0 &&
-        sortedFallbackResults.length > 0
-      ) {
         responseUpdate.latencyCorrelations = sortedFallbackResults.slice(0, 1);
 
         setResponse({

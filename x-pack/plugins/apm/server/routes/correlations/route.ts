@@ -250,9 +250,7 @@ const significantCorrelationsRoute = createApmServerRoute({
     >;
     ccsWarning: boolean;
     totalDocCount: number;
-    fallbackResult?: Array<
-      import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation
-    >;
+    fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
