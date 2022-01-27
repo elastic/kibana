@@ -71,35 +71,6 @@ describe('getSharingData', () => {
     `);
   });
 
-  test('getSearchSource adds fields to the searchSource when columns are selected', async () => {
-    const index = { ...indexPatternMock } as DataView;
-    index.timeFieldName = 'cool-timefield';
-    const searchSourceMock = createSearchSourceMock({ index });
-    const { getSearchSource } = await getSharingData(
-      searchSourceMock,
-      {
-        columns: [
-          'cool-field-1',
-          'cool-field-2',
-          'cool-field-3',
-          'cool-field-4',
-          'cool-field-5',
-          'cool-field-6',
-        ],
-      },
-      services
-    );
-    expect(getSearchSource().fields).toStrictEqual([
-      'cool-timefield',
-      'cool-field-1',
-      'cool-field-2',
-      'cool-field-3',
-      'cool-field-4',
-      'cool-field-5',
-      'cool-field-6',
-    ]);
-  });
-
   test('getSearchSource does not add fields to the searchSource', async () => {
     const index = { ...indexPatternMock } as DataView;
     index.timeFieldName = 'cool-timefield';
@@ -154,6 +125,35 @@ describe('getSharingData', () => {
         ],
       }
     `);
+  });
+
+  test('getSearchSource does add fields to the searchSource when columns are selected', async () => {
+    const index = { ...indexPatternMock } as DataView;
+    index.timeFieldName = 'cool-timefield';
+    const searchSourceMock = createSearchSourceMock({ index });
+    const { getSearchSource } = await getSharingData(
+      searchSourceMock,
+      {
+        columns: [
+          'cool-field-1',
+          'cool-field-2',
+          'cool-field-3',
+          'cool-field-4',
+          'cool-field-5',
+          'cool-field-6',
+        ],
+      },
+      services
+    );
+    expect(getSearchSource().fields).toStrictEqual([
+      'cool-timefield',
+      'cool-field-1',
+      'cool-field-2',
+      'cool-field-3',
+      'cool-field-4',
+      'cool-field-5',
+      'cool-field-6',
+    ]);
   });
 
   test('fields have prepended timeField', async () => {
