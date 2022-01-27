@@ -60,10 +60,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
     };
 
-    it('should return 400 for import of endpoint exceptions', async () => {
-      expect(true).to.be(false);
-    });
-
     describe('and accessing trusted apps', () => {
       const exceptionsGenerator = new ExceptionsListItemGenerator();
       let trustedAppData: ArtifactTestData;
