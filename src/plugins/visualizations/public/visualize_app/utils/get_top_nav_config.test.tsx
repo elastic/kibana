@@ -278,7 +278,7 @@ describe('getTopNavConfig', () => {
         stateContainer,
         visualizationIdFromUrl: undefined,
         stateTransfer: createEmbeddableStateTransferMock(),
-        editInLensOptions: {
+        editInLensConfig: {
           layers: {
             '0': {
               indexPatternId: 'test-id',
