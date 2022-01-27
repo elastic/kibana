@@ -98,6 +98,7 @@ export function ServiceProfilingTimeline({
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
+              yAccessors={['y']}
               stackAccessors={['x']}
             />
           ))}
