@@ -46,6 +46,13 @@ var IGNORE_WARNINGS = [
     //  We need to discard that warning
     name: 'ProductNotSupportedSecurityError',
   },
+  {
+    // emitted whenever a header not supported by http2 is set.
+    // it's not actionale for the end user.
+    name: 'UnsupportedWarning',
+    // message:
+    //   'header is not valid, the value will be dropped from the header and will never be in use.',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
