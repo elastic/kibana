@@ -9,8 +9,6 @@ import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
-// @ts-expect-error
-import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import type { ImportFailure } from '../../../../common/types';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
@@ -55,40 +53,40 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
       results.bytesRead = batch.bytesUsed - prevTotalBytesRead;
     }
 
-    const rawFeatures: unknown[] = this._prevBatchLastFeature ? [this._prevBatchLastFeature] : [];
+    const features: unknown[] = this._prevBatchLastFeature ? [this._prevBatchLastFeature] : [];
     this._prevBatchLastFeature = undefined;
     const isLastBatch = batch.batchType === 'root-object-batch-complete';
     if (isLastBatch) {
       // Handle single feature geoJson
       if (featureIndex === 0) {
-        rawFeatures.push(batch.container);
+        features.push(batch.container);
       }
     } else {
-      rawFeatures.push(...batch.data);
+      features.push(...batch.data);
     }
 
-    for (let i = 0; i < rawFeatures.length; i++) {
-      const rawFeature = rawFeatures[i] as Feature;
-      if (!isLastBatch && i === rawFeatures.length - 1) {
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i] as Feature;
+      if (!isLastBatch && i === features.length - 1) {
         // Do not process last feature until next batch is read, features on batch boundary may be incomplete.
-        this._prevBatchLastFeature = rawFeature;
+        this._prevBatchLastFeature = feature;
         continue;
       }
 
       featureIndex++;
-      if (!rawFeature.geometry || !rawFeature.geometry.type) {
+      if (!feature.geometry || !feature.geometry.type) {
         results.invalidFeatures.push({
           item: featureIndex,
           reason: i18n.translate('xpack.fileUpload.geojsonImporter.noGeometry', {
             defaultMessage: 'Feature does not contain required field "geometry"',
           }),
-          doc: rawFeature,
+          doc: feature,
         });
       } else {
-        if (!results.geometryTypesMap.has(rawFeature.geometry.type)) {
-          results.geometryTypesMap.set(rawFeature.geometry.type, true);
+        if (!results.geometryTypesMap.has(feature.geometry.type)) {
+          results.geometryTypesMap.set(feature.geometry.type, true);
         }
-        results.features.push(geoJsonCleanAndValidate(rawFeature));
+        results.features.push(feature);
       }
     }
 

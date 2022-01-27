@@ -14,6 +14,8 @@ import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
+// @ts-expect-error
+import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 
 const BLOCK_SIZE_MB = 5 * MB;
 
@@ -260,7 +262,12 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       const results = await this._readNext(this._totalFeaturesRead, this._totalBytesRead);
       this._hasNext = results.hasNext;
       this._blockSizeInBytes = this._blockSizeInBytes + results.bytesRead;
-      this._features = [...this._features, ...results.features];
+      this._features = [
+        ...this._features,
+        ...results.features.map((feature) => {
+          return geoJsonCleanAndValidate(feature);
+        }),
+      ];
       results.geometryTypesMap.forEach((value, key) => {
         this._geometryTypesMap.set(key, value);
       });
