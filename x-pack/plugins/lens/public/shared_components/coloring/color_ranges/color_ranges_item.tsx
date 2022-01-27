@@ -88,7 +88,7 @@ const getAppend = (
 ) => {
   const items: EuiFieldNumberProps['append'] = [];
 
-  if (rangeType === 'percent') {
+  if (rangeType === 'percent' && mode !== 'auto') {
     items.push('%');
   }
 
