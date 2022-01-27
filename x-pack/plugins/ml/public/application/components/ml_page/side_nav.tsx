@@ -272,15 +272,17 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
       const onClickCallback = onClick ?? (pathId ? redirectToTab.bind(null, pathId) : undefined);
 
+      const isSelected =
+        `/${pathId}` === activeRoute?.path ||
+        (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`));
+
       return {
         id,
         name,
-        isSelected:
-          `/${pathId}` === activeRoute?.path ||
-          (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`)),
+        isSelected,
         disabled,
         ...(onClickCallback ? { onClick: onClickCallback } : {}),
-        'data-test-subj': testSubj + (id === activeRouteId ? ' selected' : ''),
+        'data-test-subj': testSubj + (isSelected ? ' selected' : ''),
         items: items ? items.map(getTabItem) : undefined,
         forceOpen: true,
       };
