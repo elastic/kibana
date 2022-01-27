@@ -411,13 +411,22 @@ export function DashboardTopNav({
     [applyAdditionalStyle, dispatchDashboardStateChange]
   );
 
+  const onSkinClear = useCallback(() => {
+    dispatchDashboardStateChange(setCurrentSkin(undefined));
+  }, [dispatchDashboardStateChange]);
+
   const runSkins = useCallback(
     (anchorElement?: any) => {
-      openSkinsMenuPopover(anchorElement, (name) => {
-        onSkinSelected(name);
-      });
+      openSkinsMenuPopover(
+        anchorElement,
+        dashboardAppState.getLatestDashboardState().skin,
+        (name) => {
+          onSkinSelected(name);
+        },
+        onSkinClear
+      );
     },
-    [onSkinSelected]
+    [onSkinSelected, onSkinClear, dashboardAppState]
   );
 
   const runClone = useCallback(() => {

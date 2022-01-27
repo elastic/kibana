@@ -15,12 +15,14 @@ let isOpen = false;
 
 export interface SkinsMenuProps {
   onClose: () => void;
+  onClear: () => void;
   onSelected: (name: string) => void;
   button: HTMLElement;
+  currentlySelected: string;
 }
 
 export const SkinsMenu = (props: SkinsMenuProps) => {
-  const { onSelected, button } = props;
+  const { onSelected, button, onClear, currentlySelected } = props;
 
   const panels = [
     {
@@ -28,7 +30,7 @@ export const SkinsMenu = (props: SkinsMenuProps) => {
       items: [
         {
           name: 'Matrix',
-          icon: 'apps',
+          icon: currentlySelected === 'matrix' ? 'check' : 'layers',
           onClick: () => {
             onSelected('matrix');
             props.onClose();
@@ -36,9 +38,21 @@ export const SkinsMenu = (props: SkinsMenuProps) => {
         },
         {
           name: 'Purple Haze',
-          icon: 'apps',
+          icon: currentlySelected === 'purple-haze' ? 'check' : 'layers',
           onClick: () => {
             onSelected('purple-haze');
+            props.onClose();
+          },
+        },
+        {
+          isSeparator: true,
+          key: 'sep',
+        },
+        {
+          name: 'Clear',
+          icon: 'trash',
+          onClick: () => {
+            onClear();
             props.onClose();
           },
         },
@@ -49,7 +63,7 @@ export const SkinsMenu = (props: SkinsMenuProps) => {
     <EuiWrappingPopover ownFocus button={button} closePopover={props.onClose} isOpen>
       <EuiContextMenu
         initialPanelId={0}
-        panels={panels}
+        panels={panels} // @ts-ignore
         data-test-subj="dashboardSkinsContextMenu"
       />
     </EuiWrappingPopover>
@@ -64,7 +78,9 @@ function onClose() {
 
 export function openSkinsMenuPopover(
   anchorElement: HTMLElement,
-  onSelected: (name: string) => void
+  currentlySelected: string,
+  onSelected: (name: string) => void,
+  onClear: () => void
 ) {
   if (isOpen) {
     onClose();
@@ -74,6 +90,14 @@ export function openSkinsMenuPopover(
   isOpen = true;
   document.body.appendChild(container);
 
-  const element = <SkinsMenu onClose={onClose} button={anchorElement} onSelected={onSelected} />;
+  const element = (
+    <SkinsMenu
+      onClose={onClose}
+      button={anchorElement}
+      onSelected={onSelected}
+      onClear={onClear}
+      currentlySelected={currentlySelected}
+    />
+  );
   ReactDOM.render(element, container);
 }
