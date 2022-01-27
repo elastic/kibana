@@ -30,7 +30,7 @@ export function registerTraceEventsTopNThreadsRoute(router: IRouter<DataRequestH
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/threads_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: src } });
+      return response.ok({ body: src });
     }
   );
 }

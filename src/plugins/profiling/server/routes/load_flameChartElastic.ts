@@ -31,7 +31,7 @@ export function registerFlameChartElasticRoute(router: IRouter<DataRequestHandle
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/flamechart_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: mapFlamechart(src) } });
+      return response.ok({ body: mapFlamechart(src) });
     }
   );
 }

@@ -30,7 +30,7 @@ export function registerTraceEventsTopNDeploymentsRoute(router: IRouter<DataRequ
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/pods_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: src } });
+      return response.ok({ body: src });
     }
   );
 }

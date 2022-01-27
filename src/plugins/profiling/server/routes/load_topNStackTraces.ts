@@ -45,7 +45,7 @@ export function registerTraceEventsTopNStackTracesRoute(router: IRouter<DataRequ
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/traces_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: transformFlamechart(src) } });
+      return response.ok({ body: transformFlamechart(src) });
     }
   );
 }
