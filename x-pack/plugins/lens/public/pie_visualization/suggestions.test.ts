@@ -8,7 +8,14 @@
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../types';
-import { CategoryDisplay, PieChartTypes, PieLayerState, PieVisualizationState } from '../../common';
+import {
+  CategoryDisplay,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieLayerState,
+  PieVisualizationState,
+} from '../../common';
 import { layerTypes } from '../../common';
 
 describe('suggestions', () => {
@@ -60,9 +67,9 @@ describe('suggestions', () => {
                 layerType: layerTypes.DATA,
                 groups: [],
                 metric: 'a',
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -551,9 +558,9 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
-                legendDisplay: 'show',
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,
@@ -575,7 +582,7 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: 'show',
                 percentDecimals: 0,
@@ -609,9 +616,9 @@ describe('suggestions', () => {
                 groups: [],
                 metric: 'a',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -658,9 +665,9 @@ describe('suggestions', () => {
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'e',
-                numberDisplay: 'value',
+                numberDisplay: NumberDisplay.VALUE,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -707,9 +714,9 @@ describe('suggestions', () => {
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'e',
-                numberDisplay: 'percent',
+                numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -745,9 +752,9 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
-                legendDisplay: 'show',
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,
@@ -768,7 +775,7 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT, // This is changed
                 legendDisplay: 'show',
                 percentDecimals: 0,
@@ -802,9 +809,9 @@ describe('suggestions', () => {
                 groups: [],
                 metric: 'a',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -844,9 +851,9 @@ describe('suggestions', () => {
                 groups: ['a', 'b'],
                 metric: 'c',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
-                legendDisplay: 'show',
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,
@@ -879,9 +886,9 @@ describe('suggestions', () => {
                 groups: [],
                 metric: 'a',
 
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -916,9 +923,9 @@ describe('suggestions', () => {
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'c',
-                numberDisplay: 'hidden',
+                numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
-                legendDisplay: 'show',
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,

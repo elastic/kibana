@@ -19,7 +19,7 @@ import type {
   VisualizationDimensionGroupConfig,
 } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { CategoryDisplay, layerTypes } from '../../common';
+import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
@@ -31,9 +31,9 @@ function newLayerState(layerId: string): PieLayerState {
     layerId,
     groups: [],
     metric: undefined,
-    numberDisplay: 'percent',
+    numberDisplay: NumberDisplay.PERCENT,
     categoryDisplay: CategoryDisplay.DEFAULT,
-    legendDisplay: 'default',
+    legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
     layerType: layerTypes.DATA,
   };

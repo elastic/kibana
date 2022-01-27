@@ -6,12 +6,26 @@
  */
 
 import type { Ast } from '@kbn/interpreter';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { Position } from '@elastic/charts';
+
+import type { PaletteOutput, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+} from '../../../../../src/plugins/expressions/public';
 import type { Operation, DatasourcePublicAPI } from '../types';
-import { DEFAULT_PERCENT_DECIMALS, EMPTY_SIZE_RATIOS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
-import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../common';
+import {
+  CategoryDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieLayerState,
+  PieVisualizationState,
+  EmptySizeRatios,
+} from '../../common';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+import { DEFAULT_PALETTE_NAME } from '../shared_components';
 
 interface Attributes {
   isPreview: boolean;
@@ -42,17 +56,70 @@ type GenerateExpressionAstArguments = (
   paletteService: PaletteRegistry
 ) => Ast['chain'][number]['arguments'];
 
-export function toExpression(
+type GenerateLabelsAstArguments = (
   state: PieVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  attributes: Attributes,
+  layer: PieLayerState
+) => [Ast];
+
+const prepareDimension = (accessor: string) => {
+  const visdimension = buildExpressionFunction('visdimension', { accessor });
+  return buildExpression([visdimension]).toAst();
+};
+
+const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attributes, layer) => {
+  const show = [!attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE];
+  const position = layer.categoryDisplay !== CategoryDisplay.HIDE ? [layer.categoryDisplay] : [];
+  const values = [layer.numberDisplay !== NumberDisplay.HIDDEN];
+  const valuesFormat = layer.numberDisplay !== NumberDisplay.HIDDEN ? [layer.numberDisplay] : [];
+  const percentDecimals = [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS];
+
+  return [
+    {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'partitionLabels',
+          arguments: { show, position, values, valuesFormat, percentDecimals },
+        },
+      ],
+    },
+  ];
+};
+
+const generateWaffleLabelsAstArguments: GenerateLabelsAstArguments = (...args) => {
+  const [labelsExpr] = generateCommonLabelsAstArgs(...args);
+  const [labels] = labelsExpr.chain;
+  return [
+    {
+      ...labelsExpr,
+      chain: [{ ...labels, percentDecimals: DEFAULT_PERCENT_DECIMALS }],
+    },
+  ];
+};
+
+const generatePaletteAstArguments = (
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
-) {
-  return expressionHelper(state, datasourceLayers, paletteService, {
-    ...attributes,
-    isPreview: false,
-  });
-}
+  palette?: PaletteOutput
+): [Ast] =>
+  palette
+    ? [
+        {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'theme',
+              arguments: {
+                variable: ['palette'],
+                default: [paletteService.get(palette.name).toExpression(palette.params)],
+              },
+            },
+          ],
+        },
+      ]
+    : [paletteService.get('default').toExpression()];
 
 const generateCommonArguments: GenerateExpressionAstArguments = (
   state,
@@ -62,59 +129,17 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   datasourceLayers,
   paletteService
 ) => ({
-  labels: [
-    {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'partitionLabels',
-          arguments: {
-            show: [attributes.isPreview],
-            position: [layer.categoryDisplay],
-          },
-        },
-      ],
-    },
-  ],
-  groups: operations.map((o) => o.columnId),
-  metric: layer.metric ? [layer.metric] : [],
-  numberDisplay: [layer.numberDisplay],
+  labels: generateCommonLabelsAstArgs(state, attributes, layer),
+  buckets: operations.map((o) => o.columnId).map(prepareDimension),
+  metric: layer.metric ? [prepareDimension(layer.metric)] : [],
   legendDisplay: [layer.legendDisplay],
-  legendPosition: [layer.legendPosition || 'right'],
-  emptySizeRatio: [layer.emptySizeRatio ?? EMPTY_SIZE_RATIOS.SMALL],
-  showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
-  percentDecimals: [
-    state.shape === 'waffle'
-      ? DEFAULT_PERCENT_DECIMALS
-      : layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS,
-  ],
-  legendMaxLines: [layer.legendMaxLines ?? 1],
+  legendPosition: [layer.legendPosition || Position.Right],
+  maxLegendLines: [layer.legendMaxLines ?? 1],
+  nestedLegend: [!!layer.nestedLegend],
   truncateLegend: [
     layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
   ],
-  nestedLegend: [!!layer.nestedLegend],
-  ...(state.palette
-    ? {
-        palette: [
-          {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'theme',
-                arguments: {
-                  variable: ['palette'],
-                  default: [
-                    paletteService.get(state.palette.name).toExpression(state.palette.params),
-                  ],
-                },
-              },
-            ],
-          },
-        ],
-      }
-    : {}),
+  palette: generatePaletteAstArguments(paletteService, state.palette),
 });
 
 const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
@@ -123,32 +148,51 @@ const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
     {
       type: 'function',
       function: 'pieVis',
-      arguments: generateCommonArguments(...rest),
+      arguments: {
+        ...generateCommonArguments(...rest),
+        respectSourceOrder: [false],
+        startFromSecondLargestSlice: [true],
+      },
     },
   ],
 });
 
-const generateDonutVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'pieVis',
-      arguments: generateCommonArguments(...rest),
-    },
-  ],
-});
+const generateDonutVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const [, , , layer] = rest;
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'pieVis',
+        arguments: {
+          ...generateCommonArguments(...rest),
+          respectSourceOrder: [false],
+          isDonut: [true],
+          startFromSecondLargestSlice: [true],
+          emptySizeRatio: [layer.emptySizeRatio ?? EmptySizeRatios.SMALL],
+        },
+      },
+    ],
+  };
+};
 
-const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'treemapVis',
-      arguments: generateCommonArguments(...rest),
-    },
-  ],
-});
+const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const [, , , layer] = rest;
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'treemapVis',
+        arguments: {
+          ...generateCommonArguments(...rest),
+          nestedLegend: [!!layer.nestedLegend],
+        },
+      },
+    ],
+  };
+};
 
 const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
   type: 'expression',
@@ -161,18 +205,27 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
   ],
 });
 
-const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'mosaicVis',
-      arguments: generateCommonArguments(...rest),
-    },
-  ],
-});
+const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const { buckets, nestedLegend, ...args } = generateCommonArguments(...rest);
+  const [state, attributes, , layer] = rest;
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'mosaicVis',
+        arguments: {
+          ...args,
+          bucket: buckets,
+          labels: generateWaffleLabelsAstArguments(state, attributes, layer),
+          showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
+        },
+      },
+    ],
+  };
+};
 
-const generateExpressionFunctionAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
+const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
   ({
     [PieChartTypes.PIE]: () => generatePieVisAst(state, ...restArgs),
     [PieChartTypes.DONUT]: () => generateDonutVisAst(state, ...restArgs),
@@ -197,14 +250,19 @@ function expressionHelper(
     return null;
   }
 
-  return generateExpressionFunctionAst(
-    state,
-    attributes,
-    operations,
-    layer,
-    datasourceLayers,
-    paletteService
-  );
+  return generateExprAst(state, attributes, operations, layer, datasourceLayers, paletteService);
+}
+
+export function toExpression(
+  state: PieVisualizationState,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
+  attributes: Partial<{ title: string; description: string }> = {}
+) {
+  return expressionHelper(state, datasourceLayers, paletteService, {
+    ...attributes,
+    isPreview: false,
+  });
 }
 
 export function toPreviewExpression(

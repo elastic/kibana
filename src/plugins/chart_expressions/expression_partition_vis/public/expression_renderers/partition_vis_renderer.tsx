@@ -76,7 +76,10 @@ export const getPartitionVisRenderer: (
           </VisualizationContainer>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode
+      domNode,
+      () => {
+        handlers.done();
+      }
     );
   },
 });

@@ -39,7 +39,7 @@ type GetPieDonutWaffleConfigFn = (
 
 type GetTreemapMosaicConfigFn = (visParams: PartitionVisParams) => Config;
 
-const MAX_SIZE = 1000;
+const MAX_SIZE = 100;
 
 const getPieDonutWaffleCommonConfig: GetPieDonutWaffleConfigFn = (
   visParams,

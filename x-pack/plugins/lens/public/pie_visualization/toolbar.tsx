@@ -20,7 +20,7 @@ import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { PieVisualizationState, SharedPieLayerState } from '../../common';
+import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
@@ -34,21 +34,21 @@ const legendOptions: Array<{
 }> = [
   {
     id: 'pieLegendDisplay-default',
-    value: 'default',
+    value: LegendDisplay.DEFAULT,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
       defaultMessage: 'Auto',
     }),
   },
   {
     id: 'pieLegendDisplay-show',
-    value: 'show',
+    value: LegendDisplay.SHOW,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
       defaultMessage: 'Show',
     }),
   },
   {
     id: 'pieLegendDisplay-hide',
-    value: 'hide',
+    value: LegendDisplay.HIDE,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
     }),

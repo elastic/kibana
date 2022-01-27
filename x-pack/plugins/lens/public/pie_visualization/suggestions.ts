@@ -8,10 +8,17 @@
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionRequest, TableSuggestionColumn, VisualizationSuggestion } from '../types';
-import { CategoryDisplay, layerTypes } from '../../common';
+import {
+  CategoryDisplay,
+  layerTypes,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieVisualizationState,
+} from '../../common';
+import type { PieChartType } from '../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { isPartitionShape } from './render_helpers';
-import { PieChartTypes, PieVisualizationState } from '../../common';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
@@ -48,8 +55,8 @@ function getNewShape(
   return newShape ?? PieChartTypes.DONUT;
 }
 
-function hasCustomSuggestionsExists(shape: PieChartTypes | string | undefined) {
-  const shapes: Array<PieChartTypes | string> = [
+function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
+  const shapes: Array<PieChartType | string> = [
     PieChartTypes.TREEMAP,
     PieChartTypes.WAFFLE,
     PieChartTypes.MOSAIC,
@@ -120,9 +127,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
+                numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -189,9 +196,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
+                numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -233,9 +240,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
+                numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -272,9 +279,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
+                numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: 'default',
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },

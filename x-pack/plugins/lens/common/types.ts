@@ -6,6 +6,8 @@
  */
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
+import { Position } from '@elastic/charts';
+import { $Values } from '@kbn/utility-types';
 import type {
   IFieldFormat,
   SerializedFieldFormat,
@@ -13,6 +15,7 @@ import type {
 import type { Datatable } from '../../../../src/plugins/expressions/common';
 import type { PaletteContinuity } from '../../../../src/plugins/charts/common';
 import type { PaletteOutput } from '../../../../src/plugins/charts/common';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -73,27 +76,25 @@ export type LayerType = 'data' | 'referenceLine';
 // Shared by XY Chart and Heatmap as for now
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
 
-export enum PieChartTypes {
-  PIE = 'pie',
-  DONUT = 'donut',
-  TREEMAP = 'treemap',
-  MOSAIC = 'mosaic',
-  WAFFLE = 'waffle',
-}
+export type PieChartType = $Values<typeof PieChartTypes>;
+export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
+export type NumberDisplayType = $Values<typeof NumberDisplay>;
 
-export enum CategoryDisplay {
-  DEFAULT = 'default',
-  INSIDE = 'inside',
-  HIDE = 'hide',
+export type LegendDisplayType = $Values<typeof LegendDisplay>;
+
+export enum EmptySizeRatios {
+  SMALL = 0.3,
+  MEDIUM = 0.54,
+  LARGE = 0.7,
 }
 
 export interface SharedPieLayerState {
   groups: string[];
   metric?: string;
-  numberDisplay: 'hidden' | 'percent' | 'value';
-  categoryDisplay: CategoryDisplay;
-  legendDisplay: 'default' | 'show' | 'hide';
-  legendPosition?: 'left' | 'right' | 'top' | 'bottom';
+  numberDisplay: NumberDisplayType;
+  categoryDisplay: CategoryDisplayType;
+  legendDisplay: LegendDisplayType;
+  legendPosition?: Position;
   showValuesInLegend?: boolean;
   nestedLegend?: boolean;
   percentDecimals?: number;
@@ -108,7 +109,7 @@ export type PieLayerState = SharedPieLayerState & {
 };
 
 export interface PieVisualizationState {
-  shape: PieChartTypes;
+  shape: $Values<typeof PieChartTypes>;
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }

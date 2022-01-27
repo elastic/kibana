@@ -6,7 +6,13 @@
  */
 
 import { getPieVisualization } from './visualization';
-import { PieVisualizationState, PieChartTypes, CategoryDisplay } from '../../common';
+import {
+  PieVisualizationState,
+  PieChartTypes,
+  CategoryDisplay,
+  NumberDisplay,
+  LegendDisplay,
+} from '../../common';
 import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
@@ -31,9 +37,9 @@ function getExampleState(): PieVisualizationState {
         layerType: layerTypes.DATA,
         groups: [],
         metric: undefined,
-        numberDisplay: 'percent',
+        numberDisplay: NumberDisplay.PERCENT,
         categoryDisplay: CategoryDisplay.DEFAULT,
-        legendDisplay: 'default',
+        legendDisplay: LegendDisplay.DEFAULT,
         nestedLegend: false,
       },
     ],
@@ -81,9 +87,9 @@ describe('pie_visualization', () => {
             groups: ['a'],
             layerId: LAYER_ID,
             layerType: layerTypes.DATA,
-            numberDisplay: 'percent',
+            numberDisplay: NumberDisplay.PERCENT,
             categoryDisplay: CategoryDisplay.DEFAULT,
-            legendDisplay: 'default',
+            legendDisplay: LegendDisplay.DEFAULT,
             nestedLegend: false,
             metric: undefined,
           },

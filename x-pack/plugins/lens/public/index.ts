@@ -29,6 +29,7 @@ export type {
   PieLayerState,
   SharedPieLayerState,
 } from '../common/types';
+
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
 export type {
   IndexPatternPersistedState,

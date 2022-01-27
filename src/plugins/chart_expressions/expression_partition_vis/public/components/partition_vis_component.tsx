@@ -105,9 +105,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [services.fieldFormats.deserialize, visData, visParams]
   );
 
-  const [showLegend, setShowLegend] = useState<boolean>(() => {
+  const [showLegend, setShowLegend] = useState<boolean | undefined>(() => {
     const bwcLegendStateDefault = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) ?? bwcLegendStateDefault;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
   });
 
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
@@ -195,9 +195,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [props.uiState]);
 
   useEffect(() => {
-    const show = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
-    setShowLegend(show);
-    props.uiState?.set('vis.legendOpen', show);
+    if (props.uiState) {
+      const show = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+      setShowLegend(show);
+      props.uiState.set('vis.legendOpen', show);
+    }
   }, [
     bucketColumns,
     props.uiState,
@@ -355,18 +357,19 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
   const flatLegend = isLegendFlat(visType, splitChartDimension);
   const canShowPieChart = !isAllZeros && !hasNegative;
-
   return (
     <div css={partitionVisContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
       {!canShowPieChart ? (
         <VisualizationNoResults hasNegativeValues={hasNegative} />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
-          <LegendToggle
-            onClick={toggleLegend}
-            showLegend={showLegend}
-            legendPosition={legendPosition}
-          />
+          {showLegend !== undefined && (
+            <LegendToggle
+              onClick={toggleLegend}
+              showLegend={showLegend}
+              legendPosition={legendPosition}
+            />
+          )}
           <Chart size="100%">
             <ChartSplit
               splitColumnAccessor={splitChartColumnAccessor}
@@ -375,7 +378,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
             />
             <Settings
               debugState={window._echDebugStateFlag ?? false}
-              showLegend={showLegend}
+              showLegend={
+                showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
+              }
               legendPosition={legendPosition}
               legendMaxDepth={visParams.nestedLegend ? undefined : 1}
               legendColorPicker={props.uiState ? legendColorPicker : undefined}
