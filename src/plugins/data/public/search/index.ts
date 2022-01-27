@@ -54,6 +54,7 @@ export {
   waitUntilNextSessionCompletes$,
 } from './session';
 export { getEsPreference } from './es_search';
+export { handleResponse } from './fetch';
 
 export type { SearchInterceptorDeps } from './search_interceptor';
 export { SearchInterceptor } from './search_interceptor';
