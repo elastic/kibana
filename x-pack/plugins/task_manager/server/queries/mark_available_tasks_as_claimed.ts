@@ -104,15 +104,25 @@ if (doc['task.runAt'].size()!=0) {
 };
 export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
 
-export const updateFieldsAndMarkAsFailed = (
+export interface UpdateFieldsAndMarkAsFailedOpts {
   fieldUpdates: {
     [field: string]: string | number | Date;
-  },
-  claimTasksById: string[],
-  claimableTaskTypes: string[],
-  skippedTaskTypes: string[],
-  taskMaxAttempts: { [field: string]: number }
-): ScriptClause => {
+  };
+  claimTasksById: string[];
+  claimableTaskTypes: string[];
+  skippedTaskTypes: string[];
+  unusedTaskTypes: string[];
+  taskMaxAttempts: { [field: string]: number };
+}
+
+export const updateFieldsAndMarkAsFailed = ({
+  fieldUpdates,
+  claimTasksById,
+  claimableTaskTypes,
+  skippedTaskTypes,
+  unusedTaskTypes,
+  taskMaxAttempts,
+}: UpdateFieldsAndMarkAsFailedOpts): ScriptClause => {
   const markAsClaimingScript = `ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
     .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
     .join(' ')}`;
@@ -126,7 +136,7 @@ export const updateFieldsAndMarkAsFailed = (
       }
     } else if (params.skippedTaskTypes.contains(ctx._source.task.taskType) && params.claimTasksById.contains(ctx._id)) {
       ${markAsClaimingScript}
-    } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
+    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
@@ -137,6 +147,7 @@ export const updateFieldsAndMarkAsFailed = (
       claimTasksById,
       claimableTaskTypes,
       skippedTaskTypes,
+      unusedTaskTypes,
       taskMaxAttempts,
     },
   };
