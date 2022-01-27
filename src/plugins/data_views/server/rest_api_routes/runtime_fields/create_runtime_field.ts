@@ -23,6 +23,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+import { responseFormatter } from './response_formatter';
 
 interface CreateRuntimeFieldArgs {
   dataViewsService: DataViewsService;
@@ -55,10 +56,10 @@ const createRuntimeField = async ({
 
   await dataViewsService.updateSavedObject(dataView);
 
-  const savedField = dataView.fields.getByName(name);
-  if (!savedField) throw new Error(`Could not create a field [name = ${name}].`);
+  const field = dataView.fields.getByName(name);
+  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
 
-  return { dataView, savedField };
+  return { dataView, field };
 };
 
 const runtimeCreateFieldRouteFactory =
@@ -102,7 +103,7 @@ const runtimeCreateFieldRouteFactory =
         const id = req.params.id;
         const { name, runtimeField } = req.body;
 
-        const { dataView, savedField } = await createRuntimeField({
+        const { dataView, field } = await createRuntimeField({
           dataViewsService,
           usageCollection,
           counterName: `${req.route.method} ${path}`,
@@ -111,21 +112,7 @@ const runtimeCreateFieldRouteFactory =
           runtimeField,
         });
 
-        const response = {
-          body: {
-            fields: [savedField.toSpec()],
-            [serviceKey]: dataView.toSpec(),
-          },
-        };
-
-        const legacyResponse = {
-          body: {
-            [serviceKey]: dataView.toSpec(),
-            field: savedField.toSpec(),
-          },
-        };
-
-        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
+        return res.ok(responseFormatter({ serviceKey, dataView, field }));
       })
     );
   };

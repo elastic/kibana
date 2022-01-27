@@ -23,6 +23,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+import { responseFormatter } from './response_formatter';
 
 interface GetRuntimeFieldArgs {
   dataViewsService: DataViewsService;
@@ -102,21 +103,7 @@ const getRuntimeFieldRouteFactory =
           name,
         });
 
-        const legacyResponse = {
-          body: {
-            field: field.toSpec(),
-            runtimeField: dataView.getRuntimeField(name),
-          },
-        };
-
-        const response = {
-          body: {
-            fields: [field.toSpec()],
-            runtimeField: dataView.getRuntimeField(name),
-          },
-        };
-
-        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
+        return res.ok(responseFormatter({ serviceKey, dataView, field }));
       })
     );
   };
