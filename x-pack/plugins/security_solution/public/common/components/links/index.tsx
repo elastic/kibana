@@ -25,6 +25,7 @@ import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
   getHostDetailsUrl,
+  getTabsOnHostDetailsUrl,
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
@@ -40,6 +41,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
 import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
+import { HostsTableType } from '../../../hosts/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -92,23 +94,34 @@ const HostDetailsLinkComponent: React.FC<{
   hostName: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
+  hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick, title }) => {
+}> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
+
+  const encodedHostName = encodeURIComponent(hostName);
+
   const goToHostDetails = useCallback(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
-        path: getHostDetailsUrl(encodeURIComponent(hostName), search),
+        path: hostTab
+          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab, search)
+          : getHostDetailsUrl(encodedHostName, search),
       });
     },
-    [hostName, navigateToApp, search]
+    [encodedHostName, navigateToApp, search, hostTab]
   );
   const href = useMemo(
-    () => formatUrl(getHostDetailsUrl(encodeURIComponent(hostName))),
-    [formatUrl, hostName]
+    () =>
+      formatUrl(
+        hostTab
+          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab)
+          : getHostDetailsUrl(encodedHostName)
+      ),
+    [formatUrl, encodedHostName, hostTab]
   );
   return isButton ? (
     <GenericLinkButton

@@ -21,6 +21,7 @@ import { HostRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { HostRiskScore } from '../common/host_risk_score';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
+import { HostsTableType } from '../../store/model';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -54,7 +55,7 @@ export const getHostRiskScoreColumns = ({
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostName={hostName} />
+                <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
               )
             }
           />
