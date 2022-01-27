@@ -57,7 +57,7 @@ NOTE: GeoJSON feature coordinates must be in EPSG:4326 coordinate reference syst
 . <<maps-create, Create a new map>>.
 . Click *Add layer*.
 . Select *Upload file*.
-. Use the file chooser to select a GeoJSON file ending with the extension `.json` or `.geojson`.
+. Use the file chooser to select a GeoJSON file with the extension `.json` or `.geojson`.
 . Click *Import file*.
 
 discrete]
