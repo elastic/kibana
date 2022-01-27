@@ -134,29 +134,33 @@ exports.NativeRealm = class NativeRealm {
     await this._client.security.putRole({
       name: SYSTEM_INDICES_SUPERUSER,
       refresh: 'wait_for',
-      cluster: ['all'],
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-          allow_restricted_indices: true,
-        },
-      ],
-      applications: [
-        {
-          application: '*',
-          privileges: ['*'],
-          resources: ['*'],
-        },
-      ],
-      run_as: ['*'],
+      body: {
+        cluster: ['all'],
+        indices: [
+          {
+            names: ['*'],
+            privileges: ['all'],
+            allow_restricted_indices: true,
+          },
+        ],
+        applications: [
+          {
+            application: '*',
+            privileges: ['*'],
+            resources: ['*'],
+          },
+        ],
+        run_as: ['*'],
+      },
     });
 
     await this._client.security.putUser({
       username: SYSTEM_INDICES_SUPERUSER,
       refresh: 'wait_for',
-      password: this._elasticPassword,
-      roles: [SYSTEM_INDICES_SUPERUSER],
+      body: {
+        password: this._elasticPassword,
+        roles: [SYSTEM_INDICES_SUPERUSER],
+      },
     });
   }
 };
