@@ -476,7 +476,31 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentPeriod: {
+      transactionColdstartRate: Array<
+        import('../../../typings/timeseries').Coordinate
+      >;
+      average: number | null;
+    };
+    previousPeriod:
+      | {
+          transactionColdstartRate: Array<{
+            x: number;
+            y: import('../../../typings/common').Maybe<number>;
+          }>;
+          average: number | null;
+        }
+      | {
+          transactionColdstartRate: Array<{
+            x: number;
+            y: import('../../../typings/common').Maybe<number>;
+          }>;
+          average: null;
+        };
+  }> => {
     const setup = await setupRequest(resources);
 
     const { params } = resources;

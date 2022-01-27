@@ -82,25 +82,26 @@ export function TransactionColdstartRateChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (transactionType && serviceName && start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                transactionName,
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              comparisonStart,
-              comparisonEnd,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [
