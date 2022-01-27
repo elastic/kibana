@@ -8,8 +8,9 @@
 
 import React, { useState } from 'react';
 import './document_explorer_callout.scss';
-import { EuiButton, EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getServices } from '../../../../kibana_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 import { Storage } from '../../../../../../kibana_utils/public';
@@ -28,7 +29,7 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 };
 
 export const DocumentExplorerCallout = () => {
-  const { storage, addBasePath } = getServices();
+  const { storage, capabilities, addBasePath } = getServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
 
   const onCloseCallout = () => {
@@ -36,7 +37,7 @@ export const DocumentExplorerCallout = () => {
     setCalloutClosed(true);
   };
 
-  if (calloutClosed) {
+  if (calloutClosed && capabilities.advancedSettings.save) {
     return null;
   }
 
@@ -79,7 +80,14 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon onClick={onCloseCallout} type="button" iconType="cross" />
+        <EuiButtonIcon
+          aria-label={i18n.translate('discover.docExplorerCallout.closeButtonAriaLabel', {
+            defaultMessage: 'Close',
+          })}
+          onClick={onCloseCallout}
+          type="button"
+          iconType="cross"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
