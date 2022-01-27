@@ -10,11 +10,26 @@ import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getLocalRoutePaths } from '../../common';
 
-export function registerFlameChartPixiRoute(router: IRouter<DataRequestHandlerContext>) {
+function transformFlamechart(src) {
+  const obj = {
+    Total: src.TotalTraces,
+    TopN: {},
+    Metadata: src.TraceDetails,
+    SampleRate: src.SampleRate,
+  };
+  Object.keys(src.TopNTraces).map((key) => {
+    obj.TopN[key] = src.TopNTraces[key].map((item) => {
+      return { Value: item.TraceHash, Count: item.Count };
+    });
+  });
+  return obj;
+}
+
+export function registerTraceEventsTopNStackTracesRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getLocalRoutePaths();
   router.get(
     {
-      path: paths.FlamechartPixi,
+      path: paths.TopNTraces,
       validate: {
         query: schema.object({
           index: schema.maybe(schema.string()),
@@ -28,9 +43,9 @@ export function registerFlameChartPixiRoute(router: IRouter<DataRequestHandlerCo
       const timeFrom = parseInt(request.query.timeFrom);
       const timeTo = parseInt(request.query.timeTo);
       const seconds = timeTo - timeFrom;
-      const src = await import(`../fixtures/flamechart_${seconds}`);
+      const src = await import(`../fixtures/traces_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: src } });
+      return response.ok({ body: { results: transformFlamechart(src) } });
     }
   );
 }

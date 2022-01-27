@@ -10,11 +10,11 @@ import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getLocalRoutePaths } from '../../common';
 
-export function registerFlameChartPixiRoute(router: IRouter<DataRequestHandlerContext>) {
+export function registerTraceEventsTopNThreadsRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getLocalRoutePaths();
   router.get(
     {
-      path: paths.FlamechartPixi,
+      path: paths.TopNThreads,
       validate: {
         query: schema.object({
           index: schema.maybe(schema.string()),
@@ -28,7 +28,7 @@ export function registerFlameChartPixiRoute(router: IRouter<DataRequestHandlerCo
       const timeFrom = parseInt(request.query.timeFrom);
       const timeTo = parseInt(request.query.timeTo);
       const seconds = timeTo - timeFrom;
-      const src = await import(`../fixtures/flamechart_${seconds}`);
+      const src = await import(`../fixtures/threads_${seconds}`);
       delete src.default;
       return response.ok({ body: { results: src } });
     }

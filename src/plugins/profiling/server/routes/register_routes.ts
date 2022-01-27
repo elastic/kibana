@@ -10,6 +10,11 @@ import { DataRequestHandlerContext } from '../../../data/server';
 
 import { registerFlameChartElasticRoute } from './load_flameChartElastic';
 import { registerFlameChartPixiRoute } from './load_flameChartPixi';
+import { registerTraceEventsTopNContainersRoute } from './load_topNContainers';
+import { registerTraceEventsTopNDeploymentsRoute } from './load_topNDeployments';
+import { registerTraceEventsTopNHostsRoute } from './load_topNHosts';
+import { registerTraceEventsTopNStackTracesRoute } from './load_topNStackTraces';
+import { registerTraceEventsTopNThreadsRoute } from './load_topNThreads';
 
 import { registerFlameChartSearchRoute } from './search_flameChart';
 import { registerTraceEventsTopNContainersSearchRoute } from './search_topNContainers';
@@ -21,6 +26,11 @@ import { registerTraceEventsTopNThreadsSearchRoute } from './search_topNThreads'
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
   registerFlameChartElasticRoute(router);
   registerFlameChartPixiRoute(router);
+  registerTraceEventsTopNContainersRoute(router);
+  registerTraceEventsTopNDeploymentsRoute(router);
+  registerTraceEventsTopNHostsRoute(router);
+  registerTraceEventsTopNStackTracesRoute(router);
+  registerTraceEventsTopNThreadsRoute(router);
 
   registerFlameChartSearchRoute(router);
   registerTraceEventsTopNContainersSearchRoute(router);
