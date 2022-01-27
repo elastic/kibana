@@ -60,7 +60,7 @@ export interface ProcessFields {
 }
 
 export interface ProcessSelf extends ProcessFields {
-  parent: ProcessSelf;
+  parent: ProcessFields;
   session_leader: ProcessFields;
   entry_leader: ProcessFields;
   group_leader: ProcessFields;

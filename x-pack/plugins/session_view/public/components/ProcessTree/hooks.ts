@@ -121,9 +121,9 @@ export class ProcessImpl implements Process {
 
   isUserEntered() {
     const event = this.getDetails();
-    const { tty, group_leader: groupLeader, parent } = event.process;
+    const { tty } = event.process;
 
-    return !!tty && groupLeader && groupLeader.pid !== parent.group_leader.pid;
+    return !!tty && process.pid !== event.process.group_leader.pid;
   }
 
   getMaxAlertLevel() {
