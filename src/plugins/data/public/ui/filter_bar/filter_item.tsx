@@ -178,7 +178,7 @@ export function FilterItem(props: FilterItemProps) {
       {
         name: props.intl.formatMessage({
           id: 'data.filter.filterBar.editFilterButtonLabel',
-          defaultMessage: 'Edit filter',
+          defaultMessage: 'Edit filter old',
         }),
         icon: 'pencil',
         panel: 1,

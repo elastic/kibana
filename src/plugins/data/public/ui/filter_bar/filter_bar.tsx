@@ -178,13 +178,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
 
-
     return (
       <EuiFlexItem grow={false}>
         {isEditFilterPopoverOpen && (
           <AddFilterModal
             onCancel={onEditFilterClick}
-            filter={newFilter}
+            filter={props.filters[0]}
+            filters={props.filters}
             indexPatterns={props.indexPatterns!}
             onSubmit={onEditFilterClick}
             onMultipleFiltersSubmit={onEditFilterClick}

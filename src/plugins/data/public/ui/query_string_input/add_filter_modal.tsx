@@ -15,6 +15,7 @@ import {
   buildCustomFilter,
   cleanFilter,
   getFilterParams,
+  FieldFilter,
 } from '@kbn/es-query';
 import {
   EuiFormRow,
@@ -44,6 +45,8 @@ import { getIndexPatternFromFilter } from '../../query';
 import {
   getFilterableFields,
   getOperatorOptions,
+  getFieldFromFilter,
+  getOperatorFromFilter,
 } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../filter_bar/filter_editor/lib/filter_operators';
 
@@ -53,6 +56,7 @@ import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_i
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 
 import { IIndexPattern, IFieldType } from '../..';
+import { filter } from '../../../../console/server/lib/spec_definitions/js/filter';
 
 const tabs = [
   {
@@ -91,6 +95,7 @@ export function AddFilterModal({
   onCancel,
   applySavedQueries,
   filter,
+  filters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
@@ -101,6 +106,7 @@ export function AddFilterModal({
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
+  filters?: Filter[];
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
@@ -112,17 +118,36 @@ export function AddFilterModal({
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
-  const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
-    {
-      field: undefined,
-      operator: undefined,
-      value: getFilterParams(filter),
-      groupId: 1,
-      id: 0,
-      subGroupId: 1,
-    },
-  ]);
+  const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
+    convertFilterToFilterGroup(filters)
+  );
   const [groupsCount, setGroupsCount] = useState<number>(1);
+
+  function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
+    if (!convertibleFilters) {
+      return [
+        {
+          field: getFieldFromFilter(filter as FieldFilter, selectedIndexPattern),
+          operator: getOperatorFromFilter(filter),
+          value: getFilterParams(filter),
+          groupId: 1,
+          id: 0,
+          subGroupId: 1,
+        },
+      ];
+    }
+
+    return convertibleFilters.map((convertedfilter) => {
+      return {
+        field: getFieldFromFilter(convertedfilter as FieldFilter, selectedIndexPattern),
+        operator: getOperatorFromFilter(convertedfilter),
+        value: getFilterParams(convertedfilter),
+        groupId: 1,
+        id: 0,
+        subGroupId: 1,
+      };
+    });
+  }
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -246,11 +271,11 @@ export function AddFilterModal({
             placeholder={
               selectedField
                 ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                    defaultMessage: 'Operator',
-                  })
+                  defaultMessage: 'Operator',
+                })
                 : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                    defaultMessage: 'Waiting',
-                  })
+                  defaultMessage: 'Waiting',
+                })
             }
             options={operators}
             selectedOptions={selectedOperator ? [selectedOperator] : []}
@@ -416,8 +441,8 @@ export function AddFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                ? 'kbnQueryBar__filterModalGroups'
-                : '';
+                  ? 'kbnQueryBar__filterModalGroups'
+                  : '';
             return (
               <>
                 <div className={classNames(classes)}>
