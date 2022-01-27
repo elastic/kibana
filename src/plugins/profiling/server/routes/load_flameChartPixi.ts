@@ -9,13 +9,12 @@ import { schema } from '@kbn/config-schema';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
 import { getLocalRoutePaths } from '../../common';
-import { mapFlamechart } from './mappings';
 
-export function registerFlameChartElasticRoute(router: IRouter<DataRequestHandlerContext>) {
+export function registerFlameChartPixiRoute(router: IRouter<DataRequestHandlerContext>) {
   const paths = getLocalRoutePaths();
   router.get(
     {
-      path: paths.FlamechartElastic,
+      path: paths.FlamechartPixi,
       validate: {
         query: schema.object({
           index: schema.maybe(schema.string()),
@@ -26,12 +25,13 @@ export function registerFlameChartElasticRoute(router: IRouter<DataRequestHandle
       },
     },
    async (ctx, request, response) => {
+      console.log(request.query);
       const timeFrom = parseInt(request.query.timeFrom);
       const timeTo = parseInt(request.query.timeTo);
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/flamechart_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: mapFlamechart(src) } });
+      return response.ok({ body: { results: src } });
     }
   );
 }
