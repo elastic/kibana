@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export type { AsDuration, AsPercent } from './utils/formatters';
+export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
+
+export { formatDurationFromTimeUnitChar } from './utils/formatters';
+
 export {
   enableInspectEsQueries,
   maxSuggestions,
