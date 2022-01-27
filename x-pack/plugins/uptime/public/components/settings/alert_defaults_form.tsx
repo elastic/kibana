@@ -147,7 +147,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           />
         }
       >
-        <EuiFormRow
+        <RowWrapper
           describedByIds={['defaultConnectors']}
           error={error}
           fullWidth
@@ -186,7 +186,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             data-test-subj={`default-connectors-input-${loading ? 'loading' : 'loaded'}`}
             renderOption={renderOption}
           />
-        </EuiFormRow>
+        </RowWrapper>
       </EuiDescribedFormGroup>
       <DefaultEmail
         value={formFields?.defaultEmail}
@@ -200,3 +200,9 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
     </>
   );
 };
+
+const RowWrapper = styled(EuiFormRow)`
+  &&& > .euiFormRow__labelWrapper {
+    align-items: baseline;
+  }
+`;

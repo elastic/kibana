@@ -43,11 +43,11 @@ export function utilsPageProvider({ page }: { page: Page }) {
     },
 
     async findByTestSubj(dataTestSubj: string) {
-      return await page.locator(`[data-test-subj=${dataTestSubj}]`);
+      return await page.waitForSelector(`[data-test-subj=${dataTestSubj}]`);
     },
 
     async findByText(text: string) {
-      return await page.locator(`text=${text}`);
+      return await page.waitForSelector(`text=${text}`);
     },
   };
 }

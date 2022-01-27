@@ -76,7 +76,6 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
         data-test-subj="createConnectorButton"
         onClick={() => setAddFlyoutVisibility(true)}
         size="s"
-        flush="both"
         isDisabled={isDisabled || !canEdit}
       >
         <FormattedMessage
