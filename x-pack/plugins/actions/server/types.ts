@@ -138,6 +138,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  executionId?: string;
 }
 
 interface PersistedActionTaskExecutorParams {
