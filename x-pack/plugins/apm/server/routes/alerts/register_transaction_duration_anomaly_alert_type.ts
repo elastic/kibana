@@ -233,6 +233,8 @@ export function registerTransactionDurationAnomalyAlertType({
                   measured: score,
                   serviceName,
                   severityLevel,
+                  windowSize: params.windowSize,
+                  windowUnit: params.windowUnit,
                 }),
               },
             })
