@@ -8,8 +8,7 @@
 import React from 'react';
 import { Feature } from 'geojson';
 // @ts-expect-error
-import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
-import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
+import { BrowserFileSystem, DBFLoader, loadInBatches, ShapefileLoader } from '../loaders';
 import type { ImportFailure } from '../../../../common/types';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';

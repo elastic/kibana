@@ -7,4 +7,5 @@
 
 // Loading @loaders.gl from javascriopt file to typescript compilation failures within @loaders.gl.
 export { JSONLoader } from '@loaders.gl/json';
-export { loadInBatches } from '@loaders.gl/core';
+export { _BrowserFileSystem as BrowserFileSystem, loadInBatches} from '@loaders.gl/core';
+export { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';

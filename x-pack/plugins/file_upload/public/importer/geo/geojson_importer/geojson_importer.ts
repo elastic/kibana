@@ -8,7 +8,7 @@
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
-import { JSONLoader, loadInBatches } from './loaders';
+import { JSONLoader, loadInBatches } from '../loaders';
 import type { ImportFailure } from '../../../../common/types';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
