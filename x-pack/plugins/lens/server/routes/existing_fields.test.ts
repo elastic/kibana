@@ -6,9 +6,41 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/common';
-import { existingFields, Field, buildFieldList } from './existing_fields';
+import { legacyExistingFields, existingFields, Field, buildFieldList } from './existing_fields';
 
 describe('existingFields', () => {
+  it('should remove missing fields by matching names', () => {
+    expect(
+      existingFields(
+        [
+          { name: 'a', aggregatable: true, searchable: true, type: 'string' },
+          { name: 'b', aggregatable: true, searchable: true, type: 'string' },
+        ],
+        [
+          { name: 'a', isScript: false, isMeta: false },
+          { name: 'b', isScript: false, isMeta: true },
+          { name: 'c', isScript: false, isMeta: false },
+        ]
+      )
+    ).toEqual(['a', 'b']);
+  });
+
+  it('should keep scripted and runtime fields', () => {
+    expect(
+      existingFields(
+        [{ name: 'a', aggregatable: true, searchable: true, type: 'string' }],
+        [
+          { name: 'a', isScript: false, isMeta: false },
+          { name: 'b', isScript: true, isMeta: false },
+          { name: 'c', runtimeField: { type: 'keyword' }, isMeta: false, isScript: false },
+          { name: 'd', isMeta: true, isScript: false },
+        ]
+      )
+    ).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('legacyExistingFields', () => {
   function field(opts: string | Partial<Field>): Field {
     const obj = typeof opts === 'object' ? opts : {};
     const name = (typeof opts === 'string' ? opts : opts.name) || 'test';
@@ -26,7 +58,7 @@ describe('existingFields', () => {
   }
 
   it('should handle root level fields', () => {
-    const result = existingFields(
+    const result = legacyExistingFields(
       [searchResults({ foo: ['bar'] }), searchResults({ baz: [0] })],
       [field('foo'), field('bar'), field('baz')]
     );
@@ -35,7 +67,7 @@ describe('existingFields', () => {
   });
 
   it('should handle basic arrays, ignoring empty ones', () => {
-    const result = existingFields(
+    const result = legacyExistingFields(
       [searchResults({ stuff: ['heyo', 'there'], empty: [] })],
       [field('stuff'), field('empty')]
     );
@@ -44,7 +76,7 @@ describe('existingFields', () => {
   });
 
   it('should handle objects with dotted fields', () => {
-    const result = existingFields(
+    const result = legacyExistingFields(
       [searchResults({ 'geo.country_name': ['US'] })],
       [field('geo.country_name')]
     );
@@ -53,7 +85,7 @@ describe('existingFields', () => {
   });
 
   it('supports scripted fields', () => {
-    const result = existingFields(
+    const result = legacyExistingFields(
       [searchResults({ bar: ['scriptvalue'] })],
       [field({ name: 'bar', isScript: true })]
     );
@@ -62,7 +94,7 @@ describe('existingFields', () => {
   });
 
   it('supports runtime fields', () => {
-    const result = existingFields(
+    const result = legacyExistingFields(
       [searchResults({ runtime_foo: ['scriptvalue'] })],
       [
         field({
@@ -76,7 +108,7 @@ describe('existingFields', () => {
   });
 
   it('supports meta fields', () => {
-    const result = existingFields(
+    const result = legacyExistingFields(
       [
         {
           // @ts-expect-error _mymeta is not defined on estypes.SearchHit
