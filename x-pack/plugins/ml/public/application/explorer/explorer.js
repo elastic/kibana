@@ -99,7 +99,7 @@ const ExplorerPage = ({
     <EuiPageHeader>
       <EuiPageHeaderSection style={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
-        <EuiHorizontalRule margin="s" />
+
         {noInfluencersConfigured === false && influencers !== undefined ? (
           <>
             <ExplorerQueryBar
