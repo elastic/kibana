@@ -116,7 +116,7 @@ async function getAlertComments({
 }
 
 /**
- * Returns what status the alert comment should have based on whether it is associated to a case or sub case.
+ * Returns what status the alert comment should have based on whether it is associated to a case.
  */
 function getSyncStatusForComment({
   alertComment,

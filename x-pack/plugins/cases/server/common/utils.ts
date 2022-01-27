@@ -284,7 +284,7 @@ export const groupTotalAlertsByID = ({
 };
 
 /**
- * Counts the total alert IDs for a single case or sub case ID.
+ * Counts the total alert IDs for a single case.
  */
 export const countAlertsForID = ({
   comments,

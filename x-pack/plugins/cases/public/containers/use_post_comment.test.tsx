@@ -62,25 +62,6 @@ describe('usePostComment', () => {
     });
   });
 
-  it('calls postComment with correct arguments - sub case', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'postComment');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
-      );
-      await waitForNextUpdate();
-
-      result.current.postComment({
-        caseId: basicCaseId,
-        data: samplePost,
-        updateCase: updateCaseCallback,
-      });
-      await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
-    });
-  });
-
   it('post case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>

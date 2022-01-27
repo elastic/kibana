@@ -71,26 +71,6 @@ describe('useUpdateComment', () => {
     });
   });
 
-  it('calls patchComment with correct arguments - sub case', async () => {
-    const spyOnPatchComment = jest.spyOn(api, 'patchComment');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-
-      result.current.patchComment(sampleUpdate);
-      await waitForNextUpdate();
-      expect(spyOnPatchComment).toBeCalledWith({
-        caseId: basicCase.id,
-        commentId: basicCase.comments[0].id,
-        commentUpdate: 'updated comment',
-        version: basicCase.comments[0].version,
-        signal: abortCtrl.signal,
-        owner: SECURITY_SOLUTION_OWNER,
-      });
-    });
-  });
-
   it('patch comment', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHookUseUpdateComment();

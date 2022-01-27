@@ -149,7 +149,7 @@ export interface GetParams {
 }
 
 /**
- * Retrieves a case and optionally its comments and sub case comments.
+ * Retrieves a case and optionally its comments.
  *
  * @ignore
  */
@@ -201,7 +201,7 @@ export const get = async (
 };
 
 /**
- * Retrieves a case resolving its ID and optionally loading its comments and sub case comments.
+ * Retrieves a case resolving its ID and optionally loading its comments.
  *
  * @experimental
  */

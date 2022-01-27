@@ -28,7 +28,7 @@ import { Operations } from '../../authorization';
 import { CasesClientArgs } from '..';
 
 /**
- * Retrieves a case and optionally its comments and sub case comments.
+ * Retrieves a case and optionally its comments.
  *
  * @ignore
  */

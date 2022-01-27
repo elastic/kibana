@@ -16,7 +16,7 @@ import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 
 /**
- * Parameters for deleting all comments of a case or sub case.
+ * Parameters for deleting all comments of a case.
  */
 export interface DeleteAllArgs {
   /**
@@ -26,7 +26,7 @@ export interface DeleteAllArgs {
 }
 
 /**
- * Parameters for deleting a single attachment of a case or sub case.
+ * Parameters for deleting a single attachment of a case.
  */
 export interface DeleteArgs {
   /**
@@ -40,7 +40,7 @@ export interface DeleteArgs {
 }
 
 /**
- * Delete all comments for a case or sub case.
+ * Delete all comments for a case.
  *
  * @ignore
  */

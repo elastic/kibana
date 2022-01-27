@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
-import classnames from 'classnames';
 
 import {
   Case,
@@ -210,7 +209,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const tableRowProps = useCallback(
       (theCase: Case) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
-        className: classnames({ isDisabled: false }),
       }),
       []
     );

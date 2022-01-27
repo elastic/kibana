@@ -91,26 +91,6 @@ describe('useUpdateCase', () => {
     });
   });
 
-  it('patch sub case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
-        useUpdateCase({ caseId: basicCase.id })
-      );
-      await waitForNextUpdate();
-      result.current.updateCaseProperty(sampleUpdate);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        updateKey: null,
-        isLoading: false,
-        isError: false,
-        updateCaseProperty: result.current.updateCaseProperty,
-      });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, 'none');
-      expect(updateCase).toBeCalledWith(basicCase);
-      expect(onSuccess).toHaveBeenCalled();
-    });
-  });
-
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>

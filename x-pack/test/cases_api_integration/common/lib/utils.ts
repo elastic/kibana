@@ -120,7 +120,7 @@ interface SetStatusCasesParams {
 }
 
 /**
- * Sets the status of some cases or sub cases. The cases field must be all of one type.
+ * Sets the status of some cases.
  */
 export const setStatus = async ({
   supertest,
