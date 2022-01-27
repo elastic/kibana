@@ -82,26 +82,28 @@ export function ColorRangeEditButton({
     });
   }, [isLast, dispatch, continuity, dataBounds, palettes]);
 
-  const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
-    defaultMessage: 'Edit',
-  });
+  let tooltipContent = isLast
+    ? i18n.translate('xpack.lens.dynamicColoring.customPalette.setCustomMinValue', {
+        defaultMessage: `Set custom maximum value`,
+      })
+    : i18n.translate('xpack.lens.dynamicColoring.customPalette.setCustomMaxValue', {
+        defaultMessage: `Set custom minimum value`,
+      });
+
+  if (disableSwitchingContinuity) {
+    tooltipContent = i18n.translate(
+      'xpack.lens.dynamicColoring.customPalette.disallowedEditMinMaxValues',
+      {
+        defaultMessage: `For current configuration you can not set custom value`,
+      }
+    );
+  }
 
   return (
-    <TooltipWrapper
-      tooltipContent={i18n.translate(
-        'xpack.lens.dynamicColoring.customPalette.disallowedEditMinMaxValues',
-        {
-          defaultMessage: `For current configuration you can not set custom value`,
-        }
-      )}
-      condition={Boolean(disableSwitchingContinuity)}
-      position="top"
-      delay="regular"
-    >
+    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
       <EuiButtonIcon
         iconType="pencil"
-        aria-label={title}
-        title={title}
+        aria-label={tooltipContent}
         disabled={disableSwitchingContinuity}
         onClick={onExecuteAction}
         data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
@@ -127,23 +129,24 @@ export function ColorRangeAutoDetectButton({
     });
   }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
-  const title = isLast
-    ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {
-        defaultMessage: 'Auto detect maximum value',
+  let tooltipContent = isLast
+    ? i18n.translate('xpack.lens.dynamicColoring.customPalette.useAutoMaxValue', {
+        defaultMessage: `Use maximum data value`,
       })
-    : i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel', {
-        defaultMessage: 'Auto detect minimum value',
+    : i18n.translate('xpack.lens.dynamicColoring.customPalette.useAutoMinValue', {
+        defaultMessage: `Use minimum data value`,
       });
 
   return (
-    <EuiButtonIcon
-      iconType={isLast ? ValueMaxIcon : ValueMinIcon}
-      aria-label={title}
-      title={title}
-      onClick={onExecuteAction}
-      data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${
-        isLast ? 'maximum' : 'minimum'
-      }`}
-    />
+    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
+      <EuiButtonIcon
+        iconType={isLast ? ValueMaxIcon : ValueMinIcon}
+        aria-label={tooltipContent}
+        onClick={onExecuteAction}
+        data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${
+          isLast ? 'maximum' : 'minimum'
+        }`}
+      />
+    </TooltipWrapper>
   );
 }
