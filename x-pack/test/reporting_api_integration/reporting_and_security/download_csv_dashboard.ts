@@ -37,8 +37,6 @@ export default function ({ getService }: FtrProviderContext) {
   const toTime = '2019-06-25T00:00:00.000Z';
 
   describe('CSV Generation from SearchSource', function () {
-    this.onlyEsVersion('<=7');
-
     before(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': false,
@@ -52,146 +50,150 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
-      const {
-        status: resStatus,
-        text: resText,
-        type: resType,
-      } = (await generateAPI.getCSVFromSearchSource(
-        getMockJobParams({
-          searchSource: {
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            sort: [{ order_date: 'desc' }],
-            fieldsFromSource: [
-              '_id',
-              '_index',
-              '_score',
-              '_source',
-              '_type',
-              'category',
-              'category.keyword',
-              'currency',
-              'customer_birth_date',
-              'customer_first_name',
-              'customer_first_name.keyword',
-              'customer_full_name',
-              'customer_full_name.keyword',
-              'customer_gender',
-              'customer_id',
-              'customer_last_name',
-              'customer_last_name.keyword',
-              'customer_phone',
-              'day_of_week',
-              'day_of_week_i',
-              'email',
-              'geoip.city_name',
-              'geoip.continent_name',
-              'geoip.country_iso_code',
-              'geoip.location',
-              'geoip.region_name',
-              'manufacturer',
-              'manufacturer.keyword',
-              'order_date',
-              'order_id',
-              'products._id',
-              'products._id.keyword',
-              'products.base_price',
-              'products.base_unit_price',
-              'products.category',
-              'products.category.keyword',
-              'products.created_on',
-              'products.discount_amount',
-              'products.discount_percentage',
-              'products.manufacturer',
-              'products.manufacturer.keyword',
-              'products.min_price',
-              'products.price',
-              'products.product_id',
-              'products.product_name',
-              'products.product_name.keyword',
-              'products.quantity',
-              'products.sku',
-              'products.tax_amount',
-              'products.taxful_price',
-              'products.taxless_price',
-              'products.unit_discount_amount',
-              'sku',
-              'taxful_total_price',
-              'taxless_total_price',
-              'total_quantity',
-              'total_unique_products',
-              'type',
-              'user',
-            ],
-            filter: [],
-            parent: {
-              query: { language: 'kuery', query: '' },
-              filter: [],
-              parent: {
-                filter: [
-                  {
-                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                    range: {
-                      order_date: {
-                        gte: fromTime,
-                        lte: toTime,
-                        format: 'strict_date_optional_time',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          browserTimezone: 'UTC',
-          title: 'testfooyu78yt90-',
-        })
-      )) as supertest.Response;
-      expect(resStatus).to.eql(200);
-      expect(resType).to.eql('text/csv');
-      expectSnapshot(resText).toMatch();
-    });
+    describe('7.x only', function () {
+      this.onlyEsVersion('<=7');
 
-    it('Exports CSV with all fields when using defaults', async () => {
-      const {
-        status: resStatus,
-        text: resText,
-        type: resType,
-      } = await generateAPI.getCSVFromSearchSource(
-        getMockJobParams({
-          searchSource: {
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            sort: [{ order_date: 'desc' }],
-            fields: ['*'],
-            filter: [],
-            parent: {
-              query: { language: 'kuery', query: '' },
+      it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              sort: [{ order_date: 'desc' }],
+              fieldsFromSource: [
+                '_id',
+                '_index',
+                '_score',
+                '_source',
+                '_type',
+                'category',
+                'category.keyword',
+                'currency',
+                'customer_birth_date',
+                'customer_first_name',
+                'customer_first_name.keyword',
+                'customer_full_name',
+                'customer_full_name.keyword',
+                'customer_gender',
+                'customer_id',
+                'customer_last_name',
+                'customer_last_name.keyword',
+                'customer_phone',
+                'day_of_week',
+                'day_of_week_i',
+                'email',
+                'geoip.city_name',
+                'geoip.continent_name',
+                'geoip.country_iso_code',
+                'geoip.location',
+                'geoip.region_name',
+                'manufacturer',
+                'manufacturer.keyword',
+                'order_date',
+                'order_id',
+                'products._id',
+                'products._id.keyword',
+                'products.base_price',
+                'products.base_unit_price',
+                'products.category',
+                'products.category.keyword',
+                'products.created_on',
+                'products.discount_amount',
+                'products.discount_percentage',
+                'products.manufacturer',
+                'products.manufacturer.keyword',
+                'products.min_price',
+                'products.price',
+                'products.product_id',
+                'products.product_name',
+                'products.product_name.keyword',
+                'products.quantity',
+                'products.sku',
+                'products.tax_amount',
+                'products.taxful_price',
+                'products.taxless_price',
+                'products.unit_discount_amount',
+                'sku',
+                'taxful_total_price',
+                'taxless_total_price',
+                'total_quantity',
+                'total_unique_products',
+                'type',
+                'user',
+              ],
               filter: [],
               parent: {
-                filter: [
-                  {
-                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                    range: {
-                      order_date: {
-                        gte: fromTime,
-                        lte: toTime,
-                        format: 'strict_date_optional_time',
+                query: { language: 'kuery', query: '' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                      range: {
+                        order_date: {
+                          gte: fromTime,
+                          lte: toTime,
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             },
-          },
-          browserTimezone: 'UTC',
-          title: 'testfooyu78yt90-',
-        })
-      );
-      expect(resStatus).to.eql(200);
-      expect(resType).to.eql('text/csv');
-      expectSnapshot(resText).toMatch();
+            browserTimezone: 'UTC',
+            title: 'testfooyu78yt90-',
+          })
+        )) as supertest.Response;
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expectSnapshot(resText).toMatch();
+      });
+
+      it('Exports CSV with all fields when using defaults', async () => {
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              sort: [{ order_date: 'desc' }],
+              fields: ['*'],
+              filter: [],
+              parent: {
+                query: { language: 'kuery', query: '' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                      range: {
+                        order_date: {
+                          gte: fromTime,
+                          lte: toTime,
+                          format: 'strict_date_optional_time',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            browserTimezone: 'UTC',
+            title: 'testfooyu78yt90-',
+          })
+        );
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expectSnapshot(resText).toMatch();
+      });
     });
 
     describe('date formatting', () => {

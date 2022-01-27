@@ -1649,7 +1649,7 @@ exports[`discover Discover CSV Export Generate CSV: archived search generates a 
 "
 `;
 
-exports[`discover Discover CSV Export Generate CSV: new search generates a large export 1`] = `
+exports[`discover Discover CSV Export Generate CSV: new search ES 7.x only generates a large export 1`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",category,\\"category.keyword\\",currency,\\"customer_first_name\\",\\"customer_first_name.keyword\\",\\"customer_full_name\\",\\"customer_full_name.keyword\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_last_name.keyword\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,\\"geoip.city_name\\",\\"geoip.continent_name\\",\\"geoip.country_iso_code\\",\\"geoip.location\\",\\"geoip.region_name\\",manufacturer,\\"manufacturer.keyword\\",\\"order_date\\",\\"order_id\\",\\"products._id\\",\\"products._id.keyword\\",\\"products.base_price\\",\\"products.base_unit_price\\",\\"products.category\\",\\"products.category.keyword\\",\\"products.created_on\\",\\"products.discount_amount\\",\\"products.discount_percentage\\",\\"products.manufacturer\\",\\"products.manufacturer.keyword\\",\\"products.min_price\\",\\"products.price\\",\\"products.product_id\\",\\"products.product_name\\",\\"products.product_name.keyword\\",\\"products.quantity\\",\\"products.sku\\",\\"products.tax_amount\\",\\"products.taxful_price\\",\\"products.taxless_price\\",\\"products.unit_discount_amount\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
 3AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"_doc\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",\\"Sultan Al Boone\\",MALE,19,Boone,Boone,\\"(empty)\\",Saturday,5,\\"sultan al@boone-family.zzz\\",\\"Abu Dhabi\\",Asia,AE,\\"{
   \\"\\"coordinates\\"\\": [
@@ -1675,7 +1675,7 @@ BgMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"_doc\\",\\"Women's Clothing\\",\\"Wome
 KQMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"_doc\\",\\"Me"
 `;
 
-exports[`discover Discover CSV Export Generate CSV: new search generates a large export 2`] = `
+exports[`discover Discover CSV Export Generate CSV: new search ES 7.x only generates a large export 2`] = `
 "rce,\\"-\\",\\"_doc\\",\\"Women's Clothing, Women's Accessories\\",\\"Women's Clothing, Women's Accessories\\",EUR,Elyssa,Elyssa,\\"Elyssa Graves\\",\\"Elyssa Graves\\",FEMALE,27,Graves,Graves,\\"(empty)\\",Thursday,3,\\"elyssa@graves-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
   \\"\\"coordinates\\"\\": [
     -74,
@@ -1714,7 +1714,7 @@ exports[`discover Discover CSV Export Generate CSV: new search generates a large
 "
 `;
 
-exports[`discover Discover CSV Export Generate CSV: new search generates a report from a new search with data: default 1`] = `
+exports[`discover Discover CSV Export Generate CSV: new search ES 7.x only generates a report from a new search with data: default 1`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",category,\\"category.keyword\\",currency,\\"customer_first_name\\",\\"customer_first_name.keyword\\",\\"customer_full_name\\",\\"customer_full_name.keyword\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_last_name.keyword\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,\\"geoip.city_name\\",\\"geoip.continent_name\\",\\"geoip.country_iso_code\\",\\"geoip.location\\",\\"geoip.region_name\\",manufacturer,\\"manufacturer.keyword\\",\\"order_date\\",\\"order_id\\",\\"products._id\\",\\"products._id.keyword\\",\\"products.base_price\\",\\"products.base_unit_price\\",\\"products.category\\",\\"products.category.keyword\\",\\"products.created_on\\",\\"products.discount_amount\\",\\"products.discount_percentage\\",\\"products.manufacturer\\",\\"products.manufacturer.keyword\\",\\"products.min_price\\",\\"products.price\\",\\"products.product_id\\",\\"products.product_name\\",\\"products.product_name.keyword\\",\\"products.quantity\\",\\"products.sku\\",\\"products.tax_amount\\",\\"products.taxful_price\\",\\"products.taxless_price\\",\\"products.unit_discount_amount\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
 9AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"_doc\\",\\"Men's Clothing\\",\\"Men's Clothing\\",EUR,Boris,Boris,\\"Boris Bradley\\",\\"Boris Bradley\\",MALE,36,Bradley,Bradley,\\"(empty)\\",Wednesday,2,\\"boris@bradley-family.zzz\\",\\"-\\",Europe,GB,\\"{
   \\"\\"coordinates\\"\\": [

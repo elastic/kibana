@@ -37,8 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', function () {
-    this.onlyEsVersion('<=7');
-
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -79,20 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      it('generates a report from a new search with data: default', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
-
-        await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
-
-        const res = await getReport();
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-
-        const csvFile = res.text;
-        expectSnapshot(csvFile).toMatch();
-      });
-
       it('generates a report with no data', async () => {
         await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
@@ -101,21 +85,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.text).to.be(`\n`);
       });
 
-      it('generates a large export', async () => {
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.clickNewSearchButton();
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
-        });
-        await PageObjects.discover.saveSearch('large export');
+      describe('ES 7.x only', function () {
+        this.onlyEsVersion('<=7');
 
-        // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(5107481);
-        expectSnapshot(csvFile.slice(0, 5000)).toMatch();
-        expectSnapshot(csvFile.slice(-5000)).toMatch();
+        it('generates a report from a new search with data: default', async () => {
+          await PageObjects.discover.clickNewSearchButton();
+          await PageObjects.reporting.setTimepickerInEcommerceDataRange();
+
+          await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+
+          const res = await getReport();
+          expect(res.status).to.equal(200);
+          expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+          const csvFile = res.text;
+          expectSnapshot(csvFile).toMatch();
+        });
+
+        it('generates a large export', async () => {
+          const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
+          const toTime = 'Aug 23, 2019 @ 16:18:51.821';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          await PageObjects.discover.clickNewSearchButton();
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
+          });
+          await PageObjects.discover.saveSearch('large export');
+
+          // match file length, the beginning and the end of the csv file contents
+          const { text: csvFile } = await getReport();
+          expect(csvFile.length).to.be(5107481);
+          expectSnapshot(csvFile.slice(0, 5000)).toMatch();
+          expectSnapshot(csvFile.slice(-5000)).toMatch();
+        });
       });
     });
 
