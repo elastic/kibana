@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
@@ -23,6 +31,7 @@ interface Props {
 
 export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: Props) {
   const { setSeries, allSeries } = useSeriesStorage();
+  const [isPopoverOpen, setPopover] = useState(false);
 
   const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
 
@@ -46,6 +55,16 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
     }
   };
 
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const button = <EuiButtonIcon iconType="boxesHorizontal" onClick={onButtonClick} color="text" />;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -59,45 +78,47 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={VIEW_SAMPLE_DOCUMENTS_LABEL}>
-          <EuiButtonIcon
-            iconType="discoverApp"
-            aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
-            size="s"
-            color="text"
-            target="_blank"
-            href={discoverHref}
-            isDisabled={!series.dataType || !series.selectedMetricField || !indexPattern}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={HIDE_SERIES_LABEL}>
-          <EuiButtonIcon
-            iconType={series.hidden ? 'eyeClosed' : 'eye'}
-            aria-label={HIDE_SERIES_LABEL}
-            size="s"
-            color="text"
-            onClick={toggleSeries}
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem
+                key=""
+                icon="discoverApp"
+                href={discoverHref}
+                aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
+                disabled={!series.dataType || !series.selectedMetricField || !indexPattern}
+                target="_blank"
+              >
+                {VIEW_SAMPLE_DOCUMENTS_LABEL}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key=""
+                icon={series.hidden ? 'eyeClosed' : 'eye'}
+                onClick={toggleSeries}
+                aria-label={HIDE_SERIES_LABEL}
+              >
+                {HIDE_SERIES_LABEL}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key=""
+                icon="copy"
+                onClick={copySeries}
+                aria-label={COPY_SERIES_LABEL}
+              >
+                {COPY_SERIES_LABEL}
+              </EuiContextMenuItem>,
+              <RemoveSeries seriesId={seriesId} />,
+            ]}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={COPY_SERIES_LABEL}>
-          <EuiButtonIcon
-            iconType={'copy'}
-            color="text"
-            aria-label={COPY_SERIES_LABEL}
-            size="s"
-            onClick={copySeries}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <RemoveSeries seriesId={seriesId} />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -118,6 +139,6 @@ const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone
 const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
   'xpack.observability.seriesEditor.sampleDocuments',
   {
-    defaultMessage: 'View sample documents in new tab',
+    defaultMessage: 'View sample documents',
   }
 );
