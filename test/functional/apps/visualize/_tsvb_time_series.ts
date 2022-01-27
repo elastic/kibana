@@ -442,6 +442,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('Annotations', () => {
+          beforeEach(async () => {
+            await visualBuilder.clickAnnotationsTab();
+            await visualBuilder.clickAnnotationsAddDataSourceButton();
+          });
+
           it('should display correct annotations data for extension.raw field', async () => {
             const expectedAnnotationsData = [
               {
@@ -460,8 +465,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 header: '2015-09-21 07:00',
               },
             ];
-            await visualBuilder.clickAnnotationsTab();
-            await visualBuilder.clickAnnotationsAddDataSourceButton();
             await visualBuilder.setAnnotationFilter('geo.dest : "AW" or geo.src : "AM"');
             await visualBuilder.setAnnotationFields('extension.raw');
             await visualBuilder.setAnnotationRowTemplate('extension: {{extension.raw}}');
@@ -504,8 +507,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 header: '2015-09-21 16:00',
               },
             ];
-            await visualBuilder.clickAnnotationsTab();
-            await visualBuilder.clickAnnotationsAddDataSourceButton();
             await visualBuilder.setAnnotationFilter('bytes = 0');
             await visualBuilder.setAnnotationFields('machine.os.raw, memory');
             await visualBuilder.setAnnotationRowTemplate(
@@ -550,8 +551,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 header: '2015-09-21 10:00',
               },
             ];
-            await visualBuilder.clickAnnotationsTab();
-            await visualBuilder.clickAnnotationsAddDataSourceButton();
             await visualBuilder.setAnnotationFilter('memory > 300000 and geo.src: "US"');
             await visualBuilder.setAnnotationFields('hello_world_runtime_field, geo.dest');
             await visualBuilder.setAnnotationRowTemplate(
