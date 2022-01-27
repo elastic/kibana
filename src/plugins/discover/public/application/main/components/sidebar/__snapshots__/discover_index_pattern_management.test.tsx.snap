@@ -684,7 +684,7 @@ exports[`Discover DataView Management renders correctly 1`] = `
     hasArrow={true}
     isOpen={false}
     ownFocus={true}
-    panelPaddingSize="s"
+    panelPaddingSize="none"
   >
     <div
       className="euiPopover euiPopover--anchorDownCenter"
