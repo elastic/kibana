@@ -75,7 +75,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let status: number;
 
         before(async () => {
-          await generateData({ synthtraceEsClient, start, end });
+          await generateData({
+            synthtraceEsClient,
+            start,
+            end,
+            coldStartRate: 10,
+            warmStartRate: 30,
+          });
           const response = await callApi();
           body = response.body;
           status = response.status;
