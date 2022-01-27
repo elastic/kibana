@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { asDuration, asTransactionRate, toMicroseconds, asMillisecondDuration } from './duration';
+import {
+  asDuration,
+  asTransactionRate,
+  toMicroseconds,
+  asMillisecondDuration,
+  formatDurationFromTimeUnitChar,
+} from './duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -71,7 +77,7 @@ describe('duration formatters', () => {
       [1000, '1,000.0 tpm'],
       [1000000, '1,000,000.0 tpm'],
     ])(
-      'displays the correct label when the number is integer and has zero decimals',
+      'displays the correct label when the number is a positive integer and has zero decimals',
       (value, formattedValue) => {
         expect(asTransactionRate(value)).toBe(formattedValue);
       }
@@ -89,14 +95,74 @@ describe('duration formatters', () => {
         expect(asTransactionRate(value)).toBe(formattedValue);
       }
     );
+
+    it.each([
+      [-1, '< 0.1 tpm'],
+      [-10, '< 0.1 tpm'],
+      [-100, '< 0.1 tpm'],
+      [-1000, '< 0.1 tpm'],
+      [-1000000, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is a negative integer and has zero decimals',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [-1.23, '< 0.1 tpm'],
+      [-12.34, '< 0.1 tpm'],
+      [-123.45, '< 0.1 tpm'],
+      [-1234.56, '< 0.1 tpm'],
+      [-1234567.89, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is negative and has decimal part',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
   });
 
   describe('asMilliseconds', () => {
     it('converts to formatted decimal milliseconds', () => {
       expect(asMillisecondDuration(0)).toEqual('0 ms');
     });
+
     it('formats correctly with undefined values', () => {
       expect(asMillisecondDuration(undefined)).toEqual('N/A');
+    });
+  });
+
+  describe('formatDurationFromTimeUnitChar', () => {
+    it('Convert "s" to "secs".', () => {
+      expect(formatDurationFromTimeUnitChar(30, 's')).toEqual('30 secs');
+    });
+    it('Convert "s" to "sec."', () => {
+      expect(formatDurationFromTimeUnitChar(1, 's')).toEqual('1 sec');
+    });
+
+    it('Convert "m" to "mins".', () => {
+      expect(formatDurationFromTimeUnitChar(10, 'm')).toEqual('10 mins');
+    });
+
+    it('Convert "m" to "min."', () => {
+      expect(formatDurationFromTimeUnitChar(1, 'm')).toEqual('1 min');
+    });
+
+    it('Convert "h" to "hrs."', () => {
+      expect(formatDurationFromTimeUnitChar(5, 'h')).toEqual('5 hrs');
+    });
+
+    it('Convert "h" to "hr"', () => {
+      expect(formatDurationFromTimeUnitChar(1, 'h')).toEqual('1 hr');
+    });
+
+    it('Convert "d" to "days"', () => {
+      expect(formatDurationFromTimeUnitChar(2, 'd')).toEqual('2 days');
+    });
+
+    it('Convert "d" to "day"', () => {
+      expect(formatDurationFromTimeUnitChar(1, 'd')).toEqual('1 day');
     });
   });
 });

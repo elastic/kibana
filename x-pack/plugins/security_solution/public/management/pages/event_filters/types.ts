@@ -51,7 +51,7 @@ export interface EventFiltersService {
   getOne(id: string): Promise<ExceptionListItemSchema>;
   updateOne(exception: Immutable<UpdateExceptionListItemSchema>): Promise<ExceptionListItemSchema>;
   deleteOne(id: string): Promise<ExceptionListItemSchema>;
-  getSummary(): Promise<ExceptionListSummarySchema>;
+  getSummary(filter?: string): Promise<ExceptionListSummarySchema>;
 }
 
 export interface EventFiltersListPageData {
