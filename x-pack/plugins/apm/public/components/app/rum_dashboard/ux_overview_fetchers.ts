@@ -20,8 +20,7 @@ export const fetchUxOverviewDate = async ({
   relativeTime,
   serviceName,
 }: FetchDataParams): Promise<UxFetchDataResponse> => {
-  const data = await callApmApi({
-    endpoint: 'GET /internal/apm/ux/web-core-vitals',
+  const data = await callApmApi('GET /internal/apm/ux/web-core-vitals', {
     signal: null,
     params: {
       query: {
@@ -41,8 +40,7 @@ export const fetchUxOverviewDate = async ({
 export async function hasRumData(
   params: HasDataParams
 ): Promise<UXHasDataResponse> {
-  return await callApmApi({
-    endpoint: 'GET /api/apm/observability_overview/has_rum_data',
+  return await callApmApi('GET /api/apm/observability_overview/has_rum_data', {
     signal: null,
     params: {
       query: params?.absoluteTime
