@@ -24,7 +24,8 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { Panel } from '../../../common/types';
+import type { Panel, DataResponseMeta } from '../../../common/types';
+import type { EsSearchRequest } from '../search_strategies';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -69,11 +70,11 @@ export async function getTableData(
     return panel.pivot_id;
   };
 
-  const meta = {
+  const meta: DataResponseMeta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
+    trackedEsSearches: {},
   };
-
   const handleError = handleErrorResponse(panel);
 
   try {
@@ -88,29 +89,38 @@ export async function getTableData(
       throw new PivotNotSelectedForTableError();
     }
 
-    const body = await buildTableRequest({
-      req,
-      panel,
-      esQueryConfig: services.esQueryConfig,
-      seriesIndex: panelIndex,
-      capabilities,
-      uiSettings: services.uiSettings,
-      buildSeriesMetaParams: () =>
-        services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
-    });
-
-    const [resp] = await searchStrategy.search(requestContext, req, [
+    const searches: EsSearchRequest[] = [
       {
+        index: panelIndex.indexPatternString,
         body: {
-          ...body,
+          ...(await buildTableRequest({
+            req,
+            panel,
+            esQueryConfig: services.esQueryConfig,
+            seriesIndex: panelIndex,
+            capabilities,
+            uiSettings: services.uiSettings,
+            buildSeriesMetaParams: () =>
+              services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+          })),
           runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
         },
-        index: panelIndex.indexPatternString,
+        trackingEsSearchMeta: {
+          requestId: panel.id,
+          requestLabel: i18n.translate('visTypeTimeseries.tableRequest.label', {
+            defaultMessage: 'Table: {id}',
+            values: {
+              id: panel.id,
+            },
+          }),
+        },
       },
-    ]);
+    ];
+
+    const data = await searchStrategy.search(requestContext, req, searches, meta.trackedEsSearches);
 
     const buckets = get(
-      resp.rawResponse ? resp.rawResponse : resp,
+      data[0].rawResponse ? data[0].rawResponse : data[0],
       'aggregations.pivot.buckets',
       []
     );
