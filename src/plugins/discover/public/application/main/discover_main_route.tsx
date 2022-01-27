@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
@@ -20,10 +20,10 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
-import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { getUrlTracker } from '../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -48,15 +48,29 @@ export function DiscoverMainRoute() {
   const [indexPatternList, setIndexPatternList] = useState<
     Array<SavedObject<IndexPatternAttributes>>
   >([]);
-
   const { id } = useParams<DiscoverLandingParams>();
+
+  const navigateToOverview = useCallback(() => {
+    core.application.navigateToApp('kibanaOverview', { path: '#' });
+  }, [core.application]);
+
+  const checkForDataViews = useCallback(async () => {
+    const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
+    if (!hasUserDataView) {
+      navigateToOverview();
+    }
+    const defaultDataView = await data.dataViews.getDefaultDataView();
+    if (!defaultDataView) {
+      navigateToOverview();
+    }
+  }, [navigateToOverview, data.dataViews]);
 
   useEffect(() => {
     const savedSearchId = id;
 
     async function loadDefaultOrCurrentIndexPattern(searchSource: ISearchSource) {
       try {
-        await data.indexPatterns.ensureDefaultDataView();
+        await checkForDataViews();
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
@@ -83,6 +97,10 @@ export function DiscoverMainRoute() {
         const loadedIndexPattern = await loadDefaultOrCurrentIndexPattern(
           currentSavedSearch.searchSource
         );
+
+        if (!loadedIndexPattern) {
+          return;
+        }
 
         if (!currentSavedSearch.searchSource.getField('index')) {
           currentSavedSearch.searchSource.setField('index', loadedIndexPattern);
@@ -135,6 +153,7 @@ export function DiscoverMainRoute() {
     services,
     toastNotifications,
     core.theme,
+    checkForDataViews,
   ]);
 
   useEffect(() => {
