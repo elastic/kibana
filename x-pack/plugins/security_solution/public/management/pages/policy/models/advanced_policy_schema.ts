@@ -836,7 +836,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.rollback_telemetry_enabled',
       {
-        defaultMessage: 'Enable diagnostic rollaback telemetry. Default: true',
+        defaultMessage: 'Enable diagnostic rollback telemetry. Default: true',
       }
     ),
   },
