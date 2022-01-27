@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { getConfig } from './get_config';
+import { getPartitionTheme } from './get_partition_theme';
 import { createMockPieParams } from '../mocks';
 
 const visParams = createMockPieParams();
 
 describe('getConfig', () => {
   it('should cap the outerSizeRatio to 1', () => {
-    expect(getConfig(visParams, {}, { width: 400, height: 400 }).outerSizeRatio).toBe(1);
+    expect(
+      getPartitionTheme(visParams, {}, { width: 400, height: 400 }).partition?.outerSizeRatio
+    ).toBe(1);
   });
 
   it('should not have outerSizeRatio for split chart', () => {
     expect(
-      getConfig(
+      getPartitionTheme(
         {
           ...visParams,
           dimensions: {
@@ -37,11 +39,11 @@ describe('getConfig', () => {
         },
         {},
         { width: 400, height: 400 }
-      ).outerSizeRatio
+      ).partition?.outerSizeRatio
     ).toBeUndefined();
 
     expect(
-      getConfig(
+      getPartitionTheme(
         {
           ...visParams,
           dimensions: {
@@ -60,11 +62,11 @@ describe('getConfig', () => {
         },
         {},
         { width: 400, height: 400 }
-      ).outerSizeRatio
+      ).partition?.outerSizeRatio
     ).toBeUndefined();
   });
 
   it('should not set outerSizeRatio if dimensions are not defined', () => {
-    expect(getConfig(visParams, {}).outerSizeRatio).toBeUndefined();
+    expect(getPartitionTheme(visParams, {}).partition?.outerSizeRatio).toBeUndefined();
   });
 });
