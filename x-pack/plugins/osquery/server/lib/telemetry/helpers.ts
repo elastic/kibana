@@ -7,53 +7,8 @@
 
 import moment from 'moment';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { copyAllowlistedFields, packEventFields, savedQueryEventFields } from './filters';
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
-
-/**
- * Determines the when the last run was in order to execute to.
- *
- * @param executeTo
- * @param lastExecutionTimestamp
- * @returns the timestamp to search from
- */
-export const getPreviousDiagTaskTimestamp = (
-  executeTo: string,
-  lastExecutionTimestamp?: string
-) => {
-  if (lastExecutionTimestamp === undefined) {
-    return moment(executeTo).subtract(5, 'minutes').toISOString();
-  }
-
-  if (moment(executeTo).diff(lastExecutionTimestamp, 'minutes') >= 10) {
-    return moment(executeTo).subtract(10, 'minutes').toISOString();
-  }
-
-  return lastExecutionTimestamp;
-};
-
-/**
- * Determines the when the last run was in order to execute to.
- *
- * @param executeTo
- * @param lastExecutionTimestamp
- * @returns the timestamp to search from
- */
-export const getPreviousDailyTaskTimestamp = (
-  executeTo: string,
-  lastExecutionTimestamp?: string
-) => {
-  if (lastExecutionTimestamp === undefined) {
-    return moment(executeTo).subtract(24, 'hours').toISOString();
-  }
-
-  if (moment(executeTo).diff(lastExecutionTimestamp, 'hours') >= 24) {
-    return moment(executeTo).subtract(24, 'hours').toISOString();
-  }
-
-  return lastExecutionTimestamp;
-};
 
 /**
  * Chunks an Array<T> into an Array<Array<T>>
@@ -70,22 +25,6 @@ export const batchTelemetryRecords = (
   [...Array(Math.ceil(telemetryRecords.length / batchSize))].map(() =>
     telemetryRecords.splice(0, batchSize)
   );
-
-/**
- * User defined type guard for PackagePolicy
- *
- * @param data the union type of package policies
- * @returns type confirmation
- */
-export function isPackagePolicyList(
-  data: string[] | PackagePolicy[] | undefined
-): data is PackagePolicy[] {
-  if (data === undefined || data.length < 1) {
-    return false;
-  }
-
-  return (data as PackagePolicy[])[0].inputs !== undefined;
-}
 
 /**
  * Constructs the packs telemetry schema from a collection of packs saved objects
