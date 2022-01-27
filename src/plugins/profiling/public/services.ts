@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, HttpFetchError } from 'kibana/public';
+import { CoreStart, HttpFetchError, HttpFetchQuery } from 'kibana/public';
 import { FLAMECHART_ROUTE_PATH, TOPN_ROUTE_PATH } from '../common';
 
 export interface Services {
@@ -15,18 +15,25 @@ export interface Services {
   fetchRawFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
 }
 
+function getFetchQuery(seconds: string): HttpFetchQuery {
+  const unixTime = Math.floor(Date.now() / 1000);
+  return {
+    index: 'profiling-events',
+    projectID: 5,
+    timeFrom: unixTime - parseInt(seconds),
+    timeTo: unixTime
+  } as HttpFetchQuery;
+}
+
 export function getServices(core: CoreStart): Services {
   return {
     fetchTopN: async (type: string, seconds: string) => {
       try {
-        const response = await core.http.get<{ results: any[] }>(`${TOPN_ROUTE_PATH}/${type}`, {
-          query: {
-            index: 'profiling-events',
-            projectID: 5,
-            timeFrom: 1642672391,
-            timeTo: 1642758791,
-          },
-        });
+        const query = getFetchQuery(seconds);
+        const response = await core.http.get<{ results: any[] }>(
+          `${TOPN_ROUTE_PATH}/${type}`,
+          { query }
+        );
         return response;
       } catch (e) {
         return e;
@@ -35,16 +42,10 @@ export function getServices(core: CoreStart): Services {
 
     fetchFlamechart: async (seconds: string) => {
       try {
+        const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
           `${FLAMECHART_ROUTE_PATH}/canvas`,
-          {
-            query: {
-              index: 'profiling-events',
-              projectID: 5,
-              timeFrom: 1642672391,
-              timeTo: 1642758791,
-            },
-          }
+          { query }
         );
         return response;
       } catch (e) {
@@ -54,8 +55,10 @@ export function getServices(core: CoreStart): Services {
 
     fetchRawFlamechart: async (seconds: string) => {
       try {
+        const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
-          `${FLAMECHART_ROUTE_PATH}/webgl/${seconds}`
+          `${FLAMECHART_ROUTE_PATH}/webgl/${seconds}`,
+          { query }
         );
         return response.results;
       } catch (e) {
