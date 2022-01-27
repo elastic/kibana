@@ -41,7 +41,3 @@ export const ALERT_DETAILS = i18n.translate(
     defaultMessage: 'Alert details',
   }
 );
-
-export const CANCEL = i18n.translate('xpack.securitySolution.footer.cancel', {
-  defaultMessage: 'Cancel',
-});

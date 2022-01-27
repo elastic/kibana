@@ -23,7 +23,6 @@ import { Ecs } from '../../../../../common/ecs';
 import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { ACTIVE_PANEL } from './index';
-import { CANCEL } from './translations';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -130,7 +129,7 @@ export const EventDetailsFooterComponent = React.memo(
       if (preventTakeActionDropdown) {
         return (
           <EuiButtonEmpty onClick={() => handlePanelChange(null)}>
-            <FormattedMessage id={CANCEL} defaultMessage="Cancel" />
+            <FormattedMessage id="xpack.securitySolution.footer.cancel" defaultMessage="Cancel" />
           </EuiButtonEmpty>
         );
       }
