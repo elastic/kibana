@@ -66,7 +66,8 @@ export const discoverTourSteps = [
     content: (
       <EuiText>
         <p>
-          Click <EuiIcon type="tableDensityCompact" /> and then set the desired height.
+          Click <EuiIcon type="tableDensityCompact" /> to set the row height to 1 or more lines, or
+          automatically adjust the height to fit the contents.
         </p>
         <EuiImage alt="Some alt text" src={rowsPerLineGif} />
       </EuiText>
