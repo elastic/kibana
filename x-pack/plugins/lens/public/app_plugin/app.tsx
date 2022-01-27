@@ -56,6 +56,7 @@ export function App({
   datasourceMap,
   visualizationMap,
   topNavMenuEntryGenerators,
+  initialContext,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -308,6 +309,7 @@ export function App({
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+          initialContext={initialContext}
         />
 
         {getLegacyUrlConflictCallout()}

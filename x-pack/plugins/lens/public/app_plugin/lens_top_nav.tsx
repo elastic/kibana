@@ -152,6 +152,7 @@ export const LensTopNavMenu = ({
   datasourceMap,
   title,
   topNavMenuEntryGenerators,
+  initialContext,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -251,6 +252,7 @@ export const LensTopNavMenu = ({
         visualizationState: visualization.state,
         query,
         filters,
+        initialContext,
       });
       return menuEntry ? [menuEntry] : [];
     });
@@ -264,6 +266,7 @@ export const LensTopNavMenu = ({
     visualization.state,
     query,
     filters,
+    initialContext,
   ]);
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({

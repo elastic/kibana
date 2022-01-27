@@ -67,6 +67,7 @@ export interface LensAppProps {
   visualizationMap: VisualizationMap;
 
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
+  initialContext?: VisualizeFieldContext;
 }
 
 export type RunSave = (
@@ -97,6 +98,7 @@ export interface LensTopNavMenuProps {
   title?: string;
   lensInspector: LensInspector;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
+  initialContext?: VisualizeFieldContext;
 }
 
 export interface HistoryLocationState {

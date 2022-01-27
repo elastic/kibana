@@ -891,4 +891,5 @@ export type LensTopNavMenuEntryGenerator = (props: {
   visualizationState: unknown;
   query: Query;
   filters: Filter[];
+  initialContext?: VisualizeFieldContext;
 }) => undefined | TopNavMenuData;

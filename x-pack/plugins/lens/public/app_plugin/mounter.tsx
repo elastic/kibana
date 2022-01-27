@@ -230,6 +230,7 @@ export async function mountApp(
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+            initialContext={initialContext}
           />
         </Provider>
       );
