@@ -91,6 +91,10 @@ describe('ServiceNowITSM Fields', () => {
         value: 'software',
         text: 'Software',
       },
+      {
+        text: 'Failed Login',
+        value: 'failed_login',
+      },
     ]);
   });
 

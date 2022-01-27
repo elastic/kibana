@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { waitFor, act, render, screen } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
 
@@ -15,7 +15,7 @@ import { connector, choices as mockChoices } from '../mock';
 import { Choice } from './types';
 import Fields from './servicenow_sir_case_fields';
 
-let onChoicesSuccess = (c: Choice[]) => {};
+let onChoicesSuccess = (_c: Choice[]) => {};
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_choices', () => ({
@@ -49,6 +49,10 @@ describe('ServiceNowSIR Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="destIpCheckbox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sourceIpCheckbox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="malwareUrlCheckbox"]').exists()).toBeTruthy();
@@ -107,6 +111,10 @@ describe('ServiceNowSIR Fields', () => {
       {
         text: 'Software',
         value: 'software',
+      },
+      {
+        text: 'Failed Login',
+        value: 'failed_login',
       },
     ]);
   });
@@ -172,15 +180,31 @@ describe('ServiceNowSIR Fields', () => {
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
+  test('it should hide subcategory if selecting a category without subcategories', async () => {
+    // Failed Login doesn't have defined subcategories
+    const customFields = {
+      ...fields,
+      category: 'Failed Login',
+      subcategory: '',
+    };
+    const wrapper = mount(
+      <Fields fields={customFields} onChange={onChange} connector={connector} />
+    );
+
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+  });
+
   describe('onChange calls', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    let wrapper: ReactWrapper;
 
-    act(() => {
-      onChoicesSuccess(mockChoices);
+    beforeEach(() => {
+      wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+      act(() => {
+        onChoicesSuccess(mockChoices);
+      });
+      wrapper.update();
+      expect(onChange).toHaveBeenCalledWith(fields);
     });
-    wrapper.update();
-
-    expect(onChange).toHaveBeenCalledWith(fields);
 
     const checkbox = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
     checkbox.forEach((subj) =>
