@@ -172,6 +172,7 @@ export class DocLinksService {
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          hiddenIndices: `${ELASTICSEARCH_DOCS}multi-index.html#hidden`,
           ilm: `${ELASTICSEARCH_DOCS}index-lifecycle-management.html`,
           ilmForceMerge: `${ELASTICSEARCH_DOCS}ilm-forcemerge.html`,
           ilmFreeze: `${ELASTICSEARCH_DOCS}ilm-freeze.html`,
