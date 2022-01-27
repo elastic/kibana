@@ -8,6 +8,8 @@
 import type { IRouter } from '../../../../core/server';
 import { DataRequestHandlerContext } from '../../../data/server';
 
+import { registerFlameChartElasticRoute } from './load_flameChartElastic';
+
 import { registerFlameChartSearchRoute } from './search_flameChart';
 import { registerTraceEventsTopNContainersSearchRoute } from './search_topNContainers';
 import { registerTraceEventsTopNDeploymentsSearchRoute } from './search_topNDeployments';
@@ -16,6 +18,8 @@ import { registerTraceEventsTopNStackTracesSearchRoute } from './search_topNStac
 import { registerTraceEventsTopNThreadsSearchRoute } from './search_topNThreads';
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
+  registerFlameChartElasticRoute(router);
+
   registerFlameChartSearchRoute(router);
   registerTraceEventsTopNContainersSearchRoute(router);
   registerTraceEventsTopNDeploymentsSearchRoute(router);
