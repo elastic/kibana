@@ -44,6 +44,13 @@ export function ColorRangesExtraActions({
     dispatch({ type: 'distributeEqually', payload: { dataBounds, palettes } });
   }, [dataBounds, dispatch, palettes]);
 
+  const oneColorRangeWarn = i18n.translate(
+    'xpack.lens.dynamicColoring.customPalette.oneColorRange',
+    {
+      defaultMessage: `Requires more than one color`,
+    }
+  );
+
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={false}>
       <EuiFlexItem grow={false}>
@@ -81,45 +88,59 @@ export function ColorRangesExtraActions({
         </TooltipWrapper>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-test-subj={`lnsPalettePanel_dynamicColoring_reverseColors`}
-          iconType="sortable"
-          color="primary"
-          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPaletteAriaLabel', {
-            defaultMessage: 'Reverse colors',
-          })}
-          size="xs"
-          flush="left"
-          onClick={onReversePalette}
-          disabled={shouldDisableReverse}
+        <TooltipWrapper
+          tooltipContent={oneColorRangeWarn}
+          condition={shouldDisableReverse}
+          position="top"
+          delay="regular"
         >
-          <FormattedMessage
-            id="xpack.lens.dynamicColoring.customPalette.reverseColors"
-            defaultMessage="Reverse colors"
-          />
-        </EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj={`lnsPalettePanel_dynamicColoring_reverseColors`}
+            iconType="sortable"
+            color="primary"
+            aria-label={i18n.translate('xpack.lens.dynamicColoring.customPaletteAriaLabel', {
+              defaultMessage: 'Reverse colors',
+            })}
+            size="xs"
+            flush="left"
+            onClick={onReversePalette}
+            disabled={shouldDisableReverse}
+          >
+            <FormattedMessage
+              id="xpack.lens.dynamicColoring.customPalette.reverseColors"
+              defaultMessage="Reverse colors"
+            />
+          </EuiButtonEmpty>
+        </TooltipWrapper>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-test-subj={`lnsPalettePanel_dynamicColoring_distributeValues`}
-          iconType={DistributeEquallyIcon}
-          color="primary"
-          aria-label={i18n.translate(
-            'xpack.lens.dynamicColoring.customPalette.distributeValuesAriaLabel',
-            {
-              defaultMessage: 'Distribute values',
-            }
-          )}
-          size="xs"
-          flush="left"
-          disabled={shouldDisableDistribute}
-          onClick={onDistributeValues}
+        <TooltipWrapper
+          tooltipContent={oneColorRangeWarn}
+          condition={shouldDisableDistribute}
+          position="top"
+          delay="regular"
         >
-          <FormattedMessage
-            id="xpack.lens.dynamicColoring.customPalette.distributeValues"
-            defaultMessage="Distribute values"
-          />
-        </EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj={`lnsPalettePanel_dynamicColoring_distributeValues`}
+            iconType={DistributeEquallyIcon}
+            color="primary"
+            aria-label={i18n.translate(
+              'xpack.lens.dynamicColoring.customPalette.distributeValuesAriaLabel',
+              {
+                defaultMessage: 'Distribute values',
+              }
+            )}
+            size="xs"
+            flush="left"
+            disabled={shouldDisableDistribute}
+            onClick={onDistributeValues}
+          >
+            <FormattedMessage
+              id="xpack.lens.dynamicColoring.customPalette.distributeValues"
+              defaultMessage="Distribute values"
+            />
+          </EuiButtonEmpty>
+        </TooltipWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
