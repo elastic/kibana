@@ -7,6 +7,7 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
@@ -15,6 +16,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
+import { getUiSettings } from './ui_settings';
 import {
   registerLensUsageCollector,
   initializeLensTelemetry,
@@ -37,6 +39,7 @@ export interface PluginStartContract {
   taskManager?: TaskManagerStartContract;
   fieldFormats: FieldFormatsStart;
   data: DataPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export interface LensServerPluginSetup {
@@ -57,6 +60,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
     setupSavedObjects(core, getFilterMigrations);
     setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
+    core.uiSettings.register(getUiSettings());
 
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(
