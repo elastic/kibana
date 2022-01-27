@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
+import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import {
@@ -89,13 +90,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns an array of transaction cold start rates', () => {
           expect(body).to.have.property('currentPeriod');
           expect(body.currentPeriod.transactionColdstartRate).to.have.length(15);
-          expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.5)).to.be(
+          expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.25)).to.be(
             true
           );
         });
 
         it('returns correct average rate', () => {
-          expect(body.currentPeriod.average).to.be(0.5);
+          expect(body.currentPeriod.average).to.be(0.25);
         });
 
         it("doesn't have data for the previous period", () => {
@@ -110,15 +111,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let status: number;
 
         before(async () => {
-          await generateData({ synthtraceEsClient, start, end });
+          const startDate = moment(start).add(6, 'minutes');
+          const endDate = moment(start).add(9, 'minutes');
+          const comparisonStartDate = new Date(start);
+          const comparisonEndDate = moment(start).add(3, 'minutes');
 
-          const fiveMinutes = 5 * 60 * 1000;
+          await generateData({
+            synthtraceEsClient,
+            start: startDate.valueOf(),
+            end: endDate.valueOf(),
+            coldStartRate: 10,
+            warmStartRate: 30,
+          });
+          await generateData({
+            synthtraceEsClient,
+            start: comparisonStartDate.getTime(),
+            end: comparisonEndDate.valueOf(),
+            coldStartRate: 20,
+            warmStartRate: 20,
+          });
+
           const response = await callApi({
             query: {
-              start: new Date(end - fiveMinutes).toISOString(),
-              end: new Date(end).toISOString(),
-              comparisonStart: new Date(start).toISOString(),
-              comparisonEnd: new Date(start + fiveMinutes).toISOString(),
+              start: startDate.toISOString(),
+              end: endDate.subtract(1, 'seconds').toISOString(),
+              comparisonStart: comparisonStartDate.toISOString(),
+              comparisonEnd: comparisonEndDate.subtract(1, 'seconds').toISOString(),
             },
           });
           body = response.body;
@@ -159,14 +177,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
         });
 
-        it('returns same number of buckets for both periods', () => {
-          expect(body.currentPeriod.transactionColdstartRate.length).to.be(
-            body.previousPeriod.transactionColdstartRate.length
+        it('returns an array of transaction cold start rates', () => {
+          expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
+          expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.25)).to.be(
+            true
+          );
+
+          expect(body.previousPeriod.transactionColdstartRate).to.have.length(3);
+          expect(body.previousPeriod.transactionColdstartRate.every(({ y }) => y === 0.5)).to.be(
+            true
           );
         });
 
         it('has same average value for both periods', () => {
-          expect(body.currentPeriod.average).to.be(body.previousPeriod.average);
+          expect(body.currentPeriod.average).to.be(0.25);
+          expect(body.previousPeriod.average).to.be(0.5);
         });
       });
     }

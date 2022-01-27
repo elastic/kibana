@@ -9,10 +9,13 @@ import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
 
 export const dataConfig = {
   serviceName: 'synth-go',
-  rate: 10,
-  transaction: {
+  coldStartTransaction: {
     name: 'GET /apple 🍎',
     duration: 1000,
+  },
+  warmStartTransaction: {
+    name: 'GET /banana 🍌',
+    duration: 2000,
   },
 };
 
@@ -20,37 +23,48 @@ export async function generateData({
   synthtraceEsClient,
   start,
   end,
+  coldStartRate,
+  warmStartRate,
 }: {
   synthtraceEsClient: ApmSynthtraceEsClient;
   start: number;
   end: number;
+  coldStartRate: number;
+  warmStartRate: number;
 }) {
-  const { rate, transaction, serviceName } = dataConfig;
+  const { coldStartTransaction, warmStartTransaction, serviceName } = dataConfig;
   const instance = apm.service(serviceName, 'production', 'go').instance('instance-a');
 
-  const traceEvents = timerange(start, end)
-    .interval('1m')
-    .rate(rate)
-    .flatMap((timestamp) => [
-      ...instance
-        .transaction(transaction.name)
-        .defaults({
-          'faas.coldstart': true,
-        })
-        .timestamp(timestamp)
-        .duration(transaction.duration)
-        .success()
-        .serialize(),
-      ...instance
-        .transaction(transaction.name)
-        .defaults({
-          'faas.coldstart': false,
-        })
-        .timestamp(timestamp)
-        .duration(transaction.duration)
-        .success()
-        .serialize(),
-    ]);
+  const traceEvents = [
+    ...timerange(start, end)
+      .interval('1m')
+      .rate(coldStartRate)
+      .flatMap((timestamp) => [
+        ...instance
+          .transaction(coldStartTransaction.name)
+          .defaults({
+            'faas.coldstart': true,
+          })
+          .timestamp(timestamp)
+          .duration(coldStartTransaction.duration)
+          .success()
+          .serialize(),
+      ]),
+    ...timerange(start, end)
+      .interval('1m')
+      .rate(warmStartRate)
+      .flatMap((timestamp) => [
+        ...instance
+          .transaction(warmStartTransaction.name)
+          .defaults({
+            'faas.coldstart': false,
+          })
+          .timestamp(timestamp)
+          .duration(warmStartTransaction.duration)
+          .success()
+          .serialize(),
+      ]),
+  ];
 
   await synthtraceEsClient.index(traceEvents);
 }
