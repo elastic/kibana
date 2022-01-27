@@ -15,9 +15,11 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiTitle,
   EuiButtonEmpty,
   EuiText,
+  EuiToolTip,
   EuiSpacer,
   EuiPortal,
   EuiPagination,
@@ -160,19 +162,43 @@ export function DiscoverGridFlyout({
               </EuiButtonEmpty>
             </EuiFlexItem>
             {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="documents"
-                  flush="left"
-                  {...surrDocsProps}
-                  data-test-subj="docTableRowAction"
-                >
-                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
-                    defaultMessage: 'Surrounding documents',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="documents"
+                    flush="left"
+                    {...surrDocsProps}
+                    data-test-subj="docTableRowAction"
+                  >
+                    {i18n.translate(
+                      'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
+                      {
+                        defaultMessage: 'Surrounding documents',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    position="right"
+                    content={i18n.translate(
+                      'discover.grid.tableRow.viewSurroundingDocumentsHover',
+                      {
+                        defaultMessage:
+                          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+                      }
+                    )}
+                  >
+                    <EuiIcon
+                      size="s"
+                      color="subdued"
+                      type="questionInCircle"
+                      className="eui-alignTop"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
