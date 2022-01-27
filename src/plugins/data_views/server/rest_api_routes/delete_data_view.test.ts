@@ -6,29 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { setDefault, getDefault } from './default_index_pattern';
+import { deleteDataView } from './delete_data_view';
 import { dataViewsService } from '../mocks';
 import { getUsageCollection } from './test_utils';
 
-describe('default data view', () => {
-  it('set - calls usageCollection', () => {
+describe('delete data view', () => {
+  it('call usageCollection', () => {
     const usageCollection = getUsageCollection();
-    setDefault({
+    deleteDataView({
       dataViewsService,
-      counterName: 'POST /path',
+      counterName: 'DELETE /path',
       usageCollection,
-      newDefaultId: '1',
-      force: false,
-    });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
-  });
-
-  it('get - calls usageCollection', () => {
-    const usageCollection = getUsageCollection();
-    getDefault({
-      dataViewsService,
-      counterName: 'GET /path',
-      usageCollection,
+      id: '1',
     });
     expect(usageCollection.incrementCounter).toBeCalledTimes(1);
   });

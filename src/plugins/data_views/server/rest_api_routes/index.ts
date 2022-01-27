@@ -10,12 +10,12 @@ import * as fieldRoutes from './fields';
 import * as runtimeRoutes from './runtime_fields';
 import * as scriptedRoutes from './scripted_fields';
 
-import * as createRoutes from './create_index_pattern';
-import * as defaultRoutes from './default_index_pattern';
-import * as deleteRoutes from './delete_index_pattern';
-import * as getRoutes from './get_index_pattern';
-import * as hasRoutes from './has_user_index_pattern';
-import * as updateRoutes from './update_index_pattern';
+import * as createRoutes from './create_data_view';
+import * as defaultRoutes from './default_data_view';
+import * as deleteRoutes from './delete_data_view';
+import * as getRoutes from './get_data_view';
+import * as hasRoutes from './has_user_data_view';
+import * as updateRoutes from './update_data_view';
 
 const routes = [
   fieldRoutes.registerUpdateFieldsRoute,

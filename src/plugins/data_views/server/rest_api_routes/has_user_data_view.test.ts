@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { hasUserDataView } from './has_user_index_pattern';
+import { hasUserDataView } from './has_user_data_view';
 import { dataViewsService } from '../mocks';
 import { getUsageCollection } from './test_utils';
 
