@@ -7,16 +7,18 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { mockCoreContext } from '../core_context.mock';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from './types';
-import { DocLinksService } from './doc_links_service';
+import type { DocLinksService } from './doc_links_service';
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 
 const createSetupMock = (): DocLinksServiceSetup => {
-  const context = mockCoreContext.create();
-  const service = new DocLinksService(context);
-  return service.setup();
+  const branch = 'test-branch';
+  return {
+    ...getDocLinksMeta({ kibanaBranch: branch }),
+    links: getDocLinks({ kibanaBranch: branch }),
+  };
 };
 
 const createStartMock = (): DocLinksServiceStart => {

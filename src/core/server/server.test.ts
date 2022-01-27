@@ -23,6 +23,7 @@ import {
   mockEnvironmentService,
   mockPrebootService,
   mockDeprecationService,
+  mockDocLinksService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -102,6 +103,7 @@ test('sets up services on "setup"', async () => {
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
   expect(mockI18nService.setup).not.toHaveBeenCalled();
   expect(mockDeprecationService.setup).not.toHaveBeenCalled();
+  expect(mockDocLinksService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -117,6 +119,7 @@ test('sets up services on "setup"', async () => {
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
   expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.setup).toHaveBeenCalledTimes(1);
+  expect(mockDocLinksService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -167,6 +170,7 @@ test('runs services on "start"', async () => {
   expect(mockMetricsService.start).not.toHaveBeenCalled();
   expect(mockStatusService.start).not.toHaveBeenCalled();
   expect(mockDeprecationService.start).not.toHaveBeenCalled();
+  expect(mockDocLinksService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -176,6 +180,7 @@ test('runs services on "start"', async () => {
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
   expect(mockStatusService.start).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.start).toHaveBeenCalledTimes(1);
+  expect(mockDocLinksService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
