@@ -350,7 +350,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
+    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-___records___');
 
     expect(
       options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']

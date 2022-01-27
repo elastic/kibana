@@ -641,7 +641,7 @@ describe('IndexPattern Data Panel', () => {
     });
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
-      expect(wrapper.find(FieldItem).first().prop('field').name).toEqual('Records');
+      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
