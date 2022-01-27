@@ -91,7 +91,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./mvt_scaling'));
       loadTestFile(require.resolve('./mvt_geotile_grid'));
       loadTestFile(require.resolve('./add_layer_panel'));
-      loadTestFile(require.resolve('./import_geojson'));
+      loadTestFile(require.resolve('./file_upload'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./visualize_create_menu'));
       loadTestFile(require.resolve('./discover'));

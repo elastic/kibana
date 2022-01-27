@@ -163,6 +163,7 @@ export class GeoFilePicker extends Component<Props, State> {
             onChange={this._onFileSelect}
             accept={GEO_FILE_TYPES.join(',')}
             isLoading={this.state.isLoadingPreview}
+            data-test-subj="geoFilePicker"
           />
         </EuiFormRow>
         {this._renderImporterEditor()}

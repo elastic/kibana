@@ -6,23 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import path from 'path';
 import uuid from 'uuid/v4';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
-  const log = getService('log');
   const security = getService('security');
   const retry = getService('retry');
 
   async function loadFileAndIndex(loadFileName) {
-    log.debug(`Uploading ${loadFileName} for indexing`);
-    await PageObjects.maps.uploadJsonFileForIndexing(
-      path.join(__dirname, 'test_upload_files', loadFileName)
-    );
-    await PageObjects.maps.waitForLayersToLoad();
-    await PageObjects.maps.doesLayerExist('Import File');
-    await PageObjects.maps.hasFilePickerLoadedFile(loadFileName);
+    await PageObjects.maps.selectGeoJsonFile(loadFileName);
 
     const indexName = uuid();
     await PageObjects.maps.setIndexName(indexName);
@@ -49,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
     beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectGeoJsonUploadSource();
+      await PageObjects.maps.selectFileUploadCard();
     });
 
     afterEach(async () => {

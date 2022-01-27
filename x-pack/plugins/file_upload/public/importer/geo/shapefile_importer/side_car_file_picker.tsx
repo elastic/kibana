@@ -82,6 +82,7 @@ export class SideCarFilePicker extends Component<Props, State> {
           accept={this.props.ext}
           display="default"
           isInvalid={this.state.isInvalid}
+          data-test-subj={`shapefileSideCarFilePicker${this.props.ext.replace('.', '_')}`}
         />
       </EuiFormRow>
     );

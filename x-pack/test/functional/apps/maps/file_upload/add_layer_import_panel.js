@@ -6,13 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import path from 'path';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
-
-  const FILE_LOAD_DIR = 'test_upload_files';
-  const DEFAULT_LOAD_FILE_NAME = 'point.json';
   const security = getService('security');
   const retry = getService('retry');
 
@@ -32,10 +28,8 @@ export default function ({ getPageObjects, getService }) {
 
     beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
-      await PageObjects.maps.selectGeoJsonUploadSource();
-      await PageObjects.maps.uploadJsonFileForIndexing(
-        path.join(__dirname, FILE_LOAD_DIR, DEFAULT_LOAD_FILE_NAME)
-      );
+      await PageObjects.maps.selectFileUploadCard();
+      await PageObjects.maps.selectGeoJsonFile('point.json');
     });
 
     afterEach(async () => {
@@ -46,10 +40,8 @@ export default function ({ getPageObjects, getService }) {
       const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
-      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
-        DEFAULT_LOAD_FILE_NAME
-      );
-      expect(filePickerLoadedFile).to.be(true);
+      const hasLayer = await PageObjects.maps.doesLayerExist('point.json');
+      expect(hasLayer).to.be(true);
     });
 
     it('should remove layer on cancel', async () => {
@@ -61,32 +53,13 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should replace layer on input change', async () => {
-      // Upload second file
-      const secondLoadFileName = 'polygon.json';
-      await PageObjects.maps.uploadJsonFileForIndexing(
-        path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
-      );
-      await PageObjects.maps.waitForLayersToLoad();
-      // Check second file is loaded in file picker
-      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
-        secondLoadFileName
-      );
-      expect(filePickerLoadedFile).to.be(true);
+      await PageObjects.maps.selectGeoJsonFile('polygon.json');
+      const hasLayer = await PageObjects.maps.doesLayerExist('polygon.json');
+      expect(hasLayer).to.be(true);
     });
 
     it('should clear layer on replacement layer load error', async () => {
-      // Upload second file
-      const secondLoadFileName = 'not_json.txt';
-      await PageObjects.maps.uploadJsonFileForIndexing(
-        path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
-      );
-      await PageObjects.maps.waitForLayersToLoad();
-      // Check second file is loaded in file picker
-      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
-        secondLoadFileName
-      );
-      expect(filePickerLoadedFile).to.be(true);
-      // Check that no file is loaded in layer preview
+      await PageObjects.maps.selectGeoJsonFile('not_json.txt');
       const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(1);
     });

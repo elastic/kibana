@@ -393,14 +393,6 @@ export class GisPageObject extends FtrService {
     );
   }
 
-  async hasFilePickerLoadedFile(fileName: string) {
-    this.log.debug(`Has file picker loaded file ${fileName}`);
-    const filePickerText = await this.find.byCssSelector('.euiFilePicker__promptText');
-    const filePickerTextContent = await filePickerText.getVisibleText();
-
-    return fileName === filePickerTextContent;
-  }
-
   /*
    * Layer panel utility functions
    */
@@ -461,62 +453,6 @@ export class GisPageObject extends FtrService {
     }
   }
 
-  async importFileButtonEnabled() {
-    this.log.debug(`Check "Import file" button enabled`);
-    const importFileButton = await this.testSubjects.find('importFileButton');
-    const isDisabled = await importFileButton.getAttribute('disabled');
-    return !isDisabled;
-  }
-
-  async importLayerReadyForAdd() {
-    this.log.debug(`Wait until import complete`);
-    await this.testSubjects.find('indexRespCopyButton', 5000);
-    let layerAddReady = false;
-    await this.retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
-      layerAddReady = await this.importFileButtonEnabled();
-      return layerAddReady;
-    });
-    return layerAddReady;
-  }
-
-  async clickImportFileButton() {
-    this.log.debug(`Click "Import file" button`);
-    await this.testSubjects.click('importFileButton');
-  }
-
-  async setIndexName(indexName: string) {
-    this.log.debug(`Set index name to: ${indexName}`);
-    await this.testSubjects.setValue('fileUploadIndexNameInput', indexName);
-  }
-
-  async setIndexType(indexType: string) {
-    this.log.debug(`Set index type to: ${indexType}`);
-    await this.testSubjects.selectValue('fileImportIndexSelect', indexType);
-  }
-
-  async indexTypeOptionExists(indexType: string) {
-    this.log.debug(`Check index type "${indexType}" available`);
-    return await this.find.existsByCssSelector(
-      `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
-    );
-  }
-
-  async clickCopyButton(dataTestSubj: string): Promise<string> {
-    this.log.debug(`Click ${dataTestSubj} copy button`);
-
-    await this.testSubjects.click(dataTestSubj);
-
-    return await this.browser.getClipboardValue();
-  }
-
-  async getIndexResults() {
-    return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
-  }
-
-  async getIndexPatternResults() {
-    return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
-  }
-
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
@@ -571,17 +507,86 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('emsBoundaries');
   }
 
-  async selectGeoJsonUploadSource() {
-    this.log.debug(`Select upload geojson source`);
-    await this.testSubjects.click('uploadGeoJson');
+  async selectFileUploadCard() {
+    this.log.debug(`Select upload file card`);
+    await this.testSubjects.click('uploadFile');
   }
 
-  async uploadJsonFileForIndexing(path: string) {
-    await this.common.setFileInputPath(path);
-    this.log.debug(`File selected`);
+  async selectFile(selector: string, path: string) {
+    this.log.debug(`selectFile; selector: ${selector}, path: ${path}`);
+    const input =  await this.testSubjects.find(selector);
+    await input.type(path);
+  }
+
+  async isImportFileButtonEnabled(): Promise<boolean> {
+    this.log.debug(`Check "Import file" button enabled`);
+    const importFileButton = await this.testSubjects.find('importFileButton');
+    const isDisabled = await importFileButton.getAttribute('disabled');
+    return !isDisabled;
+  }
+
+  async waitForFilePreview() {
+    await this.retry.waitFor('Wait for file preview', async () => {
+      return await this.isImportFileButtonEnabled();
+    });
+  }
+
+  async previewGeoJsonFile(path: string) {
+    await this.selectFile('geoFilePicker', path);
+
+    await this.waitForFilePreview();
 
     await this.header.waitUntilLoadingHasFinished();
     await this.waitForLayersToLoad();
+  }
+
+  async previewShapefile(path: string) {
+    await this.selectFile('geoFilePicker', path);
+    await this.selectFile('shapefileSideCarFilePicker_dbf', path.replace('.shp', '.dbf'));
+    await this.selectFile('shapefileSideCarFilePicker_prj', path.replace('.shp', '.prj'));
+    await this.selectFile('shapefileSideCarFilePicker_shx', path.replace('.shp', '.shx'));
+
+    await this.waitForFilePreview();
+
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitForLayersToLoad();
+  }
+
+  async setIndexName(indexName: string) {
+    this.log.debug(`Set index name: ${indexName}`);
+    await this.testSubjects.setValue('fileUploadIndexNameInput', indexName);
+  }
+
+  async uploadFile(): Promise<unknown> {
+    // import button is disabled while checking index name
+    // make sure import button is enabled before clicking it
+    await this.retry.waitFor('Wait for import button to be enabled', async () => {
+      return await this.isImportFileButtonEnabled();
+    });
+    await this.testSubjects.click('importFileButton');
+
+    await this.retry.waitFor('wait for file import results', async () => {
+      return await this.testSubjects.exists('indexRespCopyButton');
+    });
+
+    await this.testSubjects.click('indexRespCopyButton');
+    return JSON.parse(await this.browser.getClipboardValue());
+  }
+
+  async clickCopyButton(dataTestSubj: string): Promise<string> {
+    this.log.debug(`Click ${dataTestSubj} copy button`);
+
+    await this.testSubjects.click(dataTestSubj);
+
+    return await this.browser.getClipboardValue();
+  }
+
+  async getIndexResults() {
+    return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
+  }
+
+  async getIndexPatternResults() {
+    return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
   }
 
   async selectVectorLayer(vectorLayerName: string) {
