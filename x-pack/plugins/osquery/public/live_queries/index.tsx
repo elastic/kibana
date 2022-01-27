@@ -28,7 +28,6 @@ interface LiveQueryProps {
   ecsMappingField?: boolean;
   enabled?: boolean;
   formType?: 'steps' | 'simple';
-  eventSource?: string;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -45,7 +44,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   ecsMappingField,
   formType,
   enabled,
-  eventSource,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -115,7 +113,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       onSuccess={onSuccess}
       formType={formType}
       enabled={enabled}
-      eventSource={eventSource}
     />
   );
 };

@@ -18,7 +18,6 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import { TelemetryReceiver } from './receiver';
-import { allowlistEventFields, copyAllowlistedFields } from './filters';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';

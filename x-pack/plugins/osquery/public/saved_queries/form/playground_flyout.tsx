@@ -52,7 +52,6 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
           savedQueryId={savedQueryId}
           queryField={false}
           ecsMappingField={false}
-          eventSource="osquery_app_saved_query_test"
         />
       </EuiFlyoutBody>
     </EuiFlyout>

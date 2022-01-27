@@ -15,7 +15,7 @@ import {
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 import { ConfigType } from '../config';
-import { TelemetryEventsSender } from '../telemetry/sender';
+import { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<

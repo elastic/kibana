@@ -23,11 +23,6 @@ export type AgentSelection = t.TypeOf<typeof agentSelection>;
 export const agentSelectionOrUndefined = t.union([agentSelection, t.undefined]);
 export type AgentSelectionOrUndefined = t.TypeOf<typeof agentSelectionOrUndefined>;
 
-export const eventSource = t.string;
-export type EventSource = t.TypeOf<typeof eventSource>;
-export const eventSourceOrUndefined = t.union([eventSource, t.undefined]);
-export type EventSourceOrUndefined = t.TypeOf<typeof eventSourceOrUndefined>;
-
 export const description = t.string;
 export type Description = t.TypeOf<typeof description>;
 export const descriptionOrUndefined = t.union([description, t.undefined]);

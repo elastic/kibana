@@ -62,7 +62,6 @@ interface LiveQueryFormProps {
   ecsMappingField?: boolean;
   formType?: FormType;
   enabled?: boolean;
-  eventSource?: string;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -73,7 +72,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
-  eventSource,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -166,16 +164,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    serializer: ({ savedQueryId, agentSelection, ...formData }) =>
-      pickBy(
-        {
-          ...formData,
-          agent_selection: agentSelection,
-          saved_query_id: savedQueryId,
-          event_source: eventSource,
-        },
-        (value) => !isEmpty(value)
-      ),
+    serializer: ({ savedQueryId,  ...formData }) =>
+      pickBy({ ...formData, saved_query_id: savedQueryId }, (value) => !isEmpty(value)),
     defaultValue: deepMerge(
       {
         agentSelection: {
