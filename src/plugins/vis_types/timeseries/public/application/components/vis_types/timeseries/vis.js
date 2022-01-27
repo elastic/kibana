@@ -238,7 +238,7 @@ class TimeseriesVisualization extends Component {
       } else if (!mainDomainAdded) {
         const tickFormatter = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)
           ? seriesGroupTickFormatter
-          : (val) => val;
+          : createTickFormatter(undefined, undefined, getConfig);
 
         TimeseriesVisualization.addYAxis(yAxis, {
           tickFormatter,
