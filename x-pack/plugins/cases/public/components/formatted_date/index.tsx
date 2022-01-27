@@ -170,3 +170,4 @@ export const FormattedRelativePreferenceLabel = ({
     <>{relativeLabel}</>
   );
 };
+FormattedRelativePreferenceLabel.displayName = 'FormattedRelativePreferenceLabel';
