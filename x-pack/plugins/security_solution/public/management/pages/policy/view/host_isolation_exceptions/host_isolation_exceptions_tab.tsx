@@ -89,7 +89,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
     return policySearchedExceptionsListRequest.data ? (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
-        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {host isolation exception} other {host isolation exceptions}} associated with this policy. Click here to {link}"
         values={{
           count: allPolicyExceptionsListRequest.data?.total,
           link,
