@@ -32,9 +32,10 @@ import { ComboBox } from '../combo_box';
 
 interface Props {
   validate: Validation;
+  children?: React.ReactNode;
 }
 
-export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
+export const HTTPAdvancedFields = memo<Props>(({ validate, children }) => {
   const { fields, setFields } = useHTTPAdvancedFieldsContext();
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
@@ -461,6 +462,7 @@ export const HTTPAdvancedFields = memo<Props>(({ validate }) => {
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      {children}
     </EuiAccordion>
   );
 });
