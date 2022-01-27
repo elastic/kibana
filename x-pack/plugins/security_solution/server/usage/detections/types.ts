@@ -153,8 +153,8 @@ export interface CasesSavedObject {
   alertId: string;
   index: string;
   rule: {
-    id: string;
-    name: string;
+    id: string | null;
+    name: string | null;
   };
 }
 

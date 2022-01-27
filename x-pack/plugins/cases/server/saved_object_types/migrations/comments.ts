@@ -57,13 +57,13 @@ export interface CreateCommentsMigrationsDeps {
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
+  const lensMigrations = migrationDeps.lensEmbeddableFactory().migrations;
+  const lensMigrationObject =
+    typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
   const embeddableMigrations = mapValues<
     MigrateFunctionsObject,
     SavedObjectMigrationFn<{ comment?: string }>
-  >(
-    migrationDeps.lensEmbeddableFactory().migrations,
-    migrateByValueLensVisualizations
-  ) as MigrateFunctionsObject;
+  >(lensMigrationObject, migrateByValueLensVisualizations) as MigrateFunctionsObject;
 
   const commentsMigrations = {
     '7.11.0': (
