@@ -15,11 +15,10 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
+  EuiIconTip,
   EuiTitle,
   EuiButtonEmpty,
   EuiText,
-  EuiToolTip,
   EuiSpacer,
   EuiPortal,
   EuiPagination,
@@ -161,7 +160,7 @@ export function DiscoverGridFlyout({
               </EuiButtonEmpty>
             </EuiFlexItem>
             {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="xs"
@@ -179,8 +178,7 @@ export function DiscoverGridFlyout({
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="right"
+                  <EuiIconTip
                     content={i18n.translate(
                       'discover.grid.tableRow.viewSurroundingDocumentsHover',
                       {
@@ -188,14 +186,14 @@ export function DiscoverGridFlyout({
                           'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
                       }
                     )}
-                  >
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="questionInCircle"
-                      className="eui-alignTop"
-                    />
-                  </EuiToolTip>
+                    type="questionInCircle"
+                    color="subdued"
+                    size="s"
+                    position="right"
+                    iconProps={{
+                      className: 'eui-alignTop',
+                    }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
