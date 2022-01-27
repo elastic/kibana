@@ -15,32 +15,6 @@ describe('getEventCount', () => {
     jest.clearAllMocks();
   });
 
-  it('should make the expected request', () => {
-    getEventCount({
-      esClient,
-      query: '*:*',
-      language: 'kuery',
-      filters: [],
-      exceptionItems: [],
-      index: ['test-index'],
-    });
-
-    expect(esClient.count).toHaveBeenCalledWith({
-      body: {
-        query: {
-          bool: {
-            filter: [],
-            must: [],
-            must_not: [],
-            should: [],
-          },
-        },
-      },
-      ignore_unavailable: true,
-      index: ['test-index'],
-    });
-  });
-
   it('can respect tuple', () => {
     getEventCount({
       esClient,

@@ -211,6 +211,6 @@ export interface EventCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   filters: unknown[];
-  tuple?: RuleRangeTuple;
+  tuple: RuleRangeTuple;
   timestampOverride?: string;
 }
