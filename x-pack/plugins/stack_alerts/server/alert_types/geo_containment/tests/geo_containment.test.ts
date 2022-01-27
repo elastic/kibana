@@ -22,7 +22,7 @@ import type { GeoContainmentParams } from '../alert_type';
 
 const alertInstanceFactory =
   (contextKeys: unknown[], testAlertActionArr: unknown[]) => (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertInstanceFactory<
+    const alertInstance = alertsMock.createAlertFactory<
       GeoContainmentInstanceState,
       GeoContainmentInstanceContext
     >();

@@ -6,18 +6,18 @@
  */
 
 import { AlertInstanceContext, AlertInstanceState } from '../types';
-import { AlertInstance } from './alert_instance';
+import { Alert } from './alert';
 
-export function createAlertInstanceFactory<
+export function createAlertFactory<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string
->(alertInstances: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>) {
-  return (id: string): AlertInstance<InstanceState, InstanceContext, ActionGroupIds> => {
-    if (!alertInstances[id]) {
-      alertInstances[id] = new AlertInstance<InstanceState, InstanceContext, ActionGroupIds>();
+>(alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>) {
+  return (id: string): Alert<InstanceState, InstanceContext, ActionGroupIds> => {
+    if (!alerts[id]) {
+      alerts[id] = new Alert<InstanceState, InstanceContext, ActionGroupIds>();
     }
 
-    return alertInstances[id];
+    return alerts[id];
   };
 }

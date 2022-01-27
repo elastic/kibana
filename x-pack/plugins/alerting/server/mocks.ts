@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { AlertInstance } from './alert_instance';
+import { Alert } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -37,8 +37,8 @@ const createStartMock = () => {
 export type AlertInstanceMock<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext
-> = jest.Mocked<AlertInstance<State, Context>>;
-const createAlertInstanceFactoryMock = <
+> = jest.Mocked<Alert<State, Context>>;
+const createAlertFactoryMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
@@ -82,11 +82,11 @@ const createAlertServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
-  const alertInstanceFactoryMock = createAlertInstanceFactoryMock<InstanceState, InstanceContext>();
+  const alertFactoryMock = createAlertFactoryMock<InstanceState, InstanceContext>();
   return {
-    alertInstanceFactory: jest
-      .fn<jest.Mocked<AlertInstance<InstanceState, InstanceContext>>, [string]>()
-      .mockReturnValue(alertInstanceFactoryMock),
+    alertFactory: jest
+      .fn<jest.Mocked<Alert<InstanceState, InstanceContext>>, [string]>()
+      .mockReturnValue(alertFactoryMock),
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => true,
@@ -97,7 +97,7 @@ const createAlertServicesMock = <
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
 
 export const alertsMock = {
-  createAlertInstanceFactory: createAlertInstanceFactoryMock,
+  createAlertFactory: createAlertFactoryMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
   createAlertServices: createAlertServicesMock,

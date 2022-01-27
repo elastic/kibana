@@ -6,8 +6,8 @@
  */
 
 import sinon from 'sinon';
-import { AlertInstance } from './alert_instance';
-import { createAlertInstanceFactory } from './create_alert_instance_factory';
+import { Alert } from './alert';
+import { createAlertFactory } from './create_alert_factory';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -17,9 +17,9 @@ beforeAll(() => {
 beforeEach(() => clock.reset());
 afterAll(() => clock.restore());
 
-test('creates new instances for ones not passed in', () => {
-  const alertInstanceFactory = createAlertInstanceFactory({});
-  const result = alertInstanceFactory('1');
+test('creates new alerts for ones not passed in', () => {
+  const alertFactory = createAlertFactory({});
+  const result = alertFactory('1');
   expect(result).toMatchInlineSnapshot(`
             Object {
               "meta": Object {},
@@ -28,15 +28,15 @@ test('creates new instances for ones not passed in', () => {
       `);
 });
 
-test('reuses existing instances', () => {
-  const alertInstance = new AlertInstance({
+test('reuses existing alerts', () => {
+  const alert = new Alert({
     state: { foo: true },
     meta: { lastScheduledActions: { group: 'default', date: new Date() } },
   });
-  const alertInstanceFactory = createAlertInstanceFactory({
-    '1': alertInstance,
+  const alertFactory = createAlertFactory({
+    '1': alert,
   });
-  const result = alertInstanceFactory('1');
+  const result = alertFactory('1');
   expect(result).toMatchInlineSnapshot(`
     Object {
       "meta": Object {
@@ -52,11 +52,11 @@ test('reuses existing instances', () => {
   `);
 });
 
-test('mutates given instances', () => {
-  const alertInstances = {};
-  const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
-  alertInstanceFactory('1');
-  expect(alertInstances).toMatchInlineSnapshot(`
+test('mutates given alerts', () => {
+  const alerts = {};
+  const alertFactory = createAlertFactory(alerts);
+  alertFactory('1');
+  expect(alerts).toMatchInlineSnapshot(`
             Object {
               "1": Object {
                 "meta": Object {},
