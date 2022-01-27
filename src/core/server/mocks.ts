@@ -38,6 +38,7 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
+import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -60,6 +61,7 @@ export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
@@ -156,6 +158,7 @@ function createCoreSetupMock({
   const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
     i18n: i18nServiceMock.createSetupContract(),
@@ -180,6 +183,7 @@ function createCoreSetupMock({
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     capabilities: capabilitiesServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
     metrics: metricsServiceMock.createStartContract(),
