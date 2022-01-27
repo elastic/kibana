@@ -150,9 +150,10 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       <EuiFlexItem grow={false}>{i18nHosts.HOSTS_BY_RISK}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip
+          color="subdued"
           content={i18nHosts.HOST_RISK_TABLE_TOOLTIP}
           position="right"
-          size="m"
+          size="l"
           type="iInCircle"
         />
       </EuiFlexItem>
