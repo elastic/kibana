@@ -130,6 +130,11 @@ export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
 }
 
+interface ThreatListConfig {
+  _source: string[] | boolean;
+  fields: string[] | undefined;
+}
+
 export interface GetThreatListOptions {
   buildRuleMessage: BuildRuleMessage;
   esClient: ElasticsearchClient;
@@ -144,8 +149,7 @@ export interface GetThreatListOptions {
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
   threatFilters: unknown[];
-  threatIndicatorPath: ThreatIndicatorPath;
-  threatMapping: ThreatMapping | undefined;
+  threatListConfig: ThreatListConfig;
 }
 
 export interface ThreatListCountOptions {
