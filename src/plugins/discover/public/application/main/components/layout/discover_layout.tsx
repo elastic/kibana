@@ -199,11 +199,33 @@ export function DiscoverLayout({
   }, [filterManager]);
 
   const onOpenDatePicker = useCallback(() => {
-    console.log('Open date picker...');
+    const element = document.querySelector(
+      'button[data-test-subj="superDatePickerToggleQuickMenuButton"]'
+    );
+    if (element) {
+      element.dispatchEvent(
+        new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          buttons: 1,
+        })
+      );
+    }
   }, []);
 
   const onEditSearch = useCallback(() => {
-    console.log('Edit search...');
+    const element = document.querySelector('textarea[data-test-subj="queryInput"]');
+    if (element) {
+      element.dispatchEvent(
+        new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          buttons: 1,
+        })
+      );
+    }
   }, []);
 
   const toggleSidebarCollapse = useCallback(() => {
