@@ -52,7 +52,7 @@ export function queryTopNCommon(
                         },
                         {
                           range: {
-                            TimeStamp: {
+                            '@timestamp': {
                               gte: timeFrom,
                               lt: timeTo,
                               format: 'epoch_second',
@@ -66,7 +66,7 @@ export function queryTopNCommon(
                   aggs: {
                     histogram: {
                       auto_date_histogram: {
-                        field: 'TimeStamp',
+                        field: '@timestamp',
                         buckets: 100,
                       },
                       aggs: {
