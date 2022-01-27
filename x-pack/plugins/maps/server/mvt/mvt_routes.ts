@@ -8,7 +8,7 @@
 import rison from 'rison-node';
 import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
+import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
@@ -25,9 +25,11 @@ const CACHE_TIMEOUT_SECONDS = 60 * 60;
 export function initMVTRoutes({
   router,
   logger,
+  core,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
+  core: CoreStart;
 }) {
   router.get(
     {
@@ -58,6 +60,8 @@ export function initMVTRoutes({
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const gzippedTile = await getEsTile({
+        url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        core,
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -104,6 +108,8 @@ export function initMVTRoutes({
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const gzipTileStream = await getEsGridTile({
+        url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+        core,
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
