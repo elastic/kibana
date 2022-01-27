@@ -221,6 +221,8 @@ export function registerTransactionErrorRateAlertType({
                   measured: errorRate,
                   asPercent,
                   serviceName,
+                  windowSize: ruleParams.windowSize,
+                  windowUnit: ruleParams.windowUnit,
                 }),
               },
             })
