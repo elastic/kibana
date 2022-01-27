@@ -50,8 +50,7 @@ export function PageLoadDistribution() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/page-load-distribution',
+        return callApmApi('GET /internal/apm/ux/page-load-distribution', {
           params: {
             query: {
               start,
