@@ -25,24 +25,24 @@ import {
 } from '../constants';
 
 interface CreateDataViewArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
   spec: DataViewSpec;
   override?: boolean;
   refreshFields?: boolean;
-  path: string;
+  counterName: string;
 }
 
 export const createDataView = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
   spec,
   override,
   refreshFields,
-  path,
+  counterName,
 }: CreateDataViewArgs) => {
-  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
-  return indexPatternsService.createAndSave(spec, override, !refreshFields);
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.createAndSave(spec, override, !refreshFields);
 };
 
 const indexPatternSpecSchema = schema.object({
@@ -103,7 +103,7 @@ const registerCreateDataViewRouteFactory =
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
@@ -113,12 +113,12 @@ const registerCreateDataViewRouteFactory =
           const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
 
           const dataView = await createDataView({
-            indexPatternsService,
+            dataViewsService,
             usageCollection,
             spec: spec as DataViewSpec,
             override: body.override,
             refreshFields: body.refresh_fields,
-            path,
+            counterName: `${req.route.method} ${path}`,
           });
 
           return res.ok({

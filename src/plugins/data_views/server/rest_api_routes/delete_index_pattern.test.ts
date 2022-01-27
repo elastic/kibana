@@ -10,12 +10,12 @@ import { deleteDataView } from './delete_index_pattern';
 import { dataViewsService } from '../mocks';
 import { getUsageCollection } from './test_utils';
 
-describe('set default data view', () => {
+describe('delete data view', () => {
   it('call usageCollection', () => {
     const usageCollection = getUsageCollection();
     deleteDataView({
-      indexPatternsService: dataViewsService,
-      path: '/path',
+      dataViewsService,
+      counterName: 'DELETE /path',
       usageCollection,
       id: '1',
     });

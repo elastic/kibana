@@ -32,4 +32,8 @@ export const dataViewsService = {
   createAndSave: jest.fn(),
   setDefault: jest.fn(),
   delete: jest.fn(),
+  hasUserDataView: jest.fn(),
+  getDefaultId: jest.fn(),
+  updateSavedObject: jest.fn(),
+  refreshFields: jest.fn(),
 } as unknown as jest.Mocked<DataViewsService>;

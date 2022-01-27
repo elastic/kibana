@@ -10,12 +10,12 @@ import { getDataView } from './get_index_pattern';
 import { dataViewsService } from '../mocks';
 import { getUsageCollection } from './test_utils';
 
-describe('set default data view', () => {
+describe('get default data view', () => {
   it('call usageCollection', () => {
     const usageCollection = getUsageCollection();
     getDataView({
-      indexPatternsService: dataViewsService,
-      path: '/path',
+      dataViewsService,
+      counterName: 'GET /path',
       usageCollection,
       id: '1',
     });

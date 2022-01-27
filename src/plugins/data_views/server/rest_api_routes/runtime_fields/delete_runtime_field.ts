@@ -19,23 +19,23 @@ import type {
 import { SPECIFIC_RUNTIME_FIELD_PATH, SPECIFIC_RUNTIME_FIELD_PATH_LEGACY } from '../../constants';
 
 interface DeleteRuntimeFieldArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
   id: string;
   name: string;
 }
 
 const deleteRuntimeField = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
   id,
   name,
 }: DeleteRuntimeFieldArgs) => {
-  usageCollection?.incrementCounter({ counterName: `DELETE ${path}` });
-  const indexPattern = await indexPatternsService.get(id);
-  const field = indexPattern.fields.getByName(name);
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
+  const field = dataView.fields.getByName(name);
 
   if (!field) {
     throw new ErrorIndexPatternFieldNotFound(id, name);
@@ -45,9 +45,9 @@ const deleteRuntimeField = async ({
     throw new Error('Only runtime fields can be deleted.');
   }
 
-  indexPattern.removeRuntimeField(name);
+  dataView.removeRuntimeField(name);
 
-  await indexPatternsService.updateSavedObject(indexPattern);
+  await dataViewsService.updateSavedObject(dataView);
 };
 
 const deleteRuntimeFieldRouteFactory =
@@ -79,8 +79,8 @@ const deleteRuntimeFieldRouteFactory =
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -88,7 +88,13 @@ const deleteRuntimeFieldRouteFactory =
         const id = req.params.id;
         const name = req.params.name;
 
-        await deleteRuntimeField({ indexPatternsService, usageCollection, id, name, path });
+        await deleteRuntimeField({
+          dataViewsService,
+          usageCollection,
+          id,
+          name,
+          counterName: `${req.route.method} ${path}`,
+        });
 
         return res.ok();
       })

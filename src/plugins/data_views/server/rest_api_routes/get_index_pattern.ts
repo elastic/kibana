@@ -20,20 +20,20 @@ import {
 } from '../constants';
 
 interface GetDataViewArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
   id: string;
 }
 
 export const getDataView = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
   id,
 }: GetDataViewArgs) => {
-  usageCollection?.incrementCounter({ counterName: `GET ${path}` });
-  return indexPatternsService.get(id);
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.get(id);
 };
 
 const getDataViewRouteFactory =
@@ -66,7 +66,7 @@ const getDataViewRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
@@ -74,9 +74,9 @@ const getDataViewRouteFactory =
           const id = req.params.id;
 
           const dataView = await getDataView({
-            indexPatternsService,
+            dataViewsService,
             usageCollection,
-            path,
+            counterName: `${req.route.method} ${path}`,
             id,
           });
 

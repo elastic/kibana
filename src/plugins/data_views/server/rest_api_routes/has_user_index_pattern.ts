@@ -14,18 +14,18 @@ import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart
 import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../constants';
 
 interface HasUserDataViewArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
 }
 
 export const hasUserDataView = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
 }: HasUserDataViewArgs) => {
-  usageCollection?.incrementCounter({ counterName: `GET ${path}` });
-  return indexPatternsService.hasUserDataView();
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.hasUserDataView();
 };
 
 const hasUserDataViewRouteFactory =
@@ -49,16 +49,16 @@ const hasUserDataViewRouteFactory =
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
           );
 
           const result = await hasUserDataView({
-            indexPatternsService,
+            dataViewsService,
             usageCollection,
-            path,
+            counterName: `${req.route.method} ${path}`,
           });
 
           return res.ok({

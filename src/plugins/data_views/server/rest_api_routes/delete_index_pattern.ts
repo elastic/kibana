@@ -15,20 +15,20 @@ import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart
 import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
 
 interface DeleteDataViewArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
   id: string;
 }
 
 export const deleteDataView = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
   id,
 }: DeleteDataViewArgs) => {
-  usageCollection?.incrementCounter({ counterName: `DELETE ${path}` });
-  return indexPatternsService.delete(id);
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.delete(id);
 };
 
 const deleteIndexPatternRouteFactory =
@@ -61,14 +61,19 @@ const deleteIndexPatternRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
           );
           const id = req.params.id;
 
-          await deleteDataView({ indexPatternsService, usageCollection, path, id });
+          await deleteDataView({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            id,
+          });
 
           return res.ok({
             headers: {

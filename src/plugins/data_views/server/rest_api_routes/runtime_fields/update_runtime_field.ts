@@ -26,41 +26,41 @@ import {
 } from '../../constants';
 
 interface UpdateRuntimeFieldArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
   id: string;
   name: string;
   runtimeField: Partial<RuntimeField>;
 }
 
 const updateRuntimeField = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
   id,
   name,
   runtimeField,
 }: UpdateRuntimeFieldArgs) => {
-  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
-  const indexPattern = await indexPatternsService.get(id);
-  const existingRuntimeField = indexPattern.getRuntimeField(name);
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
+  const existingRuntimeField = dataView.getRuntimeField(name);
 
   if (!existingRuntimeField) {
     throw new ErrorIndexPatternFieldNotFound(id, name);
   }
 
-  indexPattern.removeRuntimeField(name);
-  indexPattern.addRuntimeField(name, {
+  dataView.removeRuntimeField(name);
+  dataView.addRuntimeField(name, {
     ...existingRuntimeField,
     ...runtimeField,
   });
 
-  await indexPatternsService.updateSavedObject(indexPattern);
+  await dataViewsService.updateSavedObject(dataView);
 
-  const fieldObject = indexPattern.fields.getByName(name);
+  const fieldObject = dataView.fields.getByName(name);
   if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
-  return { indexPattern, fieldObject };
+  return { dataView, fieldObject };
 };
 
 const updateRuntimeFieldRouteFactory =
@@ -101,9 +101,8 @@ const updateRuntimeFieldRouteFactory =
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        usageCollection?.incrementCounter({ counterName: `POST ${path}` });
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -112,10 +111,10 @@ const updateRuntimeFieldRouteFactory =
         const name = req.params.name;
         const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const { indexPattern, fieldObject } = await updateRuntimeField({
-          indexPatternsService,
+        const { dataView, fieldObject } = await updateRuntimeField({
+          dataViewsService,
           usageCollection,
-          path,
+          counterName: `${req.route.method} ${path}`,
           id,
           name,
           runtimeField,
@@ -124,14 +123,14 @@ const updateRuntimeFieldRouteFactory =
         const legacyResponse = {
           body: {
             field: fieldObject.toSpec(),
-            [serviceKey]: indexPattern.toSpec(),
+            [serviceKey]: dataView.toSpec(),
           },
         };
 
         const response = {
           body: {
             fields: [fieldObject.toSpec()],
-            [serviceKey]: indexPattern.toSpec(),
+            [serviceKey]: dataView.toSpec(),
           },
         };
 

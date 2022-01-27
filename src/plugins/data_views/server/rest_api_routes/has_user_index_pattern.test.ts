@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createDataView } from './create_index_pattern';
+import { hasUserDataView } from './has_user_index_pattern';
 import { dataViewsService } from '../mocks';
 import { getUsageCollection } from './test_utils';
 
-describe('create data view', () => {
+describe('get default data view', () => {
   it('call usageCollection', () => {
     const usageCollection = getUsageCollection();
-    createDataView({
+    hasUserDataView({
       dataViewsService,
-      spec: {},
-      counterName: 'POST /path',
+      counterName: 'GET /path',
       usageCollection,
     });
     expect(usageCollection.incrementCounter).toBeCalledTimes(1);

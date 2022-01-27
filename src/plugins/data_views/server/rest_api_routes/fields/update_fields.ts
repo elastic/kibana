@@ -25,22 +25,22 @@ import {
 } from '../../constants';
 
 interface UpdateFieldsArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
   id: string;
   fields: Record<string, FieldUpdateType>;
 }
 
 export const updateFields = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
   id,
   fields,
 }: UpdateFieldsArgs) => {
-  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
-  const indexPattern = await indexPatternsService.get(id);
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
 
   const fieldNames = Object.keys(fields);
 
@@ -54,20 +54,20 @@ export const updateFields = async ({
 
     if (field.customLabel !== undefined) {
       changeCount++;
-      indexPattern.setFieldCustomLabel(fieldName, field.customLabel);
+      dataView.setFieldCustomLabel(fieldName, field.customLabel);
     }
 
     if (field.count !== undefined) {
       changeCount++;
-      indexPattern.setFieldCount(fieldName, field.count);
+      dataView.setFieldCount(fieldName, field.count);
     }
 
     if (field.format !== undefined) {
       changeCount++;
       if (field.format) {
-        indexPattern.setFieldFormat(fieldName, field.format);
+        dataView.setFieldFormat(fieldName, field.format);
       } else {
-        indexPattern.deleteFieldFormat(fieldName);
+        dataView.deleteFieldFormat(fieldName);
       }
     }
   }
@@ -76,8 +76,8 @@ export const updateFields = async ({
     throw new Error('Change set is empty.');
   }
 
-  await indexPatternsService.updateSavedObject(indexPattern);
-  return indexPattern;
+  await dataViewsService.updateSavedObject(dataView);
+  return dataView;
 };
 
 interface FieldUpdateType {
@@ -137,7 +137,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
@@ -145,12 +145,12 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           const id = req.params.id;
           const { fields } = req.body;
 
-          const indexPattern = await updateFields({
-            indexPatternsService,
+          const dataView = await updateFields({
+            dataViewsService,
             usageCollection,
             id,
             fields,
-            path,
+            counterName: `${req.route.method} ${path}`,
           });
 
           return res.ok({
@@ -158,7 +158,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
               'content-type': 'application/json',
             },
             body: {
-              [serviceKey]: indexPattern.toSpec(),
+              [serviceKey]: dataView.toSpec(),
             },
           });
         })

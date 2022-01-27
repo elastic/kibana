@@ -43,24 +43,24 @@ const indexPatternUpdateSchema = schema.object({
 });
 
 interface UpdateDataViewArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
   spec: DataViewSpec;
   id: string;
   refreshFields: boolean;
-  path: string;
+  counterName: string;
 }
 
 export const updateDataView = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
   spec,
   id,
   refreshFields,
-  path,
+  counterName,
 }: UpdateDataViewArgs) => {
-  usageCollection?.incrementCounter({ counterName: `POST ${path}` });
-  const indexPattern = await indexPatternsService.get(id);
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
   const {
     title,
     timeFieldName,
@@ -75,40 +75,40 @@ export const updateDataView = async ({
   let changeCount = 0;
   let doRefreshFields = false;
 
-  if (title !== undefined && title !== indexPattern.title) {
+  if (title !== undefined && title !== dataView.title) {
     changeCount++;
-    indexPattern.title = title;
+    dataView.title = title;
   }
 
-  if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
+  if (timeFieldName !== undefined && timeFieldName !== dataView.timeFieldName) {
     changeCount++;
-    indexPattern.timeFieldName = timeFieldName;
+    dataView.timeFieldName = timeFieldName;
   }
 
   if (sourceFilters !== undefined) {
     changeCount++;
-    indexPattern.sourceFilters = sourceFilters;
+    dataView.sourceFilters = sourceFilters;
   }
 
   if (fieldFormats !== undefined) {
     changeCount++;
-    indexPattern.fieldFormatMap = fieldFormats;
+    dataView.fieldFormatMap = fieldFormats;
   }
 
   if (type !== undefined) {
     changeCount++;
-    indexPattern.type = type;
+    dataView.type = type;
   }
 
   if (typeMeta !== undefined) {
     changeCount++;
-    indexPattern.typeMeta = typeMeta;
+    dataView.typeMeta = typeMeta;
   }
 
   if (fields !== undefined) {
     changeCount++;
     doRefreshFields = true;
-    indexPattern.fields.replaceAll(
+    dataView.fields.replaceAll(
       Object.values(fields || {}).map((field) => ({
         ...field,
         aggregatable: true,
@@ -119,19 +119,19 @@ export const updateDataView = async ({
 
   if (runtimeFieldMap !== undefined) {
     changeCount++;
-    indexPattern.replaceAllRuntimeFields(runtimeFieldMap);
+    dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
   if (changeCount < 1) {
     throw new Error('Index pattern change set is empty.');
   }
 
-  await indexPatternsService.updateSavedObject(indexPattern);
+  await dataViewsService.updateSavedObject(dataView);
 
   if (doRefreshFields && refreshFields) {
-    await indexPatternsService.refreshFields(indexPattern);
+    await dataViewsService.refreshFields(dataView);
   }
-  return indexPattern;
+  return dataView;
 };
 
 const updateDataViewRouteFactory =
@@ -169,7 +169,7 @@ const updateDataViewRouteFactory =
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
@@ -184,12 +184,12 @@ const updateDataViewRouteFactory =
           const spec = req.body[serviceKey] as DataViewSpec;
 
           const dataView = await updateDataView({
-            indexPatternsService,
+            dataViewsService,
             usageCollection,
             id,
             refreshFields: refresh_fields as boolean,
             spec,
-            path,
+            counterName: `${req.route.method} ${path}`,
           });
 
           return res.ok({

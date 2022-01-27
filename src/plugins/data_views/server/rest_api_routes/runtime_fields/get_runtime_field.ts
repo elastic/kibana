@@ -25,24 +25,24 @@ import {
 } from '../../constants';
 
 interface GetRuntimeFieldArgs {
-  indexPatternsService: DataViewsService;
+  dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
-  path: string;
+  counterName: string;
   id: string;
   name: string;
 }
 
 const getRuntimeField = async ({
-  indexPatternsService,
+  dataViewsService,
   usageCollection,
-  path,
+  counterName,
   id,
   name,
 }: GetRuntimeFieldArgs) => {
-  usageCollection?.incrementCounter({ counterName: `GET ${path}` });
-  const indexPattern = await indexPatternsService.get(id);
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
 
-  const field = indexPattern.fields.getByName(name);
+  const field = dataView.fields.getByName(name);
 
   if (!field) {
     throw new ErrorIndexPatternFieldNotFound(id, name);
@@ -52,7 +52,7 @@ const getRuntimeField = async ({
     throw new Error('Only runtime fields can be retrieved.');
   }
 
-  return { indexPattern, field };
+  return { dataView, field };
 };
 
 const getRuntimeFieldRouteFactory =
@@ -85,8 +85,8 @@ const getRuntimeFieldRouteFactory =
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -94,10 +94,10 @@ const getRuntimeFieldRouteFactory =
         const id = req.params.id;
         const name = req.params.name;
 
-        const { indexPattern, field } = await getRuntimeField({
-          indexPatternsService,
+        const { dataView, field } = await getRuntimeField({
+          dataViewsService,
           usageCollection,
-          path,
+          counterName: `${req.route.method} ${path}`,
           id,
           name,
         });
@@ -105,14 +105,14 @@ const getRuntimeFieldRouteFactory =
         const legacyResponse = {
           body: {
             field: field.toSpec(),
-            runtimeField: indexPattern.getRuntimeField(name),
+            runtimeField: dataView.getRuntimeField(name),
           },
         };
 
         const response = {
           body: {
             fields: [field.toSpec()],
-            runtimeField: indexPattern.getRuntimeField(name),
+            runtimeField: dataView.getRuntimeField(name),
           },
         };
 
