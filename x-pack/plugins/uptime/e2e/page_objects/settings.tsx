@@ -12,7 +12,7 @@ import { byTestId } from '../journeys/utils';
 
 export function settingsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
   return {
-    ...loginPageProvider({ page, kibanaUrl }),
+    ...loginPageProvider({ page }),
     ...utilsPageProvider({ page }),
 
     async fillToEmail(text: string) {
