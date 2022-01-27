@@ -31,7 +31,6 @@ import { SeverityBar } from './severity_bar';
 import { SeverityBadges } from './severity_badges';
 import { SeverityFilterGroup } from './severity_filter_group';
 import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
-import { HOST_RISK_TABLE_TOOLTIP } from './translations';
 
 export const rowItems: ItemsPerRow[] = [
   {
