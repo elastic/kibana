@@ -66,7 +66,7 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   useEffect(() => {
     async function checkIfHasExceptions() {
       try {
-        const summary = await getHostIsolationExceptionSummary(http);
+        const summary = await getHostIsolationExceptionSummary({ http });
         if (summary?.total > 0) {
           setCanSeeMenu(true);
         }

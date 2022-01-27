@@ -41,7 +41,7 @@ export const FleetHostIsolationExceptionsCard = memo<PackageCustomExtensionCompo
       isMounted.current = true;
       const fetchStats = async () => {
         try {
-          const summary = await getHostIsolationExceptionSummary(http);
+          const summary = await getHostIsolationExceptionSummary({ http });
           if (isMounted.current) {
             setStats(summary);
           }
