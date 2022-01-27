@@ -205,7 +205,7 @@ export class ExplorerUI extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { share } = this.props.kibana.services;
+    const { share, charts: chartsService } = this.props.kibana.services;
 
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
@@ -496,6 +496,7 @@ export class ExplorerUI extends React.Component {
                         mlLocator,
                         timeBuckets,
                         onSelectEntity: this.applyFilter,
+                        chartsService,
                       }}
                     />
                   ) : null}

@@ -186,25 +186,41 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('y', 0)
         .attr('height', chartHeight)
         .attr('width', vizWidth)
+        .style('stroke', '#cccccc')
+        .style('fill', 'none')
+        .style('stroke-width', 1);
+
+      drawLineChartAxes();
+      drawLineChartHighlightedSpan();
+      drawSyncedCursorLine(lineChartGroup);
+      drawLineChartPaths(data);
+      drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
+      drawLineChartMarkers(data);
+    }
+
+    function drawSyncedCursorLine(lineChartGroup) {
+      lineChartGroup
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('height', chartHeight)
+        .attr('width', vizWidth)
         .on('mouseout', function () {
-          if (onPointerUpdate) {
-            onPointerUpdate({
-              chartId: 'temp-chart-id',
-              scale: 'time',
-              smHorizontalValue: null,
-              smVerticalValue: null,
-              type: 'Out',
-              unit: undefined,
-            });
-          }
+          onPointerUpdate({
+            chartId: 'ml-anomaly-chart-metric',
+            scale: 'time',
+            smHorizontalValue: null,
+            smVerticalValue: null,
+            type: 'Out',
+            unit: undefined,
+          });
         })
-        .on('mouseover', function () {})
         .on('mousemove', function () {
           const mouse = d3.mouse(this);
 
           if (onPointerUpdate) {
             onPointerUpdate({
-              chartId: 'temp-chart-id',
+              chartId: 'ml-anomaly-chart-metric',
               scale: 'time',
               smHorizontalValue: null,
               smVerticalValue: null,
@@ -214,15 +230,21 @@ export class ExplorerChartSingleMetric extends React.Component {
             });
           }
         })
-        .style('stroke', '#cccccc')
-        .style('fill', 'rgba(0, 128, 0, 0)')
-        .style('stroke-width', 1);
+        .style('fill', 'rgba(0, 128, 0, 0)');
+
+      const cursorData =
+        cursor &&
+        cursor.type === 'Over' &&
+        cursor.x >= config.plotEarliest &&
+        cursor.x <= config.plotLatest
+          ? [cursor.x]
+          : [];
 
       const cursorMouseLine = lineChartGroup
         .append('g')
         .attr('class', 'cursor-line')
         .selectAll('.ml-explorer-mouse-line')
-        .data(cursor && cursor.type === 'Over' ? [cursor.x] : []);
+        .data(cursorData);
 
       cursorMouseLine.exit().remove();
 
@@ -231,20 +253,12 @@ export class ExplorerChartSingleMetric extends React.Component {
         .append('path')
         .attr('class', 'ml-explorer-mouse-line')
         .attr('d', (ts) => {
-          // console.log('ts', ts);
-          // return 'M402.9999995959596,170 402.9999995959596,0';
-
           const xPosition = lineChartXScale(ts);
           return `M${xPosition},${chartHeight} ${xPosition},0`;
         })
-        .style('stroke', 'black')
-        .style('stroke-width', '1px');
-
-      drawLineChartAxes();
-      drawLineChartHighlightedSpan();
-      drawLineChartPaths(data);
-      drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
-      drawLineChartMarkers(data);
+        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash);
     }
 
     function drawLineChartAxes() {

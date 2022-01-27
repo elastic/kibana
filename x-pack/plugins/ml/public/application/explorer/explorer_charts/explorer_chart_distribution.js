@@ -62,7 +62,15 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
+    const {
+      tooManyBuckets,
+      tooltipService,
+      timeBuckets,
+      showSelectedInterval,
+      onPointerUpdate,
+      chartTheme,
+      cursor,
+    } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -252,16 +260,74 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('width', vizWidth)
         .style('stroke', '#cccccc')
         .style('fill', 'none')
-        .style('stroke-width', 1)
-        .on('mouseover', function (d) {
-          //@todo
-        })
-        .on('mouseout', () => {});
+        .style('stroke-width', 1);
 
       drawRareChartAxes();
       drawRareChartHighlightedSpan();
+      drawSyncedCursorLine(lineChartGroup);
       drawRareChartDots(data, lineChartGroup, lineChartValuesLine);
       drawRareChartMarkers(data);
+    }
+
+    function drawSyncedCursorLine(lineChartGroup) {
+      lineChartGroup
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('height', chartHeight)
+        .attr('width', vizWidth)
+        .on('mouseout', function () {
+          onPointerUpdate({
+            chartId: 'ml-anomaly-chart-metric',
+            scale: 'time',
+            smHorizontalValue: null,
+            smVerticalValue: null,
+            type: 'Out',
+            unit: undefined,
+          });
+        })
+        .on('mousemove', function () {
+          const mouse = d3.mouse(this);
+
+          onPointerUpdate({
+            chartId: 'ml-anomaly-chart-metric',
+            scale: 'time',
+            smHorizontalValue: null,
+            smVerticalValue: null,
+            type: 'Over',
+            unit: undefined,
+            x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
+          });
+        })
+        .style('fill', 'rgba(0, 128, 0, 0)');
+
+      const cursorData =
+        cursor &&
+        cursor.type === 'Over' &&
+        cursor.x >= config.plotEarliest &&
+        cursor.x <= config.plotLatest
+          ? [cursor.x]
+          : [];
+
+      const cursorMouseLine = lineChartGroup
+        .append('g')
+        .attr('class', 'cursor-line')
+        .selectAll('.ml-explorer-mouse-line')
+        .data(cursorData);
+
+      cursorMouseLine.exit().remove();
+
+      cursorMouseLine
+        .enter()
+        .append('path')
+        .attr('class', 'ml-explorer-mouse-line')
+        .attr('d', (ts) => {
+          const xPosition = lineChartXScale(ts);
+          return `M${xPosition},${chartHeight} ${xPosition},0`;
+        })
+        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash);
     }
 
     function drawRareChartAxes() {
