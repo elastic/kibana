@@ -83,6 +83,7 @@ function createRoot({ logFileName, hosts }: RootConfig) {
         {
           name: 'root',
           appenders: ['file'],
+          level: 'info',
         },
       ],
     },
