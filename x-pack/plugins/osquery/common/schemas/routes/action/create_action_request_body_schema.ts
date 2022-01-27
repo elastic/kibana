@@ -15,7 +15,7 @@ import {
 } from '../../common/schemas';
 
 export const createActionRequestBodySchema = t.type({
-   agentSelection,
+  agentSelection,
   query,
   saved_query_id: savedQueryIdOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
