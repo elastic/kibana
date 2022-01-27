@@ -97,8 +97,7 @@ export class TopN extends Component {
       const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
-      // if result is empty, all bar need to be colored.
-      const lastValueFormatted = isEmptyValue(lastValue) ? 1 : lastValue;
+      const lastValueFormatted = isEmptyValue(lastValue) ? 0 : lastValue;
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const isPositiveValue = lastValueFormatted >= 0;
 
@@ -154,7 +153,7 @@ export class TopN extends Component {
 
     const intervalSettings = this.props.series.reduce(
       (acc, series, index) => {
-        const value = getLastValue(series.data) ?? 1;
+        const value = getLastValue(series.data) ?? 0;
 
         return {
           min: !index || value < acc.min ? value : acc.min,
