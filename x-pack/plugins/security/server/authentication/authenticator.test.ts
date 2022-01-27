@@ -10,7 +10,7 @@ jest.mock('./providers/token');
 jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
-import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
@@ -30,6 +30,7 @@ import { mockAuthenticatedUser } from '../../common/model/authenticated_user.moc
 import { auditServiceMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { securityMock } from '../mocks';
 import type { SessionValue } from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
 import { AuthenticationResult } from './authentication_result';
@@ -1327,13 +1328,16 @@ describe('Authenticator', () => {
         headers: { 'kbn-system-request': 'true' },
       });
 
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.failed(Boom.unauthorized())
+        AuthenticationResult.failed(failureReason)
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.unauthorized())
+        AuthenticationResult.failed(failureReason)
       );
 
       expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
@@ -1348,13 +1352,16 @@ describe('Authenticator', () => {
         headers: { 'kbn-system-request': 'false' },
       });
 
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.failed(Boom.unauthorized())
+        AuthenticationResult.failed(failureReason)
       );
       mockOptions.session.get.mockResolvedValue(mockSessVal);
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.unauthorized())
+        AuthenticationResult.failed(failureReason)
       );
 
       expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
@@ -1815,6 +1822,184 @@ describe('Authenticator', () => {
           )
         );
       });
+    });
+  });
+
+  describe('`reauthenticate` method', () => {
+    let authenticator: Authenticator;
+    let mockOptions: ReturnType<typeof getMockOptions>;
+    let mockSessVal: SessionValue;
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
+    beforeEach(() => {
+      auditLogger.log.mockClear();
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockOptions.session.get.mockResolvedValue(null);
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
+      mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
+
+      authenticator = new Authenticator(mockOptions);
+    });
+
+    it('fails if request is not provided.', async () => {
+      await expect(authenticator.reauthenticate(undefined as any)).rejects.toThrowError(
+        'Request should be a valid "KibanaRequest" instance, was [undefined].'
+      );
+    });
+
+    it('does not try to reauthenticate request if session is not available.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+
+      expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect to Login Selector even if it is enabled if session is not available.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      authenticator = new Authenticator(
+        getMockOptions({
+          selector: { enabled: true },
+          providers: { basic: { basic1: { order: 0 } } },
+        })
+      );
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+
+      expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
+    });
+
+    it('does not clear session if provider cannot handle authentication', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.notHandled()
+      );
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+
+      expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
+      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(
+        request,
+        mockSessVal.state
+      );
+    });
+
+    it('does not clear session if authentication fails with non-401 reason.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      const failureReason = new Error('some error');
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.failed(failureReason)
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('extends session if no update is needed.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user)
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user)
+      );
+
+      expect(mockOptions.session.extend).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.extend).toHaveBeenCalledWith(request, mockSessVal);
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('replaces existing session with the one returned by authentication provider', async () => {
+      const user = mockAuthenticatedUser();
+      const newState = { authorization: 'Basic yyy' };
+      const request = httpServerMock.createKibanaRequest();
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { state: newState })
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { state: newState })
+      );
+
+      expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
+        ...mockSessVal,
+        state: newState,
+      });
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('clears session if provider failed to authenticate request with 401.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.failed(failureReason)
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason)
+      );
+
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'user_logout', category: ['authentication'], outcome: 'unknown' },
+        })
+      );
     });
   });
 
