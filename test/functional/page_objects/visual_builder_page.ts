@@ -485,26 +485,6 @@ export class VisualBuilderPageObject extends FtrService {
     await annotationRowTemplateInput.type(template);
   }
 
-  public async getAnnotationsCount() {
-    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
-    return annotationsIcons.length;
-  }
-
-  public async clickAnnotationIcon(nth: number = 0) {
-    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
-    await annotationsIcons[nth].click();
-  }
-
-  public async getAnnotationTooltipHeader() {
-    const annotationTooltipHeader = await this.find.byClassName('echAnnotation__header');
-    return await annotationTooltipHeader.getVisibleText();
-  }
-
-  public async getAnnotationTooltipDetails() {
-    const annotationTooltipDetails = await this.find.byClassName('echAnnotation__details');
-    return await annotationTooltipDetails.getVisibleText();
-  }
-
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
     await this.retry.try(async () => {
       const isPopoverOpened = await this.testSubjects.exists(
@@ -900,7 +880,11 @@ export class VisualBuilderPageObject extends FtrService {
     return legendItems.map(({ name }) => name);
   }
 
-  public async getChartItems(chartData?: DebugState, itemType: 'areas' | 'bars' = 'areas') {
+  public async getChartItems(
+    chartData?: DebugState,
+    itemType: 'areas' | 'bars' | 'annotations' = 'areas'
+  ) {
+    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
@@ -912,6 +896,14 @@ export class VisualBuilderPageObject extends FtrService {
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+  }
+
+  public async getAnnotationsData(chartData?: DebugState) {
+    const annotations = (await this.getChartItems(
+      chartData,
+      'annotations'
+    )) as DebugState['annotations'];
+    return annotations?.map(({ data }) => data);
   }
 
   public async getVisualizeError() {
