@@ -4,6 +4,28 @@ The metric threshold rule has been super optimized and no longer presents a perf
 Chris also mentioned that in addition to the query and post-processing, [this call](https://github.com/elastic/kibana/blob/ba6be14baa6db9f9716c8746b2c355aa7031d104/x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts#L58) to actually create the executor also performs some work. It wouldn't hurt to have this happen in the worker as well.
 
 ## Load Testing Alerts
+### Configure logging event loop performance metrics
+
+Set the following configuration values:
+```yml
+logging:
+  appenders:
+    console-json:
+      type: console
+      layout:
+        type: json
+  loggers:
+  - name: metrics.ops
+    appenders: [console-json]
+    level: debug
+  - name: root
+    appenders: [console]
+    level: error
+```
+
+This will only print error logs from the Kibana server and log details about
+the event loop delay histogram and event loop utilization to the console in
+JSON.
 ### Setup
 - Start Elasticsearch via `yarn es snapshot --license=trial`
 - Start Kibana vi `yarn start`
