@@ -6,19 +6,16 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { ToolingLog } from '@kbn/dev-utils';
-import dedent from 'dedent';
-import fs from 'fs';
 import Path from 'path';
 import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDocByPlugin(
+export function buildPluginDeprecationsTable(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   log: ToolingLog
-): void {
+): string {
   const tableMdx = Object.keys(deprecationsByPlugin)
     .sort()
     .map((key) => {
@@ -67,21 +64,5 @@ export function writeDeprecationDocByPlugin(
     `;
     })
     .join('\n\n');
-
-  const mdx = dedent(`
----
-id: kibDevDocsDeprecationsByPlugin
-slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
-title: Deprecated API usage by plugin
-summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: ${moment().format('YYYY-MM-DD')}
-tags: ['contributor', 'dev', 'apidocs', 'kibana']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
----
-
-${tableMdx}   
-
-`);
-
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_plugin.mdx'), mdx);
+  return tableMdx;
 }
