@@ -89,20 +89,21 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     this.componentState = { loading: true };
     this.updateComponentState(this.componentState);
+    this.typeaheadSubject = new Subject<string>();
 
     this.initialize();
   }
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
-    if (initialSelectedOptions) {
-      await this.runOptionsListQuery(); // initial query needs to be awaited if there are selected options
-      await this.buildFilter();
-    } else {
-      this.runOptionsListQuery();
-    }
-    this.setInitializationFinished();
-    this.setupSubscriptions();
+    if (!initialSelectedOptions) this.setInitializationFinished();
+    this.runOptionsListQuery().then(async () => {
+      if (initialSelectedOptions) {
+        await this.buildFilter();
+        this.setInitializationFinished();
+      }
+      this.setupSubscriptions();
+    });
   };
 
   private setupSubscriptions = () => {
@@ -119,7 +120,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     );
 
     // push searchString changes into a debounced typeahead subject
-    this.typeaheadSubject = new Subject<string>();
     const typeaheadPipe = this.typeaheadSubject.pipe(
       tap((newSearchString) => (this.searchString = newSearchString)),
       debounceTime(100)

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
 import { ControlsPlugin } from './plugin';
 
 export const plugin = () => new ControlsPlugin();

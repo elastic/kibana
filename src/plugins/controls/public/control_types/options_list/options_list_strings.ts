@@ -83,7 +83,7 @@ export const OptionsListStrings = {
     getInvalidSelectionsTooltip: () =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
         defaultMessage:
-          'One or more selections in this control have been ignored because they would filter out all documents.',
+          'One or more selections in this control have been ignored because they no longer appear in the data.',
       }),
   },
   errors: {
