@@ -34,8 +34,7 @@ export async function saveCustomLink({
     };
 
     if (id) {
-      await callApmApi({
-        endpoint: 'PUT /internal/apm/settings/custom_links/{id}',
+      await callApmApi('PUT /internal/apm/settings/custom_links/{id}', {
         signal: null,
         params: {
           path: { id },
@@ -43,8 +42,7 @@ export async function saveCustomLink({
         },
       });
     } else {
-      await callApmApi({
-        endpoint: 'POST /internal/apm/settings/custom_links',
+      await callApmApi('POST /internal/apm/settings/custom_links', {
         signal: null,
         params: {
           body: customLink,
