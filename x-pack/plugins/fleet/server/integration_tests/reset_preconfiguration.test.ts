@@ -208,7 +208,8 @@ describe('Fleet preconfiguration rest', () => {
     });
   });
 
-  describe('Reset one preconfigured policy', () => {
+  // SKIP: https://github.com/elastic/kibana/issues/123528
+  describe.skip('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {

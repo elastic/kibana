@@ -111,10 +111,17 @@ export async function deleteOne(http: HttpStart, id: string): Promise<ExceptionL
   });
 }
 
-export async function getSummary(http: HttpStart): Promise<ExceptionListSummarySchema> {
+export async function getSummary({
+  http,
+  filter,
+}: {
+  http: HttpStart;
+  filter?: string;
+}): Promise<ExceptionListSummarySchema> {
   await ensureEventFiltersListExists(http);
   return http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
     query: {
+      filter,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
       namespace_type: 'agnostic',
     },

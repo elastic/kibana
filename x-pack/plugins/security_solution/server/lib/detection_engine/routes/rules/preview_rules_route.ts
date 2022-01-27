@@ -170,6 +170,7 @@ export const previewRulesRoute = async (
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
+              executionId: uuid.v4(),
               name: rule.name,
               params,
               previousStartedAt,
