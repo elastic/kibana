@@ -12,7 +12,13 @@ import {
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { LensDocShape715, VisState716, VisStatePost715, VisStatePre715 } from './types';
+import {
+  LensDocShape715,
+  LensDocShape810,
+  VisState716,
+  VisStatePost715,
+  VisStatePre715,
+} from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
@@ -1510,6 +1516,78 @@ describe('Lens migrations', () => {
       >;
 
       expect(result.attributes.state.filters).toEqual(expectedFilters);
+    });
+  });
+
+  describe('8.1.0 rename records field', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: null,
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: 'Anzahl der Aufnahmen',
+                      dataType: 'number',
+                      operationType: 'count',
+                      sourceField: 'Aufnahmen',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '5': {
+                      label: 'Sum of bytes',
+                      dataType: 'numver',
+                      operationType: 'sum',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                },
+              },
+            },
+          },
+          visualization: {},
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('should change field for count operations but not for others, not changing the vis', () => {
+      const result = migrations['8.1.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+
+      expect(
+        Object.values(
+          result.attributes.state.datasourceStates.indexpattern.layers['2'].columns
+        ).map((column) => column.sourceField)
+      ).toEqual(['@timestamp', '___records___', 'bytes']);
+      expect(example.attributes.state.visualization).toEqual(result.attributes.state.visualization);
     });
   });
 

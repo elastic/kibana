@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, mergeWith } from 'lodash';
+import { cloneDeep, flow, mergeWith } from 'lodash';
 import { fromExpression, toExpression, Ast, AstFunction } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
@@ -27,6 +27,7 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  LensDocShape810,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -35,6 +36,7 @@ import {
   commonMakeReversePaletteAsCustom,
   commonRenameFilterReferences,
   getLensFilterMigrations,
+  commonRenameRecordsField,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -444,12 +446,14 @@ const moveDefaultReversedPaletteToCustom: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonMakeReversePaletteAsCustom(newDoc.attributes) };
 };
 
-const renameFilterReferences: SavedObjectMigrationFn<
-  LensDocShape715<VisState716>,
-  LensDocShape715<VisState716>
-> = (doc) => {
+const renameFilterReferences: SavedObjectMigrationFn<LensDocShape715, LensDocShape810> = (doc) => {
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonRenameFilterReferences(newDoc.attributes) };
+};
+
+const renameRecordsField: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonRenameRecordsField(newDoc.attributes) };
 };
 
 const lensMigrations: SavedObjectMigrationMap = {
@@ -465,7 +469,7 @@ const lensMigrations: SavedObjectMigrationMap = {
   '7.14.0': removeTimezoneDateHistogramParam,
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
-  '8.1.0': renameFilterReferences,
+  '8.1.0': flow(renameFilterReferences, renameRecordsField),
 };
 
 export const mergeSavedObjectMigrationMaps = (
