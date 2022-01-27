@@ -111,7 +111,7 @@ export const enhancedEsSearchStrategyProvider = (
     const querystring = {
       ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
-      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...(await getDefaultSearchParams(uiSettingsClient, request.params?.body)),
       ...params,
     };
 

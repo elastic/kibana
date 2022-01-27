@@ -57,13 +57,6 @@ export async function getDefaultAsyncSubmitParams(
     ? `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`
     : '1m';
 
-  // Specifying specific fields from both "_source" and "fields' while emulating the fields API will throw errors in ES
-  // See https://github.com/elastic/elasticsearch/pull/75745
-  const hasFields = Array.isArray(params.body.fields) && params.body.fields.length > 0;
-  const hasSourceFields =
-    params.body.hasOwnProperty('_source') && typeof params.body._source !== 'boolean';
-  const enableFieldsEmulation = !(hasFields && hasSourceFields);
-
   return {
     // TODO: adjust for partial results
     batched_reduce_size: 64,
@@ -74,9 +67,7 @@ export async function getDefaultAsyncSubmitParams(
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
     keep_alive: keepAlive,
     ...(await getIgnoreThrottled(uiSettingsClient)),
-    ...(await getDefaultSearchParams(uiSettingsClient)),
-    // If search sessions are used, set the initial expiration time.
-    enable_fields_emulation: enableFieldsEmulation,
+    ...(await getDefaultSearchParams(uiSettingsClient, params)),
   };
 }
 

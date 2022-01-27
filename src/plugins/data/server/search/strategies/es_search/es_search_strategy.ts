@@ -39,7 +39,7 @@ export const esSearchStrategyProvider = (
       try {
         const config = await config$.pipe(first()).toPromise();
         const params = {
-          ...(await getDefaultSearchParams(uiSettingsClient)),
+          ...(await getDefaultSearchParams(uiSettingsClient, request.params)),
           ...getShardTimeout(config),
           ...request.params,
         };
