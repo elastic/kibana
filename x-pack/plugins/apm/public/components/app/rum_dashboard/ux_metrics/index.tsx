@@ -33,8 +33,7 @@ export function UXMetrics() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (uxQuery) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/web-core-vitals',
+        return callApmApi('GET /internal/apm/ux/web-core-vitals', {
           params: {
             query: uxQuery,
           },

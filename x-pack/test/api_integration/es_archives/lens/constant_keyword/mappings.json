@@ -1,0 +1,59 @@
+{
+  "type": "index",
+  "value": {
+    "index": "existence_index_1",
+    "mappings": {
+      "properties": {
+        "filter_field": {
+          "type": "constant_keyword",
+          "value": "a"
+        },
+        "textfield1": {
+          "type": "keyword"
+        },
+        "ts": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "existence_index_2",
+    "mappings": {
+      "runtime": {
+        "mapping_runtime_field": {
+          "type": "keyword",
+          "script" : { "source" : "emit('abc')" }
+        }
+      }, 
+      "properties": {
+        "filter_field": {
+          "type": "constant_keyword",
+          "value": "b"
+        },
+        "textfield2": {
+          "type": "keyword"
+        },
+        "ts": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
