@@ -136,6 +136,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
           "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
@@ -229,58 +230,58 @@ describe('Create Execution Handler', () => {
     });
   });
 
-  test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
-    // Mock two calls, one for check against actions[0] and the second for actions[1]
-    mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
-    mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
-    mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
-    const executionHandler = createExecutionHandler({
-      ...createExecutionHandlerParams,
-      actions: [
-        ...createExecutionHandlerParams.actions,
-        {
-          id: '2',
-          group: 'default',
-          actionTypeId: 'test2',
-          params: {
-            foo: true,
-            contextVal: 'My other {{context.value}} goes here',
-            stateVal: 'My other {{state.value}} goes here',
-          },
+test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
+  // Mock two calls, one for check against actions[0] and the second for actions[1]
+  mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
+  const executionHandler = createExecutionHandler({
+    ...createExecutionHandlerParams,
+    actions: [
+      ...createExecutionHandlerParams.actions,
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
         },
-      ],
-    });
-    const result = await executionHandler({
-      actionGroup: 'default',
-      state: {},
-      context: {},
-      alertId: '2',
-    });
-    expect(result).toHaveLength(1);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
-      id: '2',
-      params: {
-        foo: true,
-        contextVal: 'My other  goes here',
-        stateVal: 'My other  goes here',
       },
-      source: asSavedObjectExecutionSource({
-        id: '1',
-        type: 'alert',
-      }),
-      relatedSavedObjects: [
-        {
-          id: '1',
-          namespace: 'test1',
-          type: 'alert',
-          typeId: 'test',
-        },
-      ],
-      spaceId: 'test1',
-      apiKey: createExecutionHandlerParams.apiKey,
-    });
+    ],
   });
+  await executionHandler({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertId: '2',
+  });
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
+    id: '2',
+    params: {
+      foo: true,
+      contextVal: 'My other  goes here',
+      stateVal: 'My other  goes here',
+    },
+    source: asSavedObjectExecutionSource({
+      id: '1',
+      type: 'alert',
+    }),
+    relatedSavedObjects: [
+      {
+        id: '1',
+        namespace: 'test1',
+        type: 'alert',
+        typeId: 'test',
+      },
+    ],
+    spaceId: 'test1',
+    apiKey: createExecutionHandlerParams.apiKey,
+    executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  });
+});
 
   test('trow error error message when action type is disabled', async () => {
     mockActionsPlugin.preconfiguredActions = [];
@@ -352,6 +353,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
           "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
@@ -394,6 +396,7 @@ describe('Create Execution Handler', () => {
     Array [
       Object {
         "apiKey": "MTIzOmFiYw==",
+        "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
         "id": "1",
         "params": Object {
           "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
