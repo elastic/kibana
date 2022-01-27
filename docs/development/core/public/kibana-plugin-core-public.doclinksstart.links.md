@@ -197,6 +197,7 @@ readonly links: {
         readonly kibana: {
             readonly guide: string;
             readonly autocompleteSuggestions: string;
+            readonly xpackSecurity: string;
         };
         readonly upgradeAssistant: {
             readonly overview: string;
