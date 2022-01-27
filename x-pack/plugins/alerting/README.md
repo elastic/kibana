@@ -111,7 +111,7 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 
 |Property|Description|
 |---|---|
-|services.scopedClusterClient|This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.|
+|services.scopedClusterClient|This service is an instance of the scoped cluster client. Use this to make non-search Elasticsearch requests. When using asCurrentUser, the requests are in the context of the user who created the alert when security is enabled. Usage of "search" is deprecated because the queries do not abort when cancelling the rule execution, use services.search instead.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).|
 |services.alertInstanceFactory(id)|This [alert factory](#alert-factory) creates alerts and must be used in order to execute actions. The id you give to the alert factory is a unique identifier for the alert.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|

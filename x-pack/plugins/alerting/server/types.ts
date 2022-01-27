@@ -13,6 +13,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 export * from '../common';
 import {
+  ElasticsearchClient,
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectAttributes,
@@ -64,9 +65,21 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
+export type EleasticsearchClientService = {
+  /**
+   * @deprecated Usage of "search" is deprecated because the queries do not abort when cancelling the rule execution, use services.search instead. (https://github.com/elastic/kibana/issues/111259).
+   */
+  search: ElasticsearchClient['search'];
+} & Omit<ElasticsearchClient, 'search'>;
+
+export interface ScopedClusterClientService extends IScopedClusterClient {
+  asInternalUser: EleasticsearchClientService;
+  asCurrentUser: EleasticsearchClientService;
+}
+
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: IScopedClusterClient;
+  scopedClusterClient: ScopedClusterClientService;
 }
 
 export interface AlertServices<
