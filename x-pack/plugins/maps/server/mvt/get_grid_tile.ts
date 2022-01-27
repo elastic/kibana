@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreStart, Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
@@ -28,7 +28,7 @@ export async function getEsGridTile({
   abortController,
 }: {
   url: string;
-  core: CoreSetup;
+  core: CoreStart;
   x: number;
   y: number;
   z: number;

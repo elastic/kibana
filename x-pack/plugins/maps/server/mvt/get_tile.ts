@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreStart, Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Stream } from 'stream';
 import { isAbortError } from './util';
@@ -26,7 +26,7 @@ export async function getEsTile({
   abortController,
 }: {
   url: string;
-  core: CoreSetup;
+  core: CoreStart;
   x: number;
   y: number;
   z: number;

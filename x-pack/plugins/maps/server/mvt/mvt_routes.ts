@@ -8,7 +8,7 @@
 import rison from 'rison-node';
 import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
+import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
@@ -29,7 +29,7 @@ export function initMVTRoutes({
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
-  core: CoreSetup;
+  core: CoreStart;
 }) {
   router.get(
     {
