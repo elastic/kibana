@@ -1,3 +1,17 @@
+/*
+
+  Packages in this file are considered "bundled" and are installed as part of Fleet's setup process. Each entry points to a valid version name
+  avaiable in the Elastic Package Registry service, and must include a sha-512 checksum of the `.zip` archive for the given package.
+
+  When adding or updating a package to this file, download the appropriate `.zip` archive from the EPR service,
+  e.g. "https://epr-snapshot.elastic.co/epr/apm/apm-8.1.0-dev2.zip` and generate a checksum from that `.zip`, e.g:
+
+  ```
+  $ shasum -a 512 ./synthetics-0.8.0.zip
+  ```
+
+*/
+
 [
   {
     "name": "apm",

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import JSON5 from 'json5';
+
 import { Task, read, downloadToDisk } from '../lib';
 
 const EPR_URL = 'https://epr-snapshot.elastic.co';
@@ -27,11 +29,11 @@ export const BundleFleetPackages: Task = {
     const fleetPackages = (await read(configFilePath)) || '[]';
 
     await Promise.all(
-      JSON.parse(fleetPackages).map(async (fleetPackage: FleetPackage) => {
+      JSON5.parse(fleetPackages).map(async (fleetPackage: FleetPackage) => {
         const archivePath = `${fleetPackage.name}-${fleetPackage.version}.zip`;
         const archiveUrl = `${EPR_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
 
-        const destination = config.resolveFromRepo(
+        const destination = build.resolvePath(
           'x-pack/plugins/fleet/server/bundled_packages',
           archivePath
         );
