@@ -12,7 +12,8 @@ import {
   TestKibanaUtils,
 } from '../../../test_helpers/kbn_server';
 
-describe('esVersionCompatibleWithKibana', () => {
+// Temporarily skipped until https://github.com/elastic/kibana/pull/123337 is backported
+describe.skip('esVersionCompatibleWithKibana', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
 
