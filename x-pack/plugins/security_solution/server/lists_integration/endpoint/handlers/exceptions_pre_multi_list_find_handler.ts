@@ -6,13 +6,21 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../lists/server';
+import { TrustedAppValidator } from '../validators/trusted_app_validator';
 
+type ValidatedReturnType = ExceptionsListPreMultiListFindServerExtension['callback'];
 export const getExceptionsPreMultiListFindHandler = (
-  endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreMultiListFind' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+  endpointAppContextService: EndpointAppContextService
+): ValidatedReturnType => {
+  return async function ({ data, context: { request } }) {
+    if (!data.namespaceType.includes('agnostic')) {
+      return data;
+    }
+    // validate Trusted application
+    if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
+    }
 
     return data;
   };

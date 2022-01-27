@@ -5,14 +5,36 @@
  * 2.0.
  */
 
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
+import { TrustedAppValidator } from '../validators/trusted_app_validator';
 
+type ValidatedReturnType = ExceptionsListPreGetOneItemServerExtension['callback'];
 export const getExceptionsPreGetOneHandler = (
-  endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreGetOneItem' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+  endpointAppContextService: EndpointAppContextService
+): ValidatedReturnType => {
+  return async function ({ data, context: { request, exceptionListClient } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
+    const exceptionItem: ExceptionListItemSchema | null =
+      await exceptionListClient.getExceptionListItem({
+        id: data.id,
+        itemId: data.itemId,
+        namespaceType: data.namespaceType,
+      });
+
+    if (!exceptionItem) {
+      return data;
+    }
+
+    // Validate Trusted Applications
+    if (TrustedAppValidator.isTrustedApp({ listId: exceptionItem.list_id })) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreGetOneItem();
+      return data;
+    }
 
     return data;
   };

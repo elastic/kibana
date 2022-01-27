@@ -15,6 +15,10 @@ export { ListClient } from './services/lists/list_client';
 export type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
+  DeleteExceptionListItemOptions,
+  DeleteExceptionListItemByIdOptions,
+  GetExceptionListSummaryOptions,
+  GetExceptionListItemOptions,
 } from './services/exception_lists/exception_list_client_types';
 export { ExceptionListClient } from './services/exception_lists/exception_list_client';
 export type {

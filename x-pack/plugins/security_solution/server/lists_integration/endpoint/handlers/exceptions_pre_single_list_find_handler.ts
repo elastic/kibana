@@ -6,13 +6,22 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreSingleListFindServerExtension } from '../../../../../lists/server';
+import { TrustedAppValidator } from '../validators/trusted_app_validator';
 
+type ValidatedReturnType = ExceptionsListPreSingleListFindServerExtension['callback'];
 export const getExceptionsPreSingleListFindHandler = (
-  endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreSingleListFind' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+  endpointAppContextService: EndpointAppContextService
+): ValidatedReturnType => {
+  return async function ({ data, context: { request } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
+    // Validate Host Isolation Exceptions
+    if (TrustedAppValidator.isTrustedApp({ listId: data.listId })) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreSingleListFind();
+    }
 
     return data;
   };
