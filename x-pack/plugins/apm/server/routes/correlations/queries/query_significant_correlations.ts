@@ -25,6 +25,7 @@ import {
   fetchTransactionDurationFractions,
   fetchTransactionDurationHistogramRangeSteps,
   fetchTransactionDurationPercentiles,
+  fetchTransactionDurationRanges,
 } from './index';
 
 export const fetchSignificantCorrelations = async (
@@ -76,12 +77,51 @@ export const fetchSignificantCorrelations = async (
     )
   );
 
-  const latencyCorrelations: LatencyCorrelation[] = fulfilled.filter(
-    (d): d is LatencyCorrelation => d !== undefined
-  );
+  let fallbackResult: LatencyCorrelation | null = null;
+  const latencyCorrelations: LatencyCorrelation[] = [];
+
+  fulfilled.forEach((d: LatencyCorrelation | undefined) => {
+    if (d === undefined) return;
+    if (Array.isArray(d.histogram)) {
+      latencyCorrelations.push(d);
+    } else {
+      if (fallbackResult === null) {
+        fallbackResult = d;
+      } else {
+        if (
+          d.ksTest > fallbackResult.ksTest &&
+          d.correlation > fallbackResult.correlation
+        ) {
+          fallbackResult = d;
+        }
+      }
+    }
+  });
+
+  if (latencyCorrelations.length === 0 && fallbackResult) {
+    const { fieldName, fieldValue } = fallbackResult;
+    const logHistogram = await fetchTransactionDurationRanges(
+      esClient,
+      paramsWithIndex,
+      histogramRangeSteps,
+      [{ fieldName, fieldValue }]
+    );
+
+    if (typeof fallbackResult === 'object' && fallbackResult !== null) {
+      fallbackResult = {
+        ...(fallbackResult as LatencyCorrelation),
+        histogram: logHistogram,
+      };
+    }
+  }
 
   const ccsWarning =
     rejected.length > 0 && paramsWithIndex?.index.includes(':');
 
-  return { latencyCorrelations, ccsWarning, totalDocCount };
+  return {
+    latencyCorrelations,
+    ccsWarning,
+    totalDocCount,
+    fallbackResult,
+  };
 };

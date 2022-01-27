@@ -177,6 +177,7 @@ export function useLatencyCorrelations() {
         chunkSize
       );
 
+      const fallbackResults: LatencyCorrelation[] = [];
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi(
           'POST /internal/apm/correlations/significant_correlations',
@@ -197,6 +198,12 @@ export function useLatencyCorrelations() {
           );
           responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
+        } else {
+          // Rank the fallback results
+
+          if (significantCorrelations.fallbackResult) {
+            fallbackResults.push(significantCorrelations.fallbackResult);
+          }
         }
 
         chunkLoadCounter++;
@@ -213,6 +220,24 @@ export function useLatencyCorrelations() {
         }
       }
 
+      const sortedFallbackResults = fallbackResults.sort(
+        (a, b) => b.correlation - a.correlation
+      );
+
+      if (
+        latencyCorrelations.length === 0 &&
+        sortedFallbackResults.length > 0
+      ) {
+        responseUpdate.latencyCorrelations = sortedFallbackResults.slice(0, 1);
+
+        setResponse({
+          ...responseUpdate,
+          loaded:
+            LOADED_FIELD_VALUE_PAIRS +
+            (chunkLoadCounter / fieldValuePairChunks.length) *
+              PROGRESS_STEP_CORRELATIONS,
+        });
+      }
       setResponse.flush();
 
       const { stats } = await callApmApi(

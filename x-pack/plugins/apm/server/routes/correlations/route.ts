@@ -250,6 +250,9 @@ const significantCorrelationsRoute = createApmServerRoute({
     >;
     ccsWarning: boolean;
     totalDocCount: number;
+    fallbackResult?: Array<
+      import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation
+    >;
   }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
@@ -303,6 +306,7 @@ const pValuesRoute = createApmServerRoute({
       import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation
     >;
     ccsWarning: boolean;
+    fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
     const { context } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {

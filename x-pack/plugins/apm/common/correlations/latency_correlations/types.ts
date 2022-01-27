@@ -10,7 +10,7 @@ import { FieldStats } from '../field_stats_types';
 
 export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
-  histogram: HistogramItem[];
+  histogram?: HistogramItem[];
   ksTest: number;
 }
 

@@ -177,6 +177,12 @@ export function useFailedTransactionsCorrelations() {
             getFailedTransactionsCorrelationsSortedByScore([
               ...failedTransactionsCorrelations,
             ]);
+        } else {
+          if (pValues.fallbackResult) {
+            responseUpdate.failedTransactionsCorrelations = [
+              pValues.fallbackResult,
+            ];
+          }
         }
 
         chunkLoadCounter++;
