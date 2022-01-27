@@ -13,7 +13,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
-import { sample, difference } from 'lodash';
+import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
@@ -79,12 +79,16 @@ export function getCombinedProperties(
   populatedProperties: PreviewMappingsProperties,
   docs: Array<Record<string, unknown>>
 ): PreviewMappingsProperties {
-  // Take a sample from docs and resolve missing mappings
-  const sampleDoc = sample(docs) ?? {};
-  const missingMappings = difference(Object.keys(sampleDoc), Object.keys(populatedProperties));
+  // Identify missing mappings
+  const missingMappings = difference(
+    // Create an array of unique flattened field names across all docs
+    [...new Set(docs.flatMap(Object.keys))],
+    Object.keys(populatedProperties)
+  );
   return {
     ...populatedProperties,
     ...missingMappings.reduce((acc, curr) => {
+      const sampleDoc = docs.find((d) => typeof d[curr] !== 'undefined') ?? {};
       acc[curr] = { type: typeof sampleDoc[curr] as ES_FIELD_TYPES };
       return acc;
     }, {} as PreviewMappingsProperties),
