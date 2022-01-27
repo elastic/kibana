@@ -160,7 +160,8 @@ export const PolicyHostIsolationExceptionsList = ({
     return i18n.translate(
       'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount',
       {
-        defaultMessage: 'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}',
+        defaultMessage:
+          'Showing {totalItemsCount, plural, one {# host isolation exception} other {# host isolation exceptions}}',
         values: { totalItemsCount: pagination.totalItemCount },
       }
     );
@@ -179,7 +180,7 @@ export const PolicyHostIsolationExceptionsList = ({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, description, ip',
+            defaultMessage: 'Search on the fields below: name, description, IP',
           }
         )}
         defaultValue={urlParams.filter}

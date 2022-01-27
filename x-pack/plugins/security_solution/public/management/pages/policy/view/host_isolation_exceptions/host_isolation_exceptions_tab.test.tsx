@@ -109,7 +109,7 @@ describe('Policy details host isolation exceptions tab', () => {
     render();
     expect(
       await renderResult.findByTestId('policyHostIsolationExceptionsTabSubtitle')
-    ).toHaveTextContent('There are 4 exceptions associated with this policy');
+    ).toHaveTextContent('There are 4 host isolation exceptions associated with this policy');
   });
 
   it('should apply a filter when requested from location search params', async () => {
