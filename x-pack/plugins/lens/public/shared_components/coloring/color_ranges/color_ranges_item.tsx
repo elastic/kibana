@@ -190,6 +190,7 @@ export function ColorRangeItem({
             }
             secondaryInputDisplay="top"
             color={colorRange.color}
+            showAlpha={true}
             onFocus={() => setPopoverInFocus(true)}
             onBlur={() => {
               setPopoverInFocus(false);
