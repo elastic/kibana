@@ -11,6 +11,7 @@ import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public
 import { DataViewsPublicPluginStart, DataView } from '../../../../src/plugins/data_views/public';
 import {
   DateHistogramIndexPatternColumn,
+  IndexPatternPersistedState,
   LensPublicSetup,
   LensPublicStart,
 } from '../../../plugins/lens/public';
@@ -83,7 +84,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
       visualization: {
         columns: [{ columnId: 'col1' }, { columnId: 'col2' }],
         layerId: 'layer1',
-        layerType: 'DATA',
+        layerType: 'data',
       },
     },
   };
@@ -141,15 +142,20 @@ export class EmbeddedLensExamplePlugin
         iconType: 'discoverApp',
         run: async () => {
           const [, { data }] = await core.getStartServices();
-          const firstLayer = Object.values(datasourceStates.indexpattern.state.layers)[0];
+          const firstLayer = Object.values(
+            (datasourceStates.indexpattern.state as IndexPatternPersistedState).layers
+          )[0] as PersistedIndexPatternLayer & { indexPatternId: string };
           discover.locator!.navigate({
             indexPatternId: firstLayer.indexPatternId,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters,
             query,
             columns: firstLayer.columnOrder
-              .map((columnId) => firstLayer.columns[columnId].sourceField)
-              .filter(Boolean),
+              .map((columnId) => {
+                const column = firstLayer.columns[columnId];
+                if ('sourceField' in column) return column.sourceField;
+              })
+              .filter(Boolean) as string[],
           });
         },
       };
