@@ -25,6 +25,8 @@ import { useHostRiskScore } from '../../containers/host_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
+import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
+
 export interface TopHostScoreContributorsProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
   hostName: string;
@@ -34,6 +36,7 @@ export interface TopHostScoreContributorsProps
 interface TableItem {
   rank: number;
   name: string;
+  id?: string; // TODO Remove the '?' when the new transform is delivered
 }
 
 const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
@@ -48,6 +51,8 @@ const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
     field: 'name',
     sortable: true,
     truncateText: true,
+    render: (value: TableItem['name'], { id }: TableItem) =>
+      id ? <RuleLink id={id} name={value} /> : value,
   },
 ];
 
@@ -87,9 +92,10 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
   const items = useMemo(() => {
     const rules = data && data.length > 0 ? data[0].risk_stats.rule_risks : [];
+
     return rules
       .sort((a, b) => b.rule_risk - a.rule_risk)
-      .map(({ rule_name: name }, i) => ({ rank: i + 1, name }));
+      .map(({ rule_name: name, rule_id: id }, i) => ({ rank: i + 1, name, id }));
   }, [data]);
 
   const tablePagination = useMemo(

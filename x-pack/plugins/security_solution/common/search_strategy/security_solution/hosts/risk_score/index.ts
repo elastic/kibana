@@ -48,6 +48,7 @@ export interface HostsRiskScore {
 export interface RuleRisk {
   rule_name: string;
   rule_risk: number;
+  rule_id?: string; // TODO Remove the '?' when the new transform is delivered
 }
 
 export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
