@@ -28,7 +28,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
-      console.log("bubly")
+      console.log("bubly");
       xmattersServer = await getXmattersServer();
       const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       xmattersServer.listen(availablePort);
@@ -50,8 +50,8 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           name: 'An xMatters action',
           connector_type_id: '.xmatters',
           secrets: {
-            user: 'elastic',
-            password: 'changeme',
+            user: 'username',
+            password: 'mypassphrase',
           },
           config: {
             url: xmattersSimulatorURL,
@@ -71,51 +71,51 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       });
     });
 
-  //   it('should return successfully when passed valid create parameters', async () => {
-  //     const { body: createdAction } = await supertest
-  //       .post('/api/actions/connector')
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         name: 'A xmatters action',
-  //         connector_type_id: '.xmatters',
-  //         config: {
-  //           url: xmattersSimulatorURL,
-  //         },
-  //         secrets: {
-  //           user: 'username',
-  //           password: 'mypassphrase',
-  //         },
-  //       })
-  //       .expect(200);
+    // it('should return successfully when passed valid create parameters', async () => {
+    //   const { body: createdAction } = await supertest
+    //     .post('/api/actions/connector')
+    //     .set('kbn-xsrf', 'foo')
+    //     .send({
+    //       name: 'A xMatters action',
+    //       connector_type_id: '.xmatters',
+    //       config: {
+    //         url: xmattersSimulatorURL,
+    //       },
+    //       secrets: {
+    //         user: 'username',
+    //         password: 'mypassphrase',
+    //       },
+    //     })
+    //     .expect(200);
 
-  //     expect(createdAction).to.eql({
-  //       id: createdAction.id,
-  //       is_preconfigured: false,
-  //       name: 'A xmatters action',
-  //       connector_type_id: '.xmatters',
-  //       is_missing_secrets: false,
-  //       config: {
-  //         url: xmattersSimulatorURL,
-  //       },
-  //     });
+    //   expect(createdAction).to.eql({
+    //     id: createdAction.id,
+    //     is_preconfigured: false,
+    //     name: 'A xMatters action',
+    //     connector_type_id: '.xmatters',
+    //     is_missing_secrets: false,
+    //     config: {
+    //       url: xmattersSimulatorURL,
+    //     },
+    //   });
 
-  //     expect(typeof createdAction.id).to.be('string');
+    //   expect(typeof createdAction.id).to.be('string');
 
-  //     const { body: fetchedAction } = await supertest
-  //       .get(`/api/actions/connector/${createdAction.id}`)
-  //       .expect(200);
+    //   const { body: fetchedAction } = await supertest
+    //     .get(`/api/actions/connector/${createdAction.id}`)
+    //     .expect(200);
 
-  //     expect(fetchedAction).to.eql({
-  //       id: fetchedAction.id,
-  //       is_preconfigured: false,
-  //       name: 'A xmatters action',
-  //       connector_type_id: '.xmatters',
-  //       is_missing_secrets: false,
-  //       config: {
-  //         url: xmattersSimulatorURL,
-  //       },
-  //     });
-  //   });
+    //   expect(fetchedAction).to.eql({
+    //     id: fetchedAction.id,
+    //     is_preconfigured: false,
+    //     name: 'A xMatters action',
+    //     connector_type_id: '.xmatters',
+    //     is_missing_secrets: false,
+    //     config: {
+    //       url: xmattersSimulatorURL,
+    //     },
+    //   });
+    // });
 
   //   it('should return unsuccessfully when passed invalid create parameters', async () => {
   //     await supertest
