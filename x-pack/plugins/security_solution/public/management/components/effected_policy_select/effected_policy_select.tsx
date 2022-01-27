@@ -46,6 +46,12 @@ const StyledEuiSelectable = styled.div`
   }
 `;
 
+const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
+  @media only screen and (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    align-items: center;
+  }
+`;
+
 const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
@@ -216,7 +222,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <StyledEuiFlexItemButtonGroup grow={1}>
             <EuiFormRow fullWidth>
               <StyledButtonGroup
                 legend="Global Policy Toggle"
@@ -227,7 +233,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
               />
             </EuiFormRow>
-          </EuiFlexItem>
+          </StyledEuiFlexItemButtonGroup>
         </EuiFlexGroup>
         <EuiSpacer />
         {!isGlobal &&
