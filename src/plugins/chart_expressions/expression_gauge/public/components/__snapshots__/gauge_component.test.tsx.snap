@@ -4,11 +4,11 @@ exports[`GaugeComponent renders the chart 1`] = `
 <Chart
   renderer="canvas"
 >
-  <Connect(SpecInstance)
+  <Settings
     debugState={false}
     theme={Object {}}
   />
-  <Connect(SpecInstance)
+  <Component
     actual={3}
     bandFillColor={[Function]}
     bands={
