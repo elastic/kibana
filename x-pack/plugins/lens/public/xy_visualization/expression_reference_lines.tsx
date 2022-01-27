@@ -350,7 +350,7 @@ export const ReferenceLineAnnotations = ({
                 style={{
                   ...sharedStyle,
                   fill: yConfig.color || defaultColor,
-                  opacity: 0.1,
+                  opacity: yConfig.areaOpacity,
                 }}
               />
             );

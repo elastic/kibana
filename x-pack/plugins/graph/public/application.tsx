@@ -23,6 +23,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { LensPublicStart } from '../../lens/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -66,6 +67,7 @@ export interface GraphDependencies {
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
+  lens: LensPublicStart;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;

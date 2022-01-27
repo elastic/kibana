@@ -126,9 +126,17 @@ function GraphWorkspace(options) {
 
   this.nodes = [];
   this.edges = [];
+  this.filteredIds = [];
   this.lastRequest = null;
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
+  this.getTimeExtents = (timeField, filters) =>
+    new Promise((res) =>
+      options.getTimeExtents(self.options.indexName, timeField, filters, (resp) => res(resp))
+    );
+  this.clearTimeFilter = () => {
+    this.filteredIds = [];
+  };
   if (options.graphExploreProxy) {
     graphExplorer = options.graphExploreProxy;
   }
@@ -736,7 +744,7 @@ function GraphWorkspace(options) {
       connections: rootStep.connections,
       vertices: rootStep.vertices,
     };
-    self.callElasticsearch(request);
+    self.callElasticsearch(request, self.mergeGraph);
   };
 
   this.buildControls = function () {
@@ -772,7 +780,7 @@ function GraphWorkspace(options) {
 
   //=======  Adds new nodes retrieved from an elasticsearch search ========
   this.mergeGraph = function (newData) {
-    this.stopLayout();
+    self.stopLayout();
 
     if (!newData.nodes) {
       newData.nodes = [];
@@ -793,7 +801,7 @@ function GraphWorkspace(options) {
     newData.nodes.forEach((node) => {
       //Assign an ID
       node.id = self.makeNodeId(node.field, node.term);
-      if (!this.nodesMap[node.id]) {
+      if (!self.nodesMap[node.id]) {
         //Default the label
         if (!node.label) {
           node.label = node.term;
@@ -801,9 +809,9 @@ function GraphWorkspace(options) {
         dedupedNodes.push(node);
       }
     });
-    if (dedupedNodes.length > 0 && this.options.nodeLabeller) {
+    if (dedupedNodes.length > 0 && self.options.nodeLabeller) {
       // A hook for client code to attach labels etc to newly introduced nodes.
-      this.options.nodeLabeller(dedupedNodes);
+      self.options.nodeLabeller(dedupedNodes);
     }
 
     dedupedNodes.forEach((dedupedNode) => {
@@ -826,22 +834,22 @@ function GraphWorkspace(options) {
       };
       //        node.scaledSize = sizeScale(node.data.weight);
       node.scaledSize = 15;
-      node.seqNumber = this.seqNumber++;
-      this.nodes.push(node);
+      node.seqNumber = self.seqNumber++;
+      self.nodes.push(node);
       lastOps.push(new AddNodeOperation(node, self));
-      this.nodesMap[node.id] = node;
+      self.nodesMap[node.id] = node;
     });
 
     newData.edges.forEach((edge) => {
       const src = newData.nodes[edge.source];
       const target = newData.nodes[edge.target];
-      edge.id = this.makeEdgeId(src.id, target.id);
+      edge.id = self.makeEdgeId(src.id, target.id);
 
       //Lookup the wrappers object that will hold display Info like x/y coordinates
-      const srcWrapperObj = this.nodesMap[src.id];
-      const targetWrapperObj = this.nodesMap[target.id];
+      const srcWrapperObj = self.nodesMap[src.id];
+      const targetWrapperObj = self.nodesMap[target.id];
 
-      const existingEdge = this.edgesMap[edge.id];
+      const existingEdge = self.edgesMap[edge.id];
       if (existingEdge) {
         existingEdge.weight = Math.max(existingEdge.weight, edge.weight);
         //TODO update width too?
@@ -860,8 +868,8 @@ function GraphWorkspace(options) {
         newEdge.label = edge.label;
       }
 
-      this.edgesMap[newEdge.id] = newEdge;
-      this.edges.push(newEdge);
+      self.edgesMap[newEdge.id] = newEdge;
+      self.edges.push(newEdge);
       lastOps.push(new AddEdgeOperation(newEdge, self));
     });
 
@@ -869,7 +877,7 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
-    this.runLayout();
+    self.runLayout();
   };
 
   this.mergeIds = function (parentId, childId) {
@@ -909,6 +917,61 @@ function GraphWorkspace(options) {
   //Find new nodes to link to existing selected nodes
   this.expandNode = function (node) {
     self.expand(self.returnUnpackedGroupeds([node]), {});
+  };
+
+  this.selectGraphInTime = function (timeField, timeRange) {
+    const fieldsChoice = self.options.vertex_fields;
+    let step = {};
+    const rootStep = step;
+    const numHops = 2;
+    for (let hopNum = 0; hopNum < numHops; hopNum++) {
+      const arr = [];
+
+      fieldsChoice.forEach(({ name: field, hopSize }) => {
+        const stepField = {
+          field: field,
+          size: hopSize,
+          min_doc_count: 1, //parseInt(self.options.exploreControls.minDocCount),
+        };
+        arr.push(stepField);
+      });
+      step.vertices = arr;
+      if (hopNum < numHops - 1) {
+        const nextStep = {};
+        step.connections = nextStep;
+        step = nextStep;
+      }
+    }
+    const request = {
+      query: {
+        range: {
+          [timeField]: { gte: timeRange.from, lte: timeRange.to },
+        },
+      },
+      controls: self.buildControls(),
+      connections: rootStep.connections,
+      vertices: rootStep.vertices,
+    };
+    return new Promise((res) => {
+      self.callElasticsearch(request, ({ nodes, edges }) => {
+        const ids = new Set();
+        // build the subgraph here
+        for (const edge of edges) {
+          const src = nodes[edge.source];
+          const trg = nodes[edge.target];
+          const srcId = self.makeNodeId(src.field, src.term);
+          const trgId = self.makeNodeId(trg.field, trg.term);
+          const eId = self.makeEdgeId(srcId, trgId);
+          if (self.edgesMap[eId] && srcId !== trgId) {
+            ids.add(eId);
+            ids.add(srcId);
+            ids.add(trgId);
+          }
+        }
+        self.filteredIds = [...ids];
+      });
+      res();
+    });
   };
 
   // A manual expand function where the client provides the list
@@ -1525,7 +1588,7 @@ function GraphWorkspace(options) {
 
   // Internal utility function for calling the Graph API and handling the response
   // by merging results into existing nodes in this workspace.
-  this.callElasticsearch = function (request) {
+  this.callElasticsearch = function (request, mergeCallback) {
     self.lastRequest = JSON.stringify(request, null, '\t');
     graphExplorer(self.options.indexName, request, function (data) {
       self.lastResponse = JSON.stringify(data, null, '\t');
@@ -1560,7 +1623,7 @@ function GraphWorkspace(options) {
         });
       });
 
-      self.mergeGraph(
+      mergeCallback(
         {
           nodes: data.vertices,
           edges: edges,

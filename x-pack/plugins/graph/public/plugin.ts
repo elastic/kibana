@@ -23,6 +23,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
+import { LensPublicStart } from '../../lens/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import {
@@ -41,6 +42,7 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  lens: LensPublicStart;
   savedObjects: SavedObjectsStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
@@ -111,6 +113,7 @@ export class GraphPlugin
           savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
+          lens: pluginsStart.lens,
         });
       },
     });

@@ -36,6 +36,7 @@ import { GraphVisualization } from '../graph_visualization';
 import { colorChoices } from '../../helpers/style_choices';
 import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { getEditUrl } from '../../services/url';
+import { Timebar } from '../timebar/timebar';
 
 /**
  * Each component, which depends on `worksapce`
@@ -55,6 +56,7 @@ type WorkspaceLayoutProps = Pick<
   | 'canEditDrillDownUrls'
   | 'overlays'
   | 'spaces'
+  | 'lens'
 > & {
   renderCounter: number;
   workspace?: Workspace;
@@ -88,12 +90,14 @@ export const WorkspaceLayoutComponent = ({
   setHeaderActionMenu,
   sharingSavedObjectProps,
   spaces,
+  lens,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
   const [showInspect, setShowInspect] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
+  const [showTimebar, toggleTimebar] = useState(false);
   const selectedNode = useRef<WorkspaceNode | undefined>(undefined);
 
   const search = useLocation().search;
@@ -237,6 +241,8 @@ export const WorkspaceLayoutComponent = ({
               selectSelected={selectSelected}
               onSetControl={onSetControl}
               onSetMergeCandidates={onSetMergeCandidates}
+              filteredIds={control === 'timeFilter' ? workspace.filteredIds : []}
+              mergedCandidates={control === 'mergeTerms' ? mergeCandidates : []}
             />
           </div>
 
@@ -249,7 +255,23 @@ export const WorkspaceLayoutComponent = ({
             mergeCandidates={mergeCandidates}
             selectSelected={selectSelected}
             onSetControl={onSetControl}
+            toggleTimebar={
+              currentIndexPattern && currentIndexPattern.getTimeField()
+                ? () => {
+                    toggleTimebar(!showTimebar);
+                  }
+                : undefined
+            }
           />
+          {showTimebar && (
+            <Timebar
+              workspace={workspace}
+              lens={lens}
+              indexPattern={currentIndexPattern}
+              mergeCandidates={control === 'mergeTerms' ? mergeCandidates : []}
+              onSetControl={onSetControl}
+            />
+          )}
         </div>
       )}
     </Fragment>

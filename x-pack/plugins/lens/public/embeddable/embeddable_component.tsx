@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect } from 'react';
 import type { CoreStart, ThemeServiceStart } from 'kibana/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
@@ -52,7 +52,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
-  withActions?: boolean;
+  withActions?: boolean | Action[];
 };
 
 interface PluginsStartDependencies {
@@ -67,7 +67,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const factory = embeddableStart.getEmbeddableFactory('lens')!;
     const input = { ...props };
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
-    const hasActions = props.withActions === true;
+    const hasActions = Boolean(props.withActions);
     const theme = core.theme;
 
     if (loading) {
@@ -83,6 +83,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
           actionPredicate={() => hasActions}
           input={input}
           theme={theme}
+          extraActions={Array.isArray(props.withActions) ? props.withActions : []}
         />
       );
     }
@@ -98,6 +99,7 @@ interface EmbeddablePanelWrapperProps {
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
   theme: ThemeServiceStart;
+  extraActions: Action[];
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
@@ -107,6 +109,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   inspector,
   input,
   theme,
+  extraActions,
 }) => {
   useEffect(() => {
     embeddable.updateInput(input);
@@ -116,7 +119,10 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
     <EmbeddablePanel
       hideHeader={false}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
-      getActions={uiActions.getTriggerCompatibleActions}
+      getActions={async (triggerId, context) => {
+        const actions = await uiActions.getTriggerCompatibleActions(triggerId, context);
+        return [...extraActions, ...actions];
+      }}
       inspector={inspector}
       actionPredicate={actionPredicate}
       showShadow={false}

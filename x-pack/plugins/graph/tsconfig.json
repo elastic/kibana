@@ -16,6 +16,7 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../features/tsconfig.json"},
     { "path": "../../../src/plugins/data/tsconfig.json"},

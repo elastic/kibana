@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, Fragment } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
-import { makeNodeId } from '../../services/persistence';
+import { makeEdgeId, makeNodeId } from '../../services/persistence';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
+  filteredIds: string[];
+  mergedCandidates: TermIntersect[];
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -42,10 +44,16 @@ export function GraphVisualization({
   selectSelected,
   onSetControl,
   onSetMergeCandidates,
+  filteredIds,
+  mergedCandidates,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
 
   const nodeClick = (n: WorkspaceNode, event: React.MouseEvent) => {
+    // Drop the click if the node is in the filtered list
+    if (filterSet.size && !filterSet.has(n.id)) {
+      return;
+    }
     // Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
@@ -62,14 +70,28 @@ export function GraphVisualization({
     workspace.changeHandler();
   };
 
-  const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
-    const mergeCandidates: TermIntersect[] = [...termIntersects];
-    onSetMergeCandidates(mergeCandidates);
-    onSetControl('mergeTerms');
+  const handleMergeCandidatesCallback =
+    (addPreviousTerms: boolean) => (termIntersects: TermIntersect[]) => {
+      const mergeCandidates: TermIntersect[] = [...termIntersects];
+      if (addPreviousTerms) {
+        mergeCandidates.push(...mergedCandidates);
+      }
+      onSetMergeCandidates(mergeCandidates);
+      onSetControl('mergeTerms');
+    };
+
+  const edgeClick = (edge: WorkspaceEdge, event: React.MouseEvent) => {
+    if (filterSet.size && !filterSet.has(makeEdgeId(edge.source.id, edge.target.id))) {
+      return;
+    }
+    workspace.getAllIntersections(handleMergeCandidatesCallback(event.shiftKey), [
+      edge.topSrc,
+      edge.topTarget,
+    ]);
   };
 
-  const edgeClick = (edge: WorkspaceEdge) =>
-    workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+  const filterSet = new Set(filteredIds);
+  const selectedEdgeIds = new Set(mergedCandidates.map((pair) => makeEdgeId(pair.id1, pair.id2)));
 
   return (
     <svg
@@ -89,26 +111,42 @@ export function GraphVisualization({
       <g>
         <g>
           {workspace.edges &&
-            workspace.edges.map((edge) => (
-              <line
-                key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
-                  edge.target.data.field,
-                  edge.target.data.term
-                )}`}
-                x1={edge.topSrc.kx}
-                y1={edge.topSrc.ky}
-                x2={edge.topTarget.kx}
-                y2={edge.topTarget.ky}
-                onClick={() => {
-                  edgeClick(edge);
-                }}
-                className={classNames('gphEdge', {
-                  'gphEdge--selected': edge.isSelected,
-                })}
-                style={{ strokeWidth: edge.width }}
-                strokeLinecap="round"
-              />
-            ))}
+            workspace.edges.map((edge) => {
+              const edgeId = makeEdgeId(edge.source.id, edge.target.id);
+              return (
+                <Fragment key={edgeId}>
+                  <line
+                    x1={edge.topSrc.kx}
+                    y1={edge.topSrc.ky}
+                    x2={edge.topTarget.kx}
+                    y2={edge.topTarget.ky}
+                    className={classNames('gphEdge', {
+                      'gphEdge--selected': selectedEdgeIds.has(edgeId),
+                    })}
+                    style={{
+                      strokeWidth: edge.width,
+                      opacity: !filterSet.size || filterSet.has(edgeId) ? 1 : 0.1,
+                    }}
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1={edge.topSrc.kx}
+                    y1={edge.topSrc.ky}
+                    x2={edge.topTarget.kx}
+                    y2={edge.topTarget.ky}
+                    onClick={(e) => {
+                      edgeClick(edge, e);
+                    }}
+                    className="gphEdge"
+                    style={{
+                      strokeWidth: Math.max(edge.width, 15),
+                      fill: 'transparent',
+                      opacity: 0,
+                    }}
+                  />
+                </Fragment>
+              );
+            })}
         </g>
         {workspace.nodes &&
           workspace.nodes
@@ -135,7 +173,10 @@ export function GraphVisualization({
                     // eslint-disable-next-line @typescript-eslint/naming-convention
                     'gphNode__circle--selected': node.isSelected,
                   })}
-                  style={{ fill: node.color }}
+                  style={{
+                    fill: node.color,
+                    opacity: !filterSet.size || filterSet.has(node.id) ? 1 : 0.3,
+                  }}
                 />
                 {node.icon && (
                   <text
@@ -147,6 +188,7 @@ export function GraphVisualization({
                     textAnchor="middle"
                     x={node.kx}
                     y={node.ky}
+                    opacity={!filterSet.size || filterSet.has(node.id) ? 1 : 0.1}
                   >
                     {node.icon.code}
                   </text>
@@ -159,6 +201,7 @@ export function GraphVisualization({
                     transform="translate(0,22)"
                     x={node.kx}
                     y={node.ky}
+                    opacity={!filterSet.size || filterSet.has(node.id) ? 1 : 0.1}
                   >
                     {node.label}
                   </text>

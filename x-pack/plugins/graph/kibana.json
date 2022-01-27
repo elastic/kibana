@@ -5,6 +5,8 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "lens",
+    "embeddable",
     "licensing",
     "data",
     "navigation",

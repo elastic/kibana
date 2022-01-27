@@ -42,6 +42,7 @@ export const WorkspaceRoute = ({
     setHeaderActionMenu,
     spaces,
     indexPatterns: getIndexPatternProvider,
+    lens,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -63,10 +64,11 @@ export const WorkspaceRoute = ({
     [getIndexPatternProvider.get]
   );
 
-  const { loading, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } = useGraphLoader({
-    toastNotifications,
-    coreStart,
-  });
+  const { loading, callNodeProxy, callSearchNodeProxy, handleSearchQueryError, getTimeExtents } =
+    useGraphLoader({
+      toastNotifications,
+      coreStart,
+    });
 
   const services = useMemo(
     () => ({
@@ -95,6 +97,7 @@ export const WorkspaceRoute = ({
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
+          getTimeExtents,
         };
         const createdWorkspace = (workspaceRef.current = createWorkspace(options));
         return createdWorkspace;
@@ -148,6 +151,7 @@ export const WorkspaceRoute = ({
             indexPatterns={indexPatterns}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
+            lens={lens}
           />
         </Provider>
       </KibanaContextProvider>

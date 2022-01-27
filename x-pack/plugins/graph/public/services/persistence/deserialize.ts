@@ -214,6 +214,14 @@ export function makeNodeId(field: string, term: string) {
   return field + '..' + term;
 }
 
+export function makeEdgeId(srcId: string, targetId: string) {
+  let id = srcId + '->' + targetId;
+  if (srcId > targetId) {
+    id = targetId + '->' + srcId;
+  }
+  return id;
+}
+
 export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: IndexPattern,

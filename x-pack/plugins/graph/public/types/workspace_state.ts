@@ -78,11 +78,17 @@ export interface TermIntersect {
   overlap: number;
 }
 
+export interface TimeRange {
+  from: string;
+  to: string;
+}
+
 export interface Workspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
   selectedNodes: WorkspaceNode[];
+  filteredIds: string[];
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
   undoLog: string;
@@ -146,14 +152,20 @@ export interface Workspace {
 
   runLayout(): void;
   stopLayout(): void;
+
+  getTimeExtents(timeField: string, filters: Record<string, unknown>): Promise<TimeRange>;
+  selectGraphInTime(timeField: string, timeRange: TimeRange): Promise<void>;
+  clearTimeFilter(): void;
 }
 
 export type ExploreRequest = any;
 export type SearchRequest = any;
 export type ExploreResults = any;
 export type SearchResults = any;
+export type TimeExtentsResults = any;
 export type GraphExploreCallback = (data: ExploreResults) => void;
 export type GraphSearchCallback = (data: SearchResults) => void;
+export type GraphTimebarCallback = (data: TimeExtentsResults) => void;
 
 export type WorkspaceOptions = Partial<{
   indexName: string;
@@ -171,6 +183,19 @@ export type WorkspaceOptions = Partial<{
     callback: GraphSearchCallback
   ) => void;
   exploreControls: AdvancedSettings;
+  getTimeExtents: (
+    indexPattern: string,
+    timeField: string,
+    filters: Record<string, unknown>,
+    callback: GraphTimebarCallback
+  ) => void;
 }>;
 
-export type ControlType = 'style' | 'drillDowns' | 'editLabel' | 'mergeTerms' | 'none';
+export type ControlType =
+  | 'style'
+  | 'drillDowns'
+  | 'editLabel'
+  | 'mergeTerms'
+  | 'timebar'
+  | 'timeFilter'
+  | 'none';
