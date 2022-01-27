@@ -113,7 +113,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {

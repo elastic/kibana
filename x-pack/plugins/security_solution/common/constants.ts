@@ -76,7 +76,7 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threat.indicator' as const;
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
-export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 
 export enum SecurityPageName {
   administration = 'administration',
