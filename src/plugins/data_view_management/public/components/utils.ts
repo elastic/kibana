@@ -38,12 +38,13 @@ export async function getIndexPatterns(
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
-    const { id, title } = idxPattern;
+    const { id, title, namespaces } = idxPattern;
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault);
 
     return {
       id,
+      namespaces,
       title,
       default: isDefault,
       tags,

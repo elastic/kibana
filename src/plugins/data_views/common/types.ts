@@ -257,6 +257,7 @@ export interface DataViewSpec {
   runtimeFieldMap?: Record<string, RuntimeField>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  namespaces?: string[];
 }
 
 /**

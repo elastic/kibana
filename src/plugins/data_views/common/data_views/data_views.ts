@@ -48,6 +48,7 @@ export type IndexPatternListSavedObjectAttrs = Pick<
 
 export interface DataViewListItem {
   id: string;
+  namespaces?: string[];
   title: string;
   type?: string;
   typeMeta?: TypeMeta;
@@ -173,7 +174,7 @@ export class DataViewsService {
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
    */
-  getIdsWithTitle = async (refresh: boolean = false): Promise<IndexPatternListItem[]> => {
+  getIdsWithTitle = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -182,6 +183,7 @@ export class DataViewsService {
     }
     return this.savedObjectsCache.map((obj) => ({
       id: obj?.id,
+      namespaces: obj?.namespaces,
       title: obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
@@ -380,6 +382,7 @@ export class DataViewsService {
     const {
       id,
       version,
+      namespaces,
       attributes: {
         title,
         timeFieldName,
@@ -406,6 +409,7 @@ export class DataViewsService {
     return {
       id,
       version,
+      namespaces,
       title,
       timeFieldName,
       sourceFilters: parsedSourceFilters,

@@ -25,6 +25,7 @@ import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { SpacesList } from './spaces_list';
 
 const pagination = {
   initialPageSize: 10,
@@ -81,6 +82,7 @@ export const IndexPatternTable = ({
     chrome,
     dataViews,
     IndexPatternEditor,
+    spaces,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
@@ -114,39 +116,45 @@ export const IndexPatternTable = ({
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
         defaultMessage: 'Name',
       }),
-      render: (
-        name: string,
-        index: {
-          id: string;
-          tags?: Array<{
-            key: string;
-            name: string;
-          }>;
-        }
-      ) => (
+      render: (name: string, dataView: IndexPatternTableItem) => (
         <>
           <EuiFlexGroup gutterSize="s" wrap>
             <EuiFlexItem grow={false} css={flexItemStyles}>
-              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+              <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
                 {name}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {index.id && index.id.indexOf(securitySolution) === 0 && (
+            {dataView?.id?.indexOf(securitySolution) === 0 && (
               <EuiFlexItem grow={false} css={flexItemStyles}>
                 <EuiBadge>{securityDataView}</EuiBadge>
               </EuiFlexItem>
             )}
-            {index.tags &&
-              index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
-                  <EuiBadge>{tagName}</EuiBadge>
-                </EuiFlexItem>
-              ))}
+            {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
+              <EuiFlexItem grow={false} css={flexItemStyles} key={tagKey}>
+                <EuiBadge>{tagName}</EuiBadge>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </>
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
+    },
+    {
+      field: 'namespaces',
+      name: 'spaces',
+      render: (name: string, dataView: IndexPatternTableItem) => {
+        return spaces ? (
+          <SpacesList
+            spacesApi={spaces}
+            spaceIds={dataView.namespaces || []}
+            id={dataView.id}
+            refresh={() => console.log('refresh list!!')}
+          />
+        ) : (
+          <></>
+        );
+      },
     },
   ];
 
@@ -181,6 +189,8 @@ export const IndexPatternTable = ({
   ) : (
     <></>
   );
+
+  console.log('indexPatterns', indexPatterns);
 
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>

@@ -314,15 +314,18 @@ export class JobsList extends Component {
           name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
             defaultMessage: 'Spaces',
           }),
-          render: (item) => (
-            <JobSpacesList
-              spacesApi={spacesApi}
-              spaceIds={item.spaceIds}
-              jobId={item.id}
-              jobType="anomaly-detector"
-              refresh={this.props.refreshJobs}
-            />
-          ),
+          render: (item) => {
+            console.log('HERE', item.spaceIds, item.id);
+            return (
+              <JobSpacesList
+                spacesApi={spacesApi}
+                spaceIds={item.spaceIds}
+                jobId={item.id}
+                jobType="anomaly-detector"
+                refresh={this.props.refreshJobs}
+              />
+            );
+          },
           'data-test-subj': 'mlJobListColumnSpaces',
         });
       }
