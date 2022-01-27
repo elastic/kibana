@@ -72,6 +72,7 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
 
   return (
     <>
+      {addFlyoutVisible ? ConnectorAddFlyout : null}
       <EuiButtonEmpty
         data-test-subj="createConnectorButton"
         onClick={() => setAddFlyoutVisibility(true)}
@@ -83,7 +84,6 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
           defaultMessage="Add connector"
         />
       </EuiButtonEmpty>
-      {addFlyoutVisible ? ConnectorAddFlyout : null}
     </>
   );
 };
