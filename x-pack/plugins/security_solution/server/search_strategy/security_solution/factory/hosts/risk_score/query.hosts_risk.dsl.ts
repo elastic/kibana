@@ -29,18 +29,17 @@ export const buildHostsRiskScoreQuery = ({
 }: HostsRiskScoreRequestOptions) => {
   const filter = createQueryFilterClauses(filterQuery);
 
-  // @pablo we should probably stop sending it too
-  // if (timerange) {
-  //   filter.push({
-  //     range: {
-  //       '@timestamp': {
-  //         gte: timerange.from,
-  //         lte: timerange.to,
-  //         format: 'strict_date_optional_time',
-  //       },
-  //     },
-  //   });
-  // }
+  if (timerange) {
+    filter.push({
+      range: {
+        '@timestamp': {
+          gte: timerange.from,
+          lte: timerange.to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  }
 
   if (hostNames) {
     filter.push({ terms: { 'host.name': hostNames } });

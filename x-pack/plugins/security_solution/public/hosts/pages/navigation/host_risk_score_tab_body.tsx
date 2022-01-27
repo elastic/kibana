@@ -33,14 +33,6 @@ export const HostRiskScoreQueryTabBody = ({
     getHosRiskScoreSelector(state, hostsModel.HostsType.page)
   );
 
-  const timerange = useMemo(
-    () => ({
-      from: startDate,
-      to: endDate,
-    }),
-    [startDate, endDate]
-  );
-
   const pagination = useMemo(
     () => ({
       cursorStart: activePage * limit,
@@ -50,7 +42,6 @@ export const HostRiskScoreQueryTabBody = ({
   );
 
   const [loading, { data, totalCount, inspect, isInspected, refetch }] = useHostRiskScore({
-    timerange,
     filterQuery,
     skip,
     pagination,
