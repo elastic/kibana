@@ -69,7 +69,7 @@ const getQueryOrder = (sort?: HostRiskScoreSortField) => {
   }
 
   if (sort.field === HostRiskScoreFields.risk) {
-    return { [`${HostRiskScoreFields.risk}.keyword`]: sort.direction };
+    return { [HostRiskScoreFields.riskScore]: sort.direction };
   }
 
   return { [sort.field]: sort.direction };
