@@ -32,7 +32,7 @@ function sortSeries(visData, model) {
   const series = get(visData, `${model.id}.series`, []);
   return model.series.reduce((acc, item) => {
     const itemSeries = series.filter((s) => {
-      const id = first(s.id.split(/:/));
+      const id = first(s.id.split(/╰┄►/));
       return id === item.id;
     });
     const direction = item.terms_direction || 'desc';
@@ -47,7 +47,7 @@ function TopNVisualization(props) {
   const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
 
   const series = sortSeries(visData, model).map((item) => {
-    const id = first(item.id.split(/:/));
+    const id = first(item.id.split(/╰┄►/));
     const seriesConfig = model.series.find((s) => s.id === id);
     if (seriesConfig) {
       const tickFormatter =

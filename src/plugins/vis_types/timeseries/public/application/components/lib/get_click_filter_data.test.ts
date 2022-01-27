@@ -103,7 +103,7 @@ describe('getClickFilterData', () => {
         },
         {
           key: 'groupId{yaxis_6e0353a0-ad9b-11eb-b112-89cce8e43380_main_group}spec{61ca57f1-469d-11e7-af02-69e470af7417:1}yAccessor{1}splitAccessors{}',
-          specId: '61ca57f1-469d-11e7-af02-69e470af7417:1',
+          specId: '61ca57f1-469d-11e7-af02-69e470af7417╰┄►1',
         },
       ],
     ] as Array<[GeometryValue, XYChartSeriesIdentifier]>;

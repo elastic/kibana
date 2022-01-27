@@ -19,7 +19,7 @@ export function seriesAgg(resp, panel, series, meta, extractFields) {
       // Filter out the seires with the matching metric and store them
       // in targetSeries
       results = results.filter((s) => {
-        if (s.id.split(/:/)[0] === series.id) {
+        if (s.id.split(/╰┄►/)[0] === series.id) {
           targetSeries.push(s.data);
           return false;
         }

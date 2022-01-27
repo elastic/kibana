@@ -20,7 +20,7 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
     // Filter the results down to only the ones that match the series.id. Sometimes
     // there will be data from other series mixed in.
     results = results.filter((s) => {
-      if (s.id.split(/:/)[0] === series.id) {
+      if (s.id.split(/╰┄►/)[0] === series.id) {
         return false;
       }
       return true;

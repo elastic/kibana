@@ -26,7 +26,7 @@ export const seriesAgg: TableResponseProcessorsFunction =
       // Filter out the seires with the matching metric and store them
       // in targetSeries
       results = results.filter((s) => {
-        if (s.id && s.id.split(/:/)[0] === series.id) {
+        if (s.id && s.id.split(/╰┄►/)[0] === series.id) {
           targetSeries.push(s.data!);
           return false;
         }
