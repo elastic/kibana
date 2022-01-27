@@ -73,50 +73,6 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="xmattersAlertActionGroupName"
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.alertActionGroupName',
-              {
-                defaultMessage: 'Alert Action Group Name',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editAction}
-              messageVariables={messageVariables}
-              paramsProperty={'alertActionGroupName'}
-              defaultValue={'{{alertActionGroupName}}'}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            id="xmattersAlertId"
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.alertId',
-              {
-                defaultMessage: 'Alert ID',
-              }
-            )}
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editAction}
-              messageVariables={messageVariables}
-              paramsProperty={'alertId'}
-              defaultValue={'{{alertId}}'}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
             id="xmattersAlertName"
             fullWidth
             label={i18n.translate(

@@ -48,17 +48,3 @@ export const USERNAME_REQUIRED_FOR_PASSWORD = i18n.translate(
     defaultMessage: 'Username is required when password is used.',
   }
 );
-
-export const ALERT_ACTION_GROUP_NAME_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.xmattersAction.error.requiredAlertActionGroupNameText',
-  {
-    defaultMessage: 'Alert Action Group Name is required.',
-  }
-);
-
-export const ALERT_ID_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.xmattersAction.error.requiredAlertIdText',
-  {
-    defaultMessage: 'Alert Id is required.',
-  }
-);
