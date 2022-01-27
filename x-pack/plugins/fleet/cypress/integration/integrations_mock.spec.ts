@@ -66,7 +66,10 @@ describe('Add Integration - Mock API', () => {
       cy.intercept('POST', '/api/fleet/package_policies/upgrade/dryrun', [
         {
           name: 'apache-2',
-          diff: [policyConfig, policyConfig],
+          diff: [
+            policyConfig,
+            { ...policyConfig, package: { ...policyConfig.package, version: newVersion } },
+          ],
           hasErrors: false,
         },
       ]);
