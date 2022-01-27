@@ -59,8 +59,6 @@ import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeli
 import {
   goToManageAlertsDetectionRules,
   investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
@@ -412,8 +410,6 @@ describe('indicator match', () => {
       });
 
       it('Creates and activates a new Indicator Match rule', () => {
-        waitForAlertsPanelToBeLoaded();
-        waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();

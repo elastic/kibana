@@ -34,7 +34,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
-    lensEmbeddableFactory: makeLensEmbeddableFactory({}),
+    lensEmbeddableFactory: makeLensEmbeddableFactory({}, {}),
   });
 
   const contextMock = savedObjectsServiceMock.createMigrationContext();

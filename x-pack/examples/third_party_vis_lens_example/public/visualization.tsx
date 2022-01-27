@@ -12,8 +12,8 @@ import { Ast } from '@kbn/interpreter';
 import { ThemeServiceStart } from '../../../../src/core/public';
 import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
 import { Visualization, OperationMetadata } from '../../../plugins/lens/public';
-import type { RotatingNumberState } from './types';
-import { DEFAULT_COLOR } from './constants';
+import type { RotatingNumberState } from '../common/types';
+import { DEFAULT_COLOR } from '../common/constants';
 import { layerTypes } from '../../../plugins/lens/public';
 
 const toExpression = (state: RotatingNumberState): Ast | null => {

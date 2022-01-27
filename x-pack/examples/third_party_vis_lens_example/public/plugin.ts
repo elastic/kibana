@@ -14,7 +14,7 @@ import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/
 import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plugins/lens/public';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
-import { RotatingNumberState } from './types';
+import { RotatingNumberState } from '../common/types';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
