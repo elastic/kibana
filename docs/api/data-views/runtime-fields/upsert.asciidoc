@@ -6,6 +6,7 @@
 
 experimental[] Create or update an existing runtime field
 
+[float]
 [[data-views-runtime-field-upsert-request]]
 ==== Request
 
@@ -13,6 +14,7 @@ experimental[] Create or update an existing runtime field
 
 `PUT <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field`
 
+[float]
 [[data-views-runtime-field-upsert-params]]
 ==== Path parameters
 
@@ -22,6 +24,7 @@ experimental[] Create or update an existing runtime field
 `data_view_id`::
 (Required, string) The ID of the data view.
 
+[float]
 [[data-views-runtime-field-upsert-body]]
 ==== Request body
 
@@ -30,6 +33,7 @@ experimental[] Create or update an existing runtime field
 `runtimeField`:: (Required, object) The runtime field definition object.
 
 
+[float]
 [[data-views-runtime-field-upsert-example]]
 ==== Examples
 
@@ -63,6 +67,7 @@ The API returns created or updated runtime field object array and updated data v
 [discrete]
 === Upsert runtime field API (deprecated)
 
+[float]
 [[data-views-runtime-field-upsert-request-deprecated]]
 ==== Request
 
@@ -70,6 +75,7 @@ The API returns created or updated runtime field object array and updated data v
 
 `PUT <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
 
+[float]
 [[data-views-runtime-field-upsert-params-deprecated]]
 ==== Path parameters
 
@@ -79,6 +85,7 @@ The API returns created or updated runtime field object array and updated data v
 `index_pattern_id`::
 (Required, string) The ID of the data view.
 
+[float]
 [[data-views-runtime-field-upsert-body-deprecated]]
 ==== Request body
 
@@ -87,6 +94,7 @@ The API returns created or updated runtime field object array and updated data v
 `runtimeField`:: (Required, object) The runtime field definition object.
 
 
+[float]
 [[data-views-runtime-field-upsert-example-deprecated]]
 ==== Examples
 

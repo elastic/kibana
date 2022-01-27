@@ -6,6 +6,7 @@
 
 experimental[] Create data views.
 
+[float]
 [[data-views-api-create-request]]
 ==== Request
 
@@ -13,12 +14,14 @@ experimental[] Create data views.
 
 `POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view`
 
+[float]
 [[data-views-api-create-path-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[float]
 [[data-views-api-create-body-params]]
 ==== Request body
 
@@ -30,12 +33,14 @@ the data view is stored. The default is `false`.
 
 `data_view`:: (Required, object) The data view object. All fields are optional.
 
+[float]
 [[data-views-api-create-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
+[float]
 [[data-views-api-create-example]]
 ==== Examples
 

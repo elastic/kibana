@@ -6,6 +6,7 @@
 
 experimental[] Delete a runtime field from a data view.
 
+[float]
 [[data-views-runtime-field-api-delete-request]]
 ==== Request
 
@@ -13,6 +14,7 @@ experimental[] Delete a runtime field from a data view.
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
 
+[float]
 [[data-views-runtime-field-api-delete-path-params]]
 ==== Path parameters
 
@@ -26,6 +28,7 @@ experimental[] Delete a runtime field from a data view.
 (Required, string) The name of the runtime field you want to delete.
 
 
+[float]
 ==== Example
 
 Delete a runtime field from a data view:
@@ -41,6 +44,7 @@ $ curl -X DELETE api/data_views/data_view/<my-view>/runtime_field/<runtime-field
 [[data-views-runtime-field-api-delete-deprecated]]
 === Delete runtime field API (deprecated)
 
+[float]
 [[data-views-runtime-field-api-delete-request-deprecated]]
 ==== Request
 
@@ -48,6 +52,7 @@ $ curl -X DELETE api/data_views/data_view/<my-view>/runtime_field/<runtime-field
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
+[float]
 [[data-views-runtime-field-api-delete-path-params-deprecated]]
 ==== Path parameters
 
@@ -61,6 +66,7 @@ $ curl -X DELETE api/data_views/data_view/<my-view>/runtime_field/<runtime-field
 (Required, string) The name of the runtime field you want to delete.
 
 
+[float]
 ==== Example
 
 Delete a runtime field from a data view:

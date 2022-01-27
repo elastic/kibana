@@ -6,6 +6,7 @@
 
 experimental[] Get a runtime field
 
+[float]
 [[data-views-runtime-field-get-request]]
 ==== Request
 
@@ -13,6 +14,7 @@ experimental[] Get a runtime field
 
 `GET <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field/<name>`
 
+[float]
 [[data-views-runtime-field-get-params]]
 ==== Path parameters
 
@@ -25,7 +27,7 @@ experimental[] Get a runtime field
 `name`::
 (Required, string) The name of the runtime field you want to retrieve.
 
-
+[float]
 [[data-views-runtime-field-get-example]]
 ==== Example
 
@@ -56,6 +58,7 @@ The API returns a runtime `field` object array, and a `runtimeField` definition 
 [[data-views-runtime-field-api-get-deprecated]]
 === Get runtime field API (deprecated)
 
+[float]
 [[data-views-runtime-field-get-request-deprecated]]
 ==== Request
 
@@ -63,6 +66,7 @@ The API returns a runtime `field` object array, and a `runtimeField` definition 
 
 `GET <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field/<name>`
 
+[float]
 [[data-views-runtime-field-get-params-deprecated]]
 ==== Path parameters
 
@@ -75,7 +79,7 @@ The API returns a runtime `field` object array, and a `runtimeField` definition 
 `name`::
 (Required, string) The name of the runtime field you want to retrieve.
 
-
+[float]
 [[data-views-runtime-field-get-example-deprecated]]
 ==== Example
 
