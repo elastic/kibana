@@ -47,11 +47,11 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
     seriesId: id,
   };
 
-  const [isExapndedOnce, setIsExapndedOnce] = useState(false);
+  const [isExpandedOnce, setIsExpandedOnce] = useState(false);
 
   useEffect(() => {
     if (isExpanded) {
-      setIsExapndedOnce(true);
+      setIsExpandedOnce(true);
     }
   }, [isExpanded]);
 
@@ -99,7 +99,7 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued">
-          {isExapndedOnce && <ExpandedSeriesRow {...seriesProps} />}
+          {isExpandedOnce && <ExpandedSeriesRow {...seriesProps} />}
         </EuiPanel>
       </StyledAccordion>
     </EuiPanel>
