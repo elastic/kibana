@@ -23,8 +23,8 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { DocLinksStart } from 'kibana/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
-import { useAppContext } from '../../../app_context';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
 
@@ -231,11 +231,15 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
   );
 };
 
+interface CustomProps {
+  docLinks: DocLinksStart;
+}
+
 export const getMigrateSystemIndicesStep = ({
   isComplete,
   setIsComplete,
   docLinks,
-}: OverviewStepProps): EuiStepProps => {
+}: OverviewStepProps & CustomProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {

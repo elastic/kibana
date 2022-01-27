@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'kibana/public';
 import { ResponseError } from '../../../common/types';
 
 export enum LoadingState {
@@ -43,5 +42,4 @@ export interface DeprecationLoggingPreviewProps {
 export interface OverviewStepProps {
   isComplete: boolean;
   setIsComplete: (isComplete: boolean) => void;
-  docLinks: DocLinksStart;
 }
