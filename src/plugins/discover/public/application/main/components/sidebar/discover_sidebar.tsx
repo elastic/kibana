@@ -12,6 +12,9 @@ import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from '
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
+  EuiCallOut,
+  EuiIcon,
+  EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
@@ -19,6 +22,7 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
   EuiPageSideBar,
+  EuiPopover,
   useResizeObserver,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
@@ -114,6 +118,10 @@ export function DiscoverSidebarComponent({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
 
   useEffect(() => {
     if (documents) {
@@ -306,6 +314,21 @@ export function DiscoverSidebarComponent({
     );
   }
 
+  const callout = (
+    <EuiCallOut className="dscLearnCallout" size="s" title="">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem>
+          <EuiButtonEmpty className="dscLearnBtn" size="xs" onClick={onButtonClick}>
+            Learn about field types
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon color="primary" size="s" type="cross" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCallOut>
+  );
+
   return (
     <EuiPageSideBar
       className="dscSidebar"
@@ -436,6 +459,19 @@ export function DiscoverSidebarComponent({
                     </EuiNotificationBadge>
                   }
                 >
+                  <EuiSpacer size="xs" />
+                  <EuiPopover
+                    anchorPosition="rightDown"
+                    display="block"
+                    button={callout}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                  >
+                    <EuiText style={{ width: 300 }}>
+                      <p>Popover content that&rsquo;s wider than the default width</p>
+                    </EuiText>
+                  </EuiPopover>
+
                   <EuiSpacer size="s" />
                   {popularFields.length > 0 && (
                     <>
