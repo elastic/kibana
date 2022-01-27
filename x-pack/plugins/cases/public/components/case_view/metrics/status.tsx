@@ -214,6 +214,7 @@ const ValueWithExplanationIcon: React.FC<{
             <FormattedRelativePreferenceDate
               data-test-subj={`case-metrics-lifespan-reopen-${index}`}
               value={explanationValue}
+              stripMs={true}
             />
             {isNotLastItem(index, explanationValues.length) ? <EuiSpacer size="xs" /> : null}
           </React.Fragment>
