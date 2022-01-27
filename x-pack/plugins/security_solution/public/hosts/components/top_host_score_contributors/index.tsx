@@ -22,7 +22,7 @@ import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 import { HostRiskScoreFields } from '../../../../common/search_strategy';
 import { useHostRiskScore } from '../../containers/host_risk_score';
-import { ManageQueryComponent } from '../../../common/components/page/manage_query';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
 export interface TopHostScoreContributorsProps
@@ -101,16 +101,17 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     [items.length]
   );
 
+  useQueryInspector({
+    queryId: QUERY_ID,
+    loading,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect,
+  });
+
   return (
     <InspectButtonContainer>
-      <ManageQueryComponent
-        id={QUERY_ID}
-        loading={loading}
-        refetch={refetch}
-        setQuery={setQuery}
-        deleteQuery={deleteQuery}
-        inspect={inspect}
-      />
       <EuiPanel hasBorder data-test-subj="topHostScoreContributors">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>

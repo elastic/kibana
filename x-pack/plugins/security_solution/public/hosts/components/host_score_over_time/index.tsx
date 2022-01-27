@@ -29,7 +29,7 @@ import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 import { useHostRiskScore } from '../../containers/host_risk_score';
-import { ManageQueryComponent } from '../../../common/components/page/manage_query';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
 export interface HostRiskScoreOverTimeProps
@@ -96,16 +96,17 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
     [data]
   );
 
+  useQueryInspector({
+    queryId: QUERY_ID,
+    loading,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect,
+  });
+
   return (
     <InspectButtonContainer>
-      <ManageQueryComponent
-        id={QUERY_ID}
-        loading={loading}
-        refetch={refetch}
-        setQuery={setQuery}
-        deleteQuery={deleteQuery}
-        inspect={inspect}
-      />
       <EuiPanel hasBorder data-test-subj="hostRiskScoreOverTime">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
