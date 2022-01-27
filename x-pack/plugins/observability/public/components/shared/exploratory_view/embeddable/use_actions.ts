@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { createExploratoryViewUrl } from '../configurations/utils';
+import { createExploratoryViewRoutePath, createExploratoryViewUrl } from '../configurations/utils';
 import { ReportViewType } from '../types';
 import { AllSeries } from '../hooks/use_series_storage';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -52,16 +52,11 @@ export function useActions({
     appId
   );
 
-  const hrefPath = createExploratoryViewUrl(
-    { reportType, allSeries: attributes },
-    http?.basePath.get(),
-    appId,
-    true
-  );
+  const routePath = createExploratoryViewRoutePath({ reportType, allSeries: attributes });
 
   const exploreCallback = useCallback(() => {
-    application?.navigateToApp(appId, { path: hrefPath });
-  }, [appId, application, hrefPath]);
+    application?.navigateToApp(appId, { path: routePath });
+  }, [appId, application, routePath]);
 
   const saveCallback = useCallback(() => {
     setIsSaveOpen(true);
