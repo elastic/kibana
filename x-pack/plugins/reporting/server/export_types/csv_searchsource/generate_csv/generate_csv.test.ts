@@ -108,13 +108,13 @@ beforeEach(async () => {
     })
   );
 
-  searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
+  searchSourceMock.getField = jest.fn((key: string) => {
     switch (key) {
       case 'index':
         return {
           fields: {
-            getByName: jest.fn().mockImplementation(() => []),
-            getByType: jest.fn().mockImplementation(() => []),
+            getByName: jest.fn(() => []),
+            getByType: jest.fn(() => []),
           },
           metaFields: ['_id', '_index', '_type', '_score'],
           getFormatterForField: jest.fn(),

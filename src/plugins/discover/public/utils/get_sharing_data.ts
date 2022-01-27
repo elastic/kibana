@@ -82,18 +82,9 @@ export async function getSharingData(
        * Otherwise, the requests will ask for all fields, even if only a few are really needed.
        * Discover does not set fields, since having all fields is needed for the UI.
        */
-      // 1. Inspect the searchsource to find how fields are configured (fields API or "raw data")
-      const fieldConfigs: Pick<SearchSourceFields, 'fields' | 'fieldsFromSource'> = {
-        fields: searchSource.getField('fields'),
-        fieldsFromSource: searchSource.getField('fieldsFromSource'),
-      };
-      const fieldsConfig = fieldConfigs.fields ? 'fields' : 'fieldsFromSource';
-
-      // 2. explicitly set the fields into the searchsource object
-      if (fieldsConfig === 'fields' && columns.length > 0) {
+      if (searchSource.getField('fields') && columns.length) {
         searchSource.setField('fields', columns);
       }
-
       return searchSource.getSerializedFields(true);
     },
     columns,
