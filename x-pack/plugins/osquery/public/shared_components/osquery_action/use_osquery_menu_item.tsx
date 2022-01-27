@@ -11,12 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../common/lib/kibana';
 
-export const ACTION_OSQUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.osqueryAlertTitle',
-  {
-    defaultMessage: 'Run Osquery',
-  }
-);
+export const ACTION_OSQUERY = i18n.translate('xpack.osquery.alerts.osqueryAlertTitle', {
+  defaultMessage: 'Run Osquery',
+});
 
 interface IProps {
   agentId: string;

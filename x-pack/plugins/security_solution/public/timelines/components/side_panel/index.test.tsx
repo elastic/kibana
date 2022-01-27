@@ -479,12 +479,16 @@ describe('Details Panel Component', () => {
                     </ExpandableEventTitle>
                   </div>
                 </EuiFlyoutHeader>
-                <Styled(EuiFlyoutBody)>
+                <Styled(EuiFlyoutBody)
+                  preventPadding={false}
+                >
                   <EuiFlyoutBody
                     className="c1"
+                    preventPadding={false}
                   >
                     <div
                       className="euiFlyoutBody c1"
+                      preventPadding={false}
                     >
                       <div
                         className="euiFlyoutBody__overflow"
@@ -614,9 +618,11 @@ describe('Details Panel Component', () => {
                     }
                   }
                   handleOnEventClosed={[Function]}
+                  handlePanelChange={[Function]}
                   isHostIsolationPanelOpen={false}
                   loadingEventDetails={true}
                   onAddIsolationStatusClick={[Function]}
+                  preventTakeActionDropdown={false}
                   timelineId="test"
                 >
                   <Memo()
@@ -631,9 +637,11 @@ describe('Details Panel Component', () => {
                     }
                     globalQuery={Array []}
                     handleOnEventClosed={[Function]}
+                    handlePanelChange={[Function]}
                     isHostIsolationPanelOpen={false}
                     loadingEventDetails={true}
                     onAddIsolationStatusClick={[Function]}
+                    preventTakeActionDropdown={false}
                     timelineId="test"
                     timelineQuery={
                       Object {
@@ -763,12 +771,16 @@ describe('Details Panel Component', () => {
                   </ExpandableEventTitle>
                 </div>
               </EuiFlyoutHeader>
-              <Styled(EuiFlyoutBody)>
+              <Styled(EuiFlyoutBody)
+                preventPadding={false}
+              >
                 <EuiFlyoutBody
                   className="c1"
+                  preventPadding={false}
                 >
                   <div
                     className="euiFlyoutBody c1"
+                    preventPadding={false}
                   >
                     <div
                       className="euiFlyoutBody__overflow"
@@ -898,9 +910,11 @@ describe('Details Panel Component', () => {
                   }
                 }
                 handleOnEventClosed={[Function]}
+                handlePanelChange={[Function]}
                 isHostIsolationPanelOpen={false}
                 loadingEventDetails={true}
                 onAddIsolationStatusClick={[Function]}
+                preventTakeActionDropdown={false}
                 timelineId="test"
               >
                 <Memo()
@@ -915,9 +929,11 @@ describe('Details Panel Component', () => {
                   }
                   globalQuery={Array []}
                   handleOnEventClosed={[Function]}
+                  handlePanelChange={[Function]}
                   isHostIsolationPanelOpen={false}
                   loadingEventDetails={true}
                   onAddIsolationStatusClick={[Function]}
+                  preventTakeActionDropdown={false}
                   timelineId="test"
                   timelineQuery={
                     Object {
