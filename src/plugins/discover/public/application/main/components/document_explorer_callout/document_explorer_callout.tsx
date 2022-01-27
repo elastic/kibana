@@ -19,10 +19,7 @@ const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
 
 const getStoredCalloutState = (storage: Storage): boolean => {
   const calloutClosed = storage.get(CALLOUT_STATE_KEY);
-  if (typeof calloutClosed === 'boolean') {
-    return calloutClosed;
-  }
-  return false;
+  return Boolean(calloutClosed);
 };
 const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
   storage.set(CALLOUT_STATE_KEY, newState);
