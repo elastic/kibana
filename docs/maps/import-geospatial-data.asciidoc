@@ -6,7 +6,7 @@ To import geospatical data into the Elastic Stack, the data must be indexed as {
 Geospatial data comes in many formats.
 Choose an import tool based on the format of your geospatial data.
 
-TIP: When you upload GeoJSON or delimited files in {kib}, there is a file size
+TIP: When you upload files in {kib}, there is a file size
 limit, which is configurable in <<fileupload-maxfilesize,Advanced Settings>>.
 
 [discrete]
@@ -19,7 +19,7 @@ spaces in **{stack-manage-app}** in {kib}. For more information, see
 {ref}/security-privileges.html[Security privileges],
 <<kibana-privileges, {kib} privileges>>, and <<kibana-role-management, {kib} role management>>.
 
-To upload GeoJSON files in {kib} with *Maps*, you must have:
+To upload GeoJSON files and shapefiles in {kib} with *Maps*, you must have:
 
 * The `all` {kib} privilege for *Maps*
 * The `all` {kib} privilege for *{ipm-app}*
@@ -50,12 +50,28 @@ On the {kib} home page, you can upload a file and import it into an {es} index w
 [discrete]
 === Upload a GeoJSON file
 
-*Upload GeoJSON* indexes GeoJSON features as a `geo_point` or `geo_shape`.
+*Upload file* indexes GeoJSON features in {es}, creating a document for each feature.
+
+NOTE: GeoJSON feature coordinates must be in EPSG:4326 coordinate reference system..
 
 . <<maps-create, Create a new map>>.
 . Click *Add layer*.
-. Select *Upload GeoJSON*.
-. Use the file chooser to select a GeoJSON file.
+. Select *Upload file*.
+. Use the file chooser to select a GeoJSON file ending with the extension `.json` or `.geojson`.
+. Click *Import file*.
+
+discrete]
+=== Upload a shapefile
+
+*Upload file* indexes shapefile features in {es}, creating a document for each feature.
+
+. <<maps-create, Create a new map>>.
+. Click *Add layer*.
+. Select *Upload file*.
+. Use the file chooser to select the `.shp` file from your shapefile folder.
+. Use the `.dbf` file chooser to select the `.dbf` file from your shapefile folder.
+. Use the `.prj` file chooser to select the `.prj` file from your shapefile folder.
+. Use the `.shx` file chooser to select the `.shx` file from your shapefile folder.
 . Click *Import file*.
 
 [discrete]
