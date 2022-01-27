@@ -48,6 +48,8 @@ const getUtilityProps = () => {
     timefilter: timefilterMock,
     timeBuckets: timeBucketsMock,
     kibana: kibanaContextMock,
+    onPointerUpdate: jest.fn(),
+    chartsService: kibanaContextMock.services.charts,
   };
 };
 
