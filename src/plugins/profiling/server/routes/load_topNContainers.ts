@@ -30,7 +30,7 @@ export function registerTraceEventsTopNContainersRoute(router: IRouter<DataReque
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/containers_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: src } });
+      return response.ok({ body: src });
     }
   );
 }

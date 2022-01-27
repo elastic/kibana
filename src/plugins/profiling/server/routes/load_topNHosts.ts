@@ -30,7 +30,7 @@ export function registerTraceEventsTopNHostsRoute(router: IRouter<DataRequestHan
       const seconds = timeTo - timeFrom;
       const src = await import(`../fixtures/hosts_${seconds}`);
       delete src.default;
-      return response.ok({ body: { results: src } });
+      return response.ok({ body: src });
     }
   );
 }

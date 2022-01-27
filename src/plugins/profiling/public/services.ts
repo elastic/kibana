@@ -33,7 +33,7 @@ export function getServices(core: CoreStart): Services {
     fetchTopN: async (type: string, seconds: string) => {
       try {
         const query = getFetchQuery(seconds);
-        const response = await core.http.get<{ results: any[] }>(
+        const response = await core.http.get(
           `${paths.TopN}/${type}`,
           { query }
         );
@@ -46,11 +46,11 @@ export function getServices(core: CoreStart): Services {
     fetchElasticFlamechart: async (seconds: string) => {
       try {
         const query = getFetchQuery(seconds);
-        const response = await core.http.get<{ results: any[] }>(
+        const response = await core.http.get(
           paths.FlamechartElastic,
           { query }
         );
-        return response.results;
+        return response;
       } catch (e) {
         return e;
       }
@@ -59,11 +59,11 @@ export function getServices(core: CoreStart): Services {
     fetchPixiFlamechart: async (seconds: string) => {
       try {
         const query = getFetchQuery(seconds);
-        const response = await core.http.get<{ results: any[] }>(
+        const response = await core.http.get(
           paths.FlamechartPixi,
           { query }
         );
-        return response.results;
+        return response;
       } catch (e) {
         return e;
       }
