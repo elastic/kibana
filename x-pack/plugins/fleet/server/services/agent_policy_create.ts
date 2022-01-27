@@ -24,7 +24,9 @@ import { ensureDefaultEnrollmentAPIKeysExists } from './setup';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
-async function getAgentPolicyId(soClient: SavedObjectsClientContract): Promise<string | undefined> {
+async function getFleetServerAgentPolicyId(
+  soClient: SavedObjectsClientContract
+): Promise<string | undefined> {
   let agentPolicyId;
   // creating first fleet server policy with id 'fleet-server-policy'
   let agentPolicy;
@@ -97,7 +99,7 @@ export async function createAgentPolicyWithPackages({
   if (hasFleetServer) {
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
-    agentPolicyId = await getAgentPolicyId(soClient);
+    agentPolicyId = await getFleetServerAgentPolicyId(soClient);
     if (agentPolicyId === FLEET_SERVER_POLICY_ID) {
       // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
       newPolicy.is_default_fleet_server = true;
