@@ -28,6 +28,25 @@ describe('useDataInit', () => {
   let setStateMock: jest.Mock;
   const mockedObject = { mocked: true };
 
+  interface MockObjectData {
+    createdAt: number;
+    updatedAt: number;
+    text: string;
+  }
+
+  const callMockFuncWithArg = (arg: MockObjectData[]) => ({
+    ...mockContextValue,
+    services: {
+      ...mockContextValue.services,
+      objectStorageClient: {
+        text: {
+          findAll: jest.fn(() => arg),
+          create: jest.fn((data: any) => mockedObject),
+        },
+      },
+    },
+  });
+
   beforeAll(() => {
     setStateMock = jest.fn();
     useStateMock = (state: any) => [state, setStateMock];
@@ -48,11 +67,11 @@ describe('useDataInit', () => {
     });
   });
 
-  afterEach(()=> {
+  afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('calls dispatch with new objects, if no texts are provided.', async () => {
+  it('calls dispatch with new objects, if no texts are provided', async () => {
     jest.spyOn(React, 'useState').mockImplementation(useStateMock);
 
     const { result } = renderHook(() => useDataInit(), {});
@@ -61,7 +80,28 @@ describe('useDataInit', () => {
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'setCurrentTextObject',
-      payload: mockedObject
+      payload: mockedObject,
+    });
+  });
+
+  it('calls dispatch with new objects, if texts are provided', async () => {
+    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
+
+    const mockObj: MockObjectData = {
+      createdAt: 1643277939899,
+      updatedAt: 1643277939900,
+      text: 'Mocked data',
+    };
+
+    (useServicesContext as jest.Mock).mockReturnValue(callMockFuncWithArg([mockObj]));
+
+    const { result } = renderHook(() => useDataInit(), {});
+
+    await wait(0);
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'setCurrentTextObject',
+      payload: mockObj,
     });
   });
 });
