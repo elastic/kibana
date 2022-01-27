@@ -157,6 +157,8 @@ export const HostIsolationExceptionsList = () => {
       'data-test-subj': `hostIsolationExceptionsCard`,
       actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
       policies: artifactCardPolicies,
+      hideDescription: !element.description,
+      hideComments: !element.comments.length,
     };
   }
 
