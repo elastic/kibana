@@ -43,13 +43,12 @@ const service: any = {
 };
 
 describe('ServiceList', () => {
-
   beforeAll(() => {
     jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
       return {
         currentPeriodColor: 'green',
         previousPeriodColor: 'black',
-      }
+      };
     });
   });
 

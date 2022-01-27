@@ -24,13 +24,12 @@ const latencyChartData = {
 } as LatencyChartsResponse;
 
 describe('getLatencyChartSelector', () => {
-
   beforeAll(() => {
     jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
       return {
         currentPeriodColor: 'green',
         previousPeriodColor: 'black',
-      }
+      };
     });
   });
 
