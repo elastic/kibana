@@ -23,17 +23,19 @@ exports[`share url panel content render 1`] = `
           }
         />
       }
-      label={
-        <FormattedMessage
-          defaultMessage="Generate the link as"
-          id="share.urlPanel.generateLinkAsLabel"
-          values={Object {}}
-        />
-      }
       labelType="label"
     >
       <EuiRadioGroup
         idSelected="snapshot"
+        legend={
+          Object {
+            "children": <FormattedMessage
+              defaultMessage="Generate the link as"
+              id="share.urlPanel.generateLinkAsLabel"
+              values={Object {}}
+            />,
+          }
+        }
         onChange={[Function]}
         options={
           Array [
@@ -204,17 +206,19 @@ exports[`share url panel content should enable saved object export option when o
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
-      label={
-        <FormattedMessage
-          defaultMessage="Generate the link as"
-          id="share.urlPanel.generateLinkAsLabel"
-          values={Object {}}
-        />
-      }
       labelType="label"
     >
       <EuiRadioGroup
         idSelected="snapshot"
+        legend={
+          Object {
+            "children": <FormattedMessage
+              defaultMessage="Generate the link as"
+              id="share.urlPanel.generateLinkAsLabel"
+              values={Object {}}
+            />,
+          }
+        }
         onChange={[Function]}
         options={
           Array [
@@ -385,17 +389,19 @@ exports[`share url panel content should hide short url section when allowShortUr
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
-      label={
-        <FormattedMessage
-          defaultMessage="Generate the link as"
-          id="share.urlPanel.generateLinkAsLabel"
-          values={Object {}}
-        />
-      }
       labelType="label"
     >
       <EuiRadioGroup
         idSelected="snapshot"
+        legend={
+          Object {
+            "children": <FormattedMessage
+              defaultMessage="Generate the link as"
+              id="share.urlPanel.generateLinkAsLabel"
+              values={Object {}}
+            />,
+          }
+        }
         onChange={[Function]}
         options={
           Array [
@@ -502,17 +508,19 @@ exports[`should show url param extensions 1`] = `
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
-      label={
-        <FormattedMessage
-          defaultMessage="Generate the link as"
-          id="share.urlPanel.generateLinkAsLabel"
-          values={Object {}}
-        />
-      }
       labelType="label"
     >
       <EuiRadioGroup
         idSelected="snapshot"
+        legend={
+          Object {
+            "children": <FormattedMessage
+              defaultMessage="Generate the link as"
+              id="share.urlPanel.generateLinkAsLabel"
+              values={Object {}}
+            />,
+          }
+        }
         onChange={[Function]}
         options={
           Array [

@@ -454,19 +454,19 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       />
     ) : undefined;
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="share.urlPanel.generateLinkAsLabel"
-            defaultMessage="Generate the link as"
-          />
-        }
-        helpText={generateLinkAsHelp}
-      >
+      <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}
+          legend={{
+            children: (
+              <FormattedMessage
+                id="share.urlPanel.generateLinkAsLabel"
+                defaultMessage="Generate the link as"
+              />
+            ),
+          }}
         />
       </EuiFormRow>
     );

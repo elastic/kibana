@@ -15,6 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
   const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
 
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
+
   return {
     testFiles: [require.resolve('./tests/kerberos')],
     servers: xPackAPITestsConfig.get('servers'),
@@ -42,6 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authc.providers=${JSON.stringify(['kerberos', 'basic'])}`,
       ],
     },

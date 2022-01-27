@@ -92,7 +92,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     const { basePath } = http;
 
     this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
-      baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
+      baseUrl: basePath.get(),
       version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
         const [start] = await core.getStartServices();

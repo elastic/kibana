@@ -6,7 +6,7 @@
  */
 import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldNumber, EuiFormRow, formatDate } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, formatDate, htmlIdGenerator } from '@elastic/eui';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
@@ -22,7 +22,7 @@ import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../../embeddables/anomaly_charts/
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
   return {
-    type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    id: htmlIdGenerator()(),
     title: getDefaultExplorerChartsPanelTitle(jobIds),
   };
 }
@@ -48,7 +48,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   const [severity] = useTableSeverity();
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
 
-  const getPanelsData = useCallback(async () => {
+  const getEmbeddableInput = useCallback(() => {
     let timeRange: TimeRange | undefined;
     if (selectedCells !== undefined && interval !== undefined && bounds !== undefined) {
       const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
@@ -60,33 +60,27 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     }
 
     const config = getDefaultEmbeddablePanelConfig(jobIds);
-    return [
-      {
-        ...config,
-        embeddableConfig: {
-          jobIds,
-          maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
-          severityThreshold: severity.val,
-          ...(timeRange ?? {}),
-        },
-      },
-    ];
+
+    return {
+      ...config,
+      jobIds,
+      maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
+      severityThreshold: severity.val,
+      ...(timeRange ?? {}),
+    };
   }, [selectedCells, interval, bounds, jobIds, maxSeriesToPlot, severity]);
 
-  const { selectedItems, selection, dashboardItems, isLoading, search } = useDashboardTable();
-  const { addToDashboardAndEditCallback, addToDashboardCallback } = useAddToDashboardActions({
-    onClose,
-    getPanelsData,
-    selectedDashboards: selectedItems,
-  });
+  const { dashboardItems, isLoading, search } = useDashboardTable();
+  const { addToDashboardAndEditCallback } = useAddToDashboardActions(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    getEmbeddableInput
+  );
   const title = (
     <FormattedMessage
       id="xpack.ml.explorer.addToDashboard.anomalyCharts.dashboardsTitle"
       defaultMessage="Add anomaly charts to dashboards"
     />
   );
-
-  const disabled = selectedItems.length < 1 && !Array.isArray(jobIds === undefined);
 
   const extraControls = (
     <EuiFormRow
@@ -112,14 +106,11 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   return (
     <AddToDashboardControl
       onClose={onClose}
-      selectedItems={selectedItems}
-      selection={selection}
       dashboardItems={dashboardItems}
       isLoading={isLoading}
       search={search}
       addToDashboardAndEditCallback={addToDashboardAndEditCallback}
-      addToDashboardCallback={addToDashboardCallback}
-      disabled={disabled}
+      disabled={false}
       title={title}
     >
       {extraControls}
