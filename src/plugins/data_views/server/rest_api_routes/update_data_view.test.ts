@@ -17,7 +17,9 @@ describe('get default data view', () => {
       dataViewsService,
       counterName: 'GET /path',
       usageCollection,
-      spec: {},
+      spec: {
+        title: 'kibana*',
+      },
       id: 'abc',
       refreshFields: false,
     });
