@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import Fs from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 
@@ -24,7 +24,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles,
     services,
     pageObjects,
-    servers: functionalConfig.get('servers'),
+    servers: {
+      ...functionalConfig.get('servers'),
+      kibana: {
+        ...functionalConfig.get('servers.kibana'),
+        protocol: 'https',
+        certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
+      },
+    },
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
     screenshots: functionalConfig.get('screenshots'),
