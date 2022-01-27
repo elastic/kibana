@@ -43,7 +43,7 @@ export async function getColdstartRate({
   kuery: string;
   serviceName: string;
   transactionType?: string;
-  transactionName?: string;
+  transactionName: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
   start: number;
@@ -57,7 +57,7 @@ export async function getColdstartRate({
   const filter = [
     ...termQuery(SERVICE_NAME, serviceName),
     { exists: { field: FAAS_COLDSTART } },
-    ...termQuery(TRANSACTION_NAME, transactionName),
+    ...(transactionName ? termQuery(TRANSACTION_NAME, transactionName) : []),
     ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
@@ -120,7 +120,7 @@ export async function getColdstartRatePeriods({
   kuery,
   serviceName,
   transactionType,
-  transactionName,
+  transactionName = '',
   setup,
   searchAggregatedTransactions,
   comparisonStart,

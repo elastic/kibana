@@ -471,7 +471,6 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
-      t.partial({ transactionName: t.string }),
       t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
     ]),
   }),
@@ -509,7 +508,6 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       environment,
       kuery,
       transactionType,
-      transactionName,
       comparisonStart,
       comparisonEnd,
       start,
@@ -528,7 +526,6 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       kuery,
       serviceName,
       transactionType,
-      transactionName,
       setup,
       searchAggregatedTransactions,
       comparisonStart,
@@ -539,6 +536,84 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
   },
 });
 
+const transactionChartsColdstartRateByTransactionNameRoute =
+  createApmServerRoute({
+    endpoint:
+      'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name',
+    params: t.type({
+      path: t.type({
+        serviceName: t.string,
+      }),
+      query: t.intersection([
+        t.type({ transactionType: t.string, transactionName: t.string }),
+        t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      ]),
+    }),
+    options: { tags: ['access:apm'] },
+    handler: async (
+      resources
+    ): Promise<{
+      currentPeriod: {
+        transactionColdstartRate: Array<
+          import('../../../typings/timeseries').Coordinate
+        >;
+        average: number | null;
+      };
+      previousPeriod:
+        | {
+            transactionColdstartRate: Array<{
+              x: number;
+              y: import('../../../typings/common').Maybe<number>;
+            }>;
+            average: number | null;
+          }
+        | {
+            transactionColdstartRate: Array<{
+              x: number;
+              y: import('../../../typings/common').Maybe<number>;
+            }>;
+            average: null;
+          };
+    }> => {
+      const setup = await setupRequest(resources);
+
+      const { params } = resources;
+      const { serviceName } = params.path;
+      const {
+        environment,
+        kuery,
+        transactionType,
+        transactionName,
+        comparisonStart,
+        comparisonEnd,
+        start,
+        end,
+      } = params.query;
+
+      const searchAggregatedTransactions =
+        await getSearchAggregatedTransactions({
+          ...setup,
+          kuery,
+          start,
+          end,
+        });
+
+      return getColdstartRatePeriods({
+        environment,
+        kuery,
+        serviceName,
+        transactionType,
+        transactionName,
+        setup,
+        searchAggregatedTransactions,
+        comparisonStart,
+        comparisonEnd,
+        start,
+        end,
+      });
+    },
+  });
+
 export const transactionRouteRepository = {
   ...transactionGroupsMainStatisticsRoute,
   ...transactionGroupsDetailedStatisticsRoute,
@@ -547,4 +622,5 @@ export const transactionRouteRepository = {
   ...transactionChartsBreakdownRoute,
   ...transactionChartsErrorRateRoute,
   ...transactionChartsColdstartRateRoute,
+  ...transactionChartsColdstartRateByTransactionNameRoute,
 };

@@ -18,7 +18,6 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
@@ -27,6 +26,7 @@ import {
 } from '../../time_comparison/get_time_range_comparison';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { TimeRangeComparisonType } from '../../../../../common/runtime_types/comparison_type_rt';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -37,6 +37,9 @@ interface Props {
   showAnnotations?: boolean;
   kuery: string;
   environment: string;
+  transactionName?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: TimeRangeComparisonType;
 }
 
 type ColdstartRate =
@@ -58,11 +61,11 @@ export function TransactionColdstartRateChart({
   showAnnotations = true,
   environment,
   kuery,
+  transactionName,
+  comparisonEnabled,
+  comparisonType,
 }: Props) {
   const theme = useTheme();
-  const {
-    urlParams: { transactionName, comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo },
@@ -79,29 +82,30 @@ export function TransactionColdstartRateChart({
     comparisonEnabled,
   });
 
+  const endpoint = transactionName
+    ? ('GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name' as const)
+    : ('GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate' as const);
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (transactionType && serviceName && start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                transactionType,
-                transactionName,
-                comparisonStart,
-                comparisonEnd,
-              },
+        return callApmApi(endpoint, {
+          params: {
+            path: {
+              serviceName,
             },
-          }
-        );
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              comparisonStart,
+              comparisonEnd,
+              ...(transactionName ? { transactionName } : {}),
+            },
+          },
+        });
       }
     },
     [
@@ -114,6 +118,7 @@ export function TransactionColdstartRateChart({
       transactionName,
       comparisonStart,
       comparisonEnd,
+      endpoint,
     ]
   );
 
