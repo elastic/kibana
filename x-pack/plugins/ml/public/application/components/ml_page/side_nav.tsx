@@ -221,7 +221,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
               defaultMessage: 'Trained Models',
             }),
             disabled: disableLinks,
-            testSubj: 'mlMainTab modelManagement',
+            testSubj: 'mlMainTab trainedModels',
           },
           {
             id: 'nodes_overview',
