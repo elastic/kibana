@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, HttpStart, ThemeServiceStart } from 'kibana/public';
+import { CoreStart, ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
@@ -25,6 +25,7 @@ export class ShareMenuManager {
   private container = document.createElement('div');
 
   start(
+    core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
@@ -64,7 +65,6 @@ export class ShareMenuManager {
     menuItems,
     shareableUrl,
     embedUrlParamExtensions,
-    anonymousAccess,
     theme,
     showPublicUrlSwitch,
     urlService,

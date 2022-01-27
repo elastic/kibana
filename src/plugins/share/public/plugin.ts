@@ -142,6 +142,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
   public start(core: CoreStart): SharePluginStart {
     const sharingContextMenuStart = this.shareContextMenu.start(
+      core,
       this.url!,
       this.shareMenuRegistry.start(),
       this.anonymousAccessServiceProvider
