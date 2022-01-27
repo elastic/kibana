@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const es = getService('es');
+  const esVersion = getService('esVersion');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
@@ -37,8 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', function () {
-    this.onlyEsVersion('<=7');
-
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -49,12 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload(ecommerceSOPath);
-      await es.deleteByQuery({
-        index: '.reporting-*',
-        refresh: true,
-        body: { query: { match_all: {} } },
-      });
-      await esArchiver.emptyKibanaIndex();
+      // await reporting.deleteAllReports();
+      // await esArchiver.emptyKibanaIndex();
     });
 
     describe('Check Available', () => {
@@ -72,12 +66,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
-      beforeEach(async () => {
-        await kibanaServer.importExport.load(ecommerceSOPath);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
+    const describeIfEs7 = esVersion.matchRange('<8') ? describe : describe.skip;
+    const describeIfEs8 = esVersion.matchRange('>=8') ? describe : describe.skip;
+
+    const newSearchBeforeEach = async () => {
+      await kibanaServer.importExport.load(ecommerceSOPath);
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('ecommerce');
+    };
+
+    describeIfEs8('Generate: CSV: new search (8.x)', () => {
+      beforeEach(newSearchBeforeEach);
+
+      it('generates a report from a new search with data: default', async () => {
+        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
       });
+    });
+
+    describeIfEs7('Generate CSV: new search (7.17)', () => {
+      beforeEach(newSearchBeforeEach);
 
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
