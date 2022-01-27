@@ -50,7 +50,7 @@ export function getServices(core: CoreStart): Services {
           paths.FlamechartElastic,
           { query }
         );
-        return response;
+        return response.results;
       } catch (e) {
         return e;
       }
