@@ -111,6 +111,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulesTab');
     });
 
+    afterEach(async () => {
+      // Reset the Rules tab without reloading the entire page
+      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
+      await testSubjects.click('connectorsTab');
+      await testSubjects.click('rulesTab');
+    });
+
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
       await defineIndexThresholdAlert(alertName);
