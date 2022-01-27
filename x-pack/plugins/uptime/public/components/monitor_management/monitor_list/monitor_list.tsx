@@ -4,74 +4,96 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useMemo, useCallback } from 'react';
+import { Criteria, EuiBasicTable, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
-import { SyntheticsMonitorSavedObject } from '../../../../common/types';
-import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { DataStream, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
+import React, { useCallback, useContext, useMemo } from 'react';
+import {
+  CommonFields,
+  ConfigKey,
+  DataStream,
+  FetchMonitorManagementListQueryArgs,
+  SyntheticsMonitorWithId,
+} from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
+import { MonitorManagementPageAction } from '../../../pages/monitor_management/monitor_management';
+import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
+import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
+import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
-import { MonitorEnabled } from './monitor_enabled';
-import * as labels from '../../overview/monitor_list/translations';
+
+export interface MonitorManagementListPageState {
+  pageIndex: number;
+  pageSize: number;
+  sortField: keyof typeof CommonFields;
+  sortOrder: FetchMonitorManagementListQueryArgs['sortOrder'];
+}
 
 interface Props {
-  setPageSize: React.Dispatch<React.SetStateAction<number>>;
-  setPageIndex: React.Dispatch<React.SetStateAction<number>>;
-  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  pageState: MonitorManagementListPageState;
   monitorList: MonitorManagementListState;
+  onPageStateChange: (state: MonitorManagementListPageState) => void;
+  onUpdate: () => void;
 }
 
 export const MonitorManagementList = ({
+  pageState: { pageIndex, pageSize, sortField, sortOrder },
   monitorList: {
     list,
     error: { monitorList: error },
     loading: { monitorList: loading },
   },
-  setRefresh,
-  setPageSize,
-  setPageIndex,
+  onPageStateChange,
+  onUpdate,
 }: Props) => {
-  const { total, perPage, page: pageIndex } = list as MonitorManagementListState['list'];
-  const monitors = list.monitors as SyntheticsMonitorSavedObject[];
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
-      pageSize: perPage,
-      totalItemCount: total || 0,
-      pageSizeOptions: [10, 25, 50, 100],
-    }),
-    [pageIndex, perPage, total]
+  const { total } = list as MonitorManagementListState['list'];
+  const monitors: SyntheticsMonitorWithId[] = useMemo(
+    () => list.monitors.map((monitor) => ({ ...monitor.attributes, id: monitor.id })),
+    [list.monitors]
   );
 
   const handleOnChange = useCallback(
-    ({ page = {} }) => {
+    ({ page = {}, sort = {} }: Criteria) => {
       const { index, size } = page;
+      const { field, direction } = sort;
 
-      setPageIndex(index + 1); // page index for Saved Objects is base 1
-      setPageSize(size);
-      setRefresh(true);
+      onPageStateChange({
+        pageIndex: index + 1, // page index for Saved Objects is base 1
+        pageSize: size,
+        sortField: field,
+        sortOrder: direction,
+      });
     },
-    [setPageIndex, setPageSize, setRefresh]
+    [onPageStateChange]
   );
 
-  const columns = [
+  const pagination = {
+    pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
+    pageSize,
+    totalItemCount: total || 0,
+    pageSizeOptions: [10, 25, 50, 100],
+  };
+
+  const sorting: EuiTableSortingType<SyntheticsMonitorWithId> = {
+    sort: {
+      field: sortField,
+      direction: sortOrder,
+    },
+  };
+
+  const columns: EuiBasicTableColumn<SyntheticsMonitorWithId> = [
     {
       align: 'left' as const,
+      field: ConfigKey.NAME,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorName', {
         defaultMessage: 'Monitor name',
       }),
-      render: ({
-        attributes: { name, type },
-        id,
-      }: {
-        attributes: Partial<MonitorFields>;
-        id: string;
-      }) => (
+      sortable: true,
+      render: (name, { id, type }) => (
         <EuiLink
           href={`${basePath}/app/uptime/monitor/${Buffer.from(
             /* Monitor Management currently only supports inline browser monitors.
@@ -88,54 +110,54 @@ export const MonitorManagementList = ({
 
     {
       align: 'left' as const,
-      field: 'attributes',
+      field: ConfigKey.MONITOR_TYPE,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorType', {
         defaultMessage: 'Monitor type',
       }),
-      render: ({ type }: SyntheticsMonitor) => type,
+      sortable: true,
     },
     {
       align: 'left' as const,
-      field: 'attributes',
+      field: ConfigKey.TAGS,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.tags', {
         defaultMessage: 'Tags',
       }),
-      render: ({ tags }: SyntheticsMonitor) => (tags ? <MonitorTags tags={tags} /> : null),
+      render: (tags) => (tags ? <MonitorTags tags={tags} /> : null),
     },
     {
       align: 'left' as const,
-      field: 'attributes',
+      field: ConfigKey.LOCATIONS,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.locations', {
         defaultMessage: 'Locations',
       }),
-      render: ({ locations }: SyntheticsMonitor) =>
-        locations ? <MonitorLocations locations={locations} /> : null,
+      render: (locations) => (locations ? <MonitorLocations locations={locations} /> : null),
     },
     {
       align: 'left' as const,
-      field: 'attributes',
+      field: ConfigKey.SCHEDULE,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.schedule', {
         defaultMessage: 'Schedule',
       }),
-      render: ({ schedule }: SyntheticsMonitor) => `@every ${schedule?.number}${schedule?.unit}`,
+      render: (schedule) => `@every ${schedule?.number}${schedule?.unit}`,
     },
     {
       align: 'left' as const,
-      field: 'attributes',
+      field: ConfigKey.URLS,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.URL', {
         defaultMessage: 'URL',
       }),
-      render: (attributes: MonitorFields) => attributes.urls || attributes.hosts,
+      sortable: true,
+      render: (urls, { hosts }) => urls || hosts,
       truncateText: true,
     },
     {
       align: 'left' as const,
-      field: 'attributes',
+      field: ConfigKey.ENABLED,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
-      render: (attributes: SyntheticsMonitor, record: SyntheticsMonitorSavedObject) => (
-        <MonitorEnabled id={record.id} monitor={attributes} setRefresh={setRefresh} />
+      render: (_enabled, monitor) => (
+        <MonitorEnabled id={monitor.id} monitor={monitor} onUpdate={onUpdate} />
       ),
     },
     {
@@ -144,7 +166,7 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (id: string) => <Actions id={id} setRefresh={setRefresh} />,
+      render: (id: string) => <Actions id={id} onUpdate={onUpdate} />,
     },
   ];
 
@@ -164,6 +186,7 @@ export const MonitorManagementList = ({
         columns={columns}
         tableLayout={'auto'}
         pagination={pagination}
+        sorting={sorting}
         onChange={handleOnChange}
         noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
       />

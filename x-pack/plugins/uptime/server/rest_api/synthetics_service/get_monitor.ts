@@ -41,10 +41,12 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     query: schema.object({
       page: schema.maybe(schema.number()),
       perPage: schema.maybe(schema.number()),
+      sortField: schema.maybe(schema.string()),
+      sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
     }),
   },
   handler: async ({ request, savedObjectsClient }): Promise<any> => {
-    const { perPage = 50, page } = request.query;
+    const { perPage = 50, page, sortField, sortOrder } = request.query;
     // TODO: add query/filtering params
     const {
       saved_objects: monitors,
@@ -54,6 +56,8 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       type: syntheticsMonitorType,
       perPage,
       page,
+      sortField,
+      sortOrder,
     });
     return {
       ...rest,

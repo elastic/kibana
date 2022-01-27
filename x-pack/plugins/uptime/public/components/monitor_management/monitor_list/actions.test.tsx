@@ -18,11 +18,11 @@ import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { Actions } from './actions';
 
 describe('<Actions />', () => {
-  const setRefresh = jest.fn();
+  const onUpdate = jest.fn();
   const useFetcher = spyOnUseFetcher({});
 
   it('navigates to edit monitor flow on edit pencil', () => {
-    render(<Actions id="test-id" setRefresh={setRefresh} />);
+    render(<Actions id="test-id" onUpdate={onUpdate} />);
 
     expect(screen.getByLabelText('Edit monitor')).toHaveAttribute(
       'href',
@@ -34,7 +34,7 @@ describe('<Actions />', () => {
     useFetcher.mockImplementation(originalUseFetcher);
     const deleteMonitor = jest.spyOn(fetchers, 'deleteMonitor');
     const id = 'test-id';
-    render(<Actions id={id} setRefresh={setRefresh} />);
+    render(<Actions id={id} onUpdate={onUpdate} />);
 
     expect(deleteMonitor).not.toBeCalled();
 
@@ -45,11 +45,11 @@ describe('<Actions />', () => {
 
   it('calls set refresh when deletion is successful', () => {
     const id = 'test-id';
-    render(<Actions id={id} setRefresh={setRefresh} />);
+    render(<Actions id={id} onUpdate={onUpdate} />);
 
     userEvent.click(screen.getByLabelText('Delete monitor'));
 
-    expect(setRefresh).toBeCalledWith(true);
+    expect(onUpdate).toBeCalledWith(true);
   });
 
   it('shows loading spinner while waiting for monitor to delete', () => {
@@ -59,7 +59,7 @@ describe('<Actions />', () => {
       status: FETCH_STATUS.LOADING,
       refetch: () => {},
     });
-    render(<Actions id={id} setRefresh={setRefresh} />);
+    render(<Actions id={id} onUpdate={onUpdate} />);
 
     expect(screen.getByLabelText('Deleting monitor...')).toBeInTheDocument();
   });

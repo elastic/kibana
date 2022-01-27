@@ -16,10 +16,10 @@ import { setMonitor } from '../../../state/api';
 interface Props {
   id: string;
   monitor: SyntheticsMonitor;
-  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  onUpdate: () => void;
 }
 
-export const MonitorEnabled = ({ id, monitor, setRefresh }: Props) => {
+export const MonitorEnabled = ({ id, monitor, onUpdate }: Props) => {
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
 
   const { notifications } = useKibana();
@@ -52,7 +52,7 @@ export const MonitorEnabled = ({ id, monitor, setRefresh }: Props) => {
         ),
         toastLifeTimeMs: 3000,
       });
-      setRefresh(true);
+      onUpdate();
     }
   }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
