@@ -147,6 +147,7 @@ readonly links: {
             readonly significant_terms: string;
             readonly terms: string;
             readonly terms_doc_count_error: string;
+            readonly rare_terms: string;
             readonly avg: string;
             readonly avg_bucket: string;
             readonly max_bucket: string;
@@ -196,6 +197,7 @@ readonly links: {
         readonly kibana: {
             readonly guide: string;
             readonly autocompleteSuggestions: string;
+            readonly xpackSecurity: string;
         };
         readonly upgradeAssistant: {
             readonly overview: string;

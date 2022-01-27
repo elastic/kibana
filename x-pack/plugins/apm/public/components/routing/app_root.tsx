@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
@@ -20,7 +20,7 @@ import {
   HeaderMenuPortal,
   InspectorContextProvider,
 } from '../../../../observability/public';
-import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
+import { ScrollToTopOnPathChange } from '../../components/app/main/ScrollToTopOnPathChange';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,

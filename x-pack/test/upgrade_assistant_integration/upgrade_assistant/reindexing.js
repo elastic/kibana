@@ -34,7 +34,7 @@ export default function ({ getService }) {
     return lastState;
   };
 
-  describe('reindexing', () => {
+  describe.skip('reindexing', () => {
     afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
@@ -76,6 +76,32 @@ export default function ({ getService }) {
       expect(indexSummary[newIndexName].mappings.properties).to.be.an('object');
       // The number of documents in the new index matches what we expect
       expect((await es.count({ index: lastState.newIndexName })).count).to.be(3);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName,
+      });
+    });
+
+    it('can resume after reindexing was stopped right after creating the new index', async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+
+      // This new index is the new soon to be created reindexed index. We create it
+      // upfront to simulate a situation in which the user restarted kibana half
+      // way through the reindex process and ended up with an extra index.
+      await es.indices.create({ index: 'reindexed-v7-dummydata' });
+
+      const { body } = await supertest
+        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(body.indexName).to.equal('dummydata');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('dummydata');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
 
       // Cleanup newly created index
       await es.indices.delete({
