@@ -47,11 +47,13 @@ const tableType = hostsModel.HostsTableType.risk;
 
 interface HostRiskScoreTableProps {
   data: HostsRiskScore[];
+  fakeTotalCount: number;
   id: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   severityCount: SeverityCount;
+  showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
 }
@@ -64,11 +66,13 @@ export type HostRiskScoreColumns = [
 
 const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   data,
+  fakeTotalCount,
   id,
   isInspect,
   loading,
   loadPage,
   severityCount,
+  showMorePagesIndicator,
   totalCount,
   type,
 }) => {
@@ -176,11 +180,11 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       loadPage={loadPage}
       onChange={onSort}
       pageOfItems={data}
-      showMorePagesIndicator={false}
+      showMorePagesIndicator={showMorePagesIndicator}
       sorting={sort}
       split={true}
       stackHeader={true}
-      totalCount={totalCount}
+      totalCount={fakeTotalCount}
       updateLimitPagination={updateLimitPagination}
       updateActivePage={updateActivePage}
     />

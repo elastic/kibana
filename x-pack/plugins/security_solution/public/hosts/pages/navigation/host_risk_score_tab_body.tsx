@@ -6,15 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { noop } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import { useHostRiskScore } from '../../containers/host_risk_score';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRiskScoreTable } from '../../components/host_risk_score_table';
 import { useRiskScoreKpi } from '../../containers/kpi_hosts/risky_hosts';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { hostsModel, hostsSelectors } from '../../store';
-import { State } from '../../../common/store';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
@@ -28,25 +25,15 @@ export const HostRiskScoreQueryTabBody = ({
   startDate,
   type,
 }: HostsComponentsQueryProps) => {
-  const getHosRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
-  const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
-    getHosRiskScoreSelector(state, hostsModel.HostsType.page)
-  );
-
-  const pagination = useMemo(
-    () => ({
-      cursorStart: activePage * limit,
-      querySize: limit,
-    }),
-    [activePage, limit]
-  );
-
-  const [loading, { data, totalCount, inspect, isInspected, refetch }] = useHostRiskScore({
-    filterQuery,
-    skip,
-    pagination,
-    sort,
-  });
+  const [loading, { data, totalCount, inspect, isInspected, refetch, pageInfo, loadPage }] =
+    useHostRiskScore({
+      filterQuery,
+      timerange: {
+        from: startDate,
+        to: endDate,
+      },
+      skip,
+    });
 
   const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
@@ -62,9 +49,11 @@ export const HostRiskScoreQueryTabBody = ({
       inspect={inspect}
       isInspect={isInspected}
       loading={loading || isKpiLoading}
-      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
+      loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       severityCount={severityCount}
       totalCount={totalCount}
       type={type}

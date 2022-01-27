@@ -12,7 +12,18 @@ import type {
 } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
 import { ESQuery } from '../../../../typed_json';
-import { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
+import {
+  CursorType,
+  Hit,
+  Hits,
+  Inspect,
+  Maybe,
+  PageInfoPaginated,
+  PaginationInputPaginated,
+  SortField,
+  StringOrNumber,
+  TimerangeInput,
+} from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
@@ -20,10 +31,12 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   hostNames?: string[];
   timerange?: TimerangeInput;
   onlyLatest?: boolean;
-  pagination?: {
-    cursorStart: number;
-    querySize: number;
-  };
+  pagination?:
+    | PaginationInputPaginated
+    | {
+        cursorStart: number;
+        querySize: number;
+      };
   sort?: HostRiskScoreSortField;
   filterQuery?: ESQuery | string | undefined;
 }
@@ -31,6 +44,8 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
+  edges?: HostRiskScoreEdges[];
+  pageInfo?: PageInfoPaginated;
 }
 
 export interface HostsRiskScore {
@@ -56,3 +71,24 @@ export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): s
 };
 
 export type HostRiskScoreSortField = SortField<HostRiskScoreFields>;
+
+export interface HostRiskHit extends Hit {
+  _source: HostsRiskScore;
+  sort?: StringOrNumber[];
+}
+type HostRiskHits = Hits<number, HostRiskHit>;
+export interface HostRiskScoreBuckets {
+  key: string;
+  latest_risk_hit: HostRiskHits;
+}
+
+export interface HostRiskScoreEdges {
+  node: HostsRiskScore;
+  cursor: CursorType;
+}
+export interface HostRiskBuckets {
+  buckets: HostRiskScoreBuckets[];
+}
+export interface HostRiskAggEsItem {
+  hosts?: HostRiskBuckets;
+}

@@ -26,9 +26,10 @@ export const buildHostsRiskScoreQuery = ({
     cursorStart: 0,
   },
   sort,
+  onlyLatest = true,
 }: HostsRiskScoreRequestOptions) => {
   const filter = createQueryFilterClauses(filterQuery);
-
+  console.log('timerange!!!', timerange);
   if (timerange) {
     filter.push({
       range: {
@@ -55,6 +56,33 @@ export const buildHostsRiskScoreQuery = ({
     body: {
       query: { bool: { filter } },
       sort: [getQueryOrder(sort)],
+      ...(onlyLatest
+        ? {
+            aggregations: {
+              hosts: {
+                terms: {
+                  field: 'host.name',
+                },
+                aggs: {
+                  latest_risk_hit: {
+                    top_hits: {
+                      size: 1,
+                      sort: [
+                        {
+                          '@timestamp': {
+                            order: 'desc',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              host_count: { cardinality: { field: 'host.name' } },
+            },
+          }
+        : {}),
+      ...(onlyLatest ? { size: 0 } : {}),
     },
   };
 

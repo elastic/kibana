@@ -11,9 +11,20 @@ import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 export const buildHostsKpiRiskyHostsQuery = ({
   defaultIndex,
   filterQuery,
+  timerange,
 }: HostsKpiRiskyHostsRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
-
+  if (timerange) {
+    filter.push({
+      range: {
+        '@timestamp': {
+          gte: timerange.from,
+          lte: timerange.to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+  }
   const dslQuery = {
     index: defaultIndex,
     allow_no_indices: false,
