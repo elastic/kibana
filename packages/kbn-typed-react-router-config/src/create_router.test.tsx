@@ -7,19 +7,16 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
-import { route } from './route';
 
 describe('createRouter', () => {
-  const routes = route([
-    {
-      path: '/',
+  const routes = {
+    '/': {
       element: <></>,
-      children: [
-        {
-          path: '/',
+      children: {
+        '/': {
           element: <></>,
           params: t.type({
             query: t.type({
@@ -32,31 +29,27 @@ describe('createRouter', () => {
               rangeFrom: 'now-30m',
             },
           },
-          children: [
-            {
-              path: '/services/{serviceName}/errors',
+          children: {
+            '/services/{serviceName}/errors': {
               element: <></>,
               params: t.type({
                 path: t.type({
                   serviceName: t.string,
                 }),
               }),
-              children: [
-                {
-                  path: '/services/{serviceName}/errors/{groupId}',
+              children: {
+                '/services/{serviceName}/errors/{groupId}': {
                   element: <></>,
                   params: t.type({
                     path: t.type({ groupId: t.string }),
                   }),
                 },
-                {
-                  path: '/services/{serviceName}/errors',
+                '/services/{serviceName}/errors': {
                   element: <></>,
                 },
-              ],
+              },
             },
-            {
-              path: '/services',
+            '/services': {
               element: <></>,
               params: t.type({
                 query: t.type({
@@ -64,13 +57,11 @@ describe('createRouter', () => {
                 }),
               }),
             },
-            {
-              path: '/services/{serviceName}',
+            '/services/{serviceName}': {
               element: <></>,
-              children: [
-                {
+              children: {
+                '/services/{serviceName}': {
                   element: <></>,
-                  path: '/services/{serviceName}',
                   params: t.type({
                     path: t.type({
                       serviceName: t.string,
@@ -81,10 +72,9 @@ describe('createRouter', () => {
                     }),
                   }),
                 },
-              ],
+              },
             },
-            {
-              path: '/traces',
+            '/traces': {
               element: <></>,
               params: t.type({
                 query: t.type({
@@ -93,8 +83,7 @@ describe('createRouter', () => {
                 }),
               }),
             },
-            {
-              path: '/service-map',
+            '/service-map': {
               element: <></>,
               params: t.type({
                 query: t.type({
@@ -102,11 +91,11 @@ describe('createRouter', () => {
                 }),
               }),
             },
-          ],
+          },
         },
-      ],
+      },
     },
-  ] as const);
+  };
 
   let history = createMemoryHistory();
   const router = createRouter(routes);

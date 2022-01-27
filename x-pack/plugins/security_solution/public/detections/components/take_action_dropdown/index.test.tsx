@@ -21,9 +21,6 @@ import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
-jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
-  useIsolationPrivileges: jest.fn().mockReturnValue({ isAllowed: true }),
-}));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({ crud: true }),
@@ -59,6 +56,8 @@ jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', 
     }),
   };
 });
+
+jest.mock('../../../common/components/user_privileges');
 
 describe('take action dropdown', () => {
   const defaultProps: TakeActionDropdownProps = {

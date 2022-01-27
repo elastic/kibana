@@ -25,8 +25,7 @@ export function ConfirmDeleteModal({ agentKey, onCancel, onConfirm }: Props) {
 
   const deleteAgentKey = async () => {
     try {
-      await callApmApi({
-        endpoint: 'POST /internal/apm/api_key/invalidate',
+      await callApmApi('POST /internal/apm/api_key/invalidate', {
         signal: null,
         params: {
           body: { id },

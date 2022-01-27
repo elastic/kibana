@@ -7,7 +7,11 @@
 
 import { DeleteRuleOptions } from './types';
 
-export const deleteRules = async ({ ruleId, rulesClient, ruleStatusClient }: DeleteRuleOptions) => {
+export const deleteRules = async ({
+  ruleId,
+  rulesClient,
+  ruleExecutionLogClient,
+}: DeleteRuleOptions) => {
   await rulesClient.delete({ id: ruleId });
-  await ruleStatusClient.deleteCurrentStatus(ruleId);
+  await ruleExecutionLogClient.clearExecutionSummary(ruleId);
 };
