@@ -276,7 +276,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.hasAuthSwitchLabel',
               {
-                defaultMessage: 'Require authentication for this xmatters',
+                defaultMessage: 'Require basic authentication for xMatters',
               }
             )}
             disabled={readOnly}

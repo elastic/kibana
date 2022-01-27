@@ -122,7 +122,7 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.alertName',
               {
-                defaultMessage: 'Alert Name',
+                defaultMessage: 'Alert name',
               }
             )}
           >

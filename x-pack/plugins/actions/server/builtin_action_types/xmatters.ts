@@ -104,7 +104,7 @@ function validateActionTypeConfig(
     new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring xmatters action: unable to parse url: {err}',
+      defaultMessage: 'error configuring xMatters action: unable to parse url: {err}',
       values: {
         err,
       },
@@ -115,7 +115,7 @@ function validateActionTypeConfig(
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
-      defaultMessage: 'error configuring xmatters action: {message}',
+      defaultMessage: 'error configuring xMatters action: {message}',
       values: {
         message: allowListError.message,
       },
@@ -161,7 +161,7 @@ export async function executor(
     const {
       value: { status, statusText },
     } = result;
-    logger.debug(`response from xmatters action "${actionId}": [HTTP ${status}] ${statusText}`);
+    logger.debug(`response from xMatters action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     return successResult(actionId, data);
   } else {
@@ -175,7 +175,7 @@ export async function executor(
       } = error.response;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`error on ${actionId} xmatters event: ${message}`);
+      logger.error(`error on ${actionId} xMatters event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -194,15 +194,15 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
-      logger.error(`error on ${actionId} xmatters event: ${message}`);
+      logger.error(`error on ${actionId} xMatters event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     } else if (error.isAxiosError) {
       const message = `${error.message}`;
-      logger.error(`error on ${actionId} xmatters event: ${message}`);
+      logger.error(`error on ${actionId} xMatters event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }
 
-    logger.error(`error on ${actionId} xmatters action: unexpected error`);
+    logger.error(`error on ${actionId} xMatters action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }
@@ -217,7 +217,7 @@ function errorResultInvalid(
   serviceMessage: string
 ): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.xmatters.invalidResponseErrorMessage', {
-    defaultMessage: 'error calling xmatters, invalid response',
+    defaultMessage: 'error calling xMatters, invalid response',
   });
   return {
     status: 'error',
@@ -232,7 +232,7 @@ function errorResultRequestFailed(
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
   const errMessage = i18n.translate('xpack.actions.builtin.xmatters.requestFailedErrorMessage', {
-    defaultMessage: 'error calling xmatters, request failed',
+    defaultMessage: 'error calling xMatters, request failed',
   });
   return {
     status: 'error',
@@ -244,7 +244,7 @@ function errorResultRequestFailed(
 
 function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.xmatters.unreachableErrorMessage', {
-    defaultMessage: 'error calling xmatters, unexpected error',
+    defaultMessage: 'error calling xMatters, unexpected error',
   });
   return {
     status: 'error',
@@ -257,7 +257,7 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
   const errMessage = i18n.translate(
     'xpack.actions.builtin.xmatters.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage: 'error calling xmatters, retry later',
+      defaultMessage: 'error calling xMatters, retry later',
     }
   );
   return {
@@ -281,7 +281,7 @@ function retryResultSeconds(
   const errMessage = i18n.translate(
     'xpack.actions.builtin.xmatters.invalidResponseRetryDateErrorMessage',
     {
-      defaultMessage: 'error calling xmatters, retry at {retryString}',
+      defaultMessage: 'error calling xMatters, retry at {retryString}',
       values: {
         retryString,
       },

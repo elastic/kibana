@@ -5,7 +5,7 @@
 <titleabbrev>xMatters</titleabbrev>
 ++++
 
-The xMatters connector uses https://github.com/axios/axios[axios] to send a POST request to a xMatters workflow trigger.
+The xMatters connector uses https://github.com/axios/axios[axios] to send a POST request to an xMatters trigger.
 
 [float]
 [[xmatters-connector-configuration]]

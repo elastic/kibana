@@ -117,7 +117,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring xmatters action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      '"error validating action type config: error configuring xMatters action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
     );
   });
 
@@ -191,7 +191,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring xmatters action: target url is not present in allowedHosts"`
+      `"error validating action type config: error configuring xMatters action: target url is not present in allowedHosts"`
     );
   });
 });
@@ -356,7 +356,7 @@ describe('execute()', () => {
       },
     });
     expect(mockedLogger.error).toBeCalledWith(
-      'error on some-id xmatters event: maxContentLength size of 1000000 exceeded'
+      'error on some-id xMatters event: maxContentLength size of 1000000 exceeded'
     );
   });
 
