@@ -113,11 +113,9 @@ describe(`Console's send request`, () => {
       },
     } as any;
 
-    const pathWithInvalidChars = '/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23';
-    const uri = new URL(`http://noone.nowhere.none${pathWithInvalidChars}`);
-
-    const decoded = new URLSearchParams(`path=${uri.pathname}`).get('path');
-    expect(decoded).toEqual(pathWithInvalidChars);
+    const uri = new URL(
+      `http://noone.nowhere.none/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23`
+    );
 
     const result = await proxyRequest({
       agent: null as any,
@@ -130,6 +128,7 @@ describe(`Console's send request`, () => {
 
     expect(result).toEqual('done');
 
+    const decoded = new URLSearchParams(`path=${uri.pathname}`).get('path');
     const encoded = decoded
       ?.split('/')
       .map((str) => encodeURIComponent(str))
