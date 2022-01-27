@@ -60,7 +60,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
 
   return (
     <EuiPopover
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       isOpen={isAddIndexPatternFieldPopoverOpen}
       closePopover={() => {
         setIsAddIndexPatternFieldPopoverOpen(false);
@@ -82,7 +82,8 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
       }
     >
       <EuiContextMenuPanel
-        size="s"
+        size="m"
+        title="Data view"
         items={[
           <EuiContextMenuItem
             key="add"
@@ -94,7 +95,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
-              defaultMessage: 'Add field to data view',
+              defaultMessage: 'Add field',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -109,13 +110,13 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
-              defaultMessage: 'Manage data view fields',
+              defaultMessage: 'Manage settings',
             })}
           </EuiContextMenuItem>,
           <EuiHorizontalRule style={{ margin: '0px' }} />,
           <EuiContextMenuItem
             key="new"
-            icon="indexSettings"
+            icon="plusInCircleFilled"
             data-test-subj="dataview-create-new"
             onClick={() => {
               setIsAddIndexPatternFieldPopoverOpen(false);
