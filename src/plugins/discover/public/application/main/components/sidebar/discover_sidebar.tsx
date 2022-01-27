@@ -23,7 +23,10 @@ import {
   EuiNotificationBadge,
   EuiPageSideBar,
   EuiPopover,
+  EuiPopoverTitle,
   useResizeObserver,
+  EuiBasicTable,
+  EuiToken,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
@@ -329,6 +332,33 @@ export function DiscoverSidebarComponent({
     </EuiCallOut>
   );
 
+  const columnsSidebar = [
+    {
+      field: 'icon',
+      name: 'Icon',
+      render: (item) => <EuiToken iconType={item.type} />,
+    },
+    {
+      field: 'dataType',
+      name: 'Data type',
+    },
+  ];
+
+  const items = [
+    {
+      id: 0,
+      icon: 'github1',
+      dataType: 'dataType1',
+      type: 'tokenString',
+    },
+    {
+      id: 1,
+      icon: 'github2',
+      dataType: 'dataType2',
+      type: 'tokenNumber',
+    },
+  ];
+
   return (
     <EuiPageSideBar
       className="dscSidebar"
@@ -465,11 +495,18 @@ export function DiscoverSidebarComponent({
                     display="block"
                     button={callout}
                     isOpen={isPopoverOpen}
+                    panelPaddingSize="s"
                     closePopover={closePopover}
                   >
-                    <EuiText style={{ width: 300 }}>
-                      <p>Popover content that&rsquo;s wider than the default width</p>
-                    </EuiText>
+                    <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
+                    <EuiBasicTable
+                      style={{ width: 300 }}
+                      tableCaption="Description of field types"
+                      items={items}
+                      compressed={true}
+                      rowHeader="firstName"
+                      columns={columnsSidebar}
+                    />
                   </EuiPopover>
 
                   <EuiSpacer size="s" />
