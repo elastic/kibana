@@ -20142,7 +20142,6 @@
     "xpack.observability.expView.heading.addToCase.notification": "已成功将可视化添加到案例：{caseTitle}",
     "xpack.observability.expView.heading.addToCase.notification.error": "未能将可视化添加到所选案例。",
     "xpack.observability.expView.heading.addToCase.notification.viewCase": "查看案例",
-    "xpack.observability.expView.heading.label": "浏览数据",
     "xpack.observability.expView.heading.openInLens": "在 Lens 中打开",
     "xpack.observability.expView.heading.saveLensVisualization": "保存",
     "xpack.observability.expView.lastUpdated.label": "上次更新时间：{updatedDate}",

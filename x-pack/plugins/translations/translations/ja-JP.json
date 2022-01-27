@@ -19849,7 +19849,6 @@
     "xpack.observability.expView.heading.addToCase.notification": "ビジュアライゼーションが正常にケースに追加されました：{caseTitle}",
     "xpack.observability.expView.heading.addToCase.notification.error": "選択したケースにビジュアライゼーションを追加できませんでした。",
     "xpack.observability.expView.heading.addToCase.notification.viewCase": "ケースの表示",
-    "xpack.observability.expView.heading.label": "データの探索",
     "xpack.observability.expView.heading.openInLens": "Lensで開く",
     "xpack.observability.expView.heading.saveLensVisualization": "保存",
     "xpack.observability.expView.lastUpdated.label": "前回更新日時：{updatedDate}",
