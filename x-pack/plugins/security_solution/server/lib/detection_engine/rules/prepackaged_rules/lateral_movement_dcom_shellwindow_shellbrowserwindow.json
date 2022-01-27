@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Incoming DCOM Lateral Movement with ShellBrowserWindow or ShellWindows",
-  "query": "sequence by host.id with maxspan=5s\n [network where event.type == \"start\" and process.name : \"explorer.exe\" and\n  network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n  source.port > 49151 and destination.port > 49151 and not source.address in (\"127.0.0.1\", \"::1\")\n ] by process.entity_id\n [process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"explorer.exe\"\n ] by process.parent.entity_id\n",
+  "query": "sequence by host.id with maxspan=5s\n [network where event.type == \"start\" and process.name : \"explorer.exe\" and\n  network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n  source.port > 49151 and destination.port > 49151 and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n ] by process.entity_id\n [process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"explorer.exe\"\n ] by process.parent.entity_id\n",
   "references": [
     "https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/"
   ],
@@ -51,5 +51,5 @@
     }
   ],
   "type": "eql",
-  "version": 4
+  "version": 5
 }
