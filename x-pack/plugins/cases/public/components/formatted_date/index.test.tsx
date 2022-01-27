@@ -166,5 +166,16 @@ describe('formatted_date', () => {
 
       expect(wrapper.text()).toBe(getEmptyValue());
     });
+
+    test('strips down the time milliseconds when stripMs is passed', () => {
+      const date = new Date('2022-01-27T10:30:00.000Z');
+      const wrapper = mount(
+        <TestProviders>
+          <FormattedRelativePreferenceDate stripMs={true} value={date.toISOString()} />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toBe('Jan 27, 2022 @ 10:30:00');
+    });
   });
 });
