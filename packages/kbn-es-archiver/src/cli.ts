@@ -229,6 +229,8 @@ export function runCli() {
           throw createFlagError('--docs-only does not take a value');
         }
 
+        console.log(path);
+
         await esArchiver.load(path, { useCreate, docsOnly });
       },
     })
