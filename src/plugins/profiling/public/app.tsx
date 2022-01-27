@@ -33,7 +33,7 @@ import { Services } from './services';
 
 type Props = Services;
 
-function App({ fetchTopN, fetchFlamechart, fetchRawFlamechart }: Props) {
+function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) {
   const [topn, setTopN] = useState({
     samples: [],
     series: new Map(),
@@ -64,7 +64,7 @@ function App({ fetchTopN, fetchFlamechart, fetchRawFlamechart }: Props) {
         <>
           <EuiSpacer />
           <FlameGraphContext.Provider value={elasticFlamegraph}>
-            <FlameGraphNavigation getter={fetchFlamechart} setter={setElasticFlamegraph} />
+            <FlameGraphNavigation getter={fetchElasticFlamechart} setter={setElasticFlamegraph} />
             <FlameGraph id="flamechart" height={600} />
           </FlameGraphContext.Provider>
         </>
@@ -77,7 +77,7 @@ function App({ fetchTopN, fetchFlamechart, fetchRawFlamechart }: Props) {
         <>
           <EuiSpacer />
           <FlameGraphContext.Provider value={pixiFlamegraph}>
-            <FlameGraphNavigation getter={fetchRawFlamechart} setter={setPixiFlamegraph} />
+            <FlameGraphNavigation getter={fetchPixiFlamechart} setter={setPixiFlamegraph} />
             <PixiFlamechart projectID={5} />
           </FlameGraphContext.Provider>
         </>
