@@ -212,7 +212,7 @@ export const HostIsolationExceptionsList = () => {
       subtitle={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageSubTitle"
-          defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
+          defaultMessage="Add a host isolation exception to allow isolated hosts to communicate with specific IPs."
         />
       }
       actions={
@@ -226,7 +226,7 @@ export const HostIsolationExceptionsList = () => {
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-              defaultMessage="Add Host isolation exception"
+              defaultMessage="Add host isolation exception"
             />
           </EuiButton>
         ) : (
@@ -254,7 +254,7 @@ export const HostIsolationExceptionsList = () => {
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
               {
-                defaultMessage: 'Search on the fields below: name, description, ip',
+                defaultMessage: 'Search on the fields below: name, description, IP',
               }
             )}
           />
@@ -262,7 +262,7 @@ export const HostIsolationExceptionsList = () => {
           <EuiText color="subdued" size="xs" data-test-subj="hostIsolationExceptions-totalCount">
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
-              defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
+              defaultMessage="Showing {total, plural, one {# host isolation exception} other {# host isolation exceptions}}"
               values={{ total: listItems.length }}
             />
           </EuiText>
