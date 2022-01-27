@@ -11,9 +11,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
+import { RuntimeField } from 'src/plugins/data/common';
+import { DataViewsService, DataView, FieldSpec } from 'src/plugins/data_views/common';
 import { BASE_API_URL } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
+import { FIELD_EXISTENCE_SETTING } from '../ui_settings';
 import { PluginStartContract } from '../plugin';
 
 export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {
@@ -53,24 +55,24 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
       },
     },
     async (context, req, res) => {
-      const [{ savedObjects, elasticsearch, uiSettings }, { data }] =
+      const [{ savedObjects, elasticsearch, uiSettings }, { dataViews }] =
         await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
-      const includeFrozen: boolean = await uiSettings
-        .asScopedToClient(savedObjectsClient)
-        .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+      const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+      const [includeFrozen, useSampling]: boolean[] = await Promise.all([
+        uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+        uiSettingsClient.get(FIELD_EXISTENCE_SETTING),
+      ]);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
         return res.ok({
           body: await fetchFieldExistence({
             ...req.params,
             ...req.body,
-            indexPatternsService: await data.indexPatterns.indexPatternsServiceFactory(
-              savedObjectsClient,
-              esClient
-            ),
+            dataViewsService: await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient),
             context,
             includeFrozen,
+            useSampling,
           }),
         });
       } catch (e) {
@@ -103,8 +105,56 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
 async function fetchFieldExistence({
   context,
   indexPatternId,
-  indexPatternsService,
+  dataViewsService,
   dslQuery = { match_all: {} },
+  fromDate,
+  toDate,
+  timeFieldName,
+  includeFrozen,
+  useSampling,
+}: {
+  indexPatternId: string;
+  context: RequestHandlerContext;
+  dataViewsService: DataViewsService;
+  dslQuery: object;
+  fromDate?: string;
+  toDate?: string;
+  timeFieldName?: string;
+  includeFrozen: boolean;
+  useSampling: boolean;
+}) {
+  if (useSampling) {
+    return legacyFetchFieldExistenceSampling({
+      context,
+      indexPatternId,
+      dataViewsService,
+      dslQuery,
+      fromDate,
+      toDate,
+      timeFieldName,
+      includeFrozen,
+    });
+  }
+
+  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const dataView = await dataViewsService.get(indexPatternId);
+  const allFields = buildFieldList(dataView, metaFields);
+  const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
+    // filled in by data views service
+    pattern: '',
+    filter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+  });
+  return {
+    indexPatternTitle: dataView.title,
+    existingFieldNames: existingFields(existingFieldList, allFields),
+  };
+}
+
+async function legacyFetchFieldExistenceSampling({
+  context,
+  indexPatternId,
+  dataViewsService,
+  dslQuery,
   fromDate,
   toDate,
   timeFieldName,
@@ -112,7 +162,7 @@ async function fetchFieldExistence({
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
-  indexPatternsService: IndexPatternsService;
+  dataViewsService: DataViewsService;
   dslQuery: object;
   fromDate?: string;
   toDate?: string;
@@ -120,7 +170,7 @@ async function fetchFieldExistence({
   includeFrozen: boolean;
 }) {
   const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
-  const indexPattern = await indexPatternsService.get(indexPatternId);
+  const indexPattern = await dataViewsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
   const docs = await fetchIndexPatternStats({
@@ -136,14 +186,14 @@ async function fetchFieldExistence({
 
   return {
     indexPatternTitle: indexPattern.title,
-    existingFieldNames: existingFields(docs, fields),
+    existingFieldNames: legacyExistingFields(docs, fields),
   };
 }
 
 /**
  * Exported only for unit tests.
  */
-export function buildFieldList(indexPattern: IndexPattern, metaFields: string[]): Field[] {
+export function buildFieldList(indexPattern: DataView, metaFields: string[]): Field[] {
   return indexPattern.fields.map((field) => {
     return {
       name: field.name,
@@ -177,27 +227,7 @@ async function fetchIndexPatternStats({
   fields: Field[];
   includeFrozen: boolean;
 }) {
-  const filter =
-    timeFieldName && fromDate && toDate
-      ? [
-          {
-            range: {
-              [timeFieldName]: {
-                format: 'strict_date_optional_time',
-                gte: fromDate,
-                lte: toDate,
-              },
-            },
-          },
-          dslQuery,
-        ]
-      : [dslQuery];
-
-  const query = {
-    bool: {
-      filter,
-    },
-  };
+  const query = toQuery(timeFieldName, fromDate, toDate, dslQuery);
 
   const scriptedFields = fields.filter((f) => f.isScript);
   const runtimeFields = fields.filter((f) => f.runtimeField);
@@ -242,10 +272,51 @@ async function fetchIndexPatternStats({
   return result.hits.hits;
 }
 
+function toQuery(
+  timeFieldName: string | undefined,
+  fromDate: string | undefined,
+  toDate: string | undefined,
+  dslQuery: object
+) {
+  const filter =
+    timeFieldName && fromDate && toDate
+      ? [
+          {
+            range: {
+              [timeFieldName]: {
+                format: 'strict_date_optional_time',
+                gte: fromDate,
+                lte: toDate,
+              },
+            },
+          },
+          dslQuery,
+        ]
+      : [dslQuery];
+
+  const query = {
+    bool: {
+      filter,
+    },
+  };
+  return query;
+}
+
 /**
  * Exported only for unit tests.
  */
-export function existingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
+export function existingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
+  const filteredFieldsSet = new Set(filteredFields.map((f) => f.name));
+
+  return allFields
+    .filter((field) => field.isScript || field.runtimeField || filteredFieldsSet.has(field.name))
+    .map((f) => f.name);
+}
+
+/**
+ * Exported only for unit tests.
+ */
+export function legacyExistingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
