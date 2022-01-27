@@ -126,7 +126,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             paddingSize="none"
             css={styles.detailPanel}
           >
-            <SessionViewDetailPanel height={height} selectedProcess={selectedProcess} />
+            <SessionViewDetailPanel selectedProcess={selectedProcess} />
           </EuiResizablePanel>
         </>
       );

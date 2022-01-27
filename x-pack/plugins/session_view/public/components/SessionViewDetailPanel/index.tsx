@@ -9,9 +9,9 @@ import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 import { Process } from '../../../common/types/process_tree';
 import { getDetailPanelProcess } from './helpers';
 import { DetailPanelProcessTab } from '../DetailPanelProcessTab';
+import { DetailPanelHostTab } from '../DetailPanelHostTab';
 
 interface SessionViewDetailPanelDeps {
-  height?: number;
   selectedProcess: Process | null;
   session?: any;
 }
@@ -28,7 +28,7 @@ interface EuiTabProps {
 /**
  * Detail panel in the session view.
  */
-export const SessionViewDetailPanel = ({ height, selectedProcess }: SessionViewDetailPanelDeps) => {
+export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
   const processDetail = getDetailPanelProcess(selectedProcess);
   if (!selectedProcess) {
@@ -44,7 +44,7 @@ export const SessionViewDetailPanel = ({ height, selectedProcess }: SessionViewD
     {
       id: 'host',
       name: 'Host',
-      content: null,
+      content: <DetailPanelHostTab processHost={selectedProcess.events[0]?.host} />,
     },
     {
       id: 'alerts',

@@ -16,6 +16,9 @@ export const useStyles = () => {
 
     const accordion: CSSObject = {
       borderTop: '1px solid #D4DAE5',
+      '&:last-child': {
+        borderBottom: '1px solid #D4DAE5',
+      },
     };
 
     const accordionButton: CSSObject = {
