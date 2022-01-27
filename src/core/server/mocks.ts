@@ -213,6 +213,7 @@ function createInternalCoreSetupMock() {
   const setupDeps = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
@@ -234,6 +235,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps = {
     capabilities: capabilitiesServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
     http: httpServiceMock.createInternalStartContract(),
     metrics: metricsServiceMock.createInternalStartContract(),
