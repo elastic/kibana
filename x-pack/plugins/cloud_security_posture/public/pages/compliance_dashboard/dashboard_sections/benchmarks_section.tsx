@@ -16,12 +16,18 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { Query } from '@kbn/es-query';
+import { useHistory } from 'react-router-dom';
+import { PartitionElementEvent } from '@elastic/charts';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import { ComplianceTrendChart } from '../compliance_charts/compliance_trend_chart';
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
 import { CspHealthBadge } from '../../../components/csp_health_badge';
 import { ChartPanel } from '../../../components/chart_panel';
 import * as TEXT from '../translations';
+import { allNavigationItems } from '../../../common/navigation/constants';
+import { encodeQuery } from '../../../common/navigation/query_utils';
+import { Evaluation } from '../../../../common/types';
 
 type BenchmarksWithIcons = 'CIS Kubernetes';
 
@@ -37,10 +43,27 @@ const getBenchmarkLogo = (benchmarkName: BenchmarksWithIcons | string): EuiIconT
   return 'logoElastic';
 };
 
+const getBenchmarkEvaluationQuery = (name: string, evaluation: Evaluation): Query => ({
+  language: 'kuery',
+  query: `rule.benchmark : "${name}" and result.evaluation : "${evaluation}"`,
+});
+
 export const BenchmarksSection = () => {
+  const history = useHistory();
   const getStats = useCloudPostureStatsApi();
   const benchmarks = getStats.isSuccess && getStats.data.benchmarksStats;
   if (!benchmarks) return null;
+
+  const handleElementClick = (name: string, elements: PartitionElementEvent[]) => {
+    const [element] = elements;
+    const [layerValue] = element;
+    const rollupValue = layerValue[0].groupByRollup as Evaluation;
+
+    history.push({
+      pathname: allNavigationItems.findings.path,
+      search: encodeQuery(getBenchmarkEvaluationQuery(name, rollupValue)),
+    });
+  };
 
   return (
     <>
@@ -70,11 +93,17 @@ export const BenchmarksSection = () => {
                     description: (
                       <ChartPanel
                         hasBorder={false}
-                        chart={CloudPostureScoreChart}
-                        data={benchmark}
                         isLoading={getStats.isLoading}
                         isError={getStats.isError}
-                      />
+                      >
+                        <CloudPostureScoreChart
+                          id={`${benchmark.name}_score_chart`}
+                          data={benchmark}
+                          partitionOnElementClick={(elements) =>
+                            handleElementClick(benchmark.name, elements)
+                          }
+                        />
+                      </ChartPanel>
                     ),
                   },
                 ]}
@@ -88,12 +117,12 @@ export const BenchmarksSection = () => {
                     description: (
                       <ChartPanel
                         hasBorder={false}
-                        chart={ComplianceTrendChart}
-                        // TODO: no api for this chart yet, using empty state for now. needs BE
-                        data={[]}
                         isLoading={getStats.isLoading}
                         isError={getStats.isError}
-                      />
+                      >
+                        // TODO: no api for this chart yet, using empty state for now. needs BE
+                        <ComplianceTrendChart />
+                      </ChartPanel>
                     ),
                   },
                 ]}
