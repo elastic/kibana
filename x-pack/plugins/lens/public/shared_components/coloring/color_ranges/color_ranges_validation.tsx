@@ -44,7 +44,7 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
               );
             case 'greaterThanMaxValue':
               return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
-                defaultMessage: 'Maximum value should be greater than preceding values',
+                defaultMessage: 'Maximum value must be greater than preceding values',
               });
             default:
               return '';
