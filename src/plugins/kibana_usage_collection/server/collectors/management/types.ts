@@ -23,7 +23,7 @@ export interface UsageStats {
   /**
    * non-sensitive settings
    */
-  'bfetch:disabled': boolean;
+  'bfetch:disable': boolean;
   'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
   'autocomplete:valueSuggestionMethod': string;

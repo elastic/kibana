@@ -7,4 +7,4 @@
  */
 
 export const DISABLE_BFETCH_COMPRESSION = 'bfetch:disableCompression';
-export const DISABLE_BFETCH = 'bfetch:disabled';
+export const DISABLE_BFETCH = 'bfetch:disable';
