@@ -165,7 +165,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
             ) : (
               <span>
                 <FormattedMessage
-                  id={'xpack.ml.jobSelector.noJobsSelectedLabel'}
+                  id="xpack.ml.jobSelector.noJobsSelectedLabel"
                   defaultMessage="No jobs selected"
                 />
               </span>
