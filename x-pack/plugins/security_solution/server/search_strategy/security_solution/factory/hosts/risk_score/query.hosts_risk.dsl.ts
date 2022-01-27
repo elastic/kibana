@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Direction,
   HostsRiskScoreRequestOptions,
@@ -54,23 +55,25 @@ export const buildHostsRiskScoreQuery = ({
     from: cursorStart,
     body: {
       query: { bool: { filter } },
-      sort: [getQueryOrder(sort)],
+      sort: getQueryOrder(sort),
     },
   };
 
   return dslQuery;
 };
 
-const getQueryOrder = (sort?: HostRiskScoreSortField) => {
+const getQueryOrder = (sort?: HostRiskScoreSortField): Sort => {
   if (!sort) {
-    return {
-      '@timestamp': Direction.desc,
-    };
+    return [
+      {
+        '@timestamp': Direction.desc,
+      },
+    ];
   }
 
   if (sort.field === HostRiskScoreFields.risk) {
-    return { [HostRiskScoreFields.riskScore]: sort.direction };
+    return [{ [HostRiskScoreFields.riskScore]: sort.direction }];
   }
 
-  return { [sort.field]: sort.direction };
+  return [{ [sort.field]: sort.direction }];
 };
