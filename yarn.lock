@@ -2134,9 +2134,10 @@
     "@hapi/validate" "1.x.x"
     "@hapi/wreck" "17.x.x"
 
-"@hapi/hapi@github:mshustov/hapi#c3d88e2489ecf0b0e33f8ea3911e5eb09ddb2204":
+"@hapi/hapi@^20.2.1":
   version "20.2.1"
-  resolved "https://codeload.github.com/mshustov/hapi/tar.gz/c3d88e2489ecf0b0e33f8ea3911e5eb09ddb2204"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.2.1.tgz#7482bc28757cb4671623a61bdb5ce920bffc8a2f"
+  integrity sha512-OXAU+yWLwkMfPFic+KITo+XPp6Oxpgc9WUH+pxXWcTIuvWbgco5TC/jS8UDvz+NFF5IzRgF2CL6UV/KLdQYUSQ==
   dependencies:
     "@hapi/accept" "^5.0.1"
     "@hapi/ammo" "^5.0.1"
