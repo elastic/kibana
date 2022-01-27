@@ -18,15 +18,8 @@ export function createIndexPatternsStartMock() {
 
 export const dataViewsService = {
   find: jest.fn((search) => [{ id: search, title: search }]),
-  createField: jest.fn(() => {}),
-  createFieldList: jest.fn(() => []),
   ensureDefaultIndexPattern: jest.fn(),
   ensureDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
-  make: () => ({
-    fieldsFetcher: {
-      fetchForWildcard: jest.fn(),
-    },
-  }),
   get: jest.fn().mockReturnValue(Promise.resolve({})),
   clearCache: jest.fn(),
   createAndSave: jest.fn(),
