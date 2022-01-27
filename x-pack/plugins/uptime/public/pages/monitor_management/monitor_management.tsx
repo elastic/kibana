@@ -26,7 +26,7 @@ export const MonitorManagementPage: React.FC = () => {
   useEffect(() => {
     if (refresh) {
       dispatch(getMonitors({ page: pageIndex, perPage: pageSize }));
-      setRefresh(false); // TODO: avoid extra re-rendering when `refresh` turn to false (pass down the handler instead)
+      setRefresh(false);
     }
   }, [dispatch, refresh, pageIndex, pageSize]);
 
