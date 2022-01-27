@@ -8,18 +8,36 @@
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
-export const BASE_ROUTE_PATH = '/api/prodfiler';
+const BASE_ROUTE_PATH = '/api/prodfiler';
 
-export const TOPN_ROUTE_PATH = `${BASE_ROUTE_PATH}/topn`;
-export const TOPN_CONTAINERS_ROUTE_PATH = `${TOPN_ROUTE_PATH}/containers`;
-export const TOPN_DEPLOYMENTS_ROUTE_PATH = `${TOPN_ROUTE_PATH}/deployments`;
-export const TOPN_HOSTS_ROUTE_PATH = `${TOPN_ROUTE_PATH}/hosts`;
-export const TOPN_THREADS_ROUTE_PATH = `${TOPN_ROUTE_PATH}/threads`;
-export const TOPN_TRACES_ROUTE_PATH = `${TOPN_ROUTE_PATH}/traces`;
+const BASE_LOCAL_ROUTE_PATH = `${BASE_ROUTE_PATH}/v1`;
+const BASE_REMOTE_ROUTE_PATH = `${BASE_ROUTE_PATH}/v2`;
 
-export const FLAMECHART_ROUTE_PATH = `${BASE_ROUTE_PATH}/flamechart`;
-export const FLAMECHART_CANVAS_ROUTE_PATH = `${FLAMECHART_ROUTE_PATH}/canvas`;
-export const FLAMECHART_WEBGL_ROUTE_PATH = `${FLAMECHART_ROUTE_PATH}/webgl`;
+export function getLocalRoutePaths() {
+  return {
+    TopN: `${BASE_LOCAL_ROUTE_PATH}/topn`,
+    TopNContainers: `${BASE_LOCAL_ROUTE_PATH}/topn/containers`,
+    TopNDeployments: `${BASE_LOCAL_ROUTE_PATH}/topn/deployments`,
+    TopNHosts: `${BASE_LOCAL_ROUTE_PATH}/topn/hosts`,
+    TopNThreads: `${BASE_LOCAL_ROUTE_PATH}/topn/threads`,
+    TopNTraces: `${BASE_LOCAL_ROUTE_PATH}/topn/traces`,
+    FlamechartElastic: `${BASE_LOCAL_ROUTE_PATH}/flamechart/elastic`,
+    FlamechartPixi: `${BASE_LOCAL_ROUTE_PATH}/flamechart/pixi`
+  };
+}
+
+export function getRemoteRoutePaths() {
+  return {
+    TopN: `${BASE_REMOTE_ROUTE_PATH}/topn`,
+    TopNContainers: `${BASE_REMOTE_ROUTE_PATH}/topn/containers`,
+    TopNDeployments: `${BASE_REMOTE_ROUTE_PATH}/topn/deployments`,
+    TopNHosts: `${BASE_REMOTE_ROUTE_PATH}/topn/hosts`,
+    TopNThreads: `${BASE_REMOTE_ROUTE_PATH}/topn/threads`,
+    TopNTraces: `${BASE_REMOTE_ROUTE_PATH}/topn/traces`,
+    FlamechartElastic: `${BASE_REMOTE_ROUTE_PATH}/flamechart/elastic`,
+    FlamechartPixi: `${BASE_REMOTE_ROUTE_PATH}/flamechart/pixi`
+  };
+}
 
 export function getTopN(obj) {
   const data = [];

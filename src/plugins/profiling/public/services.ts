@@ -7,7 +7,7 @@
  */
 
 import { CoreStart, HttpFetchError, HttpFetchQuery } from 'kibana/public';
-import { FLAMECHART_ROUTE_PATH, TOPN_ROUTE_PATH } from '../common';
+import { getRemoteRoutePaths } from '../common';
 
 export interface Services {
   fetchTopN: (type: string, seconds: string) => Promise<any[] | HttpFetchError>;
@@ -26,12 +26,15 @@ function getFetchQuery(seconds: string): HttpFetchQuery {
 }
 
 export function getServices(core: CoreStart): Services {
+  // To use local fixtures instead, use getLocalRoutePaths
+  const paths = getRemoteRoutePaths();
+
   return {
     fetchTopN: async (type: string, seconds: string) => {
       try {
         const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
-          `${TOPN_ROUTE_PATH}/${type}`,
+          `${paths.TopN}/${type}`,
           { query }
         );
         return response;
@@ -44,7 +47,7 @@ export function getServices(core: CoreStart): Services {
       try {
         const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
-          `${FLAMECHART_ROUTE_PATH}/canvas`,
+          paths.FlamechartElastic,
           { query }
         );
         return response;
@@ -57,7 +60,7 @@ export function getServices(core: CoreStart): Services {
       try {
         const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
-          `${FLAMECHART_ROUTE_PATH}/webgl/${seconds}`,
+          paths.FlamechartPixi,
           { query }
         );
         return response.results;

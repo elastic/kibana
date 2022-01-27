@@ -7,11 +7,12 @@
  */
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import { TOPN_TRACES_ROUTE_PATH } from '../../common';
+import { getRemoteRoutePaths } from '../../common';
 import { queryTopNCommon } from './search_topN';
 
 export function registerTraceEventsTopNStackTracesSearchRoute(
   router: IRouter<DataRequestHandlerContext>
 ) {
-  return queryTopNCommon(router, TOPN_TRACES_ROUTE_PATH, 'TraceHash');
+  const paths = getRemoteRoutePaths();
+  return queryTopNCommon(router, paths.TopNTraces, 'TraceHash');
 }

@@ -10,16 +10,17 @@ import { IEsSearchRequest } from '../../../data/server';
 import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import { FLAMECHART_CANVAS_ROUTE_PATH } from '../../common';
+import { getLocalRoutePaths, getRemoteRoutePaths } from '../../common';
 import { getBase64Encoding } from './index';
 import { mapFlamechart } from './mappings';
 
 export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   const test = false;
   if (test) {
+    const paths = getLocalRoutePaths();
     router.get(
       {
-        path: FLAMECHART_CANVAS_ROUTE_PATH,
+        path: paths.FlamechartElastic,
         validate: {
           query: schema.object({
             index: schema.maybe(schema.string()),
@@ -36,9 +37,10 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
       }
     );
   } else {
+    const paths = getRemoteRoutePaths();
     router.get(
       {
-        path: FLAMECHART_CANVAS_ROUTE_PATH,
+        path: paths.FlamechartElastic,
         validate: {
           query: schema.object({
             index: schema.maybe(schema.string()),
