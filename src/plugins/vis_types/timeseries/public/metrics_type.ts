@@ -28,6 +28,7 @@ import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import { triggerTSVBtoLensConfiguration } from './trigger_action';
 import type { IndexPatternValue, Panel } from '../common/types';
+import { RequestAdapter } from '../../../inspector/public';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -160,7 +161,9 @@ export const metricsVisDefinition: VisTypeDefinition<
       : null;
     return triggerConfiguration;
   },
-  inspectorAdapters: {},
+  inspectorAdapters: () => ({
+    requests: new RequestAdapter(),
+  }),
   requiresSearch: true,
   getUsedIndexPattern: getUsedIndexPatterns,
 };
