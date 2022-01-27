@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, useEffect, memo } from 'react';
 import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
+  EuiTourState,
+  useEuiTour,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
@@ -33,6 +35,13 @@ import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
+import { DocumentTourCallout } from '../document_tour_callout';
+import {
+  DiscoverTourDetails,
+  tourConfig,
+  discoverTourSteps,
+  STORAGE_KEY,
+} from '../../../../components/discover_grid/discover_grid_tour';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -77,6 +86,25 @@ function DiscoverDocumentsComponent({
     state,
     useNewFieldsApi,
   });
+
+  const initialState = localStorage.getItem(STORAGE_KEY);
+  let tourState: EuiTourState;
+  if (initialState) {
+    tourState = JSON.parse(initialState);
+    tourState = { ...tourState, isTourActive: false };
+  } else {
+    tourState = tourConfig;
+  }
+  const [steps, actions, reducerState] = useEuiTour(discoverTourSteps, tourState);
+  const discoverTour = { steps, actions, state: reducerState } as DiscoverTourDetails;
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(discoverTour.state));
+  }, [discoverTour.state]);
+
+  const onStartTour = () => {
+    discoverTour.actions.resetTour();
+  };
 
   const onResize = useCallback(
     (colSettings: { columnId: string; width: number }) => {
@@ -151,6 +179,7 @@ function DiscoverDocumentsComponent({
         />
       )}
       {!isLegacy && (
+<<<<<<< HEAD
         <div className="dscDiscoverGrid">
           <DataGridMemoized
             ariaLabelledBy="documentsAriaLabel"
@@ -177,6 +206,39 @@ function DiscoverDocumentsComponent({
             onUpdateRowHeight={onUpdateRowHeight}
           />
         </div>
+=======
+        <>
+          <DocumentTourCallout onStartTour={onStartTour} />
+          <div className="dscDiscoverGrid">
+            <DataGridMemoized
+              ariaLabelledBy="documentsAriaLabel"
+              columns={columns}
+              expandedDoc={expandedDoc}
+              indexPattern={indexPattern}
+              isLoading={isLoading}
+              rows={rows}
+              sort={(state.sort as SortPairArr[]) || []}
+              sampleSize={sampleSize}
+              searchDescription={savedSearch.description}
+              searchTitle={savedSearch.title}
+              setExpandedDoc={setExpandedDoc}
+              showTimeCol={showTimeCol}
+              services={services}
+              settings={state.grid}
+              onAddColumn={onAddColumn}
+              onFilter={onAddFilter as DocViewFilterFn}
+              onRemoveColumn={onRemoveColumn}
+              onSetColumns={onSetColumns}
+              onSort={onSort}
+              onResize={onResize}
+              useNewFieldsApi={useNewFieldsApi}
+              rowHeightState={state.rowHeight}
+              onUpdateRowHeight={onUpdateRowHeight}
+              tour={discoverTour}
+            />
+          </div>
+        </>
+>>>>>>> Added callout banner that triggers tour.
       )}
     </EuiFlexItem>
   );

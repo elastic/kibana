@@ -11,9 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiDataGridColumn,
   EuiIconTip,
-  EuiTourActions,
   EuiScreenReaderOnly,
-  EuiStatelessTourStep,
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
@@ -23,11 +21,9 @@ import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
+import { DiscoverTourDetails } from './discover_grid_tour';
 
-export function getLeadControlColumns(
-  euiTourStep: EuiStatelessTourStep,
-  euiTourActions: EuiTourActions
-) {
+export function getLeadControlColumns(tour: DiscoverTourDetails) {
   return [
     {
       id: 'openDetails',
@@ -42,7 +38,7 @@ export function getLeadControlColumns(
         </EuiScreenReaderOnly>
       ),
       rowCellRender: ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
-        return ExpandButton(euiTourStep, euiTourActions, {
+        return ExpandButton(tour, {
           rowIndex,
           setCellProps,
         } as EuiDataGridCellValueElementProps);

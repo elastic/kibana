@@ -198,35 +198,28 @@ export function DiscoverLayout({
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
 
+  const clickEvent = useMemo(() => {
+    return new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      buttons: 1,
+    });
+  }, []);
   const onOpenDatePicker = useCallback(() => {
     const element = document.querySelector(
       'button[data-test-subj="superDatePickerToggleQuickMenuButton"]'
     );
     if (element) {
-      element.dispatchEvent(
-        new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-          buttons: 1,
-        })
-      );
+      element.dispatchEvent(clickEvent);
     }
-  }, []);
-
+  }, [clickEvent]);
   const onEditSearch = useCallback(() => {
     const element = document.querySelector('textarea[data-test-subj="queryInput"]');
     if (element) {
-      element.dispatchEvent(
-        new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-          buttons: 1,
-        })
-      );
+      element.dispatchEvent(clickEvent);
     }
-  }, []);
+  }, [clickEvent]);
 
   const toggleSidebarCollapse = useCallback(() => {
     storage.set(SIDEBAR_CLOSED_KEY, !isSidebarClosed);

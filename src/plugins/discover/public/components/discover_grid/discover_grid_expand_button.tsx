@@ -12,8 +12,6 @@ import {
   EuiDataGridCellValueElementProps,
   EuiToolTip,
   EuiTourStep,
-  EuiStatelessTourStep,
-  EuiTourActions,
 } from '@elastic/eui';
 import {
   euiLightVars as themeLight,
@@ -22,14 +20,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EsHitRecord } from '../../application/types';
-import { buttomButtons } from './discover_grid_tour';
+import { buttomButtons, DiscoverTourDetails } from './discover_grid_tour';
 
 /**
  * Button to expand a given row
  */
 export const ExpandButton = (
-  tourStep: EuiStatelessTourStep,
-  tourActions: EuiTourActions,
+  tour: DiscoverTourDetails,
   { rowIndex, setCellProps }: EuiDataGridCellValueElementProps
 ) => {
   const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
@@ -71,7 +68,7 @@ export const ExpandButton = (
   );
   if (rowIndex === 0) {
     return (
-      <EuiTourStep {...tourStep} footerAction={buttomButtons(tourActions)}>
+      <EuiTourStep {...tour.steps[0]} footerAction={buttomButtons(tour)}>
         {toolTipIcon}
       </EuiTourStep>
     );
