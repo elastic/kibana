@@ -47,8 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload(ecommerceSOPath);
-      // await reporting.deleteAllReports();
-      // await esArchiver.emptyKibanaIndex();
     });
 
     describe('Check Available', () => {
