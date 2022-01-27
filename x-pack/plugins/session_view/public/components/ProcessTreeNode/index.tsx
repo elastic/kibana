@@ -83,7 +83,7 @@ export function ProcessTreeNode({
     return null;
   }
 
-  const { interactive } = processDetails.process;
+  const { tty } = processDetails.process;
 
   const renderChildren = () => {
     const children = process.getChildren(showGroupLeadersOnly);
@@ -194,7 +194,7 @@ export function ProcessTreeNode({
 
   const renderSessionLeader = () => {
     const { name, args, user } = process.getDetails().process;
-    const sessionIcon = interactive ? 'consoleApp' : 'compute';
+    const sessionIcon = !!tty ? 'consoleApp' : 'compute';
 
     return (
       <>

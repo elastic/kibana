@@ -68,7 +68,7 @@ const DEFAULT_COLUMNS: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: 'not-filtered',
-    id: 'process.session.pid',
+    id: 'process.session_leader.pid',
     initialWidth: 180,
     isSortable: true,
   },

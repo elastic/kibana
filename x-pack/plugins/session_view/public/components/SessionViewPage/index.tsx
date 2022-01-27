@@ -56,7 +56,7 @@ export const SessionViewPage = (props: RouteComponentProps) => {
 
     if (data.hits.length) {
       const event = data.hits[0]._source as ProcessEvent;
-      setSessionEntityId(event.process.entry.entity_id);
+      setSessionEntityId(event.process.entry_leader.entity_id);
     }
   }, [data]);
 

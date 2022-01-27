@@ -55,7 +55,7 @@ export class ProcessImpl implements Process {
       const { pid } = this.getDetails().process;
 
       return children.filter((process) => {
-        const { pgid } = process.getDetails().process;
+        const pgid = process.getDetails().process.group_leader.pid;
 
         // TODO: needs update after field rename to match ECS
         return pgid !== pid || process.searchMatched;
@@ -121,9 +121,9 @@ export class ProcessImpl implements Process {
 
   isUserEntered() {
     const event = this.getDetails();
-    const { interactive, pgid, parent } = event?.process || {};
+    const { tty, group_leader: groupLeader, parent } = event.process;
 
-    return interactive && pgid !== parent.pgid;
+    return !!tty && groupLeader && groupLeader.pid !== parent.group_leader.pid;
   }
 
   getMaxAlertLevel() {
@@ -141,7 +141,10 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
-    fakeLeaderEvent.process = { ...fakeLeaderEvent.process, ...fakeLeaderEvent.process.entry };
+    fakeLeaderEvent.process = {
+      ...fakeLeaderEvent.process,
+      ...fakeLeaderEvent.process.entry_leader,
+    };
     sessionLeaderProcess.events.push(fakeLeaderEvent);
   }
 

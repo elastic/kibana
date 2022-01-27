@@ -38,7 +38,7 @@ export const doSearch = async (
   cursor: string | undefined,
   forward = true
 ) => {
-  // Temporary hack. Updates .siem-signals-default index to include a mapping for process.entry.entity_id
+  // Temporary hack. Updates .siem-signals-default index to include a mapping for process.entry_leader.entity_id
   // TODO: find out how to do proper index mapping migrations...
   let siemSignalsExists = true;
 
@@ -47,7 +47,7 @@ export const doSearch = async (
       index: '.siem-signals-default',
       body: {
         properties: {
-          'process.entry.entity_id': {
+          'process.entry_leader.entity_id': {
             type: 'keyword',
           },
         },
@@ -68,7 +68,7 @@ export const doSearch = async (
     body: {
       query: {
         match: {
-          'process.entry.entity_id': sessionEntityId,
+          'process.entry_leader.entity_id': sessionEntityId,
         },
       },
       size: PROCESS_EVENTS_PER_PAGE,
