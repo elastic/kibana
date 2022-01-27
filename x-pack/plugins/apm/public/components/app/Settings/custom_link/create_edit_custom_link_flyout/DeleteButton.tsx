@@ -48,8 +48,7 @@ async function deleteConfig(
   toasts: NotificationsStart['toasts']
 ) {
   try {
-    await callApmApi({
-      endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
+    await callApmApi('DELETE /internal/apm/settings/custom_links/{id}', {
       signal: null,
       params: {
         path: { id: customLinkId },

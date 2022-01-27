@@ -6,6 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import type {
   Logger,
   KibanaRequest,
@@ -46,6 +47,7 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
   cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
 }
 
 export class TaskRunnerFactory {

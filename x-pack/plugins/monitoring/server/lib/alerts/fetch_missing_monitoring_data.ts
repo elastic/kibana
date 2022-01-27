@@ -8,6 +8,9 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 interface ClusterBucketESResponse {
   key: string;
@@ -44,15 +47,21 @@ interface TopHitESResponse {
 export async function fetchMissingMonitoringData(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   size: number,
   nowInMs: number,
   startMs: number,
   filterQuery?: string
 ): Promise<AlertMissingData[]> {
   const endMs = nowInMs;
+  // changing this to only search ES because of changes related to https://github.com/elastic/kibana/issues/83309
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,

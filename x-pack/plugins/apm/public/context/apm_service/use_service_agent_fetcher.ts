@@ -28,8 +28,7 @@ export function useServiceAgentFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/agent',
+        return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
           params: {
             path: { serviceName },
             query: { start, end },
