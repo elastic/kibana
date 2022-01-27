@@ -140,7 +140,7 @@ export function ColorRangeItem({
         dispatch({ type: 'sortColorRanges', payload: { dataBounds, palettes } });
       }
     },
-    [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes]
+    [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes, isLast]
   );
 
   const onValueChange = useCallback(

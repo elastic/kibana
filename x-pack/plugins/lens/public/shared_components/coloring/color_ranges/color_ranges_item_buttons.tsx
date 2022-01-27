@@ -129,7 +129,7 @@ export function ColorRangeAutoDetectButton({
     });
   }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
-  let tooltipContent = isLast
+  const tooltipContent = isLast
     ? i18n.translate('xpack.lens.dynamicColoring.customPalette.useAutoMaxValue', {
         defaultMessage: `Use maximum data value`,
       })
