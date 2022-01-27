@@ -125,7 +125,8 @@ export default function Embeddable({
         timeRange={series?.time}
         attributes={attributesJSON}
         onBrushEnd={({ range }) => {}}
-        withActions={withActions ? actions : false}
+        withDefaultActions={Boolean(withActions)}
+        extraActions={actions}
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
