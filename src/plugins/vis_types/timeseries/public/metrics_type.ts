@@ -26,7 +26,7 @@ import {
 } from '../../../visualizations/public';
 import { getDataStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
-import { triggerVisualizeToLensOptions } from './trigger_action';
+import { triggerTSVBtoLensConfiguration } from './trigger_action';
 import type { IndexPatternValue, Panel } from '../common/types';
 
 export const withReplacedIds = (
@@ -155,8 +155,10 @@ export const metricsVisDefinition: VisTypeDefinition<
     return [];
   },
   navigateToLens: async (params?: VisParams) => {
-    const triggerOptions = params ? await triggerVisualizeToLensOptions(params as Panel) : null;
-    return triggerOptions;
+    const triggerConfiguration = params
+      ? await triggerTSVBtoLensConfiguration(params as Panel)
+      : null;
+    return triggerConfiguration;
   },
   inspectorAdapters: {},
   requiresSearch: true,

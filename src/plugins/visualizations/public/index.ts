@@ -30,7 +30,7 @@ export type {
   VisTypeDefinition,
   Schema,
   ISchemas,
-  NavigateToLensOptions,
+  NavigateToLensContext,
   VisualizeEditorLayersContext,
 } from './vis_types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';

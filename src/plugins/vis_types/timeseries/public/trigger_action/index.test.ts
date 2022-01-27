@@ -7,7 +7,7 @@
  */
 import type { DataView } from '../../../../data/common';
 import type { Panel, Series } from '../../common/types';
-import { triggerVisualizeToLensOptions } from './';
+import { triggerTSVBtoLensConfiguration } from './';
 
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
@@ -62,13 +62,13 @@ const model = {
   ],
 } as Panel;
 
-describe('triggerVisualizeToLensOptions', () => {
+describe('triggerTSVBtoLensConfiguration', () => {
   test('should return null for a non timeseries chart', async () => {
     const metricModel = {
       ...model,
       type: 'metric',
     } as Panel;
-    const triggerOptions = await triggerVisualizeToLensOptions(metricModel);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(metricModel);
     expect(triggerOptions).toBeNull();
   });
 
@@ -77,7 +77,7 @@ describe('triggerVisualizeToLensOptions', () => {
       ...model,
       use_kibana_indexes: false,
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(stringIndexPatternModel);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(stringIndexPatternModel);
     expect(triggerOptions).toBeNull();
   });
 
@@ -95,12 +95,12 @@ describe('triggerVisualizeToLensOptions', () => {
         },
       ],
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(nonSupportedAggModel);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(nonSupportedAggModel);
     expect(triggerOptions).toBeNull();
   });
 
   test('should return options for a supported aggregation', async () => {
-    const triggerOptions = await triggerVisualizeToLensOptions(model);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(model);
     expect(triggerOptions).toStrictEqual({
       configuration: {
         extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },
@@ -144,7 +144,7 @@ describe('triggerVisualizeToLensOptions', () => {
         },
       ],
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(modelWithFill);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithFill);
     expect(triggerOptions?.layers[0].chartType).toBe('area');
   });
 
@@ -158,7 +158,7 @@ describe('triggerVisualizeToLensOptions', () => {
         },
       ],
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(modelWithFill);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithFill);
     expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.shift).toBe('1h');
   });
 
@@ -182,7 +182,7 @@ describe('triggerVisualizeToLensOptions', () => {
         },
       ],
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(modelWithSplitFilters);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithSplitFilters);
     expect(triggerOptions?.layers[0]?.splitFilters).toStrictEqual([
       {
         color: 'rgba(188,0,85,1)',
@@ -208,7 +208,7 @@ describe('triggerVisualizeToLensOptions', () => {
         },
       ] as unknown as Series[],
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(modelWithTerms);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
     expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
       size: 6,
       otherBucket: false,
@@ -222,7 +222,7 @@ describe('triggerVisualizeToLensOptions', () => {
       ...model,
       interval: '1h',
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(modelWithTerms);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithTerms);
     expect(triggerOptions?.layers[0]?.timeInterval).toBe('1h');
   });
 
@@ -235,7 +235,7 @@ describe('triggerVisualizeToLensOptions', () => {
       show_grid: 1,
       series: [{ ...model.series[0], fill: '0.3', separate_axis: 1, axis_position: 'right' }],
     };
-    const triggerOptions = await triggerVisualizeToLensOptions(modelWithConfig);
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithConfig);
     expect(triggerOptions).toStrictEqual({
       configuration: {
         extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },

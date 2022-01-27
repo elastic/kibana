@@ -21,7 +21,7 @@ import {
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
-import type { NavigateToLensOptions } from '../../../../visualizations/public';
+import type { NavigateToLensContext } from '../../../../visualizations/public';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -63,7 +63,7 @@ const TopNav = ({
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
-  const [editInLensOptions, setEditInLensOptions] = useState<NavigateToLensOptions | null>();
+  const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -96,13 +96,13 @@ const TopNav = ({
   );
 
   useEffect(() => {
-    const asyncGetTriggerOptions = async () => {
+    const asyncGetTriggerContext = async () => {
       if (vis.type.navigateToLens) {
-        const triggerOptions = await vis.type.navigateToLens(vis.params);
-        setEditInLensOptions(triggerOptions);
+        const triggerConfig = await vis.type.navigateToLens(vis.params);
+        setEditInLensConfig(triggerConfig);
       }
     };
-    asyncGetTriggerOptions();
+    asyncGetTriggerContext();
   }, [vis.params, vis.type]);
 
   const config = useMemo(() => {
@@ -121,7 +121,7 @@ const TopNav = ({
           visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
-          editInLensOptions,
+          editInLensConfig,
           displayEditInLensItem: Boolean(vis.type.navigateToLens),
           hideLensBadge,
         },
@@ -142,7 +142,7 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    editInLensOptions,
+    editInLensConfig,
     vis.type.navigateToLens,
     hideLensBadge,
   ]);

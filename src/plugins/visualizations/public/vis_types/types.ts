@@ -112,7 +112,7 @@ interface AxisExtents {
   upperBound?: number;
 }
 
-export interface NavigateToLensOptions {
+export interface NavigateToLensContext {
   layers: {
     [key: string]: VisualizeEditorLayersContext;
   };
@@ -169,7 +169,7 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly navigateToLens?: (
     params?: VisParams
-  ) => Promise<NavigateToLensOptions | null> | undefined;
+  ) => Promise<NavigateToLensContext | null> | undefined;
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.

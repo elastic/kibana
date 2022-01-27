@@ -7,7 +7,7 @@
  */
 import { PaletteOutput } from '../../../../charts/public';
 import type {
-  NavigateToLensOptions,
+  NavigateToLensContext,
   VisualizeEditorLayersContext,
 } from '../../../../visualizations/public';
 import type { Panel } from '../../common/types';
@@ -23,15 +23,14 @@ const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
  * Returns the Lens model, only if it is supported. If not, it returns null.
  * In case of null, the menu item is disabled and the user can't navigate to Lens.
  */
-export const triggerVisualizeToLensOptions = async (
+export const triggerTSVBtoLensConfiguration = async (
   model: Panel
-): Promise<NavigateToLensOptions | null> => {
-  // console.dir(model);
-  // For now we will disable the option for not timeseries charts and for the string mode
+): Promise<NavigateToLensContext | null> => {
+  // Disables the option for not timeseries charts and for the string mode
   if (model.type !== PANEL_TYPES.TIMESERIES || !model.use_kibana_indexes) {
     return null;
   }
-  const options: { [key: string]: VisualizeEditorLayersContext } = {};
+  const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -74,7 +73,7 @@ export const triggerVisualizeToLensOptions = async (
 
     const palette = layer.palette as PaletteOutput;
 
-    const triggerOptions: VisualizeEditorLayersContext = {
+    const layerConfiguration: VisualizeEditorLayersContext = {
       indexPatternId,
       timeFieldName: timeField,
       chartType:
@@ -105,13 +104,13 @@ export const triggerVisualizeToLensOptions = async (
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
     };
-    options[layerIdx] = triggerOptions;
+    layersConfiguration[layerIdx] = layerConfiguration;
   }
 
   const extents = getYExtents(model);
 
   return {
-    layers: options,
+    layers: layersConfiguration,
     configuration: {
       fill: model.series[0].fill ?? 0.3,
       legend: {

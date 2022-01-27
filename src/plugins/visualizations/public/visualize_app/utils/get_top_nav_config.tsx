@@ -19,7 +19,7 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
   getFullPath,
-  NavigateToLensOptions,
+  NavigateToLensContext,
 } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -67,7 +67,7 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
-  editInLensOptions?: NavigateToLensOptions | null;
+  editInLensConfig?: NavigateToLensContext | null;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
 }
@@ -96,7 +96,7 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
-    editInLensOptions,
+    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
   }: TopNavConfigParams,
@@ -293,17 +293,17 @@ export const getTopNavConfig = (
             description: i18n.translate('visualizations.topNavMenu.goToLensButtonAriaLabel', {
               defaultMessage: 'Go to Lens with your current configuration',
             }),
-            disableButton: !editInLensOptions,
+            disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
             run: async () => {
               const updatedWithMeta = {
-                ...editInLensOptions,
+                ...editInLensConfig,
                 savedObjectId: visInstance.vis.id,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
               };
-              if (editInLensOptions) {
+              if (editInLensConfig) {
                 hideLensBadge();
                 getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
               }

@@ -1571,12 +1571,12 @@ export function computeLayerFromContext(
     columnOrder: [],
   };
   if (isArray(metricsArray)) {
-    const firstElement = metricsArray.shift();
-    const field = firstElement
-      ? indexPattern.getFieldByName(firstElement.fieldName) ?? documentField
+    const metricContext = metricsArray.shift();
+    const field = metricContext
+      ? indexPattern.getFieldByName(metricContext.fieldName) ?? documentField
       : documentField;
 
-    const operation = firstElement?.agg;
+    const operation = metricContext?.agg;
     // Formula should be treated differently from other operations
     if (operation === 'formula') {
       const operationDefinition = operationDefinitionMap.formula as OperationDefinition<
@@ -1592,26 +1592,27 @@ export function computeLayerFromContext(
         ...newColumn,
         params: {
           ...newColumn.params,
-          ...firstElement?.params,
+          ...metricContext?.params,
         },
       };
-      layer = firstElement?.params?.formula
+      layer = metricContext?.params?.formula
         ? insertOrReplaceFormulaColumn(generateId(), newColumn, tempLayer, {
             indexPattern,
           }).layer
         : tempLayer;
     } else {
+      // recursive function to build the layer
       layer = insertNewColumn({
         op: operation as OperationType,
         layer: isLast
           ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
           : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
         columnId: generateId(),
-        field: !firstElement?.isFullReference ? field ?? documentField : undefined,
-        columnParams: firstElement?.params ?? undefined,
-        incompleteFieldName: firstElement?.isFullReference ? field?.name : undefined,
-        incompleteFieldOperation: firstElement?.isFullReference
-          ? firstElement?.pipelineAggType
+        field: !metricContext?.isFullReference ? field ?? documentField : undefined,
+        columnParams: metricContext?.params ?? undefined,
+        incompleteFieldName: metricContext?.isFullReference ? field?.name : undefined,
+        incompleteFieldOperation: metricContext?.isFullReference
+          ? metricContext?.pipelineAggType
           : undefined,
         indexPattern,
         visualizationGroups: [],

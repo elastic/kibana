@@ -90,8 +90,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
       });
-
-      // after(async () => await visualBuilder.toggleNewChartsLibraryWithDebug(false));
     });
 
     describe('Metric', () => {

@@ -14,6 +14,6 @@ export type {
   VisTypeDefinition,
   ISchemas,
   Schema,
-  NavigateToLensOptions,
+  NavigateToLensContext,
   VisualizeEditorLayersContext,
 } from './types';

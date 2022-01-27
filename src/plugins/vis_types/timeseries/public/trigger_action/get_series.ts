@@ -98,6 +98,8 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       if (!pipelineAgg) {
         return null;
       }
+      // lens supports cumulative sum for count and sum as quick function
+      // and everything else as formula
       if (pipelineAgg !== 'count' && pipelineAgg !== 'sum') {
         const metaValue = Number(meta?.replace(']', ''));
         const formula = getParentPipelineSeriesFormula(
