@@ -8,7 +8,14 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiIconTip,
+  EuiTourActions,
+  EuiScreenReaderOnly,
+  EuiStatelessTourStep,
+  EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import type { DataView } from '../../../../data/common';
@@ -17,7 +24,10 @@ import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 
-export function getLeadControlColumns() {
+export function getLeadControlColumns(
+  euiTourStep: EuiStatelessTourStep,
+  euiTourActions: EuiTourActions
+) {
   return [
     {
       id: 'openDetails',
@@ -31,7 +41,12 @@ export function getLeadControlColumns() {
           </span>
         </EuiScreenReaderOnly>
       ),
-      rowCellRender: ExpandButton,
+      rowCellRender: ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+        return ExpandButton(euiTourStep, euiTourActions, {
+          rowIndex,
+          setCellProps,
+        } as EuiDataGridCellValueElementProps);
+      },
     },
     {
       id: 'select',

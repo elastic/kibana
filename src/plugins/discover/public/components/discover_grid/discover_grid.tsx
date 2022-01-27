@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
+  EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGrid,
   EuiScreenReaderOnly,
@@ -19,6 +20,17 @@ import {
   htmlIdGenerator,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiTour,
+  EuiTourStep,
+  EuiButtonEmpty,
+  EuiForm,
+  EuiFormRow,
+  EuiButton,
+  EuiTextArea,
+  EuiTourState,
+  useEuiTour,
+  EuiTourStepProps,
+  EuiTourActions,
 } from '@elastic/eui';
 import { flattenHit, DataView } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
@@ -50,6 +62,8 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
+import { demoTourSteps, tourConfig, STORAGE_KEY, buttomButtons } from './discover_grid_tour';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 interface SortObj {
   id: string;
@@ -201,6 +215,25 @@ export const DiscoverGrid = ({
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
+
+  const initialState = localStorage.getItem(STORAGE_KEY);
+  let tourState: EuiTourState;
+  if (initialState) {
+    tourState = JSON.parse(initialState);
+    tourState = { ...tourState, isTourActive: true };
+  } else {
+    tourState = tourConfig;
+  }
+
+  const [[euiTourStepOne, euiTourStepTwo, euiTourStepThree], actions, reducerState] = useEuiTour(
+    demoTourSteps,
+    tourState
+  );
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reducerState));
+  }, [reducerState]);
+
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
   const usedSelectedDocs = useMemo(() => {
@@ -230,6 +263,17 @@ export const DiscoverGrid = ({
     }
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
+
+  const showDisplaySelector = useMemo(
+    () =>
+      !!onUpdateRowHeight
+        ? {
+            allowDensity: false,
+            allowRowHeight: true,
+          }
+        : undefined,
+    [onUpdateRowHeight]
+  );
 
   /**
    * Pagination
@@ -341,8 +385,11 @@ export const DiscoverGrid = ({
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
   const lead = useMemo(
-    () => getLeadControlColumns().filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds]
+    () =>
+      getLeadControlColumns(euiTourStepOne, actions).filter(({ id }) =>
+        controlColumnIds.includes(id)
+      ),
+    [controlColumnIds, euiTourStepOne, actions]
   );
 
   const additionalControls = useMemo(
@@ -359,17 +406,6 @@ export const DiscoverGrid = ({
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
-  const showDisplaySelector = useMemo(
-    () =>
-      !!onUpdateRowHeight
-        ? {
-            allowDensity: false,
-            allowRowHeight: true,
-          }
-        : undefined,
-    [onUpdateRowHeight]
-  );
-
   const toolbarVisibility = useMemo(
     () =>
       defaultColumns
@@ -383,10 +419,46 @@ export const DiscoverGrid = ({
         : {
             ...toolbarVisibilityDefaults,
             showSortSelector: isSortEnabled,
-            additionalControls,
+            additionalControls: {
+              left: {
+                append: additionalControls,
+                prepend: (
+                  <EuiTourStep {...euiTourStepTwo} footerAction={buttomButtons(actions)}>
+                    <div
+                      style={{
+                        visibility: 'hidden',
+                        width: '0px',
+                      }}
+                    >
+                      {' '}
+                    </div>
+                  </EuiTourStep>
+                ),
+              },
+              right: (
+                <EuiTourStep {...euiTourStepThree}>
+                  <div
+                    style={{
+                      visibility: 'hidden',
+                      width: '0px',
+                    }}
+                  >
+                    {' '}
+                  </div>
+                </EuiTourStep>
+              ),
+            },
             showDisplaySelector,
           },
-    [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
+    [
+      defaultColumns,
+      additionalControls,
+      isSortEnabled,
+      euiTourStepTwo,
+      euiTourStepThree,
+      actions,
+      showDisplaySelector,
+    ]
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
@@ -399,6 +471,7 @@ export const DiscoverGrid = ({
   if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
+        +
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -464,9 +537,9 @@ export const DiscoverGrid = ({
           rowHeightsOptions={rowHeightsOptions}
           gridStyle={GRID_STYLE}
         />
-
         {showDisclaimer && (
           <p className="dscDiscoverGrid__footer">
+            Footer
             <FormattedMessage
               id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
               defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
@@ -497,18 +570,21 @@ export const DiscoverGrid = ({
           </EuiScreenReaderOnly>
         )}
         {expandedDoc && (
-          <DiscoverGridFlyout
-            indexPattern={indexPattern}
-            hit={expandedDoc}
-            hits={displayedRows}
-            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-            columns={defaultColumns ? [] : displayedColumns}
-            onFilter={onFilter}
-            onRemoveColumn={onRemoveColumn}
-            onAddColumn={onAddColumn}
-            onClose={() => setExpandedDoc(undefined)}
-            setExpandedDoc={setExpandedDoc}
-          />
+          <span>
+            <DiscoverGridFlyout
+              indexPattern={indexPattern}
+              hit={expandedDoc}
+              hits={displayedRows}
+              // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+              columns={defaultColumns ? [] : displayedColumns}
+              onFilter={onFilter}
+              onRemoveColumn={onRemoveColumn}
+              onAddColumn={onAddColumn}
+              onClose={() => setExpandedDoc(undefined)}
+              setExpandedDoc={setExpandedDoc}
+              services={services}
+            />
+          </span>
         )}
       </span>
     </DiscoverGridContext.Provider>
