@@ -18,7 +18,6 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
 import { postXmatters } from './lib/post_xmatters';
-import { renderMustacheString } from '../lib/mustache_renderer';
 
 export type XmattersActionType = ActionType<
   ActionTypeConfigType,
