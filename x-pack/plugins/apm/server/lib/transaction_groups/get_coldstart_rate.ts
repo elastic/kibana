@@ -26,7 +26,7 @@ import {
   getColdstartAggregation,
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
-import { termQuery, termsQuery } from '../../../../observability/server';
+import { termQuery } from '../../../../observability/server';
 
 export async function getColdstartRate({
   environment,
@@ -56,7 +56,7 @@ export async function getColdstartRate({
 
   const filter = [
     ...termQuery(SERVICE_NAME, serviceName),
-    ...termsQuery(FAAS_COLDSTART, 'true', 'false'),
+    { exists: { field: FAAS_COLDSTART } },
     ...termQuery(TRANSACTION_NAME, transactionName),
     ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
