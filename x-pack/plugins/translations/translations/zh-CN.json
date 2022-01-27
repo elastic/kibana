@@ -27564,7 +27564,6 @@
     "xpack.upgradeAssistant.overview.pageDescription": "准备使用下一版 Elastic！",
     "xpack.upgradeAssistant.overview.pageTitle": "升级助手",
     "xpack.upgradeAssistant.overview.snapshotRestoreLink": "创建快照",
-    "xpack.upgradeAssistant.overview.systemIndices.body": "在升级之前迁移存储系统信息的索引。",
     "xpack.upgradeAssistant.overview.systemIndices.errorLabel": "迁移失败",
     "xpack.upgradeAssistant.overview.systemIndices.featureNameTableColumn": "功能",
     "xpack.upgradeAssistant.overview.systemIndices.flyoutCloseButtonLabel": "关闭",
