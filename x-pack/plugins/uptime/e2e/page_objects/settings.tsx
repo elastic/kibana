@@ -10,7 +10,7 @@ import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 import { byTestId } from '../journeys/utils';
 
-export function settingsPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
+export function settingsPageProvider({ page }: { page: Page; kibanaUrl: string }) {
   return {
     ...loginPageProvider({ page }),
     ...utilsPageProvider({ page }),
