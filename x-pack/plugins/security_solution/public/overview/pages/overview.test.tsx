@@ -80,13 +80,9 @@ jest.mock('../containers/overview_cti_links/use_ti_integrations');
 const useTiIntegrationsMock = useTiIntegrations as jest.Mock;
 useTiIntegrationsMock.mockReturnValue({});
 
-jest.mock('../../common/containers/hosts_risk/use_hosts_risk_score');
+jest.mock('../../hosts/containers/host_risk_score');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
-useHostRiskScoreMock.mockReturnValue({
-  loading: false,
-  isModuleEnabled: false,
-  listItems: [],
-});
+useHostRiskScoreMock.mockReturnValue([false, { data: [], isModuleEnabled: false }]);
 
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;

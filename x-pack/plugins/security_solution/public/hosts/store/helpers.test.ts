@@ -112,7 +112,15 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
-        [HostsTableType.risk]: null,
+        [HostsTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          severitySelection: [],
+          sort: {
+            direction: 'desc',
+            field: 'risk_stats.risk_score',
+          },
+        },
       });
     });
 
@@ -141,7 +149,15 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
-        [HostsTableType.risk]: null,
+        [HostsTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          severitySelection: [],
+          sort: {
+            direction: 'desc',
+            field: 'risk_stats.risk_score',
+          },
+        },
       });
     });
   });

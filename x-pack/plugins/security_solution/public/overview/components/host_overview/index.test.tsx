@@ -17,11 +17,13 @@ import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 
 jest.mock('../../../hosts/containers/host_risk_score', () => ({
-  useHostRiskScore: jest.fn().mockReturnValue({
-    result: [],
-    isModuleEnabled: false,
-    loading: true,
-  }),
+  useHostRiskScore: jest.fn().mockReturnValue([
+    true,
+    {
+      data: [],
+      isModuleEnabled: false,
+    },
+  ]),
 }));
 
 describe('Host Summary Component', () => {
@@ -74,22 +76,24 @@ describe('Host Summary Component', () => {
       const risk = 'very high hos risk';
       const riskScore = 9999999;
 
-      (useHostRiskScore as jest.Mock).mockReturnValue({
-        result: [
-          {
-            host: {
-              name: 'testHostmame',
+      (useHostRiskScore as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: [
+            {
+              host: {
+                name: 'testHostmame',
+              },
+              risk,
+              risk_stats: {
+                rule_risks: [],
+                risk_score: riskScore,
+              },
             },
-            risk,
-            risk_stats: {
-              rule_risks: [],
-              risk_score: riskScore,
-            },
-          },
-        ],
-        isModuleEnabled: true,
-        loading: false,
-      });
+          ],
+          isModuleEnabled: true,
+        },
+      ]);
 
       const { getByTestId } = render(
         <TestProviders>

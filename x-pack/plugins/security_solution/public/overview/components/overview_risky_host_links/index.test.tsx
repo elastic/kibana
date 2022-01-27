@@ -51,11 +51,13 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders enabled module view if module is enabled', () => {
-    useHostRiskScoreMock.mockReturnValueOnce({
-      loading: false,
-      isModuleEnabled: true,
-      result: [],
-    });
+    useHostRiskScoreMock.mockReturnValueOnce([
+      false,
+      {
+        data: [],
+        isModuleEnabled: true,
+      },
+    ]);
 
     render(
       <Provider store={store}>
@@ -76,11 +78,13 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders disabled module view if module is disabled', () => {
-    useHostRiskScoreMock.mockReturnValueOnce({
-      loading: false,
-      isModuleEnabled: false,
-      result: [],
-    });
+    useHostRiskScoreMock.mockReturnValueOnce([
+      false,
+      {
+        data: [],
+        isModuleEnabled: false,
+      },
+    ]);
 
     render(
       <Provider store={store}>

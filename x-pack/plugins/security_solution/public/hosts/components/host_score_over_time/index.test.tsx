@@ -16,6 +16,8 @@ const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {
   it('renders', () => {
+    useHostRiskScoreMock.mockReturnValueOnce([false, { data: [], isModuleEnabled: true }]);
+
     const { queryByTestId } = render(
       <TestProviders>
         <HostRiskScoreOverTime
@@ -32,11 +34,7 @@ describe('Host Risk Flyout', () => {
   });
 
   it('renders loader when HostsRiskScore is laoding', () => {
-    useHostRiskScoreMock.mockReturnValueOnce({
-      loading: true,
-      isModuleEnabled: true,
-      result: [],
-    });
+    useHostRiskScoreMock.mockReturnValueOnce([true, { data: [], isModuleEnabled: true }]);
 
     const { queryByTestId } = render(
       <TestProviders>

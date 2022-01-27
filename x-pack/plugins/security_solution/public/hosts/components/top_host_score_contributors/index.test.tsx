@@ -16,6 +16,14 @@ const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {
   it('renders', () => {
+    useHostRiskScoreMock.mockReturnValueOnce([
+      true,
+      {
+        data: [],
+        isModuleEnabled: true,
+      },
+    ]);
+
     const { queryByTestId } = render(
       <TestProviders>
         <TopHostScoreContributors
@@ -32,30 +40,32 @@ describe('Host Risk Flyout', () => {
   });
 
   it('renders sorted items', () => {
-    useHostRiskScoreMock.mockReturnValueOnce({
-      loading: true,
-      isModuleEnabled: true,
-      result: [
-        {
-          risk_stats: {
-            rule_risks: [
-              {
-                rule_name: 'third',
-                rule_risk: '10',
-              },
-              {
-                rule_name: 'first',
-                rule_risk: '99',
-              },
-              {
-                rule_name: 'second',
-                rule_risk: '55',
-              },
-            ],
+    useHostRiskScoreMock.mockReturnValueOnce([
+      true,
+      {
+        data: [
+          {
+            risk_stats: {
+              rule_risks: [
+                {
+                  rule_name: 'third',
+                  rule_risk: '10',
+                },
+                {
+                  rule_name: 'first',
+                  rule_risk: '99',
+                },
+                {
+                  rule_name: 'second',
+                  rule_risk: '55',
+                },
+              ],
+            },
           },
-        },
-      ],
-    });
+        ],
+        isModuleEnabled: true,
+      },
+    ]);
 
     const { queryAllByRole } = render(
       <TestProviders>
