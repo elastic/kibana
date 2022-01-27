@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
@@ -76,7 +76,6 @@ import { checkBoxControlColumn } from './control_columns';
 import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
-import { useDataGridHeightHack } from './height_hack';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
@@ -394,6 +393,20 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
 
+    // Clean any removed custom field that may still be present in stored columnHeaders
+    useEffect(() => {
+      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
+        columnHeaders.forEach(({ id: columnId }) => {
+          if (browserFields.base?.fields?.[columnId] == null) {
+            const [category] = columnId.split('.');
+            if (browserFields[category]?.fields?.[columnId] == null) {
+              dispatch(tGridActions.removeColumn({ id, columnId }));
+            }
+          }
+        });
+      }
+    }, [browserFields, columnHeaders, dispatch, id]);
+
     const onAlertStatusActionSuccess = useMemo(() => {
       if (bulkActions && bulkActions !== true) {
         return bulkActions.onAlertStatusActionSuccess;
@@ -673,7 +686,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               pageSize,
               timelineId: id,
             });
-
           return {
             ...header,
             actions: {
@@ -788,8 +800,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [loadPage]
     );
 
-    const height = useDataGridHeightHack(pageSize, data.length);
-
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
       timelineID: id,
@@ -803,7 +813,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           {tableView === 'gridView' && (
             <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
               <EuiDataGrid
-                height={height}
                 id={'body-data-grid'}
                 data-test-subj="body-data-grid"
                 aria-label={i18n.TGRID_BODY_ARIA_LABEL}

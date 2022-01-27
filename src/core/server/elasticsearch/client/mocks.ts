@@ -12,6 +12,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { PublicKeys } from '@kbn/utility-types';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
+import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
 
 const omittedProps = [
   'diagnostic',
@@ -21,9 +22,6 @@ const omittedProps = [
   'serializer',
   'helpers',
 ] as Array<PublicKeys<KibanaClient>>;
-
-// the product header expected in every response from es
-const PRODUCT_RESPONSE_HEADER = 'x-elastic-product';
 
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');

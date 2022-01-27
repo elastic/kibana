@@ -36,6 +36,7 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: null,
       [HostsTableType.sessions]: null,
     },
   },
@@ -64,6 +65,7 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: null,
       [HostsTableType.sessions]: null,
     },
   },
@@ -96,6 +98,7 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        [HostsTableType.risk]: null,
       });
     });
 
@@ -124,6 +127,7 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        [HostsTableType.risk]: null,
       });
     });
   });

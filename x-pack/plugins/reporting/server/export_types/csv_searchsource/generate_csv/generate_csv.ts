@@ -13,7 +13,7 @@ import type { Datatable } from 'src/plugins/expressions/server';
 import type { Writable } from 'stream';
 import type { ReportingConfig } from '../../..';
 import type {
-  IndexPattern,
+  DataView,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
@@ -67,7 +67,6 @@ function isPlainStringArray(
 
 export class CsvGenerator {
   private _columns?: string[];
-  private _formatters?: Record<string, FieldFormat>;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -82,11 +81,7 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async scan(
-    index: IndexPattern,
-    searchSource: ISearchSource,
-    settings: CsvExportSettings
-  ) {
+  private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
@@ -122,10 +117,6 @@ export class CsvGenerator {
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
-    if (this._formatters) {
-      return this._formatters;
-    }
-
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
@@ -133,8 +124,7 @@ export class CsvGenerator {
       formatters[c.id] = fieldFormat;
     });
 
-    this._formatters = formatters;
-    return this._formatters;
+    return formatters;
   }
 
   private escapeValues(settings: CsvExportSettings) {
@@ -438,7 +428,6 @@ export class CsvGenerator {
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
-    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warning(
         `ES scroll returned fewer total hits than expected! ` +

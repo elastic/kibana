@@ -26,6 +26,7 @@ filegroup(
       "//packages/kbn-eslint-plugin-eslint:build",
       "//packages/kbn-expect:build",
       "//packages/kbn-field-types:build",
+      "//packages/kbn-flot-charts:build",
       "//packages/kbn-i18n:build",
       "//packages/kbn-i18n-react:build",
       "//packages/kbn-interpreter:build",
@@ -66,6 +67,7 @@ filegroup(
       "//packages/kbn-ui-framework:build",
       "//packages/kbn-ui-shared-deps-npm:build",
       "//packages/kbn-ui-shared-deps-src:build",
+      "//packages/kbn-ui-theme:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",
   ],
@@ -77,6 +79,7 @@ filegroup(
   srcs = [
       "//packages/elastic-apm-synthtrace:build_types",
       "//packages/elastic-datemath:build_types",
+      "//packages/elastic-safer-lodash-set:build_types",
       "//packages/kbn-ace:build_types",
       "//packages/kbn-alerts:build_types",
       "//packages/kbn-analytics:build_types",
@@ -94,6 +97,7 @@ filegroup(
       "//packages/kbn-i18n:build_types",
       "//packages/kbn-i18n-react:build_types",
       "//packages/kbn-interpreter:build_types",
+      "//packages/kbn-io-ts-utils:build_types",
       "//packages/kbn-mapbox-gl:build_types",
       "//packages/kbn-monaco:build_types",
       "//packages/kbn-optimizer:build_types",
@@ -119,6 +123,11 @@ filegroup(
       "//packages/kbn-server-route-repository:build_types",
       "//packages/kbn-std:build_types",
       "//packages/kbn-telemetry-tools:build_types",
+      "//packages/kbn-ui-shared-deps-npm:build_types",
+      "//packages/kbn-ui-shared-deps-src:build_types",
+      "//packages/kbn-ui-theme:build_types",
+      "//packages/kbn-utility-types:build_types",
+      "//packages/kbn-utils:build_types",
   ],
 )
 

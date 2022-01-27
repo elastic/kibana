@@ -6,22 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { AggNotSupportedInMode } from '../../../../common/errors';
-import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
-import { TSVB_METRIC_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
+import { AggNotSupportedError } from '../../../../common/errors';
+import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 
-export function isAggSupported(metrics: Metric[]) {
-  const parentPipelineAggs = getAggsByType<string>((agg) => agg.id)[AGG_TYPE.PARENT_PIPELINE];
+import type { Metric } from '../../../../common/types';
+import type { SearchCapabilities } from '../../search_strategies';
+
+export function isAggSupported(metrics: Metric[], capabilities: SearchCapabilities) {
   const metricTypes = metrics.filter(
-    (metric) =>
-      parentPipelineAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.SERIES_AGG
+    (metric) => !isMetricEnabled(metric.type, capabilities.uiRestrictions)
   );
 
   if (metricTypes.length) {
-    throw new AggNotSupportedInMode(
-      metricTypes.map((metric) => metric.type).join(', '),
-      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
-    );
+    throw new AggNotSupportedError(metricTypes.map((metric) => `"${metric.type}"`).join(', '));
   }
 }

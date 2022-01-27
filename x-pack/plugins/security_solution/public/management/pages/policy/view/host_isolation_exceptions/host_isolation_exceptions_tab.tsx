@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../../common/lib/kibana';
@@ -29,6 +30,7 @@ import {
   getHostIsolationExceptionsListPath,
   getPolicyHostIsolationExceptionsPath,
 } from '../../../../common/routing';
+import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import { getCurrentArtifactsLocation } from '../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../policy_hooks';
@@ -36,10 +38,10 @@ import { PolicyHostIsolationExceptionsAssignFlyout } from './components/assign_f
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
 import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_unexisting';
 import { PolicyHostIsolationExceptionsList } from './components/list';
-import { ManagementPageLoader } from '../../../../components/management_page_loader';
 
 export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyData }) => {
   const { getAppUrl } = useAppUrl();
+  const privileges = useUserPrivileges().endpointPrivileges;
 
   const policyId = policy.id;
 
@@ -87,7 +89,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
     return policySearchedExceptionsListRequest.data ? (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.about"
-        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {exception} other {exceptions}} associated with this policy. Click here to {link}"
+        defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {host isolation exception} other {host isolation exceptions}} associated with this policy. Click here to {link}"
         values={{
           count: allPolicyExceptionsListRequest.data?.total,
           link,
@@ -172,21 +174,23 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
             <p>{subTitle}</p>
           </EuiText>
         </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            data-test-subj="hostIsolationExceptions-assign-button"
-            onClick={handleAssignButton}
-          >
-            {i18n.translate(
-              'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.assignToPolicy',
-              {
-                defaultMessage: 'Assign host isolation exceptions to policy',
-              }
-            )}
-          </EuiButton>
-        </EuiPageHeaderSection>
+        {privileges.canIsolateHost ? (
+          <EuiPageHeaderSection>
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              data-test-subj="hostIsolationExceptions-assign-button"
+              onClick={handleAssignButton}
+            >
+              {i18n.translate(
+                'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.assignToPolicy',
+                {
+                  defaultMessage: 'Assign host isolation exceptions to policy',
+                }
+              )}
+            </EuiButton>
+          </EuiPageHeaderSection>
+        ) : null}
       </EuiPageHeader>
 
       <EuiSpacer size="l" />

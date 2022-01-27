@@ -93,7 +93,9 @@ export const samplePieVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             editor: false,
             params: [],
@@ -111,7 +113,9 @@ export const samplePieVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {

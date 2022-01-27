@@ -344,7 +344,6 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       try {
         const { body } = await mlClient.explainDataFrameAnalytics(
           {
-            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)

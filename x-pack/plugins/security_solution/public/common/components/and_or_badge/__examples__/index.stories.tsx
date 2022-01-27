@@ -8,7 +8,7 @@
 import { storiesOf } from '@storybook/react';
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { AndOrBadge } from '..';

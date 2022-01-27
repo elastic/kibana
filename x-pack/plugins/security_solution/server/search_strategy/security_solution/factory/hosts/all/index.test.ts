@@ -9,6 +9,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 
 import { HostsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './query.all_hosts.dsl';
+import * as buildRiskQuery from '../risk_score/query.hosts_risk.dsl';
 import { allHosts } from '.';
 import {
   mockOptions,
@@ -101,6 +102,29 @@ describe('allHosts search strategy', () => {
       const result = await allHosts.parse(mockOptions, mockSearchStrategyResponse, mockedDeps);
 
       expect(result.edges[0].node.risk).toBe(risk);
+    });
+
+    test('should query host risk only for hostNames in the current page', async () => {
+      const buildHostsRiskQuery = jest.spyOn(buildRiskQuery, 'buildHostsRiskScoreQuery');
+      const mockedDeps = mockDeps();
+      (mockedDeps.esClient.asCurrentUser.search as jest.Mock).mockResolvedValue({
+        body: { hits: { hits: [] } },
+      });
+
+      const hostName: string = get(
+        'aggregations.host_data.buckets[1].key',
+        mockSearchStrategyResponse.rawResponse
+      );
+
+      // 2 pages with one item on each
+      const pagination = { activePage: 1, cursorStart: 1, fakePossibleCount: 5, querySize: 2 };
+
+      await allHosts.parse({ ...mockOptions, pagination }, mockSearchStrategyResponse, mockedDeps);
+
+      expect(buildHostsRiskQuery).toHaveBeenCalledWith({
+        defaultIndex: ['ml_host_risk_score_latest_test-space'],
+        hostNames: [hostName],
+      });
     });
 
     test('should not enhance data when feature flag is disabled', async () => {
