@@ -15,7 +15,6 @@ import {
   defaultPaletteParams,
 } from './constants';
 import type { CustomPaletteParams } from '../../../common';
-import { getStopsForFixedMode } from './utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
@@ -52,7 +51,9 @@ function getCustomPaletteConfig(
     title,
     type: FIXED_PROGRESSION,
     'data-test-subj': `custom-palette`,
-    palette: getStopsForFixedMode(activePalette.params.stops, activePalette.params.colorStops),
+    palette: (activePalette.params.colorStops || activePalette.params.stops).map(
+      (colorStop) => colorStop.color
+    ),
   };
 }
 
