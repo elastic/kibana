@@ -1,10 +1,11 @@
 {
   "attributes": {
-      "timeFieldName": "@timestamp",
-      "title": "epoch-millis*"
+      "timeFieldName": "ts",
+      "title": "existence_index_*",
+      "runtimeFieldMap":"{\"data_view_runtime_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('a')\"}}}"
   },
   "coreMigrationVersion": "8.0.0",
-  "id": "epoch-millis",
+  "id": "existence_index",
   "migrationVersion": {
       "index-pattern": "7.11.0"
   },
