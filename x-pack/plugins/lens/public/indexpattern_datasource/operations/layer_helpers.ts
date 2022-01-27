@@ -1601,13 +1601,14 @@ export function computeLayerFromContext(
           }).layer
         : tempLayer;
     } else {
+      const columnId = generateId();
       // recursive function to build the layer
       layer = insertNewColumn({
         op: operation as OperationType,
         layer: isLast
           ? { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] }
           : computeLayerFromContext(metricsArray.length === 1, metricsArray, indexPattern),
-        columnId: generateId(),
+        columnId,
         field: !metricContext?.isFullReference ? field ?? documentField : undefined,
         columnParams: metricContext?.params ?? undefined,
         incompleteFieldName: metricContext?.isFullReference ? field?.name : undefined,
@@ -1617,6 +1618,9 @@ export function computeLayerFromContext(
         indexPattern,
         visualizationGroups: [],
       });
+      if (metricContext) {
+        metricContext.accessor = columnId;
+      }
     }
   }
 

@@ -534,7 +534,7 @@ export const getXyVisualization = ({
     const yConfig = metrics.map((metric, idx) => {
       return {
         color: metric.color,
-        forAccessor: foundLayer.accessors[idx],
+        forAccessor: metric.accessor ?? foundLayer.accessors[idx],
         ...(axisMode && { axisMode }),
       };
     });

@@ -215,11 +215,14 @@ export function getVisualizeFieldSuggestions({
     for (let suggestionIdx = 0; suggestionIdx < allSuggestions.length; suggestionIdx++) {
       const currentSuggestion = allSuggestions[suggestionIdx];
       const currentSuggestionsLayers = currentSuggestion.visualizationState.layers;
-      if (activeVisualization.updateLayersConfigurationFromContext) {
+      const contextLayer = layers.find(
+        (layer) => layer.layerId === Object.keys(currentSuggestion.datasourceState.layers)[0]
+      );
+      if (activeVisualization.updateLayersConfigurationFromContext && contextLayer) {
         const updatedSuggestionState = activeVisualization.updateLayersConfigurationFromContext({
           prevState: currentSuggestion.visualizationState,
           layerId: currentSuggestionsLayers[0].layerId as string,
-          context: layers[suggestionIdx],
+          context: contextLayer,
         }) as StateWithLayers;
 
         visualizationStateLayers.push(...updatedSuggestionState.layers);

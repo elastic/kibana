@@ -22,9 +22,7 @@ import {
 
 export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metrics'] | null => {
   const metricIdx = metrics.length - 1;
-  // find the metric idx that has math expression
-  const mathMetricIdx = metrics.findIndex((metric) => metric.type === 'math');
-  const aggregation = metrics[mathMetricIdx > 0 ? mathMetricIdx : metricIdx].type;
+  const aggregation = metrics[metricIdx].type;
   const fieldName = metrics[metricIdx].field;
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   if (!aggregationMap) {
@@ -44,6 +42,8 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       break;
     }
     case 'math': {
+      // find the metric idx that has math expression
+      const mathMetricIdx = metrics.findIndex((metric) => metric.type === 'math');
       let finalScript = metrics[mathMetricIdx].script;
 
       const variables = metrics[mathMetricIdx].variables;

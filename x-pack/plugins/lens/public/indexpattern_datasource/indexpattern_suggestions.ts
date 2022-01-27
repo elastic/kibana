@@ -161,14 +161,15 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
       newLayer = createNewTimeseriesLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
     }
     if (newLayer) {
-      suggestions.push(
-        buildSuggestion({
-          state,
-          updatedLayer: newLayer,
-          layerId: newId,
-          changeType: 'initial',
-        })
-      );
+      const suggestion = buildSuggestion({
+        state,
+        updatedLayer: newLayer,
+        layerId: newId,
+        changeType: 'initial',
+      });
+      const layerId = Object.keys(suggestion.state.layers)[0];
+      context[layerIdx].layerId = layerId;
+      suggestions.push(suggestion);
     }
   }
   return suggestions;

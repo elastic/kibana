@@ -88,6 +88,7 @@ interface VisualizeEditorMetricContext {
   params?: Record<string, unknown>;
   isFullReference: boolean;
   color?: string;
+  accessor?: string;
 }
 
 export interface VisualizeEditorLayersContext {
@@ -104,6 +105,7 @@ export interface VisualizeEditorLayersContext {
   timeInterval?: string;
   format?: string;
   label?: string;
+  layerId?: string;
 }
 
 interface AxisExtents {
