@@ -29,14 +29,12 @@ import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
 
-function page<TPath extends string>({
-  path,
+function page({
   title,
   tab,
   element,
   searchBarOptions,
 }: {
-  path: TPath;
   title: string;
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
@@ -48,10 +46,8 @@ function page<TPath extends string>({
   };
 }): {
   element: React.ReactElement<any, any>;
-  path: TPath;
 } {
   return {
-    path,
     element: (
       <ApmServiceTemplate
         title={title}
@@ -61,225 +57,209 @@ function page<TPath extends string>({
         {element}
       </ApmServiceTemplate>
     ),
-  } as any;
+  };
 }
 
 export const serviceDetail = {
-  path: '/services/{serviceName}',
-  element: <ApmServiceWrapper />,
-  params: t.intersection([
-    t.type({
-      path: t.type({
-        serviceName: t.string,
-      }),
-    }),
-    t.type({
-      query: t.intersection([
-        environmentRt,
-        t.type({
-          rangeFrom: t.string,
-          rangeTo: t.string,
-          kuery: t.string,
+  '/services/{serviceName}': {
+    element: <ApmServiceWrapper />,
+    params: t.intersection([
+      t.type({
+        path: t.type({
+          serviceName: t.string,
         }),
-        t.partial({
-          comparisonEnabled: toBooleanRt,
-          comparisonType: comparisonTypeRt,
-          latencyAggregationType: t.string,
-          transactionType: t.string,
-          refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-          refreshInterval: t.string,
-        }),
-      ]),
-    }),
-  ]),
-  defaults: {
-    query: {
-      kuery: '',
-      environment: ENVIRONMENT_ALL.value,
-    },
-  },
-  children: [
-    page({
-      path: '/services/{serviceName}/overview',
-      element: <ServiceOverview />,
-      tab: 'overview',
-      title: i18n.translate('xpack.apm.views.overview.title', {
-        defaultMessage: 'Overview',
       }),
-      searchBarOptions: {
-        showTransactionTypeSelector: true,
-        showTimeComparison: true,
+      t.type({
+        query: t.intersection([
+          environmentRt,
+          t.type({
+            rangeFrom: t.string,
+            rangeTo: t.string,
+            kuery: t.string,
+          }),
+          t.partial({
+            comparisonEnabled: toBooleanRt,
+            comparisonType: comparisonTypeRt,
+            latencyAggregationType: t.string,
+            transactionType: t.string,
+            refreshPaused: t.union([t.literal('true'), t.literal('false')]),
+            refreshInterval: t.string,
+          }),
+        ]),
+      }),
+    ]),
+    defaults: {
+      query: {
+        kuery: '',
+        environment: ENVIRONMENT_ALL.value,
       },
-    }),
-    {
-      ...page({
-        path: '/services/{serviceName}/transactions',
-        tab: 'transactions',
-        title: i18n.translate('xpack.apm.views.transactions.title', {
-          defaultMessage: 'Transactions',
+    },
+    children: {
+      '/services/{serviceName}/overview': page({
+        element: <ServiceOverview />,
+        tab: 'overview',
+        title: i18n.translate('xpack.apm.views.overview.title', {
+          defaultMessage: 'Overview',
         }),
-        element: <Outlet />,
         searchBarOptions: {
           showTransactionTypeSelector: true,
           showTimeComparison: true,
         },
       }),
-      children: [
-        {
-          path: '/services/{serviceName}/transactions/view',
-          element: <TransactionDetails />,
-          params: t.type({
-            query: t.intersection([
-              t.type({
-                transactionName: t.string,
-              }),
-              t.partial({
-                traceId: t.string,
-                transactionId: t.string,
-                comparisonEnabled: toBooleanRt,
-                comparisonType: comparisonTypeRt,
-              }),
-            ]),
+      '/services/{serviceName}/transactions': {
+        ...page({
+          tab: 'transactions',
+          title: i18n.translate('xpack.apm.views.transactions.title', {
+            defaultMessage: 'Transactions',
           }),
-        },
-        {
-          path: '/services/{serviceName}/transactions',
-          element: <TransactionOverview />,
-        },
-      ],
-    },
-    page({
-      path: '/services/{serviceName}/dependencies',
-      element: <ServiceDependencies />,
-      tab: 'dependencies',
-      title: i18n.translate('xpack.apm.views.dependencies.title', {
-        defaultMessage: 'Dependencies',
-      }),
-      searchBarOptions: {
-        showTimeComparison: true,
-      },
-    }),
-    {
-      ...page({
-        path: '/services/{serviceName}/errors',
-        tab: 'errors',
-        title: i18n.translate('xpack.apm.views.errors.title', {
-          defaultMessage: 'Errors',
+          element: <Outlet />,
+          searchBarOptions: {
+            showTransactionTypeSelector: true,
+            showTimeComparison: true,
+          },
         }),
-        element: <Outlet />,
+        children: {
+          '/services/{serviceName}/transactions/view': {
+            element: <TransactionDetails />,
+            params: t.type({
+              query: t.intersection([
+                t.type({
+                  transactionName: t.string,
+                }),
+                t.partial({
+                  traceId: t.string,
+                  transactionId: t.string,
+                  comparisonEnabled: toBooleanRt,
+                  comparisonType: comparisonTypeRt,
+                }),
+              ]),
+            }),
+          },
+          '/services/{serviceName}/transactions': {
+            element: <TransactionOverview />,
+          },
+        },
+      },
+      '/services/{serviceName}/dependencies': page({
+        element: <ServiceDependencies />,
+        tab: 'dependencies',
+        title: i18n.translate('xpack.apm.views.dependencies.title', {
+          defaultMessage: 'Dependencies',
+        }),
         searchBarOptions: {
           showTimeComparison: true,
         },
       }),
-      params: t.partial({
-        query: t.partial({
-          sortDirection: t.string,
-          sortField: t.string,
-          pageSize: t.string,
-          page: t.string,
+      '/services/{serviceName}/errors': {
+        ...page({
+          tab: 'errors',
+          title: i18n.translate('xpack.apm.views.errors.title', {
+            defaultMessage: 'Errors',
+          }),
+          element: <Outlet />,
+          searchBarOptions: {
+            showTimeComparison: true,
+          },
         }),
-      }),
-      children: [
-        {
-          path: '/services/{serviceName}/errors/{groupId}',
-          element: <ErrorGroupDetails />,
-          params: t.type({
-            path: t.type({
-              groupId: t.string,
-            }),
+        params: t.partial({
+          query: t.partial({
+            sortDirection: t.string,
+            sortField: t.string,
+            pageSize: t.string,
+            page: t.string,
           }),
-        },
-        {
-          path: '/services/{serviceName}/errors',
-          element: <ErrorGroupOverview />,
-        },
-      ],
-    },
-    page({
-      path: '/services/{serviceName}/metrics',
-      tab: 'metrics',
-      title: i18n.translate('xpack.apm.views.metrics.title', {
-        defaultMessage: 'Metrics',
-      }),
-      element: <ServiceMetrics />,
-    }),
-    {
-      ...page({
-        path: '/services/{serviceName}/nodes',
-        tab: 'nodes',
-        title: i18n.translate('xpack.apm.views.nodes.title', {
-          defaultMessage: 'JVMs',
         }),
-        element: <Outlet />,
-      }),
-      children: [
-        {
-          path: '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
-          element: <ServiceNodeMetrics />,
-          params: t.type({
-            path: t.type({
-              serviceNodeName: t.string,
+        children: {
+          '/services/{serviceName}/errors/{groupId}': {
+            element: <ErrorGroupDetails />,
+            params: t.type({
+              path: t.type({
+                groupId: t.string,
+              }),
             }),
-          }),
+          },
+          '/services/{serviceName}/errors': {
+            element: <ErrorGroupOverview />,
+          },
         },
-        {
-          path: '/services/{serviceName}/nodes',
-          element: <ServiceNodeOverview />,
-          params: t.partial({
-            query: t.partial({
-              sortDirection: t.string,
-              sortField: t.string,
-              pageSize: t.string,
-              page: t.string,
+      },
+      '/services/{serviceName}/metrics': page({
+        tab: 'metrics',
+        title: i18n.translate('xpack.apm.views.metrics.title', {
+          defaultMessage: 'Metrics',
+        }),
+        element: <ServiceMetrics />,
+      }),
+      '/services/{serviceName}/nodes': {
+        ...page({
+          tab: 'nodes',
+          title: i18n.translate('xpack.apm.views.nodes.title', {
+            defaultMessage: 'JVMs',
+          }),
+          element: <Outlet />,
+        }),
+        children: {
+          '/services/{serviceName}/nodes/{serviceNodeName}/metrics': {
+            element: <ServiceNodeMetrics />,
+            params: t.type({
+              path: t.type({
+                serviceNodeName: t.string,
+              }),
             }),
-          }),
+          },
+          '/services/{serviceName}/nodes': {
+            element: <ServiceNodeOverview />,
+            params: t.partial({
+              query: t.partial({
+                sortDirection: t.string,
+                sortField: t.string,
+                pageSize: t.string,
+                page: t.string,
+              }),
+            }),
+          },
         },
-      ],
+      },
+      '/services/{serviceName}/service-map': page({
+        tab: 'service-map',
+        title: i18n.translate('xpack.apm.views.serviceMap.title', {
+          defaultMessage: 'Service Map',
+        }),
+        element: <ServiceMapServiceDetail />,
+        searchBarOptions: {
+          hidden: true,
+        },
+      }),
+      '/services/{serviceName}/logs': page({
+        tab: 'logs',
+        title: i18n.translate('xpack.apm.views.logs.title', {
+          defaultMessage: 'Logs',
+        }),
+        element: <ServiceLogs />,
+        searchBarOptions: {
+          showKueryBar: false,
+        },
+      }),
+      '/services/{serviceName}/profiling': page({
+        tab: 'profiling',
+        title: i18n.translate('xpack.apm.views.serviceProfiling.title', {
+          defaultMessage: 'Profiling',
+        }),
+        element: <ServiceProfiling />,
+      }),
+      '/services/{serviceName}/infra': page({
+        tab: 'infra',
+        title: i18n.translate('xpack.apm.views.infra.title', {
+          defaultMessage: 'Infrastructure',
+        }),
+        element: <InfraOverview />,
+        searchBarOptions: {
+          hidden: true,
+        },
+      }),
+      '/services/{serviceName}/': {
+        element: <RedirectToDefaultServiceRouteView />,
+      },
     },
-    page({
-      path: '/services/{serviceName}/service-map',
-      tab: 'service-map',
-      title: i18n.translate('xpack.apm.views.serviceMap.title', {
-        defaultMessage: 'Service Map',
-      }),
-      element: <ServiceMapServiceDetail />,
-      searchBarOptions: {
-        hidden: true,
-      },
-    }),
-    page({
-      path: '/services/{serviceName}/logs',
-      tab: 'logs',
-      title: i18n.translate('xpack.apm.views.logs.title', {
-        defaultMessage: 'Logs',
-      }),
-      element: <ServiceLogs />,
-      searchBarOptions: {
-        showKueryBar: false,
-      },
-    }),
-    page({
-      path: '/services/{serviceName}/profiling',
-      tab: 'profiling',
-      title: i18n.translate('xpack.apm.views.serviceProfiling.title', {
-        defaultMessage: 'Profiling',
-      }),
-      element: <ServiceProfiling />,
-    }),
-    page({
-      path: '/services/{serviceName}/infra',
-      tab: 'infra',
-      title: i18n.translate('xpack.apm.views.infra.title', {
-        defaultMessage: 'Infrastructure',
-      }),
-      element: <InfraOverview />,
-      searchBarOptions: {
-        hidden: true,
-      },
-    }),
-    {
-      path: '/services/{serviceName}/',
-      element: <RedirectToDefaultServiceRouteView />,
-    },
-  ],
-} as const;
+  },
+};

@@ -15,7 +15,7 @@ import {
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { createSignalsIndex, createEventCorrelationRule } from '../../tasks/api_calls/rules';
+import { createEventCorrelationRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate, waitForTheRuleToBeExecuted } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -27,7 +27,6 @@ describe('Detection rules', function () {
 
   beforeEach('Reset signals index', function () {
     cleanKibana();
-    createSignalsIndex();
   });
 
   it('EQL rule on remote indices generates alerts', function () {
