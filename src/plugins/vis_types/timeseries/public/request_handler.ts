@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from 'src/core/public';
+import type { Adapters } from 'src/plugins/inspector';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
-import { ROUTES } from '../common/constants';
+import { ROUTES, UI_SETTINGS } from '../common/constants';
+import { KibanaContext, handleResponse } from '../../../data/public';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';
-import type { KibanaContext } from '../../../data/public';
 
 interface MetricsRequestHandlerParams {
   input: KibanaContext | null;
@@ -20,6 +21,7 @@ interface MetricsRequestHandlerParams {
   visParams: TimeseriesVisParams;
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
+  inspectorAdapters?: Adapters;
 }
 
 export const metricsRequestHandler = async ({
@@ -28,9 +30,11 @@ export const metricsRequestHandler = async ({
   visParams,
   searchSessionId,
   executionContext,
+  inspectorAdapters,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const data = getDataStart();
+  const theme = getCoreStart().theme;
 
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
@@ -48,7 +52,8 @@ export const metricsRequestHandler = async ({
 
     try {
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
-      return await getCoreStart().http.post(ROUTES.VIS_DATA, {
+
+      const visData: TimeseriesVisData = await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
             timezone,
@@ -64,6 +69,21 @@ export const metricsRequestHandler = async ({
         }),
         context: executionContext,
       });
+
+      inspectorAdapters?.requests?.reset();
+
+      Object.entries(visData.trackedEsSearches || {}).forEach(([key, query]) => {
+        inspectorAdapters?.requests
+          ?.start(query.label ?? key, { searchSessionId })
+          .json(query.body)
+          .ok({ time: query.time });
+
+        if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
+          handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
+        }
+      });
+
+      return visData;
     } finally {
       if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
         // untrack if this search still belongs to current session
