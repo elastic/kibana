@@ -104,7 +104,6 @@ export function DiscoverSidebarComponent({
   closeFlyout,
   editField,
   viewMode,
-  availableFields$,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<DataViewField[] | null>(null);
 
