@@ -10,22 +10,23 @@ Set the following configuration values:
 ```yml
 logging:
   appenders:
-    console-json:
-      type: console
+    metrics-file:
+      type: file
+      fileName: ./metrics.log
       layout:
         type: json
   loggers:
   - name: metrics.ops
-    appenders: [console-json]
+    appenders: [metrics-file]
     level: debug
-  - name: root
-    appenders: [console]
-    level: error
 ```
 
-This will only print error logs from the Kibana server and log details about
-the event loop delay histogram and event loop utilization to the console in
-JSON.
+This will send monitoring data about the event loop delay histogram and event loop utilization to the `metrics.json` file. To view the contents of the file you could use:
+
+```sh
+tail -f ./metrics.json | jq
+```
+
 ### Setup
 - Start Elasticsearch via `yarn es snapshot --license=trial`
 - Start Kibana vi `yarn start`

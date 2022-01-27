@@ -8,7 +8,7 @@
 import { workerData } from 'worker_threads';
 import { ClusterClient } from '../elasticsearch/client';
 import { LoggingSystem } from '../logging';
-import { makeGetActionsFromMetricThreshold } from '../../../../x-pack/plugins/infra/server/lib/alerting/metric_threshold/worker';
+// import { makeGetActionsFromMetricThreshold } from '../../../../x-pack/plugins/infra/server/lib/alerting/metric_threshold/worker';
 
 let client: ClusterClient;
 
@@ -32,6 +32,6 @@ export function initialize(): { [key: string]: (...args: any[]) => unknown } {
       const results = await client.asInternalUser.search({ index: '.kibana' });
       return JSON.stringify(results);
     },
-    getActionsFromMetricThreshold: makeGetActionsFromMetricThreshold(client.asInternalUser),
+    // getActionsFromMetricThreshold: makeGetActionsFromMetricThreshold(client.asInternalUser),
   };
 }

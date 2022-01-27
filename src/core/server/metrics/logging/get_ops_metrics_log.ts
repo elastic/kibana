@@ -83,9 +83,7 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
           usedInBytes: processMemoryUsedInBytes,
         },
       },
-      eventLoopDelay: eventLoopDelayVal,
-      eventLoopDelayHistogram: eventLoopDelayHistVals,
-      eventLoopUtilization: process?.event_loop_delay_histogram?.eventLoopUtilization,
+      eventLoopDelay: process?.event_loop_delay_histogram,
     },
     host: {
       os: {
