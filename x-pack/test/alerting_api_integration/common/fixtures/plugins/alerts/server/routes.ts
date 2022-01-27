@@ -306,6 +306,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
         await actionsClient.enqueueExecution({
           id: req.params.id,
           spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+          executionId: uuid.v4(),
           apiKey: createAPIKeyResult
             ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
                 'base64'

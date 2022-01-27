@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from 'kibana/server';
 import { NewsFeedSimulatorPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
