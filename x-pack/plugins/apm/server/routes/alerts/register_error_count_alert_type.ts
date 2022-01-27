@@ -155,6 +155,8 @@ export function registerErrorCountAlertType({
                     serviceName,
                     threshold: ruleParams.threshold,
                     measured: errorCount,
+                    windowSize: ruleParams.windowSize,
+                    windowUnit: ruleParams.windowUnit,
                   }),
                 },
               })

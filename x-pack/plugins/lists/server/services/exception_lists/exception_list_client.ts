@@ -103,7 +103,24 @@ export class ExceptionListClient {
   }
 
   private getServerExtensionCallbackContext(): ServerExtensionCallbackContext {
+    const { user, serverExtensionsClient, savedObjectsClient, request } = this;
+    let exceptionListClient: undefined | ExceptionListClient;
+
     return {
+      // Lazy getter so that we only initialize a new instance of the class if needed
+      get exceptionListClient(): ExceptionListClient {
+        if (!exceptionListClient) {
+          exceptionListClient = new ExceptionListClient({
+            enableServerExtensionPoints: false,
+            request,
+            savedObjectsClient,
+            serverExtensionsClient,
+            user,
+          });
+        }
+
+        return exceptionListClient;
+      },
       request: this.request,
     };
   }
@@ -126,12 +143,14 @@ export class ExceptionListClient {
 
   /**
    * Fetch an exception list parent container
+   * @params filter {sting | undefined} kql "filter" expression
    * @params listId {string | undefined} the "list_id" of an exception list
    * @params id {string | undefined} the "id" of an exception list
    * @params namespaceType {string | undefined} saved object namespace (single | agnostic)
    * @return {ExceptionListSummarySchema | null} summary of exception list item os types
    */
   public getExceptionListSummary = async ({
+    filter,
     listId,
     id,
     namespaceType,
@@ -142,6 +161,7 @@ export class ExceptionListClient {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSummary',
         {
+          filter,
           id,
           listId,
           namespaceType,
@@ -150,7 +170,7 @@ export class ExceptionListClient {
       );
     }
 
-    return getExceptionListSummary({ id, listId, namespaceType, savedObjectsClient });
+    return getExceptionListSummary({ filter, id, listId, namespaceType, savedObjectsClient });
   };
 
   /**
