@@ -25,10 +25,13 @@ export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = n
     : (arg: T) => Promise<void> | void;
 }
 
-export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+export const LinkButton: React.FC<PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>> =
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
+  ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
@@ -40,6 +43,8 @@ export interface CaseDetailsLinkProps {
   title?: string;
 }
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
   children,
   detailName,
@@ -77,6 +82,8 @@ export interface ConfigureCaseButtonProps {
   titleTooltip: string;
 }
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
   isDisabled,
   label,
