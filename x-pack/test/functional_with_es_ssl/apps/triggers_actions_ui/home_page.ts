@@ -91,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           objectRemover.add(createdAction.id, 'action', 'actions');
 
           const { body: createdAlert } = await supertest
-            .post(`/api/alerting/rule`)
+            .post(`/internal/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);

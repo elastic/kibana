@@ -11,7 +11,6 @@ import { get, isEmpty } from 'lodash';
 import mappings from '../../saved_objects/mappings.json';
 
 const astFunctionType = ['is', 'range', 'nested'];
-const mappingKeys = Object.keys(mappings);
 
 export const validateOperationOnAttributes = (
   astFilter: KueryNode | null,
@@ -41,7 +40,7 @@ export const validateSearchFields = (searchFields: string[], excludedFieldNames:
     (sf) => excludedFieldNames.filter((efn) => sf.split('.')[0].includes(efn)).length > 0
   );
   if (excludedSearchFields.length > 0) {
-    throw new Error(`Search is not supported on this field ${excludedSearchFields.join()}`);
+    throw new Error(`Search field ${excludedSearchFields.join()} not supported`);
   }
 };
 
@@ -89,10 +88,9 @@ export const validateFilterKueryNode = ({
 
     if (storeValue && index === 0) {
       const fieldName = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
-      const typeSavedObject = mappingKeys.length > 0 ? mappingKeys[0] : '';
       const fieldNameSplit = fieldName
         .split('.')
-        .filter((fn: string) => ![typeSavedObject, 'attributes'].includes(fn));
+        .filter((fn: string) => !['alert', 'attributes'].includes(fn));
       const firstAttribute = fieldNameSplit.length > 0 ? fieldNameSplit[0] : '';
       if (excludedFieldNames.includes(firstAttribute)) {
         throw new Error(`Filter is not supported on this field ${fieldName}`);

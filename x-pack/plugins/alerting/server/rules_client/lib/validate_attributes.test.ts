@@ -58,7 +58,7 @@ describe('Validate attributes', () => {
           excludedFieldNames
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Search is not supported on this field monitoring.execution.calculated_metrics.success_ratio"`
+        `"Search field monitoring.execution.calculated_metrics.success_ratio not supported"`
       );
     });
   });
@@ -96,6 +96,19 @@ describe('Validate attributes', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Filter is not supported on this field alert.attributes.monitoring.execution.calculated_metrics.success_ratio"`
+      );
+    });
+
+    test('should throw an error, when a nested filter contains the field to exclude', () => {
+      expect(() =>
+        validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.actions:{ group: ".server-log" }'
+          ),
+          excludedFieldNames: ['actions'],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Filter is not supported on this field alert.attributes.actions"`
       );
     });
   });

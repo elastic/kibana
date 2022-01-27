@@ -248,7 +248,7 @@ export class RulesClient {
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
   private readonly eventLogger?: IEventLogger;
-  private readonly fieldsToExclude: Array<keyof SanitizedAlert> = ['monitoring'];
+  private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedAlert> = ['monitoring'];
 
   constructor({
     ruleTypeRegistry,
@@ -433,11 +433,11 @@ export class RulesClient {
   public async get<Params extends AlertTypeParams = never>({
     id,
     includeLegacyId = false,
-    excludeInternalFields = false,
+    excludeFromPublicApi = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
-    excludeInternalFields?: boolean;
+    excludeFromPublicApi?: boolean;
   }): Promise<SanitizedAlert<Params> | SanitizedRuleWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     try {
@@ -469,7 +469,7 @@ export class RulesClient {
       result.attributes,
       result.references,
       includeLegacyId,
-      excludeInternalFields
+      excludeFromPublicApi
     );
   }
 
@@ -612,8 +612,8 @@ export class RulesClient {
 
   public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
-    excludeInternalFields = false,
-  }: { options?: FindOptions; excludeInternalFields?: boolean } = {}): Promise<FindResult<Params>> {
+    excludeFromPublicApi = false,
+  }: { options?: FindOptions; excludeFromPublicApi?: boolean } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -632,12 +632,12 @@ export class RulesClient {
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
     const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
     const sortField = mapSortField(options.sortField);
-    if (excludeInternalFields) {
+    if (excludeFromPublicApi) {
       validateOperationOnAttributes(
         filterKueryNode,
         sortField,
         options.searchFields,
-        this.fieldsToExclude
+        this.fieldsToExcludeFromPublicApi
       );
     }
 
@@ -648,7 +648,7 @@ export class RulesClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawRule>({
       ...options,
-
+      sortField,
       filter:
         (authorizationFilter && filterKueryNode
           ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
@@ -680,7 +680,7 @@ export class RulesClient {
         fields ? (pick(attributes, fields) as RawRule) : attributes,
         references,
         false,
-        excludeInternalFields
+        excludeFromPublicApi
       );
     });
 
@@ -1752,7 +1752,7 @@ export class RulesClient {
     rawRule: RawRule,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
-    excludeInternalFields: boolean = false
+    excludeFromPublicApi: boolean = false
   ): Alert | AlertWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
@@ -1764,7 +1764,7 @@ export class RulesClient {
       rawRule,
       references,
       includeLegacyId,
-      excludeInternalFields
+      excludeFromPublicApi
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
@@ -1792,12 +1792,12 @@ export class RulesClient {
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
-    excludeInternalFields: boolean = false
+    excludeFromPublicApi: boolean = false
   ): PartialAlert<Params> | PartialAlertWithLegacyId<Params> {
     const rule = {
       id,
       notifyWhen,
-      ...partialRawRule,
+      ...omit(partialRawRule, excludeFromPublicApi ? [...this.fieldsToExcludeFromPublicApi] : ''),
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: schedule as IntervalSchedule,
@@ -1810,13 +1810,7 @@ export class RulesClient {
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
     };
-    if (excludeInternalFields) {
-      this.fieldsToExclude.forEach((fte) => {
-        if (rule[fte]) {
-          delete rule[fte];
-        }
-      });
-    }
+
     return includeLegacyId
       ? ({ ...rule, legacyId } as PartialAlertWithLegacyId<Params>)
       : (rule as PartialAlert<Params>);

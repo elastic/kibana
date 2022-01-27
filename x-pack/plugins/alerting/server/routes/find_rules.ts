@@ -117,7 +117,7 @@ interface BuildFindRulesRouteParams {
   licenseState: ILicenseState;
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
-  excludeInternalFields?: boolean;
+  excludeFromPublicApi?: boolean;
   usageCounter?: UsageCounter;
 }
 
@@ -125,7 +125,7 @@ const buildFindRulesRoute = ({
   licenseState,
   path,
   router,
-  excludeInternalFields = false,
+  excludeFromPublicApi = false,
   usageCounter,
 }: BuildFindRulesRouteParams) => {
   router.get(
@@ -160,7 +160,7 @@ const buildFindRulesRoute = ({
           });
         }
 
-        const findResult = await rulesClient.find({ options, excludeInternalFields });
+        const findResult = await rulesClient.find({ options, excludeFromPublicApi });
         return res.ok({
           body: rewriteBodyRes(findResult),
         });
@@ -175,7 +175,7 @@ export const findRulesRoute = (
   usageCounter?: UsageCounter
 ) => {
   buildFindRulesRoute({
-    excludeInternalFields: true,
+    excludeFromPublicApi: true,
     licenseState,
     path: `${BASE_ALERTING_API_PATH}/rules/_find`,
     router,
@@ -189,7 +189,7 @@ export const findInternalRulesRoute = (
   usageCounter?: UsageCounter
 ) => {
   buildFindRulesRoute({
-    excludeInternalFields: false,
+    excludeFromPublicApi: false,
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`,
     router,

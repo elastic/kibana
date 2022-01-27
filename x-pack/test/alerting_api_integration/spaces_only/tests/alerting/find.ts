@@ -29,90 +29,183 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       return createdAlert;
     }
 
-    it('should handle find alert request appropriately', async () => {
-      const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+    describe('public', () => {
+      afterEach(() => objectRemover.removeAll());
 
-      const response = await supertest.get(
-        `${getUrlPrefix(
-          Spaces.space1.id
-        )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-      );
+      it('should handle find alert request appropriately', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      expect(response.status).to.eql(200);
-      expect(response.body.page).to.equal(1);
-      expect(response.body.per_page).to.be.greaterThan(0);
-      expect(response.body.total).to.be.greaterThan(0);
-      const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-      expect(match).to.eql({
-        id: createdAlert.id,
-        name: 'abc',
-        tags: ['foo'],
-        rule_type_id: 'test.noop',
-        consumer: 'alertsFixture',
-        schedule: { interval: '1m' },
-        enabled: true,
-        actions: [],
-        params: {},
-        created_by: null,
-        api_key_owner: null,
-        scheduled_task_id: match.scheduled_task_id,
-        updated_by: null,
-        throttle: '1m',
-        notify_when: 'onThrottleInterval',
-        mute_all: false,
-        muted_alert_ids: [],
-        created_at: match.created_at,
-        updated_at: match.updated_at,
-        execution_status: match.execution_status,
-        monitoring: match.monitoring,
-      });
-      expect(Date.parse(match.created_at)).to.be.greaterThan(0);
-      expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
-    });
-
-    it(`shouldn't find alert from another space`, async () => {
-      const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-      await supertest
-        .get(
+        const response = await supertest.get(
           `${getUrlPrefix(
-            Spaces.other.id
+            Spaces.space1.id
           )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-        )
-        .expect(200, {
-          page: 1,
-          per_page: 10,
-          total: 0,
-          data: [],
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.page).to.equal(1);
+        expect(response.body.per_page).to.be.greaterThan(0);
+        expect(response.body.total).to.be.greaterThan(0);
+        const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+        expect(match).to.eql({
+          id: createdAlert.id,
+          name: 'abc',
+          tags: ['foo'],
+          rule_type_id: 'test.noop',
+          consumer: 'alertsFixture',
+          schedule: { interval: '1m' },
+          enabled: true,
+          actions: [],
+          params: {},
+          created_by: null,
+          api_key_owner: null,
+          scheduled_task_id: match.scheduled_task_id,
+          updated_by: null,
+          throttle: '1m',
+          notify_when: 'onThrottleInterval',
+          mute_all: false,
+          muted_alert_ids: [],
+          created_at: match.created_at,
+          updated_at: match.updated_at,
+          execution_status: match.execution_status,
         });
+        expect(Date.parse(match.created_at)).to.be.greaterThan(0);
+        expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
+      });
+
+      it(`shouldn't find alert from another space`, async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertest
+          .get(
+            `${getUrlPrefix(
+              Spaces.other.id
+            )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+          )
+          .expect(200, {
+            page: 1,
+            per_page: 10,
+            total: 0,
+            data: [],
+          });
+      });
+
+      it('should filter on string parameters', async () => {
+        await Promise.all([
+          createAlert({ params: { strValue: 'my a' } }),
+          createAlert({ params: { strValue: 'my b' } }),
+          createAlert({ params: { strValue: 'my c' } }),
+        ]);
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].params.strValue).to.eql('my b');
+      });
     });
 
-    it('should filter on string parameters', async () => {
-      await Promise.all([
-        createAlert({ params: { strValue: 'my a' } }),
-        createAlert({ params: { strValue: 'my b' } }),
-        createAlert({ params: { strValue: 'my c' } }),
-      ]);
+    describe('internal', () => {
+      afterEach(() => objectRemover.removeAll());
 
-      const response = await supertest.get(
-        `${getUrlPrefix(
-          Spaces.space1.id
-        )}/api/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
-      );
+      it('should handle find alert request appropriately', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      expect(response.status).to.eql(200);
-      expect(response.body.total).to.equal(1);
-      expect(response.body.data[0].params.strValue).to.eql('my b');
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/internal/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.page).to.equal(1);
+        expect(response.body.per_page).to.be.greaterThan(0);
+        expect(response.body.total).to.be.greaterThan(0);
+        const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+        expect(match).to.eql({
+          id: createdAlert.id,
+          name: 'abc',
+          tags: ['foo'],
+          rule_type_id: 'test.noop',
+          consumer: 'alertsFixture',
+          schedule: { interval: '1m' },
+          enabled: true,
+          actions: [],
+          params: {},
+          created_by: null,
+          api_key_owner: null,
+          scheduled_task_id: match.scheduled_task_id,
+          updated_by: null,
+          throttle: '1m',
+          notify_when: 'onThrottleInterval',
+          mute_all: false,
+          muted_alert_ids: [],
+          created_at: match.created_at,
+          updated_at: match.updated_at,
+          execution_status: match.execution_status,
+          monitoring: match.monitoring,
+        });
+        expect(Date.parse(match.created_at)).to.be.greaterThan(0);
+        expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
+      });
+
+      it(`shouldn't find alert from another space`, async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertest
+          .get(
+            `${getUrlPrefix(
+              Spaces.other.id
+            )}/internal/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
+          )
+          .expect(200, {
+            page: 1,
+            per_page: 10,
+            total: 0,
+            data: [],
+          });
+      });
+
+      it('should filter on string parameters', async () => {
+        await Promise.all([
+          createAlert({ params: { strValue: 'my a' } }),
+          createAlert({ params: { strValue: 'my b' } }),
+          createAlert({ params: { strValue: 'my c' } }),
+        ]);
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/internal/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].params.strValue).to.eql('my b');
+      });
     });
 
     describe('legacy', () => {
@@ -156,7 +249,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           createdAt: match.createdAt,
           updatedAt: match.updatedAt,
           executionStatus: match.executionStatus,
-          monitoring: match.monitoring,
         });
         expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
         expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);

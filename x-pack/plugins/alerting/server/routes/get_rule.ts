@@ -65,13 +65,13 @@ interface BuildGetRulesRouteParams {
   licenseState: ILicenseState;
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
-  excludeInternalFields?: boolean;
+  excludeFromPublicApi?: boolean;
 }
 const buildGetRuleRoute = ({
   licenseState,
   path,
   router,
-  excludeInternalFields = false,
+  excludeFromPublicApi = false,
 }: BuildGetRulesRouteParams) => {
   router.get(
     {
@@ -84,7 +84,7 @@ const buildGetRuleRoute = ({
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.get({ id, excludeInternalFields });
+        const rule = await rulesClient.get({ id, excludeFromPublicApi });
         return res.ok({
           body: rewriteBodyRes(rule),
         });
@@ -98,7 +98,7 @@ export const getRuleRoute = (
   licenseState: ILicenseState
 ) =>
   buildGetRuleRoute({
-    excludeInternalFields: true,
+    excludeFromPublicApi: true,
     licenseState,
     path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
@@ -109,7 +109,7 @@ export const getInternalRuleRoute = (
   licenseState: ILicenseState
 ) =>
   buildGetRuleRoute({
-    excludeInternalFields: true,
+    excludeFromPublicApi: true,
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
