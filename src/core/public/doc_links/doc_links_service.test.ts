@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getDocLinksMock, getDocLinksMetaMock } from './dock_links_service.test.mocks';
+import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
 import { DocLinksService } from './doc_links_service';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
@@ -47,8 +47,6 @@ describe('DocLinksService', () => {
     });
 
     it('return the values from `getDocLinksMeta`', () => {
-      expect(getDocLinksMetaMock).not.toHaveBeenCalled();
-
       const start = service.start({ injectedMetadata });
 
       expect(start).toEqual({
@@ -70,8 +68,6 @@ describe('DocLinksService', () => {
     });
 
     it('return the values from `getDocLinks`', () => {
-      expect(getDocLinksMetaMock).not.toHaveBeenCalled();
-
       const start = service.start({ injectedMetadata });
 
       expect(start.links).toEqual({
