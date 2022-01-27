@@ -187,6 +187,30 @@ export class TrustedAppValidator extends BaseValidator {
     return item;
   }
 
+  async validatePreDeleteItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreGetOneItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreMultiListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreSingleListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreDeleteItemById(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreGetListSummary(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
   async validatePreUpdateItem(
     _updatedItem: UpdateExceptionListItemOptions,
     currentItem: ExceptionListItemSchema
