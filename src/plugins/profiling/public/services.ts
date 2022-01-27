@@ -11,8 +11,8 @@ import { FLAMECHART_ROUTE_PATH, TOPN_ROUTE_PATH } from '../common';
 
 export interface Services {
   fetchTopN: (type: string, seconds: string) => Promise<any[] | HttpFetchError>;
-  fetchFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
-  fetchRawFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
+  fetchElasticFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
+  fetchPixiFlamechart: (seconds: string) => Promise<any[] | HttpFetchError>;
 }
 
 function getFetchQuery(seconds: string): HttpFetchQuery {
@@ -40,7 +40,7 @@ export function getServices(core: CoreStart): Services {
       }
     },
 
-    fetchFlamechart: async (seconds: string) => {
+    fetchElasticFlamechart: async (seconds: string) => {
       try {
         const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
@@ -53,7 +53,7 @@ export function getServices(core: CoreStart): Services {
       }
     },
 
-    fetchRawFlamechart: async (seconds: string) => {
+    fetchPixiFlamechart: async (seconds: string) => {
       try {
         const query = getFetchQuery(seconds);
         const response = await core.http.get<{ results: any[] }>(
