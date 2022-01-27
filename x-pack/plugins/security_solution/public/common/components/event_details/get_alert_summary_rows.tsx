@@ -26,7 +26,7 @@ import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { EventCode, EventCategory } from '../../../../common/ecs/event';
 
 /** Always show these fields */
-const defaultDisplayFields: EventSummaryField[] = [
+const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
@@ -169,7 +169,7 @@ function getEventFieldsToDisplay({
   eventRuleType?: string;
 }): EventSummaryField[] {
   const fields = [
-    ...defaultDisplayFields,
+    ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
     ...getFieldsByRuleType(eventRuleType),
