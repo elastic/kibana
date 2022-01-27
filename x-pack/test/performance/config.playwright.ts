@@ -39,7 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--server.ssl.key=${KBN_KEY_PATH}`,
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        // '--server.protocol=http2',
+        '--server.protocol=http2',
       ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
