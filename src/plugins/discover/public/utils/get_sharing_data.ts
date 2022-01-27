@@ -9,13 +9,12 @@
 import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type {
-  Filter,
-  ISearchSource,
-  SearchSourceFields,
-  SerializedSearchSourceFields,
-} from 'src/plugins/data/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
+import type { Filter, ISearchSource, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../application/main/services/discover_state';
@@ -82,7 +81,8 @@ export async function getSharingData(
        * Otherwise, the requests will ask for all fields, even if only a few are really needed.
        * Discover does not set fields, since having all fields is needed for the UI.
        */
-      if (searchSource.getField('fields') && columns.length) {
+      const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+      if (useFieldsApi && columns.length) {
         searchSource.setField('fields', columns);
       }
       return searchSource.getSerializedFields(true);

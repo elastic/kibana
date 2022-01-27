@@ -11,7 +11,11 @@ import type { DataView } from 'src/plugins/data/common';
 import type { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { createSearchSourceMock } from '../../../data/common/search/search_source/mocks';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../common';
 import { indexPatternMock } from '../__mocks__/index_pattern';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
@@ -23,6 +27,9 @@ describe('getSharingData', () => {
       data: dataPluginMock.createStartContract(),
       uiSettings: {
         get: (key: string) => {
+          if (key === SEARCH_FIELDS_FROM_SOURCE) {
+            return false;
+          }
           if (key === SORT_DEFAULT_ORDER_SETTING) {
             return 'desc';
           }
@@ -62,6 +69,10 @@ describe('getSharingData', () => {
         "getSearchSource": [Function],
       }
     `);
+  });
+
+  test('getSearchSource returns a shared searchSource', () => {
+    // TODO
   });
 
   test('fields have prepended timeField', async () => {
