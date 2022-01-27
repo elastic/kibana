@@ -17,19 +17,16 @@ export function buildCopyColumnNameButton(columnName: string) {
     label: (
       <EuiCopy textToCopy={columnName}>
         {(copyCallback) => (
-          <span ref={() => (copy = copyCallback)}>
-            <FormattedMessage
-              id="discover.grid.copyToClipBoardButton"
-              defaultMessage="Copy to clipboard"
-            />
-          </span>
+          <FormattedMessage
+            ref={() => (copy = copyCallback)}
+            id="discover.grid.copyToClipBoardButton"
+            defaultMessage="Copy to clipboard"
+          />
         )}
       </EuiCopy>
     ),
     iconType: 'copyClipboard',
-    iconProps: {
-      size: 'm',
-    },
+    iconProps: { size: 'm' },
     onClick: () => copy(),
   };
 
