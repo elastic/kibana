@@ -695,6 +695,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
             onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
             multipleFilters={this.state.multipleFilters}
+            savedQueryService={this.savedQueryService}
+            onFilterSave={this.onSave}
           />
         </div>
       );

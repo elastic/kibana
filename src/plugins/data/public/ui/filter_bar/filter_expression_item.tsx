@@ -22,6 +22,8 @@ import { FILTERS } from '../../../common';
 import { existsOperator, isOneOfOperator } from './filter_editor/lib/filter_operators';
 import { IIndexPattern } from '../..';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { SavedQueryService } from '../..';
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
@@ -46,6 +48,8 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
+  savedQueryService: SavedQueryService;
+  onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -56,6 +60,8 @@ export const FilterExpressionItem: FC<Props> = ({
   groupId,
   filtersGroupsCount,
   onUpdate,
+  savedQueryService,
+  onFilterSave,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   function handleBadgeClick() {
@@ -137,6 +143,14 @@ export const FilterExpressionItem: FC<Props> = ({
         'data-test-subj': 'disableFilter',
       },
       {
+        name: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
+          defaultMessage: `Save as filter`,
+        }),
+        icon: 'save',
+        panel: 2,
+        'data-test-subj': 'saveAsFilter',
+      },
+      {
         name: i18n.translate('data.filter.filterBar.deleteFilterButtonLabel', {
           defaultMessage: `Remove`,
         }),
@@ -153,6 +167,26 @@ export const FilterExpressionItem: FC<Props> = ({
       {
         id: 0,
         items: mainPanelItems,
+      },
+      {
+        id: 2,
+        title: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
+          defaultMessage: `Save as filter`,
+        }),
+        content: (
+          <div style={{ padding: 16 }}>
+            <SaveQueryForm
+              savedQueryService={savedQueryService}
+              onSave={(savedQueryMeta) => {
+                onFilterSave(savedQueryMeta, true);
+                setIsPopoverOpen(false);
+              }}
+              onClose={() => setIsPopoverOpen(false)}
+              showTimeFilterOption={false}
+              showFilterOption={false}
+            />
+          </div>
+        ),
       },
       // {
       //   id: 1,

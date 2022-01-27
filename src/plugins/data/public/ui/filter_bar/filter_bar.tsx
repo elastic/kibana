@@ -33,6 +33,8 @@ import { SavedQueriesItem } from './saved_queries_item';
 import { FilterExpressionItem } from './filter_expression_item';
 
 import { UI_SETTINGS } from '../../../common';
+import { SavedQueryMeta } from '../saved_query_form';
+import { SavedQueryService } from '../..';
 
 interface Props {
   filters: Filter[];
@@ -46,6 +48,8 @@ interface Props {
   selectedSavedQueries?: SavedQuery[];
   removeSelectedSavedQuery: (savedQuery: SavedQuery) => void;
   onMultipleFiltersUpdated?: (filters: Filter[]) => void;
+  savedQueryService: SavedQueryService;
+  onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -110,6 +114,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
+          savedQueryService={props.savedQueryService}
+          onFilterSave={props.onFilterSave}
         />
       );
       GroupBadge.push(badge);
