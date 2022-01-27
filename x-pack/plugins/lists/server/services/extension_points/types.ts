@@ -18,6 +18,7 @@ import {
   GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
+import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
 
 /**
  * The `this` context provided to extension point's callback function
@@ -58,6 +59,16 @@ interface ServerExtensionPointDefinition<
    */
   callback: ServerExtensionCallback<Args, Response>;
 }
+
+/**
+ * Extension point is triggered prior processing an import of data into the Exceptions Lists. The callback
+ * in this extension will be called by both the `importExceptionListAndItems()` and
+ * `importExceptionListAndItemsAsArray()`
+ */
+export type ExceptionsListPreImportServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreImport',
+  PromiseFromStreams
+>;
 
 /**
  * Extension point is triggered prior to creating a new Exception List Item. Throw'ing will cause
@@ -128,6 +139,7 @@ export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDef
 >;
 
 export type ExtensionPoint =
+  | ExceptionsListPreImportServerExtension
   | ExceptionsListPreCreateItemServerExtension
   | ExceptionsListPreUpdateItemServerExtension
   | ExceptionsListPreGetOneItemServerExtension
