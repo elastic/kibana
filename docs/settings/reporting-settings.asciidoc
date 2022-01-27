@@ -97,10 +97,10 @@ NOTE: Running multiple instances of {kib} in a cluster for load balancing of
 reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.reporting.encryptionKey`>> and, if
 security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionKey`>>.
 
-`xpack.reporting.queue.pollInterval`:: 
+`xpack.reporting.queue.pollInterval`::
 Specifies the {time-units}[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
 
-[[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}:: 
+[[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}::
 {time-units}[How long] each worker has to produce a report. If your machine is slow or under heavy load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download will be available. Can be specified as number of milliseconds. Defaults to `2m`.
 
 [float]
@@ -109,7 +109,7 @@ Specifies the {time-units}[time] that the reporting poller waits between polling
 
 Reporting works by capturing screenshots from {kib}. The following settings control the capturing process.
 
-`xpack.reporting.capture.timeouts.openUrl` {ess-icon}:: 
+`xpack.reporting.capture.timeouts.openUrl` {ess-icon}::
 Specify the {time-units}[time] to allow the Reporting browser to wait for the "Loading..." screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.reporting.capture.timeouts.waitForElements` {ess-icon}::
@@ -123,7 +123,7 @@ running a report job, Reporting will log the error and try to continue
 capturing the page with a screenshot. As a result, a download will be
 available, but there will likely be errors in the visualizations in the report.
 
-`xpack.reporting.capture.maxAttempts` {ess-icon}:: 
+`xpack.reporting.capture.maxAttempts` {ess-icon}::
 If capturing a report fails for any reason, {kib} will re-attempt other reporting job, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.capture.loadDelay`::
@@ -172,14 +172,14 @@ The rule objects are evaluated sequentially from the beginning to the end of the
 -------------------------------------------------------
 # Only allow requests to placeholder.com
 xpack.reporting.capture.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com" } ] 
+  rules: [ { allow: true, host: "placeholder.com" } ]
 -------------------------------------------------------
 
 [source,yaml]
 -------------------------------------------------------
-# Only allow requests to https://placeholder.com 
+# Only allow requests to https://placeholder.com
 xpack.reporting.capture.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ] 
+  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
 -------------------------------------------------------
 
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
