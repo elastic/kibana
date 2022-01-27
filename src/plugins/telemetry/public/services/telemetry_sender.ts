@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Subscription } from 'rxjs';
+import { fromEvent, interval, merge } from 'rxjs';
+import { exhaustMap } from 'rxjs/operators';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
 import { Storage } from '../../../kibana_utils/public';
@@ -16,7 +19,7 @@ export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
   private lastReported?: number;
   private readonly storage: Storage;
-  private intervalId: number = 0; // setInterval returns a positive integer, 0 means no interval is set
+  private sendIfDue$?: Subscription;
   private retryCount: number = 0;
 
   static getRetryDelay(retryCount: number) {
@@ -132,8 +135,20 @@ export class TelemetrySender {
   };
 
   public startChecking = () => {
-    if (this.intervalId === 0) {
-      this.intervalId = window.setInterval(this.sendIfDue, 60000);
+    if (!this.sendIfDue$) {
+      // Trigger sendIfDue...
+      this.sendIfDue$ = merge(
+        // ... periodically
+        interval(60000),
+        // ... when it regains `focus`
+        fromEvent(document, 'focus')
+      )
+        .pipe(exhaustMap(this.sendIfDue))
+        .subscribe();
     }
+  };
+
+  public stop = () => {
+    this.sendIfDue$?.unsubscribe();
   };
 }

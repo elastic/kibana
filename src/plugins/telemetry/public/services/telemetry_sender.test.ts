@@ -395,9 +395,11 @@ describe('TelemetrySender', () => {
     it('calls sendIfDue every 60000 ms', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender['sendIfDue'] = jest.fn().mockResolvedValue(void 0);
       telemetrySender.startChecking();
-      expect(setInterval).toBeCalledTimes(1);
-      expect(setInterval).toBeCalledWith(telemetrySender['sendIfDue'], 60000);
+      expect(telemetrySender['sendIfDue']).toHaveBeenCalledTimes(0);
+      jest.advanceTimersByTime(60000);
+      expect(telemetrySender['sendIfDue']).toHaveBeenCalledTimes(1);
     });
   });
 });
