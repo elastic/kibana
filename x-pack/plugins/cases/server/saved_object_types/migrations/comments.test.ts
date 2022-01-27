@@ -32,7 +32,7 @@ import {
   MigrateFunctionsObject,
 } from '../../../../../../src/plugins/kibana_utils/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import { GENERATED_ALERT } from './constants';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
@@ -493,6 +493,43 @@ describe('comments migrations', () => {
         attributes: {
           type: doc.attributes.type,
         },
+      });
+    });
+
+    it('removes the sub case reference', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'user',
+          associationType: 'case',
+        },
+        type: 'abc',
+        references: [
+          {
+            type: SUB_CASE_SAVED_OBJECT,
+            id: 'test-id',
+            name: 'associated-sub-case',
+          },
+          {
+            type: 'action',
+            id: 'action-id',
+            name: 'action-name',
+          },
+        ],
+      };
+
+      expect(removeAssociationType(doc)).toEqual({
+        ...doc,
+        attributes: {
+          type: doc.attributes.type,
+        },
+        references: [
+          {
+            type: 'action',
+            id: 'action-id',
+            name: 'action-name',
+          },
+        ],
       });
     });
   });

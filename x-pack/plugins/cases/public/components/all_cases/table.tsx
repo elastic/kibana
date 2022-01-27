@@ -46,21 +46,9 @@ interface CasesTableProps {
 
 // @ts-expect-error TS2769
 const BasicTable = styled(EuiBasicTable)`
-  ${({ theme }) => `
-    .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
-      padding: 8px 0 8px 32px;
-    }
-
-    &.isSelectorView .euiTableRow.isDisabled {
-      cursor: not-allowed;
-      background-color: ${theme.eui.euiTableHoverClickableColor};
-    }
-
-    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow .euiTableRowCell,
-    &.isSelectorView .euiTableRow.euiTableRow-isExpandedRow:hover {
-      background-color: transparent;
-    }
-  `}
+  .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
+    padding: 8px 0 8px 32px;
+  }
 `;
 
 const Div = styled.div`

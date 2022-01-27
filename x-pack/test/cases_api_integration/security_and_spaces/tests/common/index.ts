@@ -34,7 +34,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/get_connectors'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
-    loadTestFile(require.resolve('./connectors/case'));
     loadTestFile(require.resolve('./metrics/get_case_metrics'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_alerts'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
