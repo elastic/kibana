@@ -19,6 +19,8 @@ describe('Host Risk Flyout', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <HostRiskScoreOverTime
+          setQuery={jest.fn()}
+          deleteQuery={jest.fn()}
           hostName={'test-host-name'}
           from={'2020-07-07T08:20:18.966Z'}
           to={'2020-07-08T08:20:18.966Z'}
@@ -39,6 +41,8 @@ describe('Host Risk Flyout', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <HostRiskScoreOverTime
+          setQuery={jest.fn()}
+          deleteQuery={jest.fn()}
           hostName={'test-host-name'}
           from={'2020-07-07T08:20:18.966Z'}
           to={'2020-07-08T08:20:18.966Z'}
