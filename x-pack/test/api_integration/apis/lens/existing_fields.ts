@@ -92,8 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      // blocked on https://github.com/elastic/elasticsearch/issues/82515
-      it.skip('should return fields filtered by match_phrase query', async () => {
+      it('should return fields filtered by match_phrase query', async () => {
         const expectedFieldNames = [
           'ts',
           'filter_field',
