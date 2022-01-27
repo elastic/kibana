@@ -6,3 +6,5 @@
  */
 
 export type { CaseActionConnector } from '../../common/ui/types';
+
+export type FetchAlertDataFunction = (alertIds: string[]) => [boolean, Record<string, unknown>];

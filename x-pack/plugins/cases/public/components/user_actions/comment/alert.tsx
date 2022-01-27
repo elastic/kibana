@@ -18,7 +18,6 @@ import { UserActionUsernameWithAvatar } from '../avatar_username';
 import { AlertCommentEvent } from './alert_event';
 import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
-import { Ecs } from '../../../containers/types';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -47,7 +46,7 @@ export const createAlertAttachmentUserActionBuilder = ({
       return [];
     }
 
-    const alertField: Ecs | undefined = alertData[alertId];
+    const alertField: unknown | undefined = alertData[alertId];
     const ruleId = getRuleId(comment, alertField);
     const ruleName = getRuleName(comment, alertField);
 
@@ -99,7 +98,7 @@ const getFirstItem = (items?: string | string[] | null): string | null => {
   return Array.isArray(items) ? items[0] : items ?? null;
 };
 
-export const getRuleId = (comment: BuilderArgs['comment'], alertData?: Ecs): string | null =>
+export const getRuleId = (comment: BuilderArgs['comment'], alertData?: unknown): string | null =>
   getRuleField({
     commentRuleField: comment?.rule?.id,
     alertData,
@@ -107,7 +106,7 @@ export const getRuleId = (comment: BuilderArgs['comment'], alertData?: Ecs): str
     kibanaAlertFieldPath: ALERT_RULE_UUID,
   });
 
-export const getRuleName = (comment: BuilderArgs['comment'], alertData?: Ecs): string | null =>
+export const getRuleName = (comment: BuilderArgs['comment'], alertData?: unknown): string | null =>
   getRuleField({
     commentRuleField: comment?.rule?.name,
     alertData,
@@ -122,7 +121,7 @@ const getRuleField = ({
   kibanaAlertFieldPath,
 }: {
   commentRuleField: string | string[] | null | undefined;
-  alertData: Ecs | undefined;
+  alertData: unknown | undefined;
   signalRuleFieldPath: string;
   kibanaAlertFieldPath: string;
 }): string | null => {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -39,11 +39,9 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
         );
 
         if (response) {
-          console.log(JSON.stringify(getAlertsGroupedById(response), null, 2));
           setAlerts(getAlertsGroupedById(response));
         }
       } catch (error) {
-        console.log('got an error ', error);
         setAlerts(undefined);
       } finally {
         setLoading(false);
@@ -52,21 +50,16 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
     [http]
   );
 
-  const validIds = getValidValues(alertIds);
-  console.log('valid ids', validIds);
+  const validIds = useMemo(() => getValidValues(alertIds), [alertIds]);
 
   useEffect(() => {
     const abortController = new AbortController();
-    console.log('rerendering');
     if (shouldFetch(validIds, alerts)) {
-      console.log('fetching');
       fetch(validIds, abortController);
-    } else {
-      console.log('not fetching');
     }
 
     return () => {
-      // abortController.abort();
+      abortController.abort();
     };
   }, [fetch, validIds, alerts]);
 
