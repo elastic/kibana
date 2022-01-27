@@ -1888,6 +1888,7 @@ describe('enqueueExecution()', () => {
         id: uuid.v4(),
         params: {},
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
@@ -1906,6 +1907,7 @@ describe('enqueueExecution()', () => {
           id: uuid.v4(),
           params: {},
           spaceId: 'default',
+          executionId: '123abc',
           apiKey: null,
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -1922,6 +1924,7 @@ describe('enqueueExecution()', () => {
         id: uuid.v4(),
         params: {},
         spaceId: 'default',
+        executionId: '123abc',
         apiKey: null,
       });
 
@@ -1937,6 +1940,7 @@ describe('enqueueExecution()', () => {
       id: uuid.v4(),
       params: { baz: false },
       spaceId: 'default',
+      executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
     };
     await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
