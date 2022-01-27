@@ -6,6 +6,7 @@
  */
 
 import { getOr, find, isEmpty, uniqBy } from 'lodash/fp';
+import { ALERT_RULE_NAMESPACE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -17,6 +18,7 @@ import {
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
+import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { getEnrichedFieldInfo, SummaryRow } from './helpers';
 import { EventSummaryField } from './types';
@@ -126,29 +128,29 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
   switch (ruleType) {
     case 'threshold':
       return [
-        { id: 'kibana.alert.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
-        { id: 'kibana.alert.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
+        { id: `${ALERT_THRESHOLD_RESULT}.count`, label: ALERTS_HEADERS_THRESHOLD_COUNT },
+        { id: `${ALERT_THRESHOLD_RESULT}.terms`, label: ALERTS_HEADERS_THRESHOLD_TERMS },
         {
-          id: 'kibana.alert.threshold_result.cardinality',
+          id: `${ALERT_THRESHOLD_RESULT}.cardinality`,
           label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
         },
       ];
     case 'machine_learning':
       return [
         {
-          id: 'kibana.alert.rule.machine_learning_job_id',
+          id: `${ALERT_RULE_NAMESPACE}.machine_learning_job_id`,
         },
         {
-          id: 'kibana.alert.rule.anomaly_threshold',
+          id: `${ALERT_RULE_NAMESPACE}.anomaly_threshold`,
         },
       ];
     case 'threat_match':
       return [
         {
-          id: 'kibana.alert.rule.threat_index',
+          id: `${ALERT_RULE_NAMESPACE}.threat_index`,
         },
         {
-          id: 'kibana.alert.rule.index',
+          id: `${ALERT_RULE_NAMESPACE}.index`,
         },
       ];
     default:
@@ -266,7 +268,7 @@ export const getSummaryRows = ({
           return acc;
         }
 
-        if (field.id === 'kibana.alert.threshold_result.terms') {
+        if (field.id === `${ALERT_THRESHOLD_RESULT}.terms`) {
           try {
             const terms = getOr(null, 'originalValue', item);
             const parsedValue = terms.map((term: string) => JSON.parse(term));
@@ -287,7 +289,7 @@ export const getSummaryRows = ({
           }
         }
 
-        if (field.id === 'kibana.alert.threshold_result.cardinality') {
+        if (field.id === `${ALERT_THRESHOLD_RESULT}.cardinality`) {
           try {
             const value = getOr(null, 'originalValue.0', field);
             const parsedValue = JSON.parse(value);
