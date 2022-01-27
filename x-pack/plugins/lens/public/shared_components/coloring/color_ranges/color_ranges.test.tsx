@@ -142,7 +142,7 @@ describe('Color Ranges', () => {
     });
   });
 
-  it('should distribute equally ranges when use click on "Distribute equally" button', () => {
+  it('should distribute equally ranges when use click on "Distribute values" button', () => {
     props.colorRanges = [
       { color: '#aaa', start: 0, end: 2 },
       { color: '#bbb', start: 3, end: 4 },
@@ -159,7 +159,7 @@ describe('Color Ranges', () => {
     component.update();
 
     expect(dispatch).toHaveBeenCalledWith({
-      type: 'distributeValues',
+      type: 'distributeEqually',
       payload: { dataBounds: { min: 0, max: 100 }, palettes: {} },
     });
   });
