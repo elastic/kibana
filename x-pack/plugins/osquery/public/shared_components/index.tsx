@@ -6,4 +6,4 @@
  */
 
 export { getLazyOsqueryAction } from './lazy_osquery_action';
-export { useOsqueryMenuItem } from './osquery_action/useOsqueryMenuItem';
+export { useOsqueryMenuItem } from './osquery_action/use_osquery_menu_item';

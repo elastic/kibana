@@ -14,7 +14,7 @@ import { LiveQuery } from '../../live_queries';
 import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { KibanaThemeProvider } from '../../shared_imports';
-import { useIsOsqueryAvailable } from './useIsOsqueryAvailable';
+import { useIsOsqueryAvailable } from './use_is_osquery_available';
 
 interface OsqueryActionProps {
   agentId?: string;
