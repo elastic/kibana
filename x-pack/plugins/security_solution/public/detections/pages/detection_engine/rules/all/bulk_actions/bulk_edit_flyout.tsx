@@ -20,9 +20,10 @@ interface Props {
   onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
   editAction: BulkActionEditType;
   rulesCount: number;
+  tags: string[];
 }
 
-const BulkEditFlyoutComponent = ({ editAction, ...props }: Props) => {
+const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: Props) => {
   switch (editAction) {
     case BulkActionEditType.add_index_patterns:
     case BulkActionEditType.delete_index_patterns:
@@ -32,7 +33,7 @@ const BulkEditFlyoutComponent = ({ editAction, ...props }: Props) => {
     case BulkActionEditType.add_tags:
     case BulkActionEditType.delete_tags:
     case BulkActionEditType.set_tags:
-      return <TagsForm {...props} editAction={editAction} />;
+      return <TagsForm {...props} editAction={editAction} tags={tags} />;
 
     default:
       return null;

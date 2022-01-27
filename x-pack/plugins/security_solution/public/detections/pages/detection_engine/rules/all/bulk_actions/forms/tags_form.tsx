@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from '../../../translations';
-
+import { caseInsensitiveSort } from '../../helpers';
 import {
   BulkActionEditType,
   BulkActionEditPayload,
@@ -76,16 +76,18 @@ interface Props {
   rulesCount: number;
   onClose: () => void;
   onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
+  tags: string[];
 }
 
-const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props) => {
+const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm, tags }: Props) => {
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,
   });
-  const { tagsLabel, tagsHelpText, formTitle } = getFormConfig(editAction);
-
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
+  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
+
+  const { tagsLabel, tagsHelpText, formTitle } = getFormConfig(editAction);
 
   const handleSubmit = async () => {
     const { data, isValid } = await form.submit();
@@ -112,6 +114,8 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: Props
           euiFieldProps: {
             fullWidth: true,
             placeholder: '',
+            noSuggestions: false,
+            options: sortedTags.map((label) => ({ label })),
           },
         }}
       />

@@ -369,6 +369,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             editAction={bulkEditActionType}
             onClose={handleBulkEditFormCancel}
             onConfirm={handleBulkEditFormConfirm}
+            tags={tags}
           />
         )}
         {shouldShowRulesTable && (
