@@ -255,7 +255,7 @@ export class VisualizeChartPageObject extends FtrService {
 
     if (isVisTypeHeatmapChart) {
       const legendItems =
-        (await this.getEsChartDebugState(heatmapChartSelector))?.legend!.items ?? [];
+        (await this.getEsChartDebugState(heatmapChartSelector))?.legend?.items ?? [];
       return legendItems.map(({ name }) => name);
     }
 
