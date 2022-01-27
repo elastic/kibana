@@ -1,0 +1,201 @@
+$yellowFeverBackgroundColor: #FFA505;
+$yellowFeverTextColor: #FFFB05;
+$yellowFeverColorSecondary: #FFC905;
+$yellowFeverColorTernary: #FFB805;
+$yellow: #FFFF00;
+$orange: #FFA500FF;
+$gold: #FFD700FF;
+
+.dashboardViewport-yellow-fever {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: $yellowFeverBackgroundColor !important;
+  font: 25pt 'Trebuchet MS' !important;
+
+  .embPanel {
+    background: radial-gradient(transparent 50%, #FFFFFF), radial-gradient(#FFFF00, transparent 70%);
+    -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
+    mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
+    border-radius: 50%;
+
+    &::after,
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform-origin: center;
+      border-radius: 50%;
+      -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
+      mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
+    }
+
+    &::before {
+      background: repeating-conic-gradient(from 0deg, $yellow 0deg 20deg, transparent 20deg 40deg);
+      animation: rotate 720s linear, scale 3s linear infinite;
+    }
+
+    &::after {
+      background: radial-gradient($yellow, $orange 27%, transparent calc(27% + 3px) 100%), radial-gradient($gold, transparent 70%), repeating-conic-gradient(from 0deg, $gold 0deg 5deg, transparent 5deg 10deg);
+      transform: rotate(15deg);
+      animation: rotate 360s linear;
+    }
+  }
+
+  .embPanel__title {
+    background-color: $yellowFeverBackgroundColor !important;
+    color: $yellowFeverTextColor !important;
+  }
+
+  .embPanel__content {
+    background-color: $yellowFeverBackgroundColor !important;
+    color: $yellowFeverTextColor !important;
+    border: 1px solid $yellowFeverColorSecondary;
+    border-radius: 2px;
+  }
+
+  .embPanel__optionsMenuPopover {
+    border: 1px solid $yellowFeverColorSecondary;
+    border-radius: 2px;
+    background-color: $yellowFeverBackgroundColor;
+  }
+
+  .lnsVisualizationContainer {
+    background-color: $yellowFeverBackgroundColor!important;
+    color: $yellowFeverTextColor !important;
+
+    .lnsMetricExpression__title {
+      color: $yellowFeverColorSecondary !important;
+    }
+  }
+
+  canvas {
+    background-color: $yellowFeverBackgroundColor !important;
+  }
+
+  .euiFieldText {
+    background-color: $yellowFeverBackgroundColor !important;
+    color: $yellowFeverTextColor;
+    &:disabled {
+      color: $yellowFeverColorSecondary !important;
+    }
+  }
+
+  input::placeholder {
+    color: $yellowFeverColorSecondary !important;
+  }
+
+  .euiPanel {
+    background-color: $yellowFeverBackgroundColor;
+  }
+
+  .euiDataGridRowCell {
+    background-color: $yellowFeverBackgroundColor;
+    color: $yellowFeverTextColor;
+    border-right-color: $yellowFeverColorTernary;
+    border-left-color: $yellowFeverColorTernary;
+  }
+
+  .euiDataGridHeaderCell {
+    background-color: $yellowFeverBackgroundColor;
+    color: $yellowFeverTextColor;
+  }
+
+  .euiDataGrid__content {
+    background-color: $yellowFeverBackgroundColor !important;
+    color: $yellowFeverTextColor !important;
+  }
+
+  .embPanel__optionsMenuButton {
+    svg {
+      fill: $yellowFeverTextColor;
+    }
+  }
+
+  .euiFormLabel {
+    color: $yellowFeverTextColor;
+  }
+
+  .euiComboBox__inputWrap {
+    background-color: $yellowFeverBackgroundColor !important;
+    .euiComboBoxPlaceholder {
+      color: $yellowFeverColorTernary;
+    }
+  }
+
+  .euiFormControl {
+    input {
+      color: $yellowFeverColorSecondary;
+    }
+  }
+
+  .euiFormControlLayout {
+    border: 1px solid $yellowFeverColorTernary !important;
+    border-radius: 6px;
+    box-sizing: content-box;
+    input {
+      background-color: $yellowFeverBackgroundColor;
+      color: $yellowFeverTextColor;
+    }
+  }
+
+  .euiButton {
+    color: 1px solid $yellowFeverColorTernary;
+    background-color: rgba(149, 112, 221, .6) !important;
+  }
+
+  .euiButtonIcon {
+    svg {
+      fill: $yellowFeverTextColor;
+    }
+  }
+
+  .euiTitle {
+    color: $yellowFeverTextColor;
+  }
+
+  .euiButton__content {
+    color: $yellowFeverTextColor;
+  }
+
+  .euiButtonEmpty {
+    color: $yellowFeverTextColor;
+    background-color: rgba(0, 59, 0, .6) !important;
+    &:disabled {
+      color: $yellowFeverColorSecondary;
+    }
+  }
+
+  .euiRangeTicks {
+    input {
+      background-color: $yellowFeverColorTernary;
+    }
+  }
+
+  .euiRangeHighlight {
+    background-color: $yellowFeverTextColor;
+  }
+
+  .dshEmptyWidget {
+    background-color: $yellowFeverBackgroundColor !important;
+  }
+
+  .euiPagination__compressedText {
+    color: $yellowFeverTextColor;
+  }
+}
+
+.euiComboBoxOptionsList {
+  background-color: $yellowFeverBackgroundColor !important;
+}
+
+.euiComboBoxOption__content {
+  color: $yellowFeverTextColor !important;
+}
+
+.euiFilterSelectItem {
+  border-color: $yellowFeverColorTernary !important;
+}

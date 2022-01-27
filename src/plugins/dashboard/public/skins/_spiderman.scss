@@ -1,0 +1,166 @@
+$spidermanBackgroundColor: #3F3F3F;
+$spidermanTextColor: #DE0606;
+$spidermanColorSecondary: #007FD7;
+$spidermanColorTernary: #AC0202;
+
+.dashboardViewport-spiderman {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: $spidermanBackgroundColor !important;
+  font: 25pt 'Roboto Light' !important;
+
+  .embPanel__title {
+    background-color: $spidermanBackgroundColor !important;
+    color: $spidermanTextColor !important;
+  }
+
+  .embPanel__content {
+    background-color: $spidermanBackgroundColor !important;
+    color: $spidermanTextColor !important;
+    border: 1px solid $spidermanColorSecondary;
+    border-radius: 2px;
+  }
+
+  .embPanel__optionsMenuPopover {
+    border: 1px solid $spidermanColorSecondary;
+    border-radius: 2px;
+    background-color: $spidermanBackgroundColor;
+  }
+
+  .lnsVisualizationContainer {
+    background-color: $spidermanBackgroundColor!important;
+    color: $spidermanTextColor !important;
+
+    .lnsMetricExpression__title {
+      color: $spidermanColorSecondary !important;
+    }
+  }
+
+  canvas {
+    background-color: $spidermanBackgroundColor !important;
+  }
+
+  .euiFieldText {
+    background-color: $spidermanBackgroundColor !important;
+    color: $spidermanTextColor;
+    &:disabled {
+      color: $spidermanColorSecondary !important;
+    }
+  }
+
+  input::placeholder {
+    color: $spidermanColorSecondary !important;
+  }
+
+  .euiPanel {
+    background-color: $spidermanBackgroundColor;
+  }
+
+  .euiDataGridRowCell {
+    background-color: $spidermanBackgroundColor;
+    color: $spidermanTextColor;
+    border-right-color: $spidermanColorSecondary;
+    border-left-color: $spidermanColorSecondary;
+  }
+
+  .euiDataGridHeaderCell {
+    background-color: $spidermanBackgroundColor;
+    color: $spidermanTextColor;
+  }
+
+  .euiDataGrid__content {
+    background-color: $spidermanBackgroundColor !important;
+    color: $spidermanTextColor !important;
+  }
+
+  .embPanel__optionsMenuButton {
+    svg {
+      fill: $spidermanTextColor;
+    }
+  }
+
+  .euiFormLabel {
+    color: $spidermanTextColor;
+  }
+
+  .euiComboBox__inputWrap {
+    background-color: $spidermanBackgroundColor !important;
+    .euiComboBoxPlaceholder {
+      color: $spidermanColorTernary;
+    }
+  }
+
+  .euiFormControl {
+    input {
+      color: $spidermanColorSecondary;
+    }
+  }
+
+  .euiFormControlLayout {
+    border: 1px solid $spidermanColorTernary !important;
+    border-radius: 6px;
+    box-sizing: content-box;
+    input {
+      background-color: $spidermanBackgroundColor;
+      color: $spidermanTextColor;
+    }
+  }
+
+  .euiButton {
+    color: 1px solid $spidermanColorTernary;
+    background-color: rgba(149, 112, 221, .6) !important;
+  }
+
+  .euiButtonIcon {
+    svg {
+      fill: $spidermanTextColor;
+    }
+  }
+
+  .euiTitle {
+    color: $spidermanTextColor;
+  }
+
+  .euiButton__content {
+    color: $spidermanTextColor;
+  }
+
+  .euiButtonEmpty {
+    color: $spidermanTextColor;
+    background-color: rgba(0, 59, 0, .6) !important;
+    &:disabled {
+      color: $spidermanColorSecondary;
+    }
+  }
+
+  .euiRangeTicks {
+    input {
+      background-color: $spidermanColorTernary;
+    }
+  }
+
+  .euiRangeHighlight {
+    background-color: $spidermanTextColor;
+  }
+
+  .dshEmptyWidget {
+    background-color: $spidermanBackgroundColor !important;
+  }
+
+  .euiPagination__compressedText {
+    color: $spidermanTextColor;
+  }
+}
+
+.euiComboBoxOptionsList {
+  background-color: $spidermanBackgroundColor !important;
+}
+
+.euiComboBoxOption__content {
+  color: $spidermanTextColor !important;
+}
+
+.euiFilterSelectItem {
+  border-color: $spidermanColorTernary !important;
+}

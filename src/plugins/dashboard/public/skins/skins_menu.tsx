@@ -45,6 +45,22 @@ export const SkinsMenu = (props: SkinsMenuProps) => {
           },
         },
         {
+          name: 'Yellow Fever',
+          icon: currentlySelected === 'yellow-fever' ? 'check' : 'layers',
+          onClick: () => {
+            onSelected('yellow-fever');
+            props.onClose();
+          },
+        },
+        {
+          name: 'Spiderman',
+          icon: currentlySelected === 'spiderman' ? 'check' : 'layers',
+          onClick: () => {
+            onSelected('spiderman');
+            props.onClose();
+          },
+        },
+        {
           isSeparator: true,
           key: 'sep',
         },
