@@ -13,6 +13,7 @@ import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
 import { getValueOrEmpty } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
+import { SERIES_SEPARATOR } from '../../../common/constants';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
@@ -43,12 +44,12 @@ export function visWithSplits(WrappedComponent) {
     );
 
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
-    if (visData[model.id].series.every((s) => s.id.split(':').length === 1)) {
+    if (visData[model.id].series.every((s) => s.id.split(SERIES_SEPARATOR).length === 1)) {
       return <WrappedComponent {...props} />;
     }
 
     const splitsVisData = visData[model.id].series.reduce((acc, series) => {
-      const [seriesId, splitId] = series.id.split(':');
+      const [seriesId, splitId] = series.id.split(SERIES_SEPARATOR);
       const seriesModel = model.series.find((s) => s.id === seriesId);
       if (!seriesModel) return acc;
 
