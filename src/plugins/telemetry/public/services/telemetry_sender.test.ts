@@ -66,12 +66,19 @@ describe('TelemetrySender', () => {
   });
 
   describe('shouldSendReport', () => {
+    let hasFocus: jest.SpyInstance;
+
     beforeEach(() => {
-      document.hasFocus = jest.fn().mockReturnValue(true);
+      hasFocus = jest.spyOn(document, 'hasFocus');
+      hasFocus.mockReturnValue(true); // Return true by default for all tests;
+    });
+
+    afterEach(() => {
+      hasFocus.mockRestore();
     });
 
     it('returns false if the page is not visible', async () => {
-      document.hasFocus = jest.fn().mockReturnValue(false);
+      hasFocus.mockReturnValue(false);
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       telemetryService.fetchLastReported = jest.fn().mockResolvedValue(Date.now());
