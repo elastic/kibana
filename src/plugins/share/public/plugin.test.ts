@@ -41,38 +41,42 @@ describe('SharePlugin', () => {
   });
 
   describe('start', () => {
-    test('wires up and returns show function, but not registry', async () => {
-      const coreSetup = coreMock.createSetup();
-      const service = new SharePlugin(coreMock.createPluginInitializerContext());
-      await service.setup(coreSetup);
-      const start = await service.start({} as CoreStart);
-      expect(registryMock.start).toHaveBeenCalled();
-      expect(managerMock.start).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          getShareMenuItems: expect.any(Function),
-        }),
-        undefined
-      );
-      expect(start.toggleShareContextMenu).toBeDefined();
-    });
+    describe('share menu', () => {
+      test('wires up and returns show function, but not registry', async () => {
+        const coreSetup = coreMock.createSetup();
+        const service = new SharePlugin(coreMock.createPluginInitializerContext());
+        await service.setup(coreSetup);
+        const start = await service.start({} as CoreStart);
+        expect(registryMock.start).toHaveBeenCalled();
+        expect(managerMock.start).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            getShareMenuItems: expect.any(Function),
+          }),
+          undefined
+        );
+        expect(start.toggleShareContextMenu).toBeDefined();
+      });
 
-    test('passes anonymous access service provider to the share menu manager when it is available', async () => {
-      const coreSetup = coreMock.createSetup();
-      const service = new SharePlugin(coreMock.createPluginInitializerContext());
-      const setup = await service.setup(coreSetup);
-      const anonymousAccessServiceProvider = () => anonymousAccessMock.create();
-      setup.setAnonymousAccessServiceProvider(anonymousAccessServiceProvider);
-      const start = await service.start({} as CoreStart);
-      expect(registryMock.start).toHaveBeenCalled();
-      expect(managerMock.start).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          getShareMenuItems: expect.any(Function),
-        }),
-        anonymousAccessServiceProvider
-      );
-      expect(start.toggleShareContextMenu).toBeDefined();
+      test('passes anonymous access service provider to the share menu manager when it is available', async () => {
+        const coreSetup = coreMock.createSetup();
+        const service = new SharePlugin(coreMock.createPluginInitializerContext());
+        const setup = await service.setup(coreSetup);
+        const anonymousAccessServiceProvider = () => anonymousAccessMock.create();
+        setup.setAnonymousAccessServiceProvider(anonymousAccessServiceProvider);
+        const start = await service.start({} as CoreStart);
+        expect(registryMock.start).toHaveBeenCalled();
+        expect(managerMock.start).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            getShareMenuItems: expect.any(Function),
+          }),
+          anonymousAccessServiceProvider
+        );
+        expect(start.toggleShareContextMenu).toBeDefined();
+      });
     });
   });
 });
