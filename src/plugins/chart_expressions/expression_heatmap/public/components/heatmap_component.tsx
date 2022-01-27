@@ -20,6 +20,7 @@ import {
   TooltipProps,
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
+  PartialTheme,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
@@ -381,62 +382,61 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     };
 
-    const config: HeatmapSpec['config'] = {
-      grid: {
-        stroke: {
-          width:
-            args.gridConfig.strokeWidth ?? chartTheme.axes?.gridLine?.horizontal?.strokeWidth ?? 1,
-          color:
-            args.gridConfig.strokeColor ??
-            chartTheme.axes?.gridLine?.horizontal?.stroke ??
-            '#D3DAE6',
-        },
-        cellHeight: {
-          max: 'fill',
-          min: 1,
+    const themeOverrides: PartialTheme = {
+      legend: {
+        labelOptions: {
+          maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
         },
       },
-      cell: {
-        maxWidth: 'fill',
-        maxHeight: 'fill',
-        label: {
-          visible: args.gridConfig.isCellLabelVisible ?? false,
-          minFontSize: 8,
-          maxFontSize: 18,
-          useGlobalMinFontSize: true, // override the min if there's a different directive upstream
+      heatmap: {
+        grid: {
+          stroke: {
+            width:
+              args.gridConfig.strokeWidth ??
+              chartTheme.axes?.gridLine?.horizontal?.strokeWidth ??
+              1,
+            color:
+              args.gridConfig.strokeColor ??
+              chartTheme.axes?.gridLine?.horizontal?.stroke ??
+              '#D3DAE6',
+          },
+          cellHeight: {
+            max: 'fill',
+            min: 1,
+          },
         },
-        border: {
-          strokeWidth: 0,
+        cell: {
+          maxWidth: 'fill',
+          maxHeight: 'fill',
+          label: {
+            visible: args.gridConfig.isCellLabelVisible ?? false,
+            minFontSize: 8,
+            maxFontSize: 18,
+            useGlobalMinFontSize: true, // override the min if there's a different directive upstream
+          },
+          border: {
+            strokeWidth: 0,
+          },
+        },
+        yAxisLabel: {
+          visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
+          // eui color subdued
+          textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+          padding: yAxisColumn?.name ? 8 : 0,
+        },
+        xAxisLabel: {
+          visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
+          // eui color subdued
+          textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+          padding: xAxisColumn?.name ? 8 : 0,
+        },
+        brushMask: {
+          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+        },
+        brushArea: {
+          stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
         },
       },
-      yAxisLabel: {
-        visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
-        // eui color subdued
-        textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
-        padding: yAxisColumn?.name ? 8 : 0,
-        name: yAxisColumn?.name ?? '',
-        ...(yAxisColumn
-          ? {
-              formatter: (v: number | string) =>
-                `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`,
-            }
-          : {}),
-      },
-      xAxisLabel: {
-        visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
-        // eui color subdued
-        textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
-        padding: xAxisColumn?.name ? 8 : 0,
-        formatter: (v: number | string) => `${xValuesFormatter.convert(v) ?? ''}`,
-        name: xAxisColumn?.name ?? '',
-      },
-      brushMask: {
-        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-      },
-      brushArea: {
-        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-      },
-      timeZone,
     };
 
     return (
@@ -456,14 +456,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendColorPicker={uiState ? legendColorPicker : undefined}
             debugState={window._echDebugStateFlag ?? false}
             tooltip={tooltip}
-            theme={{
-              ...chartTheme,
-              legend: {
-                labelOptions: {
-                  maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
-                },
-              },
-            }}
+            theme={[themeOverrides, chartTheme]}
             xDomain={{
               min:
                 dateHistogramMeta && dateHistogramMeta.timeRange
@@ -483,6 +476,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               type: 'bands',
               bands,
             }}
+            timeZone={timeZone}
             data={chartData}
             xAccessor={xAccessor}
             yAccessor={yAccessor || 'unifiedY'}
@@ -490,8 +484,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             valueFormatter={valueFormatter}
             xScale={xScale}
             ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
-            config={config}
             xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+            xAxisLabelName={xAxisColumn?.name}
+            yAxisLabelName={yAxisColumn?.name}
+            xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
+            yAxisLabelFormatter={
+              yAxisColumn
+                ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                : undefined
+            }
           />
         </Chart>
       </>

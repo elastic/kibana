@@ -18,6 +18,7 @@ import {
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
+  PartitionLayout,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import {
@@ -47,7 +48,7 @@ import {
   canFilter,
   getFilterClickData,
   getFilterEventData,
-  getConfig,
+  getPartitionTheme,
   getColumns,
   getSplitDimensionAccessor,
   getColumnByAccessor,
@@ -251,8 +252,8 @@ const PieComponent = (props: PieComponentProps) => {
     return 1;
   }, [visData.rows, metricColumn]);
 
-  const config = useMemo(
-    () => getConfig(visParams, chartTheme, dimensions, rescaleFactor),
+  const themeOverrides = useMemo(
+    () => getPartitionTheme(visParams, chartTheme, dimensions, rescaleFactor),
     [chartTheme, visParams, dimensions, rescaleFactor]
   );
   const tooltip: TooltipProps = {
@@ -369,7 +370,9 @@ const PieComponent = (props: PieComponentProps) => {
               )}
               theme={[
                 // Chart background should be transparent for the usage at Canvas.
-                { ...chartTheme, background: { color: 'transparent' } },
+                { background: { color: 'transparent' } },
+                themeOverrides,
+                chartTheme,
                 {
                   legend: {
                     labelOptions: {
@@ -385,6 +388,8 @@ const PieComponent = (props: PieComponentProps) => {
               id="pie"
               smallMultiples={SMALL_MULTIPLES_ID}
               data={visData.rows}
+              layout={PartitionLayout.sunburst}
+              specialFirstInnermostSector={false}
               valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
               percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
               valueGetter={
@@ -400,7 +405,6 @@ const PieComponent = (props: PieComponentProps) => {
                   : metricFieldFormatter.convert(d)
               }
               layers={layers}
-              config={config}
               topGroove={!visParams.labels.show ? 0 : undefined}
             />
           </Chart>

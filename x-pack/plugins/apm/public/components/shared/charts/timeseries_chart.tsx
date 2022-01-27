@@ -126,13 +126,15 @@ export function TimeseriesChart({
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
-          theme={{
-            ...chartTheme,
-            areaSeriesStyle: {
-              line: { visible: false },
+          theme={[
+            customTheme,
+            {
+              areaSeriesStyle: {
+                line: { visible: false },
+              },
             },
-            ...customTheme,
-          }}
+            ...chartTheme,
+          ]}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true },

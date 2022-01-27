@@ -33,6 +33,9 @@ import {
   RecursivePartial,
   AxisStyle,
   ScaleType,
+  AreaSeriesProps,
+  BarSeriesProps,
+  LineSeriesProps,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
@@ -83,10 +86,7 @@ declare global {
   }
 }
 
-type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
-type SeriesSpec = InferPropType<typeof LineSeries> &
-  InferPropType<typeof BarSeries> &
-  InferPropType<typeof AreaSeries>;
+type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];

@@ -11,7 +11,7 @@ import React, { FC } from 'react';
 import {
   Direction,
   Settings,
-  SettingsSpecProps,
+  SettingsProps,
   DomainRange,
   Position,
   PartialTheme,
@@ -50,7 +50,7 @@ type XYSettingsProps = Pick<
   | 'xAxis'
   | 'orderBucketsBySum'
 > & {
-  onPointerUpdate: SettingsSpecProps['onPointerUpdate'];
+  onPointerUpdate: SettingsProps['onPointerUpdate'];
   xDomain?: DomainRange;
   adjustedXDomain?: DomainRange;
   showLegend: boolean;

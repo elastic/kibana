@@ -14,6 +14,7 @@ import {
   ShapeTreeNode,
   HierarchyOfArrays,
   Chart,
+  PartialTheme,
 } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import type { LensMultiTable } from '../../common';
@@ -110,7 +111,7 @@ describe('PieVisualization component', () => {
 
     test('it sets the correct lines per legend item', () => {
       const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
-      expect(component.find(Settings).prop('theme')).toEqual({
+      expect(component.find(Settings).prop<PartialTheme[]>('theme')[0]).toMatchObject({
         background: {
           color: undefined,
         },
@@ -395,7 +396,9 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
-      expect(component.find(Partition).prop('config')?.outerSizeRatio).toBeCloseTo(1 / 1.05);
+      expect(
+        component.find(Settings).prop<PartialTheme[]>('theme')[0].partition?.outerSizeRatio
+      ).toBeCloseTo(1 / 1.05);
     });
 
     test('it should bound the shrink the chart area to ~20% when some small slices are detected', () => {
@@ -419,7 +422,9 @@ describe('PieVisualization component', () => {
       const component = shallow(
         <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
       );
-      expect(component.find(Partition).prop('config')?.outerSizeRatio).toBeCloseTo(1 / 1.2);
+      expect(
+        component.find(Settings).prop<PartialTheme[]>('theme')[0].partition?.outerSizeRatio
+      ).toBeCloseTo(1 / 1.2);
     });
   });
 });

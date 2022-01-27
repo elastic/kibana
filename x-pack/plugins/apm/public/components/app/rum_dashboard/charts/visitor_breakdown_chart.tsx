@@ -38,8 +38,14 @@ interface Props {
 }
 
 const theme: PartialTheme = {
+  chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
   legend: {
     verticalWidth: 100,
+  },
+  partition: {
+    linkLabel: { maximumSection: Infinity, maxCount: 0 },
+    outerSizeRatio: 1, // - 0.5 * Math.random(),
+    circlePadding: 4,
   },
 };
 
@@ -64,6 +70,8 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
             data={
               options?.length ? options : [{ count: 1, name: I18LABELS.noData }]
             }
+            layout={PartitionLayout.sunburst}
+            clockwiseSectors={false}
             valueAccessor={(d: Datum) => d.count as number}
             valueGetter="percent"
             percentFormatter={(d: number) =>
@@ -78,14 +86,6 @@ export function VisitorBreakdownChart({ loading, options }: Props) {
                 },
               },
             ]}
-            config={{
-              partitionLayout: PartitionLayout.sunburst,
-              linkLabel: { maximumSection: Infinity, maxCount: 0 },
-              margin: { top: 0, bottom: 0, left: 0, right: 0 },
-              outerSizeRatio: 1, // - 0.5 * Math.random(),
-              circlePadding: 4,
-              clockwiseSectors: false,
-            }}
           />
         </Chart>
       </StyleChart>
