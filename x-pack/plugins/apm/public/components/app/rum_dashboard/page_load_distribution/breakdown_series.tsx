@@ -54,6 +54,8 @@ export function BreakdownSeries({
           id={`${field}-${value}-${name}`}
           key={`${field}-${value}-${name}`}
           name={name}
+          xAccessor="x"
+          yAccessors={['y']}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           curve={CurveType.CURVE_CATMULL_ROM}
