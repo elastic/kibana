@@ -28,7 +28,6 @@ import { getComparisonChartTheme } from '../../time_comparison/get_time_range_co
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
-import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 
 interface Props {
   height?: number;
@@ -48,9 +47,7 @@ function filterNil<T>(value: T | null | undefined): value is T {
 export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
 
-  const { previousPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
-
-  const comparisonChartTheme = getComparisonChartTheme(previousPeriodColor);
+  const comparisonChartTheme = getComparisonChartTheme();
   const { urlParams } = useLegacyUrlParams();
   const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();

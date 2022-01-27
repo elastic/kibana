@@ -13,8 +13,8 @@ import { useLegacyUrlParams } from '../context/url_params_context/use_url_params
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 
-export function useComparison(ariaSeriesColor: string) {
-  const comparisonChartTheme = getComparisonChartTheme(ariaSeriesColor);
+export function useComparison() {
+  const comparisonChartTheme = getComparisonChartTheme();
   const { query } = useApmParams('/*');
 
   if (!('rangeFrom' in query && 'rangeTo' in query)) {

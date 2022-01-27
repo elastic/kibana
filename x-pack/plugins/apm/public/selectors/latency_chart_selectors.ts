@@ -42,16 +42,26 @@ export function getLatencyChartSelector({
     }),
     previousPeriod: getPreviousPeriodTimeseries({
       previousPeriod: latencyChart.previousPeriod,
+      latencyAggregationType,
     }),
   };
 }
 
 function getPreviousPeriodTimeseries({
   previousPeriod,
+  latencyAggregationType,
 }: {
   previousPeriod: LatencyChartsResponse['previousPeriod'];
+  latencyAggregationType: string;
 }) {
-  const { previousPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
+  let chartType = ChartType.LATENCY_AVG;
+  if (latencyAggregationType === 'p95') {
+    chartType = ChartType.LATENCY_P95;
+  } else if (latencyAggregationType === 'p99') {
+    chartType = ChartType.LATENCY_P99;
+  }
+
+  const { previousPeriodColor } = getTimeSeriesColor(chartType);
 
   return {
     data: previousPeriod.latencyTimeseries ?? [],
@@ -74,10 +84,9 @@ function getLatencyTimeseries({
   const { overallAvgDuration } = latencyChart;
   const { latencyTimeseries } = latencyChart;
 
-  const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
-
   switch (latencyAggregationType) {
     case 'avg': {
+      const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.averageLabel',
@@ -90,6 +99,7 @@ function getLatencyTimeseries({
       };
     }
     case 'p95': {
+      const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_P95);
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.95thPercentileLabel',
@@ -102,6 +112,7 @@ function getLatencyTimeseries({
       };
     }
     case 'p99': {
+      const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_P99);
       return {
         title: i18n.translate(
           'xpack.apm.transactions.latency.chart.99thPercentileLabel',

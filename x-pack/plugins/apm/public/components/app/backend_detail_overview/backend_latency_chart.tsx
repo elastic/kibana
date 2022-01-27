@@ -29,10 +29,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.LATENCY_AVG
-  );
-  const { offset, comparisonChartTheme } = useComparison(previousPeriodColor);
+  const { offset, comparisonChartTheme } = useComparison();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -54,6 +51,10 @@ export function BackendLatencyChart({ height }: { height: number }) {
       });
     },
     [backendName, start, end, offset, kuery, environment]
+  );
+
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.LATENCY_AVG
   );
 
   const timeseries = useMemo(() => {

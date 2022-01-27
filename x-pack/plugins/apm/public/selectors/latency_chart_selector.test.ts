@@ -10,6 +10,7 @@ import {
   getLatencyChartSelector,
   LatencyChartsResponse,
 } from './latency_chart_selectors';
+import * as timeSeriesColor from '../components/shared/charts/helper/get_timeseries_color';
 
 const latencyChartData = {
   currentPeriod: {
@@ -23,6 +24,16 @@ const latencyChartData = {
 } as LatencyChartsResponse;
 
 describe('getLatencyChartSelector', () => {
+
+  beforeAll(() => {
+    jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
+      return {
+        currentPeriodColor: 'green',
+        previousPeriodColor: 'black',
+      }
+    });
+  });
+
   describe('without anomaly', () => {
     it('returns default values when data is undefined', () => {
       const latencyChart = getLatencyChartSelector({});
@@ -43,11 +54,11 @@ describe('getLatencyChartSelector', () => {
           data: [{ x: 1, y: 10 }],
           legendValue: '1 μs',
           type: 'linemark',
-          color: '#6092c0',
+          color: 'green',
         },
 
         previousPeriod: {
-          color: '#b0c9e0',
+          color: 'black',
           data: [{ x: 1, y: 10 }],
           type: 'area',
           title: 'Previous period',
@@ -66,12 +77,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '95th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: '#6092c0',
+          color: 'green',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: '#b0c9e0',
+          color: 'black',
           title: 'Previous period',
         },
       });
@@ -89,12 +100,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '99th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: '#6092c0',
+          color: 'green',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: '#b0c9e0',
+          color: 'black',
           title: 'Previous period',
         },
       });
@@ -113,12 +124,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '99th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: '#6092c0',
+          color: 'green',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: '#b0c9e0',
+          color: 'black',
           title: 'Previous period',
         },
       });

@@ -74,10 +74,7 @@ export function FailedTransactionRateChart({
 
   const { serviceName, transactionType, alerts } = useApmServiceContext();
 
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.FAILED_TRANSACTION_RATE
-  );
-  const comparisonChartThem = getComparisonChartTheme(previousPeriodColor);
+  const comparisonChartThem = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -121,6 +118,10 @@ export function FailedTransactionRateChart({
       comparisonStart,
       comparisonEnd,
     ]
+  );
+
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.FAILED_TRANSACTION_RATE
   );
 
   const timeseries = [

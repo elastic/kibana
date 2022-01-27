@@ -47,7 +47,7 @@ export function SparkPlot({
 }) {
   const theme = useTheme();
   const defaultChartTheme = useChartTheme();
-  const comparisonChartTheme = getComparisonChartTheme(comparisonSeriesColor);
+  const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
   const sparkplotChartTheme: PartialTheme = {

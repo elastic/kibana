@@ -65,10 +65,7 @@ export function ServiceOverviewThroughputChart({
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
-  );
-  const comparisonChartTheme = getComparisonChartTheme(previousPeriodColor);
+  const comparisonChartTheme = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -112,6 +109,10 @@ export function ServiceOverviewThroughputChart({
       comparisonEnd,
       transactionName,
     ]
+  );
+
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
   );
 
   const timeseries = [

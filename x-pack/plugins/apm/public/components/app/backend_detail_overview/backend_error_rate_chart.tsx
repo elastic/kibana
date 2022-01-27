@@ -33,10 +33,7 @@ export function BackendFailedTransactionRateChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.FAILED_TRANSACTION_RATE
-  );
-  const { offset, comparisonChartTheme } = useComparison(previousPeriodColor);
+  const { offset, comparisonChartTheme } = useComparison();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -60,6 +57,9 @@ export function BackendFailedTransactionRateChart({
     [backendName, start, end, offset, kuery, environment]
   );
 
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.FAILED_TRANSACTION_RATE
+  );
   const timeseries = useMemo(() => {
     const specs: Array<TimeSeries<Coordinate>> = [];
 

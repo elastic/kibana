@@ -17,13 +17,10 @@ export function getComparisonChartTheme(): PartialTheme {
   return {
     areaSeriesStyle: {
       area: {
-        fill: ariaSeriesColor,
         visible: true,
         opacity: 0.5,
       },
       line: {
-        fill: ariaSeriesColor,
-
         strokeWidth: 1,
         visible: true,
       },
