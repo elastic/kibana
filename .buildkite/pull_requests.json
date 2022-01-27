@@ -16,7 +16,7 @@
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))",
       "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))",
       "skip_ci_labels": ["skip-ci", "jenkins-ci"],
-      "skip_target_branches": ["6.8"]
+      "skip_target_branches": ["6.8", "7.11", "7.12"]
     }
   ]
 }

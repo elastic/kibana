@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useUpdateDataView } from './use_update_data_view';
-import { useKibana } from '../../lib/kibana';
+import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import * as i18n from './translations';
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
-const mockSet = jest.fn();
 const mockPatterns = ['packetbeat-*', 'winlogbeat-*'];
+const mockedUseKibana = mockUseKibana();
 jest.mock('../../hooks/use_app_toasts', () => {
   const original = jest.requireActual('../../hooks/use_app_toasts');
 
@@ -24,7 +24,11 @@ jest.mock('../../hooks/use_app_toasts', () => {
     }),
   };
 });
-jest.mock('../../lib/kibana');
+jest.mock('../../lib/kibana', () => {
+  return {
+    useKibana: () => mockedUseKibana,
+  };
+});
 jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
   const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
 
@@ -35,15 +39,10 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
 });
 describe('use_update_data_view', () => {
   const mockError = jest.fn();
+
   beforeEach(() => {
-    (useKibana as jest.Mock).mockImplementation(() => ({
-      services: {
-        uiSettings: {
-          get: () => mockPatterns,
-          set: mockSet.mockResolvedValue(true),
-        },
-      },
-    }));
+    mockedUseKibana.services.uiSettings.get.mockImplementation(() => mockPatterns);
+    mockedUseKibana.services.uiSettings.set.mockResolvedValue(true);
     jest.clearAllMocks();
   });
 
@@ -51,40 +50,30 @@ describe('use_update_data_view', () => {
     const { result } = renderHook(() => useUpdateDataView(mockError));
     const updateDataView = result.current;
     const isUiSettingsSuccess = await updateDataView(['missing-*']);
-    expect(mockSet.mock.calls[0][1]).toEqual([...mockPatterns, 'missing-*'].sort());
+    expect(mockedUseKibana.services.uiSettings.set.mock.calls[0][1]).toEqual(
+      [...mockPatterns, 'missing-*'].sort()
+    );
     expect(isUiSettingsSuccess).toEqual(true);
     expect(mockAddSuccess).toHaveBeenCalled();
   });
 
   test('Failed uiSettings update returns false and shows error toast', async () => {
-    (useKibana as jest.Mock).mockImplementation(() => ({
-      services: {
-        uiSettings: {
-          get: () => mockPatterns,
-          set: mockSet.mockResolvedValue(false),
-        },
-      },
-    }));
+    mockedUseKibana.services.uiSettings.set.mockImplementation(() => false);
     const { result } = renderHook(() => useUpdateDataView(mockError));
     const updateDataView = result.current;
     const isUiSettingsSuccess = await updateDataView(['missing-*']);
-    expect(mockSet.mock.calls[0][1]).toEqual([...mockPatterns, 'missing-*'].sort());
+    expect(mockedUseKibana.services.uiSettings.set.mock.calls[0][1]).toEqual(
+      [...mockPatterns, 'missing-*'].sort()
+    );
     expect(isUiSettingsSuccess).toEqual(false);
     expect(mockAddError).toHaveBeenCalled();
     expect(mockAddError.mock.calls[0][0]).toEqual(new Error(i18n.FAILURE_TOAST_TITLE));
   });
 
   test('Failed uiSettings throws error and shows error toast', async () => {
-    (useKibana as jest.Mock).mockImplementation(() => ({
-      services: {
-        uiSettings: {
-          get: jest.fn().mockImplementation(() => {
-            throw new Error('Uh oh bad times over here');
-          }),
-          set: mockSet.mockResolvedValue(true),
-        },
-      },
-    }));
+    mockedUseKibana.services.uiSettings.get.mockImplementation(() => {
+      throw new Error('Uh oh bad times over here');
+    });
     const { result } = renderHook(() => useUpdateDataView(mockError));
     const updateDataView = result.current;
     const isUiSettingsSuccess = await updateDataView(['missing-*']);
