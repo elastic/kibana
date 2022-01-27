@@ -28,6 +28,7 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 
 import {
   isEsIndices,
+  isEsIngestPipelines,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
 import { TransformId } from '../../../../../../common/types/transform';
@@ -82,8 +83,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(
       defaults.destinationIndex
     );
+    const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
+      defaults.destinationIngestPipeline
+    );
     const [transformIds, setTransformIds] = useState<TransformId[]>([]);
     const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
+    const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
 
     const canCreateDataView = useMemo(
       () =>
@@ -180,7 +185,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           setTransformIds(resp.transforms.map((transform) => transform.id));
         }
 
-        const indices = await api.getEsIndices();
+        const [indices, ingestPipelines] = await Promise.all([
+          api.getEsIndices(),
+          api.getEsIngestPipelines(),
+        ]);
 
         if (isEsIndices(indices)) {
           setIndexNames(indices.map((index) => index.name));
@@ -194,6 +202,24 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 overlays={overlays}
                 theme={theme}
                 text={getErrorMessage(indices)}
+              />,
+              { theme$: theme.theme$ }
+            ),
+          });
+        }
+
+        if (isEsIngestPipelines(ingestPipelines)) {
+          setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
+        } else {
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
+              defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
+            }),
+            text: toMountPoint(
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(ingestPipelines)}
               />,
               { theme$: theme.theme$ }
             ),
@@ -311,6 +337,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         transformSettingsMaxPageSearchSize,
         transformSettingsDocsPerSecond,
         destinationIndex,
+        destinationIngestPipeline,
         touched: true,
         valid,
         indexPatternTimeField,
@@ -442,6 +469,25 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               data-test-subj="transformDestinationIndexInput"
             />
           </EuiFormRow>
+
+          {ingestPipelineNames.length > 0 && (
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.transform.stepDetailsForm.destinationIngestPipelineLabel',
+                {
+                  defaultMessage: 'Destination ingest pipeline',
+                }
+              )}
+            >
+              <EuiSelect
+                options={ingestPipelineNames.map((text: string) => ({ text, value: text }))}
+                value={destinationIngestPipeline}
+                onChange={(e) => setDestinationIngestPipeline(e.target.value)}
+                hasNoInitialSelection={defaults.destinationIngestPipeline === ''}
+                data-test-subj="transformDestinationPipelineSelect"
+              />
+            </EuiFormRow>
+          )}
 
           {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
             <>
