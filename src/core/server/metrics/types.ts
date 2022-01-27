@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EventLoopUtilization } from 'perf_hooks';
 import { Observable } from 'rxjs';
 import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
@@ -100,4 +101,5 @@ export interface IntervalHistogram {
     // 99th percentile of delays of the collected data points.
     99: number;
   };
+  eventLoopUtilization: EventLoopUtilization;
 }

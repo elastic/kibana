@@ -85,6 +85,7 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
       },
       eventLoopDelay: eventLoopDelayVal,
       eventLoopDelayHistogram: eventLoopDelayHistVals,
+      eventLoopUtilization: process?.event_loop_delay_histogram?.eventLoopUtilization,
     },
     host: {
       os: {

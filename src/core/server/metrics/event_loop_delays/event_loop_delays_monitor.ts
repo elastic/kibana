@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
-import { monitorEventLoopDelay } from 'perf_hooks';
+import type { EventLoopUtilization, IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
+import { monitorEventLoopDelay, performance } from 'perf_hooks';
 import type { IntervalHistogram } from '../types';
 
 /**
@@ -25,6 +25,7 @@ export function nsToMs(metric: number) {
 export class EventLoopDelaysMonitor {
   private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
+  private elu: EventLoopUtilization | undefined;
 
   /**
    * Creating a new instance from EventLoopDelaysMonitor will
@@ -32,6 +33,7 @@ export class EventLoopDelaysMonitor {
    */
   constructor() {
     const monitor = monitorEventLoopDelay();
+    this.elu = performance.eventLoopUtilization();
     monitor.enable();
     this.fromTimestamp = new Date();
     this.loopMonitor = monitor;
@@ -49,6 +51,8 @@ export class EventLoopDelaysMonitor {
   public collect(): IntervalHistogram {
     const lastUpdated = new Date();
     this.loopMonitor.disable();
+    // Capture the event loop utilization since the previous collection
+    this.elu = performance.eventLoopUtilization(this.elu);
     const {
       min: minNs,
       max: maxNs,
@@ -71,6 +75,7 @@ export class EventLoopDelaysMonitor {
         95: nsToMs(this.loopMonitor.percentile(95)),
         99: nsToMs(this.loopMonitor.percentile(99)),
       },
+      eventLoopUtilization: this.elu,
     };
 
     this.loopMonitor.enable();
@@ -81,6 +86,7 @@ export class EventLoopDelaysMonitor {
    * Resets the collected histogram data.
    */
   public reset() {
+    this.elu = undefined;
     this.loopMonitor.reset();
     this.fromTimestamp = new Date();
   }

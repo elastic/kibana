@@ -23,7 +23,7 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
   private readonly eventLoopDelayMonitor = new EventLoopDelaysMonitor();
 
   private getCurrentPidMetrics(): OpsProcessMetrics {
-    const eventLoopDelayHistogram = this.eventLoopDelayMonitor.collect();
+    const eventLoopMetrics = this.eventLoopDelayMonitor.collect();
     const heapStats = v8.getHeapStatistics();
     const memoryUsage = process.memoryUsage();
 
@@ -37,8 +37,8 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
         resident_set_size_in_bytes: memoryUsage.rss,
       },
       pid: process.pid,
-      event_loop_delay: eventLoopDelayHistogram.mean,
-      event_loop_delay_histogram: eventLoopDelayHistogram,
+      event_loop_delay: eventLoopMetrics.mean,
+      event_loop_delay_histogram: eventLoopMetrics,
       uptime_in_millis: process.uptime() * 1000,
     };
   }
