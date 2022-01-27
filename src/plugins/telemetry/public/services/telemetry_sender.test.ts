@@ -66,6 +66,22 @@ describe('TelemetrySender', () => {
   });
 
   describe('shouldSendReport', () => {
+    beforeEach(() => {
+      document.hasFocus = jest.fn().mockReturnValue(true);
+    });
+
+    it('returns false if the page is not visible', async () => {
+      document.hasFocus = jest.fn().mockReturnValue(false);
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      telemetryService.fetchLastReported = jest.fn().mockResolvedValue(Date.now());
+      const telemetrySender = new TelemetrySender(telemetryService);
+      const shouldSendReport = await telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(false);
+      expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
+      expect(telemetryService.fetchLastReported).toBeCalledTimes(0);
+    });
+
     it('returns false whenever optIn is false', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);

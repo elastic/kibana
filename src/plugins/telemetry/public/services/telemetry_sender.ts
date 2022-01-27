@@ -62,11 +62,21 @@ export class TelemetrySender {
   };
 
   /**
-   * Using configuration and the lastReported dates, it decides whether a new telemetry report should be sent.
+   * Returns `true` when the page is visible and active in the browser.
+   */
+  private isActiveWindow = () => {
+    // Using `document.hasFocus()` instead of `document.visibilityState` because the latter may return "visible"
+    // if 2 windows are open side-by-side because they are "technically" visible.
+    return document.hasFocus();
+  };
+
+  /**
+   * Using configuration, page visibility state and the lastReported dates,
+   * it decides whether a new telemetry report should be sent.
    * @returns `true` if a new report should be sent. `false` otherwise.
    */
   private shouldSendReport = async (): Promise<boolean> => {
-    if (this.telemetryService.canSendTelemetry()) {
+    if (this.isActiveWindow() && this.telemetryService.canSendTelemetry()) {
       return await this.isReportDue();
     }
 
