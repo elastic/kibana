@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { Key } from 'selenium-webdriver';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
   const filterBar = getService('filterBar');
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -82,46 +84,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
 
+        // get shared URL value
         await PageObjects.share.clickShareTopNavButton();
         const sharedURL = await PageObjects.share.getSharedUrl();
 
-        // eslint-disable-next-line no-console
-        console.log(1);
-
+        // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openCsvReportingPanel();
         const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
         await advOpt.click();
         const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
         await postUrl.click();
-        const clipboardPermission = await browser.checkBrowserPermission('clipboard-read');
-        // const reportURL = decodeURIComponent(await browser.getClipboardValue());
 
-        // eslint-disable-next-line no-console
-        console.log(2, 'clipboardPermission', clipboardPermission);
+        // get clipboard value using field search input, since
+        // 'browser.getClipboardValue()' doesn't work, due to permissions
+        const pastToElement = await testSubjects.find('fieldFilterSearchInput');
+        await pastToElement.click();
+        await browser.getActions().keyDown(Key.CONTROL).perform();
+        await browser.getActions().keyDown('v').perform();
 
-        // const timeFiltersNumberInReportURL =
-        //   reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
+        const reportURL = decodeURIComponent(await pastToElement.getAttribute('value'));
+
+        // get number of filters in URLs
+        const timeFiltersNumberInReportURL =
+          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
-
-        // eslint-disable-next-line no-console
-        console.log(3, timeFiltersNumberInSharedURL);
 
         expect(timeFiltersNumberInSharedURL).to.be(1);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
-        // eslint-disable-next-line no-console
-        console.log(4);
+        expect(timeFiltersNumberInReportURL).to.be(1);
+        expect(
+          reportURL.includes(
+            'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
+          )
+        ).to.be(true);
 
-        // expect(timeFiltersNumberInReportURL).to.be(1);
-        // expect(
-        //   reportURL.includes(
-        //     'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
-        //   )
-        // ).to.be(true);
+        // return keyboard state
+        await browser.getActions().keyUp(Key.CONTROL).perform();
+        await browser.getActions().keyUp('v').perform();
 
-        // eslint-disable-next-line no-console
-        console.log(5);
+        //  return field search input state
+        await pastToElement.clearValue();
       });
 
       it('generates a report from a new search with data: default', async () => {
