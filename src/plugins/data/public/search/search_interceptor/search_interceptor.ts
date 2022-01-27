@@ -24,6 +24,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreSetup, CoreStart, ThemeServiceSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { DISABLE_BFETCH } from 'src/plugins/bfetch/common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -69,6 +70,7 @@ const MAX_CACHE_SIZE_MB = 10;
 export class SearchInterceptor {
   private uiSettingsSub: Subscription;
   private searchTimeout: number;
+  private bFetchDisabled: boolean;
   private readonly responseCache: SearchResponseCache = new SearchResponseCache(
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
@@ -106,6 +108,7 @@ export class SearchInterceptor {
     });
 
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+    //this.bFetchDisabled = deps.uiSettings.get(UI);
 
     this.uiSettingsSub = deps.uiSettings
       .get$(UI_SETTINGS.SEARCH_TIMEOUT)
