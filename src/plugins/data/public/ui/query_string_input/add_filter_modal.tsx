@@ -95,7 +95,7 @@ export function AddFilterModal({
   onCancel,
   applySavedQueries,
   filter,
-  filters,
+  multipleFilters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
@@ -106,7 +106,7 @@ export function AddFilterModal({
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
-  filters?: Filter[];
+  multipleFilters?: Filter[];
   indexPatterns: IIndexPattern[];
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
@@ -119,7 +119,7 @@ export function AddFilterModal({
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    convertFilterToFilterGroup(filters)
+    convertFilterToFilterGroup(multipleFilters)
   );
   const [groupsCount, setGroupsCount] = useState<number>(1);
 
@@ -127,12 +127,13 @@ export function AddFilterModal({
     if (!convertibleFilters) {
       return [
         {
-          field: getFieldFromFilter(filter as FieldFilter, selectedIndexPattern),
-          operator: getOperatorFromFilter(filter),
-          value: getFilterParams(filter),
+          field: undefined,
+          operator: undefined,
+          value: undefined,
           groupId: 1,
           id: 0,
           subGroupId: 1,
+          relationship: undefined
         },
       ];
     }
@@ -142,9 +143,10 @@ export function AddFilterModal({
         field: getFieldFromFilter(convertedfilter as FieldFilter, selectedIndexPattern),
         operator: getOperatorFromFilter(convertedfilter),
         value: getFilterParams(convertedfilter),
-        groupId: 1,
-        id: 0,
-        subGroupId: 1,
+        groupId: convertedfilter.groupId,
+        id: convertedfilter.id,
+        subGroupId: convertedfilter.subGroupId,
+        relationship: convertedfilter.relationship
       };
     });
   }
@@ -395,16 +397,22 @@ export function AddFilterModal({
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
-          return buildFilter(
-            selectedIndexPattern,
-            localFilter.field,
-            localFilter.operator.type,
-            localFilter.operator.negate,
-            filter.meta.disabled ?? false,
-            localFilter.value ?? '',
-            alias,
-            $state.store
-          );
+          return {
+            ...buildFilter(
+              selectedIndexPattern,
+              localFilter.field,
+              localFilter.operator.type,
+              localFilter.operator.negate,
+              filter.meta.disabled ?? false,
+              localFilter.value ?? '',
+              alias,
+              $state.store
+            ),
+            groupId: localFilter.groupId,
+            id: localFilter.id,
+            subGroupId: localFilter.subGroupId,
+            relationship: localFilter.relationship,
+          };
         }
       });
       if (builtFilters && builtFilters.length) {

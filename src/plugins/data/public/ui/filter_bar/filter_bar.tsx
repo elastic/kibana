@@ -69,7 +69,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const onEditFilterClick = () => setIsEditFilterPopoverOpen(!isEditFilterPopoverOpen);
 
   function renderItems() {
-    return props.filters.map((filter, i) => {
+    return props.multipleFilters.map((filter, i) => {
       // Do not display filters from saved queries
       if (filter.meta.isFromSavedQuery) return null;
       return (
@@ -184,7 +184,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           <AddFilterModal
             onCancel={onEditFilterClick}
             filter={props.filters[0]}
-            filters={props.filters}
+            multipleFilters={props.multipleFilters}
             indexPatterns={props.indexPatterns!}
             onSubmit={onEditFilterClick}
             onMultipleFiltersSubmit={onEditFilterClick}

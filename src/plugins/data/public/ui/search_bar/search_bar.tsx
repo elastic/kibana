@@ -203,7 +203,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     currentProps: this.props,
     selectedSavedQueries: [],
     finalSelectedSavedQueries: [],
-    multipleFilters: [],
+    multipleFilters: this.props.filters?.length ? [...this.props.filters] : [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
