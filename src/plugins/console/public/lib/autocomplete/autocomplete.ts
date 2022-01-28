@@ -390,8 +390,25 @@ export default function ({
         templateInserted = false;
       }
     }
+    const linesToMoveDown = (context.prefixToAdd ?? '').match(/\n|\r/g)?.length ?? 0;
 
-    valueToInsert = context.prefixToAdd + valueToInsert + context.suffixToAdd;
+    let prefix = context.prefixToAdd ?? '';
+
+    if (linesToMoveDown) {
+      const prefixPieces = context.prefixToAdd?.split(/\n|\r/g);
+      const firstPart = _.first(prefixPieces) ?? '';
+      const lastPart = _.last(prefixPieces) ?? '';
+      const { start } = context.rangeToReplace!;
+      const end = { ...start, column: start.column + firstPart.length };
+
+      editor.replace({ start, end }, firstPart);
+
+      prefix = lastPart;
+      context.rangeToReplace!.start.lineNumber = context.rangeToReplace!.end.lineNumber;
+      context.rangeToReplace!.start.column = 0;
+    }
+
+    valueToInsert = prefix + valueToInsert + context.suffixToAdd;
 
     // disable listening to the changes we are making.
     editor.off('changeSelection', editorChangeListener);
@@ -410,7 +427,7 @@ export default function ({
       column:
         context.rangeToReplace!.start.column +
         termAsString.length +
-        context.prefixToAdd!.length +
+        prefix.length +
         (templateInserted ? 0 : context.suffixToAdd!.length),
     };
 
