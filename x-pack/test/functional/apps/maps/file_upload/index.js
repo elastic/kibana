@@ -8,7 +8,7 @@
 export default function ({ loadTestFile }) {
   describe('geo file upload', function () {
     loadTestFile(require.resolve('./wizard'));
-    loadTestFile(require.resolve('./geojson'));
+    //loadTestFile(require.resolve('./geojson'));
     loadTestFile(require.resolve('./shapefile'));
   });
 }
