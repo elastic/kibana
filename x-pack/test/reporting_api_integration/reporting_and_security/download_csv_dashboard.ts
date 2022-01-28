@@ -474,7 +474,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(resStatus).to.eql(200);
           expect(resType).to.eql('text/csv');
-          expectSnapshot(resText).toMatch();
 
           await reportingAPI.teardownEcommerce();
           resText = text;
