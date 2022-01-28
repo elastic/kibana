@@ -7,7 +7,7 @@
  */
 import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
