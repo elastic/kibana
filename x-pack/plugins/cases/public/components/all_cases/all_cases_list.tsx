@@ -98,7 +98,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     );
 
     const filterRefetch = useRef<() => void>();
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable | null>(null);
     const [isLoading, handleIsLoading] = useState<boolean>(false);
 
     const setFilterRefetch = useCallback(

@@ -12,6 +12,7 @@ import {
   EuiTableSelectionType,
   EuiBasicTable,
   EuiBasicTableProps,
+  Pagination,
 } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
@@ -23,7 +24,7 @@ import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 
 interface CasesTableProps {
-  columns: EuiBasicTableProps<Case>['columns']; //  CasesColumns[];
+  columns: EuiBasicTableProps<Case>['columns'];
   data: AllCases;
   filterOptions: FilterOptions;
   goToCreateCase?: () => void;
@@ -33,23 +34,16 @@ interface CasesTableProps {
   isDataEmpty: boolean;
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<Case>['onChange'];
-  pagination: EuiBasicTableProps<Case>['pagination'];
+  pagination: Pagination;
   refreshCases: (a?: boolean) => void;
   selectedCases: Case[];
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
-  tableRef: MutableRefObject<EuiBasicTable | undefined>;
+  tableRef: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
   userCanCrud: boolean;
 }
-
-// @ts-expect-error TS2769
-const BasicTable = styled(EuiBasicTable)`
-  .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
-    padding: 8px 0 8px 32px;
-  }
-`;
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -103,7 +97,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         selectedCases={selectedCases}
         refreshCases={refreshCases}
       />
-      <BasicTable
+      <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
