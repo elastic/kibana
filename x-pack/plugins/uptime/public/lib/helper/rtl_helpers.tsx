@@ -117,6 +117,9 @@ const mockCore: () => Partial<CoreStart> = () => {
           save: true,
           show: true,
         },
+        actions: {
+          save: true,
+        },
       },
     },
     uiSettings: {
