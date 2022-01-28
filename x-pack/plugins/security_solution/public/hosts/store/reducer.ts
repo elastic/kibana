@@ -53,6 +53,7 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.risk]: null,
       [HostsTableType.sessions]: null,
+      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -82,6 +83,7 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.risk]: null,
       [HostsTableType.sessions]: null,
+      [HostsTableType.risk]: null,
     },
   },
 };
