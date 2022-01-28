@@ -36,6 +36,7 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
+  StaticValueIndexPatternColumn,
 } from './operations';
 
 export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';
