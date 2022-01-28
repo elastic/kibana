@@ -30,7 +30,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-  const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -60,15 +59,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
-  };
-
-  const initLogs = async () => {
-    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-    await kibanaServer.importExport.load(logsSOPath);
-  };
-  const teardownLogs = async () => {
-    await kibanaServer.importExport.unload(logsSOPath);
-    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
   };
 
   const createDataAnalystRole = async () => {
@@ -245,8 +235,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     logTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
-    initLogs,
-    teardownLogs,
     DATA_ANALYST_USERNAME,
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
