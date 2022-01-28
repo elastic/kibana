@@ -176,40 +176,36 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 
-export const DiscoverGrid = (
-  // tourSteps: EuiTourStepProps[],
-  // tourActions: EuiTourActions,
-  {
-    ariaLabelledBy,
-    columns,
-    indexPattern,
-    isLoading,
-    expandedDoc,
-    onAddColumn,
-    onFilter,
-    onRemoveColumn,
-    onResize,
-    onSetColumns,
-    onSort,
-    rows,
-    sampleSize,
-    searchDescription,
-    searchTitle,
-    services,
-    setExpandedDoc,
-    settings,
-    showTimeCol,
-    sort,
-    useNewFieldsApi,
-    isSortEnabled = true,
-    isPaginationEnabled = true,
-    controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
-    className,
-    rowHeightState,
-    onUpdateRowHeight,
-    tour,
-  }: DiscoverGridProps
-) => {
+export const DiscoverGrid = ({
+  ariaLabelledBy,
+  columns,
+  indexPattern,
+  isLoading,
+  expandedDoc,
+  onAddColumn,
+  onFilter,
+  onRemoveColumn,
+  onResize,
+  onSetColumns,
+  onSort,
+  rows,
+  sampleSize,
+  searchDescription,
+  searchTitle,
+  setExpandedDoc,
+  settings,
+  showTimeCol,
+  sort,
+  useNewFieldsApi,
+  isSortEnabled = true,
+  isPaginationEnabled = true,
+  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  className,
+  rowHeightState,
+  onUpdateRowHeight,
+  tour,
+}: DiscoverGridProps) => {
+  const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
 

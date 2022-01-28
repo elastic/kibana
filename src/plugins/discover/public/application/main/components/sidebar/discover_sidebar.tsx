@@ -434,6 +434,27 @@ export function DiscoverSidebarComponent({
             />
           </form>
         </EuiFlexItem>
+        <EuiSpacer size="xs" />
+        <EuiPopover
+          anchorPosition="rightDown"
+          display="block"
+          button={callout}
+          isOpen={isPopoverOpen}
+          panelPaddingSize="m"
+          closePopover={closePopover}
+        >
+          <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
+          <EuiBasicTable
+            style={{ width: 350 }}
+            tableCaption="Description of field types"
+            items={items}
+            compressed={true}
+            rowHeader="firstName"
+            columns={columnsSidebar}
+          />
+          <EuiSpacer size="s" />
+        </EuiPopover>
+        <EuiSpacer size="xs" />
         <EuiFlexItem className="eui-yScroll">
           <div
             ref={(el) => {
@@ -521,27 +542,6 @@ export function DiscoverSidebarComponent({
                     </EuiNotificationBadge>
                   }
                 >
-                  <EuiSpacer size="xs" />
-                  <EuiPopover
-                    anchorPosition="rightDown"
-                    display="block"
-                    button={callout}
-                    isOpen={isPopoverOpen}
-                    panelPaddingSize="m"
-                    closePopover={closePopover}
-                  >
-                    <EuiPopoverTitle paddingSize="s">Field types</EuiPopoverTitle>
-                    <EuiBasicTable
-                      style={{ width: 350 }}
-                      tableCaption="Description of field types"
-                      items={items}
-                      compressed={true}
-                      rowHeader="firstName"
-                      columns={columnsSidebar}
-                    />
-                    <EuiSpacer size="s" />
-                  </EuiPopover>
-
                   <EuiSpacer size="s" />
                   {popularFields.length > 0 && (
                     <>

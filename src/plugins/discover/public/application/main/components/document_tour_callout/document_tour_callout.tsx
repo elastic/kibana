@@ -11,9 +11,8 @@ import './document_tour_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getServices } from '../../../../kibana_services';
-import { DOC_TABLE_LEGACY } from '../../../../../common';
 import { Storage } from '../../../../../../kibana_utils/public';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 const CALLOUT_STATE_KEY = 'discover:docTourCalloutClosed';
 
@@ -26,7 +25,7 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 };
 
 export const DocumentTourCallout = ({ onStartTour }: { onStartTour: () => void }) => {
-  const { storage, capabilities, addBasePath } = getServices();
+  const { storage, capabilities } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
 
   const onCloseCallout = () => {
@@ -47,11 +46,17 @@ export const DocumentTourCallout = ({ onStartTour }: { onStartTour: () => void }
       <p>
         <FormattedMessage
           id="discover.docTourCallout.bodyMessage"
-          defaultMessage="View field details, drag and drop columns, and more in the Document Explorer. Ready for the rundown?"
+          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the Document Explorer."
         />
       </p>
       <p>
-        <EuiButton size="s" onClick={onStartTour}>
+        <EuiButton
+          size="s"
+          onClick={() => {
+            onStartTour();
+            onCloseCallout();
+          }}
+        >
           <FormattedMessage
             id="discover.docTourCallout.tryDocumentTour"
             defaultMessage="Take a tour"

@@ -179,34 +179,6 @@ function DiscoverDocumentsComponent({
         />
       )}
       {!isLegacy && (
-<<<<<<< HEAD
-        <div className="dscDiscoverGrid">
-          <DataGridMemoized
-            ariaLabelledBy="documentsAriaLabel"
-            columns={columns}
-            expandedDoc={expandedDoc}
-            indexPattern={indexPattern}
-            isLoading={isLoading}
-            rows={rows}
-            sort={(state.sort as SortPairArr[]) || []}
-            sampleSize={sampleSize}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
-            setExpandedDoc={setExpandedDoc}
-            showTimeCol={showTimeCol}
-            settings={state.grid}
-            onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onRemoveColumn={onRemoveColumn}
-            onSetColumns={onSetColumns}
-            onSort={onSort}
-            onResize={onResize}
-            useNewFieldsApi={useNewFieldsApi}
-            rowHeightState={state.rowHeight}
-            onUpdateRowHeight={onUpdateRowHeight}
-          />
-        </div>
-=======
         <>
           <DocumentTourCallout onStartTour={onStartTour} />
           <div className="dscDiscoverGrid">
@@ -223,7 +195,6 @@ function DiscoverDocumentsComponent({
               searchTitle={savedSearch.title}
               setExpandedDoc={setExpandedDoc}
               showTimeCol={showTimeCol}
-              services={services}
               settings={state.grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
@@ -238,7 +209,6 @@ function DiscoverDocumentsComponent({
             />
           </div>
         </>
->>>>>>> Added callout banner that triggers tour.
       )}
     </EuiFlexItem>
   );
