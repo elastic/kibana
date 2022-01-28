@@ -86,38 +86,17 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey, relatedSavedObjects },
+          attributes: { actionId, params, apiKey, executionId, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
           spaceIdToNamespace
         );
-
-        const requestHeaders: Record<string, string> = {};
-        if (apiKey) {
-          requestHeaders.authorization = `ApiKey ${apiKey}`;
-        }
-
         const path = addSpaceIdToPath('/', spaceId);
 
-        // Since we're using API keys and accessing elasticsearch can only be done
-        // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest = KibanaRequest.from({
-          headers: requestHeaders,
-          path: '/',
-          route: { settings: {} },
-          url: {
-            href: '/',
-          },
-          raw: {
-            req: {
-              url: '/',
-            },
-          },
-        } as unknown as Request);
-
-        basePathService.set(fakeRequest, path);
+        const request = getFakeRequest(apiKey);
+        basePathService.set(request, path);
 
         // Throwing an executor error means we will attempt to retry the task
         // TM will treat a task as a failure if `attempts >= maxAttempts`
@@ -132,9 +111,10 @@ export class TaskRunnerFactory {
             params,
             actionId: actionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
-            request: fakeRequest,
+            request,
             ...getSourceFromReferences(references),
             taskInfo,
+            executionId,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
@@ -181,7 +161,7 @@ export class TaskRunnerFactory {
             // We would idealy secure every operation but in order to support clean up of legacy alerts
             // we allow this operation in an unsecured manner
             // Once support for legacy alert RBAC is dropped, this can be secured
-            await getUnsecuredSavedObjectsClient(fakeRequest).delete(
+            await getUnsecuredSavedObjectsClient(request).delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
               actionTaskExecutorParams.actionTaskParamsId
             );
@@ -193,8 +173,64 @@ export class TaskRunnerFactory {
           }
         }
       },
+      cancel: async () => {
+        // Write event log entry
+        const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
+        const { spaceId } = actionTaskExecutorParams;
+
+        const {
+          attributes: { actionId, apiKey, executionId, relatedSavedObjects },
+          references,
+        } = await getActionTaskParams(
+          actionTaskExecutorParams,
+          encryptedSavedObjectsClient,
+          spaceIdToNamespace
+        );
+
+        const request = getFakeRequest(apiKey);
+        const path = addSpaceIdToPath('/', spaceId);
+        basePathService.set(request, path);
+
+        await actionExecutor.logCancellation({
+          actionId,
+          request,
+          executionId,
+          relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
+          ...getSourceFromReferences(references),
+        });
+
+        logger.debug(
+          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
+        );
+        return { state: {} };
+      },
     };
   }
+}
+
+function getFakeRequest(apiKey?: string) {
+  const requestHeaders: Record<string, string> = {};
+  if (apiKey) {
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
+  }
+
+  // Since we're using API keys and accessing elasticsearch can only be done
+  // via a request, we're faking one with the proper authorization headers.
+  const fakeRequest = KibanaRequest.from({
+    headers: requestHeaders,
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  } as unknown as Request);
+
+  return fakeRequest;
 }
 
 async function getActionTaskParams(
