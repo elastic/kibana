@@ -71,7 +71,12 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   };
 
   const popoverButton = (
-    <EuiButtonIcon iconType="boxesHorizontal" onClick={changePopoverVisibility} color="text" />
+    <EuiButtonIcon
+      iconType="boxesHorizontal"
+      onClick={changePopoverVisibility}
+      color="text"
+      aria-label={POPOVER_BUTTON_LABEL}
+    />
   );
 
   return (
@@ -97,6 +102,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
           anchorPosition="downLeft"
         >
           <EuiContextMenuPanel
+            aria-label={ACTIONS_CONTEXT_MENU_LABEL}
             items={[
               <EuiContextMenuItem
                 key="viewSampleDocuments"
@@ -177,5 +183,16 @@ const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
   'xpack.observability.seriesEditor.sampleDocuments',
   {
     defaultMessage: 'View sample documents',
+  }
+);
+
+const POPOVER_BUTTON_LABEL = i18n.translate('xpack.observability.seriesEditor.popoverButtonLabel', {
+  defaultMessage: 'View series actions',
+});
+
+const ACTIONS_CONTEXT_MENU_LABEL = i18n.translate(
+  'xpack.observability.seriesEditor.actionsAriaContextLabel',
+  {
+    defaultMessage: 'Series actions list',
   }
 );
