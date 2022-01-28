@@ -19,10 +19,7 @@ import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from 'src/plugins/discover/public/types';
-<<<<<<< HEAD
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
-=======
->>>>>>> [Discover] add row height options
 
 setHeaderActionMenuMounter(jest.fn());
 

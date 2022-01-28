@@ -32,14 +32,11 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
-<<<<<<< HEAD
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 import { FieldFormatsStart } from '../../../../../../field_formats/public';
 import { IUiSettingsClient } from 'kibana/public';
-=======
 import { DiscoverServices } from 'src/plugins/discover/public/build_services';
 import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
->>>>>>> [Discover] add row height options
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -56,7 +53,6 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-<<<<<<< HEAD
   services.storage.get = (key: string) => {
     if (key === SIDEBAR_CLOSED_KEY) {
       return prevSidebarClosed;
@@ -70,9 +66,6 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     ...services.uiSettings,
     get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
   } as unknown as IUiSettingsClient;
-=======
-  setServices(services);
->>>>>>> [Discover] add row height options
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
