@@ -226,6 +226,7 @@ export class DocLinksService {
         kibana: {
           guide: `${KIBANA_DOCS}index.html`,
           autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
+          xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
         },
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
@@ -508,9 +509,9 @@ export class DocLinksService {
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
-          registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
-          registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
-          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
+          registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-filesystem-repository.html#filesystem-repository-settings`,
+          registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-source-only-repository.html#source-only-repository-settings`,
+          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.html#read-only-url-repository-settings`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
           restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
           searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
@@ -797,6 +798,7 @@ export interface DocLinksStart {
     readonly kibana: {
       readonly guide: string;
       readonly autocompleteSuggestions: string;
+      readonly xpackSecurity: string;
     };
     readonly upgradeAssistant: {
       readonly overview: string;

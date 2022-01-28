@@ -98,10 +98,11 @@
 /x-pack/plugins/observability/ @elastic/observability-ui
 
 # Unified Observability
-/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/unified-observability
+/x-pack/plugins/observability/public/context @elastic/unified-observability
 /x-pack/plugins/observability/public/pages/home @elastic/unified-observability
 /x-pack/plugins/observability/public/pages/landing @elastic/unified-observability
-/x-pack/plugins/observability/public/context @elastic/unified-observability
+/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
 
 # Actionable Observability
 /x-pack/plugins/observability/common/rules @elastic/actionable-observability
@@ -135,7 +136,6 @@
 
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
@@ -184,6 +184,8 @@
 /x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
+/x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
+/x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
 
 # ML team owns and maintains the transform plugin despite it living in the Data management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
@@ -339,8 +341,8 @@
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 #CC# /x-pack/plugins/stack_alerts @elastic/response-ops
-/x-pack/plugins/cases @elastic/response-ops
-/x-pack/test/cases_api_integration @elastic/response-ops
+/x-pack/plugins/cases/ @elastic/response-ops
+/x-pack/test/cases_api_integration/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
