@@ -13,6 +13,7 @@ import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from './types';
+import { merge } from 'lodash';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -71,6 +72,12 @@ const useGetChoicesResponse = {
       label: 'Operation System',
       value: 'os',
       element: 'subcategory',
+    },
+    {
+      dependent_value: '',
+      label: 'Failed Login',
+      value: 'failed_login',
+      element: 'category',
     },
     ...['severity', 'urgency', 'impact']
       .map((element) => [
@@ -195,6 +202,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
         value: 'software',
         text: 'Software',
       },
+      {
+        value: 'failed_login',
+        text: 'Failed Login',
+      },
     ]);
   });
 
@@ -229,6 +240,26 @@ describe('ServiceNowITSMParamsFields renders', () => {
         { value: '4', text: '4 - Low' },
       ])
     );
+  });
+
+  it('should hide subcategory if selecting a category without subcategories', async () => {
+    const newProps = merge({}, defaultProps, {
+      actionParams: {
+        subActionParams: {
+          incident: {
+            category: 'failed_login',
+            subcategory: null,
+          },
+        },
+      },
+    });
+    const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
   });
 
   describe('UI updates', () => {

@@ -13,6 +13,7 @@ import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';
 import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import { Choice } from './types';
+import { merge } from 'lodash';
 
 jest.mock('./use_get_choices');
 jest.mock('../../../../common/lib/kibana');
@@ -78,6 +79,12 @@ const choicesResponse = {
       dependent_value: '',
       label: 'Denial of Service',
       value: 'Denial of Service',
+      element: 'category',
+    },
+    {
+      dependent_value: '',
+      label: 'Failed Login',
+      value: 'failed_login',
       element: 'category',
     },
     {
@@ -223,6 +230,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
         text: 'Criminal activity/investigation',
       },
       { value: 'Denial of Service', text: 'Denial of Service' },
+      { value: 'failed_login', text: 'Failed Login' },
     ]);
   });
 
@@ -278,6 +286,24 @@ describe('ServiceNowSIRParamsFields renders', () => {
         value: '5',
       },
     ]);
+  });
+  it('should hide subcategory if selecting a category without subcategories', async () => {
+    const newProps = merge({}, defaultProps, {
+      actionParams: {
+        subActionParams: {
+          incident: {
+            category: 'failed_login',
+            subcategory: null,
+          },
+        },
+      },
+    });
+    const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...newProps} />);
+    act(() => {
+      onChoicesSuccess(choicesResponse.choices);
+    });
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
   });
 
   describe('UI updates', () => {
