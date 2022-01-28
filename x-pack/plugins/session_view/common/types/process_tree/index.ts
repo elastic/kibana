@@ -42,23 +42,6 @@ export type EntryMetaType =
   | 'terminal'
   | 'console';
 
-export interface ProcessFields {
-  args: string[];
-  args_count: number;
-  entity_id: string;
-  executable: string;
-  interactive: boolean;
-  name: string;
-  working_directory: string;
-  pid: number;
-  pgid: number;
-  user: User;
-  start: Date;
-  end?: Date;
-  exit_code?: number;
-  entry_meta?: EntryMeta;
-}
-
 export interface EntryMeta {
   type: EntryMetaType;
   source: {
@@ -66,11 +49,38 @@ export interface EntryMeta {
   };
 }
 
+export interface Teletype {
+  descriptor: number;
+  type: string;
+  char_device: {
+    major: number;
+    minor: number;
+  };
+}
+
+export interface ProcessFields {
+  entity_id: string;
+  args: string[];
+  args_count: number;
+  command_line: string;
+  executable: string;
+  name: string;
+  interactive: boolean;
+  working_directory: string;
+  pid: number;
+  start: Date;
+  end?: Date;
+  user: User;
+  exit_code?: number;
+  entry_meta?: EntryMeta;
+  tty: Teletype;
+}
+
 export interface ProcessSelf extends ProcessFields {
   parent: ProcessFields;
-  session: ProcessFields;
-  entry: ProcessFields;
-  last_user_entered?: ProcessFields;
+  session_leader: ProcessFields;
+  entry_leader: ProcessFields;
+  group_leader: ProcessFields;
 }
 
 export interface ProcessEventHost {
@@ -86,7 +96,6 @@ export interface ProcessEventHost {
     kernel: string;
     name: string;
     platform: string;
-    type: string;
     version: string;
   };
 }
@@ -139,6 +148,7 @@ export interface Process {
   id: string; // the process entity_id
   events: ProcessEvent[];
   children: Process[];
+  orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
@@ -150,6 +160,7 @@ export interface Process {
   getDetails(): ProcessEvent;
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
+  getChildren(hideSameGroup?: boolean): Process[];
 }
 
 export type ProcessMap = {

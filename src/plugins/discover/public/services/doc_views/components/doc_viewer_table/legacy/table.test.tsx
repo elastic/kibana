@@ -10,17 +10,13 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
-import { IndexPattern } from '../../../../../../../data/public';
+import { DataView } from '../../../../../../../data/common';
 import { DocViewRenderProps } from '../../../doc_views_types';
-
-jest.mock('../../../../../kibana_services', () => ({
-  getServices: jest.fn(),
-}));
-
-import { getServices } from '../../../../../kibana_services';
 import { ElasticSearchHit } from '../../../../../types';
+import { KibanaContextProvider } from '../../../../../../../kibana_react/public';
+import { DiscoverServices } from 'src/plugins/discover/public/build_services';
 
-(getServices as jest.Mock).mockImplementation(() => ({
+const services = {
   uiSettings: {
     get: (key: string) => {
       if (key === 'discover:showMultiFields') {
@@ -32,7 +28,7 @@ import { ElasticSearchHit } from '../../../../../types';
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
   },
-}));
+};
 
 const indexPattern = {
   fields: {
@@ -71,14 +67,18 @@ const indexPattern = {
   },
   metaFields: ['_index', '_score'],
   getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
 
-const mountComponent = (props: DocViewRenderProps) => {
-  return mountWithIntl(<DocViewerLegacyTable {...props} />);
+const mountComponent = (props: DocViewRenderProps, overrides?: Partial<DiscoverServices>) => {
+  return mountWithIntl(
+    <KibanaContextProvider services={{ ...services, ...overrides }}>
+      <DocViewerLegacyTable {...props} />{' '}
+    </KibanaContextProvider>
+  );
 };
 
 describe('DocViewTable at Discover', () => {
@@ -364,7 +364,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     },
     metaFields: ['_index', '_type', '_score', '_id'],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 
   indexPatterneCommerce.fields.getByName = (name: string) => {
     return indexPatterneCommerce.fields.getAll().find((field) => field.name === name);
@@ -424,14 +424,16 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
   });
 
   it('does not render multifield rows if showMultiFields flag is not set', () => {
-    (getServices as jest.Mock).mockImplementationOnce(() => ({
+    const overridedServices = {
       uiSettings: {
         get: (key: string) => {
-          return key === 'discover:showMultiFields' && false;
+          if (key === 'discover:showMultiFields') {
+            return false;
+          }
         },
       },
-    }));
-    const component = mountComponent(props);
+    } as unknown as DiscoverServices;
+    const component = mountComponent(props, overridedServices);
 
     const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
     expect(categoryKeywordRow.length).toBe(0);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const sampleAttributeKpi = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',
@@ -57,7 +57,7 @@ export const sampleAttributeKpi = {
     filters: [],
     query: {
       language: 'kuery',
-      query: '',
+      query: 'transaction.type: page-load and processor.event: transaction',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

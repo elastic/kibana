@@ -23,10 +23,7 @@ import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-
-jest.mock('../../../../kibana_services', () => ({
-  getServices: () => mockDiscoverServices,
-}));
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
@@ -59,7 +56,6 @@ function getCompProps(): DiscoverSidebarProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockDiscoverServices,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
@@ -76,7 +72,11 @@ describe('discover sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebar {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={mockDiscoverServices}>
+        <DiscoverSidebar {...props} />
+      </KibanaContextProvider>
+    );
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -84,7 +84,7 @@ describe('discover sidebar', function () {
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
     expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
+    expect(unpopular.children().length).toBe(6);
     expect(selected.children().length).toBe(1);
   });
   it('should allow selecting fields', function () {

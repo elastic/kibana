@@ -7,6 +7,7 @@
  */
 
 import { History } from 'history';
+import { memoize } from 'lodash';
 
 import {
   Capabilities,
@@ -21,7 +22,7 @@ import {
 import {
   FilterManager,
   TimefilterContract,
-  IndexPatternsContract,
+  DataViewsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -56,7 +57,7 @@ export interface DiscoverServices {
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
@@ -72,7 +73,7 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
 }
 
-export function buildServices(
+export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
@@ -109,4 +110,4 @@ export function buildServices(
     http: core.http,
     spaces: plugins.spaces,
   };
-}
+});

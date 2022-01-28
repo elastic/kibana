@@ -34,7 +34,7 @@ import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { SourceSelection } from '../source_selection';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
-import { AnalyticsEmptyPrompt } from './empty_prompt';
+import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
@@ -229,17 +229,17 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  if (analytics.length === 0) {
+  if (analytics.length === 0 && !isManagementTable) {
     return (
       <div data-test-subj="mlAnalyticsJobList">
+        <EuiSpacer size="m" />
         <AnalyticsEmptyPrompt
-          isManagementTable={isManagementTable}
           disabled={disabled}
-          onCreateFirstJobClick={() => setIsSourceIndexModalVisible(true)}
+          onCreateFirstJobClick={setIsSourceIndexModalVisible.bind(null, true)}
         />
-        {isSourceIndexModalVisible === true && (
-          <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-        )}
+        {isSourceIndexModalVisible ? (
+          <SourceSelection onClose={setIsSourceIndexModalVisible.bind(null, false)} />
+        ) : null}
       </div>
     );
   }

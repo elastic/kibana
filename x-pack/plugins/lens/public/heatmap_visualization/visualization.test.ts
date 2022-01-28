@@ -153,10 +153,7 @@ describe('heatmap', () => {
               {
                 columnId: 'v-accessor',
                 triggerIcon: 'colorBy',
-                palette: [
-                  { color: 'blue', stop: 100 },
-                  { color: 'yellow', stop: 350 },
-                ],
+                palette: ['blue', 'yellow'],
               },
             ],
             filterOperations: isCellValueSupported,
@@ -406,6 +403,7 @@ describe('heatmap', () => {
                   ],
                 },
               ],
+              lastRangeIsRightOpen: [true],
               legend: [
                 {
                   type: 'expression',
@@ -432,14 +430,10 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
-                        cellHeight: [],
-                        cellWidth: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
-                        yAxisLabelWidth: [],
-                        yAxisLabelColor: [],
                         // X-axis
                         isXAxisLabelVisible: [true],
                       },

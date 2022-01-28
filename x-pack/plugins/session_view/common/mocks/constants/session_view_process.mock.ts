@@ -13,10 +13,9 @@ import {
   EventAction,
   EventKind,
   ProcessMap,
-  User,
 } from '../../types/process_tree';
 
-const mockEvents = [
+export const mockEvents = [
   {
     '@timestamp': new Date('2021-11-23T15:25:04.210Z'),
     process: {
@@ -435,6 +434,67 @@ export const mockData: ProcessEventsPage[] = [
   },
 ];
 
+export const childProcessMock: Process = {
+  id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bd',
+  events: [],
+  children: [],
+  autoExpand: false,
+  searchMatched: null,
+  parent: undefined,
+  orphans: [],
+  getChildren: () => [],
+  hasOutput: () => false,
+  hasAlerts: () => false,
+  getAlerts: () => [],
+  hasExec: () => false,
+  getOutput: () => '',
+  getDetails: () =>
+    ({
+      '@timestamp': new Date('2021-11-23T15:25:05.210Z'),
+      event: {
+        kind: EventKind.event,
+        category: 'process',
+        action: EventAction.exec,
+      },
+      process: {
+        args: ['ls', '-l'],
+        args_count: 2,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bd',
+        executable: '/bin/ls',
+        interactive: true,
+        name: 'ls',
+        working_directory: '/home/vagrant',
+        start: new Date('2021-11-23T15:25:05.210Z'),
+        pid: 2,
+        pgid: 1,
+        user: {
+          id: '1',
+          name: 'vagrant',
+        },
+        parent: {
+          args: ['bash'],
+          args_count: 1,
+          entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+          executable: '/bin/bash',
+          interactive: false,
+          name: '',
+          working_directory: '/home/vagrant',
+          start: new Date('2021-11-23T15:25:04.210Z'),
+          pid: 1,
+          pgid: 1,
+          user: {
+            id: '1',
+            name: 'vagrant',
+          },
+        },
+        session: {} as ProcessFields,
+        entry: {} as ProcessFields,
+      },
+    } as ProcessEvent),
+  isUserEntered: () => false,
+  getMaxAlertLevel: () => null,
+};
+
 export const processMock: Process = {
   id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
   events: [],
@@ -442,6 +502,8 @@ export const processMock: Process = {
   autoExpand: false,
   searchMatched: null,
   parent: undefined,
+  orphans: [],
+  getChildren: () => [],
   hasOutput: () => false,
   hasAlerts: () => false,
   getAlerts: () => [],
@@ -456,17 +518,20 @@ export const processMock: Process = {
         action: EventAction.exec,
       },
       process: {
-        args: [],
-        args_count: 0,
+        args: ['bash'],
+        args_count: 1,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
-        executable: '',
+        executable: '/bin/bash',
         interactive: false,
         name: '',
         working_directory: '/home/vagrant',
         start: new Date('2021-11-23T15:25:04.210Z'),
         pid: 1,
         pgid: 1,
-        user: {} as User,
+        user: {
+          id: '1',
+          name: 'vagrant',
+        },
         parent: {} as ProcessFields,
         session: {} as ProcessFields,
         entry: {} as ProcessFields,
@@ -501,6 +566,8 @@ export const mockProcessMap = mockEvents.reduce(
       parent: undefined,
       autoExpand: false,
       searchMatched: null,
+      orphans: [],
+      getChildren: () => [],
       hasOutput: () => false,
       hasAlerts: () => false,
       getAlerts: () => [],

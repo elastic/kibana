@@ -156,13 +156,13 @@ export class GisPageObject extends FtrService {
     await this.renderable.waitForRender();
   }
 
-  async saveMap(name: string, redirectToOrigin = true, tags?: string[]) {
+  async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
     await this.testSubjects.click('mapSaveButton');
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
       redirectToOrigin,
-      saveAsNew: true,
+      saveAsNew,
     });
     if (tags) {
       await this.testSubjects.click('savedObjectTagSelector');

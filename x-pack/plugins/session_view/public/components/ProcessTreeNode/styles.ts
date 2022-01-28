@@ -34,13 +34,12 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
     };
 
     const searchHighlight = `
-      background-color: ${colors.highlight};
-      color: ${colors.text};
+      background-color: yellow;
+      color: black;
       border-radius: ${border.radius.medium};
     `;
 
     const children: CSSObject = {
-      position: 'relative',
       color: colors.ghost,
       marginLeft: '16px',
       paddingLeft: '8px',

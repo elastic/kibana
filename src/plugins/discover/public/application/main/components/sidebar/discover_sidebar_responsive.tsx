@@ -26,13 +26,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../../data/common';
+import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { DiscoverServices } from '../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../utils/use_saved_search';
@@ -55,7 +54,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Has been toggled closed
    */
@@ -67,7 +66,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when changing an index pattern
    */
@@ -80,11 +79,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
+  selectedIndexPattern?: DataView;
   /**
    * Discover App state
    */
@@ -119,6 +114,7 @@ export interface DiscoverSidebarResponsiveProps {
  * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
+  const services = useDiscoverServices();
   const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -171,7 +167,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     setIsFlyoutVisible(false);
   }, []);
 
-  const { dataViewFieldEditor } = props.services;
+  const { dataViewFieldEditor } = services;
 
   const editField = useCallback(
     (fieldName?: string) => {
@@ -245,7 +241,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverIndexPatternManagement
-                  services={props.services}
                   selectedIndexPattern={selectedIndexPattern}
                   editField={editField}
                   useNewFieldsApi={useNewFieldsApi}

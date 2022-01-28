@@ -20,12 +20,15 @@ import { UpdateKey } from './types';
 import { allCases, basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,7 +64,7 @@ describe('useGetCases', () => {
       });
       await waitForNextUpdate();
       expect(spyOnGetCases).toBeCalledWith({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -112,6 +115,9 @@ describe('useGetCases', () => {
         updateCase.version,
         abortCtrl.signal
       );
+    });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: `Updated "${basicCase.title}"`,
     });
   });
 
@@ -174,6 +180,7 @@ describe('useGetCases', () => {
         search: 'new',
         tags: ['new'],
         status: CaseStatuses.closed,
+        owner: [SECURITY_SOLUTION_OWNER],
       };
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
@@ -212,7 +219,7 @@ describe('useGetCases', () => {
       await waitForNextUpdate();
 
       expect(spyOnGetCases.mock.calls[1][0]).toEqual({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,
           ...newQueryParams,

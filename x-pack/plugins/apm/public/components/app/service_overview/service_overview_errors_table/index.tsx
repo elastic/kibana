@@ -19,7 +19,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
@@ -95,20 +95,21 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       if (!start || !end || !transactionType) {
         return;
       }
-      return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-        params: {
-          path: { serviceName },
-          query: {
-            environment,
-            kuery,
-            start,
-            end,
-            transactionType,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+            },
           },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         const currentPageErrorGroups = orderBy(
           response.errorGroups,
           field,
@@ -148,26 +149,27 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              groupIds: JSON.stringify(
-                items.map(({ groupId: groupId }) => groupId).sort()
-              ),
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                transactionType,
+                groupIds: JSON.stringify(
+                  items.map(({ groupId: groupId }) => groupId).sort()
+                ),
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     // only fetches agg results when requestId changes

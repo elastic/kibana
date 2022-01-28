@@ -18,12 +18,13 @@ import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
-import type { AgentPolicyServiceInterface, PackageService } from '../services';
+import type { AgentPolicyServiceInterface } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import { createFleetAuthzMock } from '../../common';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
+import { packageServiceMock } from '../services/epm/package_service.mock';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
@@ -33,8 +34,8 @@ export interface MockedFleetAppContext extends FleetAppContext {
   data: ReturnType<typeof dataPluginMock.createStartContract>;
   encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
   savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
-  securitySetup?: ReturnType<typeof securityMock.createSetup>;
-  securityStart?: ReturnType<typeof securityMock.createStart>;
+  securitySetup: ReturnType<typeof securityMock.createSetup>;
+  securityStart: ReturnType<typeof securityMock.createStart>;
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 
@@ -142,9 +143,7 @@ export const createMockAgentService = () => agentServiceMock.create();
  */
 export const createMockAgentClient = () => agentServiceMock.createClient();
 
-export const createMockPackageService = (): PackageService => {
-  return {
-    getInstallation: jest.fn(),
-    ensureInstalledPackage: jest.fn(),
-  };
-};
+/**
+ * Creates a mock PackageService
+ */
+export const createMockPackageService = () => packageServiceMock.create();

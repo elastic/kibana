@@ -8,19 +8,18 @@
 import { uniq } from 'lodash';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Required } from '@kbn/utility-types';
 import { EuiText } from '@elastic/eui';
 import {
   Chart,
   Datum,
   LayerValue,
   Partition,
-  PartitionConfig,
   PartitionLayer,
-  PartitionFillLabel,
-  RecursivePartial,
   Position,
   Settings,
   ElementClickListener,
+  PartialTheme,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
@@ -99,7 +98,7 @@ export function PieComponent(
     });
   }
 
-  const fillLabel: Partial<PartitionFillLabel> = {
+  const fillLabel: PartitionLayer['fillLabel'] = {
     valueFont: {
       fontWeight: 700,
     },
@@ -202,42 +201,52 @@ export function PieComponent(
     };
   });
 
-  const { legend, partitionType: partitionLayout, label: chartType } = PartitionChartsMeta[shape];
+  const { legend, partitionType, label: chartType } = PartitionChartsMeta[shape];
 
-  const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout,
-    fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    outerSizeRatio: 1,
-    specialFirstInnermostSector: true,
-    minFontSize: 10,
-    maxFontSize: 16,
-    // Labels are added outside the outer ring when the slice is too small
-    linkLabel: {
-      maxCount: 5,
-      fontSize: 11,
-      // Dashboard background color is affected by dark mode, which we need
-      // to account for in outer labels
-      // This does not handle non-dashboard embeddables, which are allowed to
-      // have different backgrounds.
-      textColor: chartTheme.axes?.axisTitle?.fill,
+  const themeOverrides: Required<PartialTheme, 'partition'> = {
+    chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
+    background: {
+      color: undefined, // removes background for embeddables
     },
-    sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
-    sectorLineWidth: 1.5,
-    circlePadding: 4,
+    legend: {
+      labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
+    },
+    partition: {
+      fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
+      outerSizeRatio: 1,
+      minFontSize: 10,
+      maxFontSize: 16,
+      // Labels are added outside the outer ring when the slice is too small
+      linkLabel: {
+        maxCount: 5,
+        fontSize: 11,
+        // Dashboard background color is affected by dark mode, which we need
+        // to account for in outer labels
+        // This does not handle non-dashboard embeddables, which are allowed to
+        // have different backgrounds.
+        textColor: chartTheme.axes?.axisTitle?.fill,
+      },
+      sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
+      sectorLineWidth: 1.5,
+      circlePadding: 4,
+    },
   };
   if (isTreemapOrMosaicShape(shape)) {
     if (hideLabels || categoryDisplay === 'hide') {
-      config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
+      themeOverrides.partition.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
   } else {
-    config.emptySizeRatio = shape === 'donut' ? emptySizeRatio : 0;
+    themeOverrides.partition.emptySizeRatio = shape === 'donut' ? emptySizeRatio : 0;
 
     if (hideLabels || categoryDisplay === 'hide') {
       // Force all labels to be linked, then prevent links from showing
-      config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
+      themeOverrides.partition.linkLabel = {
+        maxCount: 0,
+        maximumSection: Number.POSITIVE_INFINITY,
+      };
     } else if (categoryDisplay === 'inside') {
       // Prevent links from showing
-      config.linkLabel = { maxCount: 0 };
+      themeOverrides.partition.linkLabel = { maxCount: 0 };
     } else {
       // if it contains any slice below 2% reduce the ratio
       // first step: sum it up the overall sum
@@ -246,7 +255,7 @@ export function PieComponent(
       const smallSlices = slices.filter((value) => value < 0.02).length;
       if (smallSlices) {
         // shrink up to 20% to give some room for the linked values
-        config.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+        themeOverrides.partition.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
       }
     }
   }
@@ -322,27 +331,19 @@ export function PieComponent(
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
           legendAction={props.interactive ? getLegendAction(firstTable, onClickValue) : undefined}
-          theme={{
-            ...chartTheme,
-            background: {
-              ...chartTheme.background,
-              color: undefined, // removes background for embeddables
-            },
-            legend: {
-              labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
-            },
-          }}
+          theme={[themeOverrides, chartTheme]}
           baseTheme={chartBaseTheme}
         />
         <Partition
           id={shape}
           data={firstTable.rows}
+          layout={partitionType}
+          specialFirstInnermostSector
           valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
           percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
           valueGetter={hideLabels || numberDisplay === 'value' ? undefined : 'percent'}
           valueFormatter={(d: number) => (hideLabels ? '' : formatters[metricColumn.id].convert(d))}
           layers={layers}
-          config={config}
           topGroove={hideLabels || categoryDisplay === 'hide' ? 0 : undefined}
         />
       </Chart>

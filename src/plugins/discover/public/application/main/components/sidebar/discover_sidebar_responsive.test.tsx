@@ -27,6 +27,7 @@ import { DataDocuments$ } from '../../utils/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 const mockServices = {
   history: () => ({
@@ -62,7 +63,6 @@ jest.mock('../../../../kibana_services', () => ({
       getTriggerCompatibleActions: jest.fn(() => []),
     };
   }),
-  getServices: () => mockServices,
 }));
 
 jest.mock('../../utils/calc_field_counts', () => ({
@@ -100,7 +100,6 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockServices,
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
@@ -114,7 +113,11 @@ describe('discover responsive sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebarResponsive {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...props} />
+      </KibanaContextProvider>
+    );
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -122,7 +125,7 @@ describe('discover responsive sidebar', function () {
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
     expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
+    expect(unpopular.children().length).toBe(6);
     expect(selected.children().length).toBe(1);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
@@ -140,7 +143,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(7);
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
     act(() => {
       findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
         target: { value: 'abc' },

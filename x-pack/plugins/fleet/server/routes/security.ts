@@ -22,7 +22,7 @@ import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
 
 function checkSecurityEnabled() {
-  return appContextService.hasSecurity() && appContextService.getSecurityLicense().isEnabled();
+  return appContextService.getSecurityLicense().isEnabled();
 }
 
 export function checkSuperuser(req: KibanaRequest) {

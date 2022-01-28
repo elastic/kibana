@@ -27,6 +27,7 @@ function getDescription() {
 }
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();

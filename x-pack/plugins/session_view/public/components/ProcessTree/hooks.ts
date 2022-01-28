@@ -16,6 +16,7 @@ import {
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
 import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
+import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
@@ -30,13 +31,38 @@ export class ProcessImpl implements Process {
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null;
+  orphans: Process[];
 
   constructor(id: string) {
     this.id = id;
     this.events = [];
     this.children = [];
+    this.orphans = [];
     this.autoExpand = false;
     this.searchMatched = null;
+  }
+
+  // hideSameGroup will filter out any processes which have the same pgid as this process
+  getChildren(hideSameGroup: boolean = false) {
+    let children = this.children;
+
+    // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
+    if (this.orphans.length) {
+      children = [...children, ...this.orphans].sort(sortProcesses);
+    }
+
+    if (hideSameGroup) {
+      const { pid } = this.getDetails().process;
+
+      return children.filter((process) => {
+        const pgid = process.getDetails().process.group_leader.pid;
+
+        // TODO: needs update after field rename to match ECS
+        return pgid !== pid || process.searchMatched;
+      });
+    }
+
+    return children;
   }
 
   hasOutput() {
@@ -95,9 +121,9 @@ export class ProcessImpl implements Process {
 
   isUserEntered() {
     const event = this.getDetails();
-    const { interactive, pgid, parent } = event?.process || {};
+    const { tty } = event.process;
 
-    return interactive && pgid !== parent.pgid;
+    return !!tty && process.pid !== event.process.group_leader.pid;
   }
 
   getMaxAlertLevel() {
@@ -115,7 +141,10 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
-    fakeLeaderEvent.process = { ...fakeLeaderEvent.process, ...fakeLeaderEvent.process.entry };
+    fakeLeaderEvent.process = {
+      ...fakeLeaderEvent.process,
+      ...fakeLeaderEvent.process.entry_leader,
+    };
     sessionLeaderProcess.events.push(fakeLeaderEvent);
   }
 
@@ -163,9 +192,12 @@ export const useProcessTree = ({ sessionEntityId, data, searchQuery }: UseProces
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
     autoExpandProcessTree(processMap);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [searchQuery, processMap]);
 
-  // return the root session leader process, and a list of orphans
-  return { sessionLeader: processMap[sessionEntityId], processMap, orphans, searchResults };
+  // set new orphans array on the session leader
+  const sessionLeader = processMap[sessionEntityId];
+
+  sessionLeader.orphans = orphans;
+
+  return { sessionLeader: processMap[sessionEntityId], processMap, searchResults };
 };

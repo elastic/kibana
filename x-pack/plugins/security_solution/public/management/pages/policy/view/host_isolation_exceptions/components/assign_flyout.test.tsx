@@ -10,6 +10,7 @@ import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import uuid from 'uuid';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
@@ -26,7 +27,9 @@ import {
 import { PolicyHostIsolationExceptionsAssignFlyout } from './assign_flyout';
 
 jest.mock('../../../../host_isolation_exceptions/service');
+jest.mock('../../../../../../common/components/user_privileges');
 
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;
 const endpointGenerator = new EndpointDocGenerator('seed');
@@ -49,6 +52,11 @@ describe('Policy details host isolation exceptions assign flyout', () => {
   beforeEach(() => {
     getHostIsolationExceptionItemsMock.mockClear();
     updateOneHostIsolationExceptionItemMock.mockClear();
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canIsolateHost: true,
+      },
+    });
     policy = endpointGenerator.generatePolicyPackagePolicy();
     policyId = policy.id;
     mockedContext = createAppRootMockRenderer();
@@ -95,7 +103,7 @@ describe('Policy details host isolation exceptions assign flyout', () => {
     await waitFor(() => {
       expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `((not exception-list-agnostic.attributes.tags:"policy:${policyId}" AND not exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.name:(*no*results*with*this*) OR exception-list-agnostic.attributes.description:(*no*results*with*this*) OR exception-list-agnostic.attributes.entries.value:(*no*results*with*this*)))`,
+          filter: `((not exception-list-agnostic.attributes.tags:"policy:${policyId}" AND not exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.item_id:(*no*results*with*this*) OR exception-list-agnostic.attributes.name:(*no*results*with*this*) OR exception-list-agnostic.attributes.description:(*no*results*with*this*) OR exception-list-agnostic.attributes.entries.value:(*no*results*with*this*)))`,
         })
       );
       expect(renderResult.getByTestId('hostIsolationExceptions-no-items-found')).toBeTruthy();
@@ -146,6 +154,21 @@ describe('Policy details host isolation exceptions assign flyout', () => {
     render();
     expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
     expect(renderResult.getByTestId('hostIsolationExceptions-too-many-results')).toBeTruthy();
+  });
+
+  describe('without privileges', () => {
+    beforeEach(() => {
+      useUserPrivilegesMock.mockReturnValue({ endpointPrivileges: { canIsolateHost: false } });
+    });
+    it('should not render if invoked without privileges', () => {
+      render();
+      expect(renderResult.queryByTestId('hostIsolationExceptions-assign-flyout')).toBeNull();
+    });
+
+    it('should call onClose if accessed without privileges', () => {
+      render();
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 
   describe('when submitting the form', () => {

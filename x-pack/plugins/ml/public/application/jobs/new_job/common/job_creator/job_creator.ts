@@ -370,7 +370,7 @@ export class JobCreator {
   }
 
   public get timeFieldName(): string {
-    return this._job_config.data_description.time_field;
+    return this._job_config.data_description.time_field!;
   }
 
   public set timeFieldName(fieldName: string) {
@@ -767,6 +767,7 @@ export class JobCreator {
 
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers!;
+
     if (this._job_config.groups === undefined) {
       this._job_config.groups = [];
     }

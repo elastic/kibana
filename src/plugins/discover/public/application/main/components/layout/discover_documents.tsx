@@ -14,6 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -24,10 +25,9 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
-import { DiscoverServices } from '../../../../build_services';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -43,23 +43,21 @@ function DiscoverDocumentsComponent({
   indexPattern,
   onAddFilter,
   savedSearch,
-  services,
   setExpandedDoc,
   state,
   stateContainer,
 }: {
   documents$: DataDocuments$;
   expandedDoc?: ElasticSearchHit;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  services: DiscoverServices;
   setExpandedDoc: (doc?: ElasticSearchHit) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const { capabilities, indexPatterns, uiSettings } = services;
+  const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -121,7 +119,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" tabIndex={-1} aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -160,7 +158,6 @@ function DiscoverDocumentsComponent({
             searchTitle={savedSearch.title}
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
-            services={services}
             settings={state.grid}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}

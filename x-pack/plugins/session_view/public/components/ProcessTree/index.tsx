@@ -34,6 +34,7 @@ interface ProcessTreeDeps {
   // currently selected process
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process) => void;
+  setSearchResults?: (results: Process[]) => void;
 }
 
 export const ProcessTree = ({
@@ -48,10 +49,11 @@ export const ProcessTree = ({
   searchQuery,
   selectedProcess,
   onProcessSelected,
+  setSearchResults,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
-  const { sessionLeader, processMap, orphans, searchResults } = useProcessTree({
+  const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
     searchQuery,
@@ -59,6 +61,12 @@ export const ProcessTree = ({
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const selectionAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (setSearchResults) {
+      setSearchResults(searchResults);
+    }
+  }, [searchResults, setSearchResults]);
 
   useScroll({
     div: scrollerRef.current,
@@ -123,22 +131,23 @@ export const ProcessTree = ({
   }, [selectedProcess, selectProcess, onProcessSelected, sessionLeader]);
 
   useEffect(() => {
-    if (searchResults.length > 0) {
-      selectProcess(searchResults[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchResults]);
-
-  useEffect(() => {
+    // after 2 pages are loaded (due to bi-directional jump to), auto select the process
+    // for the jumpToEvent
     if (jumpToEvent && data.length === 2) {
       const process = processMap[jumpToEvent.process.entity_id];
 
       if (process) {
-        selectProcess(process);
+        onProcessSelected(process);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jumpToEvent, processMap]);
+  }, [jumpToEvent, processMap, onProcessSelected, data]);
+
+  // auto selects the session leader process if no selection is made yet
+  useEffect(() => {
+    if (!selectedProcess) {
+      onProcessSelected(sessionLeader);
+    }
+  }, [sessionLeader, onProcessSelected, selectedProcess]);
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
     return (
@@ -159,11 +168,14 @@ export const ProcessTree = ({
         <ProcessTreeNode
           isSessionLeader
           process={sessionLeader}
-          orphans={orphans}
           onProcessSelected={onProcessSelected}
         />
       )}
-      <div ref={selectionAreaRef} css={styles.selectionArea} />
+      <div
+        data-test-subj="processTreeSelectionArea"
+        ref={selectionAreaRef}
+        css={styles.selectionArea}
+      />
       {hasNextPage &&
         renderLoadMoreButton(
           <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,

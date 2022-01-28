@@ -22,7 +22,7 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
+import { useUpgradeAssistantHref } from '../../shared/links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
@@ -63,8 +63,7 @@ function useServicesFetcher() {
   const { data = initialData, status: mainStatisticsStatus } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services',
+        return callApmApi('GET /internal/apm/services', {
           params: {
             query: {
               environment,
@@ -89,8 +88,7 @@ function useServicesFetcher() {
   const { data: comparisonData } = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/detailed_statistics',
+        return callApmApi('GET /internal/apm/services/detailed_statistics', {
           params: {
             query: {
               environment,

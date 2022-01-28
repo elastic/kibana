@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { PolicyData } from '../../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -18,8 +20,10 @@ import { getHostIsolationExceptionItems } from '../../../host_isolation_exceptio
 import { PolicyHostIsolationExceptionsTab } from './host_isolation_exceptions_tab';
 
 jest.mock('../../../host_isolation_exceptions/service');
+jest.mock('../../../../../common/components/user_privileges');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 
@@ -42,6 +46,11 @@ describe('Policy details host isolation exceptions tab', () => {
     getHostIsolationExceptionItemsMock.mockClear();
     policy = endpointGenerator.generatePolicyPackagePolicy();
     policyId = policy.id;
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canIsolateHost: true,
+      },
+    });
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () =>
@@ -100,7 +109,7 @@ describe('Policy details host isolation exceptions tab', () => {
     render();
     expect(
       await renderResult.findByTestId('policyHostIsolationExceptionsTabSubtitle')
-    ).toHaveTextContent('There are 4 exceptions associated with this policy');
+    ).toHaveTextContent('There are 4 host isolation exceptions associated with this policy');
   });
 
   it('should apply a filter when requested from location search params', async () => {
@@ -110,7 +119,7 @@ describe('Policy details host isolation exceptions tab', () => {
     });
     render();
     expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
-      filter: `((exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.name:(*my*filter*) OR exception-list-agnostic.attributes.description:(*my*filter*) OR exception-list-agnostic.attributes.entries.value:(*my*filter*)))`,
+      filter: `((exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.item_id:(*my*filter*) OR exception-list-agnostic.attributes.name:(*my*filter*) OR exception-list-agnostic.attributes.description:(*my*filter*) OR exception-list-agnostic.attributes.entries.value:(*my*filter*)))`,
       http: mockedContext.coreStart.http,
       page: 1,
       perPage: 10,
@@ -121,6 +130,9 @@ describe('Policy details host isolation exceptions tab', () => {
     it('should not render the assign button if there are not existing exceptions', async () => {
       getHostIsolationExceptionItemsMock.mockReturnValue(emptyList);
       render();
+      await waitFor(() => {
+        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledTimes(2);
+      });
       expect(renderResult.queryByTestId('hostIsolationExceptions-assign-button')).toBeFalsy();
     });
 
@@ -128,16 +140,40 @@ describe('Policy details host isolation exceptions tab', () => {
       history.push(getPolicyHostIsolationExceptionsPath(policyId, { show: 'list' }));
       getHostIsolationExceptionItemsMock.mockReturnValue(emptyList);
       render();
+      await waitFor(() => {
+        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledTimes(2);
+      });
       expect(renderResult.queryByTestId('hostIsolationExceptions-assign-flyout')).toBeFalsy();
     });
 
-    it('should open the assign flyout if there are existing exceptions', () => {
+    it('should open the assign flyout if there are existing exceptions', async () => {
       history.push(getPolicyHostIsolationExceptionsPath(policyId, { show: 'list' }));
       getHostIsolationExceptionItemsMock.mockImplementation(() => {
         return getFoundExceptionListItemSchemaMock(1);
       });
       render();
-      expect(renderResult.findByTestId('hostIsolationExceptions-assign-flyout')).toBeTruthy();
+      await waitFor(() => {
+        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledTimes(2);
+      });
+      expect(await renderResult.findByTestId('hostIsolationExceptions-assign-flyout')).toBeTruthy();
+    });
+  });
+
+  describe('Without can isolate privileges', () => {
+    beforeEach(() => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          canIsolateHost: false,
+        },
+      });
+    });
+    it('should not display the assign policies button', async () => {
+      getHostIsolationExceptionItemsMock.mockImplementation(() => {
+        return getFoundExceptionListItemSchemaMock(5);
+      });
+      render();
+      expect(await renderResult.findByTestId('policyHostIsolationExceptionsTab')).toBeTruthy();
+      expect(renderResult.queryByTestId('hostIsolationExceptions-assign-button')).toBeFalsy();
     });
   });
 });

@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   NumericFieldStats,
@@ -60,6 +59,18 @@ export const getNumericFieldStatsRequest = (
   };
 };
 
+interface SampledTopAggs
+  extends estypes.AggregationsTermsAggregateBase<TopValueBucket> {
+  buckets: TopValueBucket[];
+}
+interface StatsAggs {
+  sampled_top: SampledTopAggs;
+  sampled_field_stats: {
+    doc_count: number;
+    actual_stats: estypes.AggregationsStatsAggregate;
+  };
+}
+
 export const fetchNumericFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
@@ -71,29 +82,24 @@ export const fetchNumericFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search(request);
+  const { body } = await esClient.search<unknown, StatsAggs>(request);
 
-  const aggregations = body.aggregations as {
-    sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
-    sampled_field_stats: {
-      doc_count: number;
-      actual_stats: estypes.AggregationsStatsAggregate;
-    };
-  };
+  const aggregations = body.aggregations;
   const docCount = aggregations?.sampled_field_stats?.doc_count ?? 0;
-  const fieldStatsResp = aggregations?.sampled_field_stats?.actual_stats ?? {};
+  const fieldStatsResp: Partial<estypes.AggregationsStatsAggregate> =
+    aggregations?.sampled_field_stats?.actual_stats ?? {};
   const topValues = aggregations?.sampled_top?.buckets ?? [];
 
   const stats: NumericFieldStats = {
     fieldName: field.fieldName,
     count: docCount,
-    min: get(fieldStatsResp, 'min', 0),
-    max: get(fieldStatsResp, 'max', 0),
-    avg: get(fieldStatsResp, 'avg', 0),
+    min: fieldStatsResp?.min || 0,
+    max: fieldStatsResp?.max || 0,
+    avg: fieldStatsResp?.avg || 0,
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc: number, curr: TopValueBucket) => acc + curr.doc_count,
-      aggregations.sampled_top?.sum_other_doc_count ?? 0
+      aggregations?.sampled_top?.sum_other_doc_count ?? 0
     ),
   };
 
