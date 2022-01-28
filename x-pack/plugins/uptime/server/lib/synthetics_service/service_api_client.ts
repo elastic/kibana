@@ -12,7 +12,11 @@ import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
-import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
+import {
+  MonitorFields,
+  ServiceLocations,
+  ServiceLocationErrors,
+} from '../../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 import { ServiceConfig } from '../../../common/config';
 
@@ -112,7 +116,7 @@ export class ServiceAPIClient {
       });
     };
 
-    const pushErrors: Array<{ locationId: string; error: Error }> = [];
+    const pushErrors: ServiceLocationErrors = [];
 
     const promises: Array<Observable<unknown>> = [];
 
@@ -131,7 +135,7 @@ export class ServiceAPIClient {
               );
             }),
             catchError((err) => {
-              pushErrors.push({ locationId: id, error: err });
+              pushErrors.push({ locationId: id, error: err.response?.data });
               this.logger.error(err);
               // we don't want to throw an unhandled exception here
               return of(true);

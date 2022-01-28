@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useDispatch, useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -27,6 +28,9 @@ import { setMonitor } from '../../../state/api';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestRun } from '../test_now_mode/test_now_mode';
+
+import { getServiceLocations } from '../../../state/actions';
+import { monitorManagementListSelector } from '../../../state/selectors';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -39,6 +43,7 @@ export interface ActionBarProps {
 export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: ActionBarProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { basePath } = useContext(UptimeSettingsContext);
+  const { locations } = useSelector(monitorManagementListSelector);
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,6 +59,8 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       id: monitorId ? Buffer.from(monitorId, 'base64').toString('utf8') : undefined,
     });
   }, [monitor, monitorId, isValid, isSaving]);
+
+  const hasErrors = data && Object.keys(data).length;
 
   const handleOnSave = useCallback(() => {
     if (onSave) {
@@ -79,7 +86,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
         title: <p data-test-subj="uptimeAddMonitorFailure">{MONITOR_FAILURE_LABEL}</p>,
         toastLifeTimeMs: 3000,
       });
-    } else if (status === FETCH_STATUS.SUCCESS) {
+    } else if (status === FETCH_STATUS.SUCCESS && !hasErrors) {
       notifications.toasts.success({
         title: (
           <p data-test-subj="uptimeAddMonitorSuccess">
@@ -88,10 +95,43 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
         ),
         toastLifeTimeMs: 3000,
       });
+    } else if (hasErrors) {
+      Object.values(data).forEach((location) => {
+        const { status: responseStatus, reason } = location.error || {};
+        notifications.toasts.danger({
+          title: (
+            <p data-test-subj="uptimeAddMonitorFailure">
+              {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
+                defaultMessage: `There was a problem saving your monitor configuration for location {location}. Please try again, or contact Support.`,
+                values: {
+                  location: locations?.find((loc) => loc?.id === location.locationId)?.label,
+                },
+              })}
+            </p>
+          ),
+          body: (
+            <p>
+              {status
+                ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
+                    defaultMessage: 'Status: {status}. ',
+                    values: { status: responseStatus },
+                  })
+                : null}
+              {reason
+                ? i18n.translate('xpack.uptime.monitorManagement.service.error.reason', {
+                    defaultMessage: 'Reason: {reason}.',
+                    values: { reason },
+                  })
+                : null}
+            </p>
+          ),
+          toastLifeTimeMs: 3000,
+        });
+      });
     }
-  }, [data, status, notifications.toasts, isSaving, isValid, monitorId]);
+  }, [data, status, notifications.toasts, isSaving, isValid, monitorId, hasErrors, locations]);
 
-  return status === FETCH_STATUS.SUCCESS ? (
+  return status === FETCH_STATUS.SUCCESS && !hasErrors ? (
     <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

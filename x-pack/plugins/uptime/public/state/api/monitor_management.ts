@@ -13,18 +13,18 @@ import {
   ServiceLocations,
   SyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
+  ServiceLocationErrors,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
 
-// TODO: Type the return type from runtime types
 export const setMonitor = async ({
   monitor,
   id,
 }: {
   monitor: SyntheticsMonitor;
   id?: string;
-}): Promise<SyntheticsMonitorSavedObject> => {
+}): Promise<ServiceLocationErrors> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
