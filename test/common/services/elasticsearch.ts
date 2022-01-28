@@ -11,6 +11,7 @@ import fs from 'fs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
+import { systemIndicesSuperuser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 /*
@@ -19,9 +20,15 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function ElasticsearchProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
 
+  const esUrl = formatUrl({
+    ...config.get('servers.elasticsearch'),
+    // Use system indices user so tests can write to system indices
+    auth: `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`,
+  });
+
   if (process.env.TEST_CLOUD) {
     return new Client({
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
+      nodes: [esUrl],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
       Connection: HttpConnection,
     });
@@ -30,7 +37,7 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Clien
       tls: {
         ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
       },
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
+      nodes: [esUrl],
       requestTimeout: config.get('timeouts.esRequestTimeout'),
       Connection: HttpConnection,
     });

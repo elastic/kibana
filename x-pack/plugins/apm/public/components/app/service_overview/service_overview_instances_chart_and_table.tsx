@@ -98,25 +98,26 @@ export function ServiceOverviewInstancesChartAndTable({
         return;
       }
 
-      return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              environment,
+              kuery,
+              latencyAggregationType,
+              start,
+              end,
+              transactionType,
+              comparisonStart,
+              comparisonEnd,
+            },
           },
-          query: {
-            environment,
-            kuery,
-            latencyAggregationType,
-            start,
-            end,
-            transactionType,
-            comparisonStart,
-            comparisonEnd,
-          },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
           requestId: uuid(),
@@ -179,29 +180,30 @@ export function ServiceOverviewInstancesChartAndTable({
           return;
         }
 
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                latencyAggregationType,
+                start,
+                end,
+                numBuckets: 20,
+                transactionType,
+                serviceNodeIds: JSON.stringify(
+                  currentPeriodOrderedItems.map((item) => item.serviceNodeName)
+                ),
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              latencyAggregationType,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              serviceNodeIds: JSON.stringify(
-                currentPeriodOrderedItems.map((item) => item.serviceNodeName)
-              ),
-              comparisonStart,
-              comparisonEnd,
-            },
-          },
-        });
+          }
+        );
       },
       // only fetches detailed statistics when requestId is invalidated by main statistics api call
       // eslint-disable-next-line react-hooks/exhaustive-deps

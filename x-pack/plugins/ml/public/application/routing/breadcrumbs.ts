@@ -42,8 +42,8 @@ export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 });
 
 export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.trainedModelsLabel', {
-    defaultMessage: 'Trained Models',
+  text: i18n.translate('xpack.ml.modelManagementLabel', {
+    defaultMessage: 'Model Management',
   }),
   href: '/trained_models',
 });
@@ -101,12 +101,16 @@ export const breadcrumbOnClickFactory = (
 
 export const getBreadcrumbWithUrlForApp = (
   breadcrumbName: Breadcrumb,
-  navigateToPath: NavigateToPath,
-  basePath: string
+  navigateToPath?: NavigateToPath,
+  basePath?: string
 ): EuiBreadcrumb => {
   return {
     text: breadcrumbs[breadcrumbName].text,
-    href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
-    onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
+    ...(navigateToPath
+      ? {
+          href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
+          onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
+        }
+      : {}),
   };
 };

@@ -130,22 +130,14 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },
 
-    async navigateToModelManagement() {
-      await this.navigateToArea('~mlMainTab & ~modelManagement', 'mlPageModelManagement');
-    },
-
     async navigateToTrainedModels() {
       await this.navigateToMl();
-      await this.navigateToModelManagement();
-      await testSubjects.click('mlTrainedModelsTab');
-      await testSubjects.existOrFail('mlModelsTableContainer');
+      await this.navigateToArea('~mlMainTab & ~trainedModels', 'mlModelsTableContainer');
     },
 
     async navigateToModelManagementNodeList() {
       await this.navigateToMl();
-      await this.navigateToModelManagement();
-      await testSubjects.click('mlNodesOverviewTab');
-      await testSubjects.existOrFail('mlNodesTableContainer');
+      await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlNodesTableContainer');
     },
 
     async navigateToDataVisualizer() {
