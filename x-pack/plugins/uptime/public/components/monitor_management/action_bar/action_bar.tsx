@@ -100,16 +100,22 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
         notifications.toasts.danger({
           title: (
             <p data-test-subj="uptimeAddMonitorFailure">
-              {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
-                defaultMessage: `There was a problem saving your monitor configuration for location {location}. Please try again, or contact Support.`,
+              {i18n.translate('xpack.uptime.monitorManagement.service.error.title', {
+                defaultMessage: `Unable to {action}.`,
                 values: {
-                  location: locations?.find((loc) => loc?.id === location.locationId)?.label,
+                  action: (monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL).toLowerCase(),
                 },
               })}
             </p>
           ),
           body: (
             <p>
+              {i18n.translate('xpack.uptime.monitorManagement.service.error.message', {
+                defaultMessage: `There was a problem saving your monitor configuration for location {location}. Please try again, or contact Support. `,
+                values: {
+                  location: locations?.find((loc) => loc?.id === location.locationId)?.label,
+                },
+              })}
               {status
                 ? i18n.translate('xpack.uptime.monitorManagement.service.error.status', {
                     defaultMessage: 'Status: {status}. ',
@@ -229,7 +235,6 @@ const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
   }
 );
 
-// TODO: Discuss error states with product
 const MONITOR_FAILURE_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorFailureMessage',
   {

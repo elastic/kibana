@@ -69,31 +69,27 @@ describe('<ActionBar /> Service Errors', () => {
       expect(toast).toBeCalledWith({
         body: (
           <p>
+            {
+              'There was a problem saving your monitor configuration for location US Central. Please try again, or contact Support. '
+            }
             {'Status: 400. '}
             {'Reason: Invalid config.'}
           </p>
         ),
-        title: (
-          <p data-test-subj="uptimeAddMonitorFailure">
-            There was a problem saving your monitor configuration for location US Central. Please
-            try again, or contact Support.
-          </p>
-        ),
+        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to save monitor.</p>,
         toastLifeTimeMs: 3000,
       });
       expect(toast).toBeCalledWith({
         body: (
           <p>
+            {
+              'There was a problem saving your monitor configuration for location US Central. Please try again, or contact Support. '
+            }
             {'Status: 500. '}
             {'Reason: Cannot schedule.'}
           </p>
         ),
-        title: (
-          <p data-test-subj="uptimeAddMonitorFailure">
-            There was a problem saving your monitor configuration for location US Central. Please
-            try again, or contact Support.
-          </p>
-        ),
+        title: <p data-test-subj="uptimeAddMonitorFailure">Unable to save monitor.</p>,
         toastLifeTimeMs: 3000,
       });
     });
