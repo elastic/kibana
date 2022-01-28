@@ -45,7 +45,7 @@ export async function loadAlerts({
       total: number;
       data: Array<AsApiContract<Rule>>;
     }>
-    >(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`, {
+  >(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`, {
     query: {
       page: page.index + 1,
       per_page: page.size,

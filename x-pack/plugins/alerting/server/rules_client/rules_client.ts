@@ -426,7 +426,9 @@ export class RulesClient {
       createdAlert.id,
       createdAlert.attributes.alertTypeId,
       createdAlert.attributes,
-      references
+      references,
+      false,
+      true
     );
   }
 
@@ -1046,7 +1048,9 @@ export class RulesClient {
       id,
       ruleType,
       updatedObject.attributes,
-      updatedObject.references
+      updatedObject.references,
+      false,
+      true
     );
   }
 

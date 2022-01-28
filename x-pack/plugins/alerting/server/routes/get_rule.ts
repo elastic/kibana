@@ -109,7 +109,7 @@ export const getInternalRuleRoute = (
   licenseState: ILicenseState
 ) =>
   buildGetRuleRoute({
-    excludeFromPublicApi: true,
+    excludeFromPublicApi: false,
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
