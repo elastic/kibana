@@ -81,6 +81,7 @@
       "items": [
         { "id": "kibDevDocsApiWelcome" },
         { "id": "kibDevDocsPluginDirectory" },
+        { "id": "kibDevDocsDeprecationsDueByTeam" },
         { "id": "kibDevDocsDeprecationsByPlugin" },
         { "id": "kibDevDocsDeprecationsByApi" },
         { "id": "kibCorePluginApi" },
