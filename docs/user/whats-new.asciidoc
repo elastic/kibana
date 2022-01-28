@@ -53,7 +53,7 @@ visual attention in *Maps*.
 [float]
 === Discover has field statistics (beta)
 
-Enable the new {kibana-ref}/field-statistics.html[*Field statistics*] view
+Enable the new {kibana-ref}/show-field-statistics.html[*Field statistics*] view
 for a summary of all fields (or just selected fields) in your data.
 You'll find interesting fields to visualize and learn more about the shape of your data.
 The *Field statistics* view
