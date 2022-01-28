@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
@@ -17,6 +17,22 @@ import {
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
 
+const EntrySchema = schema.object({
+  field: schema.literal('destination.ip'),
+  operator: schema.literal('included'),
+  type: schema.literal('match'),
+  value: schema.ip(),
+});
+
+const HostIsolationDataSchema = schema.object(
+  {
+    entries: schema.arrayOf(EntrySchema, { minSize: 1 }),
+  },
+  {
+    unknowns: 'ignore',
+  }
+);
+
 export class HostIsolationExceptionsValidator extends BaseValidator {
   static isHostIsolationException(listId: string): boolean {
     return listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
@@ -25,24 +41,21 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
-    // must be plat -- authz.canIsolateHost
     await this.validateCanIsolateHosts();
-    // policy validation -- validateByPolicyItem
-    await this.validateByPolicyItem(item);
-    // ip validation - this schema type might already exist
     await this.validateHostIsolationData(item);
+    await this.validateByPolicyItem(item);
 
     return item;
   }
 
   async validatePreUpdateItem(
-    _updatedItem: UpdateExceptionListItemOptions,
-    currentItem: ExceptionListItemSchema
+    _updatedItem: UpdateExceptionListItemOptions
   ): Promise<UpdateExceptionListItemOptions> {
+    const updatedItem = _updatedItem as ExceptionItemLikeOptions;
+
     await this.validateCanIsolateHosts();
-    // must be plat
-    // policy validation
-    // ip validation
+    await this.validateHostIsolationData(updatedItem);
+    await this.validateByPolicyItem(updatedItem);
 
     return _updatedItem;
   }
@@ -79,5 +92,11 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
 
   private async validateHostIsolationData(item: ExceptionItemLikeOptions): Promise<void> {
     await this.validateBasicData(item);
+
+    try {
+      HostIsolationDataSchema.validate(item);
+    } catch (error) {
+      throw new EndpointArtifactExceptionValidationError(error.message);
+    }
   }
 }
