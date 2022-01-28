@@ -26,6 +26,11 @@ export const nodesListRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS'),
+    {
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.nodeOverviewLabel', {
+        defaultMessage: 'Nodes Overview',
+      }),
+    },
   ],
   enableDatePicker: true,
 });

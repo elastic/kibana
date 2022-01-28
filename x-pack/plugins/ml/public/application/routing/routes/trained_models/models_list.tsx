@@ -27,6 +27,11 @@ export const modelsListRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS'),
+    {
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.trainedModelsLabel', {
+        defaultMessage: 'Trained Models',
+      }),
+    },
   ],
   enableDatePicker: true,
   'data-test-subj': 'mlPageModelManagement',
