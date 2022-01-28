@@ -96,6 +96,7 @@ export function ActionMenuContent(): React.ReactElement {
           href={syntheticExploratoryViewLink}
           color="text"
           iconType="visBarVerticalStacked"
+          data-test-subj={'uptimeExploreDataButton'}
         >
           {ANALYZE_DATA}
         </EuiHeaderLink>
@@ -103,11 +104,9 @@ export function ActionMenuContent(): React.ReactElement {
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
-          defaultMessage: 'Navigate to the Elastic Synthetics integration to add Uptime data',
+          defaultMessage: 'Navigate to a tutorial about adding Uptime data',
         })}
-        href={kibana.services?.application?.getUrlForApp(
-          '/integrations/detail/synthetics/overview'
-        )}
+        href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
         color="primary"
         iconType="indexOpen"
       >

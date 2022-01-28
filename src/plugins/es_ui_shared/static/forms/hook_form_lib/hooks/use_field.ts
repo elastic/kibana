@@ -203,7 +203,7 @@ export const useField = <T, FormType = FormData, I = T>(
         formData: any;
         value: I;
         onlyBlocking: boolean;
-        validationTypeToValidate?: string;
+        validationTypeToValidate: string;
       },
       clearFieldErrors: FieldHook['clearErrors']
     ): ValidationError[] | Promise<ValidationError[]> => {
@@ -224,10 +224,7 @@ export const useField = <T, FormType = FormData, I = T>(
         type: validationType,
         isBlocking,
       }: ValidationConfig<FormType, string, I>) => {
-        if (
-          typeof validationTypeToValidate !== 'undefined' &&
-          validationType !== validationTypeToValidate
-        ) {
+        if (validationType !== undefined && validationType !== validationTypeToValidate) {
           return true;
         }
 
@@ -384,7 +381,7 @@ export const useField = <T, FormType = FormData, I = T>(
       const {
         formData = __getFormData$().value,
         value: valueToValidate = value,
-        validationType,
+        validationType = VALIDATION_TYPES.FIELD,
         onlyBlocking = false,
       } = validationData;
 

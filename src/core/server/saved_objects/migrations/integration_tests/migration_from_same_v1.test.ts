@@ -94,6 +94,7 @@ describe('migrating from the same Kibana version that used v1 migrations', () =>
             {
               name: 'root',
               appenders: ['file'],
+              level: 'info',
             },
           ],
         },

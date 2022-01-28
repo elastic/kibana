@@ -21,7 +21,6 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 // -------------------------------
 const schemaLatest = schema.object(
   {
-    ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),

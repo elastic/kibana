@@ -117,6 +117,7 @@ export function PageViewsChart({ data, loading }: Props) {
             labelFormat={(d) => numeral(d).format('0a')}
           />
           <BarSeries
+            timeZone="local"
             id={I18LABELS.pageViews}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}

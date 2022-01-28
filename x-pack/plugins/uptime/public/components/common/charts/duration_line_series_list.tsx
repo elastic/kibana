@@ -23,6 +23,7 @@ export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
         curve={CurveType.CURVE_MONOTONE_X}
         // this id is used for the line chart representing the average duration length
         data={line.map(({ x, y }) => [x, y || null])}
+        timeZone="local"
         id={`loc-avg-${name}`}
         key={`loc-line-${name}`}
         name={name}

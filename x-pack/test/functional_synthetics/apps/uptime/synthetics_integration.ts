@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FullAgentPolicy } from '../../../../plugins/fleet/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getPageObjects, getService } = providerContext;
   const monitorName = 'Sample Synthetics integration';
 
   const uptimePage = getPageObjects(['syntheticsIntegration']);
@@ -129,9 +131,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
-
   describe('When on the Synthetics Integration Policy Create Page', function () {
-    this.tags(['ciGroup10']);
+    skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
       name: monitorName,
       apmServiceName: 'Sample APM Service',
@@ -172,8 +173,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/103390
-    describe.skip('create new policy', () => {
+    describe('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {
@@ -558,6 +558,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               schedule: '@every 3m',
               timeout: '16s',
               tags: [config.tags],
+              throttling: '5d/3u/20l',
               'service.name': config.apmServiceName,
               'source.zip_url.url': config.zipUrl,
               'source.zip_url.folder': config.folder,
@@ -607,6 +608,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               schedule: '@every 3m',
               timeout: '16s',
               tags: [config.tags],
+              throttling: '5d/3u/20l',
               'service.name': config.apmServiceName,
               'source.inline.script': config.inlineScript,
               __ui: {
@@ -665,6 +667,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               schedule: '@every 3m',
               timeout: '16s',
               tags: [config.tags],
+              throttling: '1337d/1338u/1339l',
               'service.name': config.apmServiceName,
               'source.zip_url.url': config.zipUrl,
               'source.zip_url.folder': config.folder,
@@ -672,11 +675,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'source.zip_url.password': config.password,
               params: JSON.parse(config.params),
               synthetics_args: [advancedConfig.syntheticsArgs],
-              'throttling.is_enabled': advancedConfig.isThrottlingEnabled,
-              'throttling.download_speed': advancedConfig.downloadSpeed,
-              'throttling.upload_speed': advancedConfig.uploadSpeed,
-              'throttling.latency': advancedConfig.latency,
-              'throttling.config': `${advancedConfig.downloadSpeed}d/${advancedConfig.uploadSpeed}u/${advancedConfig.latency}l`,
               __ui: {
                 is_tls_enabled: false,
                 is_zip_url_tls_enabled: false,
@@ -740,11 +738,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'source.zip_url.password': config.password,
               params: JSON.parse(config.params),
               synthetics_args: [advancedConfig.syntheticsArgs],
-              'throttling.is_enabled': advancedConfig.isThrottlingEnabled,
-              'throttling.download_speed': advancedConfig.downloadSpeed,
-              'throttling.upload_speed': advancedConfig.uploadSpeed,
-              'throttling.latency': advancedConfig.latency,
-              'throttling.config': 'false',
+              throttling: false,
               __ui: {
                 is_tls_enabled: false,
                 is_zip_url_tls_enabled: false,
