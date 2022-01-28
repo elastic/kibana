@@ -271,7 +271,7 @@ describe('Screenshot Observable Pipeline', () => {
                 },
               },
             ],
-            "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
+            "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
             "screenshots": Array [
               Object {
                 "data": Object {
@@ -313,7 +313,7 @@ describe('Screenshot Observable Pipeline', () => {
                 },
               },
             ],
-            "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
+            "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
             "screenshots": Array [
               Object {
                 "data": Object {
