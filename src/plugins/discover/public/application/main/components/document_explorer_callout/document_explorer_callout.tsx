@@ -11,11 +11,11 @@ import './document_explorer_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getServices } from '../../../../kibana_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 import { Storage } from '../../../../../../kibana_utils/public';
 
-const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
+export const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
 
 const getStoredCalloutState = (storage: Storage): boolean => {
   const calloutClosed = storage.get(CALLOUT_STATE_KEY);
@@ -26,7 +26,7 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 };
 
 export const DocumentExplorerCallout = () => {
-  const { storage, capabilities, addBasePath } = getServices();
+  const { storage, capabilities, addBasePath } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
 
   const onCloseCallout = () => {
@@ -34,7 +34,7 @@ export const DocumentExplorerCallout = () => {
     setCalloutClosed(true);
   };
 
-  if (calloutClosed && capabilities.advancedSettings.save) {
+  if (calloutClosed || !capabilities.advancedSettings.save) {
     return null;
   }
 
