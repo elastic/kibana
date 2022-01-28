@@ -262,6 +262,15 @@ function buildComponentTemplates(params: {
 
   templatesMap[mappingsTemplateName] = {
     template: {
+      settings: {
+        index: {
+          mapping: {
+            total_fields: {
+              limit: '10000',
+            },
+          },
+        },
+      },
       mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
     },
     _meta,
