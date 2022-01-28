@@ -41,7 +41,7 @@ do
    esac
 done
 
-TMPFILE=$(mktemp /tmp/output-XXXX)
+TMPFILE=$(mktemp -t output-XXXX)
 trap "rm -f $TMPFILE" EXIT
 
 show_msg "[INFO] Creating your deployment ${DEPLOYMENT_NAME}. Please hold, it takes about 5 minutes. ⌛" 
