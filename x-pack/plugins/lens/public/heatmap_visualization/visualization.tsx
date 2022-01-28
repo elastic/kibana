@@ -109,7 +109,7 @@ export const getHeatmapVisualization = ({
         defaultMessage: 'Heatmap',
       }),
       groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: true,
+      showExperimentalBadge: false,
       sortPriority: 1,
     },
   ],

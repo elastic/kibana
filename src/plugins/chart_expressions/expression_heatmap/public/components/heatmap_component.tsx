@@ -487,6 +487,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
             xAxisLabelName={xAxisColumn?.name}
             yAxisLabelName={yAxisColumn?.name}
+            xAxisTitle={xAxisColumn?.name}
+            yAxisTitle={yAxisColumn?.name}
             xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
             yAxisLabelFormatter={
               yAxisColumn
