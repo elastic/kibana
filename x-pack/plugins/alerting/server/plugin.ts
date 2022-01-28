@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -51,7 +51,7 @@ import {
   AlertTypeState,
   Services,
 } from './types';
-import { registerAlertsUsageCollector } from './usage';
+import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
@@ -156,6 +156,7 @@ export class AlertingPlugin {
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
+  private usageCounter: UsageCounter | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
@@ -211,7 +212,7 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      registerAlertsUsageCollector(
+      registerAlertingUsageCollector(
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
@@ -226,7 +227,7 @@ export class AlertingPlugin {
     }
 
     // Usage counter for telemetry
-    const usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
 
     setupSavedObjects(
       core.savedObjects,
@@ -269,7 +270,7 @@ export class AlertingPlugin {
     defineRoutes({
       router,
       licenseState: this.licenseState,
-      usageCounter,
+      usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
 
@@ -403,6 +404,7 @@ export class AlertingPlugin {
         supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
         maxEphemeralActionsPerRule: config.maxEphemeralActionsPerAlert,
         cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
+        usageCounter: this.usageCounter,
       });
     });
 

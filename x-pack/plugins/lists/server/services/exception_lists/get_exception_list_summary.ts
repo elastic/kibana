@@ -7,6 +7,7 @@
 
 import type {
   ExceptionListSummarySchema,
+  FilterOrUndefined,
   IdOrUndefined,
   ListIdOrUndefined,
   NamespaceType,
@@ -20,6 +21,7 @@ import {
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 interface GetExceptionListSummaryOptions {
+  filter: FilterOrUndefined;
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
@@ -37,6 +39,7 @@ interface ByOsAggType {
 }
 
 export const getExceptionListSummary = async ({
+  filter,
   id,
   listId,
   savedObjectsClient,
@@ -59,6 +62,10 @@ export const getExceptionListSummary = async ({
     }
   }
 
+  // only pick the items in the list and not the list definition
+  const itemTypeFilter = `${savedObjectType}.attributes.type: "simple"`;
+  const adjustedFilter = filter ? `(${filter}) AND ${itemTypeFilter}` : itemTypeFilter;
+
   const savedObject = await savedObjectsClient.find<ExceptionListSoSchema, ByOsAggType>({
     aggs: {
       by_os: {
@@ -67,7 +74,7 @@ export const getExceptionListSummary = async ({
         },
       },
     },
-    filter: `${savedObjectType}.attributes.list_type: item`,
+    filter: adjustedFilter,
     perPage: 0,
     search: finalListId,
     searchFields: ['list_id'],
@@ -84,7 +91,7 @@ export const getExceptionListSummary = async ({
     (acc, item: ByOsAggBucketType) => ({
       ...acc,
       [item.key]: item.doc_count,
-      total: acc.total + item.doc_count,
+      total: savedObject.total,
     }),
     { linux: 0, macos: 0, total: 0, windows: 0 }
   );
