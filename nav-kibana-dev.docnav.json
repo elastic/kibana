@@ -64,6 +64,7 @@
     {
       "category": "Contributors Newsletters",
       "items": [
+        { "id": "kibJanuary2022ContributorNewsletter" },
         { "id": "kibDecember2021ContributorNewsletter" },
         { "id": "kibNovember2021ContributorNewsletter" },
         { "id": "kibOctober2021ContributorNewsletter" },
