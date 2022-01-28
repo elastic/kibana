@@ -22,18 +22,6 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
-export type Color =
-  | 'euiColorVis0'
-  | 'euiColorVis1'
-  | 'euiColorVis2'
-  | 'euiColorVis3'
-  | 'euiColorVis4'
-  | 'euiColorVis5'
-  | 'euiColorVis6'
-  | 'euiColorVis7'
-  | 'euiColorVis8'
-  | 'euiColorVis9';
-
 function hasValidTimeseries(
   series?: Coordinate[] | null
 ): series is Coordinate[] {
@@ -48,16 +36,18 @@ export function SparkPlot({
   comparisonSeries = [],
   valueLabel,
   compact,
+  comparisonSeriesColor,
 }: {
-  color: Color;
+  color: string;
   series?: Coordinate[] | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
+  comparisonSeriesColor: string;
 }) {
   const theme = useTheme();
   const defaultChartTheme = useChartTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+  const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
   const sparkplotChartTheme: PartialTheme = {
@@ -70,8 +60,6 @@ export function SparkPlot({
     },
     ...(hasComparisonSeries ? comparisonChartTheme : {}),
   };
-
-  const colorValue = theme.eui[color];
 
   const chartSize = {
     height: theme.eui.euiSizeL,
@@ -106,7 +94,7 @@ export function SparkPlot({
               xAccessor={'x'}
               yAccessors={['y']}
               data={series}
-              color={colorValue}
+              color={color}
               curve={CurveType.CURVE_MONOTONE_X}
             />
             {hasComparisonSeries && (
@@ -117,7 +105,7 @@ export function SparkPlot({
                 xAccessor={'x'}
                 yAccessors={['y']}
                 data={comparisonSeries}
-                color={theme.eui.euiColorLightestShade}
+                color={comparisonSeriesColor}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
             )}

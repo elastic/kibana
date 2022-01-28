@@ -21,7 +21,11 @@ import {
 } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { SparkPlot, Color } from '../../../shared/charts/spark_plot';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 
 type ServiceNodeReturn =
   APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
@@ -58,7 +62,8 @@ interface Item {
   valueLabel: string | null;
   timeseries?: Coordinate[];
   previousPeriodTimeseries?: Coordinate[];
-  color: Color;
+  color: string;
+  comparisonSeriesColor: string;
 }
 
 export function StatsList({ data, isLoading }: StatsListProps) {
@@ -87,7 +92,9 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         timeseries: currentPeriod?.transactionStats?.latency?.timeseries,
         previousPeriodTimeseries:
           previousPeriod?.transactionStats?.latency?.timeseries,
-        color: 'euiColorVis1',
+        color: getTimeSeriesColor(ChartType.LATENCY_AVG).currentPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.LATENCY_AVG)
+          .previousPeriodColor,
       },
       {
         title: i18n.translate(
@@ -102,7 +109,9 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         timeseries: currentPeriod?.transactionStats?.throughput?.timeseries,
         previousPeriodTimeseries:
           previousPeriod?.transactionStats?.throughput?.timeseries,
-        color: 'euiColorVis0',
+        color: getTimeSeriesColor(ChartType.THROUGHPUT).currentPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.THROUGHPUT)
+          .previousPeriodColor,
       },
       {
         title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
@@ -116,7 +125,11 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         timeseries: currentPeriod?.failedTransactionsRate?.timeseries,
         previousPeriodTimeseries:
           previousPeriod?.failedTransactionsRate?.timeseries,
-        color: 'euiColorVis7',
+        color: getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE)
+          .currentPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        ).previousPeriodColor,
       },
       {
         title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
@@ -125,7 +138,9 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         valueLabel: asPercent(currentPeriod?.cpuUsage?.value, 1, ''),
         timeseries: currentPeriod?.cpuUsage?.timeseries,
         previousPeriodTimeseries: previousPeriod?.cpuUsage?.timeseries,
-        color: 'euiColorVis3',
+        color: getTimeSeriesColor(ChartType.CPU_USAGE).currentPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.CPU_USAGE)
+          .previousPeriodColor,
       },
       {
         title: i18n.translate(
@@ -137,7 +152,9 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         valueLabel: asPercent(currentPeriod?.memoryUsage?.value, 1, ''),
         timeseries: currentPeriod?.memoryUsage?.timeseries,
         previousPeriodTimeseries: previousPeriod?.memoryUsage?.timeseries,
-        color: 'euiColorVis8',
+        color: getTimeSeriesColor(ChartType.MEMORY_USAGE).currentPeriodColor,
+        comparisonSeriesColor: getTimeSeriesColor(ChartType.MEMORY_USAGE)
+          .previousPeriodColor,
       },
     ],
     [currentPeriod, previousPeriod]
@@ -160,6 +177,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
           timeseries,
           color,
           previousPeriodTimeseries,
+          comparisonSeriesColor,
         }) => {
           if (!valueLabel) {
             return null;
@@ -184,6 +202,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
                       color={color}
                       valueLabel={valueLabel}
                       comparisonSeries={previousPeriodTimeseries}
+                      comparisonSeriesColor={comparisonSeriesColor}
                     />
                   ) : (
                     <div>{valueLabel}</div>
