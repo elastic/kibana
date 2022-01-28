@@ -8,12 +8,12 @@
 // eslint-disable-next-line max-classes-per-file
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { IField, IVectorSource } from '../../../maps/public';
 import { FIELD_ORIGIN } from '../../../maps/common';
 import { TileMetaFeature } from '../../../maps/common/descriptor_types';
 import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
-import { Filter } from '../../../../../src/plugins/data/public';
 
 export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
   defaultMessage: 'Actual',

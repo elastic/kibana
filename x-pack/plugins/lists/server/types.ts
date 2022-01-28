@@ -77,5 +77,12 @@ export type {
   ExtensionPoint,
   ExceptionsListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreImportServerExtension,
+  ExceptionsListPreSummaryServerExtension,
+  ExceptionsListPreExportServerExtension,
+  ExceptionsListPreMultiListFindServerExtension,
+  ExceptionsListPreSingleListFindServerExtension,
+  ExceptionsListPreDeleteItemServerExtension,
   ListsServerExtensionRegistrar,
 } from './services/extension_points';
