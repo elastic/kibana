@@ -28,6 +28,7 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
       monitorNames: {
         terms: {
           field: `${syntheticsMonitorType}.attributes.name`,
+          size: 10000,
         },
       },
     };
