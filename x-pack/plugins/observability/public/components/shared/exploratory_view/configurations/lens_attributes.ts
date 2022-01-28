@@ -783,7 +783,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
+  getJSON(): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
@@ -792,7 +792,7 @@ export class LensAttributes {
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: String(refresh),
+      description: '',
       visualizationType: 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({
