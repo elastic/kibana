@@ -33,6 +33,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers: config.xpack.api.get('servers'),
       services: {
         es: config.kibana.api.get('services.es'),
+        esWithoutSystemIndices: config.kibana.api.get('services.esWithoutSystemIndices'),
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
