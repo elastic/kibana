@@ -4,7 +4,7 @@
 beta::[]
 
 *Discover* has a *Document Explorer* with resizable columns, better data sorting and comparison,
-and a full screen view.
+and a fullscreen view.
 
 [role="screenshot"]
 image::images/document-explorer.png[Document Explorer with improved look over classic view]
@@ -87,7 +87,7 @@ image:images/actions-icon.png[three dots icon in table column] in the *Actions* 
 
 [float]
 [[document-explorer-full-screen]]
-=== View in full screen mode
+=== View documents in fullscreen
 
 To view as much data as possible and eliminate distractions, click the fullscreen icon
 image:images/fullscreen-icon.png[icon to display the Document Explorer in fullscreen mode].
