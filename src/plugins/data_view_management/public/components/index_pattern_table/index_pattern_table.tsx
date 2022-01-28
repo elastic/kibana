@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
@@ -26,6 +26,7 @@ import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
+import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 
 const pagination = {
   initialPageSize: 10,
@@ -88,15 +89,21 @@ export const IndexPatternTable = ({
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
 
+  const loadDataViews = useCallback(async () => {
+    setIsLoadingIndexPatterns(true);
+    const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
+      uiSettings.get('defaultIndex'),
+      dataViews
+    );
+    setIndexPatterns(gettedIndexPatterns);
+    setIsLoadingIndexPatterns(false);
+    return gettedIndexPatterns;
+  }, [dataViews, uiSettings]);
+
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
     (async function () {
-      const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-        uiSettings.get('defaultIndex'),
-        dataViews
-      );
-      setIndexPatterns(gettedIndexPatterns);
-      setIsLoadingIndexPatterns(false);
+      const gettedIndexPatterns = await loadDataViews();
       if (
         gettedIndexPatterns.length === 0 ||
         !(await dataViews.hasUserDataView().catch(() => false))
@@ -104,11 +111,18 @@ export const IndexPatternTable = ({
         setShowCreateDialog(true);
       }
     })();
-  }, [indexPatternManagementStart, uiSettings, dataViews]);
+  }, [indexPatternManagementStart, uiSettings, dataViews, loadDataViews]);
 
   chrome.docTitle.change(title);
 
   const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+
+  const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
+  const ContextWrapper = useMemo(
+    () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
+    [spaces]
+  );
 
   const columns = [
     {
@@ -149,7 +163,7 @@ export const IndexPatternTable = ({
             spacesApi={spaces}
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
-            refresh={() => console.log('refresh list!!')}
+            refresh={loadDataViews}
           />
         ) : (
           <></>
@@ -190,8 +204,6 @@ export const IndexPatternTable = ({
     <></>
   );
 
-  console.log('indexPatterns', indexPatterns);
-
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
       <EuiPageHeader
@@ -207,17 +219,18 @@ export const IndexPatternTable = ({
       />
 
       <EuiSpacer size="l" />
-
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        itemId="id"
-        isSelectable={false}
-        items={indexPatterns}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        search={search}
-      />
+      <ContextWrapper>
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          itemId="id"
+          isSelectable={false}
+          items={indexPatterns}
+          columns={columns}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+        />
+      </ContextWrapper>
       {displayIndexPatternEditor}
     </div>
   );
