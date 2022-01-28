@@ -16,6 +16,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/trusted_apps/constants';
 import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
+import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../plugins/security_solution/public/management/pages/host_isolation_exceptions/constants';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -85,5 +86,14 @@ export class EndpointArtifactsTestResources extends FtrService {
     const trustedApp = this.exceptionsGenerator.generateTrustedAppForCreate(overrides);
 
     return this.createExceptionItem(trustedApp);
+  }
+
+  async createHostIsolationException(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): Promise<ArtifactTestData> {
+    await this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION);
+    const artifact = this.exceptionsGenerator.generateHostIsolationExceptionForCreate(overrides);
+
+    return this.createExceptionItem(artifact);
   }
 }
