@@ -120,7 +120,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       }
 
       // Import block in chunks to avoid sending too much data to Elasticsearch at a time.
-      const chunks = createChunks(this._features, this._geoFieldType, MAX_CHUNK_CHAR_COUNT);
+      const chunks = createChunks(this._features, this._geoFieldType, MAX_CHUNK_CHAR_COUNT / 2);
       const blockSizeInBytes = this._blockSizeInBytes;
 
       // reset block for next read
