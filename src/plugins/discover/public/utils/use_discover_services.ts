@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'kibana/server';
-import { NewsFeedSimulatorPlugin } from './plugin';
+import { useKibana } from '../../../kibana_react/public';
+import { DiscoverServices } from '../build_services';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new NewsFeedSimulatorPlugin(initializerContext);
-}
+export const useDiscoverServices = () => useKibana<DiscoverServices>().services;
