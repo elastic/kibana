@@ -3337,6 +3337,25 @@
             ],
             "path": "x-pack/plugins/lens/server/plugin.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-server.PluginStartContract.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.DataViewsServerPluginStart",
+                "text": "DataViewsServerPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/lens/server/plugin.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

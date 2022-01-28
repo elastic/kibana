@@ -536,6 +536,7 @@
               "params",
               "params",
               "params",
+              "params",
               "return"
             ],
             "label": "getExceptionListSummary",
@@ -543,7 +544,7 @@
               "\nFetch an exception list parent container"
             ],
             "signature": [
-              "({ listId, id, namespaceType, }: ",
+              "({ filter, listId, id, namespaceType, }: ",
               "GetExceptionListSummaryOptions",
               ") => Promise<{ windows: number; linux: number; macos: number; total: number; } | null>"
             ],
@@ -555,7 +556,7 @@
                 "id": "def-server.ExceptionListClient.getExceptionListSummary.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    listId,\n    id,\n    namespaceType,\n  }",
+                "label": "{\n    filter,\n    listId,\n    id,\n    namespaceType,\n  }",
                 "description": [],
                 "signature": [
                   "GetExceptionListSummaryOptions"
@@ -2794,6 +2795,146 @@
       },
       {
         "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreDeleteItemServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreDeleteItemServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to performing a list item deletion. Note, this extension point\nis triggered by both `deleteExceptionListItem()` and `deleteExceptionListItemById()` methods of the\n`ExceptionListClient` class"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreDeleteItem\", ",
+          "DeleteExceptionListItemOptions",
+          ", ",
+          "DeleteExceptionListItemOptions",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreExportServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreExportServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to performing an `export` operation against exceptions list and items"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreExport\", ",
+          "ExportExceptionListAndItemsOptions",
+          ", ",
+          "ExportExceptionListAndItemsOptions",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreGetOneItemServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreGetOneItemServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to performing a `patch` operation on the exception item"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreGetOneItem\", ",
+          "GetExceptionListItemOptions",
+          ", ",
+          "GetExceptionListItemOptions",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreImportServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreImportServerExtension",
+        "description": [
+          "\nExtension point is triggered prior processing an import of data into the Exceptions Lists. The callback\nin this extension will be called by both the `importExceptionListAndItems()` and\n`importExceptionListAndItemsAsArray()`"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreImport\", ",
+          "PromiseFromStreams",
+          ", ",
+          "PromiseFromStreams",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreMultiListFindServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreMultiListFindServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to performing a `find` operation against a multiple lists"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreMultiListFind\", ",
+          "FindExceptionListsItemOptions",
+          ", ",
+          "FindExceptionListsItemOptions",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreSingleListFindServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreSingleListFindServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to performing a `find` operation against a SINGLE list"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreSingleListFind\", ",
+          "FindExceptionListItemOptions",
+          ", ",
+          "FindExceptionListItemOptions",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
+        "id": "def-server.ExceptionsListPreSummaryServerExtension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExceptionsListPreSummaryServerExtension",
+        "description": [
+          "\nExtension point is triggered prior to performing a list summary operation"
+        ],
+        "signature": [
+          "ServerExtensionPointDefinition<\"exceptionsListPreSummary\", ",
+          "GetExceptionListSummaryOptions",
+          ", ",
+          "GetExceptionListSummaryOptions",
+          ">"
+        ],
+        "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lists",
         "id": "def-server.ExceptionsListPreUpdateItemServerExtension",
         "type": "Type",
         "tags": [],
@@ -2836,6 +2977,14 @@
             "pluginId": "lists",
             "scope": "server",
             "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreImportServerExtension",
+            "text": "ExceptionsListPreImportServerExtension"
+          },
+          " | ",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
             "section": "def-server.ExceptionsListPreCreateItemServerExtension",
             "text": "ExceptionsListPreCreateItemServerExtension"
           },
@@ -2848,17 +2997,53 @@
             "text": "ExceptionsListPreUpdateItemServerExtension"
           },
           " | ",
-          "ExceptionsListPreGetOneItemServerExtension",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreGetOneItemServerExtension",
+            "text": "ExceptionsListPreGetOneItemServerExtension"
+          },
           " | ",
-          "ExceptionsListPreSingleListFindServerExtension",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreSingleListFindServerExtension",
+            "text": "ExceptionsListPreSingleListFindServerExtension"
+          },
           " | ",
-          "ExceptionsListPreMultiListFindServerExtension",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreMultiListFindServerExtension",
+            "text": "ExceptionsListPreMultiListFindServerExtension"
+          },
           " | ",
-          "ExceptionsListPreExportServerExtension",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreExportServerExtension",
+            "text": "ExceptionsListPreExportServerExtension"
+          },
           " | ",
-          "ExceptionsListPreSummaryServerExtension",
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreSummaryServerExtension",
+            "text": "ExceptionsListPreSummaryServerExtension"
+          },
           " | ",
-          "ExceptionsListPreDeleteItemServerExtension"
+          {
+            "pluginId": "lists",
+            "scope": "server",
+            "docId": "kibListsPluginApi",
+            "section": "def-server.ExceptionsListPreDeleteItemServerExtension",
+            "text": "ExceptionsListPreDeleteItemServerExtension"
+          }
         ],
         "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
         "deprecated": false,
@@ -2900,6 +3085,14 @@
                 "pluginId": "lists",
                 "scope": "server",
                 "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreImportServerExtension",
+                "text": "ExceptionsListPreImportServerExtension"
+              },
+              " | ",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
                 "section": "def-server.ExceptionsListPreCreateItemServerExtension",
                 "text": "ExceptionsListPreCreateItemServerExtension"
               },
@@ -2912,17 +3105,53 @@
                 "text": "ExceptionsListPreUpdateItemServerExtension"
               },
               " | ",
-              "ExceptionsListPreGetOneItemServerExtension",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreGetOneItemServerExtension",
+                "text": "ExceptionsListPreGetOneItemServerExtension"
+              },
               " | ",
-              "ExceptionsListPreSingleListFindServerExtension",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreSingleListFindServerExtension",
+                "text": "ExceptionsListPreSingleListFindServerExtension"
+              },
               " | ",
-              "ExceptionsListPreMultiListFindServerExtension",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreMultiListFindServerExtension",
+                "text": "ExceptionsListPreMultiListFindServerExtension"
+              },
               " | ",
-              "ExceptionsListPreExportServerExtension",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreExportServerExtension",
+                "text": "ExceptionsListPreExportServerExtension"
+              },
               " | ",
-              "ExceptionsListPreSummaryServerExtension",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreSummaryServerExtension",
+                "text": "ExceptionsListPreSummaryServerExtension"
+              },
               " | ",
-              "ExceptionsListPreDeleteItemServerExtension"
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.ExceptionsListPreDeleteItemServerExtension",
+                "text": "ExceptionsListPreDeleteItemServerExtension"
+              }
             ],
             "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
             "deprecated": false
@@ -3439,6 +3668,14 @@
                   "pluginId": "lists",
                   "scope": "server",
                   "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreImportServerExtension",
+                  "text": "ExceptionsListPreImportServerExtension"
+                },
+                " | ",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
                   "section": "def-server.ExceptionsListPreCreateItemServerExtension",
                   "text": "ExceptionsListPreCreateItemServerExtension"
                 },
@@ -3451,17 +3688,53 @@
                   "text": "ExceptionsListPreUpdateItemServerExtension"
                 },
                 " | ",
-                "ExceptionsListPreGetOneItemServerExtension",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreGetOneItemServerExtension",
+                  "text": "ExceptionsListPreGetOneItemServerExtension"
+                },
                 " | ",
-                "ExceptionsListPreSingleListFindServerExtension",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreSingleListFindServerExtension",
+                  "text": "ExceptionsListPreSingleListFindServerExtension"
+                },
                 " | ",
-                "ExceptionsListPreMultiListFindServerExtension",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreMultiListFindServerExtension",
+                  "text": "ExceptionsListPreMultiListFindServerExtension"
+                },
                 " | ",
-                "ExceptionsListPreExportServerExtension",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreExportServerExtension",
+                  "text": "ExceptionsListPreExportServerExtension"
+                },
                 " | ",
-                "ExceptionsListPreSummaryServerExtension",
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreSummaryServerExtension",
+                  "text": "ExceptionsListPreSummaryServerExtension"
+                },
                 " | ",
-                "ExceptionsListPreDeleteItemServerExtension"
+                {
+                  "pluginId": "lists",
+                  "scope": "server",
+                  "docId": "kibListsPluginApi",
+                  "section": "def-server.ExceptionsListPreDeleteItemServerExtension",
+                  "text": "ExceptionsListPreDeleteItemServerExtension"
+                }
               ],
               "path": "x-pack/plugins/lists/server/services/extension_points/types.ts",
               "deprecated": false

@@ -2945,14 +2945,6 @@
             "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -3015,14 +3007,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
           },
           {
             "plugin": "maps",
@@ -5201,14 +5185,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -18610,10 +18586,6 @@
             },
             {
               "plugin": "discover",
-              "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-            },
-            {
-              "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
             },
             {
@@ -18702,6 +18674,10 @@
             },
             {
               "plugin": "infra",
+              "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/editor.tsx"
+            },
+            {
+              "plugin": "infra",
               "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx"
             },
             {
@@ -18711,10 +18687,6 @@
             {
               "plugin": "infra",
               "path": "x-pack/plugins/infra/public/utils/logs_overview_fetchers.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/editor.tsx"
             },
             {
               "plugin": "infra",
@@ -21228,14 +21200,6 @@
             "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -21298,14 +21262,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
           },
           {
             "plugin": "maps",
@@ -23794,14 +23750,6 @@
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
@@ -23957,14 +23905,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -29532,10 +29472,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },
@@ -31008,14 +30944,6 @@
             "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -31078,14 +31006,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
           },
           {
             "plugin": "maps",
@@ -33264,14 +33184,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
           },
           {
             "plugin": "visTypeTimeseries",

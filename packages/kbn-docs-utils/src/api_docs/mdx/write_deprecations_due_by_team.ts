@@ -66,6 +66,8 @@ export function writeDeprecationDueByTeam(
         const api = groupedDeprecationReferences[dep].api;
         const refs = groupedDeprecationReferences[dep].refs;
 
+        if (refs.length === 0) return;
+
         const deprecatedAPILink = `<DocLink id="${getPluginApiDocId(
           api.parentPluginId
         )}" section="${api.id}" text="${api.label}"/>`;
@@ -86,7 +88,7 @@ export function writeDeprecationDueByTeam(
         const removeBy = api.removeBy ? api.removeBy : '-';
 
         // These were initially grouped by plugin, so each array of references is coming from a specific plugin.
-        return `| ${refs[0].plugin} | ${deprecatedAPILink} | ${referencedLocations} | ${removeBy} |`;
+        return `| ${firstTen[0].plugin} | ${deprecatedAPILink} | ${referencedLocations} | ${removeBy} |`;
       })
       .join('\n')}
     `;
