@@ -209,7 +209,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             {osquery?.OsqueryAction?.({ agentId, formType: 'steps' })}
           </OsqueryActionWrapper>
         );
-      // return <OsqueryLiveQuery agentId={agentId} formType={'steps'} />;
       case ACTIVE_PANEL.HOST_ISOLATION:
         return (
           <HostIsolationPanel
