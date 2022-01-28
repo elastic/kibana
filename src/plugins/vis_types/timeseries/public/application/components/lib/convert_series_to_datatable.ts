@@ -9,8 +9,8 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
 import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
-import type { PanelData } from '../../../../common/types';
-import { BUCKET_TYPES } from '../../../../common/enums';
+import type { PanelData, Metric } from '../../../../common/types';
+import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
@@ -78,6 +78,10 @@ export const addMetaToColumns = (
   });
 };
 
+const hasSeriesAgg = (metrics: Metric[]) => {
+  return metrics.some((metric) => metric.type === TSVB_METRIC_TYPES.SERIES_AGG);
+};
+
 export const convertSeriesToDataTable = async (
   model: TimeseriesVisParams,
   series: PanelData[],
@@ -96,7 +100,9 @@ export const convertSeriesToDataTable = async (
         usedIndexPattern = indexPattern;
       }
     }
-    const isGroupedByTerms = layer.split_mode === BUCKET_TYPES.TERMS;
+    // series aggregation is a special case, splitting by terms doesn't create multiple series per term
+    const isGroupedByTerms =
+      layer.split_mode === BUCKET_TYPES.TERMS && !hasSeriesAgg(layer.metrics);
     const isGroupedByFilters = layer.split_mode === BUCKET_TYPES.FILTERS;
     const seriesPerLayer = series.filter((s) => s.seriesId === layer.id);
     let id = X_ACCESSOR_INDEX;
