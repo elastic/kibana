@@ -14,7 +14,7 @@ import type {
   ESClusterInfo,
   ESLicense,
 } from '../types';
-import { TelemetryReceiver } from '../receiver';
+import { ITelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 import {
   batchTelemetryRecords,
