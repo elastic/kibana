@@ -289,7 +289,7 @@ describe('ServiceIcons', () => {
           data: {
             serverless: {
               type: '',
-              functionName: 'lambda-java-dev',
+              functionNames: ['lambda-java-dev'],
               faasTriggerTypes: ['datasource', 'http'],
             },
           },

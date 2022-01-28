@@ -62,6 +62,7 @@ export function getTransactionMetrics(events: ApmFields[]) {
     'service.runtime.name',
     'service.runtime.version',
     'host.os.platform',
+    'faas.id',
     'faas.coldstart',
     'faas.trigger.type',
   ]);

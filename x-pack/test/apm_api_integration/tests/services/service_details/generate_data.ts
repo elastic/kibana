@@ -28,6 +28,8 @@ export const dataConfig = {
   },
   containerOs: 'linux',
   serverless: {
+    firstFunctionName: 'my-function-1',
+    secondFunctionName: 'my-function-2',
     faasTriggerType: 'other',
   },
   cloud: {
@@ -58,40 +60,71 @@ export async function generateData({
     projectName,
     serviceName: cloudServiceName,
   } = cloud;
-  const { faasTriggerType } = serverless;
+  const { faasTriggerType, firstFunctionName, secondFunctionName } = serverless;
   const { version, runtime, framework, agent, name: serviceName } = service;
   const { name: serviceRunTimeName, version: serviceRunTimeVersion } = runtime;
   const { name: agentName, version: agentVersion } = agent;
 
   const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
 
-  const traceEvents = timerange(start, end)
-    .interval('30s')
-    .rate(rate)
-    .flatMap((timestamp) =>
-      instance
-        .transaction(transaction.name)
-        .timestamp(timestamp)
-        .defaults({
-          'cloud.provider': provider,
-          'cloud.project.name': projectName,
-          'cloud.service.name': cloudServiceName,
-          'cloud.availability_zone': availabilityZone,
-          'cloud.machine.type': machineType,
-          'cloud.region': region,
-          'faas.trigger.type': faasTriggerType,
-          'host.os.platform': containerOs,
-          'kubernetes.pod.uid': '48f4c5a5-0625-4bea-9d94-77ee94a17e70',
-          'service.version': version,
-          'service.runtime.name': serviceRunTimeName,
-          'service.runtime.version': serviceRunTimeVersion,
-          'service.framework.name': framework,
-          'agent.version': agentVersion,
-        })
-        .duration(transaction.duration)
-        .success()
-        .serialize()
-    );
+  const traceEvents = [
+    ...timerange(start, end)
+      .interval('30s')
+      .rate(rate)
+      .flatMap((timestamp) =>
+        instance
+          .transaction(transaction.name)
+          .timestamp(timestamp)
+          .defaults({
+            'cloud.provider': provider,
+            'cloud.project.name': projectName,
+            'cloud.service.name': cloudServiceName,
+            'cloud.availability_zone': availabilityZone,
+            'cloud.machine.type': machineType,
+            'cloud.region': region,
+            'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:${firstFunctionName}`,
+            'faas.trigger.type': faasTriggerType,
+            'host.os.platform': containerOs,
+            'kubernetes.pod.uid': '48f4c5a5-0625-4bea-9d94-77ee94a17e70',
+            'service.version': version,
+            'service.runtime.name': serviceRunTimeName,
+            'service.runtime.version': serviceRunTimeVersion,
+            'service.framework.name': framework,
+            'agent.version': agentVersion,
+          })
+          .duration(transaction.duration)
+          .success()
+          .serialize()
+      ),
+    ...timerange(start, end)
+      .interval('30s')
+      .rate(rate)
+      .flatMap((timestamp) =>
+        instance
+          .transaction(transaction.name)
+          .timestamp(timestamp)
+          .defaults({
+            'cloud.provider': provider,
+            'cloud.project.name': projectName,
+            'cloud.service.name': cloudServiceName,
+            'cloud.availability_zone': availabilityZone,
+            'cloud.machine.type': machineType,
+            'cloud.region': region,
+            'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:${secondFunctionName}`,
+            'faas.trigger.type': faasTriggerType,
+            'host.os.platform': containerOs,
+            'kubernetes.pod.uid': '48f4c5a5-0625-4bea-9d94-77ee94a17e70',
+            'service.version': version,
+            'service.runtime.name': serviceRunTimeName,
+            'service.runtime.version': serviceRunTimeVersion,
+            'service.framework.name': framework,
+            'agent.version': agentVersion,
+          })
+          .duration(transaction.duration)
+          .success()
+          .serialize()
+      ),
+  ];
 
   await synthtraceEsClient.index(traceEvents);
 }

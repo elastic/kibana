@@ -101,10 +101,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct serverless details', () => {
         const { cloud, serverless } = dataConfig;
         const { serviceName: cloudServiceName } = cloud;
-        const { faasTriggerType } = serverless;
+        const { faasTriggerType, firstFunctionName, secondFunctionName } = serverless;
 
         expect(body?.serverless?.type).to.be(cloudServiceName);
-        expect(body?.serverless?.functionName).to.be(serviceName);
+        expect(body?.serverless?.functionNames).to.have.length(2);
+        expect(body?.serverless?.functionNames).to.contain(firstFunctionName);
+        expect(body?.serverless?.functionNames).to.contain(secondFunctionName);
         expect(first(body?.serverless?.faasTriggerTypes)).to.be(faasTriggerType);
       });
 

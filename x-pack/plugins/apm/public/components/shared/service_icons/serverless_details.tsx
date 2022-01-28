@@ -24,15 +24,26 @@ export function ServerlessDetails({ serverless }: Props) {
   }
 
   const listItems: EuiDescriptionListProps['listItems'] = [];
-  if (serverless.functionName) {
+
+  if (!!serverless.functionNames?.length) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.cloud.functionNameLabel',
         {
-          defaultMessage: 'Function name',
+          defaultMessage:
+            '{functionNames, plural, =0 {Function name} one {Function name} other {Function names}} ',
+          values: { functionNames: serverless.functionNames.length },
         }
       ),
-      description: serverless.functionName,
+      description: (
+        <ul>
+          {serverless.functionNames.map((type, index) => (
+            <li key={index}>
+              <EuiBadge color="hollow">{type}</EuiBadge>
+            </li>
+          ))}
+        </ul>
+      ),
     });
   }
 

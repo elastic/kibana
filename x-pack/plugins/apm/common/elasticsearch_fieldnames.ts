@@ -154,5 +154,6 @@ export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
 export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
 export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
 
+export const FAAS_ID = 'faas.id';
 export const FAAS_COLDSTART = 'faas.coldstart';
 export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';

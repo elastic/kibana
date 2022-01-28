@@ -20,6 +20,7 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
+  FAAS_ID,
   FAAS_TRIGGER_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
@@ -55,7 +56,7 @@ export interface ServiceMetadataDetails {
   };
   serverless?: {
     type?: string;
-    functionName?: string;
+    functionNames?: string[];
     faasTriggerTypes?: string[];
   };
   cloud?: {
@@ -138,6 +139,12 @@ export async function getServiceMetadataDetails({
             size: 10,
           },
         },
+        faasFunctionNames: {
+          terms: {
+            field: FAAS_ID,
+            size: 10,
+          },
+        },
         totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
     },
@@ -185,7 +192,9 @@ export async function getServiceMetadataDetails({
     !!response.aggregations?.faasTriggerTypes?.buckets.length && cloud
       ? {
           type: cloud.service?.name,
-          functionName: service.name,
+          functionNames: response.aggregations?.faasFunctionNames.buckets
+            .map((bucket) => getLambdaFunctionNameFromARN(bucket.key as string))
+            .filter((name) => name),
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
@@ -215,4 +224,9 @@ export async function getServiceMetadataDetails({
     serverless: serverlessDetails,
     cloud: cloudDetails,
   };
+}
+
+function getLambdaFunctionNameFromARN(arn: string) {
+  // Lambda function ARN example: arn:aws:lambda:us-west-2:123456789012:function:my-function
+  return arn.split(':')[6] || '';
 }
