@@ -40,6 +40,7 @@ import {
 } from '../../../observability/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export const uxRoutes: APMRouteDefinition[] = [
   {
@@ -166,7 +167,7 @@ export const renderApp = ({
   corePlugins: ApmPluginStartDeps;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
-  const { element } = appMountParameters;
+  const { element, theme$ } = appMountParameters;
 
   createCallApmApi(core);
 
@@ -177,14 +178,16 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    <UXAppRoot
-      appMountParameters={appMountParameters}
-      core={core}
-      deps={deps}
-      config={config}
-      corePlugins={corePlugins}
-      observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-    />,
+    <KibanaThemeProvider theme$={theme$}>
+      <UXAppRoot
+        appMountParameters={appMountParameters}
+        core={core}
+        deps={deps}
+        config={config}
+        corePlugins={corePlugins}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+      />
+    </KibanaThemeProvider>,
     element
   );
   return () => {

@@ -30,6 +30,7 @@ const executeParams = {
   params: {
     foo: true,
   },
+  executionId: '123abc',
   request: {} as KibanaRequest,
 };
 
@@ -118,6 +119,13 @@ test('successfully executes', async () => {
             "kind": "action",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -139,6 +147,13 @@ test('successfully executes', async () => {
             "outcome": "success",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -518,15 +533,24 @@ test('writes to event log for execute timeout', async () => {
 
   await actionExecutor.logCancellation({
     actionId: 'action1',
+    executionId: '123abc',
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
     event: {
       action: 'execute-timeout',
+      kind: 'action',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',
@@ -549,11 +573,19 @@ test('writes to event log for execute and execute start', async () => {
   });
   await actionExecutor.execute(executeParams);
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
     event: {
       action: 'execute-start',
+      kind: 'action',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',
@@ -566,11 +598,20 @@ test('writes to event log for execute and execute start', async () => {
     },
     message: 'action started: test:1: action-1',
   });
-  expect(eventLogger.logEvent.mock.calls[1][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
     event: {
       action: 'execute',
+      kind: 'action',
+      outcome: 'success',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',
