@@ -26,7 +26,7 @@ import {
   updateCurrentWriteIndices,
 } from './template';
 
-const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-1';
+const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-2';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
