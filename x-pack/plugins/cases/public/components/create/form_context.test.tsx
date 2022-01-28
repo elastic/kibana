@@ -520,6 +520,11 @@ describe('Create case', () => {
         expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
       });
 
+      // we need the choices response to conditionally show the subcategory select
+      act(() => {
+        onChoicesSuccess(useGetChoicesResponse.choices);
+      });
+
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
         wrapper
           .find(`select[data-test-subj="${subj}"]`)
