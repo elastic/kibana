@@ -223,6 +223,10 @@ const buildReasonWithVerboseMetricName = (
   useWarningThreshold?: boolean
 ) => {
   if (!resultItem) return '';
+  const thresholdToFormat = useWarningThreshold
+    ? resultItem.warningThreshold!
+    : resultItem.threshold;
+
   const resultWithVerboseMetricName = {
     ...resultItem,
     group,
@@ -232,7 +236,9 @@ const buildReasonWithVerboseMetricName = (
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
-    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    threshold: Array.isArray(thresholdToFormat)
+      ? thresholdToFormat.map((threshold: number) => `${threshold}%`)
+      : `${thresholdToFormat}%`,
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);

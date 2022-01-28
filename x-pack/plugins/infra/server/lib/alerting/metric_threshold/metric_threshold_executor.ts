@@ -32,6 +32,7 @@ import {
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -286,7 +287,7 @@ const formatAlertResult = <AlertResult>(
     warningThreshold?: number[];
     warningComparator?: Comparator;
     timeSize: number;
-    timeUnit: string;
+    timeUnit: TimeUnitChar;
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
