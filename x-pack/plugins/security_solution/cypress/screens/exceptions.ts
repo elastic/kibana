@@ -34,7 +34,7 @@ export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]
 
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
-export const BUILDER_MODAL_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
+export const BUILDER_FLYOUT_BODY = '[data-test-subj="exceptionsBuilderWrapper"]';
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
 
@@ -59,3 +59,5 @@ export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContai
 
 export const EXCEPTION_FIELD_LIST =
   '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
+
+export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exception-flyout-title"]';

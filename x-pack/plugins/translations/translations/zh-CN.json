@@ -27690,7 +27690,6 @@
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.expression": "之内",
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.value": "上一 {value}",
     "xpack.uptime.alerts.searchPlaceholder.kql": "使用 kql 语法筛选",
-    "xpack.uptime.alerts.settings.createConnector": "创建连接器",
     "xpack.uptime.alerts.timerangeUnitSelectable.daysOption.ariaLabel": "“天”时间范围选择项",
     "xpack.uptime.alerts.timerangeUnitSelectable.hoursOption.ariaLabel": "“小时”时间范围选择项",
     "xpack.uptime.alerts.timerangeUnitSelectable.minutesOption.ariaLabel": "“分钟”时间范围选择项",
