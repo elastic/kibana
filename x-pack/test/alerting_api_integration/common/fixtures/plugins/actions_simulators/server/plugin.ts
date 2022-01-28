@@ -63,8 +63,7 @@ export async function getHttpsWebhookServer(): Promise<https.Server> {
 }
 
 export async function getXmattersServer(): Promise<http.Server> {
-  const { httpServer } = await initXmatters();
-  return httpServer;
+  return await initXmatters();
 }
 
 export async function getSlackServer(): Promise<http.Server> {
