@@ -284,4 +284,7 @@ include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
 
+include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
+
 include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
+
