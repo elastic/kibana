@@ -86,6 +86,7 @@ export interface MlSummaryJob {
 
   /**
    * Used in older implementations of the job config, where the datafeed was placed inside the job for convenience.
+   * This will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint.
    */
   fullJob?: CombinedJob;
 
@@ -111,7 +112,8 @@ export interface MlSummaryJob {
   isNotSingleMetricViewerJobMessage?: string;
 
   /**
-   * When present, it explains that a task is executed on the job that blocks it from opening.
+   * When present, it explains that a task is currently running on the job, which is stopping
+   * any other actions from being performed on the job.
    */
   blocked?: MlJobBlocked;
 
