@@ -14,9 +14,15 @@ export const jobTypeLiterals = schema.oneOf([
 
 export const jobTypeSchema = schema.object({ jobType: jobTypeLiterals });
 
-export const jobsAndSpaces = schema.object({
+export const updateJobsSpaces = schema.object({
   jobType: jobTypeLiterals,
   jobIds: schema.arrayOf(schema.string()),
+  spacesToAdd: schema.arrayOf(schema.string()),
+  spacesToRemove: schema.arrayOf(schema.string()),
+});
+
+export const updateModelsSpaces = schema.object({
+  modelIds: schema.arrayOf(schema.string()),
   spacesToAdd: schema.arrayOf(schema.string()),
   spacesToRemove: schema.arrayOf(schema.string()),
 });

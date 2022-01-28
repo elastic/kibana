@@ -7,17 +7,17 @@
 
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from 'kibana/server';
-import type { JobObject, JobSavedObjectService } from './service';
-import {
+import type { JobObject, JobSavedObjectService, ModelObject } from './service';
+import type {
   JobType,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
 } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
-import { getSavedObjectClientError } from './util';
+import { getSavedObjectClientError, getJobDetailsFromModel } from './util';
 
-import { Datafeed } from '../../common/types/anomaly_detection_jobs';
+import type { Datafeed } from '../../common/types/anomaly_detection_jobs';
 
 export interface JobSpaceOverrides {
   overrides: {
@@ -116,7 +116,9 @@ export function syncSavedObjectsFactory(
           tasks.push(async () => {
             try {
               const mod = models.trained_model_configs.find((m) => m.model_id === modelId);
-              await jobSavedObjectService.createModel(mod!);
+              // CHANGE ME!!!!!!!!!!!! throw here if mod is undefined
+              const job = getJobDetailsFromModel(mod!);
+              await jobSavedObjectService.createModel(modelId, job);
               results.savedObjectsCreated[modelId] = {
                 success: true,
                 type,
@@ -292,6 +294,7 @@ export function syncSavedObjectsFactory(
     const results: InitializeSavedObjectResponse = {
       jobs: [],
       datafeeds: [],
+      models: [],
       success: true,
     };
     const status = await checkStatus();
@@ -300,7 +303,7 @@ export function syncSavedObjectsFactory(
       return acc;
     }, {} as Record<string, JobStatus>);
 
-    const jobs: Array<{ job: JobObject; namespaces: string[] }> = [];
+    const jobObjects: Array<{ job: JobObject; namespaces: string[] }> = [];
     const datafeeds: Array<{ jobId: string; datafeedId: string }> = [];
     const types: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
 
@@ -310,7 +313,7 @@ export function syncSavedObjectsFactory(
           if (simulate === true) {
             results.jobs.push({ id: job.jobId, type });
           } else {
-            jobs.push({
+            jobObjects.push({
               job: {
                 job_id: job.jobId,
                 datafeed_id: job.datafeedId ?? null,
@@ -349,10 +352,39 @@ export function syncSavedObjectsFactory(
       }
     });
 
+    const models = status.jobs.models.filter((m) => m.checks.savedObjectExits === false);
+    const modelObjects: ModelObject[] = [];
+
+    if (models.length) {
+      if (simulate === true) {
+        results.models = models.map(({ modelId }) => ({ id: modelId }));
+      } else {
+        const {
+          body: { trained_model_configs: trainedModelConfigs },
+        } = await client.asInternalUser.ml.getTrainedModels({
+          model_id: models.map(({ modelId }) => modelId).join(','),
+        });
+        const jobDetails = trainedModelConfigs.reduce((acc, cur) => {
+          const job = getJobDetailsFromModel(cur);
+          if (job !== null) {
+            acc[cur.model_id] = job;
+          }
+          return acc;
+        }, {} as Record<string, ModelObject['job']>);
+
+        models.forEach(({ modelId }) => {
+          modelObjects.push({
+            model_id: modelId,
+            job: jobDetails[modelId] ? jobDetails[modelId] : null,
+          });
+        });
+      }
+    }
+
     try {
       // create missing job saved objects
-      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs);
-      createResults.saved_objects.forEach(({ attributes }) => {
+      const createJobsResults = await jobSavedObjectService.bulkCreateJobs(jobObjects);
+      createJobsResults.saved_objects.forEach(({ attributes }) => {
         results.jobs.push({
           id: attributes.job_id,
           type: attributes.type,
@@ -367,6 +399,14 @@ export function syncSavedObjectsFactory(
           type: 'anomaly-detector',
         });
       }
+
+      // use * space if no spaces for related jobs can be found.
+      const createModelsResults = await jobSavedObjectService.bulkCreateModel(modelObjects, '*');
+      createModelsResults.saved_objects.forEach(({ attributes }) => {
+        results.models.push({
+          id: attributes.model_id,
+        });
+      });
     } catch (error) {
       results.success = false;
       results.error = Boom.boomify(error);

@@ -78,4 +78,18 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+  modelsSpaces() {
+    return httpService.http<JobsSpacesResponse>({
+      path: `${basePath()}/saved_objects/models_spaces`,
+      method: 'GET',
+    });
+  },
+  updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]) {
+    const body = JSON.stringify({ modelIds, spacesToAdd, spacesToRemove });
+    return httpService.http<SavedObjectResult>({
+      path: `${basePath()}/saved_objects/update_models_spaces`,
+      method: 'POST',
+      body,
+    });
+  },
 });

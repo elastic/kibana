@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import type { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import type { JobSavedObjectService } from './service';
-import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
+import type { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
-import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
-import { ResolveMlCapabilities } from '../../common/types/capabilities';
+import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import type { ResolveMlCapabilities } from '../../common/types/capabilities';
 import { getJobDetailsFromModel } from './util';
 
 export interface JobSavedObjectStatus {
@@ -121,7 +121,7 @@ export function checksFactory(
         return acc;
       }
 
-      const { jobId, createTime } = job;
+      const { job_id: jobId, create_time: createTime } = job;
       const exists = createTime === dfaJobsCreateTimeMap.get(jobId);
 
       if (jobId && createTime) {
@@ -221,19 +221,14 @@ export function checksFactory(
       })
       .map((model: estypes.MlTrainedModelConfig) => {
         const modelId = model.model_id;
-        // const jobId = metadata.
-        const job = getJobDetailsFromModel(model);
-
-        let savedObjectExits = false;
-        let dfaJobReferenced = null;
         const modelObject = nonSpaceModelObjectIds.get(modelId);
-        if (modelObject !== undefined) {
-          savedObjectExits = true;
-          if (job !== null) {
-            dfaJobReferenced =
-              modelObject.attributes.job?.job_id === job.jobId &&
-              modelObject.attributes.job?.create_time === job.createTime;
-          }
+        const savedObjectExits = modelObject !== undefined;
+        const job = getJobDetailsFromModel(model);
+        let dfaJobReferenced = null;
+        if (job !== null) {
+          dfaJobReferenced =
+            modelObject?.attributes.job?.job_id === job.job_id &&
+            modelObject?.attributes.job?.create_time === job.create_time;
         }
 
         return {

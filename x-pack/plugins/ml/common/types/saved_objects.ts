@@ -40,6 +40,7 @@ export type JobsSpacesResponse = {
 export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: JobType }>;
   datafeeds: Array<{ id: string; type: JobType }>;
+  models: Array<{ id: string }>;
   success: boolean;
   error?: ErrorType;
 }

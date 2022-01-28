@@ -41,7 +41,7 @@ export function jobSavedObjectsInitializationFactory(
         mlLog.error('Internal saved object client not initialized!');
         return;
       }
-
+      // return;
       if ((await _needsInitializing(savedObjectsClient)) === false) {
         // ml job saved objects have already been initialized
         return;

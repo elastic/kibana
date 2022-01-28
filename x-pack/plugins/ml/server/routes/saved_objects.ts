@@ -9,7 +9,8 @@ import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory, JobSavedObjectStatus } from '../saved_objects';
 import {
-  jobsAndSpaces,
+  updateJobsSpaces,
+  updateModelsSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
   syncCheckSchema,
@@ -165,13 +166,13 @@ export function savedObjectsRoutes(
    * @apiName UpdateJobsSpaces
    * @apiDescription Update a list of jobs to add and/or remove them from given spaces
    *
-   * @apiSchema (body) jobsAndSpaces
+   * @apiSchema (body) updateJobsSpaces
    */
   router.post(
     {
       path: '/api/ml/saved_objects/update_jobs_spaces',
       validate: {
-        body: jobsAndSpaces,
+        body: updateJobsSpaces,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -184,6 +185,44 @@ export function savedObjectsRoutes(
         const body = await jobSavedObjectService.updateJobsSpaces(
           jobType,
           jobIds,
+          spacesToAdd,
+          spacesToRemove
+        );
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {post} /api/ml/saved_objects/update_models_spaces Update what spaces jobs are assigned to
+   * @apiName UpdateModelsSpaces
+   * @apiDescription Update a list of models to add and/or remove them from given spaces
+   *
+   * @apiSchema (body) updateModelsSpaces
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/update_models_spaces',
+      validate: {
+        body: updateModelsSpaces,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { modelIds, spacesToAdd, spacesToRemove } = request.body;
+
+        const body = await jobSavedObjectService.updateModelsSpaces(
+          modelIds,
           spacesToAdd,
           spacesToRemove
         );
@@ -268,14 +307,13 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
       try {
         const { checkStatus } = checksFactory(client, jobSavedObjectService);
-        const allStatuses = Object.entries((await checkStatus()).savedObjects)
-          .filter(([a, b]) => {
-            return a === 'anomaly-detector' || a === 'data-frame-analytics';
-          })
-          .map(([, b]) => b)
-          .flat() as JobSavedObjectStatus[];
-
-        const body = allStatuses
+        const savedObjects = (await checkStatus()).savedObjects;
+        const jobStatus = (
+          Object.entries(savedObjects)
+            .filter(([type]) => type === 'anomaly-detector' || type === 'data-frame-analytics')
+            .map(([, status]) => status)
+            .flat() as JobSavedObjectStatus[]
+        )
           .filter((s) => s.checks.jobExists)
           .reduce((acc, cur) => {
             const type = cur.type;
@@ -287,7 +325,46 @@ export function savedObjectsRoutes(
           }, {} as { [id: string]: { [id: string]: string[] | undefined } });
 
         return response.ok({
-          body,
+          body: jobStatus,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {get} /api/ml/saved_objects/models_spaces Get all models and their spaces
+   * @apiName ModelsSpaces
+   * @apiDescription List all models and their spaces.
+   *
+   */
+  router.get(
+    {
+      path: '/api/ml/saved_objects/models_spaces',
+      validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
+      try {
+        const { checkStatus } = checksFactory(client, jobSavedObjectService);
+        const savedObjects = (await checkStatus()).savedObjects;
+        const modelStatus = savedObjects.models
+          .filter((s) => s.checks.modelExists)
+          .reduce(
+            (acc, cur) => {
+              acc.models[cur.modelId] = cur.namespaces;
+              return acc;
+            },
+            { models: {} } as { models: { [id: string]: string[] | undefined } }
+          );
+
+        return response.ok({
+          body: modelStatus,
         });
       } catch (e) {
         return response.customError(wrapError(e));

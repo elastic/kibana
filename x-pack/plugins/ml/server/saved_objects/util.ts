@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsServiceStart, KibanaRequest } from 'kibana/server';
 import { SavedObjectsClient } from '../../../../../src/core/server';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import type { ModelJob } from './service';
 
 export function savedObjectClientsFactory(
   getSavedObjectsStart: () => SavedObjectsServiceStart | null
@@ -42,10 +43,9 @@ export function getSavedObjectClientError(error: any) {
   return error.isBoom && error.output?.payload ? error.output.payload : error.body ?? error;
 }
 
-export function getJobDetailsFromModel(model: estypes.MlTrainedModelConfig) {
+export function getJobDetailsFromModel(model: estypes.MlTrainedModelConfig): ModelJob | null {
   // @ts-ignore types are wrong
   if (model.metadata?.analytics_config === undefined) {
-    // acc.set(cur.model_id, null);
     return null;
   }
 
@@ -53,5 +53,5 @@ export function getJobDetailsFromModel(model: estypes.MlTrainedModelConfig) {
   const jobId: string = model.metadata.analytics_config.id;
   // @ts-ignore types are wrong
   const createTime: number = model.metadata.analytics_config.create_time;
-  return { jobId, createTime };
+  return { job_id: jobId, create_time: createTime };
 }
