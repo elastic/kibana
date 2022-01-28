@@ -29,7 +29,7 @@ export interface MlSummaryJob {
   description: string;
 
   /**
-   * A list of job groups. A job can belong to no groups or many.
+   * A list of job groups. A job can belong to no groups, one or many.
    */
   groups: string[];
 
