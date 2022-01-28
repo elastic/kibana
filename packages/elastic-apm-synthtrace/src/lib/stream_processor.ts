@@ -171,7 +171,7 @@ export class StreamProcessor {
       if (!d.service?.name) {
         dataStream = 'metrics-apm.app-default';
       } else {
-        if (!d.transaction || !d.span) {
+        if (!d.transaction && !d.span) {
           dataStream = 'metrics-apm.app-default';
         }
       }

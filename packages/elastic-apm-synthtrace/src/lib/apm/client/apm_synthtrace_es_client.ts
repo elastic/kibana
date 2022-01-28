@@ -82,12 +82,13 @@ export class ApmSynthtraceEsClient {
     const writeTargets = await this.getWriteTargets();
     // TODO logger.perf
     await this.client.helpers.bulk<ApmFields>({
-      concurrency: options?.concurrency,
+      concurrency: options?.concurrency ?? 10,
       refresh: false,
       refreshOnCompletion: false,
       datasource: new StreamProcessor({
         processors: StreamProcessor.apmProcessors,
         maxSourceEvents: options?.maxDocs,
+        logger: this.logger,
       })
         // TODO https://github.com/elastic/elasticsearch-js/issues/1610
         // having to map here is awkward, it'd be better to map just before serialization.
@@ -114,6 +115,7 @@ export class ApmSynthtraceEsClient {
     return this.client.indices.refresh({
       index: indices,
       allow_no_indices: true,
+      ignore_unavailable: true,
     });
   }
 }
