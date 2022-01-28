@@ -127,31 +127,37 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
         : [];
 
-    const { groups, actionsToSchedule } = (await (
-      await libs.getWorkerThreads()
-    ).run({
-      name: 'getActionsFromMetricThreshold',
-      args: {
-        params,
-        config,
-        prevGroups,
-        alertOnNoData,
-        alertOnGroupDisappear,
-        compositeSize,
-      },
-      scopedClusterClient: services.scopedClusterClient,
-    })) as { groups: string[]; actionsToSchedule: IActionSchedulingInfo[] };
+    if (process.env.RUN_RULE_IN_WORKER === 'true') {
+      console.log('RUN_RULE_IN_WORKER=true Running metric threshold rule in a worker');
+    } else {
+      console.log('RUN_RULE_IN_WORKER!=true Running metric threshold rul in the main thread');
+    }
 
-    // const { groups, actionsToSchedule } = (await makeGetActionsFromMetricThreshold(
-    //   services.scopedClusterClient.asCurrentUser
-    // )({
-    //   params,
-    //   config,
-    //   prevGroups,
-    //   alertOnNoData,
-    //   alertOnGroupDisappear,
-    //   compositeSize,
-    // })) as { groups: string[]; actionsToSchedule: IActionSchedulingInfo[] };
+    const { groups, actionsToSchedule } = (
+      process.env.RUN_RULE_IN_WORKER === 'true'
+        ? await (
+            await libs.getWorkerThreads()
+          ).run({
+            name: 'getActionsFromMetricThreshold',
+            args: {
+              params,
+              config,
+              prevGroups,
+              alertOnNoData,
+              alertOnGroupDisappear,
+              compositeSize,
+            },
+            scopedClusterClient: services.scopedClusterClient,
+          })
+        : await makeGetActionsFromMetricThreshold(services.scopedClusterClient.asCurrentUser)({
+            params,
+            config,
+            prevGroups,
+            alertOnNoData,
+            alertOnGroupDisappear,
+            compositeSize,
+          })
+    ) as { groups: string[]; actionsToSchedule: IActionSchedulingInfo[] };
 
     actionsToSchedule.forEach(
       ({ actionGroupId, alertState, group, reason, timestamp, value, threshold }) => {
