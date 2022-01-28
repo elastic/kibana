@@ -202,19 +202,35 @@ const getMetric: (
         bucketSelector,
         afterKeyHandler
       )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
-      const groupedResults: Record<string, any> = {};
-      for (const bucket of compositeBuckets) {
-        const key = Object.values(bucket.key).join(', ');
-        const value = getValuesFromAggregations(
-          bucket,
-          aggType,
-          dropPartialBucketsOptions,
-          calculatedTimerange,
-          bucket.doc_count
-        );
-        groupedResults[key] = value;
-      }
-      return groupedResults;
+      // Use unoptimized code from before https://github.com/elastic/kibana/pull/121904/files
+      const groupedResults = compositeBuckets.reduce(
+        (result, bucket) => ({
+          ...result,
+          [Object.values(bucket.key)
+            .map((value) => value)
+            .join(', ')]: getValuesFromAggregations(
+            bucket,
+            aggType,
+            dropPartialBucketsOptions,
+            calculatedTimerange,
+            bucket.doc_count
+          ),
+        }),
+        {}
+      );
+      // const groupedResults: Record<string, any> = {};
+      // for (const bucket of compositeBuckets) {
+      //   const key = Object.values(bucket.key).join(', ');
+      //   const value = getValuesFromAggregations(
+      //     bucket,
+      //     aggType,
+      //     dropPartialBucketsOptions,
+      //     calculatedTimerange,
+      //     bucket.doc_count
+      //   );
+      //   groupedResults[key] = value;
+      // }
+      // return groupedResults;
     }
     const { body: result } = await esClient.search({
       body: searchBody,
