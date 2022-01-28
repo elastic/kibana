@@ -14,7 +14,6 @@ export class GeoFileUploadPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
-  private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
   
   async isNextButtonEnabled(): Promise<boolean> {
@@ -83,7 +82,7 @@ export class GeoFileUploadPageObject extends FtrService {
     return JSON.parse(await this.browser.getClipboardValue());
   }
 
-  async addFileAsDocumentLayer(): Promise<ImportResults> {
+  async addFileAsDocumentLayer() {
     await this.clickNextButton();
 
     await this.header.waitUntilLoadingHasFinished();

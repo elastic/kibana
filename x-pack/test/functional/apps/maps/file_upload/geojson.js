@@ -40,9 +40,7 @@ export default function ({ getPageObjects, getService }) {
       expect(numberOfLayers).to.be(2);
 
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('world_countries_v7');
-      expect(tooltipText).to.be(
-        'world_countries_v7\nResults limited to 76 features, 41% of file.'
-      );
+      expect(tooltipText).to.be('world_countries_v7\nResults limited to 76 features, 41% of file.');
     });
 
     it('should import geojson', async () => {
@@ -61,9 +59,7 @@ export default function ({ getPageObjects, getService }) {
       expect(numberOfLayers).to.be(2);
 
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
-      expect(tooltipText).to.be(
-        `${indexName}\nFound ~281 documents. This count is approximate.`
-      );
+      expect(tooltipText).to.be(`${indexName}\nFound ~281 documents. This count is approximate.`);
     });
   });
 }

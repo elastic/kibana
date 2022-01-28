@@ -61,9 +61,7 @@ export default function ({ getPageObjects, getService }) {
       expect(numberOfLayers).to.be(2);
 
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
-      expect(tooltipText).to.be(
-        `${indexName}\nFound 174 documents.`
-      );
+      expect(tooltipText).to.be(`${indexName}\nFound 174 documents.`);
     });
   });
 }
