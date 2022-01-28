@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { Feature, Point } from 'geojson';
+import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { GeoFileImporter, GeoFilePreview } from './types';
 import { CreateDocsResponse, ImportResults } from '../types';
@@ -16,6 +16,7 @@ import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
+import { createChunks } from './create_chunks';
 
 const BLOCK_SIZE_MB = 5 * MB;
 
@@ -310,49 +311,4 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   protected _createDocs(text: string): CreateDocsResponse {
     throw new Error('_createDocs not implemented.');
   }
-}
-
-export function createChunks(
-  features: Feature[],
-  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE,
-  maxChunkCharCount: number
-): ImportDoc[][] {
-  const chunks: ImportDoc[][] = [];
-
-  let chunk: ImportDoc[] = [];
-  let chunkChars = 0;
-  for (let i = 0; i < features.length; i++) {
-    const doc = toEsDoc(features[i], geoFieldType);
-    const docChars = JSON.stringify(doc).length + 1; // +1 adds CHAR for comma once document is in list
-    if (chunk.length === 0 || chunkChars + docChars < maxChunkCharCount) {
-      // add ES document to current chunk
-      chunk.push(doc);
-      chunkChars += docChars;
-    } else {
-      // chunk boundary found, start new chunk
-      chunks.push(chunk);
-      chunk = [doc];
-      chunkChars = docChars;
-    }
-  }
-
-  if (chunk.length) {
-    chunks.push(chunk);
-  }
-
-  return chunks;
-}
-
-export function toEsDoc(
-  feature: Feature,
-  geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE
-) {
-  const properties = feature.properties ? feature.properties : {};
-  return {
-    geometry:
-      geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
-        ? feature.geometry
-        : (feature.geometry as Point).coordinates,
-    ...properties,
-  };
 }
