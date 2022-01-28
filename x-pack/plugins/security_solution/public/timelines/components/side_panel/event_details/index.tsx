@@ -37,7 +37,7 @@ import { EntityType } from '../../../../../../timelines/common';
 import { useHostsRiskScore } from '../../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)<{ preventPadding: boolean }>`
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
     display: flex;
     flex: 1;
@@ -46,10 +46,12 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)<{ preventPadding: boolean }>`
     .euiFlyoutBody__overflowContent {
       flex: 1;
       overflow: hidden;
-      padding: ${({ theme, preventPadding }) =>
-        !preventPadding && `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
+      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
     }
   }
+`;
+const OsqueryActionWrapper = styled.div`
+  padding: 8px;
 `;
 
 interface EventDetailsPanelProps {
@@ -202,7 +204,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const renderFlyoutBody = useMemo(() => {
     switch (isActivePanel) {
       case ACTIVE_PANEL.OSQUERY:
-        return osquery?.OsqueryAction?.({ agentId, formType: 'steps' });
+        return (
+          <OsqueryActionWrapper>
+            {osquery?.OsqueryAction?.({ agentId, formType: 'steps' })}
+          </OsqueryActionWrapper>
+        );
       // return <OsqueryLiveQuery agentId={agentId} formType={'steps'} />;
       case ACTIVE_PANEL.HOST_ISOLATION:
         return (
@@ -271,9 +277,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           isolateAction={isolateAction}
         />
       )}
-      <StyledEuiFlyoutBody preventPadding={isActivePanel === ACTIVE_PANEL.OSQUERY}>
-        {renderFlyoutBody}
-      </StyledEuiFlyoutBody>
+      <StyledEuiFlyoutBody>{renderFlyoutBody}</StyledEuiFlyoutBody>
 
       <EventDetailsFooter
         detailsData={detailsData}
