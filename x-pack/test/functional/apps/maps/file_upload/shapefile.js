@@ -10,7 +10,7 @@ import path from 'path';
 import uuid from 'uuid/v4';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
 
   describe('shapefile', () => {
@@ -31,9 +31,10 @@ export default function ({ getPageObjects, getService }) {
     it('should preview part of shapefile', async () => {
       await PageObjects.maps.clickAddLayer();
       await PageObjects.maps.selectFileUploadCard();
-      await PageObjects.maps.previewShapefile(
+      await PageObjects.geoFileUpload.previewShapefile(
         path.join(__dirname, 'test_upload_files', 'cb_2018_us_csa_500k.shp')
       );
+      await PageObjects.maps.waitForLayersToLoad();
 
       const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
@@ -46,8 +47,8 @@ export default function ({ getPageObjects, getService }) {
 
     it('should import shapefile', async () => {
       indexName = uuid();
-      await PageObjects.maps.setIndexName(indexName);
-      const importResults = await PageObjects.maps.uploadFile();
+      await PageObjects.geoFileUpload.setIndexName(indexName);
+      const importResults = await PageObjects.geoFileUpload.uploadFile();
 
       expect(importResults.docCount).to.be(174);
     });
