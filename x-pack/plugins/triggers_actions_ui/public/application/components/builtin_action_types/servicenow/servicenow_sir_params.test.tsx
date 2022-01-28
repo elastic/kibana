@@ -144,6 +144,10 @@ describe('ServiceNowSIRParamsFields renders', () => {
 
   test('all params fields is rendered', () => {
     const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+    act(() => {
+      onChoicesSuccess(choicesResponse.choices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="correlation_displayInput"]').exists()).toBeTruthy();
@@ -294,6 +298,10 @@ describe('ServiceNowSIRParamsFields renders', () => {
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, () => {
         const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
+        act(() => {
+          onChoicesSuccess(choicesResponse.choices);
+        });
+        wrapper.update();
         const theField = wrapper.find(field.dataTestSubj).first();
         theField.prop('onChange')!(changeEvent);
         expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);

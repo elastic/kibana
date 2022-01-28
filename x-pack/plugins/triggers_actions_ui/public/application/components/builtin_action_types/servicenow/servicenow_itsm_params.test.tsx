@@ -116,6 +116,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
   test('all params fields is rendered', () => {
     const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...defaultProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
@@ -247,6 +251,10 @@ describe('ServiceNowITSMParamsFields renders', () => {
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, () => {
         const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...defaultProps} />);
+        act(() => {
+          onChoices(useGetChoicesResponse.choices);
+        });
+        wrapper.update();
         const theField = wrapper.find(field.dataTestSubj).first();
         theField.prop('onChange')!(changeEvent);
         expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);
