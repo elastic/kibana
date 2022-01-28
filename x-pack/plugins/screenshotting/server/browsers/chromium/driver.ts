@@ -351,16 +351,14 @@ export class HeadlessChromiumDriver {
       this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
-    // Even though 3xx redirects go through our request
-    // handler, we should probably inspect responses just to
-    // avoid being bamboozled by some malicious request
     this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
+      const status = interceptedResponse.status();
 
-      if (!interceptedResponse.ok()) {
+      if (status >= 400 && !interceptedResponse.ok()) {
         logger.warn(
-          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+          `Chromium received a non-OK response (${status}) for request ${interceptedUrl}`
         );
       }
 
