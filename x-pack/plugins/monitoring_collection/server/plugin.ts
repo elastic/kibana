@@ -6,39 +6,58 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from 'kibana/server';
 import { registerDynamicRoute } from './routes';
+import { INDEX_TEMPLATE_KIBANA } from '../../monitoring/common/constants';
+import { MakeSchemaFrom } from '../../../../src/plugins/usage_collection/server';
+import { verifyMappings } from './lib';
 
 export interface MonitoringCollectionSetup {
-  registerMetric: (metric: Metric) => void;
-  getMetrics: () => Promise<Record<string, MetricResult | MetricResult[]>>;
+  registerMetric: <T>(metric: Metric<T>) => void;
+  getMetrics: <T>() => Promise<Record<string, MetricResult<T> | Array<MetricResult<T>>>>;
 }
 
-export type MetricResult = JsonObject;
+export type MetricResult<T> = T & JsonObject;
 
-export interface Metric {
+export interface Metric<T> {
   type: string;
-  fetch: () => Promise<MetricResult | MetricResult[]>;
+  schema: MakeSchemaFrom<T>;
+  fetch: () => Promise<MetricResult<T> | Array<MetricResult<T>>>;
 }
 
 export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSetup, void, {}, {}> {
   private readonly initializerContext: PluginInitializerContext;
+  private readonly logger: Logger;
 
-  private metrics: Metric[] = [];
+  private metrics: Array<Metric<any>> = [];
+  private disabledMetricTypes: string[] = [];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
+    this.logger = initializerContext.logger.get();
   }
 
   async getAllMetrics() {
-    const metrics: Record<string, MetricResult | MetricResult[]> = {};
+    const metrics: Record<string, MetricResult<any> | Array<MetricResult<any>>> = {};
     for (const metric of this.metrics) {
+      if (this.disabledMetricTypes.includes(metric.type)) {
+        this.logger.info(
+          `Unable to get metrics for ${metric.type} type because this type is disabled. Please see startup Kibana server logs for more details.`
+        );
+        continue;
+      }
       metrics[metric.type] = await metric.fetch();
     }
     return metrics;
   }
 
   async getMetrics(type?: string) {
+    if (type && this.disabledMetricTypes.includes(type)) {
+      this.logger.warn(
+        `Unable to get metrics for ${type} type because this type is disabled. Please see startup Kibana server logs for more details.`
+      );
+      return undefined;
+    }
     for (const metric of this.metrics) {
       if (metric.type === type) {
         return await metric.fetch();
@@ -67,14 +86,23 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     });
 
     return {
-      registerMetric: (metric: Metric) => {
+      registerMetric: <T>(metric: Metric<T>) => {
         this.metrics.push(metric);
       },
       getMetrics: async () => await this.getAllMetrics(),
     };
   }
 
-  start() {}
+  async start(core: CoreStart) {
+    const esClient = core.elasticsearch.client.asInternalUser;
+
+    verifyMappings({
+      client: esClient,
+      name: INDEX_TEMPLATE_KIBANA,
+      metrics: this.metrics,
+      logger: this.logger,
+    }).then((types) => types && this.disabledMetricTypes.push(...types));
+  }
 
   stop() {}
 }
