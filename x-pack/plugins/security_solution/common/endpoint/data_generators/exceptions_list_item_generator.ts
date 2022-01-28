@@ -72,6 +72,21 @@ const exceptionItemToCreateExceptionItem = (
   };
 };
 
+const exceptionItemToUpdateExceptionItem = (
+  exceptionItem: ExceptionListItemSchema
+): UpdateExceptionListItemSchemaWithNonNullProps => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { id, item_id, _version } = exceptionItem;
+  const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
+
+  return {
+    ...updateAttributes,
+    id,
+    item_id,
+    _version: _version ?? 'some value',
+  };
+};
+
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
     const exceptionItem: ExceptionListItemSchema = {
@@ -143,15 +158,8 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateTrustedAppForUpdate(
     overrides: Partial<UpdateExceptionListItemSchema> = {}
   ): UpdateExceptionListItemSchemaWithNonNullProps {
-    const trustedApp = this.generateTrustedApp();
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { id, item_id, _version } = trustedApp;
-
     return {
-      ...exceptionItemToCreateExceptionItem(trustedApp),
-      id,
-      item_id,
-      _version: _version ?? 'some value',
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedApp()),
       ...overrides,
     };
   }
@@ -178,15 +186,8 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   generateEventFilterForUpdate(
     overrides: Partial<UpdateExceptionListItemSchema> = {}
   ): UpdateExceptionListItemSchemaWithNonNullProps {
-    const eventFilter = this.generateTrustedApp();
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { id, item_id, _version } = eventFilter;
-
     return {
-      ...exceptionItemToCreateExceptionItem(eventFilter),
-      id,
-      item_id,
-      _version: _version ?? 'some value',
+      ...exceptionItemToUpdateExceptionItem(this.generateEventFilter()),
       ...overrides,
     };
   }
