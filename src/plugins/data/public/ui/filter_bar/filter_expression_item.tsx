@@ -46,7 +46,7 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
-  onEditFilterClick: () => void;
+  onEditFilterClick: (groupId: string) => void;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -76,7 +76,7 @@ export const FilterExpressionItem: FC<Props> = ({
     // const finalFilters = [...multipleUpdatedFilters, ...groupedFilters];
     // onUpdate?.(finalFilters, groupId, false);
 
-    onEditFilterClick();
+    onEditFilterClick(groupId);
   }
 
   function onDuplicate() {
@@ -439,7 +439,7 @@ export const FilterExpressionItem: FC<Props> = ({
       button={badge}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      <EuiContextMenu initialPanelId={0} panels={getPanels(groupId)} />
     </EuiPopover>
   );
 };

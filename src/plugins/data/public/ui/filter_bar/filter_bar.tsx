@@ -53,6 +53,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const [isEditFilterPopoverOpen, setIsEditFilterPopoverOpen] = useState(false);
+  const [editFilterGropId, setEditFilterGropId] = useState(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
@@ -66,7 +67,10 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
-  const onEditFilterClick = () => setIsEditFilterPopoverOpen(!isEditFilterPopoverOpen);
+  const onEditFilterClick = (groupId: string) => {
+    setEditFilterGropId(groupId);
+    setIsEditFilterPopoverOpen(!isEditFilterPopoverOpen);
+  };
 
   function renderItems() {
     return props.multipleFilters.map((filter, i) => {
@@ -178,13 +182,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
 
+    const filteredFilter = props.multipleFilters?.filter(({ groupId }) => groupId === Number(editFilterGropId));
+
     return (
       <EuiFlexItem grow={false}>
         {isEditFilterPopoverOpen && (
           <AddFilterModal
             onCancel={onEditFilterClick}
             filter={props.filters[0]}
-            multipleFilters={props.multipleFilters}
+            multipleFilters={filteredFilter}
             indexPatterns={props.indexPatterns!}
             onSubmit={onEditFilterClick}
             onMultipleFiltersSubmit={onEditFilterClick}
