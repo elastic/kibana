@@ -44,6 +44,7 @@ import { ISearchSource } from '../../../../../../../src/plugins/data/common/sear
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
@@ -287,6 +288,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
           }
         ),
         searchSessionId,
+        executionContext: makePublicExecutionContext('es_geo_grid_source:cluster_composite'),
       });
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
@@ -360,6 +362,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
       searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_grid_source:cluster'),
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
