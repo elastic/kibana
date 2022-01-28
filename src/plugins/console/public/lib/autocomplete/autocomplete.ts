@@ -393,7 +393,7 @@ export default function ({
     const linesToMoveDown = (context.prefixToAdd ?? '').match(/\n|\r/g)?.length ?? 0;
 
     let prefix = context.prefixToAdd ?? '';
-
+    // if should add chars on the previous not empty line
     if (linesToMoveDown) {
       const prefixPieces = context.prefixToAdd?.split(/\n|\r/g);
       const firstPart = _.first(prefixPieces) ?? '';
@@ -401,8 +401,10 @@ export default function ({
       const { start } = context.rangeToReplace!;
       const end = { ...start, column: start.column + firstPart.length };
 
+      // adding only the content of prefix before newlines
       editor.replace({ start, end }, firstPart);
 
+      // and the last prefix line, keeping the editor's own newlines.
       prefix = lastPart;
       context.rangeToReplace!.start.lineNumber = context.rangeToReplace!.end.lineNumber;
       context.rangeToReplace!.start.column = 0;
