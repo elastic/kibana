@@ -17,8 +17,6 @@ import type { FormulaPublicApi, LensPublicStart } from '../../../../lens/public'
 import { TIME_STEPS, getCustomActions } from './actions';
 import { buildQueryFilters, getLensAttributes, MAIN_COLOR, SELECTION_COLOR } from './helpers';
 
-const HEIGHT = 250;
-
 export interface TimebarProps {
   workspace: Workspace;
   lens: LensPublicStart;
@@ -117,7 +115,7 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
     <>
       <FormattedMessage id="xpack.graph.timebar.selectionVs" defaultMessage=" vs " />
       <strong>
-        <span style={{ backgroundColor: SELECTION_COLOR }} className="gphTitleSelection">
+        <span style={{ color: SELECTION_COLOR }} className="gphTitleSelection">
           <FormattedMessage
             id="xpack.graph.timebar.selection"
             defaultMessage="{selectionLength, plural, one { Selection } other { Selection ({selectionLength}) }}"
@@ -146,7 +144,7 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
           values={{
             mainContent: (
               <strong>
-                <span style={{ backgroundColor: MAIN_COLOR }} className="gphTitleContent">
+                <span style={{ color: MAIN_COLOR }} className="gphTitleContent">
                   <FormattedMessage
                     id="xpack.graph.timebar.mainContent"
                     defaultMessage="Edges traffic"
@@ -161,7 +159,7 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
       </EuiTitle>
       <LensComponent
         id="timebar"
-        style={{ height: (HEIGHT * 5) / 6 }}
+        className="gphTimebar__component"
         timeRange={timeRange}
         attributes={getLensAttributes(workspace, indexPattern, formulaApi, {
           timeFilter,
@@ -180,7 +178,8 @@ export function Timebar({ workspace, indexPattern, lens, onSetControl }: Timebar
           onSetControl('none');
         }}
         viewMode={ViewMode.VIEW}
-        withActions={actions}
+        extraActions={actions}
+        withDefaultActions
       />
     </EuiPanel>
   );

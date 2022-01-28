@@ -2,9 +2,7 @@
 
   max-height: 250px;
 
-  .gphTitleContent, .gphTitleSelection {
-    padding: 0 8px;
-    border-radius: 3px;
-    color: $euiColorGhost;
+  .gphTimebar__component {
+    height: 210px;
   }
 }

@@ -21,7 +21,7 @@ import type {
 
 // Based on default Lens palette
 export const MAIN_COLOR = '#54B399';
-export const SELECTION_COLOR = '#6092C0';
+export const SELECTION_COLOR = '#9170B8';
 
 function escapeString(string: string) {
   return string.replace(/'/g, `\\'`);
@@ -155,7 +155,7 @@ export function getLensAttributes(
       layerType: 'data',
       seriesType: 'line',
       xAccessor: 'col1',
-      yConfig: [{ forAccessor: 'col3', axisMode: 'right' }],
+      yConfig: [{ forAccessor: 'col3', axisMode: 'right', color: SELECTION_COLOR }],
     });
   }
 
@@ -191,6 +191,7 @@ export function getLensAttributes(
         lineWidth: 4,
         lineStyle: 'dashed',
         icon: i ? 'arrowLeft' : 'arrowRight',
+        areaOpacity: 0.5,
       })),
       accessors: cols,
       seriesType: 'bar_stacked',
