@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, Fragment } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { isColorDark, hexToRgb } from '@elastic/eui';
@@ -90,24 +90,39 @@ export function GraphVisualization({
         <g>
           {workspace.edges &&
             workspace.edges.map((edge) => (
-              <line
+              <Fragment
                 key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
                   edge.target.data.field,
                   edge.target.data.term
                 )}`}
-                x1={edge.topSrc.kx}
-                y1={edge.topSrc.ky}
-                x2={edge.topTarget.kx}
-                y2={edge.topTarget.ky}
-                onClick={() => {
-                  edgeClick(edge);
-                }}
-                className={classNames('gphEdge', {
-                  'gphEdge--selected': edge.isSelected,
-                })}
-                style={{ strokeWidth: edge.width }}
-                strokeLinecap="round"
-              />
+              >
+                {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
+                <line
+                  x1={edge.topSrc.kx}
+                  y1={edge.topSrc.ky}
+                  x2={edge.topTarget.kx}
+                  y2={edge.topTarget.ky}
+                  className={classNames('gphEdge', {
+                    'gphEdge--selected': edge.isSelected,
+                  })}
+                  strokeLinecap="round"
+                />
+                <line
+                  x1={edge.topSrc.kx}
+                  y1={edge.topSrc.ky}
+                  x2={edge.topTarget.kx}
+                  y2={edge.topTarget.ky}
+                  onClick={() => {
+                    edgeClick(edge);
+                  }}
+                  className="gphEdge"
+                  style={{
+                    strokeWidth: Math.max(edge.width, 15),
+                    fill: 'transparent',
+                    opacity: 0,
+                  }}
+                />
+              </Fragment>
             ))}
         </g>
         {workspace.nodes &&
