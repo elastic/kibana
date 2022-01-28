@@ -335,6 +335,20 @@ export default function ({
     });
   }
 
+  function replaceLinesWithPrefixPieces(prefixPieces: string[], startLineNumber: number) {
+    const middlePiecesCount = prefixPieces.length - 1;
+    prefixPieces.forEach((piece, index) => {
+      if (index >= middlePiecesCount) {
+        return;
+      }
+      const ln = startLineNumber + index + 1;
+      const col = editor.getLineValue(ln).length - 1;
+      const start = { lineNumber: ln, column: 0 };
+      const end = { lineNumber: ln, column: col };
+      editor.replace({ start, end }, piece);
+    });
+  }
+
   function applyTerm(term: {
     value?: string;
     context?: AutoCompleteContext;
@@ -393,16 +407,24 @@ export default function ({
     const linesToMoveDown = (context.prefixToAdd ?? '').match(/\n|\r/g)?.length ?? 0;
 
     let prefix = context.prefixToAdd ?? '';
+
+    // disable listening to the changes we are making.
+    editor.off('changeSelection', editorChangeListener);
+
     // if should add chars on the previous not empty line
     if (linesToMoveDown) {
-      const prefixPieces = context.prefixToAdd?.split(/\n|\r/g);
-      const firstPart = _.first(prefixPieces) ?? '';
+      const [firstPart = '', ...prefixPieces] = context.prefixToAdd?.split(/\n|\r/g) ?? [];
       const lastPart = _.last(prefixPieces) ?? '';
       const { start } = context.rangeToReplace!;
       const end = { ...start, column: start.column + firstPart.length };
 
       // adding only the content of prefix before newlines
       editor.replace({ start, end }, firstPart);
+
+      // replacing prefix pieces without the last one, which is handled separately
+      if (prefixPieces.length - 1 > 0) {
+        replaceLinesWithPrefixPieces(prefixPieces, start.lineNumber);
+      }
 
       // and the last prefix line, keeping the editor's own newlines.
       prefix = lastPart;
@@ -411,9 +433,6 @@ export default function ({
     }
 
     valueToInsert = prefix + valueToInsert + context.suffixToAdd;
-
-    // disable listening to the changes we are making.
-    editor.off('changeSelection', editorChangeListener);
 
     if (context.rangeToReplace!.start.column !== context.rangeToReplace!.end.column) {
       editor.replace(context.rangeToReplace!, valueToInsert);
@@ -723,7 +742,7 @@ export default function ({
 
         spaces = spaces >= 0 ? spaces : 0;
         const spacesToEnter = isTheSameLine ? (spaces === 0 ? 1 : spaces) : spaces;
-        const newLineChars = '\n'.repeat(linesToEnter >= 0 ? linesToEnter : 0);
+        const newLineChars = `\n`.repeat(linesToEnter >= 0 ? linesToEnter : 0);
         const whitespaceChars = ' '.repeat(spacesToEnter);
         // add a comma at the end of the previous line, a new line and indentation
         context.prefixToAdd = `,${newLineChars}${whitespaceChars}`;
@@ -820,12 +839,8 @@ export default function ({
       case 'punctuation.colon':
       case 'method':
         break;
-      case 'string':
-      case 'punctuation.end_triple_quote':
-        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length);
-        break;
       default:
-        addCommaToPrefixOnAutocomplete(nonEmptyToken, context);
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length);
         break;
     }
 
