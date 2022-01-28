@@ -286,9 +286,9 @@ export class FleetPlugin
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: i18n.translate(
-          'xpack.fleet.serverPlugin.IntegrationsPrivilegesTooltip',
+          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
           {
-            defaultMessage: 'All Spaces is required for Integrations access.',
+            defaultMessage: 'All Spaces is required for All Integrations access.',
           }
         ),
         privileges: {

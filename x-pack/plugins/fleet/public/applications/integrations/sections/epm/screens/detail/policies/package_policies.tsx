@@ -247,7 +247,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                       policyId: agentPolicy.id,
                       packagePolicyId: packagePolicy.id,
                     })}?from=integrations-policy-list`}
-                    isDisabled={Boolean(!canWriteIntegrationPolicies)}
+                    isDisabled={!canWriteIntegrationPolicies}
                   >
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"

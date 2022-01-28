@@ -84,7 +84,7 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
 
   if (error === 'MISSING_PRIVILEGES') {
     return (
-      <Panel>
+      <Panel data-test-subj="missingPrivilegesPrompt">
         <EuiEmptyPrompt
           iconType="securityApp"
           title={

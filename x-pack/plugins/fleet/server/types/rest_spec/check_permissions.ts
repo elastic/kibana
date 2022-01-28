@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './fleet_server_cloud_unhealthy_callout';
-export * from './fleet_server_on_prem_unhealthy_callout';
-export * from './fleet_server_on_prem_required_callout';
-export * from './fleet_server_missing_privileges';
+import { schema } from '@kbn/config-schema';
+
+export const CheckPermissionsRequestSchema = {
+  query: schema.object({
+    fleetServerSetup: schema.maybe(schema.boolean()),
+  }),
+};
