@@ -20,6 +20,27 @@ export function registerCollector({
 }) {
   monitoringCollection.registerMetric({
     type: 'actions',
+    schema: {
+      overdue: {
+        count: {
+          type: 'long',
+        },
+        duration: {
+          p50: {
+            type: 'long',
+          },
+          p99: {
+            type: 'long',
+          },
+        },
+      },
+      failures: {
+        type: 'long',
+      },
+      executions: {
+        type: 'long',
+      },
+    },
     fetch: async () => {
       const inMemoryMetrics = getAllInMemoryMetrics();
 

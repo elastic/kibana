@@ -6,7 +6,7 @@
  */
 import { MetricResult } from '../../../monitoring_collection/server';
 
-export interface RulesMetric extends MetricResult {
+export type RulesMetric = MetricResult<{
   overdue: {
     count: number;
     duration: {
@@ -16,4 +16,4 @@ export interface RulesMetric extends MetricResult {
   };
   failures: number | null;
   executions: number | null;
-}
+}>;
