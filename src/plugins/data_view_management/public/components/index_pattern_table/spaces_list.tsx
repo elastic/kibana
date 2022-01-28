@@ -47,7 +47,6 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
       title,
       noun,
     },
-    behaviorContext: 'outside-space',
     onClose,
   };
 
