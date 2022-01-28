@@ -70,6 +70,7 @@ describe('renderApp (APM)', () => {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
+      theme$: new Observable(),
     };
 
     const data = dataPluginMock.createStartContract();
