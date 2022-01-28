@@ -102,15 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
           },
           getBody: () => undefined,
         },
-        // PT: this API authz does not seem to be working as expected. Team following up. Commented out for now
-        // {
-        //   method: 'get',
-        //   info: 'list summary',
-        //   get path() {
-        //     return `${EXCEPTION_LIST_URL}/summary?list_id=${existingExceptionData.artifact.list_id}&namespace_type=${existingExceptionData.artifact.namespace_type}`;
-        //   },
-        //   getBody: () => undefined,
-        // },
+        {
+          method: 'get',
+          info: 'list summary',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/summary?list_id=${existingExceptionData.artifact.list_id}&namespace_type=${existingExceptionData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
         {
           method: 'delete',
           info: 'single item',
