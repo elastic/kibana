@@ -26,7 +26,6 @@ import {
   LegendDisplay,
 } from '../../common';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
-import { DEFAULT_PALETTE_NAME } from '../shared_components';
 
 interface Attributes {
   isPreview: boolean;
