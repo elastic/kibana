@@ -69,6 +69,7 @@ export interface GetExceptionListOptions {
 }
 
 export interface GetExceptionListSummaryOptions {
+  filter: FilterOrUndefined;
   listId: ListIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;

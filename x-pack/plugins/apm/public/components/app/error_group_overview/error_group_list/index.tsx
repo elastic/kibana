@@ -25,6 +25,10 @@ import { APMQueryParams } from '../../../shared/links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -203,9 +207,12 @@ function ErrorGroupList({
             detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
+          const { currentPeriodColor, previousPeriodColor } =
+            getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+
           return (
             <SparkPlot
-              color="euiColorVis7"
+              color={currentPeriodColor}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -219,6 +226,7 @@ function ErrorGroupList({
               comparisonSeries={
                 comparisonEnabled ? previousPeriodTimeseries : undefined
               }
+              comparisonSeriesColor={previousPeriodColor}
             />
           );
         },
