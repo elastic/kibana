@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Page } from './page';
+export { ExplorerNoJobsSelected } from './explorer_no_jobs_selected';

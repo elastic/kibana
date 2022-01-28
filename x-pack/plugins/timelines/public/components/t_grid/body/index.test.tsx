@@ -126,7 +126,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('div.euiDataGrid__overflow').first().exists()).toEqual(true);
+      expect(wrapper.find('div.euiDataGrid__virtualized').first().exists()).toEqual(true);
     });
 
     test('it renders events', () => {

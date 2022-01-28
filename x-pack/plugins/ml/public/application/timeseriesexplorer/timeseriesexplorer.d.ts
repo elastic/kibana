@@ -10,11 +10,11 @@ import { TimeRangeBounds } from '../util/time_buckets';
 
 interface Props {
   appStateHandler: (action: string, payload: any) => void;
-  autoZoomDuration: number;
-  bounds: TimeRangeBounds;
+  autoZoomDuration: number | undefined;
+  bounds: TimeRangeBounds | undefined;
   dateFormatTz: string;
   lastRefresh: number;
-  selectedJobId: string;
+  selectedJobId: string | undefined;
   selectedDetectorIndex: number;
   selectedEntities: Record<string, string> | undefined;
   selectedForecastId?: string;
@@ -24,4 +24,4 @@ interface Props {
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
-declare class TimeSeriesExplorer extends React.Component<Props, any> {}
+declare class TimeSeriesExplorer extends React.Component<Props> {}

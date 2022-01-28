@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export { ExplorerNoJobsFound } from './explorer_no_jobs_found';
+import { APP_ID } from './constants';
+
+export function makeExecutionContext(id: string, url: string, description?: string) {
+  return {
+    name: APP_ID,
+    type: 'application',
+    id,
+    description: description || '',
+    url,
+  };
+}

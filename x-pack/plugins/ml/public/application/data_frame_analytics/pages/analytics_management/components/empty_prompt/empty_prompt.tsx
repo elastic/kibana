@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dfaImage from './data_frame_analytics_kibana_image.png';
+import dfaImage from './data_frame_analytics_kibana.png';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface Props {
