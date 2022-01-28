@@ -30,9 +30,10 @@ import { InspectResponse } from '../../../types';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface HostRiskScoreState {
-  data: HostsRiskScore[];
+  data?: HostsRiskScore[];
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
@@ -73,7 +74,8 @@ export const useHostRiskScore = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const [loading, setLoading] = useState<boolean>(riskyHostsFeatureEnabled);
   const [riskScoreRequest, setHostRiskScoreRequest] = useState<HostsRiskScoreRequestOptions | null>(
     null
   );
@@ -81,14 +83,14 @@ export const useHostRiskScore = ({
   const { addError, addWarning } = useAppToasts();
 
   const [riskScoreResponse, setHostRiskScoreResponse] = useState<HostRiskScoreState>({
-    data: [],
+    data: undefined,
     inspect: {
       dsl: [],
       response: [],
     },
     isInspected: false,
     refetch: refetch.current,
-    totalCount: -1,
+    totalCount: 0,
     isModuleEnabled: undefined,
   });
 
@@ -133,11 +135,11 @@ export const useHostRiskScore = ({
             error: (error) => {
               setLoading(false);
               if (isIndexNotFoundError(error)) {
-                setHostRiskScoreRequest((prevRequest) =>
-                  !prevRequest
-                    ? prevRequest
+                setHostRiskScoreResponse((prevResponse) =>
+                  !prevResponse
+                    ? prevResponse
                     : {
-                        ...prevRequest,
+                        ...prevResponse,
                         isModuleEnabled: false,
                       }
                 );
@@ -153,10 +155,13 @@ export const useHostRiskScore = ({
       };
       searchSubscription.current.unsubscribe();
       abortCtrl.current.abort();
-      asyncSearch();
+      if (riskyHostsFeatureEnabled) {
+        asyncSearch();
+      }
+
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, addWarning, skip, riskyHostsFeatureEnabled]
   );
   const [spaceId, setSpaceId] = useState<string>();
 

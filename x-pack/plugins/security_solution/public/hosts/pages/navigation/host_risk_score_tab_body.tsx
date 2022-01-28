@@ -57,7 +57,7 @@ export const HostRiskScoreQueryTabBody = ({
   return (
     <HostRiskScoreTableManage
       deleteQuery={deleteQuery}
-      data={data}
+      data={data ?? []}
       id={HostRiskScoreQueryId.HOSTS_BY_RISK}
       inspect={inspect}
       isInspect={isInspected}
