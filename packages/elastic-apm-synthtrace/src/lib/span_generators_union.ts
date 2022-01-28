@@ -8,6 +8,7 @@
 
 import { ApmFields } from './apm/apm_fields';
 import { SpanIterable } from './span_iterable';
+import { merge } from './utils/merge_iterable';
 
 export class SpanGeneratorsUnion implements SpanIterable {
   constructor(private readonly dataGenerators: SpanIterable[]) {
@@ -32,10 +33,9 @@ export class SpanGeneratorsUnion implements SpanIterable {
   }
 
   *[Symbol.iterator]() {
-    for (const iterator of this.dataGenerators) {
-      for (const fields of iterator) {
-        yield fields;
-      }
+    const iterator = merge(this.dataGenerators);
+    for (const fields of iterator) {
+      yield fields;
     }
   }
 
