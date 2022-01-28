@@ -15,7 +15,7 @@ export class GeoFileUploadPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
-  
+
   async isNextButtonEnabled(): Promise<boolean> {
     const importFileButton = await this.testSubjects.find('importFileButton');
     const isDisabled = await importFileButton.getAttribute('disabled');
@@ -31,7 +31,7 @@ export class GeoFileUploadPageObject extends FtrService {
 
   async selectFile(selector: string, path: string) {
     this.log.debug(`selectFile; selector: ${selector}, path: ${path}`);
-    const input =  await this.testSubjects.find(selector);
+    const input = await this.testSubjects.find(selector);
     await input.type(path);
   }
 
@@ -72,7 +72,6 @@ export class GeoFileUploadPageObject extends FtrService {
       return await this.isNextButtonEnabled();
     });
     await this.clickNextButton();
-    
 
     await this.retry.waitFor('wait for file import results', async () => {
       return await this.testSubjects.exists('indexRespCopyButton');
