@@ -11,6 +11,7 @@ import type {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
@@ -148,6 +149,41 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
     return {
       ...exceptionItemToCreateExceptionItem(trustedApp),
+      id,
+      item_id,
+      _version: _version ?? 'some value',
+      ...overrides,
+    };
+  }
+
+  generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    const eventFilter = this.generate(overrides);
+
+    return {
+      ...eventFilter,
+      name: `Event filter (${this.randomString(5)})`,
+      list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+    };
+  }
+
+  generateEventFilterForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateEventFilter()),
+      ...overrides,
+    };
+  }
+
+  generateEventFilterForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    const eventFilter = this.generateTrustedApp();
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { id, item_id, _version } = eventFilter;
+
+    return {
+      ...exceptionItemToCreateExceptionItem(eventFilter),
       id,
       item_id,
       _version: _version ?? 'some value',
