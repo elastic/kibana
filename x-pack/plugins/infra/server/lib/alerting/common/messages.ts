@@ -137,6 +137,7 @@ export const buildFiredAlertReason: (alertResult: {
     },
   });
 
+// Once recovered reason messages are re-enabled, checkout this issue https://github.com/elastic/kibana/issues/121272 regarding latest reason format
 export const buildRecoveredAlertReason: (alertResult: {
   group: string;
   metric: string;
@@ -145,7 +146,8 @@ export const buildRecoveredAlertReason: (alertResult: {
   currentValue: number | string;
 }) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
-    defaultMessage: '{metric} is now {currentValue} for {group} ({comparator} {threshold}%).',
+    defaultMessage:
+      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
       metric,
       comparator: recoveredComparatorToI18n(
