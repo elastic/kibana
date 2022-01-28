@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerStatus } from '../../types';
 
+import { StartCrawlContextMenu } from './start_crawl_context_menu';
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
 export const CrawlerStatusIndicator: React.FC = () => {
@@ -39,16 +40,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
 
   switch (mostRecentCrawlRequestStatus) {
     case CrawlerStatus.Success:
-      return (
-        <EuiButton fill onClick={startCrawl}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
-            {
-              defaultMessage: 'Start a crawl',
-            }
-          )}
-        </EuiButton>
-      );
+      return <StartCrawlContextMenu />;
     case CrawlerStatus.Failed:
     case CrawlerStatus.Canceled:
       return (
