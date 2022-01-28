@@ -60,8 +60,8 @@ import { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { ITelemetryEventsSender, TelemetryEventsSender } from './lib/telemetry/sender';
+import { ITelemetryReceiver, TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
@@ -104,8 +104,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly appClientFactory: AppClientFactory;
 
   private readonly endpointAppContextService = new EndpointAppContextService();
-  private readonly telemetryReceiver: TelemetryReceiver;
-  private readonly telemetryEventsSender: TelemetryEventsSender;
+  private readonly telemetryReceiver: ITelemetryReceiver;
+  private readonly telemetryEventsSender: ITelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -259,7 +259,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleOptions,
       core.getStartServices,
       securityRuleTypeOptions,
-      previewRuleDataClient
+      previewRuleDataClient,
+      this.telemetryReceiver
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

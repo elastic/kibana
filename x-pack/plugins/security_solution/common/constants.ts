@@ -273,6 +273,14 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
+/**
+ * Telemetry detection endpoint for any previews requested of what data we are
+ * providing through UI/UX and for e2e tests.
+ *   curl http//localhost:5601/internal/security_solution/telemetry
+ * to see the contents
+ */
+export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as const;
+
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;

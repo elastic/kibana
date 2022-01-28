@@ -7,9 +7,9 @@
 
 import { Logger } from 'src/core/server';
 import { getPreviousDiagTaskTimestamp } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
+import { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
-import { TelemetryReceiver } from '../receiver';
+import { ITelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 
 export function createTelemetryDiagnosticsTaskConfig() {
@@ -23,8 +23,8 @@ export function createTelemetryDiagnosticsTaskConfig() {
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      receiver: ITelemetryReceiver,
+      sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       if (!taskExecutionPeriod.last) {

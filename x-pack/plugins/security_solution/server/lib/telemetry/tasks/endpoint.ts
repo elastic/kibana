@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'src/core/server';
-import { TelemetryEventsSender } from '../sender';
+import { ITelemetryEventsSender } from '../sender';
 import type {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -47,8 +47,8 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: TelemetryReceiver,
-      sender: TelemetryEventsSender,
+      receiver: ITelemetryReceiver,
+      sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       if (!taskExecutionPeriod.last) {
@@ -255,9 +255,10 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          *
          * Send the documents in a batches of maxTelemetryBatch
          */
-        batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch).forEach((telemetryBatch) =>
-          sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
-        );
+        const batches = batchTelemetryRecords(telemetryPayloads, maxTelemetryBatch);
+        for (const batch of batches) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
+        }
         return telemetryPayloads.length;
       } catch (err) {
         logger.warn('could not complete endpoint alert telemetry task');
@@ -268,7 +269,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 }
 
 async function fetchEndpointData(
-  receiver: TelemetryReceiver,
+  receiver: ITelemetryReceiver,
   executeFrom: string,
   executeTo: string
 ) {

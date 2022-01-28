@@ -58,7 +58,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
-import { TelemetryEventsSender } from '../lib/telemetry/sender';
+import { ITelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 import {
@@ -68,13 +68,15 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { ITelemetryReceiver } from '../lib/telemetry/receiver';
+import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
-  telemetrySender: TelemetryEventsSender,
+  telemetrySender: ITelemetryEventsSender,
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
   logger: Logger,
@@ -82,7 +84,8 @@ export const initRoutes = (
   ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  previewTelemetryReceiver: ITelemetryReceiver
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
@@ -161,4 +164,7 @@ export const initRoutes = (
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
   getSourcererDataViewRoute(router, getStartServices);
+
+  // telemetry endpoints for detection engine
+  telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
 };

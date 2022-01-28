@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TelemetryEventsSender } from '../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
@@ -29,7 +29,7 @@ export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEve
 
 export function sendAlertTelemetryEvents(
   logger: Logger,
-  eventsTelemetry: TelemetryEventsSender | undefined,
+  eventsTelemetry: ITelemetryEventsSender | undefined,
   filteredEvents: SignalSearchResponse,
   buildRuleMessage: BuildRuleMessage
 ) {

@@ -11,7 +11,11 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsAggregate,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
@@ -22,6 +26,8 @@ import {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import { TransportResult } from '@elastic/elasticsearch';
+import { Agent, AgentPolicy } from '../../../../fleet/common';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -37,9 +43,89 @@ import type {
   ESClusterInfo,
   GetEndpointListResponse,
   RuleSearchResult,
+  ExceptionListItem,
 } from './types';
 
-export class TelemetryReceiver {
+export interface ITelemetryReceiver {
+  start(
+    core?: CoreStart,
+    kibanaIndex?: string,
+    endpointContextService?: EndpointAppContextService,
+    exceptionListClient?: ExceptionListClient
+  ): Promise<void>;
+
+  getClusterInfo(): ESClusterInfo | undefined;
+
+  fetchFleetAgents(): Promise<
+    | {
+        agents: Agent[];
+        total: number;
+        page: number;
+        perPage: number;
+      }
+    | undefined
+  >;
+
+  fetchEndpointPolicyResponses(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchEndpointMetrics(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchDiagnosticAlerts(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<SearchResponse<TelemetryEvent, Record<string, AggregationsAggregate>>>;
+
+  fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
+
+  fetchTrustedApplications(): Promise<{
+    data: ExceptionListItem[] | undefined;
+    total: number;
+    page: number;
+    per_page: number;
+  }>;
+
+  fetchEndpointList(listId: string): Promise<GetEndpointListResponse>;
+
+  fetchDetectionRules(): Promise<
+    TransportResult<
+      SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
+      unknown
+    >
+  >;
+
+  fetchDetectionExceptionList(
+    listId: string,
+    ruleVersion: number
+  ): Promise<{
+    data: ExceptionListItem[];
+    total: number;
+    page: number;
+    per_page: number;
+  }>;
+
+  fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+
+  copyLicenseFields(lic: ESLicense): {
+    issuer?: string | undefined;
+    issued_to?: string | undefined;
+    uid: string;
+    status: string;
+    type: string;
+  };
+}
+export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
