@@ -193,6 +193,12 @@
     ]
   },
   "metadata": {
-    "system_owned": false
+    "system_owned": false,
+    "tags": [
+      {
+        "key": "terminate",
+        "value": "false"
+      }
+    ]
   }
 }
