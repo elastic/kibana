@@ -156,6 +156,10 @@ export interface Workspace {
   getTimeExtents(timeField: string, filters: Record<string, unknown>): Promise<TimeRange>;
   selectGraphInTime(timeField: string, timeRange: TimeRange): Promise<void>;
   clearTimeFilter(): void;
+  addEdgeToSelection(edge: WorkspaceEdge): void;
+  removeEdgeFromSelection(edge: WorkspaceEdge): void;
+  clearEdgeSelection(): void;
+  getEdgeSelection(): WorkspaceEdge[];
 }
 
 export type ExploreRequest = any;
@@ -198,4 +202,5 @@ export type ControlType =
   | 'mergeTerms'
   | 'timebar'
   | 'timeFilter'
+  | 'edgeSelection'
   | 'none';

@@ -18,7 +18,6 @@ export interface GraphVisualizationProps {
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
   filteredIds: string[];
-  mergedCandidates: TermIntersect[];
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -45,7 +44,6 @@ export function GraphVisualization({
   onSetControl,
   onSetMergeCandidates,
   filteredIds,
-  mergedCandidates,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
 
@@ -70,28 +68,34 @@ export function GraphVisualization({
     workspace.changeHandler();
   };
 
-  const handleMergeCandidatesCallback =
-    (addPreviousTerms: boolean) => (termIntersects: TermIntersect[]) => {
-      const mergeCandidates: TermIntersect[] = [...termIntersects];
-      if (addPreviousTerms) {
-        mergeCandidates.push(...mergedCandidates);
-      }
-      onSetMergeCandidates(mergeCandidates);
-      onSetControl('mergeTerms');
-    };
+  const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
+    const mergeCandidates: TermIntersect[] = [...termIntersects];
+    onSetMergeCandidates(mergeCandidates);
+    onSetControl('mergeTerms');
+  };
 
   const edgeClick = (edge: WorkspaceEdge, event: React.MouseEvent) => {
     if (filterSet.size && !filterSet.has(makeEdgeId(edge.source.id, edge.target.id))) {
       return;
     }
-    workspace.getAllIntersections(handleMergeCandidatesCallback(event.shiftKey), [
-      edge.topSrc,
-      edge.topTarget,
-    ]);
+
+    if (!event.shiftKey) {
+      const prevSelection = edge.isSelected;
+      workspace.clearEdgeSelection();
+      edge.isSelected = prevSelection;
+    }
+
+    if (!edge.isSelected) {
+      workspace.addEdgeToSelection(edge);
+    } else {
+      workspace.removeEdgeFromSelection(edge);
+    }
+    onSetControl('edgeSelection');
+
+    workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
   };
 
   const filterSet = new Set(filteredIds);
-  const selectedEdgeIds = new Set(mergedCandidates.map((pair) => makeEdgeId(pair.id1, pair.id2)));
 
   return (
     <svg
@@ -121,7 +125,7 @@ export function GraphVisualization({
                     x2={edge.topTarget.kx}
                     y2={edge.topTarget.ky}
                     className={classNames('gphEdge', {
-                      'gphEdge--selected': selectedEdgeIds.has(edgeId),
+                      'gphEdge--selected': edge.isSelected,
                     })}
                     style={{
                       strokeWidth: edge.width,

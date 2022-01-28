@@ -242,7 +242,6 @@ export const WorkspaceLayoutComponent = ({
               onSetControl={onSetControl}
               onSetMergeCandidates={onSetMergeCandidates}
               filteredIds={control === 'timeFilter' ? workspace.filteredIds : []}
-              mergedCandidates={control === 'mergeTerms' ? mergeCandidates : []}
             />
           </div>
 
@@ -268,7 +267,6 @@ export const WorkspaceLayoutComponent = ({
               workspace={workspace}
               lens={lens}
               indexPattern={currentIndexPattern}
-              mergeCandidates={control === 'mergeTerms' ? mergeCandidates : []}
               onSetControl={onSetControl}
             />
           )}
