@@ -29,7 +29,7 @@ export const buildHostsRiskScoreQuery = ({
   onlyLatest = true,
 }: HostsRiskScoreRequestOptions) => {
   const filter = createQueryFilterClauses(filterQuery);
-  console.log('timerange!!!', timerange);
+
   if (timerange) {
     filter.push({
       range: {
@@ -45,7 +45,8 @@ export const buildHostsRiskScoreQuery = ({
   if (hostNames) {
     filter.push({ terms: { 'host.name': hostNames } });
   }
-
+  const sortOrder = getQueryOrder(sort);
+  const sortAggs = { field: Object.keys(sortOrder)[0], direction: Object.values(sortOrder)[0] };
   const dslQuery = {
     index: defaultIndex,
     allow_no_indices: false,
@@ -55,13 +56,16 @@ export const buildHostsRiskScoreQuery = ({
     from: cursorStart,
     body: {
       query: { bool: { filter } },
-      sort: [getQueryOrder(sort)],
+      ...(!onlyLatest ? { sort: [sortOrder] } : {}),
       ...(onlyLatest
         ? {
             aggregations: {
               hosts: {
                 terms: {
                   field: 'host.name',
+                  order: {
+                    risk_score: sortAggs.direction,
+                  },
                 },
                 aggs: {
                   latest_risk_hit: {
@@ -74,6 +78,11 @@ export const buildHostsRiskScoreQuery = ({
                           },
                         },
                       ],
+                    },
+                  },
+                  risk_score: {
+                    max: {
+                      field: sortAggs.field, // sort field
                     },
                   },
                 },
