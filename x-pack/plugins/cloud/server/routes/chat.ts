@@ -20,23 +20,23 @@ export const registerChatRoute = ({
   router: IRouter;
   chatIdentitySecret: string;
   security?: SecurityPluginSetup;
-  isDev?: boolean;
+  isDev: boolean;
 }) => {
+  if (!security) {
+    return;
+  }
+
   router.get(
     {
       path: GET_CHAT_USER_DATA_ROUTE_PATH,
       validate: {},
     },
     async (_context, request, response) => {
-      if (!security) {
-        return response.customError({
-          statusCode: 500,
-        });
-      }
-
       const user = security.authc.getCurrentUser(request);
       let { email: userEmail, username: userId } = user || {};
 
+      // In local development, these values are not populated.  This is a workaround
+      // to allow for local testing.
       if (isDev) {
         if (!userId) {
           userId = 'first.last';

@@ -14,15 +14,17 @@ interface WithoutChat {
 interface WithChat {
   enabled: true;
   chatURL: string;
-  identityJWT: string;
-  userID: string;
-  userEmail: string;
+  user: {
+    jwt: string;
+    id: string;
+    email: string;
+  };
 }
 
-export type ChatService = WithChat | WithoutChat;
+export type ChatConfig = WithChat | WithoutChat;
 
 export interface CloudServices {
-  chat: ChatService;
+  chat: ChatConfig;
 }
 
 const ServicesContext = createContext<CloudServices>({ chat: { enabled: false } });
@@ -38,7 +40,7 @@ export function useServices() {
   return useContext(ServicesContext);
 }
 
-export function useChat(): ChatService {
+export function useChat(): ChatConfig {
   const { chat } = useServices();
   return chat;
 }

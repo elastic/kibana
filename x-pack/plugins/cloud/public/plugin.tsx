@@ -32,7 +32,7 @@ import type { GetChatUserDataResponseBody } from '../common/types';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
-import { ChatService, ServicesProvider } from './services';
+import { ChatConfig, ServicesProvider } from './services';
 
 export interface CloudConfigType {
   id?: string;
@@ -91,7 +91,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
   private appSubscription?: Subscription;
-  private chatService: ChatService = { enabled: false };
+  private chatConfig: ChatConfig = { enabled: false };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -179,7 +179,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       CloudContextProvider: ({ children }) => (
-        <ServicesProvider chat={this.chatService}>{children}</ServicesProvider>
+        <ServicesProvider chat={this.chatConfig}>{children}</ServicesProvider>
       ),
     };
   }
@@ -303,20 +303,30 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   private async setupChat({ http, security }: SetupChatDeps) {
+    if (!this.isCloudEnabled) {
+      return;
+    }
+
     const { enabled, chatURL } = this.config.chat;
 
     if (!security || !enabled || !chatURL) {
       return;
     }
 
-    const chatUserData = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
+    const {
+      email,
+      id,
+      token: jwt,
+    } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
 
-    this.chatService = {
+    this.chatConfig = {
       enabled,
       chatURL,
-      userEmail: chatUserData.email,
-      userID: chatUserData.id,
-      identityJWT: chatUserData.token,
+      user: {
+        email,
+        id,
+        jwt,
+      },
     };
   }
 }

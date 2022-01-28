@@ -8,6 +8,7 @@
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
 import { css } from '@emotion/react';
 import { useChat } from '../../services';
+import { getChatContext } from './get_chat_context';
 
 type UseChatType =
   | { enabled: false }
@@ -16,55 +17,18 @@ type UseChatType =
       src: string;
       ref: React.MutableRefObject<HTMLIFrameElement | null>;
       style: CSSProperties;
+      isReady: boolean;
     };
 
 const MESSAGE_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
 const MESSAGE_SET_CONTEXT = 'driftSetContext';
 
-const iframeStyle = css`
-  position: fixed;
-  botton: 30px;
-  right: 30px;
-  display: block;
-`;
-
-// We're sending a lot of information to the frame, so this method puts together the specific
-// properties, 1/ to avoid leaking too much, and 2/ to enumerate precisely what we're sending.
-const getContext = () => {
-  const { location, navigator, innerHeight, innerWidth } = window;
-  const { hash, host, hostname, href, origin, pathname, port, protocol, search } = location;
-  const { language, userAgent } = navigator;
-  const { title, referrer } = document;
-
-  return {
-    window: {
-      location: {
-        hash,
-        host,
-        hostname,
-        href,
-        origin,
-        pathname,
-        port,
-        protocol,
-        search,
-      },
-      navigator: { language, userAgent },
-      innerHeight,
-      innerWidth,
-    },
-    document: {
-      title,
-      referrer,
-    },
-  };
-};
-
-const useFrame = (): UseChatType => {
+const useChatConfig = (): UseChatType => {
   const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
   const [style, setStyle] = useState<CSSProperties>({});
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent): void => {
@@ -78,17 +42,19 @@ const useFrame = (): UseChatType => {
         return;
       }
 
+      const context = getChatContext();
       const { data: message } = event;
-      const context = getContext();
+      const { user: userConfig } = chat;
+      const { id, email, jwt } = userConfig;
 
       switch (message.type) {
         case MESSAGE_READY: {
           const user = {
-            id: chat.userID,
+            id,
             attributes: {
-              email: chat.userEmail,
+              email,
             },
-            jwt: chat.identityJWT,
+            jwt,
           };
 
           chatIframe.contentWindow.postMessage(
@@ -98,6 +64,9 @@ const useFrame = (): UseChatType => {
             },
             '*'
           );
+
+          setIsReady(true);
+
           break;
         }
 
@@ -118,18 +87,25 @@ const useFrame = (): UseChatType => {
   }, [chat, style]);
 
   if (chat.enabled) {
-    return { enabled: true, src: chat.chatURL, ref, style };
+    return { enabled: true, src: chat.chatURL, ref, style, isReady };
   }
 
   return { enabled: false };
 };
 
 export const Chat = () => {
-  const frameProps = useFrame();
+  const config = useChatConfig();
 
-  if (!frameProps.enabled) {
+  if (!config.enabled) {
     return null;
   }
 
-  return <iframe css={iframeStyle} data-test-id="iframe-chat" title="chat" {...frameProps} />;
+  const iframeStyle = css`
+    position: fixed;
+    botton: 30px;
+    right: 30px;
+    visibility: ${config.isReady ? 'visible' : 'hidden'};
+  `;
+
+  return <iframe css={iframeStyle} title="chat" {...config} />;
 };

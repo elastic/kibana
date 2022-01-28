@@ -8,7 +8,8 @@
 import React, { Suspense } from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
-export const LazyChat = React.lazy(() => import('./chat'));
+export const LazyChat = React.lazy(() => import('./chat').then(({ Chat }) => ({ default: Chat })));
+
 export const Chat = () => (
   <EuiErrorBoundary>
     <Suspense fallback={<div />}>

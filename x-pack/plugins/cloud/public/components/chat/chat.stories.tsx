@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { Chat } from './iframe';
+import { Chat } from './chat';
 
 export default {
-  title: 'IFRAME Chat',
+  title: 'Chat Widget',
   description: '',
   parameters: {},
 };

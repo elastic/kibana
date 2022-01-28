@@ -26,9 +26,11 @@ const config = {
   chat: {
     enabled: true,
     chatURL: 'chat-url',
-    userID: 'user-id',
-    userEmail: 'test-user@elastic.co',
-    identityJWT: 'identity-jwt',
+    user: {
+      id: 'user-id',
+      email: 'test-user@elastic.co',
+      jwt: 'identity-jwt',
+    },
   },
 };
 

@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
-import { Chat } from './iframe';
-export { Chat } from './iframe';
-
-/**
- * Exporting the Chat component as a default export so it can be loaded by React.lazy.
- */
-export default Chat;
+export { Chat } from './chat';
