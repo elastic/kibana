@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsClient } from '../../../../../../src/core/server';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
@@ -41,10 +41,12 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     query: schema.object({
       page: schema.maybe(schema.number()),
       perPage: schema.maybe(schema.number()),
+      search: schema.maybe(schema.string()),
     }),
   },
   handler: async ({ request, savedObjectsClient }): Promise<any> => {
-    const { perPage = 50, page } = request.query;
+    const { perPage = 50, page, search } = request.query;
+
     // TODO: add query/filtering params
     const {
       saved_objects: monitors,
@@ -54,6 +56,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       type: syntheticsMonitorType,
       perPage,
       page,
+      filter: search ? `${syntheticsMonitorType}.attributes.name: ${search}` : '',
     });
     return {
       ...rest,
