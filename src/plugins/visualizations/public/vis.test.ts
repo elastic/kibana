@@ -38,7 +38,7 @@ jest.mock('./services', () => {
     getTypes: () => ({ get: () => visType }),
     getAggs: () => ({
       createAggConfigs: (indexPattern: any, cfg: any) => ({
-        aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, toJSON: () => aggConfig })),
+        aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, serialize: () => aggConfig })),
       }),
     }),
     getSearch: () => ({
