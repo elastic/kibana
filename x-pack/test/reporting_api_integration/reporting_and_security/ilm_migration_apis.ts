@@ -13,6 +13,7 @@ import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
+  const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
   const security = getService('security');
@@ -34,13 +35,15 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
   const checkMigrationStatus = async () => {
-    await reportingAPI.checkIlmMigrationStatus(
+    return await reportingAPI.checkIlmMigrationStatus(
       reportingAPI.REPORTING_USER_USERNAME,
       reportingAPI.REPORTING_USER_PASSWORD
     );
   };
 
-  describe('ILM policy migration APIs', () => {
+  describe('ILM policy migration APIs', function () {
+    this.onlyEsVersion('<=7');
+
     before(async () => {
       await security.role.create(reportingAPI.REPORTING_ROLE, {
         metadata: {},
@@ -67,12 +70,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await reportingAPI.createTestReportingUser();
 
-      await reportingAPI.initLogs();
+      log.debug(`Deleting all reports`);
+      await reportingAPI.initEcommerce();
+      log.debug(`Running migration`);
       await runMigrate(); // ensure that the ILM policy exists for the first test
     });
 
     after(async () => {
-      await reportingAPI.teardownLogs();
+      await reportingAPI.teardownEcommerce();
     });
 
     afterEach(async () => {
@@ -81,12 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when no migration is needed', async () => {
-      expect(
-        await reportingAPI.checkIlmMigrationStatus(
-          reportingAPI.REPORTING_USER_USERNAME,
-          reportingAPI.REPORTING_USER_PASSWORD
-        )
-      ).to.eql('ok');
+      expect(await checkMigrationStatus()).to.eql('ok');
 
       // try creating a report
       await supertestWithoutAuth
@@ -99,10 +99,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
-      await reportingAPI.makeAllReportingIndicesUnmanaged();
+      log.debug(`Making reporting indices unmanaged`);
+      await reportingAPI.makeAllReportingIndicesUnmanaged(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD
+      );
+
       // TODO: Remove "any" when no longer through type issue "policy_id" missing
+      log.debug(`Deleting ILM policy`);
       await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
 
+      log.debug(`Creating report job`);
       await supertestWithoutAuth
         .post(`/api/reporting/generate/csv_searchsource`)
         .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
@@ -116,7 +123,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
-      await reportingAPI.makeAllReportingIndicesUnmanaged();
+      await reportingAPI.makeAllReportingIndicesUnmanaged(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD
+      );
       await supertestWithoutAuth
         .post(`/api/reporting/generate/csv_searchsource`)
         .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)

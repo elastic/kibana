@@ -227,13 +227,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     }
   };
 
-  const makeAllReportingIndicesUnmanaged = async () => {
+  const makeAllReportingIndicesUnmanaged = async (username: string, password: string) => {
     log.debug('ReportingAPI.makeAllReportingIndicesUnmanaged');
     const settings = {
       'index.lifecycle.name': null,
     };
-    await esSupertest
+    await supertestWithoutAuth
       .put('/.reporting*/_settings')
+      .auth(username, password)
       .send({
         settings,
       })
