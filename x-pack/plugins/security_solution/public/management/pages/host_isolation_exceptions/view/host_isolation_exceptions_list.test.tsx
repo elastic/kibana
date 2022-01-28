@@ -123,7 +123,7 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
         expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
-          'Showing 1 exception'
+          'Showing 1 host isolation exception'
         );
         expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
       });

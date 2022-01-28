@@ -24,7 +24,7 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { partition, pick } from 'lodash';
+import { partition } from 'lodash';
 import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
@@ -33,7 +33,6 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
-  REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -346,9 +345,8 @@ function getAvailableActionVariables(
   actionGroup?: ActionGroupWithMessageVariables
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
+    actionVariables,
     actionGroup?.omitOptionalMessageVariables
-      ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
-      : actionVariables
   );
 
   // partition deprecated items so they show up last

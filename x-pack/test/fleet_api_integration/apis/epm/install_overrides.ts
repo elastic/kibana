@@ -63,7 +63,9 @@ export default function (providerContext: FtrProviderContext) {
           method: 'GET',
           path: `/_component_template/${templateName}@mappings`,
         },
-        { meta: true }
+        {
+          meta: true,
+        }
       ));
 
       // The mappings override provided in the package is set in the mappings component template
@@ -128,6 +130,8 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       ));
+      // omit routings
+      delete body.template.settings.index.routing;
 
       expect(body).to.eql({
         template: {
