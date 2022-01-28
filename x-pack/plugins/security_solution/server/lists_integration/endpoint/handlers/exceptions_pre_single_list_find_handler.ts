@@ -13,6 +13,10 @@ export const getExceptionsPreSingleListFindHandler = (
   endpointAppContext: EndpointAppContextService
 ): ExceptionsListPreSingleListFindServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     // Validate Host Isolation Exceptions
     if (HostIsolationExceptionsValidator.isHostIsolationException(data.listId)) {
       await new HostIsolationExceptionsValidator(
