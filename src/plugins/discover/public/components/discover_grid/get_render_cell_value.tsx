@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
+
 import type { DataView, DataViewField } from 'src/plugins/data/common';
 import {
   EuiDataGridCellValueElementProps,
@@ -15,6 +16,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
+import { FieldFormatsStart } from '../../../../field_formats/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
@@ -22,10 +24,12 @@ import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
 import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 export const getRenderCellValueFn =
   (
-    indexPattern: DataView,
+    dataView: DataView,
     rows: ElasticSearchHit[] | undefined,
     rowsFlattened: Array<Record<string, unknown>>,
     useNewFieldsApi: boolean,
@@ -33,12 +37,16 @@ export const getRenderCellValueFn =
     maxDocFieldsDisplayed: number
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
+    const { uiSettings, fieldFormats } = useDiscoverServices();
+
+    const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
+
     const row = rows ? rows[rowIndex] : undefined;
     const rowFlattened = rowsFlattened
       ? (rowsFlattened[rowIndex] as Record<string, unknown>)
       : undefined;
 
-    const field = indexPattern.fields.getByName(columnId);
+    const field = dataView.fields.getByName(columnId);
     const ctx = useContext(DiscoverGridContext);
 
     useEffect(() => {
@@ -75,23 +83,24 @@ export const getRenderCellValueFn =
     );
 
     if (isDetails) {
-      return renderPopoverContent(
-        row,
+      return renderPopoverContent({
+        rowRaw: row,
         rowFlattened,
         field,
         columnId,
-        indexPattern,
-        useTopLevelObjectColumns
-      );
+        dataView,
+        useTopLevelObjectColumns,
+        fieldFormats,
+      });
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
       const pairs = useTopLevelObjectColumns
-        ? getTopLevelObjectPairs(row, columnId, indexPattern, fieldsToShow).slice(
+        ? getTopLevelObjectPairs(row, columnId, dataView, fieldsToShow).slice(
             0,
             maxDocFieldsDisplayed
           )
-        : formatHit(row, indexPattern, fieldsToShow);
+        : formatHit(row, dataView, fieldsToShow, maxEntries, fieldFormats);
 
       return (
         <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
@@ -113,7 +122,7 @@ export const getRenderCellValueFn =
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: formatFieldValue(rowFlattened[columnId], row, indexPattern, field),
+          __html: formatFieldValue(rowFlattened[columnId], row, fieldFormats, dataView, field),
         }}
       />
     );
@@ -134,14 +143,23 @@ function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
 /**
  * Helper function for the cell popover
  */
-function renderPopoverContent(
-  rowRaw: ElasticSearchHit,
-  rowFlattened: Record<string, unknown>,
-  field: DataViewField | undefined,
-  columnId: string,
-  dataView: DataView,
-  useTopLevelObjectColumns: boolean
-) {
+function renderPopoverContent({
+  rowRaw,
+  rowFlattened,
+  field,
+  columnId,
+  dataView,
+  useTopLevelObjectColumns,
+  fieldFormats,
+}: {
+  rowRaw: ElasticSearchHit;
+  rowFlattened: Record<string, unknown>;
+  field: DataViewField | undefined;
+  columnId: string;
+  dataView: DataView;
+  useTopLevelObjectColumns: boolean;
+  fieldFormats: FieldFormatsStart;
+}) {
   if (useTopLevelObjectColumns || field?.type === '_source') {
     const json = useTopLevelObjectColumns
       ? getInnerColumns(rowRaw.fields as Record<string, unknown[]>, columnId)
@@ -156,7 +174,7 @@ function renderPopoverContent(
       // formatFieldValue guarantees sanitized values
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{
-        __html: formatFieldValue(rowFlattened[columnId], rowRaw, dataView, field),
+        __html: formatFieldValue(rowFlattened[columnId], rowRaw, fieldFormats, dataView, field),
       }}
     />
   );

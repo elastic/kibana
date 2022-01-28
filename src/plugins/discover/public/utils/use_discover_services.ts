@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { FieldStatisticsTable } from './field_stats_table';
+import { useKibana } from '../../../kibana_react/public';
+import { DiscoverServices } from '../build_services';
+
+export const useDiscoverServices = () => useKibana<DiscoverServices>().services;

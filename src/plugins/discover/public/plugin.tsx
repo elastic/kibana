@@ -37,13 +37,11 @@ import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
   setDocViewsRegistry,
   setUrlTracker,
-  setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
-  getServices,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
@@ -64,6 +62,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
+import { useDiscoverServices } from './utils/use_discover_services';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -211,10 +210,7 @@ export class DiscoverPlugin
   private urlGenerator?: DiscoverStart['urlGenerator'];
   private locator?: DiscoverAppLocator;
 
-  setup(
-    core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
-    plugins: DiscoverSetupPlugins
-  ): DiscoverSetup {
+  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -242,9 +238,12 @@ export class DiscoverPlugin
       }),
       order: 10,
       component: (props) => {
-        const Component = getServices().uiSettings.get(DOC_TABLE_LEGACY)
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const services = useDiscoverServices();
+        const DocView = services.uiSettings.get(DOC_TABLE_LEGACY)
           ? DocViewerLegacyTable
           : DocViewerTable;
+
         return (
           <React.Suspense
             fallback={
@@ -253,7 +252,7 @@ export class DiscoverPlugin
               </DeferredSpinner>
             }
           >
-            <Component {...props} />
+            <DocView {...props} />
           </React.Suspense>
         );
       },
@@ -339,7 +338,6 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        const [, depsStart] = await core.getStartServices();
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
@@ -349,14 +347,18 @@ export class DiscoverPlugin
         const unlistenParentHistory = params.history.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
+
+        const [coreStart, discoverStartPlugins] = await core.getStartServices();
+        const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+
         // make sure the index pattern list is up to date
-        await depsStart.data.indexPatterns.clearCache();
+        await discoverStartPlugins.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element);
+        const unmount = renderApp(params.element, services);
         return () => {
           unlistenParentHistory();
           unmount();
@@ -413,10 +415,7 @@ export class DiscoverPlugin
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 
-    const services = buildServices(core, plugins, this.initializerContext);
-    setServices(services);
-
-    injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));
+    injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     return {
       urlGenerator: this.urlGenerator,
@@ -439,7 +438,12 @@ export class DiscoverPlugin
       };
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices);
+    const getDiscoverServices = async () => {
+      const [coreStart, discoverStartPlugins] = await core.getStartServices();
+      return buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+    };
+
+    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }

@@ -17,11 +17,6 @@ jest.mock('../../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
   return {
-    getServices: () => ({
-      uiSettings: {
-        get: jest.fn(),
-      },
-    }),
     getDocViewsRegistry: () => ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addDocView(view: any) {
@@ -34,6 +29,16 @@ jest.mock('../../../../kibana_services', () => {
         registry = [];
       },
     }),
+  };
+});
+
+jest.mock('../../../../utils/use_discover_services', () => {
+  return {
+    useDiscoverServices: {
+      uiSettings: {
+        get: jest.fn(),
+      },
+    },
   };
 });
 
