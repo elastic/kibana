@@ -151,7 +151,7 @@ export function* fetchAlertsEffect() {
       yield put(createAlertAction.success(response));
 
       kibanaService.core.notifications.toasts.addSuccess(
-        simpleAlertEnabled(action.payload.defaultActions, kibanaService.theme)
+        simpleAlertEnabled(action.payload.defaultActions, kibanaService.theme, response)
       );
       yield put(getMonitorAlertsAction.get());
     } catch (err) {
