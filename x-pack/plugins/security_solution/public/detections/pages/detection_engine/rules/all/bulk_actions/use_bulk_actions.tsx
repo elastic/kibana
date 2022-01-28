@@ -46,7 +46,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
-import type { BulkActionPartialErrorResponseSchema } from '../../../../../../../common/detection_engine/schemas/response/perform_bulk_action_schema';
+import type { BulkActionPartialErrorResponse } from '../../../../../../../common/detection_engine/schemas/response/perform_bulk_action_schema';
 import type { HTTPError } from '../../../../../../../common/detection_engine/types';
 
 interface UseBulkActionsArgs {
@@ -306,8 +306,8 @@ export const useBulkActions = ({
 
               // if response doesn't have number of failed rules, it means the whole bulk action failed
               // and general error toast will be shown. Otherwise - error toast for partial failure
-              const failedRulesCount = (error?.body as BulkActionPartialErrorResponseSchema)
-                ?.attributes?.rules?.failed;
+              const failedRulesCount = (error?.body as BulkActionPartialErrorResponse)?.attributes
+                ?.rules?.failed;
 
               if (isNaN(failedRulesCount)) {
                 toastsApi.addError(error, { title: i18n.BULK_ACTION_FAILED });
