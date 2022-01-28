@@ -41,7 +41,7 @@ export function getTailSamplingSettings(): SettingsRow[] {
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingIntervalDescription',
             {
               defaultMessage:
-                'Interval for syncronisation between multiple APM Servers. Should be in the order of tens of seconds or low minutes.',
+                'Interval for synchronization between multiple APM Servers. Should be in the order of tens of seconds or low minutes.',
             }
           ),
           placeholder: i18n.translate(
