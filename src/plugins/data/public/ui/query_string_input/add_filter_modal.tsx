@@ -397,22 +397,16 @@ export function AddFilterModal({
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
-          return {
-            ...buildFilter(
-              selectedIndexPattern,
-              localFilter.field,
-              localFilter.operator.type,
-              localFilter.operator.negate,
-              filter.meta.disabled ?? false,
-              localFilter.value ?? '',
-              alias,
-              $state.store
-            ),
-            groupId: localFilter.groupId,
-            id: localFilter.id,
-            subGroupId: localFilter.subGroupId,
-            relationship: localFilter.relationship,
-          };
+          return buildFilter(
+            selectedIndexPattern,
+            localFilter.field,
+            localFilter.operator.type,
+            localFilter.operator.negate,
+            filter.meta.disabled ?? false,
+            localFilter.value ?? '',
+            alias,
+            $state.store
+          );
         }
       });
       if (builtFilters && builtFilters.length) {
