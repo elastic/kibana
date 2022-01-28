@@ -10,10 +10,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { sslSchema } from '@kbn/server-http-tools';
 
 const serviceConfig = schema.object({
-  enabled: schema.boolean(),
+  enabled: schema.maybe(schema.boolean()),
   username: schema.maybe(schema.string()),
   password: schema.maybe(schema.string()),
-  manifestUrl: schema.string(),
+  manifestUrl: schema.maybe(schema.string()),
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   syncInterval: schema.maybe(schema.string()),
   tls: schema.maybe(sslSchema),
@@ -24,22 +24,14 @@ const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   ui: schema.maybe(
     schema.object({
-      unsafe: schema.maybe(
+      monitorManagement: schema.maybe(
         schema.object({
-          monitorManagement: schema.maybe(
-            schema.object({
-              enabled: schema.boolean(),
-            })
-          ),
+          enabled: schema.boolean(),
         })
       ),
     })
   ),
-  unsafe: schema.maybe(
-    schema.object({
-      service: serviceConfig,
-    })
-  ),
+  service: schema.maybe(serviceConfig),
 });
 
 export const config: PluginConfigDescriptor = {

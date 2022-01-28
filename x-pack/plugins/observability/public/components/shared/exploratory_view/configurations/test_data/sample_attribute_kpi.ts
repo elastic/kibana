@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const sampleAttributeKpi = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',

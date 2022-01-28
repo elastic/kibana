@@ -184,6 +184,8 @@
 /x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
+/x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
+/x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
 
 # ML team owns and maintains the transform plugin despite it living in the Data management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
@@ -392,6 +394,7 @@
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt

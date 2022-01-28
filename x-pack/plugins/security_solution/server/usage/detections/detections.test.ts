@@ -70,6 +70,8 @@ describe('Detections Usage and Metrics', () => {
               rule_type: 'query',
               rule_version: 4,
               updated_on: '2021-03-23T17:15:59.634Z',
+              has_legacy_notification: false,
+              has_notification: false,
             },
           ],
           detection_rule_usage: {
@@ -79,15 +81,20 @@ describe('Detections Usage and Metrics', () => {
               disabled: 1,
               alerts: 3400,
               cases: 1,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
             },
             elastic_total: {
               alerts: 3400,
               cases: 1,
               disabled: 1,
               enabled: 0,
-            },
-            legacy_notifications: {
-              total: 4,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
             },
           },
         },
@@ -118,15 +125,20 @@ describe('Detections Usage and Metrics', () => {
               cases: 1,
               disabled: 1,
               enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
             },
             query: {
               alerts: 800,
               cases: 1,
               disabled: 1,
               enabled: 0,
-            },
-            legacy_notifications: {
-              total: 4,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
             },
           },
         },
@@ -144,7 +156,7 @@ describe('Detections Usage and Metrics', () => {
       savedObjectsClient.find.mockResolvedValue(getMockAlertCasesResponse());
       const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
-      expect(result).toEqual({
+      expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
           detection_rule_detail: [
@@ -159,6 +171,8 @@ describe('Detections Usage and Metrics', () => {
               rule_type: 'query',
               rule_version: 4,
               updated_on: '2021-03-23T17:15:59.634Z',
+              has_legacy_notification: false,
+              has_notification: false,
             },
           ],
           detection_rule_usage: {
@@ -168,15 +182,20 @@ describe('Detections Usage and Metrics', () => {
               cases: 1,
               disabled: 1,
               enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
             },
             query: {
               alerts: 0,
               cases: 1,
               disabled: 1,
               enabled: 0,
-            },
-            legacy_notifications: {
-              total: 4,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
             },
           },
         },

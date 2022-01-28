@@ -19,6 +19,8 @@ async function fetchIndicesCall(
   const { body: indices } = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
+    // only get specified properties in the response
+    filter_path: ['*.aliases', '*.settings.index.hidden', '*.data_stream'],
   });
 
   if (!Object.keys(indices).length) {
@@ -53,7 +55,7 @@ async function fetchIndicesCall(
         isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
         aliases: aliases.length ? aliases : 'none',
         // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/532
-        hidden: index.settings.index.hidden === 'true',
+        hidden: index.settings?.index.hidden === 'true',
         data_stream: index.data_stream!,
       });
     }

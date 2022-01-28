@@ -32,7 +32,7 @@ export function convertToDataStreamFormat(monitor: Record<string, any>): DataStr
     id: monitor.id,
     // Schedule is needed by service at root level as well
     schedule: monitor.schedule,
-    enabled: monitor.enabled,
+    enabled: monitor.enabled ?? true,
     data_stream: {
       namespace: monitor.namespace ?? DEFAULT_NAMESPACE_STRING,
     },

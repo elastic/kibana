@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { last, isEqual } from 'lodash';
 import { DATA_FORMATTERS } from '../../../../common/enums';
+import { aggs } from '../../../../common/agg_utils';
 import type { Series } from '../../../../common/types';
 import type { FieldFormatMap } from '../../../../../../data/common';
 
@@ -15,19 +15,30 @@ export const checkIfSeriesHaveSameFormatters = (
   seriesModel: Series[],
   fieldFormatMap?: FieldFormatMap
 ) => {
-  const allSeriesHaveDefaultFormatting = seriesModel.every(
-    (seriesGroup) => seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
-  );
+  const uniqFormatters = new Set();
 
-  return allSeriesHaveDefaultFormatting && fieldFormatMap
-    ? seriesModel
-        .map(({ metrics }) => fieldFormatMap[last(metrics)?.field ?? ''])
-        .every((fieldFormat, index, [firstSeriesFieldFormat]) =>
-          isEqual(fieldFormat, firstSeriesFieldFormat)
-        )
-    : seriesModel.every(
-        (series) =>
-          series.formatter === seriesModel[0].formatter &&
-          series.value_template === seriesModel[0].value_template
+  seriesModel.forEach((seriesGroup) => {
+    if (!seriesGroup.separate_axis) {
+      if (seriesGroup.formatter === DATA_FORMATTERS.DEFAULT) {
+        const activeMetric = seriesGroup.metrics[seriesGroup.metrics.length - 1];
+        const aggMeta = aggs.find((agg) => agg.id === activeMetric.type);
+
+        if (
+          activeMetric.field &&
+          aggMeta?.meta.isFieldRequired &&
+          fieldFormatMap?.[activeMetric.field]
+        ) {
+          return uniqFormatters.add(JSON.stringify(fieldFormatMap[activeMetric.field]));
+        }
+      }
+      uniqFormatters.add(
+        JSON.stringify({
+          // requirement: in the case of using TSVB formatters, we do not need to check the value_template, just formatter!
+          formatter: seriesGroup.formatter,
+        })
       );
+    }
+  });
+
+  return uniqFormatters.size === 1;
 };

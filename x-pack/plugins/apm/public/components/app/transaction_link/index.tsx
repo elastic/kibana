@@ -27,8 +27,7 @@ export function TransactionLink() {
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {
       if (transactionId) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/transactions/{transactionId}',
+        return callApmApi('GET /internal/apm/transactions/{transactionId}', {
           params: {
             path: {
               transactionId,
