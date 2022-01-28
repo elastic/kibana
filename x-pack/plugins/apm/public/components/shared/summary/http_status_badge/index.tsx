@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { statusCodes } from './status_codes';
-import { httpStatusCodeToColor } from '../../../../utils/httpStatusCodeToColor';
+import { httpStatusCodeToColor } from '../../../../utils/http_status_code_to_color';
 
 interface HttpStatusBadgeProps {
   status: number;

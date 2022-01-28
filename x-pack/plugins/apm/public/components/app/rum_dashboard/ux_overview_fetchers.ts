@@ -11,9 +11,9 @@ import {
   UxFetchDataResponse,
   UXHasDataResponse,
 } from '../../../../../observability/public/';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
-export { createCallApmApi } from '../../../services/rest/createCallApmApi';
+export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
 export const fetchUxOverviewDate = async ({
   absoluteTime,

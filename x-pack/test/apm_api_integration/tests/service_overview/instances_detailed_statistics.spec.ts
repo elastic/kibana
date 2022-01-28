@@ -10,7 +10,7 @@ import url from 'url';
 import moment from 'moment';
 import { Coordinate } from '../../../../plugins/apm/typings/timeseries';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { createApmApiClient } from '../../common/apm_api_supertest';

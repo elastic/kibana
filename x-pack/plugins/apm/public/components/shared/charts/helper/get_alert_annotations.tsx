@@ -26,7 +26,7 @@ import { ValuesType } from 'utility-types';
 import type { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
 import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { asDuration, asPercent } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type Alert = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']

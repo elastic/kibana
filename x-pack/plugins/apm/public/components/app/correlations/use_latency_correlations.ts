@@ -21,7 +21,7 @@ import type {
   LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
 
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 import {
   getInitialResponse,

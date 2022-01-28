@@ -9,7 +9,7 @@ import moment from 'moment';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';

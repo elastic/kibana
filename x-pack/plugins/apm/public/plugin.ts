@@ -53,7 +53,7 @@ import {
 import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { SecurityPluginStart } from '../../security/public';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
@@ -186,7 +186,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       );
 
       const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
+        './services/rest/create_call_apm_api'
       );
 
       // have to do this here as well in case app isn't mounted yet
@@ -241,7 +241,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         './components/app/rum_dashboard/ux_overview_fetchers'
       );
       const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
+        './services/rest/create_call_apm_api'
       );
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
@@ -326,7 +326,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/uxApp'),
+          import('./application/ux_app'),
           core.getStartServices(),
         ]);
 

@@ -9,7 +9,7 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Breadcrumb } from '../app/breadcrumb';
-import { TraceLink } from '../app/TraceLink';
+import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
 import { home } from './home';
 import { serviceDetail } from './service_detail';

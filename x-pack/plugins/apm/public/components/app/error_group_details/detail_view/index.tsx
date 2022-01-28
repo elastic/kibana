@@ -20,7 +20,7 @@ import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
@@ -37,7 +37,7 @@ import {
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
-} from './ErrorTabs';
+} from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`
