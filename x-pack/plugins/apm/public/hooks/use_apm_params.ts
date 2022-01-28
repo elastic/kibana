@@ -16,17 +16,17 @@ export function useMaybeApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath,
   optional: true
 ): TypeOf<ApmRoutes, TPath> | undefined {
-  return useParams(path, optional);
+  return useParams(path, optional) as TypeOf<ApmRoutes, TPath> | undefined;
 }
 
 export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath
 ): TypeOf<ApmRoutes, TPath> {
-  return useParams(path)!;
+  return useParams(path)! as TypeOf<ApmRoutes, TPath>;
 }
 
 export function useAnyOfApmParams<TPaths extends Array<PathsOf<ApmRoutes>>>(
   ...paths: TPaths
 ): TypeOf<ApmRoutes, ValuesType<TPaths>> {
-  return useParams(...paths)!;
+  return useParams(...paths)! as TypeOf<ApmRoutes, ValuesType<TPaths>>;
 }
