@@ -22,6 +22,7 @@ jest.mock('../../static_globals', () => ({
     },
   },
 }));
+import { Globals } from '../../static_globals';
 
 describe('fetchClusters', () => {
   const clusterUuid = '1sdfds734';
@@ -80,5 +81,52 @@ describe('fetchClusters', () => {
     await fetchClusters(esClient);
     const params = esClient.search.mock.calls[0][0] as any;
     expect(params?.body?.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
+  });
+
+  it('should call ES with correct query', async () => {
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    await fetchClusters(esClient);
+    expect(esClient.search).toHaveBeenCalledWith({
+      index:
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+      filter_path: [
+        'hits.hits._source.cluster_settings.cluster.metadata.display_name',
+        'hits.hits._source.cluster_uuid',
+        'hits.hits._source.cluster_name',
+      ],
+      body: {
+        size: 1000,
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'cluster_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { range: { timestamp: { gte: 'now-2m' } } },
+            ],
+          },
+        },
+        collapse: { field: 'cluster_uuid' },
+      },
+    });
+  });
+  it('should call ES with correct query when ccs disabled', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = false;
+    const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+    });
+    await fetchClusters(esClient);
+    // @ts-ignore
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
   });
 });
