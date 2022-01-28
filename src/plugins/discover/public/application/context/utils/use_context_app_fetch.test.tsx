@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { setServices, getServices } from '../../../kibana_services';
 import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
@@ -22,6 +22,7 @@ import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '../../../../../data_views/common';
 import { themeServiceMock } from '../../../../../../core/public/mocks';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -52,7 +53,7 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
   const dangerNotification = jest.fn();
   const mockSearchSource = createContextSearchSourceStub('timestamp');
 
-  setServices({
+  const services = {
     data: {
       search: {
         searchSource: {
@@ -74,9 +75,9 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
         }
       },
     },
-  } as unknown as DiscoverServices);
+  } as unknown as DiscoverServices;
 
-  return {
+  const props = {
     dangerNotification,
     props: {
       anchorId: 'mock_anchor_id',
@@ -86,18 +87,22 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
         successorCount: 2,
       },
       useNewFieldsApi: false,
-      services: getServices(),
-    } as unknown as ContextAppFetchProps,
+    } as ContextAppFetchProps,
+  };
+
+  return {
+    result: renderHook(() => useContextAppFetch(props.props), {
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      ),
+    }).result,
+    dangerNotification,
   };
 };
 
 describe('test useContextAppFetch', () => {
   it('should fetch all correctly', async () => {
-    const { props } = initDefaults(['_doc']);
-
-    const { result } = renderHook(() => {
-      return useContextAppFetch(props);
-    });
+    const { result } = initDefaults(['_doc']);
 
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
@@ -116,11 +121,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set anchorStatus to failed when tieBreakingField array is empty', async () => {
-    const { props } = initDefaults([]);
-
-    const { result } = renderHook(() => {
-      return useContextAppFetch(props);
-    });
+    const { result } = initDefaults([]);
 
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
 
@@ -136,11 +137,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set anchorStatus to failed when invalid indexPatternId provided', async () => {
-    const { props, dangerNotification } = initDefaults(['_doc'], '');
-
-    const { result } = renderHook(() => {
-      return useContextAppFetch(props);
-    });
+    const { result, dangerNotification } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
 
@@ -157,11 +154,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should fetch context rows correctly', async () => {
-    const { props } = initDefaults(['_doc']);
-
-    const { result } = renderHook(() => {
-      return useContextAppFetch(props);
-    });
+    const { result } = initDefaults(['_doc']);
 
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
     expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
@@ -177,11 +170,7 @@ describe('test useContextAppFetch', () => {
   });
 
   it('should set context rows statuses to failed when invalid indexPatternId provided', async () => {
-    const { props, dangerNotification } = initDefaults(['_doc'], '');
-
-    const { result } = renderHook(() => {
-      return useContextAppFetch(props);
-    });
+    const { result, dangerNotification } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
     expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);

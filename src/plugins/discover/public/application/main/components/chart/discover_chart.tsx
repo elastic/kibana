@@ -21,10 +21,10 @@ import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
-import { DiscoverServices } from '../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -34,7 +34,6 @@ export function DiscoverChart({
   savedSearch,
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
-  services,
   stateContainer,
   isTimeBased,
   viewMode,
@@ -46,7 +45,6 @@ export function DiscoverChart({
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
-  services: DiscoverServices;
   stateContainer: GetStateReturn;
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
@@ -54,10 +52,9 @@ export function DiscoverChart({
   hideChart?: boolean;
   interval?: string;
 }) {
+  const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
-  const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
-
-  const { data, storage } = services;
+  const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
@@ -165,7 +162,6 @@ export function DiscoverChart({
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
-              services={services}
             />
           </section>
           <EuiSpacer size="s" />

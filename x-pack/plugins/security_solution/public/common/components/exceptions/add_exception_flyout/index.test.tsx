@@ -10,8 +10,8 @@ import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AddExceptionModal } from './';
-import { useCurrentUser } from '../../../../common/lib/kibana';
+import { AddExceptionFlyout } from '.';
+import { useCurrentUser } from '../../../lib/kibana';
 import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
@@ -127,7 +127,7 @@ describe('When the add exception modal is opened', () => {
       ]);
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <AddExceptionModal
+          <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={[]}
             ruleName={ruleName}
@@ -139,7 +139,7 @@ describe('When the add exception modal is opened', () => {
       );
     });
     it('should show the loading spinner', () => {
-      expect(wrapper.find('[data-test-subj="loadingAddExceptionModal"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
     });
   });
 
@@ -148,7 +148,7 @@ describe('When the add exception modal is opened', () => {
     beforeEach(async () => {
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <AddExceptionModal
+          <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
@@ -192,7 +192,7 @@ describe('When the add exception modal is opened', () => {
       };
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <AddExceptionModal
+          <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
@@ -252,7 +252,7 @@ describe('When the add exception modal is opened', () => {
       };
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <AddExceptionModal
+          <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
@@ -313,7 +313,7 @@ describe('When the add exception modal is opened', () => {
       };
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <AddExceptionModal
+          <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
@@ -387,7 +387,7 @@ describe('When the add exception modal is opened', () => {
       };
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
-          <AddExceptionModal
+          <AddExceptionFlyout
             ruleId={'123'}
             ruleIndices={['filebeat-*']}
             ruleName={ruleName}
@@ -457,7 +457,7 @@ describe('When the add exception modal is opened', () => {
   test('when there are exception builder errors submit button is disabled', async () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
-        <AddExceptionModal
+        <AddExceptionFlyout
           ruleId={'123'}
           ruleIndices={['filebeat-*']}
           ruleName={ruleName}
