@@ -18,7 +18,9 @@ interface SuggestionsSelectProps {
   onChange: (value?: string) => void;
   allowCustomOption?: boolean;
   isClearable?: boolean;
+  isInvalid?: boolean;
   placeholder: string;
+  dataTestSubj?: string;
 }
 
 export function SuggestionsSelect({
@@ -28,6 +30,8 @@ export function SuggestionsSelect({
   field,
   onChange,
   placeholder,
+  isInvalid,
+  dataTestSubj,
   isClearable = true,
   allowCustomOption = true,
 }: SuggestionsSelectProps) {
@@ -101,8 +105,10 @@ export function SuggestionsSelect({
       placeholder={placeholder}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
+      isInvalid={isInvalid}
       style={{ minWidth: '256px' }}
       onCreateOption={allowCustomOption ? handleCreateOption : undefined}
+      data-test-subj={dataTestSubj}
     />
   );
 }
