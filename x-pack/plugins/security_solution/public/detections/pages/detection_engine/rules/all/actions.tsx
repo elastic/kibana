@@ -35,7 +35,7 @@ import {
 import { RulesTableActions } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import { transformOutput } from '../../../../containers/detection_engine/rules/transforms';
 import * as i18n from '../translations';
-import { bucketRulesResponse, getExportedRulesCount } from './helpers';
+import { bucketRulesResponse, getExportedRulesCounts } from './helpers';
 
 export const editRuleAction = (
   ruleId: string,
@@ -88,9 +88,9 @@ export const exportRulesAction = async (
     const blob = await exportRules({ ids: exportRuleId });
     downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
 
-    const exportedRulesCount = await getExportedRulesCount(blob);
+    const { exported } = await getExportedRulesCounts(blob);
     displaySuccessToast(
-      i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, exportRuleId.length),
+      i18n.SUCCESSFULLY_EXPORTED_RULES(exported, exportRuleId.length),
       dispatchToaster
     );
   } catch (e) {
@@ -177,7 +177,6 @@ export const enableRulesAction = async (
 
 interface ExecuteRulesBulkActionArgs {
   visibleRuleIds: string[];
-  selectedItemsCount?: number;
   action: BulkAction;
   toastsApi: ToastsStart;
   search: { query: string } | { ids: string[] };
@@ -189,7 +188,6 @@ interface ExecuteRulesBulkActionArgs {
 
 const executeRulesBulkAction = async ({
   visibleRuleIds,
-  selectedItemsCount,
   action,
   setLoadingRules,
   toastsApi,
@@ -204,10 +202,9 @@ const executeRulesBulkAction = async ({
     if (action === BulkAction.export) {
       const blob = await performBulkAction({ ...search, action });
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
-      const exportedRulesCount = await getExportedRulesCount(blob);
-      toastsApi.addSuccess(
-        i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount ?? 0)
-      );
+      const { exported, total } = await getExportedRulesCounts(blob);
+
+      toastsApi.addSuccess(i18n.SUCCESSFULLY_EXPORTED_RULES(exported, total));
     } else {
       const response = await performBulkAction({ ...search, action, edit: payload?.edit });
 

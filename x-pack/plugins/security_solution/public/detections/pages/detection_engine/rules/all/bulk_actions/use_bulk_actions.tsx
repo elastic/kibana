@@ -127,7 +127,6 @@ export const useBulkActions = ({
         if (isAllSelected) {
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: ruleIds,
-            selectedItemsCount,
             action: BulkAction.enable,
             setLoadingRules,
             toastsApi,
@@ -146,7 +145,6 @@ export const useBulkActions = ({
         if (isAllSelected) {
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: activatedIds,
-            selectedItemsCount,
             action: BulkAction.disable,
             setLoadingRules,
             toastsApi,
@@ -170,7 +168,6 @@ export const useBulkActions = ({
         if (isAllSelected) {
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
-            selectedItemsCount,
             action: BulkAction.duplicate,
             setLoadingRules,
             toastsApi,
@@ -198,7 +195,6 @@ export const useBulkActions = ({
 
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
-            selectedItemsCount,
             action: BulkAction.delete,
             setLoadingRules,
             toastsApi,
@@ -216,7 +212,6 @@ export const useBulkActions = ({
         if (isAllSelected) {
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
-            selectedItemsCount,
             action: BulkAction.export,
             setLoadingRules,
             toastsApi,
@@ -503,7 +498,6 @@ export const useBulkActions = ({
       loadingRuleIds,
       hasMlPermissions,
       dispatchToaster,
-      selectedItemsCount,
       filterQuery,
       setLoadingRules,
       reFetchRules,
