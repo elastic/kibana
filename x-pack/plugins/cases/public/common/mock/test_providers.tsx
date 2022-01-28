@@ -79,6 +79,7 @@ export const createAppMockRenderer = ({
       </KibanaContextProvider>
     </I18nProvider>
   );
+  AppWrapper.displayName = 'AppWrapper';
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
       wrapper: AppWrapper as React.ComponentType,
