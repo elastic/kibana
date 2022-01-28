@@ -6,7 +6,7 @@
  */
 
 import { getOr, find, isEmpty, uniqBy } from 'lodash/fp';
-import { ALERT_RULE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAMESPACE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -230,7 +230,7 @@ export const getSummaryRows = ({
     ? eventCodeField?.originalValue?.[0]
     : eventCodeField?.originalValue;
 
-  const eventRuleTypeField = find({ category: 'kibana', field: 'kibana.rule.type' }, data);
+  const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
   const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;

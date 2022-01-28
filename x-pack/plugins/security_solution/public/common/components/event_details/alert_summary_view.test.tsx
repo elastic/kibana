@@ -201,6 +201,46 @@ describe('AlertSummaryView', () => {
     });
   });
 
+  test('Threshold events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms',
+        values: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
+        originalValue: ['{"field":"host.name","value":"Host-i120rdnmnw"}'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['Threshold Count', 'host.name [threshold]'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test("doesn't render empty fields", () => {
     const renderProps = {
       ...props,
