@@ -71,6 +71,7 @@ export class Plugin implements PluginType {
       config,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     } as UptimeServerSetup;
 
     if (this.server?.config?.service?.enabled) {

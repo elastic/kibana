@@ -34,12 +34,14 @@ export class ServiceAPIClient {
   private locations: ServiceLocations;
   private logger: Logger;
   private readonly config: ServiceConfig;
+  private readonly kibanaVersion: string;
 
-  constructor(logger: Logger, config: ServiceConfig) {
+  constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
     this.config = config;
     const { username, password, manifestUrl, devUrl } = config;
     this.username = username;
     this.devUrl = devUrl;
+    this.kibanaVersion = kibanaVersion;
 
     if (username && password) {
       this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
@@ -102,7 +104,7 @@ export class ServiceAPIClient {
       return axios({
         method,
         url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
-        data: { monitors: monitorsStreams, output },
+        data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
         headers: this.authorization
           ? {
               Authorization: this.authorization,
