@@ -71,6 +71,7 @@ describe('validateMonitor', () => {
           url: 'https://test-url.com',
         },
       ],
+      [ConfigKey.NAMESPACE]: 'testnamespace',
     };
     testMetaData = {
       is_tls_enabled: false,
@@ -425,6 +426,7 @@ function getJsonPayload() {
     '    "TLSv1.2"' +
     '  ],' +
     '  "name": "test-monitor-name",' +
+    '  "namespace": "testnamespace",' +
     '  "locations": [{' +
     '    "id": "eu-west-01",' +
     '    "label": "Europe West",' +

@@ -13,6 +13,7 @@ import { usePolicyConfigContext } from '../../fleet_package/contexts';
 import { CustomFields } from '../../fleet_package/custom_fields';
 import { validate } from '../validation';
 import { MonitorNameAndLocation } from './monitor_name_location';
+import { MonitorManagementAdvancedFields } from './monitor_advanced_fields';
 
 export const MonitorFields = () => {
   const { monitorType } = usePolicyConfigContext();
@@ -21,6 +22,7 @@ export const MonitorFields = () => {
       <CustomFields
         validate={validate[monitorType]}
         dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER]}
+        appendAdvancedFields={<MonitorManagementAdvancedFields validate={validate[monitorType]} />}
       >
         <MonitorNameAndLocation validate={validate[monitorType]} />
       </CustomFields>

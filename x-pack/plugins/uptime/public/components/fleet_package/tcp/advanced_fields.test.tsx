@@ -23,12 +23,14 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('<TCPAdvancedFields />', () => {
   const WrappedComponent = ({
     defaultValues = defaultConfig,
+    children,
   }: {
     defaultValues?: TCPAdvancedFieldsType;
+    children?: React.ReactNode;
   }) => {
     return (
       <TCPAdvancedFieldsContextProvider defaultValues={defaultValues}>
-        <TCPAdvancedFields />
+        <TCPAdvancedFields>{children}</TCPAdvancedFields>
       </TCPAdvancedFieldsContextProvider>
     );
   };
@@ -67,5 +69,13 @@ describe('<TCPAdvancedFields />', () => {
     fireEvent.change(proxyUrl, { target: { value: 'sampleProxyUrl' } });
 
     expect(getByLabelText('Resolve hostnames locally')).toBeInTheDocument();
+  });
+
+  it('renders upstream fields', () => {
+    const upstreamFieldsText = 'Monitor Advanced field section';
+    const { getByText } = render(<WrappedComponent>{upstreamFieldsText}</WrappedComponent>);
+
+    const upstream = getByText(upstreamFieldsText) as HTMLInputElement;
+    expect(upstream).toBeInTheDocument();
   });
 });

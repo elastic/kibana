@@ -49,13 +49,15 @@ describe('<HTTPAdvancedFields />', () => {
   const WrappedComponent = ({
     defaultValues,
     validate = defaultValidation,
+    children,
   }: {
     defaultValues?: HTTPAdvancedFieldsType;
     validate?: Validation;
+    children?: React.ReactNode;
   }) => {
     return (
       <HTTPAdvancedFieldsContextProvider defaultValues={defaultValues}>
-        <HTTPAdvancedFields validate={validate} />
+        <HTTPAdvancedFields validate={validate}>{children}</HTTPAdvancedFields>
       </HTTPAdvancedFieldsContextProvider>
     );
   };
@@ -125,5 +127,13 @@ describe('<HTTPAdvancedFields />', () => {
     expect(requestHeaders).toBeInTheDocument();
     expect(indexResponseBody.checked).toBe(false);
     expect(indexResponseHeaders.checked).toBe(false);
+  });
+
+  it('renders upstream fields', () => {
+    const upstreamFieldsText = 'Monitor Advanced field section';
+    const { getByText } = render(<WrappedComponent>{upstreamFieldsText}</WrappedComponent>);
+
+    const upstream = getByText(upstreamFieldsText) as HTMLInputElement;
+    expect(upstream).toBeInTheDocument();
   });
 });
