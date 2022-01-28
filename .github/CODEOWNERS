@@ -98,10 +98,11 @@
 /x-pack/plugins/observability/ @elastic/observability-ui
 
 # Unified Observability
-/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/unified-observability
+/x-pack/plugins/observability/public/context @elastic/unified-observability
 /x-pack/plugins/observability/public/pages/home @elastic/unified-observability
 /x-pack/plugins/observability/public/pages/landing @elastic/unified-observability
-/x-pack/plugins/observability/public/context @elastic/unified-observability
+/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
 
 # Actionable Observability
 /x-pack/plugins/observability/common/rules @elastic/actionable-observability
@@ -135,7 +136,6 @@
 
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
