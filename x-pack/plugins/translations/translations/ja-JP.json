@@ -27207,7 +27207,6 @@
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.expression": "within",
     "xpack.uptime.alerts.monitorStatus.timerangeValueField.value": "最終{value}",
     "xpack.uptime.alerts.searchPlaceholder.kql": "KQL構文を使用してフィルタリング",
-    "xpack.uptime.alerts.settings.createConnector": "コネクターを作成",
     "xpack.uptime.alerts.timerangeUnitSelectable.daysOption.ariaLabel": "「日」の時間範囲選択項目",
     "xpack.uptime.alerts.timerangeUnitSelectable.hoursOption.ariaLabel": "「時間」の時間範囲選択項目",
     "xpack.uptime.alerts.timerangeUnitSelectable.minutesOption.ariaLabel": "「分」の時間範囲選択項目",

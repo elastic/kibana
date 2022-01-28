@@ -19,6 +19,13 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
 
+jest.mock('../../../../../../kibana_react/public', () => ({
+  ...jest.requireActual('../../../../../../kibana_react/public'),
+  useKibana: () => ({
+    services: jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
+  }),
+}));
+
 function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
 
@@ -27,7 +34,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     indexPattern: indexPatternMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),
-    services: discoverServiceMock,
     query: {} as Query,
     savedQuery: '',
     updateQuery: jest.fn(),
