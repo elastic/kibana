@@ -10,20 +10,20 @@ import { addIntegration } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 // import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+// import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('Super User - Add Integration', () => {
+describe.only('Super User - Add Integration', () => {
   const integration = 'Osquery Manager';
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
-  });
+  // before(() => {
+  //   runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+  // });
   beforeEach(() => {
     login();
   });
 
-  after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
-  });
+  // after(() => {
+  //   runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+  // });
 
   // it('should add the old integration and be able to upgrade it', () => {
   //   cy.visit(OLD_OSQUERY_MANAGER);
