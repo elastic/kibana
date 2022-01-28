@@ -37,16 +37,18 @@ describe('<BrowserAdvancedFields />', () => {
     defaultValues = defaultConfig,
     defaultSimpleFields = defaultBrowserSimpleFields,
     validate = defaultValidation,
+    children,
   }: {
     defaultValues?: BrowserAdvancedFieldsType;
     defaultSimpleFields?: BrowserSimpleFields;
     validate?: Validation;
+    children?: React.ReactNode;
   }) => {
     return (
       <IntlProvider locale="en">
         <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
           <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
-            <BrowserAdvancedFields validate={validate} />
+            <BrowserAdvancedFields validate={validate}>{children}</BrowserAdvancedFields>
           </BrowserAdvancedFieldsContextProvider>
         </BrowserSimpleFieldsContextProvider>
       </IntlProvider>
@@ -95,5 +97,13 @@ describe('<BrowserAdvancedFields />', () => {
         /Use these options to apply the selected monitor settings to a subset of the tests in your suite./
       )
     ).toBeInTheDocument();
+  });
+
+  it('renders upstream fields', () => {
+    const upstreamFieldsText = 'Monitor Advanced field section';
+    const { getByText } = render(<WrappedComponent>{upstreamFieldsText}</WrappedComponent>);
+
+    const upstream = getByText(upstreamFieldsText) as HTMLInputElement;
+    expect(upstream).toBeInTheDocument();
   });
 });

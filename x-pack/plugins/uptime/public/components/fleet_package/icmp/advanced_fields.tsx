@@ -9,7 +9,7 @@ import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ICMPAdvancedFields = ({ children }: { children: React.ReactNode }) => {
+export const ICMPAdvancedFields = ({ children }: { children?: React.ReactNode }) => {
   if (!!children) {
     return (
       <EuiAccordion
