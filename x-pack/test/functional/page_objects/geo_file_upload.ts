@@ -17,22 +17,28 @@ export class GeoFileUploadPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
   
+  async isNextButtonEnabled(): Promise<boolean> {
+    const importFileButton = await this.testSubjects.find('importFileButton');
+    const isDisabled = await importFileButton.getAttribute('disabled');
+    const isEnabled = !isDisabled;
+    this.log.debug(`isNextButtonEnabled: ${isEnabled}`);
+    return isEnabled;
+  }
+
+  async clickNextButton() {
+    this.log.debug(`Clicking next button to advance to next step in wizard`);
+    await this.testSubjects.click('importFileButton');
+  }
+
   async selectFile(selector: string, path: string) {
     this.log.debug(`selectFile; selector: ${selector}, path: ${path}`);
     const input =  await this.testSubjects.find(selector);
     await input.type(path);
   }
 
-  async isImportFileButtonEnabled(): Promise<boolean> {
-    this.log.debug(`Check "Import file" button enabled`);
-    const importFileButton = await this.testSubjects.find('importFileButton');
-    const isDisabled = await importFileButton.getAttribute('disabled');
-    return !isDisabled;
-  }
-
   async waitForFilePreview() {
     await this.retry.waitFor('Wait for file preview', async () => {
-      return await this.isImportFileButtonEnabled();
+      return await this.isNextButtonEnabled();
     });
   }
 
@@ -61,12 +67,13 @@ export class GeoFileUploadPageObject extends FtrService {
   }
 
   async uploadFile(): Promise<ImportResults> {
-    // import button is disabled while checking index name
-    // make sure import button is enabled before clicking it
+    // next button is disabled while checking index name
+    // make sure next button is enabled before clicking it
     await this.retry.waitFor('Wait for import button to be enabled', async () => {
-      return await this.isImportFileButtonEnabled();
+      return await this.isNextButtonEnabled();
     });
-    await this.testSubjects.click('importFileButton');
+    await this.clickNextButton();
+    
 
     await this.retry.waitFor('wait for file import results', async () => {
       return await this.testSubjects.exists('indexRespCopyButton');
@@ -74,6 +81,12 @@ export class GeoFileUploadPageObject extends FtrService {
 
     await this.testSubjects.click('indexRespCopyButton');
     return JSON.parse(await this.browser.getClipboardValue());
+  }
+
+  async addFileAsDocumentLayer(): Promise<ImportResults> {
+    await this.clickNextButton();
+
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickCopyButton(dataTestSubj: string): Promise<string> {

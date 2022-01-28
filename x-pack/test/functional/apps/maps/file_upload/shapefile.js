@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
 
-  describe('shapefile', () => {
+  describe('shapefile upload', () => {
     let indexName = '';
     before(async () => {
       await security.testUser.setRoles([
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.clickAddLayer();
       await PageObjects.maps.selectFileUploadCard();
       await PageObjects.geoFileUpload.previewShapefile(
-        path.join(__dirname, 'test_upload_files', 'cb_2018_us_csa_500k.shp')
+        path.join(__dirname, 'files', 'cb_2018_us_csa_500k.shp')
       );
       await PageObjects.maps.waitForLayersToLoad();
 
@@ -53,9 +53,8 @@ export default function ({ getPageObjects, getService }) {
       expect(importResults.docCount).to.be(174);
     });
 
-    /*it('should add as document layer', async () => {
-      // add layer as documents layer
-      await PageObjects.maps.clickImportFileButton();
+    it('should add as document layer', async () => {
+      await PageObjects.geoFileUpload.addFileAsDocumentLayer();
       await PageObjects.maps.waitForLayersToLoad();
 
       const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
@@ -63,8 +62,8 @@ export default function ({ getPageObjects, getService }) {
 
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
       expect(tooltipText).to.be(
-        'cb_2018_us_csa_500k\nResults limited to 141 features, 81% of file.'
+        `${indexName}\nFound 174 documents.`
       );
-    });*/
+    });
   });
 }
