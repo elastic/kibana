@@ -13,6 +13,7 @@ import { GetExceptionSummaryResponse } from '../../../../../../../../common/endp
 
 import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
 import { ExceptionItemsSummary } from './exception_items_summary';
+import { parsePoliciesToKQL } from '../../../../../../common/utils';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
 import {
   StyledEuiFlexGridGroup,
@@ -40,30 +41,11 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
       isMounted.current = true;
       const fetchStats = async () => {
         try {
-          let response;
-          if (policyId) {
-            response = await trustedAppsApi.getTrustedAppsList({
-              per_page: 1,
-              kuery: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
-            });
-            if (isMounted.current) {
-              setStats({
-                total: response.total,
-                windows: 0,
-                macos: 0,
-                linux: 0,
-              });
-            }
-          } else {
-            response = await trustedAppsApi.getTrustedAppsSummary();
-            if (isMounted.current) {
-              setStats({
-                total: response.total,
-                windows: response.windows,
-                macos: response.macos,
-                linux: response.linux,
-              });
-            }
+          const response = await trustedAppsApi.getTrustedAppsSummary(
+            policyId ? parsePoliciesToKQL([policyId, 'all']) : undefined
+          );
+          if (isMounted.current) {
+            setStats(response);
           }
         } catch (error) {
           if (isMounted.current) {

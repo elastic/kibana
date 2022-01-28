@@ -181,6 +181,7 @@ export function createExecutionHandler<
           id: ruleId,
           type: 'alert',
         }),
+        executionId,
         relatedSavedObjects: [
           {
             id: ruleId,

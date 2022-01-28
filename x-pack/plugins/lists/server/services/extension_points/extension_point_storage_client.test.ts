@@ -138,9 +138,7 @@ describe('When using the ExtensionPointStorageClient', () => {
         if (extensionPointsMock.type === 'exceptionsListPreCreateItem') {
           expect(extensionPointsMock.callback).toHaveBeenCalledWith(
             expect.objectContaining({
-              context: {
-                request: expect.any(Object),
-              },
+              context: callbackContext,
             })
           );
         }
