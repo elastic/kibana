@@ -27,6 +27,7 @@ export async function fetchClusters(
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
+    dataset: 'cluster_stats',
     ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
   });
   const params = {
