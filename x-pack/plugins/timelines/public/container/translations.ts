@@ -20,3 +20,17 @@ export const FAIL_TIMELINE_EVENTS = i18n.translate(
     defaultMessage: `Failed to run search on timeline events`,
   }
 );
+
+export const ERROR_RUNTIME_FIELD_TIMELINE_EVENTS = i18n.translate(
+  'xpack.timelines.timelineEvents.errorRuntimeFieldSearchDescription',
+  {
+    defaultMessage: 'Runtime field error',
+  }
+);
+
+export const ERROR_RUNTIME_FIELD_RESET_SORT = i18n.translate(
+  'xpack.timelines.timelineEvents.errorRuntimeFieldSearchButton',
+  {
+    defaultMessage: 'Reset sort',
+  }
+);

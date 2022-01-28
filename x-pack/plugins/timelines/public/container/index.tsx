@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
+import { EuiButton } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -18,7 +19,7 @@ import {
   setTimelineUpdatedAt,
 } from '../store/t_grid/actions';
 
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart, IEsError } from '../../../../../src/plugins/data/public';
 import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
 import {
   Direction,
@@ -42,6 +43,8 @@ import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
+import { tGridActions } from '../store/t_grid';
+import { mountReactNode } from '../../../../../src/core/public/utils';
 
 export type InspectResponse = Inspect & { response: string[] };
 
@@ -191,7 +194,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addError, addWarning, api: toastsApi } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -242,6 +245,19 @@ export const useTimelineEvents = ({
               },
               error: (msg) => {
                 setLoading(false);
+                const runtimeFieldErrorReason = getRuntimeFieldErrorReason(msg.err);
+                if (runtimeFieldErrorReason) {
+                  // show warning toast to reset the sort parameter, otherwise the timeline may become inaccessible
+                  const toast = addWarning(
+                    getRuntimeFieldSortWarningToast({
+                      text: runtimeFieldErrorReason,
+                      resetSort: () => {
+                        dispatch(tGridActions.updateSort({ id, sort: [] }));
+                        toastsApi.remove(toast);
+                      },
+                    })
+                  );
+                }
                 addError(msg, {
                   title: i18n.FAIL_TIMELINE_EVENTS,
                 });
@@ -256,7 +272,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, setUpdated, addWarning, addError]
+    [skip, data, entityType, setUpdated, addWarning, addError, toastsApi, dispatch, id]
   );
 
   useEffect(() => {
@@ -378,3 +394,41 @@ export const useTimelineEvents = ({
 
   return [loading, timelineResponse];
 };
+
+/**
+ * Returns the reason string if the error is a runtime script missing field error
+ */
+const getRuntimeFieldErrorReason = (error: IEsError): string | null => {
+  const failedShards = error?.attributes?.caused_by?.failed_shards;
+  if (failedShards && failedShards.length > 0) {
+    const runtimeFieldFailedShard = failedShards?.find((failedShard) =>
+      failedShard.reason?.caused_by?.reason?.match(`A document doesn't have a value for a field!`)
+    );
+    if (runtimeFieldFailedShard) {
+      return runtimeFieldFailedShard?.reason?.caused_by?.reason ?? null;
+    }
+  }
+  return null;
+};
+
+const getRuntimeFieldSortWarningToast = ({
+  text,
+  resetSort,
+}: {
+  text: string;
+  resetSort: () => void;
+}) => ({
+  iconType: 'alert',
+  title: i18n.ERROR_RUNTIME_FIELD_TIMELINE_EVENTS,
+  toastLifeTimeMs: Infinity,
+  text: mountReactNode(
+    <>
+      <p>{text}</p>
+      <div className="eui-textRight">
+        <EuiButton size="s" color="warning" onClick={resetSort}>
+          {i18n.ERROR_RUNTIME_FIELD_RESET_SORT}
+        </EuiButton>
+      </div>
+    </>
+  ),
+});
