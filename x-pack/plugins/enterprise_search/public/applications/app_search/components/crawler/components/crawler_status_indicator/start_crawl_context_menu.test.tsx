@@ -11,7 +11,15 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiResizeObserver,
+} from '@elastic/eui';
+
+import { mountWithIntl } from '../../../../../test_helpers';
 
 import { StartCrawlContextMenu } from './start_crawl_context_menu';
 
@@ -25,10 +33,29 @@ describe('CrawlerStatusIndicator', () => {
     setMockActions(MOCK_ACTIONS);
   });
 
-  it('contains a button to start a crawl', () => {
+  it('is initially closed', () => {
     const wrapper = shallow(<StartCrawlContextMenu />);
-    expect(wrapper.is(EuiButton)).toEqual(true);
-    expect(wrapper.render().text()).toContain('Start a crawl');
-    expect(wrapper.prop('onClick')).toEqual(MOCK_ACTIONS.startCrawl);
+
+    expect(wrapper.is(EuiPopover)).toBe(true);
+    expect(wrapper.prop('isOpen')).toEqual(false);
+  });
+
+  it('can be opened to stop crawls', () => {
+    const wrapper = mountWithIntl(<StartCrawlContextMenu />);
+
+    wrapper.find(EuiButton).simulate('click');
+
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+
+    const menuItem = wrapper
+      .find(EuiContextMenuPanel)
+      .find(EuiResizeObserver)
+      .find(EuiContextMenuItem);
+
+    expect(menuItem).toHaveLength(1);
+
+    menuItem.simulate('click');
+
+    expect(MOCK_ACTIONS.startCrawl).toHaveBeenCalled();
   });
 });
