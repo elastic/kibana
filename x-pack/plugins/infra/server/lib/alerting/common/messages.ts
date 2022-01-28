@@ -41,43 +41,6 @@ export const stateToAlertMessage = {
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
 
-const comparatorToI18n = (comparator: Comparator, threshold: number[], currentValue: number) => {
-  const gtText = i18n.translate('xpack.infra.metrics.alerting.threshold.gtComparator', {
-    defaultMessage: 'greater than',
-  });
-  const ltText = i18n.translate('xpack.infra.metrics.alerting.threshold.ltComparator', {
-    defaultMessage: 'less than',
-  });
-  const eqText = i18n.translate('xpack.infra.metrics.alerting.threshold.eqComparator', {
-    defaultMessage: 'equal to',
-  });
-
-  switch (comparator) {
-    case Comparator.BETWEEN:
-      return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenComparator', {
-        defaultMessage: 'between',
-      });
-    case Comparator.OUTSIDE_RANGE:
-      return i18n.translate('xpack.infra.metrics.alerting.threshold.outsideRangeComparator', {
-        defaultMessage: 'not between',
-      });
-    case Comparator.GT:
-      return gtText;
-    case Comparator.LT:
-      return ltText;
-    case Comparator.GT_OR_EQ:
-    case Comparator.LT_OR_EQ: {
-      if (currentValue === threshold[0]) {
-        return eqText;
-      } else if (currentValue < threshold[0]) {
-        return ltText;
-      } else {
-        return gtText;
-      }
-    }
-  }
-};
-
 const recoveredComparatorToI18n = (
   comparator: Comparator,
   threshold: number[],
