@@ -56,7 +56,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
       },
       // delay shutdown by 15 seconds to ensure that APM can report the data it collects during test execution
-      delayShutdown: 15_000,
+      delayShutdown: 60_000,
     },
   };
 }
