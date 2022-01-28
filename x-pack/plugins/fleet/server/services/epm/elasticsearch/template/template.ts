@@ -394,7 +394,9 @@ function getBaseTemplate(
       settings: {
         index: {},
       },
-      mappings: {},
+      mappings: {
+        _meta,
+      },
     },
     data_stream: { hidden },
     composed_of: composedOfTemplates,
