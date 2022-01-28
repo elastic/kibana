@@ -130,10 +130,12 @@ export async function updateOneHostIsolationExceptionItem(
   });
 }
 export async function getHostIsolationExceptionSummary(
-  http: HttpStart
+  http: HttpStart,
+  filter?: string
 ): Promise<ExceptionListSummarySchema> {
   return http.get<ExceptionListSummarySchema>(`${EXCEPTION_LIST_URL}/summary`, {
     query: {
+      filter,
       list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
       namespace_type: 'agnostic',
     },

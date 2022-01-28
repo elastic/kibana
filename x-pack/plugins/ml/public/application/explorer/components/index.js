@@ -6,5 +6,5 @@
  */
 
 export { ExplorerNoInfluencersFound } from './explorer_no_influencers_found';
-export { ExplorerNoJobsFound } from './explorer_no_jobs_found';
+export { ExplorerNoJobsSelected } from './explorer_no_jobs_selected';
 export { ExplorerNoResultsFound } from './explorer_no_results_found';

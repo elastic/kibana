@@ -21,6 +21,7 @@ import { createStaticDataView } from '../services/rest/data_view';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
 import { ApmAppRoot } from '../components/routing/app_root';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.
@@ -41,7 +42,7 @@ export const renderApp = ({
   pluginsStart: ApmPluginStartDeps;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
-  const { element } = appMountParameters;
+  const { element, theme$ } = appMountParameters;
   const apmPluginContextValue = {
     appMountParameters,
     config,
@@ -68,10 +69,12 @@ export const renderApp = ({
   element.classList.add(APP_WRAPPER_CLASS);
 
   ReactDOM.render(
-    <ApmAppRoot
-      apmPluginContextValue={apmPluginContextValue}
-      pluginsStart={pluginsStart}
-    />,
+    <KibanaThemeProvider theme$={theme$}>
+      <ApmAppRoot
+        apmPluginContextValue={apmPluginContextValue}
+        pluginsStart={pluginsStart}
+      />
+    </KibanaThemeProvider>,
     element
   );
   return () => {
