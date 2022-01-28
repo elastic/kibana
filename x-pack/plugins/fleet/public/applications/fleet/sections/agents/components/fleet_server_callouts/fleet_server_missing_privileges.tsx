@@ -18,7 +18,7 @@ const Panel = styled(EuiPanel)`
 
 export const FleetServerMissingPrivileges = () => {
   return (
-    <Panel data-test-subj="missingPrivilegesPrompt">
+    <Panel data-test-subj="fleetServerMissingPrivilegesPrompt">
       <EuiEmptyPrompt
         iconType="securityApp"
         title={

@@ -92,7 +92,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       validate: CheckPermissionsRequestSchema,
       options: { tags: [] },
-      // no permission check for that route
     },
     getCheckPermissionsHandler
   );
