@@ -175,7 +175,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
+              ...formatAlertResult(result[group] as any, nextState === AlertStates.WARNING),
               group,
             })
           )
