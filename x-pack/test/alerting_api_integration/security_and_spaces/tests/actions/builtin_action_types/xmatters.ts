@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
 import http from 'http';
 import expect from '@kbn/expect';
 
 import getPort from 'get-port';
-import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getXmattersServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
@@ -18,28 +16,17 @@ import { getXmattersServer } from '../../../../common/fixtures/plugins/actions_s
 // eslint-disable-next-line import/no-default-export
 export default function xmattersTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const configService = getService('config');
 
   describe.only('xmatters action', () => {
     let xmattersServer: http.Server;
     let xmattersSimulatorURL: string = '';
-    let proxyServer: httpProxy | undefined;
-    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
-      console.log("bubly");
       xmattersServer = await getXmattersServer();
       const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       xmattersServer.listen(availablePort);
       xmattersSimulatorURL = `http://localhost:${availablePort}`;
-      proxyServer = await getHttpProxyServer(
-        xmattersSimulatorURL,
-        configService.get('kbnTestServer.serverArgs'),
-        () => {
-          proxyHaveBeenCalled = true;
-        }
-      );
     });
 
     it('xmatters connector can be executed without username and password', async () => {
@@ -49,10 +36,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .send({
           name: 'An xMatters action',
           connector_type_id: '.xmatters',
-          secrets: {
-            user: 'username',
-            password: 'mypassphrase',
-          },
           config: {
             url: xmattersSimulatorURL,
           },
@@ -64,7 +47,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         name: 'A xmatters action',
         connector_type_id: '.xmatters',
-        is_missing_secrets: false,
+        is_missing_secrets: true,
         config: {
           url: xmattersSimulatorURL,
         },

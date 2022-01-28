@@ -87,12 +87,6 @@ export function getActionType(): ActionTypeModel<
       };
       const validationResult = { errors };
       validationResult.errors = errors;
-      if (!actionParams.alertActionGroupName?.length) {
-        errors.alertActionGroupName.push(translations.ALERT_ACTION_GROUP_NAME_REQUIRED);
-      }
-      if (!actionParams.alertId?.length) {
-        errors.alertId.push(translations.ALERT_ID_REQUIRED);
-      }
       return validationResult;
     },
     actionConnectorFields: lazy(() => import('./xmatters_connectors')),
