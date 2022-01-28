@@ -36,6 +36,7 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
+  compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
       validate: (rawConfig) => {
@@ -297,6 +298,11 @@ export class ElasticsearchConfig {
   public readonly apiVersion: string;
 
   /**
+   * Whether to use compression for communications with elasticsearch.
+   */
+  public readonly compression: boolean;
+
+  /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
    * be used as seeds to discover the rest of your cluster.
    */
@@ -398,6 +404,7 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
