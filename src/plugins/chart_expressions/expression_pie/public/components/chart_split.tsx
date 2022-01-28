@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Accessor, AccessorFn, GroupBy, SmallMultiples } from '@elastic/charts';
+import { Predicate } from '@elastic/charts/dist/common/predicate';
 import { DatatableColumn } from '../../../../expressions/public';
 
 interface ChartSplitProps {
@@ -35,7 +36,7 @@ export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplit
           }
           return spec.id;
         }}
-        sort="dataIndex"
+        sort={Predicate.DataIndex}
       />
       <SmallMultiples
         id={SMALL_MULTIPLES_ID}
