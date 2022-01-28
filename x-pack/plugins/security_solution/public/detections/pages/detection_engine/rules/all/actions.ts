@@ -135,8 +135,7 @@ export const enableRulesAction = async (
   ids: string[],
   enabled: boolean,
   dispatchToaster: Dispatch<ActionToaster>,
-  setLoadingRules: RulesTableActions['setLoadingRules'],
-  updateRules: RulesTableActions['updateRules']
+  setLoadingRules: RulesTableActions['setLoadingRules']
 ) => {
   const errorTitle = enabled
     ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(ids.length)
@@ -147,7 +146,6 @@ export const enableRulesAction = async (
 
     const response = await enableRules({ ids, enabled });
     const { rules, errors } = bucketRulesResponse(response);
-    updateRules(rules);
 
     if (errors.length > 0) {
       displayErrorToast(
