@@ -35,7 +35,7 @@ import { UNNAMED_LOCATION } from '../../../common/constants';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
-import { formatDurationFromTimeUnitChar } from '../../../../observability/common';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 /**
@@ -186,7 +186,7 @@ export const getStatusMessage = (
     availabilityMessage = `${statusCheckTranslations.availabilityBreachLabel(
       (availMonInfo.availabilityRatio! * 100).toFixed(2),
       availability?.threshold!,
-      formatDurationFromTimeUnitChar(availability?.range!, availability?.rangeUnit!)
+      formatDurationFromTimeUnitChar(availability?.range!, availability?.rangeUnit! as TimeUnitChar)
     )}.`;
   }
   if (availMonInfo && downMonParams?.info) {

@@ -14,7 +14,7 @@ import { Ping } from '../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { UptimeESClient } from '../lib';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { formatDurationFromTimeUnitChar } from '../../../../observability/common';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -52,7 +52,7 @@ export const getMonitorDownStatusMessageParams = (
     count,
     interval: oldVersionTimeRange
       ? oldVersionTimeRange.from.slice(-3)
-      : formatDurationFromTimeUnitChar(timerangeCount, timerangeUnit),
+      : formatDurationFromTimeUnitChar(timerangeCount, timerangeUnit as TimeUnitChar),
     numTimes,
   };
 };
