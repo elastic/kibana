@@ -30,14 +30,14 @@ export const HostIsolationExceptionsEmptyState = memo<{
           <h2>
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.listEmpty.title"
-              defaultMessage="Add your first Host isolation exception"
+              defaultMessage="Add your first host isolation exception"
             />
           </h2>
         }
         body={
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.listEmpty.message"
-            defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
+            defaultMessage="Add a host isolation exception to allow isolated hosts to communicate with specific IPs."
           />
         }
         actions={[
@@ -48,7 +48,7 @@ export const HostIsolationExceptionsEmptyState = memo<{
           >
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.listEmpty.addButton"
-              defaultMessage="Add Host isolation exception"
+              defaultMessage="Add host isolation exception"
             />
           </EuiButton>,
 

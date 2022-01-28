@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
   AlertExecutorOptions,
   AlertTypeParams,
@@ -32,6 +33,10 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
+jest.mock('uuid', () => ({
+  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
@@ -47,6 +52,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -102,6 +110,7 @@ describe('Task Runner Cancel', () => {
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
+    usageCounter: mockUsageCounter,
   };
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
@@ -208,6 +217,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -236,6 +252,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -261,6 +284,13 @@ describe('Task Runner Cancel', () => {
         outcome: 'success',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'ok',
         },
@@ -308,6 +338,11 @@ describe('Task Runner Cancel', () => {
       },
       { refresh: false, namespace: undefined }
     );
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
+      incrementBy: 1,
+    });
   });
 
   test('actionsPlugin.execute is called if rule execution is cancelled but cancelAlertsOnRuleTimeout from config is false', async () => {
@@ -336,6 +371,8 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     testActionsExecute();
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('actionsPlugin.execute is called if rule execution is cancelled but cancelAlertsOnRuleTimeout for ruleType is false', async () => {
@@ -372,6 +409,8 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     testActionsExecute();
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('actionsPlugin.execute is skipped if rule execution is cancelled and cancelAlertsOnRuleTimeout for both config and ruleType are true', async () => {
@@ -437,6 +476,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -465,6 +511,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -491,6 +544,13 @@ describe('Task Runner Cancel', () => {
         outcome: 'success',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'active',
         },
@@ -516,6 +576,12 @@ describe('Task Runner Cancel', () => {
         name: 'rule-name',
         ruleset: 'alerts',
       },
+    });
+
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
+      incrementBy: 1,
     });
   });
 
@@ -553,6 +619,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -582,6 +655,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -609,6 +689,13 @@ describe('Task Runner Cancel', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -642,6 +729,13 @@ describe('Task Runner Cancel', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -666,6 +760,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
@@ -697,6 +798,13 @@ describe('Task Runner Cancel', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(6, {
       event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'active',
         },

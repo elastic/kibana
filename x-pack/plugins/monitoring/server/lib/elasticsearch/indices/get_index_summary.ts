@@ -15,6 +15,8 @@ import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(shardStats: any, indexUuid: string) {
   return (response: ElasticsearchResponse) => {
@@ -64,7 +66,6 @@ export function handleResponse(shardStats: any, indexUuid: string) {
 
 export function getIndexSummary(
   req: LegacyRequest,
-  esIndexPattern: string,
   shardStats: any,
   {
     clusterUuid,
@@ -73,7 +74,15 @@ export function getIndexSummary(
     end,
   }: { clusterUuid: string; indexUuid: string; start: number; end: number }
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndexSummary');
+  const dataset = 'index'; // data_stream.dataset
+  const type = 'index_stats'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    dataset,
+    moduleType,
+    ccs: req.payload.ccs,
+  });
 
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [
@@ -87,13 +96,15 @@ export function getIndexSummary(
     },
   ];
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['index', 'index_stats'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

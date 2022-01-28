@@ -22,6 +22,6 @@ export const NO_NEWS_MESSAGE_ADMIN = i18n.translate(
 export const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.newsFeed.advancedSettingsLinkTitle',
   {
-    defaultMessage: 'SIEM advanced settings',
+    defaultMessage: 'Security Solution advanced settings',
   }
 );
