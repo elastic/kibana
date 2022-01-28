@@ -839,8 +839,15 @@ export default function ({
       case 'punctuation.colon':
       case 'method':
         break;
-      default:
+      case 'text':
+      case 'string':
+      case 'constant.numeric':
+      case 'constant.language.boolean':
+      case 'punctuation.end_triple_quote':
         addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length);
+        break;
+      default:
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context);
         break;
     }
 
