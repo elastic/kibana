@@ -12,9 +12,9 @@ export const performBulkActionSchema = t.intersection([
   t.exact(
     t.type({
       query: queryOrUndefined,
-      ids: t.union([t.array(t.string), t.undefined]),
     })
   ),
+  t.exact(t.partial({ ids: t.array(t.string) })),
   t.union([
     t.exact(
       t.type({
