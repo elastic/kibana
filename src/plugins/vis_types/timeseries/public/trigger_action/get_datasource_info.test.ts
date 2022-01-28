@@ -35,7 +35,12 @@ jest.mock('../services', () => {
 
 describe('getDataSourceInfo', () => {
   test('should return the default dataview if model_indexpattern is string', async () => {
-    const { indexPatternId, timeField } = await getDataSourceInfo('test', undefined, undefined);
+    const { indexPatternId, timeField } = await getDataSourceInfo(
+      'test',
+      undefined,
+      false,
+      undefined
+    );
     expect(indexPatternId).toBe('12345');
     expect(timeField).toBe('@timestamp');
   });
@@ -44,6 +49,7 @@ describe('getDataSourceInfo', () => {
     const { indexPatternId, timeField } = await getDataSourceInfo(
       { id: 'dataview-1-id' },
       'timeField-1',
+      false,
       undefined
     );
     expect(indexPatternId).toBe('dataview-1-id');
@@ -54,6 +60,7 @@ describe('getDataSourceInfo', () => {
     const { indexPatternId, timeField } = await getDataSourceInfo(
       { id: 'dataview-1-id' },
       'timeField-1',
+      true,
       { id: 'test2' }
     );
     expect(indexPatternId).toBe('test2');

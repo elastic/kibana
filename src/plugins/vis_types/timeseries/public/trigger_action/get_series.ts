@@ -18,6 +18,7 @@ import {
   getFormulaEquivalent,
   getParentPipelineSeriesFormula,
   getFilterRatioFormula,
+  getTimeScale,
 } from './metrics_helpers';
 
 export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metrics'] | null => {
@@ -47,7 +48,6 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       let finalScript = metrics[mathMetricIdx].script;
 
       const variables = metrics[mathMetricIdx].variables;
-      // supportedTimeScales.includes(currentMetric.unit)
       const layerMetricsArray = metrics;
       if (!finalScript || !variables) return null;
 
@@ -139,15 +139,14 @@ export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metr
       break;
     }
     default: {
+      const timeScale = getTimeScale(metrics[metricIdx]);
       metricsArray = [
         {
           agg: aggregationMap.name,
           isFullReference: aggregationMap.isFullReference,
           fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
           params: {
-            ...(metrics[metricIdx].unit && {
-              timeScale: metrics[metricIdx].unit?.replace('1', ''),
-            }),
+            ...(timeScale && { timeScale }),
           },
         },
       ];

@@ -40,7 +40,8 @@ export const triggerTSVBtoLensConfiguration = async (
     const { indexPatternId, timeField } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
-      Boolean(layer.override_index_pattern) ? layer.series_index_pattern : undefined
+      Boolean(layer.override_index_pattern),
+      layer.series_index_pattern
     );
 
     const timeShift = layer.offset_time;
@@ -115,6 +116,7 @@ export const triggerTSVBtoLensConfiguration = async (
       fill: model.series[0].fill ?? 0.3,
       legend: {
         isVisible: Boolean(model.show_legend) ?? true,
+        showSingleSeries: Boolean(model.show_legend) ?? true,
         position: model.legend_position ?? 'right',
         shouldTruncate: Boolean(model.truncate_legend) ?? false,
         maxLines: model.max_lines_legend ?? 1,

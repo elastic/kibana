@@ -125,6 +125,7 @@ export interface NavigateToLensContext {
       position: string;
       shouldTruncate: boolean;
       maxLines: number;
+      showSingleSeries: boolean;
     };
     gridLinesVisibility: {
       x: boolean;

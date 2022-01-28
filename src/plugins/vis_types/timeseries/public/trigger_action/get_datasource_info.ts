@@ -12,6 +12,7 @@ import { getDataStart } from '../services';
 export const getDataSourceInfo = async (
   modelIndexPattern: IndexPatternValue,
   modelTimeField: string | undefined,
+  isOverwritten: boolean,
   overwrittenIndexPattern: IndexPatternValue | undefined
 ) => {
   const { dataViews } = getDataStart();
@@ -20,26 +21,25 @@ export const getDataSourceInfo = async (
 
   let timeField = modelTimeField;
   // handle override index pattern
-  if (overwrittenIndexPattern) {
+  if (isOverwritten) {
     const { indexPattern } = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
     if (indexPattern) {
       indexPatternId = indexPattern.id ?? '';
       timeField = indexPattern.timeFieldName;
     }
-  } else {
-    if (!timeField) {
-      if (indexPatternId) {
-        const indexPattern = await dataViews.get(indexPatternId);
-        timeField = indexPattern.timeFieldName;
-      } else {
-        const defaultIndex = await dataViews.getDefault();
-        timeField = defaultIndex?.timeFieldName;
-      }
-    }
-    if (!indexPatternId) {
+  }
+  if (!timeField) {
+    if (indexPatternId) {
+      const indexPattern = await dataViews.get(indexPatternId);
+      timeField = indexPattern.timeFieldName;
+    } else {
       const defaultIndex = await dataViews.getDefault();
-      indexPatternId = defaultIndex?.id ?? '';
+      timeField = defaultIndex?.timeFieldName;
     }
+  }
+  if (!indexPatternId) {
+    const defaultIndex = await dataViews.getDefault();
+    indexPatternId = defaultIndex?.id ?? '';
   }
 
   return {

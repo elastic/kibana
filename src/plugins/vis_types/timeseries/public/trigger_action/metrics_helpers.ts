@@ -39,6 +39,15 @@ export const getPipelineAgg = (subFunctionMetric: Metric) => {
   return pipelineAggMap.name;
 };
 
+export const getTimeScale = (metric: Metric) => {
+  const supportedTimeScales = ['1s', '1m', '1h', '1d'];
+  let timeScale;
+  if (metric.unit && supportedTimeScales.includes(metric.unit)) {
+    timeScale = metric.unit.replace('1', '');
+  }
+  return timeScale;
+};
+
 export const computeParentSeries = (
   aggregation: MetricType,
   currentMetric: Metric,
@@ -47,11 +56,7 @@ export const computeParentSeries = (
   meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
-  const supportedTimeScales = ['1s', '1m', '1h', '1d'];
-  let timeScale;
-  if (currentMetric.unit && supportedTimeScales.includes(currentMetric.unit)) {
-    timeScale = currentMetric.unit.replace('1', '');
-  }
+  const timeScale = getTimeScale(currentMetric);
   return [
     {
       agg: aggregationMap.name,

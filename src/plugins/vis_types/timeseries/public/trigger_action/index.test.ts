@@ -106,7 +106,13 @@ describe('triggerTSVBtoLensConfiguration', () => {
         extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },
         fill: '0',
         gridLinesVisibility: { x: false, yLeft: false, yRight: false },
-        legend: { isVisible: false, maxLines: 1, position: 'right', shouldTruncate: false },
+        legend: {
+          isVisible: false,
+          maxLines: 1,
+          position: 'right',
+          shouldTruncate: false,
+          showSingleSeries: false,
+        },
       },
       layers: {
         '0': {
@@ -241,7 +247,13 @@ describe('triggerTSVBtoLensConfiguration', () => {
         extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },
         fill: '0.3',
         gridLinesVisibility: { x: true, yLeft: true, yRight: true },
-        legend: { isVisible: true, maxLines: 1, position: 'bottom', shouldTruncate: false },
+        legend: {
+          isVisible: true,
+          maxLines: 1,
+          position: 'bottom',
+          shouldTruncate: false,
+          showSingleSeries: true,
+        },
       },
       layers: {
         '0': {
