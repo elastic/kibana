@@ -154,4 +154,32 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       ],
     });
   });
+  test('index missing in stats call', async () => {
+    getIndices.mockResolvedValue({
+      body: {
+        index_missing_stats: createTestIndexState(),
+      },
+    });
+    // simulates when an index has been deleted after get indices call
+    // deleted index won't be present in the indices stats call response
+    getIndicesStats.mockResolvedValue({
+      body: {
+        indices: {
+          some_other_index: createTestIndexStats({ uuid: 'some_other_index' }),
+        },
+      },
+    });
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: [
+        createTestIndexResponse({
+          name: 'index_missing_stats',
+          uuid: undefined,
+          health: undefined,
+          status: undefined,
+          documents: 0,
+          size: '0b',
+        }),
+      ],
+    });
+  });
 });

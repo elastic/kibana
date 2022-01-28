@@ -54,7 +54,7 @@ async function fetchIndicesCall(
       // @ts-expect-error new property https://github.com/elastic/elasticsearch-specification/issues/1253
       status: indexStats?.status,
       name: indexName,
-      uuid: indexStats.uuid!,
+      uuid: indexStats?.uuid,
       primary: indexData.settings?.index?.number_of_shards,
       replica: indexData.settings?.index?.number_of_replicas,
       documents: indexStats?.total?.docs?.count ?? 0,

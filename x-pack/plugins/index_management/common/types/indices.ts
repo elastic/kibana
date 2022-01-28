@@ -52,10 +52,10 @@ export interface IndexSettings {
 }
 
 export interface Index {
-  health: string;
-  status: string;
+  health?: string;
+  status?: string;
   name: string;
-  uuid: string;
+  uuid?: string;
   primary?: number | string;
   replica?: number | string;
   documents: number;
