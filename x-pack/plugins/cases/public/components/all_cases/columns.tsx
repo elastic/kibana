@@ -305,7 +305,7 @@ export const useCasesColumns = ({
             if (createdAt != null) {
               return (
                 <span data-test-subj={`case-table-column-createdAt`}>
-                  <FormattedRelativePreferenceDate value={createdAt} />
+                  <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
                 </span>
               );
             }
