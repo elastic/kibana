@@ -20,6 +20,7 @@ const listOfJourneys = [
   'StepsDuration',
   'TlsFlyoutInAlertingApp',
   'StatusFlyoutInAlertingApp',
+  'DefaultEmailSettings',
   'MonitorManagement-http',
   'MonitorManagement-tcp',
   'MonitorManagement-icmp',
