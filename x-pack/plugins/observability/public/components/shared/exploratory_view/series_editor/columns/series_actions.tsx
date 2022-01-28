@@ -16,7 +16,6 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { useDiscoverLink } from '../../hooks/use_discover_link';
@@ -30,7 +29,7 @@ interface Props {
 }
 
 export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: Props) {
-  const { setSeries, allSeries } = useSeriesStorage();
+  const { setSeries, removeSeries, allSeries } = useSeriesStorage();
   const [isPopoverOpen, setPopover] = useState(false);
 
   const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
@@ -38,6 +37,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   const { indexPatterns } = useAppIndexPatternContext();
 
   const indexPattern = indexPatterns?.[series.dataType];
+  const deleteDisabled = seriesId === 0 && allSeries.length > 1;
 
   const copySeries = () => {
     let copySeriesId: string = `${series.name}-copy`;
@@ -45,6 +45,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
       copySeriesId = copySeriesId + allSeries.length;
     }
     setSeries(allSeries.length, { ...series, name: copySeriesId, breakdown: undefined });
+    closePopover();
   };
 
   const toggleSeries = () => {
@@ -53,9 +54,15 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
     } else {
       setSeries(seriesId, { ...series, hidden: true });
     }
+    closePopover();
   };
 
-  const onButtonClick = () => {
+  const onRemoveSeriesClick = () => {
+    removeSeries(seriesId);
+    closePopover();
+  };
+
+  const changePopoverVisibility = () => {
     setPopover(!isPopoverOpen);
   };
 
@@ -63,7 +70,9 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
     setPopover(false);
   };
 
-  const button = <EuiButtonIcon iconType="boxesHorizontal" onClick={onButtonClick} color="text" />;
+  const popoverButton = (
+    <EuiButtonIcon iconType="boxesHorizontal" onClick={changePopoverVisibility} color="text" />
+  );
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
@@ -81,7 +90,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
 
       <EuiFlexItem grow={false}>
         <EuiPopover
-          button={button}
+          button={popoverButton}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
@@ -90,7 +99,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
-                key=""
+                key="viewSampleDocuments"
                 icon="discoverApp"
                 href={discoverHref}
                 aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
@@ -100,22 +109,31 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
                 {VIEW_SAMPLE_DOCUMENTS_LABEL}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                key=""
+                key="hideSeries"
                 icon={series.hidden ? 'eyeClosed' : 'eye'}
                 onClick={toggleSeries}
-                aria-label={HIDE_SERIES_LABEL}
+                aria-label={series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
               >
-                {HIDE_SERIES_LABEL}
+                {series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                key=""
+                key="copySeries"
                 icon="copy"
                 onClick={copySeries}
                 aria-label={COPY_SERIES_LABEL}
               >
                 {COPY_SERIES_LABEL}
               </EuiContextMenuItem>,
-              <RemoveSeries seriesId={seriesId} />,
+              <EuiContextMenuItem
+                key="deleteSeries"
+                icon="trash"
+                onClick={onRemoveSeriesClick}
+                aria-label={DELETE_SERIES_LABEL}
+                disabled={deleteDisabled}
+                toolTipContent={deleteDisabled ? DELETE_SERIES_TOOLTIP_LABEL : ''}
+              >
+                {DELETE_SERIES_LABEL}
+              </EuiContextMenuItem>,
             ]}
           />
         </EuiPopover>
@@ -132,9 +150,28 @@ const HIDE_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.hide'
   defaultMessage: 'Hide series',
 });
 
+const SHOW_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.show', {
+  defaultMessage: 'Show series',
+});
+
 const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone', {
   defaultMessage: 'Duplicate series',
 });
+
+const DELETE_SERIES_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeSeries',
+  {
+    defaultMessage: 'Remove series',
+  }
+);
+
+const DELETE_SERIES_TOOLTIP_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeSeriesDisabled',
+  {
+    defaultMessage:
+      'Main series cannot be removed. Please remove all series below before you can remove this.',
+  }
+);
 
 const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
   'xpack.observability.seriesEditor.sampleDocuments',
