@@ -17,10 +17,12 @@ import {
   ServiceNowActionParams,
   JiraActionParams,
   WebhookActionParams,
+  EmailActionParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server';
 import { ActionTypeId } from '../../components/settings/types';
 import { Ping } from '../../../common/runtime_types/ping';
+import { DefaultEmail } from '../../../common/runtime_types';
 
 export const SLACK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
@@ -30,6 +32,7 @@ export const TEAMS_ACTION_ID: ActionTypeId = '.teams';
 export const SERVICE_NOW_ACTION_ID: ActionTypeId = '.servicenow';
 export const JIRA_ACTION_ID: ActionTypeId = '.jira';
 export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
+export const EMAIL_ACTION_ID: ActionTypeId = '.email';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -45,7 +48,11 @@ const getRecoveryMessage = (selectedMonitor: Ping) => {
   });
 };
 
-export function populateAlertActions({ defaultActions, selectedMonitor }: NewAlertParams) {
+export function populateAlertActions({
+  defaultActions,
+  selectedMonitor,
+  defaultEmail,
+}: NewAlertParams) {
   const actions: RuleAction[] = [];
   defaultActions.forEach((aId) => {
     const action: RuleAction = {
@@ -97,6 +104,11 @@ export function populateAlertActions({ defaultActions, selectedMonitor }: NewAle
           message: MonitorStatusTranslations.defaultActionMessage,
         };
         actions.push(recoveredAction);
+        break;
+      case EMAIL_ACTION_ID:
+        if (defaultEmail) {
+          action.params = getEmailActionParams(defaultEmail, selectedMonitor);
+        }
         break;
       default:
         action.params = {
@@ -211,6 +223,29 @@ function getJiraActionParams(): JiraActionParams {
         parent: null,
       },
       comments: [],
+    },
+  };
+}
+
+function getEmailActionParams(
+  defaultEmail: DefaultEmail,
+  selectedMonitor: Ping
+): EmailActionParams {
+  return {
+    to: defaultEmail.to,
+    subject: i18n.translate('xpack.uptime.monitor.simpleStatusAlert.email.subject', {
+      defaultMessage: 'Monitor {monitor} with url {url} is down',
+      values: {
+        monitor: selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id,
+        url: selectedMonitor?.url?.full,
+      },
+    }),
+    message: MonitorStatusTranslations.defaultActionMessage,
+    cc: defaultEmail.cc ?? [],
+    bcc: defaultEmail.bcc ?? [],
+    kibanaFooterLink: {
+      path: '',
+      text: '',
     },
   };
 }
