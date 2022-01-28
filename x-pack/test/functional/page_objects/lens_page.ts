@@ -220,7 +220,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await this.waitForVisualization();
+      await this.PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
