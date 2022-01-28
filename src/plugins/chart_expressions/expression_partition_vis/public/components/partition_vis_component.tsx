@@ -19,7 +19,6 @@ import {
   TooltipType,
   SeriesIdentifier,
 } from '@elastic/charts';
-import { useEuiTheme } from '@elastic/eui';
 import {
   LegendToggle,
   ClickTriggerEvent,
@@ -61,7 +60,8 @@ import { VisualizationNoResults } from './visualization_noresults';
 import { VisTypePiePluginStartDependencies } from '../plugin';
 import {
   partitionVisWrapperStyle,
-  partitionVisContainerStyleFactory,
+  partitionVisContainerStyle,
+  partitionVisContainerWithToggleStyle,
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
@@ -91,7 +91,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { visData, visParams: preVisParams, visType, services, syncColors } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
 
-  const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
@@ -109,6 +108,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     const bwcLegendStateDefault = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
   });
+
+  const showToggleLegendElement = showLegend !== undefined;
 
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
 
@@ -357,13 +358,16 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
   const flatLegend = isLegendFlat(visType, splitChartDimension);
   const canShowPieChart = !isAllZeros && !hasNegative;
+  const chartContainerStyle = showToggleLegendElement
+    ? partitionVisContainerWithToggleStyle
+    : partitionVisContainerStyle;
   return (
-    <div css={partitionVisContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
+    <div css={chartContainerStyle} data-test-subj="visTypePieChart">
       {!canShowPieChart ? (
         <VisualizationNoResults hasNegativeValues={hasNegative} />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
-          {showLegend !== undefined && (
+          {showToggleLegendElement && (
             <LegendToggle
               onClick={toggleLegend}
               showLegend={showLegend}

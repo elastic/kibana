@@ -8,6 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { ClassNames } from '@emotion/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Datatable, ExpressionRenderDefinition } from '../../../../expressions/public';
@@ -40,6 +41,8 @@ function shouldShowNoResultsMessage(visData: Datatable | undefined): boolean {
   return Boolean(isZeroHits);
 }
 
+const partitionVisClass = { height: '100%' };
+
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
 ) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
@@ -60,20 +63,28 @@ export const getPartitionVisRenderer: (
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
-          <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-            <PartitionVisComponent
-              chartsThemeService={theme}
-              palettesRegistry={palettesRegistry}
-              visParams={visConfig}
-              visData={visData}
-              visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={handlers.done}
-              fireEvent={handlers.event}
-              uiState={handlers.uiState as PersistedState}
-              services={{ data: services.data, fieldFormats: services.fieldFormats }}
-              syncColors={syncColors}
-            />
-          </VisualizationContainer>
+          <ClassNames>
+            {({ css, cx }) => (
+              <VisualizationContainer
+                handlers={handlers}
+                showNoResult={showNoResult}
+                className={cx('partitionVisContainer', css(partitionVisClass))}
+              >
+                <PartitionVisComponent
+                  chartsThemeService={theme}
+                  palettesRegistry={palettesRegistry}
+                  visParams={visConfig}
+                  visData={visData}
+                  visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+                  renderComplete={handlers.done}
+                  fireEvent={handlers.event}
+                  uiState={handlers.uiState as PersistedState}
+                  services={{ data: services.data, fieldFormats: services.fieldFormats }}
+                  syncColors={syncColors}
+                />
+              </VisualizationContainer>
+            )}
+          </ClassNames>
         </KibanaThemeProvider>
       </I18nProvider>,
       domNode,

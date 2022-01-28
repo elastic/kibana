@@ -23,6 +23,7 @@ import {
   PieLayerState,
   PieVisualizationState,
   EmptySizeRatios,
+  LegendDisplay,
 } from '../../common';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { DEFAULT_PALETTE_NAME } from '../shared_components';
@@ -132,7 +133,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   labels: generateCommonLabelsAstArgs(state, attributes, layer),
   buckets: operations.map((o) => o.columnId).map(prepareDimension),
   metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-  legendDisplay: [layer.legendDisplay],
+  legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
   legendPosition: [layer.legendPosition || Position.Right],
   maxLegendLines: [layer.legendMaxLines ?? 1],
   nestedLegend: [!!layer.nestedLegend],
@@ -213,7 +214,7 @@ const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
     chain: [
       {
         type: 'function',
-        function: 'mosaicVis',
+        function: 'waffleVis',
         arguments: {
           ...args,
           bucket: buckets,
