@@ -79,8 +79,21 @@ export const getSplitSeriesAccessorFnMap = (
 };
 
 // For percentile, the aggregation id is coming in the form %s.%d, where %s is agg_id and %d - percents
-export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
-  columnId.toString().split('.')[0] === seriesColumnId;
+export const getSafeId = (columnId?: number | string | null) => {
+  const id = String(columnId);
+  // only multi-value aggs like percentiles are allowed to contain dots and [
+  const isMultiValueId = id.includes('[') || id.includes('.');
+  if (!isMultiValueId) {
+    return id;
+  }
+  const baseId = id.substring(0, id.indexOf('[') !== -1 ? id.indexOf('[') : id.indexOf('.'));
+  return baseId;
+};
+
+export const isPercentileIdEqualToSeriesId = (
+  columnId: number | string | null | undefined,
+  seriesColumnId: string
+) => getSafeId(columnId) === seriesColumnId;
 
 export const isValidSeriesForDimension = (seriesColumnId: string, { aggId, accessor }: Aspect) =>
   (aggId === seriesColumnId || isPercentileIdEqualToSeriesId(aggId ?? '', seriesColumnId)) &&

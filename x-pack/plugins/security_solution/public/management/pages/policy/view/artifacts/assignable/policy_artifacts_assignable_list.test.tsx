@@ -41,7 +41,7 @@ describe('Policy artifacts list', () => {
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
 
-    expect(component.getByTestId('loading-spinner')).not.toBeNull();
+    expect(component.getByTestId('artifactsAssignableListLoader')).not.toBeNull();
   });
 
   it('should artifacts list without data', async () => {

@@ -48,7 +48,10 @@ const { startES } = kbnTestServer.createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, './archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.resolve(
+        __dirname,
+        '../../integration_tests/archives/7.7.2_xpack_100k_obj.zip'
+      ),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -331,7 +334,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -395,7 +398,7 @@ describe('migration actions', () => {
               // Allocate 1 replica so that this index stays yellow
               number_of_replicas: '1',
               // Disable all shard allocation so that the index status is red
-              'index.routing.allocation.enable': 'none',
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
@@ -1450,7 +1453,7 @@ describe('migration actions', () => {
                 // Allocate 1 replica so that this index stays yellow
                 number_of_replicas: '1',
                 // Disable all shard allocation so that the index status is red
-                'index.routing.allocation.enable': 'none',
+                index: { routing: { allocation: { enable: 'none' } } },
               },
             },
           },
@@ -1567,8 +1570,8 @@ describe('migration actions', () => {
         }
       `);
     });
-    // TODO: unskip after https://github.com/elastic/kibana/issues/116111
-    it.skip('resolves left request_entity_too_large_exception when the payload is too large', async () => {
+
+    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
       const newDocs = new Array(10000).fill({
         _source: {
           title:

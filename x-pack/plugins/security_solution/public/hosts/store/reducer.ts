@@ -52,6 +52,7 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.sessions]: null,
+      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -80,6 +81,7 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.sessions]: null,
+      [HostsTableType.risk]: null,
     },
   },
 };

@@ -85,7 +85,7 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   return canSeeMenu;
 }
 
-const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
+const SEARCHABLE_FIELDS: Readonly<string[]> = [`item_id`, `name`, `description`, `entries.value`];
 
 export function useFetchHostIsolationExceptionsList({
   filter,

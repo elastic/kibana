@@ -37,6 +37,7 @@ const translogSettingsIndexDeprecation: estypes.IndicesCreateRequest = {
   index: 'deprecated_settings',
   body: {
     settings: {
+      // @ts-expect-error is not declared in the type definition
       'translog.retention.size': '1b',
       'translog.retention.age': '5m',
       'index.soft_deletes.enabled': true,

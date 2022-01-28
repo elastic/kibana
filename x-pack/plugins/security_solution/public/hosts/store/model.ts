@@ -20,6 +20,7 @@ export enum HostsTableType {
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
   alerts = 'externalAlerts',
+  risk = 'hostRisk',
   sessions = 'sessions',
 }
 
@@ -40,6 +41,7 @@ export interface Queries {
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
+  [HostsTableType.risk]: null | undefined;
   [HostsTableType.sessions]: null | undefined;
 }
 

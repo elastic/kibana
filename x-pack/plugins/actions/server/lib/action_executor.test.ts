@@ -30,6 +30,7 @@ const executeParams = {
   params: {
     foo: true,
   },
+  executionId: '123abc',
   request: {} as KibanaRequest,
 };
 
@@ -115,8 +116,16 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute-start",
+            "kind": "action",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -134,9 +143,17 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute",
+            "kind": "action",
             "outcome": "success",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -308,7 +325,7 @@ test('throws an error when connector is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: `error validating action type connector: error`,
+    message: `error validating action type connector: config must be defined`,
   });
 });
 
@@ -511,6 +528,43 @@ test('logs a warning when alert executor returns invalid status', async () => {
   );
 });
 
+test('writes to event log for execute timeout', async () => {
+  setupActionExecutorMock();
+
+  await actionExecutor.logCancellation({
+    actionId: 'action1',
+    executionId: '123abc',
+    relatedSavedObjects: [],
+    request: {} as KibanaRequest,
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-timeout',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: 'action1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+    },
+    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+  });
+});
+
 test('writes to event log for execute and execute start', async () => {
   const executorMock = setupActionExecutorMock();
   executorMock.mockResolvedValue({
@@ -519,11 +573,19 @@ test('writes to event log for execute and execute start', async () => {
   });
   await actionExecutor.execute(executeParams);
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
     event: {
       action: 'execute-start',
+      kind: 'action',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',
@@ -536,11 +598,20 @@ test('writes to event log for execute and execute start', async () => {
     },
     message: 'action started: test:1: action-1',
   });
-  expect(eventLogger.logEvent.mock.calls[1][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
     event: {
       action: 'execute',
+      kind: 'action',
+      outcome: 'success',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',

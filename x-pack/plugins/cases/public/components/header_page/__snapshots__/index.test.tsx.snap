@@ -8,7 +8,7 @@ exports[`HeaderPage it renders 1`] = `
     alignItems="center"
   >
     <FlexItem>
-      <Memo(TitleComponent)
+      <Memo(Title)
         badgeOptions={
           Object {
             "beta": true,

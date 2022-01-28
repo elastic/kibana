@@ -23,7 +23,6 @@ import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_eng
 import { MlAuthz } from '../../../../machine_learning/authz';
 import { throwHttpError } from '../../../../machine_learning/validation';
 import { RulesClient } from '../../../../../../../../plugins/alerting/server';
-import { IRuleExecutionLogClient } from '../../../rule_execution_log';
 import { ExceptionListClient } from '../../../../../../../../plugins/lists/server';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 
@@ -45,7 +44,6 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param isRuleRegistryEnabled {boolean} - feature flag that should be
  * removed as this is now on and no going back
  * @param rulesClient {object}
- * @param ruleStatusClient {object}
  * @param savedObjectsClient {object}
  * @param exceptionsClient {object}
  * @param spaceId {string} - space being used during import
@@ -61,7 +59,6 @@ export const importRules = async ({
   overwriteRules,
   isRuleRegistryEnabled,
   rulesClient,
-  ruleStatusClient,
   savedObjectsClient,
   exceptionsClient,
   spaceId,
@@ -74,7 +71,6 @@ export const importRules = async ({
   overwriteRules: boolean;
   isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
-  ruleStatusClient: IRuleExecutionLogClient;
   savedObjectsClient: SavedObjectsClientContract;
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
@@ -243,11 +239,8 @@ export const importRules = async ({
                   });
                   await patchRules({
                     rulesClient,
-                    savedObjectsClient,
                     author,
                     buildingBlockType,
-                    spaceId,
-                    ruleStatusClient,
                     description,
                     enabled,
                     eventCategoryOverride,

@@ -17,10 +17,7 @@ import { HostDetailsLink } from '../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import {
-  AddFilterToGlobalSearchBar,
-  createFilter,
-} from '../../../common/components/add_filter_to_global_search_bar';
+import { DefaultDraggable } from '../../../common/components/draggables';
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
@@ -91,16 +88,27 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
     },
     {
       field: 'node.host.os.name',
-      name: i18n.OS,
+      name: (
+        <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
+          <>
+            {i18n.OS} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
       render: (hostOsName) => {
         if (hostOsName != null) {
           return (
-            <AddFilterToGlobalSearchBar filter={createFilter('host.os.name', hostOsName)}>
-              <>{hostOsName}</>
-            </AddFilterToGlobalSearchBar>
+            <DefaultDraggable
+              id={`host-page-draggable-host.os.name-${hostOsName[0]}`}
+              field={'host.os.name'}
+              value={hostOsName[0]}
+              isDraggable={false}
+              hideTopN={true}
+              tooltipContent={null}
+            />
           );
         }
         return getEmptyTagValue();
@@ -115,9 +123,14 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
       render: (hostOsVersion) => {
         if (hostOsVersion != null) {
           return (
-            <AddFilterToGlobalSearchBar filter={createFilter('host.os.version', hostOsVersion)}>
-              <>{hostOsVersion}</>
-            </AddFilterToGlobalSearchBar>
+            <DefaultDraggable
+              id={`host-page-draggable-host.os.version-${hostOsVersion[0]}`}
+              field={'host.os.version'}
+              value={hostOsVersion[0]}
+              isDraggable={false}
+              hideTopN={true}
+              tooltipContent={null}
+            />
           );
         }
         return getEmptyTagValue();

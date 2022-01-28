@@ -9,7 +9,7 @@ import React from 'react';
 import { registerTestBed } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
-import { UnwrapPromise, SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
 
 import type { NotificationsSetup } from '../../../../../../src/core/public';
 import {
@@ -97,7 +97,7 @@ const createTestBed = registerTestBed(
   { memoryRouter: { wrapComponent: false } }
 );
 
-export type TestBed = UnwrapPromise<ReturnType<typeof setup>>;
+export type TestBed = Awaited<ReturnType<typeof setup>>;
 
 export const setup = async (props?: Partial<Props>) => {
   const uiSettingsClient = coreMock.createSetup().uiSettings;

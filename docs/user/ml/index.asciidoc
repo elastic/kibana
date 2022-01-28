@@ -47,10 +47,8 @@ pane:
 [role="screenshot"]
 image::user/ml/images/ml-job-management.png[Job Management]
 
-You can use the *Settings* pane to create and edit
-{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-calendars[calendars] and the
-filters that are used in
-{ml-docs}/ml-ad-finding-anomalies.html#ml-ad-rules[custom rules]:
+You can use the *Settings* pane to create and edit calendars and the
+filters that are used in custom rules:
 
 [role="screenshot"]
 image::user/ml/images/ml-settings.png[Calendar Management]

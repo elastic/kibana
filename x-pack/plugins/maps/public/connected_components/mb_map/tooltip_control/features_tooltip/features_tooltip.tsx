@@ -34,12 +34,10 @@ interface Props {
   isLocked: boolean;
   loadFeatureProperties: ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   getLayerName: (layerId: string) => Promise<string | null>;
   findLayerById: (layerId: string) => IVectorLayer | undefined;
