@@ -180,7 +180,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     browserFields,
                     isDraggable,
                     timelineId,
-                    title: i18n.DUCOMENT_SUMMARY,
+                    title: i18n.HIGHLIGHTES_FIELDS,
                   }}
                   goToTable={goToTableTab}
                 />
