@@ -13,6 +13,21 @@ coming[8.0.0]
 // tag::notable-highlights[]
 
 [float]
+=== Security on-by-default
+
+Authentication, authorization and multi-tenancy
+with {kib} Spaces are on-by-default, with next-to-zero configuration effort.
+When you run {kib} for the first time, you will be presented with a new interactive
+UI that will help you set up {kib} and connect it securely to {es}.
+Simply paste the enrollment token that you receive when you ran
+{es}, and {kib} will set up all the previous security features
+for you and will connect {es} over TLS.
+
+[role="screenshot"]
+image::images/highlights-security.png[Configure Elastic to get started]
+
+
+[float]
 === Index patterns are now data views
 By renaming index patterns to data views, we’re laying a foundation for building
 many exciting features over the next year and beyond. Your data views will work
