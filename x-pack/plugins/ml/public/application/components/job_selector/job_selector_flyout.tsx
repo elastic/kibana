@@ -35,18 +35,20 @@ import { JobSelectionMaps } from './job_selector';
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
+export interface JobSelectionResult {
+  newSelection: string[];
+  jobIds: string[];
+  groups: Array<{ groupId: string; jobIds: string[] }>;
+  time: { from: string; to: string } | undefined;
+}
+
 export interface JobSelectorFlyoutProps {
   dateFormatTz: string;
   selectedIds?: string[];
   newSelection?: string[];
   onFlyoutClose: () => void;
   onJobsFetched?: (maps: JobSelectionMaps) => void;
-  onSelectionConfirmed: (payload: {
-    newSelection: string[];
-    jobIds: string[];
-    groups: Array<{ groupId: string; jobIds: string[] }>;
-    time: any;
-  }) => void;
+  onSelectionConfirmed: (payload: JobSelectionResult) => void;
   singleSelection: boolean;
   timeseriesOnly: boolean;
   maps: JobSelectionMaps;
@@ -192,7 +194,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody className="mlJobSelectorFlyoutBody">
+      <EuiFlyoutBody className="mlJobSelectorFlyoutBody" data-test-subj={'mlJobSelectorFlyoutBody'}>
         <EuiResizeObserver onResize={handleResize}>
           {(resizeRef) => (
             <div
