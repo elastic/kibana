@@ -63,7 +63,7 @@ export class FunctionalTestRunner {
 
       // validate es version
       if (providers.hasService('es')) {
-        const es = (await providers.getService('es')) as unknown as EsClient;
+        const es = (await providers.getService('esWithoutSystemIndices')) as unknown as EsClient;
         let esInfo;
         try {
           esInfo = await es.info();
