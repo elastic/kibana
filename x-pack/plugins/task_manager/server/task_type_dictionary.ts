@@ -11,7 +11,10 @@ import { Logger } from '../../../../src/core/server';
 /**
  * Types that are no longer registered and will be marked as unregistered
  */
-export const REMOVED_TYPES: string[] = [].sort();
+export const REMOVED_TYPES: string[] = [
+  // for testing
+  'sampleTaskRemovedType',
+];
 
 /**
  * Defines a task which can be scheduled and run by the Kibana
