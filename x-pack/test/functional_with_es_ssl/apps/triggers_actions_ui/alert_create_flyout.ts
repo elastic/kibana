@@ -105,10 +105,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/89397
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('rulesTab');
+    });
+
+    afterEach(async () => {
+      // Reset the Rules tab without reloading the entire page
+      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
+      await testSubjects.click('connectorsTab');
       await testSubjects.click('rulesTab');
     });
 
