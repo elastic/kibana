@@ -8,12 +8,11 @@
 
 export type {
   DataPublicPluginStart,
-  IndexPatternSpec,
   GetFieldsOptions,
   IndexPatternAggRestrictions,
 } from '../../data/public';
 export { IndexPattern, IndexPatternField } from '../../data/public';
-export { DataView } from '../../data_views/public';
+export { DataView, DataViewSpec } from '../../data_views/public';
 
 export {
   createKibanaReactContext,
