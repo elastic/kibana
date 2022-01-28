@@ -341,10 +341,10 @@ export default function ({
       if (index >= middlePiecesCount) {
         return;
       }
-      const ln = startLineNumber + index + 1;
-      const col = editor.getLineValue(ln).length - 1;
-      const start = { lineNumber: ln, column: 0 };
-      const end = { lineNumber: ln, column: col };
+      const line = startLineNumber + index + 1;
+      const column = editor.getLineValue(line).length - 1;
+      const start = { lineNumber: line, column: 0 };
+      const end = { lineNumber: line, column };
       editor.replace({ start, end }, piece);
     });
   }
