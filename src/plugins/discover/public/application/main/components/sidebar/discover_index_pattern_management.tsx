@@ -15,7 +15,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DiscoverServices } from '../../../../build_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DataView } from '../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
@@ -23,10 +23,6 @@ export interface DiscoverIndexPatternManagementProps {
    * Currently selected index pattern
    */
   selectedIndexPattern?: DataView;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
   /**
    * Read from the Fields API
    */
@@ -44,7 +40,7 @@ export interface DiscoverIndexPatternManagementProps {
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const { dataViewFieldEditor, core } = props.services;
+  const { dataViewFieldEditor, core } = useDiscoverServices();
   const { useNewFieldsApi, selectedIndexPattern, editField, createNewDataView } = props;
   const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;

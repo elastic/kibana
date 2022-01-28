@@ -12,6 +12,7 @@ import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eu
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 const mockServices = {
   history: () => ({
@@ -57,13 +58,14 @@ describe('Discover DataView Management', () => {
 
   const mountComponent = () => {
     return mountWithIntl(
-      <DiscoverIndexPatternManagement
-        services={mockServices}
-        editField={editField}
-        selectedIndexPattern={indexPattern}
-        useNewFieldsApi={true}
-        createNewDataView={createNewDataView}
-      />
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverIndexPatternManagement
+          editField={editField}
+          selectedIndexPattern={indexPattern}
+          useNewFieldsApi={true}
+          createNewDataView={createNewDataView}
+        />
+      </KibanaContextProvider>
     );
   };
 
