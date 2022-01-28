@@ -15,7 +15,7 @@ import { usePager } from '../../utils/use_pager';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { getServices } from '../../kibana_services';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
@@ -24,6 +24,7 @@ export interface DocTableEmbeddableProps extends DocTableProps {
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
+  const services = useDiscoverServices();
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
     curPageIndex,
@@ -72,8 +73,8 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   const sampleSize = useMemo(() => {
-    return getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500);
-  }, []);
+    return services.uiSettings.get(SAMPLE_SIZE_SETTING, 500);
+  }, [services]);
 
   const renderDocTable = useCallback(
     (renderProps: DocTableRenderProps) => {

@@ -230,6 +230,8 @@ export const EventFiltersListPage = memo(() => {
             children: DELETE_EVENT_FILTER_ACTION_LABEL,
           },
         ],
+        hideDescription: !eventFilter.description,
+        hideComments: !eventFilter.comments.length,
       };
     }
 
