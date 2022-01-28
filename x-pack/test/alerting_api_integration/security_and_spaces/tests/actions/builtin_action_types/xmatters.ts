@@ -25,7 +25,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
     before(async () => {
       xmattersServer = await getXmattersServer();
       const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
-      xmattersServer.listen(availablePort);
+      if (!xmattersServer.listening) {
+        xmattersServer.listen(availablePort);
+      }
       xmattersSimulatorURL = `http://localhost:${availablePort}`;
     });
 
