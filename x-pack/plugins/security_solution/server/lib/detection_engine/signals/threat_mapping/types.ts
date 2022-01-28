@@ -203,3 +203,14 @@ export interface BuildThreatEnrichmentOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
 }
+
+export interface EventCountOptions {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  index: string[];
+  language: ThreatLanguageOrUndefined;
+  query: string;
+  filters: unknown[];
+  tuple: RuleRangeTuple;
+  timestampOverride?: string;
+}
