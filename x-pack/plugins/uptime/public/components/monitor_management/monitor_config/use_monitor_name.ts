@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { useMonitorId } from '../../../hooks';
 
 interface AggsResponse {
   monitorNames: {
@@ -20,6 +21,8 @@ interface AggsResponse {
 
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
   const [values, setValues] = useState<string[]>([]);
+
+  const monitorId = useMonitorId();
 
   const { savedObjects } = useKibana().services;
 
@@ -41,15 +44,21 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
 
   useEffect(() => {
     if (data?.aggregations) {
-      setValues(
-        (data.aggregations as AggsResponse)?.monitorNames.buckets.map(({ key }) =>
-          key.toLowerCase()
-        )
+      const newValues = (data.aggregations as AggsResponse)?.monitorNames.buckets.map(({ key }) =>
+        key.toLowerCase()
       );
+      if (monitorId && newValues.includes(search.toLowerCase())) {
+        setValues(newValues.filter((val) => val !== search.toLowerCase()));
+      } else {
+        setValues(newValues);
+      }
     }
-  }, [data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, monitorId]);
 
-  const hasMonitor = Boolean(search && values?.includes(search.trim().toLowerCase()));
+  const hasMonitor = Boolean(
+    search && values && values.length > 0 && values?.includes(search.trim().toLowerCase())
+  );
 
   return { nameAlreadyExists: hasMonitor, validName: hasMonitor ? '' : search };
 };

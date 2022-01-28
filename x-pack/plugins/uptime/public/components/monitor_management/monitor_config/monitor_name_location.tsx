@@ -26,7 +26,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
     [ConfigKey.LOCATIONS]: locations,
   });
 
-  const [localName, setLocalName] = useState('');
+  const [localName, setLocalName] = useState(name);
 
   const { validName, nameAlreadyExists } = useMonitorName({ search: localName });
 
