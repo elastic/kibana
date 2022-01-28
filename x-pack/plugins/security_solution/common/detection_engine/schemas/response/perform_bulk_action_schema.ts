@@ -34,6 +34,4 @@ export const bulkActionPartialErrorResponseSchema = t.exact(
   })
 );
 
-export type BulkActionPartialErrorResponse = t.TypeOf<
-  typeof bulkActionPartialErrorResponseSchema
->;
+export type BulkActionPartialErrorResponse = t.TypeOf<typeof bulkActionPartialErrorResponseSchema>;
