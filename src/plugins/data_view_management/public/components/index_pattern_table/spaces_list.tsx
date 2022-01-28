@@ -55,7 +55,7 @@ export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh 
       <EuiButtonEmpty
         onClick={() => setShowFlyout(true)}
         style={{ height: 'auto' }}
-        data-test-subj="mlJobListRowManageSpacesButton"
+        data-test-subj="manageSpacesButton"
       >
         <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>
