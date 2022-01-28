@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DiscoverServices } from '../build_services';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -25,10 +24,3 @@ export type EsHitRecord = Required<
   isAnchor?: boolean;
 };
 export type EsHitRecordList = EsHitRecord[];
-
-export interface DiscoverRouteProps {
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
-}

@@ -12,12 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
-import { getTimeRangeFromSelection } from '../../components/job_selector/job_select_service_utils';
 import { mlJobService } from '../../services/job_service';
 
 import { createTimeSeriesJobData } from './timeseriesexplorer_utils';
+import { GetJobSelection } from '../../contexts/ml/use_job_selection_flyout';
 
 /**
+ * FIXME validator should not have any side effects like the global state update
  * returns true/false if setGlobalState has been triggered
  * or returns the job id which should be loaded.
  */
@@ -25,8 +26,9 @@ export function validateJobSelection(
   jobsWithTimeRange: MlJobWithTimeRange[],
   selectedJobIds: string[],
   setGlobalState: (...args: any) => void,
-  toastNotifications: ToastsStart
-) {
+  toastNotifications: ToastsStart,
+  getJobSelection: GetJobSelection
+): boolean | string {
   const jobs = createTimeSeriesJobData(mlJobService.jobs);
   const timeSeriesJobIds: string[] = jobs.map((j: any) => j.id);
 
@@ -96,14 +98,20 @@ export function validateJobSelection(
     // Clear the detectorIndex, entities and forecast info.
     return validSelectedJobIds[0];
   } else if (validSelectedJobIds.length === 0 && jobs.length > 0) {
-    // no jobs were loaded from the URL, so add the first job
-    // from the full jobs list.
-    const jobIds = [jobs[0].id];
-    const time = getTimeRangeFromSelection(jobsWithTimeRange, jobIds);
-    setGlobalState({
-      ...{ ml: { jobIds } },
-      ...(time !== undefined ? { time } : {}),
-    });
+    // no jobs were loaded from the URL.
+    // Ask the user to select one.
+
+    getJobSelection({ singleSelection: true, timeseriesOnly: true })
+      .then(({ jobIds, time }) => {
+        setGlobalState({
+          ...{ ml: { jobIds } },
+          ...(time !== undefined ? { time } : {}),
+        });
+      })
+      .catch((e) => {
+        // Flyout has been closed without selection
+      });
+
     return true;
   } else {
     // Jobs exist, but no time series jobs.
