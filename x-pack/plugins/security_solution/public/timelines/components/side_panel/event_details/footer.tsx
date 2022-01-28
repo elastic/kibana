@@ -13,7 +13,7 @@ import { TakeActionDropdown } from '../../../../detections/components/take_actio
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
-import { AddExceptionModalWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
@@ -148,7 +148,7 @@ export const EventDetailsFooterComponent = React.memo(
         {exceptionModalType != null &&
           addExceptionModalWrapperData.ruleId != null &&
           addExceptionModalWrapperData.eventId != null && (
-            <AddExceptionModalWrapper
+            <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}
               ruleIndices={ruleIndices}
               exceptionListType={exceptionModalType}

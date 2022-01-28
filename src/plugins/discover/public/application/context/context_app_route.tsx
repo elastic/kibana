@@ -14,16 +14,16 @@ import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
-import { DiscoverRouteProps } from '../types';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface ContextUrlParams {
   indexPatternId: string;
   id: string;
 }
 
-export function ContextAppRoute(props: DiscoverRouteProps) {
-  const { services } = props;
+export function ContextAppRoute() {
+  const services = useDiscoverServices();
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();

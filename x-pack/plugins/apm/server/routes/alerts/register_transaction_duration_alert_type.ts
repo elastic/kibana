@@ -196,6 +196,9 @@ export function registerTransactionDurationAlertType({
                 serviceName: ruleParams.serviceName,
                 threshold: thresholdMicroseconds,
                 asDuration,
+                aggregationType: String(ruleParams.aggregationType),
+                windowSize: ruleParams.windowSize,
+                windowUnit: ruleParams.windowUnit,
               }),
             },
           })
