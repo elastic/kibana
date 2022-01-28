@@ -71,14 +71,14 @@ export class Plugin implements PluginType {
       config,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     } as UptimeServerSetup;
 
     if (this.server?.config?.service?.enabled) {
       this.syntheticService = new SyntheticsService(
         this.logger,
         this.server,
-        this.server.config.service,
-        this.initContext.env.packageInfo.version
+        this.server.config.service
       );
 
       this.syntheticService.registerSyncTask(plugins.taskManager);

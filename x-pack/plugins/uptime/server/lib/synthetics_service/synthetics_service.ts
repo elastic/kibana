@@ -45,17 +45,12 @@ export class SyntheticsService {
 
   private apiKey: SyntheticsServiceApiKey | undefined;
 
-  constructor(
-    logger: Logger,
-    server: UptimeServerSetup,
-    config: ServiceConfig,
-    kibanaVersion: string
-  ) {
+  constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config, kibanaVersion);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
