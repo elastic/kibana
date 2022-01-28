@@ -11,6 +11,7 @@ import { AbstractSearchStrategy } from './strategies';
 
 export { SearchStrategyRegistry } from './search_strategy_registry';
 export { AbstractSearchStrategy, RollupSearchStrategy, DefaultSearchStrategy } from './strategies';
+export type { EsSearchRequest } from './strategies/abstract_search_strategy';
 
 export type SearchCapabilities = DefaultSearchCapabilities;
 export type SearchStrategy = AbstractSearchStrategy;

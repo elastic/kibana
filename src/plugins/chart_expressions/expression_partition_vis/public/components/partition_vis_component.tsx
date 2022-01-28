@@ -47,7 +47,7 @@ import {
   canFilter,
   getFilterClickData,
   getFilterEventData,
-  getConfig,
+  getPartitionTheme,
   getColumns,
   getSplitDimensionAccessor,
   getColumnByAccessor,
@@ -55,6 +55,7 @@ import {
   shouldShowLegend,
   generateFormatters,
   getFormatter,
+  getPartitionType,
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
@@ -285,8 +286,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     return 1;
   }, [visData.rows, metricColumn]);
 
-  const config = useMemo(
-    () => getConfig(visType, visParams, chartTheme, dimensions, rescaleFactor),
+  const themeOverrides = useMemo(
+    () => getPartitionTheme(visType, visParams, chartTheme, dimensions, rescaleFactor),
     [visType, visParams, chartTheme, dimensions, rescaleFactor]
   );
 
@@ -355,6 +356,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
   const flatLegend = isLegendFlat(visType, splitChartDimension);
   const canShowPieChart = !isAllZeros && !hasNegative;
+  const partitionType = getPartitionType(visType);
 
   return (
     <div css={partitionVisContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
@@ -401,13 +403,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               )}
               theme={[
                 // Chart background should be transparent for the usage at Canvas.
-                {
-                  ...chartTheme,
-                  background: {
-                    ...chartTheme.background,
-                    color: 'transparent',
-                  },
-                },
+                { background: { color: 'transparent' } },
+                themeOverrides,
+                chartTheme,
                 {
                   legend: {
                     labelOptions: {
@@ -423,6 +421,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               id={visType}
               smallMultiples={SMALL_MULTIPLES_ID}
               data={visData.rows}
+              layout={partitionType}
+              specialFirstInnermostSector={visParams.startFromSecondLargestSlice}
               valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
               percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
               valueGetter={
@@ -438,7 +438,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   : metricFieldFormatter.convert(d)
               }
               layers={layers}
-              config={config}
               topGroove={!visParams.labels.show ? 0 : undefined}
             />
           </Chart>

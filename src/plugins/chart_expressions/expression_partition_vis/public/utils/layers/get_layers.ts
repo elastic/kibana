@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
+import { Datum, PartitionLayer } from '@elastic/charts';
 import { FieldFormat } from '../../../../../field_formats/common';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
 import { PaletteRegistry } from '../../../../../charts/public';
@@ -31,7 +31,7 @@ export const getLayers = (
   syncColors: boolean,
   isDarkMode: boolean
 ): PartitionLayer[] => {
-  const fillLabel: Partial<PartitionFillLabel> = {
+  const fillLabel: PartitionLayer['fillLabel'] = {
     valueFont: {
       fontWeight: 700,
     },
