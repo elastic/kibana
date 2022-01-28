@@ -185,6 +185,15 @@ describe('fetchMissingMonitoringData', () => {
           bool: {
             filter: [
               { terms: { cluster_uuid: ['clusterUuid1'] } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'node_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
               { range: { timestamp: { format: 'epoch_millis', gte: 100, lte: 10 } } },
             ],
           },
