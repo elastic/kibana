@@ -45,7 +45,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
       size="100%"
     >
       <ChartSplit />
-      <Connect(SpecInstance)
+      <Settings
         baseTheme={Object {}}
         debugState={false}
         flatLegend={false}
@@ -64,6 +64,31 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
             },
             Object {
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "emptySizeRatio": 0.3,
+                "fontFamily": undefined,
+                "linkLabel": Object {
+                  "fontSize": 11,
+                  "maxCount": 5,
+                  "maxTextLength": 100,
+                  "textColor": undefined,
+                },
+                "maxFontSize": 16,
+                "minFontSize": 10,
+                "outerSizeRatio": undefined,
+                "sectorLineStroke": undefined,
+                "sectorLineWidth": 1.5,
+              },
+            },
+            Object {},
+            Object {
               "legend": Object {
                 "labelOptions": Object {
                   "maxLines": 1,
@@ -78,26 +103,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
           }
         }
       />
-      <Connect(SpecInstance)
-        config={
-          Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0.3,
-            "fontFamily": undefined,
-            "linkLabel": Object {
-              "fontSize": 11,
-              "maxCount": 5,
-              "maxTextLength": 100,
-              "textColor": undefined,
-            },
-            "maxFontSize": 16,
-            "minFontSize": 10,
-            "outerSizeRatio": undefined,
-            "partitionLayout": "sunburst",
-            "sectorLineStroke": undefined,
-            "sectorLineWidth": 1.5,
-          }
-        }
+      <Partition
         data={
           Array [
             Object {
@@ -183,6 +189,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
             },
           ]
         }
+        layout="sunburst"
         percentFormatter={[Function]}
         smallMultiples="__pie_chart_sm__"
         valueAccessor={[Function]}
@@ -239,7 +246,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
       size="100%"
     >
       <ChartSplit />
-      <Connect(SpecInstance)
+      <Settings
         baseTheme={Object {}}
         debugState={false}
         flatLegend={false}
@@ -257,6 +264,31 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
             },
             Object {
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "emptySizeRatio": 0,
+                "fontFamily": undefined,
+                "linkLabel": Object {
+                  "fontSize": 11,
+                  "maxCount": 5,
+                  "maxTextLength": undefined,
+                  "textColor": undefined,
+                },
+                "maxFontSize": 16,
+                "minFontSize": 10,
+                "outerSizeRatio": 1,
+                "sectorLineStroke": undefined,
+                "sectorLineWidth": 1.5,
+              },
+            },
+            Object {},
+            Object {
               "legend": Object {
                 "labelOptions": Object {
                   "maxLines": 1,
@@ -271,26 +303,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
           }
         }
       />
-      <Connect(SpecInstance)
-        config={
-          Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0,
-            "fontFamily": undefined,
-            "linkLabel": Object {
-              "fontSize": 11,
-              "maxCount": 5,
-              "maxTextLength": undefined,
-              "textColor": undefined,
-            },
-            "maxFontSize": 16,
-            "minFontSize": 10,
-            "outerSizeRatio": 1,
-            "partitionLayout": "mosaic",
-            "sectorLineStroke": undefined,
-            "sectorLineWidth": 1.5,
-          }
-        }
+      <Partition
         data={
           Array [
             Object {
@@ -376,6 +389,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
             },
           ]
         }
+        layout="mosaic"
         percentFormatter={[Function]}
         smallMultiples="__pie_chart_sm__"
         valueAccessor={[Function]}
@@ -432,7 +446,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
       size="100%"
     >
       <ChartSplit />
-      <Connect(SpecInstance)
+      <Settings
         baseTheme={Object {}}
         debugState={false}
         flatLegend={false}
@@ -451,6 +465,31 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
             },
             Object {
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "emptySizeRatio": 0,
+                "fontFamily": undefined,
+                "linkLabel": Object {
+                  "fontSize": 11,
+                  "maxCount": 5,
+                  "maxTextLength": 100,
+                  "textColor": undefined,
+                },
+                "maxFontSize": 16,
+                "minFontSize": 10,
+                "outerSizeRatio": undefined,
+                "sectorLineStroke": undefined,
+                "sectorLineWidth": 1.5,
+              },
+            },
+            Object {},
+            Object {
               "legend": Object {
                 "labelOptions": Object {
                   "maxLines": 1,
@@ -465,26 +504,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
           }
         }
       />
-      <Connect(SpecInstance)
-        config={
-          Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0,
-            "fontFamily": undefined,
-            "linkLabel": Object {
-              "fontSize": 11,
-              "maxCount": 5,
-              "maxTextLength": 100,
-              "textColor": undefined,
-            },
-            "maxFontSize": 16,
-            "minFontSize": 10,
-            "outerSizeRatio": undefined,
-            "partitionLayout": "sunburst",
-            "sectorLineStroke": undefined,
-            "sectorLineWidth": 1.5,
-          }
-        }
+      <Partition
         data={
           Array [
             Object {
@@ -570,6 +590,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
             },
           ]
         }
+        layout="sunburst"
         percentFormatter={[Function]}
         smallMultiples="__pie_chart_sm__"
         valueAccessor={[Function]}
@@ -626,7 +647,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
       size="100%"
     >
       <ChartSplit />
-      <Connect(SpecInstance)
+      <Settings
         baseTheme={Object {}}
         debugState={false}
         flatLegend={false}
@@ -644,6 +665,31 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
             },
             Object {
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "emptySizeRatio": 0,
+                "fontFamily": undefined,
+                "linkLabel": Object {
+                  "fontSize": 11,
+                  "maxCount": 5,
+                  "maxTextLength": undefined,
+                  "textColor": undefined,
+                },
+                "maxFontSize": 16,
+                "minFontSize": 10,
+                "outerSizeRatio": 1,
+                "sectorLineStroke": undefined,
+                "sectorLineWidth": 1.5,
+              },
+            },
+            Object {},
+            Object {
               "legend": Object {
                 "labelOptions": Object {
                   "maxLines": 1,
@@ -658,26 +704,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
           }
         }
       />
-      <Connect(SpecInstance)
-        config={
-          Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0,
-            "fontFamily": undefined,
-            "linkLabel": Object {
-              "fontSize": 11,
-              "maxCount": 5,
-              "maxTextLength": undefined,
-              "textColor": undefined,
-            },
-            "maxFontSize": 16,
-            "minFontSize": 10,
-            "outerSizeRatio": 1,
-            "partitionLayout": "treemap",
-            "sectorLineStroke": undefined,
-            "sectorLineWidth": 1.5,
-          }
-        }
+      <Partition
         data={
           Array [
             Object {
@@ -763,6 +790,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
             },
           ]
         }
+        layout="treemap"
         percentFormatter={[Function]}
         smallMultiples="__pie_chart_sm__"
         valueAccessor={[Function]}
@@ -819,7 +847,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
       size="100%"
     >
       <ChartSplit />
-      <Connect(SpecInstance)
+      <Settings
         baseTheme={Object {}}
         debugState={false}
         flatLegend={false}
@@ -839,6 +867,31 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
             },
             Object {
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "emptySizeRatio": 0,
+                "fontFamily": undefined,
+                "linkLabel": Object {
+                  "fontSize": 11,
+                  "maxCount": 5,
+                  "maxTextLength": undefined,
+                  "textColor": undefined,
+                },
+                "maxFontSize": 16,
+                "minFontSize": 10,
+                "outerSizeRatio": 1,
+                "sectorLineStroke": undefined,
+                "sectorLineWidth": 1.5,
+              },
+            },
+            Object {},
+            Object {
               "legend": Object {
                 "labelOptions": Object {
                   "maxLines": 1,
@@ -853,26 +906,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           }
         }
       />
-      <Connect(SpecInstance)
-        config={
-          Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0,
-            "fontFamily": undefined,
-            "linkLabel": Object {
-              "fontSize": 11,
-              "maxCount": 5,
-              "maxTextLength": undefined,
-              "textColor": undefined,
-            },
-            "maxFontSize": 16,
-            "minFontSize": 10,
-            "outerSizeRatio": 1,
-            "partitionLayout": "mosaic",
-            "sectorLineStroke": undefined,
-            "sectorLineWidth": 1.5,
-          }
-        }
+      <Partition
         data={
           Array [
             Object {
@@ -944,6 +978,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
             },
           ]
         }
+        layout="mosaic"
         percentFormatter={[Function]}
         smallMultiples="__pie_chart_sm__"
         valueAccessor={[Function]}
