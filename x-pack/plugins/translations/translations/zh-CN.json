@@ -21910,7 +21910,6 @@
     "xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle": "未找到威胁情报扩充",
     "xpack.securitySolution.alertDetails.noRiskDataDescription": "未找到此告警的主机风险数据",
     "xpack.securitySolution.alertDetails.overview": "概览",
-    "xpack.securitySolution.alertDetails.overview.documentSummary": "文档摘要",
     "xpack.securitySolution.alertDetails.overview.enrichedDataTitle": "扩充数据",
     "xpack.securitySolution.alertDetails.overview.hostDataTooltipContent": "仅在其对主机可用时才会显示风险分类。确保在您的环境中启用了 {hostsRiskScoreDocumentationLink}。",
     "xpack.securitySolution.alertDetails.overview.hostRiskDataTitle": "主机风险数据",

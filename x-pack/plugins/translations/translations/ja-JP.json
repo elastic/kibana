@@ -21582,7 +21582,6 @@
     "xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle": "Threat Intel Enrichmentが見つかりません",
     "xpack.securitySolution.alertDetails.noRiskDataDescription": "このアラートのホストリスクデータが見つかりません",
     "xpack.securitySolution.alertDetails.overview": "概要",
-    "xpack.securitySolution.alertDetails.overview.documentSummary": "ドキュメント概要",
     "xpack.securitySolution.alertDetails.overview.enrichedDataTitle": "強化されたデータ",
     "xpack.securitySolution.alertDetails.overview.hostDataTooltipContent": "リスク分類は、ホストで使用可能なときにのみ表示されます。環境内で{hostsRiskScoreDocumentationLink}が有効であることを確認してください。",
     "xpack.securitySolution.alertDetails.overview.hostRiskDataTitle": "ホストリスクデータ",
