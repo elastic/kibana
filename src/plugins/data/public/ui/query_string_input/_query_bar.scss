@@ -42,7 +42,6 @@
   // Firefox adds margin to textarea
   margin: 0;
 
-
   @include kbnThemeStyle('v7') {
     padding-top: $euiSizeS + 2px;
   }
