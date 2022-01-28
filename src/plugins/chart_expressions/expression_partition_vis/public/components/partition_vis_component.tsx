@@ -148,11 +148,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         splitChartDimension,
         splitChartFormatter
       );
-      const event = {
-        name: 'filterBucket',
-        data: { data },
-      };
-      props.fireEvent(event);
+      props.fireEvent({ name: 'filter', data: { data } });
     },
     [props]
   );
