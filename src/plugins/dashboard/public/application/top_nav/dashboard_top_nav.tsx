@@ -371,7 +371,8 @@ export function DashboardTopNav({
       // render the character at (x, y)
       ctx.fillText(text, x, y);
 
-      ypos[ind] = y + 20;
+      if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+      else ypos[ind] = y + 20;
     });
   };
 
@@ -439,8 +440,6 @@ export function DashboardTopNav({
           setInterval(() => {
             matrix(canvas, cols, ypos);
           }, 50);
-
-          ctx.clearRect(canvas.clientLeft, canvas.clientTop, w, h);
         }
       } else if (name === 'spiderman') {
         spiderman();
