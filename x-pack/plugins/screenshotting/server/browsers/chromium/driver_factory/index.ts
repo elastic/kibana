@@ -261,19 +261,21 @@ export class HeadlessChromiumDriverFactory {
    * See https://github.com/puppeteer/puppeteer/issues/3397.
    */
   private async getErrorMessage(message: ConsoleMessage): Promise<undefined | string> {
-    let errorMessage: undefined | string;
     for (const arg of message.args()) {
-      errorMessage = await arg.executionContext().evaluate<undefined | string>((_arg: unknown) => {
-        /* !! We are now in the browser context !! */
-        if (_arg instanceof Error) {
-          return _arg.message;
-        }
-        return undefined;
-        /* !! End of browser context !! */
-      }, arg);
-      if (errorMessage) break;
+      const errorMessage = await arg
+        .executionContext()
+        .evaluate<undefined | string>((_arg: unknown) => {
+          /* !! We are now in the browser context !! */
+          if (_arg instanceof Error) {
+            return _arg.message;
+          }
+          return undefined;
+          /* !! End of browser context !! */
+        }, arg);
+      if (errorMessage) {
+        return errorMessage;
+      }
     }
-    return errorMessage;
   }
 
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
