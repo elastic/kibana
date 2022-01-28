@@ -26,6 +26,7 @@ const createConfig = (
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
+    compression: false,
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},
     hosts: ['http://localhost'],
