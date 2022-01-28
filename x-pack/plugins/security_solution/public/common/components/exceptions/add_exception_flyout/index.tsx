@@ -10,10 +10,11 @@
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalFooter,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutFooter,
+  EuiFlyoutBody,
   EuiButton,
   EuiButtonEmpty,
   EuiHorizontalRule,
@@ -24,6 +25,7 @@ import {
   EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import type {
   ExceptionListType,
@@ -65,7 +67,7 @@ import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
-export interface AddExceptionModalProps {
+export interface AddExceptionFlyoutProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
@@ -84,25 +86,19 @@ export interface AddExceptionModalProps {
   onRuleChange?: () => void;
 }
 
-const Modal = styled(EuiModal)`
+const FlyoutHeader = styled(EuiFlyoutHeader)`
   ${({ theme }) => css`
-    width: ${theme.eui.euiBreakpoints.l};
-    max-width: ${theme.eui.euiBreakpoints.l};
+    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
   `}
 `;
 
-const ModalHeader = styled(EuiModalHeader)`
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
-const ModalHeaderSubtitle = styled.div`
+const FlyoutSubtitle = styled.div`
   ${({ theme }) => css`
     color: ${theme.eui.euiColorMediumShade};
   `}
 `;
 
-const ModalBodySection = styled.section`
+const FlyoutBodySection = styled.section`
   ${({ theme }) => css`
     padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
 
@@ -112,7 +108,22 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-export const AddExceptionModal = memo(function AddExceptionModal({
+const FlyoutCheckboxesSection = styled(EuiFlyoutBody)`
+  overflow-y: inherit;
+  height: auto;
+
+  .euiFlyoutBody__overflowContent {
+    padding-top: 0;
+  }
+`;
+
+const FlyoutFooterGroup = styled(EuiFlexGroup)`
+  ${({ theme }) => css`
+    padding: ${theme.eui.euiSizeS};
+  `}
+`;
+
+export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
@@ -123,7 +134,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   onConfirm,
   onRuleChange,
   alertStatus,
-}: AddExceptionModalProps) {
+}: AddExceptionFlyoutProps) {
   const { http, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
@@ -411,17 +422,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [hasOsSelection, selectedOs]);
 
   return (
-    <Modal onClose={onCancel} data-test-subj="add-exception-modal">
-      <ModalHeader>
-        <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
+    <EuiFlyout size="l" onClose={onCancel} data-test-subj="add-exception-flyout">
+      <FlyoutHeader>
+        <EuiTitle>
+          <h2 data-test-subj="exception-flyout-title">{addExceptionMessage}</h2>
+        </EuiTitle>
         <EuiSpacer size="xs" />
-        <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
+        <FlyoutSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
-        </ModalHeaderSubtitle>
-      </ModalHeader>
+        </FlyoutSubtitle>
+        <EuiSpacer size="m" />
+      </FlyoutHeader>
 
       {fetchOrCreateListError != null && (
-        <EuiModalFooter>
+        <EuiFlyoutFooter>
           <ErrorCallout
             http={http}
             errorInfo={fetchOrCreateListError}
@@ -429,9 +443,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             onCancel={onCancel}
             onSuccess={handleDissasociationSuccess}
             onError={handleDissasociationError}
-            data-test-subj="addExceptionModalErrorCallout"
+            data-test-subj="addExceptionFlyoutErrorCallout"
           />
-        </EuiModalFooter>
+        </EuiFlyoutFooter>
       )}
       {fetchOrCreateListError == null &&
         (isLoadingExceptionList ||
@@ -439,7 +453,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           isSignalIndexLoading ||
           isAlertDataLoading ||
           isSignalIndexPatternLoading) && (
-          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+          <Loader data-test-subj="loadingAddExceptionFlyout" size="xl" />
         )}
       {fetchOrCreateListError == null &&
         !isSignalIndexLoading &&
@@ -451,7 +465,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         !isAlertDataLoading &&
         ruleExceptionList && (
           <>
-            <ModalBodySection className="builder-section">
+            <FlyoutBodySection className="builder-section">
               {isRuleEQLSequenceStatement && (
                 <>
                   <EuiCallOut
@@ -507,9 +521,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 newCommentValue={comment}
                 newCommentOnChange={onCommentChange}
               />
-            </ModalBodySection>
+            </FlyoutBodySection>
             <EuiHorizontalRule />
-            <ModalBodySection>
+            <FlyoutCheckboxesSection>
               {alertData != null && alertStatus !== 'closed' && (
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
@@ -541,26 +555,28 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   </EuiText>
                 </>
               )}
-            </ModalBodySection>
+            </FlyoutCheckboxesSection>
           </>
         )}
       {fetchOrCreateListError == null && (
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
+        <EuiFlyoutFooter>
+          <FlyoutFooterGroup justifyContent="spaceBetween">
+            <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
 
-          <EuiButton
-            data-test-subj="add-exception-confirm-button"
-            onClick={onAddExceptionConfirm}
-            isLoading={addExceptionIsLoading}
-            isDisabled={isSubmitButtonDisabled}
-            fill
-          >
-            {addExceptionMessage}
-          </EuiButton>
-        </EuiModalFooter>
+            <EuiButton
+              data-test-subj="add-exception-confirm-button"
+              onClick={onAddExceptionConfirm}
+              isLoading={addExceptionIsLoading}
+              isDisabled={isSubmitButtonDisabled}
+              fill
+            >
+              {addExceptionMessage}
+            </EuiButton>
+          </FlyoutFooterGroup>
+        </EuiFlyoutFooter>
       )}
-    </Modal>
+    </EuiFlyout>
   );
 });

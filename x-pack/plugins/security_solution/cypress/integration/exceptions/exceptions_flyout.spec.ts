@@ -13,11 +13,11 @@ import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { openExceptionModalFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
+import { openExceptionFlyoutFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueOfItemX,
-  closeExceptionBuilderModal,
+  closeExceptionBuilderFlyout,
 } from '../../tasks/exceptions';
 import {
   ADD_AND_BTN,
@@ -35,11 +35,11 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { cleanKibana, reload } from '../../tasks/common';
 
 // NOTE: You might look at these tests and feel they're overkill,
-// but the exceptions modal has a lot of logic making it difficult
+// but the exceptions flyout has a lot of logic making it difficult
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe('Exceptions modal', () => {
+describe('Exceptions flyout', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
@@ -76,7 +76,7 @@ describe('Exceptions modal', () => {
     cy.get(FIELD_INPUT).eq(0).should('have.text', 'agent.name');
     cy.get(FIELD_INPUT).eq(1).should('have.text', 'c');
 
-    closeExceptionBuilderModal();
+    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values or-ed together', () => {
@@ -129,11 +129,11 @@ describe('Exceptions modal', () => {
       .should('have.text', 'user.id.keyword');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).should('not.exist');
 
-    closeExceptionBuilderModal();
+    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values of nested entry items', () => {
-    openExceptionModalFromRuleSettings();
+    openExceptionFlyoutFromRuleSettings();
     cy.get(LOADING_SPINNER).should('not.exist');
 
     // exception item 1
@@ -193,7 +193,7 @@ describe('Exceptions modal', () => {
       .eq(1)
       .should('have.text', '@timestamp');
 
-    closeExceptionBuilderModal();
+    closeExceptionBuilderFlyout();
   });
 
   it('Contains custom index fields', () => {
@@ -202,6 +202,6 @@ describe('Exceptions modal', () => {
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
 
-    closeExceptionBuilderModal();
+    closeExceptionBuilderFlyout();
   });
 });
