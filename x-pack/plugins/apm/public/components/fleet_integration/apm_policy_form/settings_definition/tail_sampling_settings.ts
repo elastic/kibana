@@ -20,7 +20,7 @@ export function getTailSamplingSettings(): SettingsRow[] {
       ),
       rowDescription: i18n.translate(
         'xpack.apm.fleet_integration.settings.tailSampling.enableTailSamplingDescription',
-        { defaultMessage: 'Enable tail based sampling.' }
+        { defaultMessage: 'Enable tail-based sampling.' }
       ),
       type: 'boolean',
       settings: [
