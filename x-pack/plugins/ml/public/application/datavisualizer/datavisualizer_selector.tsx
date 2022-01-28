@@ -158,8 +158,8 @@ export const DatavisualizerSelector: FC = () => {
           <Fragment>
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
-            <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
-              <EuiFlexItem grow={false} style={{ width: '600px' }}>
+            <EuiFlexGrid gutterSize="xl" columns={2} style={{ maxWidth: '1000px' }}>
+              <EuiFlexItem>
                 <EuiCard
                   hasBorder
                   title={
@@ -184,7 +184,7 @@ export const DatavisualizerSelector: FC = () => {
                   data-test-subj="mlDataVisualizerCardStartTrial"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiFlexGrid>
           </Fragment>
         )}
       </div>

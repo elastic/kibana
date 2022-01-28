@@ -33,7 +33,7 @@ import {
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
-import { ExplorerNoJobsFound, ExplorerNoResultsFound } from './components';
+import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
 import { InfluencersList } from '../components/influencers_list';
 import { explorerService } from './explorer_dashboard_service';
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
@@ -98,6 +98,8 @@ const ExplorerPage = ({
     </MlPageHeader>
     <EuiPageHeader>
       <EuiPageHeaderSection style={{ width: '100%' }}>
+        <JobSelector {...jobSelectorProps} />
+
         {noInfluencersConfigured === false && influencers !== undefined ? (
           <>
             <ExplorerQueryBar
@@ -108,13 +110,11 @@ const ExplorerPage = ({
               updateLanguage={updateLanguage}
             />
             <EuiSpacer size="m" />
+            <EuiHorizontalRule margin="none" />
           </>
         ) : null}
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiHorizontalRule margin="none" />
-    <JobSelector {...jobSelectorProps} />
-    <EuiHorizontalRule margin="none" />
     {children}
   </>
 );
@@ -260,7 +260,7 @@ export class ExplorerUI extends React.Component {
       dateFormatTz: getDateFormatTz(),
     };
 
-    const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
+    const noJobsSelected = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
     const hasResultsWithAnomalies =
       (hasResults && overallSwimlaneData.points.some((v) => v.value > 0)) ||
@@ -268,10 +268,10 @@ export class ExplorerUI extends React.Component {
 
     const hasActiveFilter = isDefined(swimLaneSeverity);
 
-    if (noJobsFound && !loading) {
+    if (noJobsSelected && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
-          <ExplorerNoJobsFound />
+          <ExplorerNoJobsSelected />
         </ExplorerPage>
       );
     }
@@ -318,6 +318,7 @@ export class ExplorerUI extends React.Component {
 
           {noInfluencersConfigured === false && (
             <div className="column col-xs-2" data-test-subj="mlAnomalyExplorerInfluencerList">
+              <EuiSpacer size={'s'} />
               <EuiTitle className="panel-title">
                 <h2>
                   <FormattedMessage
