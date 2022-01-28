@@ -53,7 +53,6 @@ export function jobSavedObjectServiceFactory(
     }
     const { filter, searchFields } = createSavedObjectFilter(filterObject);
 
-    console.log('load jobs - currentSpaceOnly', currentSpaceOnly);
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
       perPage: 10000,
@@ -63,7 +62,7 @@ export function jobSavedObjectServiceFactory(
     };
 
     const jobs = await savedObjectsClient.find<JobObject>(options);
-    console.log('saved_objects', jobs.saved_objects);
+
     return jobs.saved_objects;
   }
 
