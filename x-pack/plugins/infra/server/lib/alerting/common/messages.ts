@@ -165,13 +165,14 @@ export const buildNoDataAlertReason: (alertResult: {
     },
   });
 
-export const buildErrorAlertReason = (metric: string) =>
+export const buildErrorAlertReason = (metric: string) => {
   i18n.translate('xpack.infra.metrics.alerting.threshold.errorAlertReason', {
     defaultMessage: 'Elasticsearch failed when attempting to query data for {metric}',
     values: {
       metric,
     },
   });
+};
 
 export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.queryErrorAlertReason', {

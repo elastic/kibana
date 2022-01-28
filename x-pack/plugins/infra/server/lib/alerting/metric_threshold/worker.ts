@@ -20,7 +20,11 @@ import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { evaluateRule, EvaluatedRuleParams } from './lib/evaluate_rule';
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates, Comparator } from './types';
-import { FIRED_ACTIONS, WARNING_ACTIONS } from './metric_threshold_executor';
+import {
+  FIRED_ACTIONS,
+  MetricThresholdRuleParams,
+  WARNING_ACTIONS,
+} from './metric_threshold_executor';
 
 export interface IActionSchedulingInfo {
   actionGroupId: string;
@@ -42,7 +46,7 @@ const makeGetActionsFromMetricThreshold =
     alertOnGroupDisappear,
     compositeSize,
   }: {
-    params: EvaluatedRuleParams;
+    params: MetricThresholdRuleParams;
     config: InfraSource['configuration'];
     prevGroups: string[];
     alertOnNoData: boolean;
@@ -51,7 +55,7 @@ const makeGetActionsFromMetricThreshold =
   }) => {
     const alertResults = await evaluateRule(
       scopedClient,
-      params,
+      params as EvaluatedRuleParams,
       config,
       prevGroups,
       compositeSize

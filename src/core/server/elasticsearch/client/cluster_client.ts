@@ -108,7 +108,7 @@ export class ClusterClient implements ICustomClusterClient {
       headers: scopedHeaders,
       Transport: transportClass,
     });
-    return new ScopedClusterClient(this.asInternalUser, scopedClient);
+    return new ScopedClusterClient(this.asInternalUser, scopedClient, scopedHeaders);
   }
 
   public async close() {

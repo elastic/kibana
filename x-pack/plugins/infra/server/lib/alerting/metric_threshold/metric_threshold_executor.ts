@@ -26,7 +26,7 @@ import {
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { AlertStates } from './types';
-import { IActionSchedulingInfo } from './worker';
+import { IActionSchedulingInfo, makeGetActionsFromMetricThreshold } from './worker';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -139,7 +139,19 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         alertOnGroupDisappear,
         compositeSize,
       },
+      scopedClusterClient: services.scopedClusterClient,
     })) as { groups: string[]; actionsToSchedule: IActionSchedulingInfo[] };
+
+    // const { groups, actionsToSchedule } = (await makeGetActionsFromMetricThreshold(
+    //   services.scopedClusterClient.asCurrentUser
+    // )({
+    //   params,
+    //   config,
+    //   prevGroups,
+    //   alertOnNoData,
+    //   alertOnGroupDisappear,
+    //   compositeSize,
+    // })) as { groups: string[]; actionsToSchedule: IActionSchedulingInfo[] };
 
     actionsToSchedule.forEach(
       ({ actionGroupId, alertState, group, reason, timestamp, value, threshold }) => {

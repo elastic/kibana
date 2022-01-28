@@ -9,7 +9,7 @@
 import { CoreService } from 'src/core/types';
 import path from 'path';
 import Piscina from 'piscina';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import { InternalElasticsearchServiceSetup, IScopedClusterClient } from '../elasticsearch';
 
 export interface SetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
@@ -21,11 +21,17 @@ export interface WorkerThreadsServiceSetup {}
 export interface RunOptions<T> {
   name: string;
   args: T;
+  scopedClusterClient?: IScopedClusterClient;
   abortSignal?: AbortSignal;
 }
 
 export interface WorkerThreadsServiceStart {
-  run: <T = unknown, U = unknown>({ name, args, abortSignal }: RunOptions<T>) => Promise<U>;
+  run: <T = unknown, U = unknown>({
+    name,
+    args,
+    abortSignal,
+    scopedClusterClient,
+  }: RunOptions<T>) => Promise<U>;
 }
 
 export class WorkerThreadsService
@@ -42,8 +48,14 @@ export class WorkerThreadsService
   }
   public async start() {
     return {
-      run: async <T, U>({ name, args, abortSignal }: RunOptions<T>) =>
-        this.piscina!.run(args, { name, signal: abortSignal }) as Promise<U>,
+      run: async <T, U>({ name, args, abortSignal, scopedClusterClient }: RunOptions<T>) =>
+        this.piscina!.run(
+          { args, scopedHeaders: scopedClusterClient?.headers },
+          {
+            name,
+            signal: abortSignal,
+          }
+        ) as Promise<U>,
     };
   }
   public stop() {

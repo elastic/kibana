@@ -7,6 +7,7 @@
  */
 
 import { ElasticsearchClient } from './types';
+import { Headers } from '../../http/router';
 
 /**
  * Serves the same purpose as the normal {@link IClusterClient | cluster client} but exposes
@@ -27,12 +28,17 @@ export interface IScopedClusterClient {
    * on behalf of the user that initiated the request to the Kibana server.
    */
   readonly asCurrentUser: ElasticsearchClient;
+  /**
+   * TODO only expose type on InternalScopedClusterClient?
+   */
+  readonly headers: Headers;
 }
 
 /** @internal **/
 export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
     public readonly asInternalUser: ElasticsearchClient,
-    public readonly asCurrentUser: ElasticsearchClient
+    public readonly asCurrentUser: ElasticsearchClient,
+    public readonly headers: Headers
   ) {}
 }
