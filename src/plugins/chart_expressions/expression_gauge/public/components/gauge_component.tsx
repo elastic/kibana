@@ -29,7 +29,11 @@ declare global {
   }
 }
 
-function normalizeColors({ colors, stops, range }: CustomPaletteState, min: number) {
+function normalizeColors(
+  { colors, stops, range, rangeMin, rangeMax }: CustomPaletteState,
+  min: number,
+  max: number
+) {
   if (!colors) {
     return;
   }
@@ -37,23 +41,67 @@ function normalizeColors({ colors, stops, range }: CustomPaletteState, min: numb
     stops.filter((stop, i) => (range === 'percent' ? stop < 0 : stop < min)).length,
     0
   );
-  return colors.slice(colorsOutOfRangeSmaller);
+  let updatedColors = colors.slice(colorsOutOfRangeSmaller);
+
+  let correctMin = rangeMin;
+  let correctMax = rangeMax;
+  if (range === 'percent') {
+    correctMin = min + rangeMin * ((max - min) / 100);
+    correctMax = min + rangeMax * ((max - min) / 100);
+  }
+
+  if (correctMin !== min && isFinite(correctMin)) {
+    updatedColors = [
+      ...(correctMin > min ? [`rgba(255,255,255,0)`] : [updatedColors[0]]),
+      ...updatedColors,
+    ];
+  }
+
+  if (correctMax !== max && isFinite(correctMax)) {
+    updatedColors = [
+      ...updatedColors,
+      ...(correctMax < max ? [`rgba(255,255,255,0)`] : [updatedColors[updatedColors.length - 1]]),
+    ];
+  }
+
+  return updatedColors;
 }
 
 function normalizeBands(
-  { colors, stops, range }: CustomPaletteState,
+  { colors, stops, range, rangeMax, rangeMin }: CustomPaletteState,
   { min, max }: { min: number; max: number }
 ) {
   if (!stops.length) {
     const step = (max - min) / colors.length;
     return [min, ...colors.map((_, i) => min + (i + 1) * step)];
   }
+  let firstRanges = [min];
+  let lastRanges = [max];
+  let correctMin = rangeMin;
+  let correctMax = rangeMax;
+  if (range === 'percent') {
+    correctMin = min + rangeMin * ((max - min) / 100);
+    correctMax = min + rangeMax * ((max - min) / 100);
+  }
+
+  if (correctMin !== min && isFinite(correctMin)) {
+    firstRanges = correctMin > min ? [min, correctMin] : [correctMin, min];
+  }
+
+  if (correctMax !== max && isFinite(correctMax)) {
+    lastRanges = correctMax > max ? [max, correctMax] : [correctMax, max];
+  }
+
   if (range === 'percent') {
     const filteredStops = stops.filter((stop) => stop >= 0 && stop <= 100);
-    return [min, ...filteredStops.map((step) => min + step * ((max - min) / 100)), max];
+    return [
+      ...firstRanges,
+      ...filteredStops.map((step) => min + step * ((max - min) / 100)),
+      ...lastRanges,
+    ];
   }
   const orderedStops = stops.filter((stop, i) => stop < max && stop > min);
-  return [min, ...orderedStops, max];
+  return [...firstRanges, ...orderedStops, ...lastRanges];
 }
 
 function getTitle(
@@ -179,7 +227,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             },
           }
     );
-    const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
+    const colors = palette?.params?.colors ? normalizeColors(palette.params, min, max) : undefined;
     const bands: number[] = (palette?.params as CustomPaletteState)
       ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
       : [min, max];
@@ -193,8 +241,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         <Goal
           id="goal"
           subtype={subtype}
-          base={min}
-          target={goal && goal >= min && goal <= max ? goal : undefined}
+          base={bands[0]}
+          target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
           actual={formattedActual}
           tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
           bands={bands}
@@ -205,6 +253,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
                   const index = bands && bands.indexOf(val.value) - 1;
                   return colors && index >= 0 && colors[index]
                     ? colors[index]
+                    : val.value <= bands[0]
+                    ? colors[0]
                     : colors[colors.length - 1];
                 }
               : () => `rgba(255,255,255,0)`
