@@ -56,7 +56,7 @@ export const getThreatList = async ({
         },
       ],
       search_after: searchAfter,
-      sort: ['_doc'],
+      sort: ['_doc', { '@timestamp': 'asc' }],
     },
     track_total_hits: false,
     ignore_unavailable: true,
