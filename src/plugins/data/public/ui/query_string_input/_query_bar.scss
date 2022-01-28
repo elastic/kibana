@@ -39,6 +39,9 @@
   // shadow to line up correctly.
   padding: $euiSizeS;
   box-shadow: 0 0 0 1px $euiFormBorderColor;
+  // Firefox adds margin to textarea
+  margin: 0;
+
 
   @include kbnThemeStyle('v7') {
     padding-top: $euiSizeS + 2px;
