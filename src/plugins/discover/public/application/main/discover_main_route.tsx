@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
-import { History } from 'history';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
 import {
@@ -23,23 +22,18 @@ import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { DiscoverRouteProps } from '../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
-
-export interface DiscoverMainProps extends DiscoverRouteProps {
-  /**
-   * Instance of browser history
-   */
-  history: History;
-}
 
 interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
+export function DiscoverMainRoute() {
+  const history = useHistory();
+  const services = useDiscoverServices();
   const {
     core,
     chrome,
@@ -178,12 +172,5 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     return <LoadingIndicator />;
   }
 
-  return (
-    <DiscoverMainAppMemoized
-      history={history}
-      indexPatternList={indexPatternList}
-      savedSearch={savedSearch}
-      services={services}
-    />
-  );
+  return <DiscoverMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />;
 }
