@@ -20,7 +20,8 @@ async function fetchIndicesCall(
   const { body: indices } = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
-    // only get specified properties in the response
+    // only get specified index properties from ES to keep the response under 536MB
+    // node.js string length limit: https://github.com/nodejs/node/issues/33960
     filter_path: [
       '*.aliases',
       '*.settings.index.number_of_shards',
