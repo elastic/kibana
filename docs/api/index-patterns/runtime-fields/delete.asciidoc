@@ -4,6 +4,8 @@
 <titleabbrev>Delete runtime field</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-delete>> instead.]
+
 experimental[] Delete a runtime field from an index pattern.
 
 [[index-patterns-runtime-field-api-delete-request]]
