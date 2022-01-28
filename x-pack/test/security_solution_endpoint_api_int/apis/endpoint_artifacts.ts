@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -213,38 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('and user DOES NOT have authorization to manage endpoint security', () => {
-        // Define a new array that includes the prior set from above, plus additional API calls that
-        // only have Authz validations setup
-        const allTrustedAppApiCalls: TrustedAppApiCallsInterface = [
-          ...trustedAppApiCalls,
-          {
-            method: 'get',
-            path: `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            path: `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
-            getBody: () => undefined,
-          },
-          {
-            method: 'delete',
-            path: `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
-            getBody: () => undefined,
-          },
-          {
-            method: 'post',
-            path: `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            path: `${EXCEPTION_LIST_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`,
-            getBody: () => undefined,
-          },
-        ];
-
-        for (const trustedAppApiCall of allTrustedAppApiCalls) {
+        for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLES.detections_admin, 'changeme')
