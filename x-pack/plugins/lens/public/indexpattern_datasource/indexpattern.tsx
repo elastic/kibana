@@ -527,10 +527,10 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
-    getWarningMessages: (state, frame) => {
+    getWarningMessages: (state, frame, setState) => {
       return [
         ...(getStateTimeShiftWarningMessages(state, frame) || []),
-        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks),
+        ...getPrecisionErrorWarningMessages(state, frame, core.docLinks, setState),
       ];
     },
     checkIntegrity: (state) => {

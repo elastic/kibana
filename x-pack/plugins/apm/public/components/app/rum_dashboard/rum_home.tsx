@@ -12,7 +12,7 @@ import { RumOverview } from '../rum_dashboard';
 import { CsmSharedContextProvider } from './csm_shared_context';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { UxEnvironmentFilter } from '../../shared/environment_filter';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';

@@ -135,32 +135,3 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
   defaultMessage: 'Back to Cases',
 });
-
-export const TOTAL_ALERTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.totalAlerts', {
-  defaultMessage: 'Total Alerts',
-});
-
-export const ASSOCIATED_USERS_METRIC = i18n.translate(
-  'xpack.cases.caseView.metrics.associatedUsers',
-  {
-    defaultMessage: 'Associated Users',
-  }
-);
-
-export const ASSOCIATED_HOSTS_METRIC = i18n.translate(
-  'xpack.cases.caseView.metrics.associatedHosts',
-  {
-    defaultMessage: 'Associated Hosts',
-  }
-);
-
-export const ISOLATED_HOSTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.isolatedHosts', {
-  defaultMessage: 'Isolated Hosts',
-});
-
-export const TOTAL_CONNECTORS_METRIC = i18n.translate(
-  'xpack.cases.caseView.metrics.totalConnectors',
-  {
-    defaultMessage: 'Total Connectors',
-  }
-);

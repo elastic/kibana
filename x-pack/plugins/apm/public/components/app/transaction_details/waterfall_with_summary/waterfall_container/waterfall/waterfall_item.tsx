@@ -16,7 +16,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
-import { Margins } from '../../../../../shared/charts/Timeline';
+import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './sync_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
@@ -228,7 +228,12 @@ export function WaterfallItem({
 
         <Duration item={item} />
         <RelatedErrors item={item} errorCount={errorCount} />
-        {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
+        {item.docType === 'span' && (
+          <SyncBadge
+            sync={item.doc.span.sync}
+            agentName={item.doc.agent.name}
+          />
+        )}
       </ItemText>
     </Container>
   );

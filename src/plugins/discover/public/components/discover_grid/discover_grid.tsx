@@ -38,7 +38,6 @@ import {
   pageSizeArr,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from './constants';
-import { DiscoverServices } from '../../build_services';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -50,6 +49,7 @@ import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 interface SortObj {
   id: string;
@@ -131,10 +131,6 @@ export interface DiscoverGridProps {
    */
   searchTitle?: string;
   /**
-   * Discover plugin services
-   */
-  services: DiscoverServices;
-  /**
    * Determines whether the time columns should be displayed (legacy settings)
    */
   showTimeCol: boolean;
@@ -190,7 +186,6 @@ export const DiscoverGrid = ({
   sampleSize,
   searchDescription,
   searchTitle,
-  services,
   setExpandedDoc,
   settings,
   showTimeCol,
@@ -203,6 +198,7 @@ export const DiscoverGrid = ({
   rowHeightState,
   onUpdateRowHeight,
 }: DiscoverGridProps) => {
+  const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
@@ -512,7 +508,6 @@ export const DiscoverGrid = ({
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
             setExpandedDoc={setExpandedDoc}
-            services={services}
           />
         )}
       </span>

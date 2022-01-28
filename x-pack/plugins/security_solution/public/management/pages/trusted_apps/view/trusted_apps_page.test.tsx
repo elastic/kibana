@@ -284,7 +284,7 @@ describe('When on the Trusted Apps Page', () => {
                   field: 'process.hash.md5',
                   operator: 'included',
                   type: 'match',
-                  value: '1234234659af249ddf3e40864e9fb241',
+                  value: '741462ab431a22233c787baab9b653c7',
                 },
                 {
                   field: 'process.executable.caseless',
@@ -301,7 +301,6 @@ describe('When on the Trusted Apps Page', () => {
               id: '05b5e350-0cad-4dc3-a61d-6e6796b0af39',
               comments: [],
               item_id: '2d95bec3-b48f-4db7-9622-a2b061cc031d',
-              meta: {},
               namespace_type: 'agnostic',
               type: 'simple',
             });
@@ -596,7 +595,7 @@ describe('When on the Trusted Apps Page', () => {
 
           it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual({
-              text: '"Generated Exception (3xnng)" has been added to the Trusted Applications list.',
+              text: '"Generated Exception (3xnng)" has been added to the trusted applications list.',
               title: 'Success!',
             });
           });

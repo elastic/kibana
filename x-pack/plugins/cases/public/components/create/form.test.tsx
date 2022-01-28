@@ -68,7 +68,7 @@ describe('CreateCaseForm', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     useGetTagsMock.mockReturnValue({ tags: ['test'] });
     useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);

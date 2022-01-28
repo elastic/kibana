@@ -22,7 +22,7 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../csm_shared_context';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 
 interface JSErrorItem {
   errorMessage: string;
@@ -40,8 +40,7 @@ export function JSErrors() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/js-errors',
+        return callApmApi('GET /internal/apm/ux/js-errors', {
           params: {
             query: {
               start,
