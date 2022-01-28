@@ -7,8 +7,11 @@
 
 /* global jest */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
