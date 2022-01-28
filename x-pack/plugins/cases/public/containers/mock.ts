@@ -37,6 +37,7 @@ export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
+export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
 export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
@@ -174,6 +175,14 @@ export const caseWithAlerts = {
   ...basicCase,
   totalAlerts: 2,
   id: caseWithAlertsId,
+};
+export const caseWithAlertsSyncOff = {
+  ...basicCase,
+  totalAlerts: 2,
+  settings: {
+    syncAlerts: false,
+  },
+  id: caseWithAlertsSyncOffId,
 };
 
 export const basicResolvedCase: ResolvedCase = {
@@ -318,6 +327,7 @@ const basicAction = {
 export const cases: Case[] = [
   basicCase,
   caseWithAlerts,
+  caseWithAlertsSyncOff,
   { ...pushedCase, id: '1', totalComment: 0, comments: [] },
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
