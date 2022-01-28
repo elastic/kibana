@@ -83,6 +83,7 @@ async function createRoot({ logFileName }: CreateRootConfig) {
         {
           name: 'root',
           appenders: ['file'],
+          level: 'info',
         },
         {
           name: 'savedobjects-service',

@@ -95,20 +95,21 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       if (!start || !end || !transactionType) {
         return;
       }
-      return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-        params: {
-          path: { serviceName },
-          query: {
-            environment,
-            kuery,
-            start,
-            end,
-            transactionType,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+            },
           },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         const currentPageErrorGroups = orderBy(
           response.errorGroups,
           field,
@@ -148,26 +149,27 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
-        return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              groupIds: JSON.stringify(
-                items.map(({ groupId: groupId }) => groupId).sort()
-              ),
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                transactionType,
+                groupIds: JSON.stringify(
+                  items.map(({ groupId: groupId }) => groupId).sort()
+                ),
+                comparisonStart,
+                comparisonEnd,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     // only fetches agg results when requestId changes

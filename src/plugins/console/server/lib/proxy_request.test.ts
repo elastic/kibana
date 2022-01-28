@@ -9,7 +9,7 @@
 import http, { ClientRequest } from 'http';
 import * as sinon from 'sinon';
 import { proxyRequest } from './proxy_request';
-import { URL } from 'url';
+import { URL, URLSearchParams } from 'url';
 import { fail } from 'assert';
 
 describe(`Console's send request`, () => {
@@ -100,5 +100,40 @@ describe(`Console's send request`, () => {
       Host: 'myhost', // Uses provided host name
       'transfer-encoding': 'chunked',
     });
+  });
+
+  it('should decode percent-encoded uri and encode it correctly', async () => {
+    fakeRequest = {
+      abort: sinon.stub(),
+      on() {},
+      once(event: string, fn: (v: string) => void) {
+        if (event === 'response') {
+          return fn('done');
+        }
+      },
+    } as any;
+
+    const uri = new URL(
+      `http://noone.nowhere.none/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23`
+    );
+
+    const result = await proxyRequest({
+      agent: null as any,
+      headers: {},
+      method: 'get',
+      payload: null as any,
+      timeout: 30000,
+      uri,
+    });
+
+    expect(result).toEqual('done');
+
+    const decoded = new URLSearchParams(`path=${uri.pathname}`).get('path');
+    const encoded = decoded
+      ?.split('/')
+      .map((str) => encodeURIComponent(str))
+      .join('/');
+    const [httpRequestOptions] = stub.firstCall.args;
+    expect((httpRequestOptions as any).path).toEqual(encoded);
   });
 });

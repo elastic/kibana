@@ -19,6 +19,12 @@ export function utilsPageProvider({ page }: { page: Page }) {
       }
     },
 
+    async dismissSyntheticsCallout() {
+      await page.click('[data-test-subj=uptimeDismissSyntheticsCallout]', {
+        timeout: 60 * 1000,
+      });
+    },
+
     async assertText({ text }: { text: string }) {
       await page.waitForSelector(`text=${text}`);
       expect(await page.$(`text=${text}`)).toBeTruthy();
@@ -37,11 +43,11 @@ export function utilsPageProvider({ page }: { page: Page }) {
     },
 
     async findByTestSubj(dataTestSubj: string) {
-      return await page.locator(`[data-test-subj=${dataTestSubj}]`);
+      return await page.waitForSelector(`[data-test-subj=${dataTestSubj}]`);
     },
 
     async findByText(text: string) {
-      return await page.locator(`text=${text}`);
+      return await page.waitForSelector(`text=${text}`);
     },
   };
 }
