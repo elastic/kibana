@@ -24,7 +24,7 @@ export const calculateEndpointAuthz = (
   userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
-  const hasAllAccessToFleet = fleetAuthz.fleet.all || userRoles.includes('superuser');
+  const hasAllAccessToFleet = userRoles.includes('superuser');
 
   return {
     canAccessFleet: hasAllAccessToFleet,
