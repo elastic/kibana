@@ -96,6 +96,7 @@ export interface SettingsSection {
   subtitle?: string;
   settings: SettingsRow[];
   isBeta?: boolean;
+  isPlatinumLicence?: boolean;
 }
 
 interface Props {
@@ -105,7 +106,8 @@ interface Props {
 }
 
 export function SettingsForm({ settingsSection, vars, onChange }: Props) {
-  const { title, subtitle, settings, isBeta } = settingsSection;
+  const { title, subtitle, settings, isBeta, isPlatinumLicence } =
+    settingsSection;
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -113,11 +115,40 @@ export function SettingsForm({ settingsSection, vars, onChange }: Props) {
           <EuiTitle size="s">
             <h3>
               {title} &nbsp;
+              {isPlatinumLicence && (
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.platinumBadgeLabel',
+                    {
+                      defaultMessage: 'Platinum',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.platinumBadgeDescription',
+                    {
+                      defaultMessage:
+                        'Configurations are saved but ignored if your Kibana licence is not Platinum.',
+                    }
+                  )}
+                />
+              )}
+              &nbsp;
               {isBeta && (
                 <EuiBetaBadge
                   color="subdued"
-                  label="Beta"
-                  tooltipContent="This module is not GA. Please help us by reporting any bugs."
+                  label={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.betaBadgeLabel',
+                    {
+                      defaultMessage: 'Beta',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.betaBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This module is not GA. Please help us by reporting any bugs.',
+                    }
+                  )}
                 />
               )}
             </h3>

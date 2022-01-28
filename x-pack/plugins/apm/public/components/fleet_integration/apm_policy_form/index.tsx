@@ -84,6 +84,7 @@ export function APMPolicyForm({
       ),
       settings: tailSamplingSettings,
       isBeta: true,
+      isPlatinumLicence: true,
     },
     {
       id: 'apm',

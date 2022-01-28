@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 import { PackagePolicyVars, SettingsRow } from '../typings';
+import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 
 const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
@@ -52,10 +53,11 @@ export function getTailSamplingSettings(): SettingsRow[] {
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
+          validation: getDurationRt({ min: '1s' }),
         },
         {
           key: 'tail_sampling_policies',
-          type: 'area',
+          type: 'yaml',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingPolicies',
             { defaultMessage: 'Tail sampling policies' }
@@ -80,7 +82,7 @@ export function getTailSamplingSettings(): SettingsRow[] {
             }
           ),
           required: true,
-          defaultValue: 'sample_rate: 0.1',
+          defaultValue: 'policies:\n  - sample_rate: 0.1',
         },
       ],
     },

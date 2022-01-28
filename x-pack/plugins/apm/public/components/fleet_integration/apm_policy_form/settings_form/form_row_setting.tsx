@@ -15,8 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import styled from 'styled-components';
 import { FormRowOnChange } from './';
 import { SettingsRow } from '../typings';
+import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+
+const FixedHeightDiv = styled.div`
+  height: 300px;
+`;
 
 interface Props {
   row: SettingsRow;
@@ -108,6 +114,43 @@ export function FormRowSetting({ row, value, onChange }: Props) {
           }}
           isClearable={true}
         />
+      );
+    }
+    case 'yaml': {
+      return (
+        <FixedHeightDiv>
+          <CodeEditor
+            languageId="yaml"
+            width="100%"
+            height="300px"
+            value={value || row.defaultValue}
+            onChange={(val) => {
+              onChange(row.key, val);
+            }}
+            options={{
+              minimap: {
+                enabled: false,
+              },
+              ariaLabel: i18n.translate(
+                'xpack.apm.fleet_integration.settings.yamlCodeEditor',
+                {
+                  defaultMessage: 'YAML Code Editor',
+                }
+              ),
+              scrollBeyondLastLine: false,
+              wordWrap: 'off',
+              wrappingIndent: 'indent',
+              tabSize: 2,
+              // To avoid left margin
+              lineNumbers: 'off',
+              lineNumbersMinChars: 0,
+              glyphMargin: false,
+              folding: false,
+              lineDecorationsWidth: 0,
+              overviewRulerBorder: false,
+            }}
+          />
+        </FixedHeightDiv>
       );
     }
     default:
