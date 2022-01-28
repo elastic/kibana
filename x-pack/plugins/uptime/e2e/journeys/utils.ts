@@ -40,3 +40,7 @@ export const assertText = async ({ page, text }: { page: Page; text: string }) =
   await page.waitForSelector(`text=${text}`);
   expect(await page.$(`text=${text}`)).toBeTruthy();
 };
+
+export const assertNotText = async ({ page, text }: { page: Page; text: string }) => {
+  expect(await page.$(`text=${text}`)).toBeFalsy();
+};

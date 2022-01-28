@@ -21,7 +21,7 @@ export const VALUE_MUST_BE_AN_INTEGER = i18n.translate('xpack.uptime.settings.in
 export const MonitorStatusTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
     defaultMessage:
-      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage}. The latest error message is {latestErrorMessage}',
+      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
     values: {
       monitorName: '{{state.monitorName}}',
       monitorUrl: '{{{state.monitorUrl}}}',
