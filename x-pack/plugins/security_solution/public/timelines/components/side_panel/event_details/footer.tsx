@@ -125,7 +125,8 @@ export const EventDetailsFooterComponent = React.memo(
     });
 
     const ecsData = detailsEcsData ?? get(0, alertsEcsData);
-    const renderFooterBody = useCallback(() => {
+
+    const renderFooterBody = useMemo(() => {
       if (preventTakeActionDropdown) {
         return (
           <EuiButtonEmpty onClick={() => handlePanelChange(null)}>
@@ -170,7 +171,7 @@ export const EventDetailsFooterComponent = React.memo(
       <>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>{renderFooterBody()}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{renderFooterBody}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
         {/* This is still wrong to do render flyout/modal inside of the flyout

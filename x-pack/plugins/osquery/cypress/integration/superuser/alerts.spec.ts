@@ -17,15 +17,6 @@ import {
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
-// import { navigateTo } from '../../tasks/navigation';
-// import {
-//   checkResults,
-//   inputQuery,
-//   selectAllAgents,
-//   submitQuery,
-//   typeInECSFieldInput,
-//   typeInOsqueryFieldInput,
-// } from '../../tasks/live_query';
 
 describe('Alert Event Details', () => {
   before(() => {
@@ -53,6 +44,7 @@ describe('Alert Event Details', () => {
     );
     findAndClickButton('Update pack');
     closeModalIfVisible();
+    cy.contains(PACK_NAME);
     cy.visit('/app/security/alerts');
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();

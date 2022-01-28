@@ -23,8 +23,8 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
-import { useOsqueryActionItems } from '../alerts_table/timeline_actions/use_osquery_action_items';
 import { ACTIVE_PANEL } from '../../../timelines/components/side_panel/event_details';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface ActionsData {
   alertStatus: Status;
@@ -65,6 +65,7 @@ export const TakeActionDropdown = React.memo(
     handlePanelChange,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+    const { osquery } = useKibana().services;
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -171,9 +172,9 @@ export const TakeActionDropdown = React.memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
-    const osqueryActionItem = useOsqueryActionItems({
-      onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
+    const osqueryActionItem = osquery?.osqueryMenuItem({
       agentId,
+      onClick: () => handlePanelChange(ACTIVE_PANEL.OSQUERY),
     });
 
     const alertsActionItems = useMemo(
@@ -205,13 +206,13 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
-        ...osqueryActionItem,
+        ...(osqueryActionItem ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
       ],
       [
         tGridEnabled,
-        alertsActionItems,
         addToCaseActionItems,
+        alertsActionItems,
         hostIsolationActionItems,
         osqueryActionItem,
         investigateInTimelineActionItems,
