@@ -9,11 +9,11 @@ import { ConditionEntryField, OperatingSystem, TrustedAppEntryTypes } from '../e
 
 export const getPlaceholderText = () => ({
   windows: {
-    wildcard: 'C:\\sample\\**\\path.exe',
+    wildcard: 'C:\\sample\\*\\path.exe',
     exact: 'C:\\sample\\path.exe',
   },
   others: {
-    wildcard: '/opt/**/app',
+    wildcard: '/opt/*/app',
     exact: '/opt/bin',
   },
 });
