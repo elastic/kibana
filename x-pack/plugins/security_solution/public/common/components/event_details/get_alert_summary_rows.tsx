@@ -112,7 +112,6 @@ function getFieldsByEventCode(
         },
       ];
     case EventCode.MEMORY_SIGNATURE:
-      return [{ id: 'process.Ext.memory_region.malware_signature.all_names' }];
     case EventCode.RANSOMWARE:
       // Resolve more fields based on the source event
       return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });

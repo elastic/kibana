@@ -99,12 +99,22 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+
+    [
+      'host.name',
+      'user.name',
+      'destination.address',
+      'source.address',
+      'source.port',
+      'process.name',
+    ].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
   test('Memory event code renders additional summary rows', () => {
     const renderProps = {
@@ -120,12 +130,14 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'Target.process.executable'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
   test('Behavior event code renders additional summary rows', () => {
     const renderProps = {
@@ -148,12 +160,14 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
 
   test('Ransomware event code resolves fields from the source event', () => {
@@ -177,12 +191,14 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { container } = render(
+    const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
 
   test("doesn't render empty fields", () => {

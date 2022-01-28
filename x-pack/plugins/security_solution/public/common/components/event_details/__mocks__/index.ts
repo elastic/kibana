@@ -629,4 +629,10 @@ export const mockAlertDetailsData = [
     values: ['host.name'],
     originalValue: ['host.name'],
   },
+  {
+    category: 'Target',
+    field: 'Target.process.executable',
+    values: ['dummy.exe'],
+    originalValue: ['dummy.exe'],
+  },
 ];
