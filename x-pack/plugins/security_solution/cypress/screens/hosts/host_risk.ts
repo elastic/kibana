@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RULE_NAME = '[data-test-subj="topHostScoreContributors"] .euiTableCellContent__text';
+export const RULE_NAME = '[data-test-subj="topHostScoreContributors"] .euiTableCellContent';
 
 export const RISK_FLYOUT = '[data-test-subj="open-risk-information-flyout"] .euiFlyoutHeader';
 
