@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from 'react-router-dom';
 import type { AppMountParameters } from 'kibana/public';
@@ -97,7 +97,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         items: useSideNavItems(activeRoute),
       }}
       pageHeader={{
-        pageTitle: pageState.pageHeader,
+        pageTitle: pageState.pageHeader ?? <EuiLoadingContent lines={1} />,
         rightSideItems: [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])],
         restrictWidth: false,
       }}
