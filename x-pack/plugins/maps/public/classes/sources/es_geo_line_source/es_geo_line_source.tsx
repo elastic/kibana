@@ -39,6 +39,7 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
@@ -225,6 +226,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:entities'),
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -296,6 +298,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:tracks'),
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,
