@@ -32,6 +32,7 @@ interface CollectorSetConfig {
   collectors?: AnyCollector[];
 }
 
+// Schema manually added in src/plugins/telemetry/schema/oss_root.json under `stack_stats.kibana.plugins.usage_collector_stats`
 interface CollectorStats {
   not_ready: { count: number; names: string[] };
   not_ready_timeout: { count: number; names: string[] };
@@ -221,6 +222,7 @@ export class CollectorSet {
     collectorStats.succeeded.count = collectorStats.succeeded.names.length;
     collectorStats.failed.count = collectorStats.failed.names.length;
 
+    // Treat it as just another "collector"
     responses.push({ type: 'usage_collector_stats', result: collectorStats });
 
     return responses.filter(

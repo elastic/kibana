@@ -194,6 +194,62 @@
               "properties": {
                 "kibana_config_usage": {
                   "type": "pass_through"
+                },
+                "usage_collector_stats": {
+                  "properties": {
+                    "not_ready": {
+                      "properties": {
+                        "count": {
+                          "type":  "short"
+                        },
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "not_ready_timeout": {
+                      "properties": {
+                        "count": {
+                          "type":  "short"
+                        },
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "succeeded": {
+                      "properties": {
+                        "count": {
+                          "type":  "short"
+                        },
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "failed": {
+                      "properties": {
+                        "count": {
+                          "type":  "short"
+                        },
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
