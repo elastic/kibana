@@ -29,6 +29,7 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   id: string;
   spaceId: string;
   apiKey: string | null;
+  executionId: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -45,7 +46,7 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
+    { id, params, spaceId, source, apiKey, executionId, relatedSavedObjects }: ExecuteOptions
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -87,6 +88,7 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
+        executionId,
         relatedSavedObjects: relatedSavedObjectWithRefs,
       },
       {
@@ -113,7 +115,7 @@ export function createEphemeralExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey }: ExecuteOptions
+    { id, params, spaceId, source, apiKey, executionId }: ExecuteOptions
   ): Promise<RunNowResult> {
     const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
@@ -131,6 +133,7 @@ export function createEphemeralExecutionEnqueuerFunction({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         params: params as Record<string, any>,
         ...(apiKey ? { apiKey } : {}),
+        ...(executionId ? { executionId } : {}),
       },
       ...executionSourceAsSavedObjectReferences(source),
     };
