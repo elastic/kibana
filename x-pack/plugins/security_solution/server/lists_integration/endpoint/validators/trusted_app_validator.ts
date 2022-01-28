@@ -199,6 +199,10 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateCanManageEndpointArtifacts();
   }
 
+  async validatePreExport(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
   async validatePreSingleListFind(): Promise<void> {
     await this.validateCanManageEndpointArtifacts();
   }
