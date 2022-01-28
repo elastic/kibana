@@ -352,9 +352,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     const exceptionListClient = this.lists!.getExceptionListClient(
       savedObjectsClient,
       'kibana',
-      // execution of Lists plugin exception server extension points callback should be turned off
-      // here becuase most of the uses of this client will be in contexts where some of the endpoint
-      // validation (specificlaly those around authz) can not be done (due ot the lack of a `KibanaRequest`
+      // execution of Lists plugin server extension points callbacks should be turned off
+      // here because most of the uses of this client will be in contexts where some endpoint
+      // validations (specifically those around authz) can not be done (due ot the lack of a `KibanaRequest`
       // from where authz can be derived)
       false
     );
