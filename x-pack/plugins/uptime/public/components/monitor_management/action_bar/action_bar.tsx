@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -29,7 +29,6 @@ import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestRun } from '../test_now_mode/test_now_mode';
 
-import { getServiceLocations } from '../../../state/actions';
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 export interface ActionBarProps {
