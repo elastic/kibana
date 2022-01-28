@@ -26,12 +26,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { DiscoverServices } from '../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
@@ -82,10 +82,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   selectedIndexPattern?: DataView;
   /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
-  /**
    * Discover App state
    */
   state: AppState;
@@ -123,6 +119,7 @@ export interface DiscoverSidebarResponsiveProps {
  * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
+  const services = useDiscoverServices();
   const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -175,7 +172,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     setIsFlyoutVisible(false);
   }, []);
 
-  const { dataViewFieldEditor } = props.services;
+  const { dataViewFieldEditor } = services;
   const { availableFields$ } = props;
 
   useEffect(
@@ -275,7 +272,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverIndexPatternManagement
-                  services={props.services}
                   selectedIndexPattern={selectedIndexPattern}
                   editField={editField}
                   useNewFieldsApi={useNewFieldsApi}
