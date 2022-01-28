@@ -14,9 +14,9 @@ $gold: #FFD700FF;
   font: 25pt 'Trebuchet MS' !important;
 
   .embPanel {
-    background: radial-gradient(transparent 50%, #FFFFFF), radial-gradient(#FFFF00, transparent 70%);
-    -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
-    mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
+    background: radial-gradient(transparent  90%, #FFFFFF), radial-gradient(#FFFF00, transparent 90%);
+    -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 85%);
+    mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 85%);
     border-radius: 50%;
 
     &::after,
@@ -29,19 +29,8 @@ $gold: #FFD700FF;
       height: 100%;
       transform-origin: center;
       border-radius: 50%;
-      -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
-      mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 65%);
-    }
-
-    &::before {
-      background: repeating-conic-gradient(from 0deg, $yellow 0deg 20deg, transparent 20deg 40deg);
-      animation: rotate 720s linear, scale 3s linear infinite;
-    }
-
-    &::after {
-      background: radial-gradient($yellow, $orange 27%, transparent calc(27% + 3px) 100%), radial-gradient($gold, transparent 70%), repeating-conic-gradient(from 0deg, $gold 0deg 5deg, transparent 5deg 10deg);
-      transform: rotate(15deg);
-      animation: rotate 360s linear;
+      -webkit-mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 85%);
+      mask-image: radial-gradient(rgba(0, 0, 0, 1.0) 40%, transparent 85%);
     }
   }
 

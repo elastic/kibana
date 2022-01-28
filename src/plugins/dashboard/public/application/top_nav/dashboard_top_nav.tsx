@@ -375,33 +375,79 @@ export function DashboardTopNav({
     });
   };
 
-  const applyAdditionalStyle = useCallback((name: string) => {
-    if (name === 'matrix') {
-      const canvasElements = document.getElementsByTagName('canvas');
-      for (let i = 0; i < canvasElements.length; i++) {
-        const canvas = canvasElements.item(i) as HTMLCanvasElement;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        // set the width and height of the canvas
-        const w = canvas.width; // document.body.offsetWidth);
-        const h = canvas.height; // document.body.offsetHeight);
-
-        // draw a black rectangle of width and height same as that of the canvas
-        ctx.fillStyle = '#000';
-        ctx.fillRect(canvas.clientLeft, canvas.clientTop, w, h);
-
-        const cols = Math.floor(w / 20) + 1;
-        const ypos = Array(cols).fill(30);
-
-        setInterval(() => {
-          matrix(canvas, cols, ypos);
-        }, 50);
-
-        ctx.clearRect(canvas.clientLeft, canvas.clientTop, w, h);
-      }
+  const createDiv = (name: string) => {
+    const div = document.createElement('div');
+    if (name === 'wrapper' || name === 'spiderman') {
+      div.setAttribute('id', name);
+    } else {
+      div.setAttribute('class', name);
     }
+    return div;
+  };
+
+  const spiderman = useCallback(() => {
+    const wrapper = createDiv('wrapper');
+    document.body.appendChild(wrapper);
+
+    const spidermanDiv = createDiv('spiderman');
+    wrapper.appendChild(spidermanDiv);
+
+    const head = createDiv('head');
+    spidermanDiv.appendChild(head);
+    const eyeLeft = createDiv('eye-left');
+    head.appendChild(eyeLeft);
+    const eyeRight = createDiv('eye-right');
+    head.appendChild(eyeRight);
+
+    const body = createDiv('body');
+    spidermanDiv.appendChild(body);
+    const spider = createDiv('spider');
+    body.appendChild(spider);
+    const armLeft = createDiv('arm-left');
+    body.appendChild(armLeft);
+    const armRight = createDiv('arm-right');
+    body.appendChild(armRight);
+
+    const legs = createDiv('legs');
+    spidermanDiv.appendChild(legs);
+    const bootLeft = createDiv('boot-left');
+    legs.appendChild(bootLeft);
+    const bootRight = createDiv('boot-right');
+    legs.appendChild(bootRight);
   }, []);
+
+  const applyAdditionalStyle = useCallback(
+    (name: string) => {
+      if (name === 'matrix') {
+        const canvasElements = document.getElementsByTagName('canvas');
+        for (let i = 0; i < canvasElements.length; i++) {
+          const canvas = canvasElements.item(i) as HTMLCanvasElement;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+
+          // set the width and height of the canvas
+          const w = canvas.width; // document.body.offsetWidth);
+          const h = canvas.height; // document.body.offsetHeight);
+
+          // draw a black rectangle of width and height same as that of the canvas
+          ctx.fillStyle = '#000';
+          ctx.fillRect(canvas.clientLeft, canvas.clientTop, w, h);
+
+          const cols = Math.floor(w / 20) + 1;
+          const ypos = Array(cols).fill(30);
+
+          setInterval(() => {
+            matrix(canvas, cols, ypos);
+          }, 50);
+
+          ctx.clearRect(canvas.clientLeft, canvas.clientTop, w, h);
+        }
+      } else if (name === 'spiderman') {
+        spiderman();
+      }
+    },
+    [spiderman]
+  );
 
   const onSkinSelected = useCallback(
     (name: string) => {

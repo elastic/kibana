@@ -8,7 +8,7 @@ $spidermanColorTernary: #AC0202;
   display: flex;
   flex-direction: column;
   background-color: $spidermanBackgroundColor !important;
-  font: 25pt 'Roboto Light' !important;
+  font: 25pt 'Tahoma' !important;
 
   .embPanel__title {
     background-color: $spidermanBackgroundColor !important;
@@ -109,7 +109,7 @@ $spidermanColorTernary: #AC0202;
 
   .euiButton {
     color: 1px solid $spidermanColorTernary;
-    background-color: rgba(149, 112, 221, .6) !important;
+    background-color: rgba(222, 6, 6, .6) !important;
   }
 
   .euiButtonIcon {
@@ -128,7 +128,7 @@ $spidermanColorTernary: #AC0202;
 
   .euiButtonEmpty {
     color: $spidermanTextColor;
-    background-color: rgba(0, 59, 0, .6) !important;
+    background-color: rgba(222, 6, 6, .6) !important;
     &:disabled {
       color: $spidermanColorSecondary;
     }
@@ -163,4 +163,446 @@ $spidermanColorTernary: #AC0202;
 
 .euiFilterSelectItem {
   border-color: $spidermanColorTernary !important;
+}
+
+#wrapper {
+  position: fixed;
+  margin-bottom: 10px;
+  height: 300px;
+  top: 90px;
+  left: calc(100vw - 50%);
+}
+
+#spiderman {
+  -webkit-animation: swinganimation 3.5s infinite alternate;
+  -moz-animation: swinganimation 3.5s infinite alternate;
+  -ms-animation: swinganimation 3.5s infinite alternate;
+  -o-animation: swinganimation 3.5s infinite alternate;
+  animation: swinganimation 3.5s infinite alternate;
+  position: absolute;
+  width: 70px;
+  height: 103px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+#spiderman:before {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 1000px;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: -18px;
+  margin-left: -1px;
+  border: solid;
+  border-width: 1px;
+  border-color: #FFFFFF;
+  z-index: 10;
+}
+#spiderman .head {
+  -webkit-border-radius: 15px 15px 10px 10px;
+  -moz-border-radius: 15px 15px 10px 10px;
+  -ms-border-radius: 15px 5px 10px 10px;
+  -o-border-radius: 15px 5px 10px 10px;
+  border-radius: 15px 15px 10px 10px;
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  bottom: 5px;
+  left: 50%;
+  margin-left: -14px;
+  background: $spidermanTextColor;
+  border: solid 1px #1B405F;
+  /* Neck */
+}
+#spiderman .head:before {
+  content: ' ';
+  position: absolute;
+  height: 4px;
+  width: 8px;
+  top: -6px;
+  left: 50%;
+  margin-left: -5px;
+  background: $spidermanTextColor;
+  border: solid 1px #1B405F;
+}
+#spiderman .head .ear-left,
+#spiderman .head .ear-right {
+  position: absolute;
+  width: 0;
+  height: 0;
+  top: 100%;
+  border-style: solid;
+  border-color: #1B405F transparent transparent transparent;
+}
+#spiderman .head .ear-left:before,
+#spiderman .head .ear-right:before {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+  top: -6px;
+  border-style: solid;
+  border-color: $spidermanTextColor transparent transparent transparent;
+}
+#spiderman .head .ear-left {
+  left: -1px;
+  border-width: 6px 8px 0 0;
+}
+#spiderman .head .ear-left:before {
+  left: 1px;
+  border-width: 5px 5px 0 0;
+}
+#spiderman .head .ear-right {
+  right: -1px;
+  border-width: 6px 0 0 8px;
+}
+#spiderman .head .ear-right:before {
+  right: 1px;
+  border-width: 5px 0 0 5px;
+}
+#spiderman .head .eye-left,
+#spiderman .head .eye-right {
+  -webkit-animation: eyesanimation 1s infinite alternate;
+  -moz-animation: eyesanimation 1s infinite alternate;
+  -ms-animation: eyesanimation 1s infinite alternate;
+  -o-animation: eyesanimation 1s infinite alternate;
+  animation: eyesanimation 1s infinite alternate;
+  -moz-border-radius-topleft: 50%;
+  -webkit-border-top-left-radius: 50%;
+  border-top-left-radius: 50%;
+  -moz-border-radius-topright: 50%;
+  -webkit-border-top-right-radius: 50%;
+  border-top-right-radius: 50%;
+  position: absolute;
+  width: 9px;
+  height: 2px;
+  bottom: 9px;
+  background: #FFFFFF;
+  border: solid 1px #1B405F;
+}
+#spiderman .head .eye-left {
+  left: 3px;
+}
+#spiderman .head .eye-right {
+  right: 3px;
+}
+#spiderman .body {
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  top: 34px;
+  left: 50%;
+  margin-left: -16px;
+  background: #336687;
+  border: solid 1px #1B405F;
+  z-index: 2;
+}
+#spiderman .body:before {
+  content: ' ';
+  position: absolute;
+  top: 0;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  background: $spidermanTextColor;
+}
+#spiderman .body:after {
+  content: ' ';
+  position: absolute;
+  width: 36px;
+  height: 6px;
+  top: -7px;
+  left: 50%;
+  margin-left: -19px;
+  background: $spidermanTextColor;
+  border: solid 1px #1B405F;
+  z-index: 0;
+}
+#spiderman .body .spider {
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+  border-radius: 50%;
+  position: absolute;
+  width: 4px;
+  height: 10px;
+  left: 50%;
+  bottom: 5px;
+  margin-left: -2px;
+  background: #1B405F;
+}
+#spiderman .body .spider:before, #spiderman .body .spider:after {
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+  border-radius: 50%;
+  content: ' ';
+  position: absolute;
+  width: 10px;
+  height: 12px;
+  left: 50%;
+  margin-left: -6px;
+  border-style: double;
+  border-width: 1px;
+}
+#spiderman .body .spider:before {
+  top: 50%;
+  border-color: #1B405F transparent transparent transparent;
+}
+#spiderman .body .spider:after {
+  bottom: 50%;
+  border-color: transparent transparent #1B405F transparent;
+}
+#spiderman .body .arm-left,
+#spiderman .body .arm-right {
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-transform-origin: bottom center 0 50%;
+  -moz-transform-origin: bottom center 0 50%;
+  -ms-transform-origin: bottom center 0 50%;
+  -o-transform-origin: bottom center 0 50%;
+  transform-origin: bottom center 0 50%;
+  position: absolute;
+  width: 12px;
+  height: 54px;
+  bottom: -2px;
+  background: #336687;
+  border: solid 1px #1B405F;
+  z-index: 1;
+}
+#spiderman .body .arm-left:before,
+#spiderman .body .arm-right:before {
+  -webkit-border-radius: 6px 6px 0 0;
+  -moz-border-radius: 6px 6px 0 0;
+  -ms-border-radius: 6px 6px 0 0;
+  -o-border-radius: 6px 6px 0 0;
+  border-radius: 6px 6px 0 0;
+  content: ' ';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: 50%;
+  background: $spidermanTextColor;
+  border: solid 1px #1B405F;
+}
+#spiderman .body .arm-left {
+  -webkit-transform: rotate(20deg);
+  -moz-transform: rotate(20deg);
+  -ms-transform: rotate(20deg);
+  -o-transform: rotate(20deg);
+  transform: rotate(20deg);
+  left: -9px;
+  z-index: 2;
+}
+#spiderman .body .arm-right {
+  -webkit-transform: rotate(-20deg);
+  -moz-transform: rotate(-20deg);
+  -ms-transform: rotate(-20deg);
+  -o-transform: rotate(-20deg);
+  transform: rotate(-20deg);
+  right: -9px;
+}
+#spiderman .legs {
+  -webkit-border-radius: 35px;
+  -moz-border-radius: 35px;
+  -ms-border-radius: 35px;
+  -o-border-radius: 35px;
+  border-radius: 35px;
+  position: absolute;
+  width: 70px;
+  height: 28px;
+  top: 6px;
+  left: 50%;
+  margin-left: -35px;
+  background: transparent;
+  border: solid 10px #1B405F;
+  z-index: 0;
+}
+#spiderman .legs:before {
+  -webkit-border-radius: 35px;
+  -moz-border-radius: 35px;
+  -ms-border-radius: 35px;
+  -o-border-radius: 35px;
+  border-radius: 35px;
+  content: ' ';
+  position: absolute;
+  width: 52px;
+  height: 10px;
+  top: -9px;
+  left: 50%;
+  margin-left: -34px;
+  background: transparent;
+  z-index: 0;
+}
+#spiderman .legs .boot-left,
+#spiderman .legs .boot-right {
+  position: absolute;
+  width: 19px;
+  height: 12px;
+  top: -11px;
+  background: $spidermanTextColor;
+  border: solid 1px #1B405F;
+}
+#spiderman .legs .boot-left:before, #spiderman .legs .boot-left:after,
+#spiderman .legs .boot-right:before,
+#spiderman .legs .boot-right:after {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+#spiderman .legs .boot-left {
+  right: 50%;
+  margin-right: 1px;
+}
+#spiderman .legs .boot-left:before {
+  top: -7px;
+  right: -1px;
+  border-color: transparent transparent #1B405F transparent;
+  border-width: 0 0 7px 7px;
+}
+#spiderman .legs .boot-left:after {
+  top: -5px;
+  right: 0;
+  border-color: transparent transparent $spidermanTextColor transparent;
+  border-width: 0 0 5px 5px;
+}
+#spiderman .legs .boot-right {
+  left: 50%;
+  margin-left: 1px;
+}
+#spiderman .legs .boot-right:before {
+  top: -7px;
+  left: -1px;
+  border-color: transparent transparent #1B405F transparent;
+  border-width: 0 7px 7px 0;
+}
+#spiderman .legs .boot-right:after {
+  top: -5px;
+  left: 0;
+  border-color: transparent transparent $spidermanTextColor transparent;
+  border-width: 0 5px 5px 0;
+}
+
+@-webkit-keyframes eyesanimation {
+  0% {
+    height: 2px;
+  }
+
+  100% {
+    height: 5px;
+  }
+}
+
+@-moz-keyframes eyesanimation {
+  0% {
+    height: 2px;
+  }
+
+  100% {
+    height: 5px;
+  }
+}
+
+@-ms-keyframes eyesanimation {
+  0% {
+    height: 2px;
+  }
+
+  100% {
+    height: 5px;
+  }
+}
+
+@keyframes eyesanimation {
+  0% {
+    height: 2px;
+  }
+
+  100% {
+    height: 5px;
+  }
+}
+
+@-webkit-keyframes swinganimation {
+  0% {
+    -webkit-transform: translateY(-100px);
+    -moz-transform: translateY(-100px);
+    -ms-transform: translateY(-100px);
+    -o-transform: translateY(-100px);
+    transform: translateY(-100px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@-moz-keyframes swinganimation {
+  0% {
+    -webkit-transform: translateY(-100px);
+    -moz-transform: translateY(-100px);
+    -ms-transform: translateY(-100px);
+    -o-transform: translateY(-100px);
+    transform: translateY(-100px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@-ms-keyframes swinganimation {
+  0% {
+    -webkit-transform: translateY(-100px);
+    -moz-transform: translateY(-100px);
+    -ms-transform: translateY(-100px);
+    -o-transform: translateY(-100px);
+    transform: translateY(-100px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes swinganimation {
+  0% {
+    -webkit-transform: translateY(-100px);
+    -moz-transform: translateY(-100px);
+    -ms-transform: translateY(-100px);
+    -o-transform: translateY(-100px);
+    transform: translateY(-100px);
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+  }
 }
