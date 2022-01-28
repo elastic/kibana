@@ -23,7 +23,7 @@ export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.r
 
 export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
-export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
+export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
 export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
