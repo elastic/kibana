@@ -177,12 +177,12 @@ export const enableRulesAction = async (
 
 interface ExecuteRulesBulkActionArgs {
   visibleRuleIds: string[];
-  selectedItemsCount: number;
+  selectedItemsCount?: number;
   action: BulkAction;
   toastsApi: ToastsStart;
   search: { query: string } | { ids: string[] };
   payload?: { edit?: BulkActionEditPayload[] };
-  onSuccess?: () => void;
+  onSuccess?: (arg: { rulesCount: number }) => void;
   onError?: (error: Error) => void;
   setLoadingRules: RulesTableActions['setLoadingRules'];
 }
@@ -206,12 +206,13 @@ const executeRulesBulkAction = async ({
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
       const exportedRulesCount = await getExportedRulesCount(blob);
       toastsApi.addSuccess(
-        i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount)
+        i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount ?? 0)
       );
     } else {
-      await performBulkAction({ ...search, action, edit: payload?.edit });
+      const response = await performBulkAction({ ...search, action, edit: payload?.edit });
+
+      onSuccess?.({ rulesCount: response.rules_count });
     }
-    onSuccess?.();
   } catch (e) {
     if (onError) {
       onError(e);

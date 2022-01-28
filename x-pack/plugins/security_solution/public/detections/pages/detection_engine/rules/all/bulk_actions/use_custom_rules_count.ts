@@ -5,42 +5,46 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import { useQuery, QueryClient } from 'react-query';
+
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 
-interface UseCustomRulesCount {
-  fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
+const CUSTOM_RULES_COUNT_QUERY_KEY = 'customRulesCount';
+interface CustomRulesCountData {
   customRulesCount: number;
-  isCustomRulesCountLoading: boolean;
 }
 
-export const useCustomRulesCount = (): UseCustomRulesCount => {
-  const [customRulesCount, setCustomRulesCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export const getCustomRulesCountFromCache = (queryClient: QueryClient) =>
+  queryClient.getQueryData<CustomRulesCountData>(CUSTOM_RULES_COUNT_QUERY_KEY)?.customRulesCount ??
+  0;
 
-  const fetchCustomRulesCount = useCallback(async (filterOptions: FilterOptions) => {
-    const abortController = new AbortController();
-    try {
-      setIsLoading(true);
+type UseCustomRulesCount = (arg: { filterOptions: FilterOptions; enabled: boolean }) => {
+  customRulesCount: number;
+  isCustomRulesCountLoading: boolean;
+};
+
+export const useCustomRulesCount: UseCustomRulesCount = ({ filterOptions, enabled }) => {
+  const { data, isFetching } = useQuery<CustomRulesCountData>(
+    [CUSTOM_RULES_COUNT_QUERY_KEY],
+    async ({ signal }) => {
       const res = await fetchRules({
         pagination: { perPage: 1, page: 1 },
         filterOptions: { ...filterOptions, showCustomRules: true },
-        signal: abortController.signal,
+        signal,
       });
-      setCustomRulesCount(res.total);
-      return { customRulesCount: res.total };
-    } catch (err) {
-      setCustomRulesCount(0);
-      return { customRulesCount: 0 };
-    } finally {
-      setIsLoading(false);
+
+      return {
+        customRulesCount: res.total,
+      };
+    },
+    {
+      enabled,
     }
-  }, []);
+  );
 
   return {
-    fetchCustomRulesCount,
-    customRulesCount,
-    isCustomRulesCountLoading: isLoading,
+    customRulesCount: data?.customRulesCount ?? 0,
+    isCustomRulesCountLoading: isFetching,
   };
 };

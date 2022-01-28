@@ -7,6 +7,7 @@
 /* eslint-disable complexity */
 
 import React, { useCallback } from 'react';
+import { useQueryClient } from 'react-query';
 import {
   EuiTextColor,
   EuiContextMenuPanelDescriptor,
@@ -39,6 +40,7 @@ import {
 } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
+import { getCustomRulesCountFromCache } from './use_custom_rules_count';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
@@ -55,7 +57,6 @@ interface UseBulkActionsArgs {
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
-  fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   reFetchTags: () => void;
 }
 
@@ -65,9 +66,9 @@ export const useBulkActions = ({
   selectedItemsCount,
   confirmBulkEdit,
   completeBulkEditForm,
-  fetchCustomRulesCount,
   reFetchTags,
 }: UseBulkActionsArgs) => {
+  const queryClient = useQueryClient();
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
   const [, dispatchToaster] = useStateToaster();
@@ -242,12 +243,6 @@ export const useBulkActions = ({
           const customSelectedRuleIds = selectedRules
             .filter((rule) => rule.immutable === false)
             .map((rule) => rule.id);
-          let customRulesCount = customSelectedRuleIds.length;
-
-          if (isAllSelected) {
-            const res = await fetchCustomRulesCount(filterOptions);
-            customRulesCount = res.customRulesCount;
-          }
 
           // User has cancelled edit action or there are no custom rules to proceed
           if ((await confirmBulkEdit()) === false) {
@@ -265,6 +260,10 @@ export const useBulkActions = ({
               toastsApi.remove(longTimeWarningToast);
             }
           };
+
+          const customRulesCount = isAllSelected
+            ? getCustomRulesCountFromCache(queryClient)
+            : customSelectedRuleIds.length;
 
           // show warning toast only if bulk edit action exceeds 5s
           // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
@@ -295,16 +294,15 @@ export const useBulkActions = ({
 
           const rulesBulkAction = initRulesBulkAction({
             visibleRuleIds: selectedRuleIds,
-            selectedItemsCount: customRulesCount,
             action: BulkAction.edit,
             setLoadingRules,
             toastsApi,
             payload: { edit: [editPayload] },
-            onSuccess: () => {
+            onSuccess: ({ rulesCount }) => {
               hideWarningToast();
               toastsApi.addSuccess({
                 title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
-                text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(customRulesCount),
+                text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(rulesCount),
                 iconType: undefined,
               });
             },
@@ -515,11 +513,11 @@ export const useBulkActions = ({
       toastsApi,
       filterOptions,
       completeBulkEditForm,
-      fetchCustomRulesCount,
       confirmBulkEdit,
       resolveTagsRefetch,
       setIsRefreshOn,
       getIsMounted,
+      queryClient,
     ]
   );
 };

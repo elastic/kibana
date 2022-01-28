@@ -128,8 +128,6 @@ export const RulesTables = React.memo<RulesTableProps>(
     );
 
     const [isLoadingTags, tags, reFetchTags] = useTags();
-    const { customRulesCount, isCustomRulesCountLoading, fetchCustomRulesCount } =
-      useCustomRulesCount();
 
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
@@ -145,6 +143,11 @@ export const RulesTables = React.memo<RulesTableProps>(
     const [confirmBulkEdit, handleBulkEditConfirm, handleBulkEditCancel] = useAsyncConfirmation({
       onInit: showBulkEditonfirmation,
       onFinish: hideBulkEditConfirmation,
+    });
+
+    const { customRulesCount, isCustomRulesCountLoading } = useCustomRulesCount({
+      enabled: isBulkEditConfirmationVisible && isAllSelected,
+      filterOptions,
     });
 
     const {
@@ -171,7 +174,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       selectedItemsCount,
       completeBulkEditForm,
       reFetchTags,
-      fetchCustomRulesCount,
     });
 
     const paginationMemo = useMemo(
@@ -351,7 +353,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
           </EuiConfirmModal>
         )}
-        {isBulkEditConfirmationVisible && (
+        {isBulkEditConfirmationVisible && !isCustomRulesCountLoading && (
           <BulkEditConfirmation
             customRulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
             elasticRulesCount={
