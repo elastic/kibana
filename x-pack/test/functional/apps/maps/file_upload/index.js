@@ -7,8 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('geo file upload', function () {
-    //loadTestFile(require.resolve('./add_layer_import_panel'));
-    //loadTestFile(require.resolve('./file_indexing_panel'));
+    loadTestFile(require.resolve('./wizard'));
     loadTestFile(require.resolve('./geojson'));
     loadTestFile(require.resolve('./shapefile'));
   });
