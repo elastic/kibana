@@ -60,9 +60,9 @@ export class EndpointArtifactsTestResources extends FtrService {
       .then(this.getHttpResponseFailureHandler())
       .then((response) => response.body as ExceptionListItemSchema);
 
-    const { item_id: itemId, namespace_type: namespaceType } = artifact;
+    const { item_id: itemId, namespace_type: namespaceType, list_id: listId } = artifact;
 
-    this.log.info(`Created exception list item: ${itemId}`);
+    this.log.info(`Created exception list item [${listId}]: ${itemId}`);
 
     const cleanup = async () => {
       const deleteResponse = await this.supertest
@@ -71,7 +71,9 @@ export class EndpointArtifactsTestResources extends FtrService {
         .send()
         .then(this.getHttpResponseFailureHandler([404]));
 
-      this.log.info(`Deleted exception list item: ${itemId} (${deleteResponse.status})`);
+      this.log.info(
+        `Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`
+      );
     };
 
     return {
