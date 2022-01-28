@@ -11,3 +11,7 @@ export KB_ROOT='../../../../../../'
 export ES_TARGET=${ES_TARGET-}
 
 export ECCTL_CONFIG=$HOME/.ecctl/config.json
+
+# synthtrace 
+export SCENARIO_FILE='01_simple_trace.ts'
+export SYNTHTRACE_OPTIONS=''

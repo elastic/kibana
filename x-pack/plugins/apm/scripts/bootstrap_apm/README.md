@@ -11,20 +11,24 @@ A script for creating an elastic stack deployment on a remote cluster using `ecc
 
 ## Configuration
 
-Update the following configuration with your own credentials and store it in your home directory `$HOME/.ecctl/config.json`
+If it’s your first time using ecctl, use the `ecctl init` command to assist you in generating a configuration file. The resulting configuration file will be saved under `~/.ecctl/config.json`
+
+or just update the configuration file in `~/.ecctl/config.json` with the following
 
 ```
 $HOME/.ecctl/config.json
 
 {
   "host": "https://staging.found.no",
-  "api_key": "API_KEY",
-  "region": "us-west-2",
+  "api_key": "YOUR_STAGING_API_KEY",
+  "region": "gcp-us-central1", // gcp-us-central1 only available region in staging
   "output": "text",
   "timeout": 30000000000,
   "insecure": true
 }
 ```
+
+The `output` should be as `text` for `ecctl` in order to access the data correctly and be able to format the response.
 
 ## Run script
 
@@ -38,9 +42,11 @@ The following options are supported:
 | `-v` | Stack version | `7.17.0`
 | `-n` | Deployment name | `performance-apm-cluster`
 | `-r` | Region | `gcp-us-central1`
-| `-p` | Hardware profile | gcp-cpu-optimized`
+| `-p` | Hardware profile | `gcp-cpu-optimized`
+| `-s` | Data scenario for `apm-synthtrace` | [01_simple_trace.ts](https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts)
+| `-o` | Options for `apm-synthtrace` | check the [available options](https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace#cli)
 
-The script will try to bootstrap automatically a remote cluster with the following settings and it will use [01_simple_trace.ts](https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts) to generate data
+The script will try to bootstrap automatically a remote cluster with the following settings and it will use the default scenario [01_simple_trace.ts](https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts) to generate the data.
 
 | Setting            | Description                                                       | Default                    |
 | ------------------ | ----------------------------------------------------------------- | -------------------------- |
@@ -53,4 +59,8 @@ The script will try to bootstrap automatically a remote cluster with the followi
 
 _Available regions, deployment templates and instance configurations can be found [here](https://www.elastic.co/guide/en/cloud/current/ec-regions-templates-instances.html)_
 
-<!-- TODO 1. pass dynamic synthtrace example -->
+For a different scenario pass the option `-s $SCENARIO_NAME`
+
+Here's an example bootraping a cluster with customized `apm-synthtrace` options
+
+`bash x-pack/plugins/apm/scripts/bootstrap_apm/src/run.sh -n apm-live-data v 7.16.3 -s 03_monitoring.ts -o '-o '--workers 3 --clientWorkers 2' `

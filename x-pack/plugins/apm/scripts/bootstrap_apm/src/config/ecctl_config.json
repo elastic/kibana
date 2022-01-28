@@ -1,7 +1,7 @@
 {
   "host": "https://staging.found.no",
-  "api_key": "API_KEY",
-  "region": "us-west-2",
+  "api_key": "YOUR_STAGING_API_KEY",
+  "region": "gcp-us-central1", // gcp-us-central1 only available region in staging
   "output": "text",
   "timeout": 30000000000,
   "insecure": true

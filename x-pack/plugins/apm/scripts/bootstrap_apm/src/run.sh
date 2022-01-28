@@ -8,11 +8,13 @@ source utils/logger.sh
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -v "7.17.0" -n my-deployment -r europe-west2 -p gcp-hot-warm"
+   echo "Usage: $0 -v "7.17.0" -n my-deployment -s 01_simple_trace.ts -o '--from=now-24h --to=now' "
    echo -e "\t-v Version of the stack "
    echo -e "\t-n Deployment name"
    echo -e "\t-r Region"
    echo -e "\t-p Hardware profile"
+   echo -e "\t-s Data scenario for apm-synthtrace. Available scenarios can be found https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace/src/scripts/examples"
+   echo -e "\t-o Options for apm-synthtrace. Supported options can be found https://github.com/elastic/kibana/tree/main/packages/elastic-apm-synthtrace#cli"
    exit 0 # Exit script after printing help
 }
 
@@ -26,13 +28,15 @@ if ! test -f "$ECCTL_CONFIG"; then
    exit 1
 fi
 
-while getopts ":v:n:r:p:" opt
+while getopts ":v:n:r:p:s:o:" opt
 do
    case "$opt" in
       v ) VERSION="$OPTARG" ;;
       n ) DEPLOYMENT_NAME="$OPTARG" ;;
       r ) REGION="$OPTARG" ;;
       p ) HARDWARE_PROFILE="$OPTARG" ;;
+      s ) SCENARIO_FILE="$OPTARG" ;;
+      o ) SYNTHTRACE_OPTIONS="$OPTARG" ;;
       ? ) helpFunction ;; 
    esac
 done
@@ -74,7 +78,7 @@ fi
 if [ -n "$ES_TARGET" ]; then 
    show_msg "[SUCCESS] Elasticsearch target ${ES_TARGET}" 1
    show_msg "[INFO] Starting to generate synthetic APM data"
-   node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=$ES_TARGET
+   node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/$SCENARIO_FILE --target=$ES_TARGET $SYNTHTRACE_OPTIONS
    show_msg "[SUCCESS] Succesfully generated APM data ✅" 1
 else 
    show_msg "[ERROR] ES_TARGET is required" 4
