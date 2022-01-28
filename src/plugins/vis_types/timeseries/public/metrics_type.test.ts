@@ -20,11 +20,6 @@ describe('metricsVisDefinition', () => {
     let defaultParams: TimeseriesVisParams;
 
     beforeEach(async () => {
-      defaultParams = (
-        await metricsVisDefinition.setup!({
-          params: cloneDeep(metricsVisDefinition.visConfig.defaults),
-        } as unknown as Vis<TimeseriesVisParams>)
-      ).params;
       setDataStart({
         indexPatterns: {
           async getDefault() {
@@ -42,6 +37,11 @@ describe('metricsVisDefinition', () => {
           },
         } as unknown as DataViewsContract,
       } as DataPublicPluginStart);
+      defaultParams = (
+        await metricsVisDefinition.setup!({
+          params: cloneDeep(metricsVisDefinition.visConfig.defaults),
+        } as unknown as Vis<TimeseriesVisParams>)
+      ).params;
     });
 
     it('should resolve correctly the base index pattern by id', async () => {
