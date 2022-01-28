@@ -59,16 +59,18 @@ const args: HeatmapArguments = {
   highlightInHover: false,
   xAccessor: 'col-1-2',
   valueAccessor: 'col-0-1',
+  yAccessor: 'col-2-3',
 };
 const data: Datatable = {
   type: 'datatable',
   rows: [
-    { 'col-0-1': 0, 'col-1-2': 'a' },
-    { 'col-0-1': 148, 'col-1-2': 'b' },
+    { 'col-0-1': 0, 'col-1-2': 'a', 'col-2-3': 'd' },
+    { 'col-0-1': 148, 'col-1-2': 'b', 'col-2-3': 'c' },
   ],
   columns: [
     { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
     { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+    { id: 'col-2-3', name: 'Test', meta: { type: 'string' } },
   ],
 };
 
@@ -161,6 +163,12 @@ describe('HeatmapComponent', function () {
         type: 'bands',
       });
     });
+  });
+
+  it('renders the axis titles', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+    expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('Dest');
+    expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('Test');
   });
 
   it('hides the legend if the legend isVisible args is false', async () => {
