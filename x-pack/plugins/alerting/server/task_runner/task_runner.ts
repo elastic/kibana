@@ -5,7 +5,6 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
@@ -27,7 +26,6 @@ import {
 import {
   RawRule,
   IntervalSchedule,
-  Services,
   RawAlertInstance,
   RuleTaskState,
   Alert,
@@ -43,7 +41,6 @@ import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   ActionGroup,
@@ -187,14 +184,6 @@ export class TaskRunner<
     return fakeRequest;
   }
 
-  private getServicesWithSpaceLevelPermissions(
-    spaceId: string,
-    apiKey: RawRule['apiKey']
-  ): [Services, PublicMethodsOf<RulesClient>] {
-    const request = this.getFakeKibanaRequest(spaceId, apiKey);
-    return [this.context.getServices(request), this.context.getRulesClientWithRequest(request)];
-  }
-
   private getExecutionHandler(
     ruleId: string,
     ruleName: string,
@@ -290,7 +279,7 @@ export class TaskRunner<
   }
 
   async executeAlerts(
-    services: Services,
+    fakeRequest: KibanaRequest,
     rule: SanitizedAlert<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
@@ -347,7 +336,13 @@ export class TaskRunner<
           alertId: ruleId,
           executionId: this.executionId,
           services: {
-            ...services,
+            savedObjectsClient: this.context.savedObjects.getScopedClient(fakeRequest, {
+              includedHiddenTypes: ['alert', 'action'],
+            }),
+            scopedClusterClient: createAbortableEsClientFactory({
+              scopedClusterClient: this.context.elasticsearch.client.asScoped(fakeRequest),
+              abortController: this.searchAbortController,
+            }),
             alertInstanceFactory: createAlertInstanceFactory<
               InstanceState,
               InstanceContext,
@@ -355,10 +350,6 @@ export class TaskRunner<
             >(alerts),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,
-            search: createAbortableEsClientFactory({
-              scopedClusterClient: services.scopedClusterClient,
-              abortController: this.searchAbortController,
-            }),
           },
           params,
           state: alertTypeState as State,
@@ -520,7 +511,7 @@ export class TaskRunner<
   }
 
   async validateAndExecuteRule(
-    services: Services,
+    fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
     rule: SanitizedAlert<Params>,
     event: Event
@@ -541,7 +532,7 @@ export class TaskRunner<
       rule.actions,
       rule.params
     );
-    return this.executeAlerts(services, rule, validatedParams, executionHandler, spaceId, event);
+    return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
   }
 
   async loadRuleAttributesAndRun(event: Event): Promise<Resultable<RuleTaskRunResult, Error>> {
@@ -565,7 +556,8 @@ export class TaskRunner<
       );
     }
 
-    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
+    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
 
     let rule: SanitizedAlert<Params>;
 
@@ -604,7 +596,7 @@ export class TaskRunner<
     return {
       monitoring: asOk(rule.monitoring),
       state: await promiseResult<RuleTaskState, Error>(
-        this.validateAndExecuteRule(services, apiKey, rule, event)
+        this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have

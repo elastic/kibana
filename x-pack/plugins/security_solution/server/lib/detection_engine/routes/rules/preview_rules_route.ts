@@ -179,8 +179,6 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertInstanceFactory,
-                // Just use es client always for preview
-                search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
