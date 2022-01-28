@@ -228,7 +228,7 @@ export const BULK_EDIT_SUCCESS_TOAST_DESCRIPTION = (rulesCount: number) =>
 export const BULK_EDIT_WARNING_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle',
   {
-    defaultMessage: 'Rule updates are currently in progress',
+    defaultMessage: 'Rules updates are in progress',
   }
 );
 
@@ -237,15 +237,14 @@ export const BULK_EDIT_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastDescription',
     {
       values: { rulesCount },
-      defaultMessage:
-        '{rulesCount, plural, =1 {# rule update is} other {# rules update are}} updating.',
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} updating.',
     }
   );
 
 export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastNotifyButtonLabel',
   {
-    defaultMessage: `Notify me when it's completed`,
+    defaultMessage: `Notify me when done`,
   }
 );
 
