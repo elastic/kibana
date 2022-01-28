@@ -262,10 +262,7 @@ function buildComponentTemplates(params: {
 
   templatesMap[mappingsTemplateName] = {
     template: {
-      mappings: merge(
-        { properties: mappings.properties },
-        registryElasticsearch?.['index_template.mappings'] ?? {}
-      ),
+      mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
     },
     _meta,
   };
