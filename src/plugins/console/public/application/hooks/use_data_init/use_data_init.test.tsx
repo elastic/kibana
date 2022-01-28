@@ -35,7 +35,7 @@ describe('useDataInit', () => {
     text: string;
   }
 
-  const callMockFuncWithArg = (arg: MockObjectData[]) => ({
+  const callMockFuncWithArg = (arg: MockObjectData[] | Function ) => ({
     ...mockContextValue,
     services: {
       ...mockContextValue.services,
@@ -129,5 +129,22 @@ describe('useDataInit', () => {
     expect(setErrorMock).toHaveBeenCalledWith(null);
     expect(setDoneMock).toHaveBeenCalledWith(false);
     expect(setRetryTokenMock).toHaveBeenCalledWith({});
+  });
+
+  it('call error function', async () => {
+    const error = new Error('Message');
+
+    (useServicesContext as jest.Mock).mockReturnValue(
+      callMockFuncWithArg(() => {
+        throw error;
+      })
+    );
+
+    const setErrorMock = jest.fn();
+    const useErrorMock: UseStateMock = (state: any) => [state, setErrorMock];
+
+    jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
+
+    expect(setErrorMock).toHaveBeenCalledWith(error);
   });
 });
