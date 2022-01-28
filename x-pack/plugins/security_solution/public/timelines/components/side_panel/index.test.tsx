@@ -479,16 +479,12 @@ describe('Details Panel Component', () => {
                     </ExpandableEventTitle>
                   </div>
                 </EuiFlyoutHeader>
-                <Styled(EuiFlyoutBody)
-                  preventPadding={false}
-                >
+                <Styled(EuiFlyoutBody)>
                   <EuiFlyoutBody
                     className="c1"
-                    preventPadding={false}
                   >
                     <div
                       className="euiFlyoutBody c1"
-                      preventPadding={false}
                     >
                       <div
                         className="euiFlyoutBody__overflow"
@@ -771,16 +767,12 @@ describe('Details Panel Component', () => {
                   </ExpandableEventTitle>
                 </div>
               </EuiFlyoutHeader>
-              <Styled(EuiFlyoutBody)
-                preventPadding={false}
-              >
+              <Styled(EuiFlyoutBody)>
                 <EuiFlyoutBody
                   className="c1"
-                  preventPadding={false}
                 >
                   <div
                     className="euiFlyoutBody c1"
-                    preventPadding={false}
                   >
                     <div
                       className="euiFlyoutBody__overflow"
