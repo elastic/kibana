@@ -14,12 +14,12 @@ export const getExecutionSuccessRatio = (ruleMonitoring: RuleMonitoring) => {
 };
 
 export const getExecutionDurationPercentiles = (ruleMonitoring: RuleMonitoring) => {
-  const durationSamples = ruleMonitoring.execution.history.reduce((duration, history) => {
+  const durationSamples = ruleMonitoring.execution.history.reduce<number[]>((duration, history) => {
     if (typeof history.duration === 'number') {
       return [...duration, history.duration];
     }
     return duration;
-  }, [] as number[]);
+  }, []);
 
   if (durationSamples.length) {
     return {
