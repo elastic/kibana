@@ -11,7 +11,7 @@ const meta = getESAssetMetadata();
 
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-1';
+export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-2';
 
 export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
   _meta: meta,
@@ -22,6 +22,22 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
       },
     },
     mappings: {
+      // All the dynamic field mappings
+      dynamic_templates: [
+        // This makes sure all mappings are keywords by default
+        {
+          strings_as_keyword: {
+            mapping: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            match_mapping_type: 'string',
+          },
+        },
+      ],
+      // As we define fields ahead, we don't need any automatic field detection
+      // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
+      date_detection: false,
       properties: {
         event: {
           properties: {
