@@ -472,6 +472,3 @@ export const bulkActionEditPayload = t.union([
 ]);
 
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
-
-export const ids = t.array(t.string);
-export const idsOrUndefined = t.union([ids, t.undefined]);
