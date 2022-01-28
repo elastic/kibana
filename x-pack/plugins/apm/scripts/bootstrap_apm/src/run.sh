@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
 source variables.sh
@@ -37,13 +37,16 @@ do
    esac
 done
 
+TMPFILE=$(mktemp /tmp/output-XXXX)
+trap "rm -f $TMPFILE" EXIT
+
 show_msg "[INFO] Creating your deployment ${DEPLOYMENT_NAME}. Please hold, it takes about 5 minutes. ⌛" 
 
 # create deployment
 `ecctl deployment create -f ./config/deployment.json --version ${VERSION} --name ${DEPLOYMENT_NAME} \
---format "export DEPLOYMENT_ID={{.ID}} export CLOUD_ID={{(index .Resources 0).CloudID}} export ES_PASS={{(index .Resources 0).Credentials.Password}}" --track > output.txt`;
+--format "export DEPLOYMENT_ID={{.ID}} export CLOUD_ID={{(index .Resources 0).CloudID}} export ES_PASS={{(index .Resources 0).Credentials.Password}}" --track > $TMPFILE`;
 
-$(head -n 1 output.txt)
+$(head -n 1 $TMPFILE)
 
 if [ -n "$DEPLOYMENT_ID" ]; then 
    show_msg "[INFO] Deployment status: Being created 👷‍♀️" 
@@ -65,6 +68,7 @@ if [ -n "$KBN_TARGET" ] || [ -n "$ES_TARGET" ]; then
 else 
    show_msg "[ERROR] KBN_TARGET is required" 4
    show_msg "[ERROR] ES_TARGET is required" 4
+   exit 1
 fi
 
 if [ -n "$ES_TARGET" ]; then 
@@ -74,4 +78,5 @@ if [ -n "$ES_TARGET" ]; then
    show_msg "[SUCCESS] Succesfully generated APM data ✅" 1
 else 
    show_msg "[ERROR] ES_TARGET is required" 4
+   exit 1
 fi
