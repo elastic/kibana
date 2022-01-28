@@ -6,99 +6,48 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-/*
-import {
-  JobType,
-  ML_SAVED_OBJECT_TYPE,
-  SavedObjectResult,
-} from '../../../../common/types/saved_objects';
-*/
 import type {
   SpacesPluginStart,
   ShareToSpaceFlyoutProps,
 } from '../../../../../../x-pack/plugins/spaces/public';
-// import { ml } from '../../services/ml_api_service';
-// import { useToastNotificationService } from '../../services/toast_notification_service';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data_views/public';
 
 interface Props {
   spacesApi: SpacesPluginStart;
   spaceIds: string[];
   id: string;
+  title: string;
   refresh(): void;
 }
 
-// const ALL_SPACES_ID = '*';
-/*
-const objectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.objectNoun', {
-  defaultMessage: 'job',
+const noun = i18n.translate('indexPatternManagement.indexPatternTable.savedObjectName', {
+  defaultMessage: 'data view',
 });
-*/
 
-export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, refresh }) => {
-  // const { displayErrorToast } = useToastNotificationService();
-
+export const SpacesList: FC<Props> = ({ spacesApi, spaceIds, id, title, refresh }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-
-  /*
-  async function changeSpacesHandler(
-    _objects: Array<{ type: string; id: string }>, // this is ignored because ML jobs do not have references
-    spacesToAdd: string[],
-    spacesToMaybeRemove: string[]
-  ) {
-    // If the user is adding the job to all current and future spaces, don't remove it from any specified spaces
-    const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
-
-    if (spacesToAdd.length || spacesToRemove.length) {
-      const resp = await ml.savedObjects.updateJobsSpaces(
-        jobType,
-        [jobId],
-        spacesToAdd,
-        spacesToRemove
-      );
-      handleApplySpaces(resp);
-    }
-    onClose();
-  }
-
-
-
-  function handleApplySpaces(resp: SavedObjectResult) {
-    Object.entries(resp).forEach(([id, { success, error }]) => {
-      if (success === false) {
-        const title = i18n.translate('xpack.ml.management.jobsSpacesList.updateSpaces.error', {
-          defaultMessage: 'Error updating {id}',
-          values: { id },
-        });
-        displayErrorToast(error, title);
-      }
-    });
-  }
-*/
 
   function onClose() {
     setShowFlyout(false);
     refresh();
   }
 
-  const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
-  const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
-    spacesApi,
-  ]);
+  const LazySpaceList = spacesApi.ui.components.getSpaceList;
+  const LazyShareToSpaceFlyout = spacesApi.ui.components.getShareToSpaceFlyout;
 
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
-      type: 'index-pattern',
-      id,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       namespaces: spaceIds,
-      title: 'data view TITLE GOES HERE',
-      noun: 'data views',
+      id,
+      title,
+      noun,
     },
     behaviorContext: 'outside-space',
-    // changeSpacesHandler,
     onClose,
   };
 
