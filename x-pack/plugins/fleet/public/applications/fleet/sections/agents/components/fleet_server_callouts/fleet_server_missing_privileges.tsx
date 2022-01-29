@@ -24,7 +24,7 @@ export const FleetServerMissingPrivileges = () => {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.fleet.permissionDeniedErrorTitle"
+              id="xpack.fleet.fleetServerSetupPermissionDeniedErrorTitle"
               defaultMessage="Permission denied"
             />
           </h2>
@@ -32,7 +32,7 @@ export const FleetServerMissingPrivileges = () => {
         body={
           <p>
             <FormattedMessage
-              id="xpack.fleet.permissionDeniedErrorMessage"
+              id="xpack.fleet.fleetServerSetupPermissionDeniedErrorMessage"
               defaultMessage="Fleet Server needs to be set up. This requires the {roleName} cluster privilege. Contact your administrator."
               values={{
                 roleName: <EuiCode>&quot;manage_service_account&quot;</EuiCode>,
