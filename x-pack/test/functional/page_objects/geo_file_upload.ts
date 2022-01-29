@@ -13,7 +13,7 @@ export class GeoFileUploadPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
-  private readonly browser = this.ctx.getService('browser');
+  //private readonly browser = this.ctx.getService('browser');
 
   async isNextButtonEnabled(): Promise<boolean> {
     const importFileButton = await this.testSubjects.find('importFileButton');
