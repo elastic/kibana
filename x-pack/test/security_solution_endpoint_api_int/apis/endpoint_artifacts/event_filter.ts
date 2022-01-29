@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -18,6 +18,10 @@ import {
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
+import {
+  getImportExceptionsListSchemaMock,
+  toNdJsonString,
+} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -26,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   describe('Endpoint artifacts (via lists plugin) event filter', () => {
+    const USER = ROLES.detections_admin;
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -33,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
 
       // create role/user
-      await createUserAndRole(getService, ROLES.detections_admin);
+      await createUserAndRole(getService, USER);
     });
 
     after(async () => {
@@ -42,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       // delete role/user
-      await deleteUserAndRole(getService, ROLES.detections_admin);
+      await deleteUserAndRole(getService, USER);
     });
 
     const anEndpointArtifactError = (res: { body: { message: string } }) => {
@@ -63,21 +68,25 @@ export default function ({ getService }: FtrProviderContext) {
     const exceptionsGenerator = new ExceptionsListItemGenerator();
     let eventFilterData: ArtifactTestData;
 
-    type EventFilterApiCallsInterface = Array<{
-      method: keyof Pick<typeof supertest, 'post' | 'put'>;
+    type UnknownBodyGetter = () => unknown;
+    type PutPostBodyGetter = (
+      overrides?: Partial<ExceptionListItemSchema>
+    ) => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
+
+    type EventFilterApiCallsInterface<BodyGetter = UnknownBodyGetter> = Array<{
+      method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+      info?: string;
       path: string;
       // The body just needs to have the properties we care about in the tests. This should cover most
       // mocks used for testing that support different interfaces
-      getBody: (
-        overrides: Partial<ExceptionListItemSchema>
-      ) => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
+      getBody: BodyGetter;
     }>;
 
-    const eventFilterCalls: EventFilterApiCallsInterface = [
+    const eventFilterCalls: EventFilterApiCallsInterface<PutPostBodyGetter> = [
       {
         method: 'post',
         path: EXCEPTION_LIST_ITEM_URL,
-        getBody: (overrides) =>
+        getBody: (overrides = {}) =>
           exceptionsGenerator.generateEventFilterForCreate({
             tags: eventFilterData.artifact.tags,
             ...overrides,
@@ -86,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'put',
         path: EXCEPTION_LIST_ITEM_URL,
-        getBody: (overrides) =>
+        getBody: (overrides = {}) =>
           exceptionsGenerator.generateEventFilterForUpdate({
             id: eventFilterData.artifact.id,
             item_id: eventFilterData.artifact.item_id,
@@ -107,6 +116,24 @@ export default function ({ getService }: FtrProviderContext) {
       if (eventFilterData) {
         await eventFilterData.cleanup();
       }
+    });
+
+    it('should return 400 for import of endpoint exceptions', async () => {
+      await supertest
+        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+        .set('kbn-xsrf', 'true')
+        .attach(
+          'file',
+          Buffer.from(
+            toNdJsonString([getImportExceptionsListSchemaMock(eventFilterData.artifact.list_id)])
+          ),
+          'exceptions.ndjson'
+        )
+        .expect(400, {
+          status_code: 400,
+          message:
+            'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions',
+        });
     });
 
     describe('and has authorization to manage endpoint security', () => {
@@ -159,13 +186,61 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('and user DOES NOT have authorization to manage endpoint security', () => {
-      for (const eventFilterCall of eventFilterCalls) {
-        it(`should 403 on [${eventFilterCall.method}]`, async () => {
-          await supertestWithoutAuth[eventFilterCall.method](eventFilterCall.path)
+    describe(`and user (${USER}) DOES NOT have authorization to manage endpoint security`, () => {
+      // Define a new array that includes the prior set from above, plus additional API calls that
+      // only have Authz validations setup
+      const allApiCalls: EventFilterApiCallsInterface<PutPostBodyGetter | UnknownBodyGetter> = [
+        ...eventFilterCalls,
+        {
+          method: 'get',
+          info: 'single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${eventFilterData.artifact.item_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'list summary',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/summary?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'delete',
+          info: 'single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${eventFilterData.artifact.item_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'post',
+          info: 'list export',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/_export?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&id=1`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'find items',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
+      for (const apiCall of allApiCalls) {
+        it(`should error on [${apiCall.method}]${
+          apiCall.info ? ` ${apiCall.info}` : ''
+        }`, async () => {
+          await supertestWithoutAuth[apiCall.method](apiCall.path)
             .auth(ROLES.detections_admin, 'changeme')
             .set('kbn-xsrf', 'true')
-            .send(eventFilterCall.getBody({}))
+            .send(apiCall.getBody())
             .expect(403, {
               status_code: 403,
               message: 'EndpointArtifactError: Endpoint authorization failure',
