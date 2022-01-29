@@ -49,6 +49,7 @@ const QueryStringInput = withKibana(QueryStringInputUI);
 // @internal
 export interface QueryBarTopRowProps {
   filters: Filter[];
+  multipleFilters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   onMultipleFiltersUpdated?: (filters: Filter[]) => void;
   applySelectedSavedQueries?: () => void;
@@ -394,18 +395,26 @@ export const QueryBarTopRow = React.memo(
     }
 
     function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+      const lastFilter: any = props.multipleFilters[props.multipleFilters.length - 1];
       const mappedFilters = mapAndFlattenFilters(buildFilters);
       const mergedFilters = mappedFilters.map((filter, idx) => {
+        let groupId = selectedFilters[idx].groupId;
+        // given 1 + last undefined  -> 1
+        // given 2 + last 1 -> 3
+
+        if (lastFilter !== undefined) groupId = selectedFilters[idx].groupId + lastFilter.groupId;
+
         return {
           ...filter,
-          groupId: selectedFilters[idx].groupId,
+          groupId,
           id: selectedFilters[idx].id,
           relationship: selectedFilters[idx].relationship,
           subGroupId: selectedFilters[idx].subGroupId,
         };
       });
       props.toggleAddFilterModal?.(false);
-      props?.onMultipleFiltersUpdated?.(mergedFilters);
+      props?.onMultipleFiltersUpdated?.([...props.multipleFilters, ...mergedFilters]);
+      // props?.onMultipleFiltersUpdated?.(mergedFilters);
 
       const filters = [...props.filters, ...buildFilters];
       props?.onFiltersUpdated?.(filters);
