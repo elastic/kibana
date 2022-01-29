@@ -165,6 +165,6 @@ export const initRoutes = (
   createSourcererDataViewRoute(router, getStartServices);
   getSourcererDataViewRoute(router, getStartServices);
 
-  // telemetry endpoints for detection engine
+  // telemetry preview endpoint for e2e integration tests and any UI/UX
   telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
 };

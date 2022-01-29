@@ -316,6 +316,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
+
     const results = await this.exceptionListClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
@@ -340,7 +343,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     // Ensure list is created if it does not exist
-    await this.exceptionListClient.createTrustedAppsList();
+    await this.exceptionListClient.createEndpointList();
 
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,

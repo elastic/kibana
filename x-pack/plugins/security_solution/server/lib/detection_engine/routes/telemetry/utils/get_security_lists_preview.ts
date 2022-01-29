@@ -30,7 +30,7 @@ export const getSecurityListsPreview = async ({
   const taskSender = new PreviewTelemetryEventsSender(logger, telemetrySender);
   const task = createTelemetrySecurityListTaskConfig(1000);
   await task.runTask(
-    'security-lists-task-preview',
+    'security-lists-preview',
     logger,
     telemetryReceiver,
     taskSender,

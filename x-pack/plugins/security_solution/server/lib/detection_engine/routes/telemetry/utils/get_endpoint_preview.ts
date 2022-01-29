@@ -30,7 +30,7 @@ export const getEndpointPreview = async ({
   const taskSender = new PreviewTelemetryEventsSender(logger, telemetrySender);
   const task = createTelemetryEndpointTaskConfig(1000);
   await task.runTask(
-    'endpoint-task-preview',
+    'endpoint-preview',
     logger,
     telemetryReceiver,
     taskSender,

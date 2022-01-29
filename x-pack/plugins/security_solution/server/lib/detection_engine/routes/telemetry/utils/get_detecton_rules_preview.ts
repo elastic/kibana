@@ -30,7 +30,7 @@ export const getDetectionRulesPreview = async ({
   const taskSender = new PreviewTelemetryEventsSender(logger, telemetrySender);
   const task = createTelemetryDetectionRuleListsTaskConfig(1000);
   await task.runTask(
-    'detection-rules-task-preview',
+    'detection-rules-preview',
     logger,
     telemetryReceiver,
     taskSender,
