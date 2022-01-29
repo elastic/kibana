@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import { FtrService } from '../ftr_provider_context';
-import { ImportResults } from '../../../plugins/file_upload/public/importer';
 
 export class GeoFileUploadPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
@@ -65,7 +64,7 @@ export class GeoFileUploadPageObject extends FtrService {
     await this.testSubjects.setValue('fileUploadIndexNameInput', indexName);
   }
 
-  async uploadFile(): Promise<ImportResults> {
+  async uploadFile(): Promise<void> {
     // next button is disabled while checking index name
     // make sure next button is enabled before clicking it
     await this.retry.waitFor('Wait for import button to be enabled', async () => {
@@ -73,12 +72,9 @@ export class GeoFileUploadPageObject extends FtrService {
     });
     await this.clickNextButton();
 
-    await this.retry.waitFor('wait for file import results', async () => {
-      return await this.testSubjects.exists('indexRespCopyButton');
+    await this.retry.waitFor('wait for file upload status', async () => {
+      return await this.testSubjects.exists('fileUploadStatusCallout');
     });
-
-    await this.testSubjects.click('indexRespCopyButton');
-    return JSON.parse(await this.browser.getClipboardValue());
   }
 
   async addFileAsDocumentLayer() {
@@ -87,6 +83,12 @@ export class GeoFileUploadPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  async getFileUploadStatusCalloutMsg() {
+    return await this.testSubjects.getVisibleText('fileUploadStatusCallout');
+  }
+
+  /*
+  // copy permission does not work on CI, use getFileUploadStatusCalloutMsg instead
   async clickCopyButton(dataTestSubj: string): Promise<string> {
     this.log.debug(`Click ${dataTestSubj} copy button`);
 
@@ -101,5 +103,5 @@ export class GeoFileUploadPageObject extends FtrService {
 
   async getIndexPatternResults() {
     return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
-  }
+  }*/
 }

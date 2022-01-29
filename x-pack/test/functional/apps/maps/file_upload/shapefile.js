@@ -48,9 +48,10 @@ export default function ({ getPageObjects, getService }) {
     it('should import shapefile', async () => {
       indexName = uuid();
       await PageObjects.geoFileUpload.setIndexName(indexName);
-      const importResults = await PageObjects.geoFileUpload.uploadFile();
+      await PageObjects.geoFileUpload.uploadFile();
 
-      expect(importResults.docCount).to.be(174);
+      const statusText = await PageObjects.geoFileUpload.getFileUploadStatusCalloutMsg();
+      expect(statusText).to.be('File upload complete\nIndexed 174 features.');
     });
 
     it('should add as document layer', async () => {
