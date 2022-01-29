@@ -5,14 +5,38 @@
  * 2.0.
  */
 
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
+import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreGetOneHandler = (
-  endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreGetOneItem' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+  endpointAppContextService: EndpointAppContextService
+): ExceptionsListPreGetOneItemServerExtension['callback'] => {
+  return async function ({ data, context: { request, exceptionListClient } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
+    const exceptionItem: ExceptionListItemSchema | null =
+      await exceptionListClient.getExceptionListItem({
+        id: data.id,
+        itemId: data.itemId,
+        namespaceType: data.namespaceType,
+      });
+
+    if (!exceptionItem) {
+      return data;
+    }
+
+    const listId = exceptionItem.list_id;
+
+    // Event Filters Exception
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem();
+
+      return data;
+    }
 
     return data;
   };

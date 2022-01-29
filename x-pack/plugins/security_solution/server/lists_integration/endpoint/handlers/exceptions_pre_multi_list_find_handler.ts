@@ -6,13 +6,22 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../lists/server';
+import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreMultiListFindHandler = (
   endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreMultiListFind' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+): ExceptionsListPreMultiListFindServerExtension['callback'] => {
+  return async function ({ data, context: { request } }) {
+    if (!data.namespaceType.includes('agnostic')) {
+      return data;
+    }
+
+    // Event Filters Exceptions
+    if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
+      await new EventFilterValidator(endpointAppContext, request).validatePreMultiListFind();
+      return data;
+    }
 
     return data;
   };

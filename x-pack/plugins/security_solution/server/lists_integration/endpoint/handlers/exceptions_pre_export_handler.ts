@@ -6,13 +6,29 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreExportServerExtension } from '../../../../../lists/server';
+import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreExportHandler = (
-  endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreExport' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+  endpointAppContextService: EndpointAppContextService
+): ExceptionsListPreExportServerExtension['callback'] => {
+  return async function ({ data, context: { request, exceptionListClient } }) {
+    const { listId: maybeListId, id } = data;
+    let listId: string | null | undefined = maybeListId;
+
+    if (!listId && id) {
+      listId = (await exceptionListClient.getExceptionList(data))?.list_id ?? null;
+    }
+
+    if (!listId) {
+      return data;
+    }
+
+    // Event Filter validations
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreExport();
+      return data;
+    }
 
     return data;
   };
