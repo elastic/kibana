@@ -999,6 +999,14 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
                 ],
               },
             },
+            runtime_mappings: {
+              '@a.runtime.field': {
+                script: {
+                  source: 'emit("Radically mocked dude: " + doc[\'host.name\'].value)',
+                },
+                type: 'keyword',
+              },
+            },
             size: 0,
           },
         },
