@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
@@ -103,31 +110,35 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   };
 
   return (
-    <div className="app-container" data-test-subj="monitoringAppContainer">
-      <ActionMenu>
-        <AlertsDropdown />
-      </ActionMenu>
-      <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
-      {tabs && (
-        <EuiTabs>
-          {tabs.map((item, idx) => {
-            return (
-              <EuiTab
-                key={idx}
-                disabled={isDisabledTab(product)}
-                title={item.label}
-                data-test-subj={item.testSubj}
-                href={createHref(item.route)}
-                isSelected={isTabSelected(item.route)}
-              >
-                {item.label}
-              </EuiTab>
-            );
-          })}
-        </EuiTabs>
-      )}
-      <div>{renderContent()}</div>
-    </div>
+    <EuiPage data-test-subj="monitoringAppContainer">
+      <EuiPageBody>
+        <EuiPageContent>
+          <ActionMenu>
+            <AlertsDropdown />
+          </ActionMenu>
+          <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+          {tabs && (
+            <EuiTabs>
+              {tabs.map((item, idx) => {
+                return (
+                  <EuiTab
+                    key={idx}
+                    disabled={isDisabledTab(product)}
+                    title={item.label}
+                    data-test-subj={item.testSubj}
+                    href={createHref(item.route)}
+                    isSelected={isTabSelected(item.route)}
+                  >
+                    {item.label}
+                  </EuiTab>
+                );
+              })}
+            </EuiTabs>
+          )}
+          <div>{renderContent()}</div>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };
 

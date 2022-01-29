@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import './enter_button.scss';
 import { METRIC_TYPE, useUiTracker } from '../../../../observability/public';
 import { TELEMETRY_METRIC_BUTTON_CLICK } from '../../../common/constants';
 
@@ -38,19 +37,17 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   }
 
   return (
-    <div className="monSetupModeEnterButton__buttonWrapper">
-      <EuiButton
-        onClick={enterSetupMode}
-        iconType="flag"
-        size="s"
-        iconSide="right"
-        isLoading={isLoading}
-        data-test-subj="monitoringSetupModeBtn"
-      >
-        {i18n.translate('xpack.monitoring.setupMode.enter', {
-          defaultMessage: 'Enter setup mode',
-        })}
-      </EuiButton>
-    </div>
+    <EuiButton
+      onClick={enterSetupMode}
+      iconType="flag"
+      size="s"
+      iconSide="right"
+      isLoading={isLoading}
+      data-test-subj="monitoringSetupModeBtn"
+    >
+      {i18n.translate('xpack.monitoring.setupMode.enter', {
+        defaultMessage: 'Enter setup mode',
+      })}
+    </EuiButton>
   );
 };
