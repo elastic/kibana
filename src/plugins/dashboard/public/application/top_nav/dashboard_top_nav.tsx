@@ -55,7 +55,7 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '../../../../presentation_util/public';
-import { openSkinsMenuPopover, SkinsMenu } from '../../skins/skins_menu';
+import { openSkinsMenuPopover } from '../../skins/skins_menu';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -122,6 +122,7 @@ export function DashboardTopNav({
   const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [intervals, setIntervals] = useState<NodeJS.Timer[]>([]);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes = ['markdown', 'maps'];
@@ -420,12 +421,12 @@ export function DashboardTopNav({
   const applyAdditionalStyle = useCallback(
     (name: string) => {
       if (name === 'matrix') {
+        const localIntervals = [] as NodeJS.Timer[];
         const canvasElements = document.getElementsByTagName('canvas');
         for (let i = 0; i < canvasElements.length; i++) {
           const canvas = canvasElements.item(i) as HTMLCanvasElement;
           const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-
+          if (!ctx) continue;
           // set the width and height of the canvas
           const w = canvas.width; // document.body.offsetWidth);
           const h = canvas.height; // document.body.offsetHeight);
@@ -437,16 +438,29 @@ export function DashboardTopNav({
           const cols = Math.floor(w / 20) + 1;
           const ypos = Array(cols).fill(30);
 
-          setInterval(() => {
+          const interval = setInterval(() => {
             matrix(canvas, cols, ypos);
           }, 50);
+          localIntervals.push(interval);
         }
+        setIntervals(localIntervals);
       } else if (name === 'spiderman') {
         spiderman();
       }
     },
     [spiderman]
   );
+
+  // cleanup
+  useEffect(() => {
+    return () => {
+      if (dashboardAppState.getLatestDashboardState().skin !== 'matrix') {
+        for (let i = 0; i < intervals.length; i++) {
+          if (intervals[i]) clearInterval(intervals[i]);
+        }
+      }
+    };
+  });
 
   const onSkinSelected = useCallback(
     (name: string) => {
