@@ -324,7 +324,7 @@ describe('Integration', () => {
       '    "field": "something"\n' +
       '   },\n' +
       '   "facets": {},\n' +
-      '   "size": 20 \n' +
+      '   "size": 20\n' +
       '}',
     MAPPING,
     SEARCH_KB,
@@ -358,14 +358,14 @@ describe('Integration', () => {
       },
       {
         name: 'prefix comma, end of line',
-        cursor: { lineNumber: 6, column: 15 },
+        cursor: { lineNumber: 7, column: 1 },
         initialValue: '',
         addTemplate: true,
-        prefixToAdd: ', ',
+        prefixToAdd: ',\n',
         suffixToAdd: '',
         rangeToReplace: {
-          start: { lineNumber: 6, column: 13 },
-          end: { lineNumber: 6, column: 15 },
+          start: { lineNumber: 6, column: 14 },
+          end: { lineNumber: 7, column: 1 },
         },
         autoCompleteSet: ['facets', 'query', 'size'],
       },
