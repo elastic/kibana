@@ -13,6 +13,7 @@ import {
   EuiTextColor,
   EuiPopover,
   EuiContextMenu,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
@@ -46,6 +47,7 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
+  customLabel?: string;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -56,6 +58,7 @@ export const FilterExpressionItem: FC<Props> = ({
   groupId,
   filtersGroupsCount,
   onUpdate,
+  customLabel,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   function handleBadgeClick() {
@@ -406,9 +409,16 @@ export const FilterExpressionItem: FC<Props> = ({
         onClick={handleBadgeClick}
       >
         <div ref={ref}>
-          {filterExpression.map((expression) => {
-            return <>{expression}</>;
-          })}
+          {customLabel ? (
+            <>
+              <EuiIcon type="save" />
+              {customLabel}
+            </>
+          ) : (
+            filterExpression.map((expression) => {
+              return <>{expression}</>;
+            })
+          )}
         </div>
       </EuiBadge>
     </EuiFlexItem>
