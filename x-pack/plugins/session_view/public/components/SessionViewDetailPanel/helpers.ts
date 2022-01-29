@@ -41,12 +41,17 @@ export const getDetailPanelProcess = (process: Process | null) => {
     if (event.process.executable) {
       processData.executable.push([event.process.executable, `(${event.event.action})`]);
     }
+    if (event.process.exit_code) {
+      processData.exit_code = event.process.exit_code;
+    }
   });
 
   processData.args = [...args];
-  processData.entryLeader = geteDetailPanelProcessLeader(process.events[0].process.entry);
-  processData.sessionLeader = geteDetailPanelProcessLeader(process.events[0].process.session);
-  // processData.groupLeader = geteDetailPanelProcessLeader(process.events[0].process.group_leader);
+  processData.entryLeader = geteDetailPanelProcessLeader(process.events[0].process.entry_leader);
+  processData.sessionLeader = geteDetailPanelProcessLeader(
+    process.events[0].process.session_leader
+  );
+  processData.groupLeader = geteDetailPanelProcessLeader(process.events[0].process.group_leader);
   processData.parent = geteDetailPanelProcessLeader(process.events[0].process.parent);
 
   return processData;

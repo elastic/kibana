@@ -11,7 +11,7 @@ import { CSSObject } from '@emotion/react';
 export const useStyles = () => {
   const cached = useMemo(() => {
     const descriptionList: CSSObject = {
-      padding: '16px',
+      padding: '8px',
     };
 
     return {

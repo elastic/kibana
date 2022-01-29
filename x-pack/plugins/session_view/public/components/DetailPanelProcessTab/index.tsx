@@ -5,11 +5,13 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import { DetailPanelProcess } from '../../types';
 import { useStyles } from './styles';
 import { DetailPanelAccordion } from '../DetailPanelAccordion';
+import { DetailPanelCopy } from '../DetailPanelCopy';
 import { DetailPanelDescriptionList } from '../DetailPanelDescriptionList';
+import { DetailPanelListItem } from '../DetailPanelListItem';
 
 interface DetailPanelProcessTabDeps {
   processDetail: DetailPanelProcess;
@@ -31,11 +33,11 @@ const leaderDescriptionListInfo = [
     title: 'Session Leader',
     tooltipContent: 'a session leader placeholder description',
   },
-  // {
-  //   id: 'processGroupLeader',
-  //   title: 'Group Leader',
-  //   tooltipContent: 'a group leader placeholder description',
-  // },
+  {
+    id: 'processGroupLeader',
+    title: 'Group Leader',
+    tooltipContent: 'a group leader placeholder description',
+  },
   {
     id: 'processParent',
     title: 'Parent',
@@ -51,7 +53,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
   const leaderListItems = [
     processDetail.entryLeader,
     processDetail.sessionLeader,
-    // processDetail.groupLeader,
+    processDetail.groupLeader,
     processDetail.parent,
   ].map((leader, idx) => {
     const listItems: ListItems = [
@@ -65,7 +67,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: 'start',
-        description: leader.start,
+        description: leader.start.toISOString(),
       },
     ];
     if (idx === 0) {
@@ -102,67 +104,104 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
     }
     return {
       ...leaderDescriptionListInfo[idx],
+      name: leader.name,
       listItems,
     };
   });
+
+  const processArgs = processDetail.args.length
+    ? `[${processDetail.args.map((arg) => `'${arg}'`)}]`
+    : '-';
 
   return (
     <>
       <DetailPanelDescriptionList
         listItems={[
           {
-            title: 'id',
+            title: <DetailPanelListItem>id</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processDetail.id}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processDetail.id}>
+                <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
+                  {processDetail.id}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'start',
-            description: processDetail.start,
-          },
-          {
-            title: 'end',
-            description: processDetail.end,
-          },
-          {
-            title: 'exit_code',
+            title: <DetailPanelListItem>start</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processDetail.exit_code || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processDetail.start.toISOString()}>
+                {processDetail.start.toISOString()}
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'user',
-            description: processDetail.user,
+            title: <DetailPanelListItem>end</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={processDetail.end.toISOString()}>
+                {processDetail.end.toISOString()}
+              </DetailPanelCopy>
+            ),
           },
           {
-            title: 'args',
-            description: processDetail.args.length
-              ? `[${processDetail.args.map((arg) => `'${arg}'`)}]`
-              : '-',
+            title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={processDetail.exit_code.toString()}>
+                <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
+                  {processDetail.exit_code}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
           },
           {
-            title: 'executable',
-            description: processDetail.executable.map((execTuple) => {
-              const [executable, eventAction] = execTuple;
-              return (
-                <EuiText>
-                  <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                    {executable}
-                  </EuiTextColor>
-                  <EuiTextColor color="subdued" css={styles.executableAction}>
-                    {eventAction}
-                  </EuiTextColor>
-                </EuiText>
-              );
-            }),
+            title: <DetailPanelListItem>user</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={processDetail.user}>
+                {processDetail.user}
+              </DetailPanelCopy>
+            ),
           },
           {
-            title: 'process.pid',
-            description: processDetail.pid,
+            title: <DetailPanelListItem>args</DetailPanelListItem>,
+            description: <DetailPanelCopy textToCopy={processArgs}>{processArgs}</DetailPanelCopy>,
+          },
+          {
+            title: <DetailPanelListItem>executable</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={processDetail.executable
+                  .map((execTuple) => {
+                    const [executable, eventAction] = execTuple;
+                    return `${executable} ${eventAction}`;
+                  })
+                  .join(', ')}
+                display="block"
+              >
+                {processDetail.executable.map((execTuple) => {
+                  const [executable, eventAction] = execTuple;
+                  return (
+                    <div>
+                      <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
+                        {executable}
+                      </EuiTextColor>
+                      <EuiTextColor color="subdued" css={styles.executableAction}>
+                        {eventAction}
+                      </EuiTextColor>
+                    </div>
+                  );
+                })}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>process.pid</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={processDetail.pid.toString()}>
+                <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
+                  {processDetail.pid}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
           },
         ]}
       />
@@ -172,6 +211,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           title={leader.title}
           tooltipContent={leader.tooltipContent}
           listItems={leader.listItems}
+          extraActionTitle={leader.name}
         />
       ))}
     </>

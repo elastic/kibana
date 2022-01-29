@@ -6,7 +6,6 @@
  */
 import React, { useState, ComponentType } from 'react';
 import {
-  EuiSearchBar,
   EuiEmptyPrompt,
   EuiButton,
   EuiFlexGroup,
@@ -129,7 +128,10 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             paddingSize="none"
             css={styles.detailPanel}
           >
-            <SessionViewDetailPanel selectedProcess={selectedProcess} />
+            <SessionViewDetailPanel
+              selectedProcess={selectedProcess}
+              onProcessSelected={onProcessSelected}
+            />
           </EuiResizablePanel>
         </>
       );

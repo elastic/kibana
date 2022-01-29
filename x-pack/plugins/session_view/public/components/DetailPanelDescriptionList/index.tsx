@@ -15,8 +15,12 @@ interface DetailPanelDescriptionListDeps {
   }>;
 }
 
-const TAB_LIST_TITLE_STYLE = { style: { width: '40%' } };
-const TAB_LIST_DESCRIPTION_STYLE = { style: { width: '60%' } };
+const TAB_LIST_TITLE_STYLE = {
+  style: { width: '40%', display: 'flex', alignItems: 'center' },
+};
+const TAB_LIST_DESCRIPTION_STYLE = {
+  style: { width: '60%', display: 'flex', alignItems: 'center' },
+};
 
 /**
  * Description list in session view detail panel.

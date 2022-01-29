@@ -17,9 +17,10 @@ export type SessionViewServices = CoreStart & {
 
 export interface DetailPanelProcess {
   id: string;
+  name: string;
   start: Date;
   end: Date;
-  exit_code: string;
+  exit_code: number;
   user: string;
   args: string[];
   executable: string[][];
@@ -32,6 +33,7 @@ export interface DetailPanelProcess {
 
 export interface DetailPanelProcessLeader {
   id: string;
+  name: string;
   start: Date;
   entryMetaType: string;
   userName: string;

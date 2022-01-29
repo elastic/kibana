@@ -13,7 +13,7 @@ import { DetailPanelHostTab } from '../DetailPanelHostTab';
 
 interface SessionViewDetailPanelDeps {
   selectedProcess: Process | null;
-  session?: any;
+  onProcessSelected?: (process: Process) => void;
 }
 
 interface EuiTabProps {

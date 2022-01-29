@@ -13,14 +13,14 @@ export enum EventKind {
 export enum EventAction {
   fork = 'fork',
   exec = 'exec',
-  exit = 'exit',
+  end = 'end',
   output = 'output',
 }
 
 export interface EventActionPartition {
   fork: ProcessEvent[];
   exec: ProcessEvent[];
-  exit: ProcessEvent[];
+  end: ProcessEvent[];
   output: ProcessEvent[];
 }
 
