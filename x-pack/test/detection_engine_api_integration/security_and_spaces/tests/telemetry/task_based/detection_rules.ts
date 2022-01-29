@@ -58,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('custom rules should never show any detection_rules telemetry data for each list type', () => {
       it('should NOT give telemetry/stats for an exception list of type "detection"', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -105,6 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint"', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -152,6 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -199,6 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint_events"', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -246,6 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -293,10 +298,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
-      it('should return mutating types such as "id", "@timestamp", etc... for list of type "detection"', async () => {
+      beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
         await installPrePackagedRules(supertest, log);
+      });
 
+      it('should return mutating types such as "id", "@timestamp", etc... for list of type "detection"', async () => {
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -355,9 +362,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give telemetry/stats for an exception list of type "detection"', async () => {
-        // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
-
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -429,9 +433,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give telemetry/stats for an exception list of type "endpoint"', async () => {
-        // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
-
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -503,9 +504,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
-        // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
-
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -577,9 +575,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give telemetry/stats for an exception list of type "endpoint_events"', async () => {
-        // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
-
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -651,9 +646,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
-        // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, log);
-
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -726,10 +718,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
-      it('should give telemetry/stats for 2 exception lists to the type of "detection"', async () => {
+      beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
         await installPrePackagedRules(supertest, log);
+      });
 
+      it('should give telemetry/stats for 2 exception lists to the type of "detection"', async () => {
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
           description: 'description',
@@ -799,6 +793,7 @@ export default ({ getService }: FtrProviderContext) => {
             .sort((rule1: { entries: { name: number } }, rule2: { entries: { name: number } }) => {
               return rule1.entries.name - rule2.entries.name;
             });
+
           expect(detectionRules).to.eql([
             {
               created_at: detectionRules[0].created_at,

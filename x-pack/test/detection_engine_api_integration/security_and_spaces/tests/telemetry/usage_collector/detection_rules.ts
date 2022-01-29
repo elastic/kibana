@@ -60,13 +60,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest, log);
     });
 
-    it('should have initialized empty/zero values when no rules are running', async () => {
-      await retry.try(async () => {
-        const stats = await getStats(supertest, log);
-        expect(stats).to.eql(getInitialDetectionMetrics());
-      });
-    });
-
     describe('"kql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
