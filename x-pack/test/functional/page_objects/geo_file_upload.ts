@@ -13,7 +13,6 @@ export class GeoFileUploadPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
-  //private readonly browser = this.ctx.getService('browser');
 
   async isNextButtonEnabled(): Promise<boolean> {
     const importFileButton = await this.testSubjects.find('importFileButton');
@@ -86,22 +85,4 @@ export class GeoFileUploadPageObject extends FtrService {
   async getFileUploadStatusCalloutMsg() {
     return await this.testSubjects.getVisibleText('fileUploadStatusCallout');
   }
-
-  /*
-  // copy permission does not work on CI, use getFileUploadStatusCalloutMsg instead
-  async clickCopyButton(dataTestSubj: string): Promise<string> {
-    this.log.debug(`Click ${dataTestSubj} copy button`);
-
-    await this.testSubjects.click(dataTestSubj);
-
-    return await this.browser.getClipboardValue();
-  }
-
-  async getIndexResults() {
-    return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
-  }
-
-  async getIndexPatternResults() {
-    return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
-  }*/
 }
