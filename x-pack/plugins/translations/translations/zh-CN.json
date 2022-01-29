@@ -7206,7 +7206,6 @@
     "xpack.apm.transactionDetails.resultLabel": "结果",
     "xpack.apm.transactionDetails.serviceLabel": "服务",
     "xpack.apm.transactionDetails.servicesTitle": "服务",
-    "xpack.apm.transactionDetails.spanFlyout.backendLabel": "后端",
     "xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning": "这是一组连续、相似跨度的样例文档",
     "xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle": "数据库语句",
     "xpack.apm.transactionDetails.spanFlyout.nameLabel": "名称",
