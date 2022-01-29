@@ -19,6 +19,7 @@ import {
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
+import type { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 /**
  * The `this` context provided to extension point's callback function
@@ -30,6 +31,13 @@ export interface ServerExtensionCallbackContext {
    * is not triggered via one of the HTTP handlers
    */
   request?: KibanaRequest;
+
+  /**
+   * An `ExceptionListClient` instance that **DOES NOT** execute server extension point callbacks.
+   * This client should be used when needing to access Exception List content from within an Extension
+   * Point to avoid circular infinite loops
+   */
+  exceptionListClient: ExceptionListClient;
 }
 
 export type ServerExtensionCallback<A extends object | void = void, R = A> = (args: {
