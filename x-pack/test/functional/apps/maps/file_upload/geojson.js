@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.clickAddLayer();
       await PageObjects.maps.selectFileUploadCard();
       await PageObjects.geoFileUpload.previewGeoJsonFile(
-        path.join(__dirname, 'files', 'polygon.json')
+        path.join(__dirname, 'files', 'point.json')
       );
       await PageObjects.maps.waitForLayersToLoad();
 
