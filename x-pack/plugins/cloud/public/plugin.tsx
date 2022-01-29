@@ -16,7 +16,8 @@ import {
   ApplicationStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
@@ -91,7 +92,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
   private appSubscription?: Subscription;
-  private chatConfig: ChatConfig = { enabled: false };
+  private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -108,11 +109,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
 
-    this.setupChat({ http: core.http, security }).catch((e) =>
-      // eslint-disable-next-line no-console
-      console.debug(`Error setting up Chat: ${e.toString()}`)
-    );
-
     const {
       id,
       cname,
@@ -123,6 +119,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     } = this.config;
 
     this.isCloudEnabled = getIsCloudEnabled(id);
+
+    this.setupChat({ http: core.http, security }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up Chat: ${e.toString()}`)
+    );
 
     if (home) {
       home.environment.update({ cloud: this.isCloudEnabled });
@@ -177,10 +178,15 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // Cloud admin console will always perform the actual authorization checks.
       .catch(() => setLinks(true));
 
+    // There's a risk that the request for chat config will take too much time to complete, and the provider
+    // will maintain a stale value.  To avoid this, we'll use an Observable.
+    const CloudContextProvider: FC = ({ children }) => {
+      const chatConfig = useObservable(this.chatConfig$, { enabled: false });
+      return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
+    };
+
     return {
-      CloudContextProvider: ({ children }) => (
-        <ServicesProvider chat={this.chatConfig}>{children}</ServicesProvider>
-      ),
+      CloudContextProvider,
     };
   }
 
@@ -319,7 +325,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       token: jwt,
     } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
 
-    this.chatConfig = {
+    this.chatConfig$.next({
       enabled,
       chatURL,
       user: {
@@ -327,7 +333,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         id,
         jwt,
       },
-    };
+    });
   }
 }
 
