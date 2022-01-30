@@ -319,21 +319,30 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       return;
     }
 
-    const {
-      email,
-      id,
-      token: jwt,
-    } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
-
-    this.chatConfig$.next({
-      enabled,
-      chatURL,
-      user: {
+    try {
+      const {
         email,
         id,
-        jwt,
-      },
-    });
+        token: jwt,
+      } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
+
+      if (!email || !id || !jwt) {
+        return;
+      }
+
+      this.chatConfig$.next({
+        enabled,
+        chatURL,
+        user: {
+          email,
+          id,
+          jwt,
+        },
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.debug(`[cloud.chat] Could not retrieve chat config: ${e.res.status} ${e.message}`, e);
+    }
   }
 }
 
