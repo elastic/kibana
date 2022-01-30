@@ -21,6 +21,8 @@ import type {
 } from './types';
 import { defineRoutes } from './routes';
 import { initUiSettings } from './uiSettings';
+import { cspRuleAssetType } from './saved_objects/benchmark_rules/csp_rule_type';
+import { initializeCspRules } from './saved_objects/benchmark_rules/initialize_rules';
 
 export class CspPlugin
   implements
@@ -41,6 +43,9 @@ export class CspPlugin
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
+
+    core.savedObjects.registerType(cspRuleAssetType);
+
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -55,6 +60,9 @@ export class CspPlugin
     createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser, this.logger).catch(
       this.logger.error
     );
+
+    initializeCspRules(core.savedObjects.createInternalRepository());
+
     return {};
   }
   public stop() {}
