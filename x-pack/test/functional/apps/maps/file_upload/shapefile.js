@@ -12,6 +12,7 @@ import uuid from 'uuid/v4';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('shapefile upload', () => {
     let indexName = '';
@@ -61,8 +62,10 @@ export default function ({ getPageObjects, getService }) {
       const numberOfLayers = await PageObjects.maps.getNumberOfLayers();
       expect(numberOfLayers).to.be(2);
 
-      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
-      expect(tooltipText).to.be(`${indexName}\nFound 174 documents.`);
+      await retry.try(async () => {
+        const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
+        expect(tooltipText).to.be(`${indexName}\nFound 174 documents.`);
+      });
     });
   });
 }
