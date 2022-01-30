@@ -46,8 +46,11 @@ export interface CloudConfigType {
     enabled: boolean;
     org_id?: string;
   };
+  /** Configuration to enable live chat in Cloud-enabled instances of Kibana. */
   chat: {
+    /** Determines if chat is enabled. */
     enabled: boolean;
+    /** The URL to the remotely-hosted chat application. */
     chatURL: string;
   };
 }

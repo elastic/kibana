@@ -107,5 +107,5 @@ export const Chat = () => {
     visibility: ${config.isReady ? 'visible' : 'hidden'};
   `;
 
-  return <iframe css={iframeStyle} title="chat" {...config} />;
+  return <iframe css={iframeStyle} data-test-subj="floatingChatTrigger" title="chat" {...config} />;
 };
