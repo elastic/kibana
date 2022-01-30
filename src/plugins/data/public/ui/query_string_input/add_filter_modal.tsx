@@ -100,6 +100,7 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
   initialAddFilterMode,
+  onRemoveFilterGroup
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
@@ -111,6 +112,7 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
+  onRemoveFilterGroup: (groupId: string) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -121,7 +123,7 @@ export function AddFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(multipleFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(multipleFilters?.length >= 1 ? multipleFilters[0].groupId : 1);
+  const [groupsCount, setGroupsCount] = useState<number>(1);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -133,7 +135,7 @@ export function AddFilterModal({
           groupId: 1,
           id: 0,
           subGroupId: 1,
-          relationship: undefined
+          relationship: undefined,
         },
       ];
     }
@@ -423,7 +425,9 @@ export function AddFilterModal({
 
   const onApplyChangesFilter = () => {};
 
-  const onDeliteFilter = () => {};
+  const onDeliteFilter = () => {
+    onRemoveFilterGroup(multipleFilters[0]?.groupId);
+  };
 
   const renderGroupedFilters = () => {
     const groupedFiltersNew = groupBy(localFilters, 'groupId');
@@ -523,13 +527,13 @@ export function AddFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId: groupsCount,
+                                    groupId: filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
                                     subGroupId,
                                     id: localFilters.length,
                                   },
                                 ]);
                                 if (filtersOnGroup.length <= 1) {
-                                  setGroupsCount(groupsCount => groupsCount + 1);
+                                  setGroupsCount(groupsCount + 1);
                                 }
                               }}
                               iconType="plus"

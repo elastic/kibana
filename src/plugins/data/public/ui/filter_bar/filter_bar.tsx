@@ -67,8 +67,31 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
+
   const onEditFilterClick = (groupId: string) => {
     setEditFilterGropId(groupId);
+    setIsEditFilterPopoverOpen(!isEditFilterPopoverOpen);
+  };
+
+  const onDeleteFilterGroup = (groupId: string) => {
+    console.log('onDeleteFilterGroup', groupId);
+    const multipleFilters = [...props.multipleFilters];
+    const updatedMultipleFilters = multipleFilters.filter(
+      (filter) => filter.groupId !== Number(groupId)
+    );
+    const filters = [...props.filters];
+    const updatedFilters: Filter[] = [];
+
+    updatedMultipleFilters.forEach((filter) => {
+      filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+    onFiltersUpdated(updatedFilters);
+    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
+
     setIsEditFilterPopoverOpen(!isEditFilterPopoverOpen);
   };
 
@@ -195,6 +218,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             onSubmit={onEditFilterClick}
             onMultipleFiltersSubmit={onEditFilterClick}
             applySavedQueries={onEditFilterClick}
+            onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             savedQueryManagement={undefined}
             initialAddFilterMode={undefined}
