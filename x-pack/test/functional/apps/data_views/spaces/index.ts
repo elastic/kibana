@@ -29,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('it can add a space', async () => {
-      await PageObjects.settings.createIndexPattern('log*');
-
       await spacesService.create({
         id: 'custom_space',
         name: 'custom_space',
@@ -38,6 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.createIndexPattern('log*');
+
       await PageObjects.settings.clickKibanaIndexPatterns();
 
       // click manage spaces on first entry
