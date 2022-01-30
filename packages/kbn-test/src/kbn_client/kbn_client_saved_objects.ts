@@ -228,8 +228,8 @@ export class KbnClientSavedObjects {
         await this.requester.request({
           method: 'DELETE',
           path: options.space
-            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}`
-            : uriencode`/api/saved_objects/${obj.type}/${obj.id}`,
+            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}?force=true`
+            : uriencode`/api/saved_objects/${obj.type}/${obj.id}?force=true`,
         });
         deleted++;
       } catch (error) {
