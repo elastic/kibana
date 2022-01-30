@@ -63,6 +63,7 @@ export default function ({ getPageObjects, getService }) {
       expect(numberOfLayers).to.be(2);
 
       await retry.try(async () => {
+        await PageObjects.maps.waitForLayersToLoad();
         const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg(indexName);
         expect(tooltipText).to.be(`${indexName}\nFound 174 documents.`);
       });

@@ -60,6 +60,7 @@ export class SideCarFilePicker extends Component<Props, State> {
     const file = files[0];
     if (!this._isSideCarFileValid(file)) {
       this.setState({ error: this._getSideCarFileNameError(), isInvalid: true });
+      this.props.onSelect(null);
       return;
     }
 
