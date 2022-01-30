@@ -121,7 +121,7 @@ export function AddFilterModal({
   const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
     convertFilterToFilterGroup(multipleFilters)
   );
-  const [groupsCount, setGroupsCount] = useState<number>(1);
+  const [groupsCount, setGroupsCount] = useState<number>(multipleFilters?.length >= 1 ? multipleFilters[0].groupId : 1);
 
   function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
     if (!convertibleFilters) {
@@ -421,6 +421,10 @@ export function AddFilterModal({
     }
   };
 
+  const onApplyChangesFilter = () => {};
+
+  const onDeliteFilter = () => {};
+
   const renderGroupedFilters = () => {
     const groupedFiltersNew = groupBy(localFilters, 'groupId');
     const GroupComponent: JSX.Element[] = [];
@@ -519,14 +523,13 @@ export function AddFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId:
-                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                    groupId: groupsCount,
                                     subGroupId,
                                     id: localFilters.length,
                                   },
                                 ]);
                                 if (filtersOnGroup.length <= 1) {
-                                  setGroupsCount(groupsCount + 1);
+                                  setGroupsCount(groupsCount => groupsCount + 1);
                                 }
                               }}
                               iconType="plus"
@@ -686,6 +689,20 @@ export function AddFilterModal({
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="trash"
+                  onClick={onDeliteFilter}
+                  data-test-subj="canvasCustomElementForm-submit"
+                  color="danger"
+                >
+                  {i18n.translate('data.filter.addFilterModal.deleteFilterBtnLabel', {
+                    defaultMessage: 'Delete filter',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="plusInCircleFilled"
@@ -695,6 +712,19 @@ export function AddFilterModal({
                 >
                   {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
                     defaultMessage: 'Add filter',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="checkInCircleFilled"
+                  fill
+                  onClick={onApplyChangesFilter}
+                  data-test-subj="canvasCustomElementForm-submit"
+                >
+                  {i18n.translate('data.filter.addFilterModal.applyChangesFilterBtnLabel', {
+                    defaultMessage: 'Apply changes',
                   })}
                 </EuiButton>
               </EuiFlexItem>
