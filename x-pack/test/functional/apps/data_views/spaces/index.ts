@@ -17,10 +17,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
   ]);
   const spacesService = getService('spaces');
+  const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
+
   describe('spaces', function () {
     this.tags('skipFirefox');
 
-    it('does a thing', async () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    });
+
+    it('it can add a space', async () => {
+      PageObjects.settings.createIndexPattern('log*');
+
       await spacesService.create({
         id: 'custom_space',
         name: 'custom_space',
@@ -29,6 +39,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+
+      // click manage spaces on first entry
+      await (await testSubjects.findAll('manageSpacesButton', 10000))[0].click();
+
+      // select custom space
+      await testSubjects.click('sts-space-selector-row-custom_space');
+      await testSubjects.click('sts-save-button');
+
+      // verify custom space has been added to list
+      await testSubjects.existOrFail('space-avatar-custom_space');
     });
   });
 }
