@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('it can add a space', async () => {
-      PageObjects.settings.createIndexPattern('log*');
+      await PageObjects.settings.createIndexPattern('log*');
 
       await spacesService.create({
         id: 'custom_space',
