@@ -8,3 +8,4 @@
 export * from './findings';
 export * from './compliance_dashboard';
 export { Benchmarks } from './benchmarks';
+export { Rules } from './rules';
