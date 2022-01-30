@@ -10,7 +10,6 @@ import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { useTheme } from './use_theme';
 import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useTimeRange } from './use_time_range';
 import { useApmParams } from './use_apm_params';
@@ -23,7 +22,6 @@ export function useTransactionLatencyChartsFetcher({
   environment: string;
 }) {
   const { transactionType, serviceName } = useApmServiceContext();
-  const theme = useTheme();
   const {
     urlParams: {
       transactionName,
@@ -94,7 +92,6 @@ export function useTransactionLatencyChartsFetcher({
     () =>
       getLatencyChartSelector({
         latencyChart: data,
-        theme,
         latencyAggregationType,
       }),
     // It should only update when the data has changed
