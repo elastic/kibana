@@ -77,7 +77,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
         ? i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel', {
             defaultMessage: 'Panel options',
           })
-        : i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel', {
+        : i18n.translate('embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabelWithIndex', {
             defaultMessage: 'Options for panel {index}',
             values: { index },
           });
