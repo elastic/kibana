@@ -16,17 +16,26 @@ import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
+import { isValidIPv4OrCIDR } from '../../../../common/endpoint/utils/is_valid_ip';
+
+function validateIp(value: string) {
+  if (!isValidIPv4OrCIDR(value)) {
+    return `invalid ip: ${value}`;
+  }
+}
 
 const EntrySchema = schema.object({
   field: schema.literal('destination.ip'),
   operator: schema.literal('included'),
   type: schema.literal('match'),
-  value: schema.ip(),
+  value: schema.string({
+    validate: validateIp,
+  }),
 });
 
 const HostIsolationDataSchema = schema.object(
   {
-    entries: schema.arrayOf(EntrySchema, { minSize: 1 }),
+    entries: schema.arrayOf(EntrySchema, { minSize: 1, maxSize: 1 }),
   },
   {
     unknowns: 'ignore',
@@ -34,8 +43,8 @@ const HostIsolationDataSchema = schema.object(
 );
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
-  static isHostIsolationException(listId: string): boolean {
-    return listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
+  static isHostIsolationException(item: { listId: string }): boolean {
+    return item.listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
   }
 
   async validatePreCreateItem(

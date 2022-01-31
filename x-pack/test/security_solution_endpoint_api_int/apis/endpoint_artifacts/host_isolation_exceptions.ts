@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           exceptionsGenerator.generateHostIsolationExceptionForUpdate({
             id: existingExceptionData.artifact.id,
             item_id: existingExceptionData.artifact.item_id,
+            _version: existingExceptionData.artifact._version,
           }),
       },
     ];
@@ -141,10 +142,10 @@ export default function ({ getService }: FtrProviderContext) {
             .send(body)
             .expect(400)
             .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/types that failed validation:/));
+            .expect(anErrorMessageWith(/expected value to equal \[destination.ip\]/));
         });
 
-        it(`should error on [${apiCall.method}] if a condition entry field is used more than once`, async () => {
+        it(`should error on [${apiCall.method}] if more than one entry`, async () => {
           const body = apiCall.getBody();
 
           body.entries.push({ ...body.entries[0] });
@@ -154,18 +155,18 @@ export default function ({ getService }: FtrProviderContext) {
             .send(body)
             .expect(400)
             .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/Duplicate/));
+            .expect(anErrorMessageWith(/\[entries\]: array size is \[2\]/));
         });
 
-        it(`should error on [${apiCall.method}] if an invalid hash is used`, async () => {
+        it(`should error on [${apiCall.method}] if an invalid ip is used`, async () => {
           const body = apiCall.getBody();
 
           body.entries = [
             {
-              field: 'process.hash.md5',
+              field: 'destination.ip',
               operator: 'included',
               type: 'match',
-              value: '1',
+              value: 'not.an.ip',
             },
           ];
 
@@ -174,40 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send(body)
             .expect(400)
             .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/invalid hash/));
-        });
-
-        it(`should error on [${apiCall.method}] if signer is set for a non windows os entry item`, async () => {
-          const body = apiCall.getBody();
-
-          body.os_types = ['linux'];
-          body.entries = [
-            {
-              field: 'process.Ext.code_signature',
-              entries: [
-                {
-                  field: 'trusted',
-                  value: 'true',
-                  type: 'match',
-                  operator: 'included',
-                },
-                {
-                  field: 'subject_name',
-                  value: 'foo',
-                  type: 'match',
-                  operator: 'included',
-                },
-              ],
-              type: 'nested',
-            },
-          ];
-
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/^.*(?!process\.Ext\.code_signature)/));
+            .expect(anErrorMessageWith(/invalid ip/));
         });
 
         it(`should error on [${apiCall.method}] if more than one OS is set`, async () => {
@@ -234,6 +202,15 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400)
             .expect(anEndpointArtifactError)
             .expect(anErrorMessageWith(/invalid policy ids/));
+        });
+
+        it(`should work on [${apiCall.method}] if entry is valid`, async () => {
+          const body = apiCall.getBody();
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(200);
         });
       }
     });
@@ -282,6 +259,23 @@ export default function ({ getService }: FtrProviderContext) {
             return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${existingExceptionData.artifact.list_id}&namespace_type=${existingExceptionData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
           },
           getBody: () => undefined,
+        },
+        {
+          method: 'post',
+          info: 'create item',
+          path: EXCEPTION_LIST_ITEM_URL,
+          getBody: () => exceptionsGenerator.generateHostIsolationExceptionForCreate(),
+        },
+        {
+          method: 'put',
+          info: 'update item',
+          path: EXCEPTION_LIST_ITEM_URL,
+          getBody: () =>
+            exceptionsGenerator.generateHostIsolationExceptionForUpdate({
+              id: existingExceptionData.artifact.id,
+              item_id: existingExceptionData.artifact.item_id,
+              _version: existingExceptionData.artifact._version,
+            }),
         },
       ];
 
