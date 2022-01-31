@@ -344,8 +344,8 @@ export const ExceptionListsTable = React.memo(() => {
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
         description={
-        <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
-      }
+          <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
+        }
       />
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
