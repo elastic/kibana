@@ -1833,6 +1833,7 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
     const auditLogger = {
       log: jest.fn(),
+      enabled: true,
     };
 
     beforeEach(() => {
