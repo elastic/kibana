@@ -37,6 +37,7 @@ import {
   CommentType,
   User,
   CaseAttributes,
+  CaseStatuses,
 } from '../../../common/api';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject, groupTotalAlertsByID } from '../../common/utils';
@@ -243,6 +244,59 @@ export class CasesService {
       perPage: cases.per_page,
       total: cases.total,
     };
+  }
+
+  public async getCaseStatusStats({
+    unsecuredSavedObjectsClient,
+    caseOptions,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    caseOptions: SavedObjectFindOptionsKueryNode;
+  }): Promise<{
+    // TODO: switch these to the CaseStatuses. field
+    open: number;
+    inProgress: number;
+    closed: number;
+  }> {
+    const cases = await unsecuredSavedObjectsClient.find<
+      ESCaseAttributes,
+      {
+        statuses: {
+          buckets: Array<{
+            key: string;
+            doc_count: number;
+          }>;
+        };
+      }
+    >({
+      ...caseOptions,
+      type: CASE_SAVED_OBJECT,
+      perPage: 0,
+      aggs: {
+        statuses: {
+          terms: {
+            field: `${CASE_SAVED_OBJECT}.attributes.status`,
+            // there should only be 3 status fields
+            size: 10,
+            order: { _key: 'asc' },
+          },
+        },
+      },
+    });
+
+    const statusBuckets = CasesService.getStatusBuckets(cases.aggregations?.statuses.buckets);
+    return {
+      open: statusBuckets?.get('open') ?? 0,
+      inProgress: statusBuckets?.get('in-progress') ?? 0,
+      closed: statusBuckets?.get('closed') ?? 0,
+    };
+  }
+
+  private static getStatusBuckets(buckets: Array<{ key: string; doc_count: number }> | undefined) {
+    return buckets?.reduce((acc, bucket) => {
+      acc.set(bucket.key, bucket.doc_count);
+      return acc;
+    }, new Map<string, number>());
   }
 
   /**
