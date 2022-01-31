@@ -14,7 +14,6 @@ import {
 } from '../../../../src/core/server';
 import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 import { registerRoutes } from './routes';
-import { getTestSavedObject } from './saved_objects';
 
 export class SessionViewPlugin implements Plugin {
   private logger: Logger;
@@ -28,15 +27,11 @@ export class SessionViewPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup, plugins: SessionViewSetupPlugins) {
-    const { savedObjects } = core;
     this.logger.debug('session view: Setup');
     const router = core.http.createRouter();
 
     // Register server routes
     registerRoutes(router, this.logger);
-
-    // Register saved objects
-    savedObjects.registerType(getTestSavedObject());
   }
 
   public start(core: CoreStart, plugins: SessionViewStartPlugins) {

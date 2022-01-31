@@ -90,3 +90,6 @@ export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreePr
 
 SessionViewTableProcessTreeContent.displayName = 'SessionViewTableProcessTreeContent';
 SessionViewTableProcessTree.displayName = 'SessionViewTableProcessTree';
+
+// eslint-disable-next-line import/no-default-export
+export { SessionViewTableProcessTree as default };
