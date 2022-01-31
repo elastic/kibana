@@ -41,6 +41,8 @@ const args: HeatmapArguments = {
     isCellLabelVisible: true,
     isYAxisLabelVisible: true,
     isXAxisLabelVisible: true,
+    isYAxisTitleVisible: true,
+    isXAxisTitleVisible: true,
     type: 'heatmap_grid',
   },
   palette: {
@@ -169,6 +171,19 @@ describe('HeatmapComponent', function () {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
     expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('Dest');
     expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('Test');
+  });
+
+  it('renders custom axis titles if given', () => {
+    const newProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        gridConfig: { ...wrapperProps.args.gridConfig, xTitle: 'test1', yTitle: 'test2' },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = shallowWithIntl(<HeatmapComponent {...newProps} />);
+    expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('test1');
+    expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('test2');
   });
 
   it('hides the legend if the legend isVisible args is false', async () => {
