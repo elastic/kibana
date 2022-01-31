@@ -53,7 +53,6 @@ export const useDataVisualizerGridData = (
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
-  const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
@@ -255,7 +254,7 @@ export const useDataVisualizerGridData = (
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
-    dataVisualizerListStateRef.current
+    dataVisualizerListState
   );
 
   const combinedProgress = useMemo(
@@ -472,7 +471,9 @@ export const useDataVisualizerGridData = (
     metricConfigs,
     visibleFieldTypes,
     visibleFieldNames,
-    strategyResponse.fieldStats,
+    strategyResponse.progress.loaded,
+    dataVisualizerListState.pageIndex,
+    dataVisualizerListState.pageSize,
   ]);
 
   // Some actions open up fly-out or popup

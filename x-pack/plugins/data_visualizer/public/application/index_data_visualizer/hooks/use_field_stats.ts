@@ -6,10 +6,11 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { combineLatest, from, Observable, Subject, Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
-import { switchMap } from 'rxjs/operators';
+import { mergeMap, switchMap, tap } from 'rxjs/operators';
+import { Comparators } from '@elastic/eui';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -99,7 +100,6 @@ export function useFieldStatsSearchStrategy(
         fieldStatsParams.nonMetricConfigs.length === 0)
     ) {
       setFetchState({
-        loaded: 100,
         isRunning: false,
       });
 
@@ -112,14 +112,26 @@ export function useFieldStatsSearchStrategy(
      * Then divide into chunks by the initial page size
      */
 
-    let sortedConfigs = [...fieldStatsParams.metricConfigs, ...fieldStatsParams.nonMetricConfigs];
+    const itemsSorter = Comparators.property(
+      sortField as string,
+      Comparators.default(sortDirection as 'asc' | 'desc' | undefined)
+    );
 
-    if (sortField === 'fieldName' || sortField === 'type') {
-      sortedConfigs = sortedConfigs.sort((a, b) => a[sortField].localeCompare(b[sortField]));
-    }
-    if (sortDirection === 'desc') {
-      sortedConfigs = sortedConfigs.reverse();
-    }
+    let sortedConfigs = [
+      ...fieldStatsParams.metricConfigs,
+      ...fieldStatsParams.nonMetricConfigs,
+    ].sort(itemsSorter);
+
+    const startingPage =
+      initialDataVisualizerListState.pageIndex > 1
+        ? initialDataVisualizerListState.pageIndex - 1
+        : 0;
+    const endingPage = initialDataVisualizerListState.pageIndex + 1;
+
+    sortedConfigs = sortedConfigs.slice(
+      initialDataVisualizerListState.pageSize * startingPage,
+      initialDataVisualizerListState.pageSize * endingPage
+    );
 
     const filterCriteria = buildBaseFilterCriteria(
       searchStrategyParams.timeFieldName,
@@ -161,11 +173,10 @@ export function useFieldStatsSearchStrategy(
     const statsMap$ = new Subject();
     const fieldsToRetry$ = new Subject<Field[]>();
 
-    const fieldStatsSub = combineLatest(
-      batches
-        .map((batch) => getFieldsStats(data.search, params, batch, searchOptions))
-        .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>
-    );
+    const fieldStatsToFetch = batches
+      .map((batch) => getFieldsStats(data.search, params, batch, searchOptions))
+      .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
+
     const onError = (error: any) => {
       toasts.addError(error, {
         title: i18n.translate('xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage', {
@@ -184,17 +195,27 @@ export function useFieldStatsSearchStrategy(
       });
     };
 
+    const statsMapTmp = new Map<string, FieldStats>();
+
     // First, attempt to fetch field stats in batches of 10
-    searchSubscription$.current = fieldStatsSub.subscribe({
-      next: (resp) => {
-        if (resp) {
-          const statsMap = new Map<string, FieldStats>();
-          const failedFields: Field[] = [];
-          resp.forEach((batchResponse) => {
+    searchSubscription$.current = from(fieldStatsToFetch)
+      .pipe(
+        mergeMap((observable) => observable, 20),
+        tap(() => {
+          setFetchState({
+            loaded: 0,
+            isRunning: true,
+          });
+        })
+      )
+      .subscribe({
+        next: (batchResponse) => {
+          if (batchResponse) {
+            const failedFields: Field[] = [];
             if (Array.isArray(batchResponse)) {
               batchResponse.forEach((f) => {
                 if (f.fieldName !== undefined) {
-                  statsMap.set(f.fieldName, f);
+                  statsMapTmp.set(f.fieldName, f);
                 }
               });
             } else {
@@ -202,23 +223,22 @@ export function useFieldStatsSearchStrategy(
               // retry each field in the failed batch individually
               failedFields.push(...(batchResponse.fields ?? []));
             }
-          });
 
-          setFetchState({
-            loaded: (statsMap.size / sortedConfigs.length) * 100,
-            isRunning: true,
-          });
+            setFetchState({
+              loaded: (statsMapTmp.size / sortedConfigs.length) * 100,
+              isRunning: true,
+            });
 
-          setFieldStats(statsMap);
-          if (failedFields.length > 0) {
-            statsMap$.next(statsMap);
-            fieldsToRetry$.next(failedFields);
+            setFieldStats(statsMapTmp);
+            if (failedFields.length > 0) {
+              statsMap$.next(statsMapTmp);
+              fieldsToRetry$.next(failedFields);
+            }
           }
-        }
-      },
-      error: onError,
-      complete: onComplete,
-    });
+        },
+        error: onError,
+        complete: onComplete,
+      });
 
     // If any of batches failed, retry each of the failed field at least one time individually
     retries$.current = combineLatest([
@@ -256,7 +276,15 @@ export function useFieldStatsSearchStrategy(
       complete: onComplete,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search, toasts, fieldStatsParams, initialDataVisualizerListState]);
+  }, [
+    data.search,
+    toasts,
+    fieldStatsParams,
+    initialDataVisualizerListState.pageSize,
+    initialDataVisualizerListState.pageIndex,
+    initialDataVisualizerListState.sortDirection,
+    initialDataVisualizerListState.sortField,
+  ]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
