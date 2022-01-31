@@ -74,9 +74,7 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const includedPoliciesParam = location.included_policies;
-
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+  const { isLoading, isRefetching, data, error, refetch } = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
