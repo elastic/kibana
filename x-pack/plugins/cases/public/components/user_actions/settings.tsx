@@ -32,7 +32,7 @@ export const createSettingsUserActionBuilder: UserActionBuilder = ({
       userAction,
       handleOutlineComment,
       label: getSettingsLabel(userAction as UserActionResponse<SettingsUserAction>),
-      icon: 'dot',
+      icon: 'gear',
     });
 
     return commonBuilder.build();
