@@ -9,6 +9,7 @@
 export interface IndexPatternRef {
   id: string;
   title: string;
+  readableTitle?: string;
 }
 
 export interface FieldDetails {
