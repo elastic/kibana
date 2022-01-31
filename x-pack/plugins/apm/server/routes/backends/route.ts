@@ -15,7 +15,6 @@ import {
   rangeRt,
 } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { getMetadataForBackend } from './get_metadata_for_backend';
 import { getLatencyChartsForBackend } from './get_latency_charts_for_backend';
 import { getTopBackends } from './get_top_backends';
@@ -41,7 +40,59 @@ const topBackendsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    backends: Array<{
+      currentStats: {
+        latency: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+        throughput: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+        errorRate: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+        totalTime: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+      } & { impact: number };
+      previousStats:
+        | ({
+            latency: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+            throughput: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+            errorRate: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+            totalTime: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+          } & { impact: number })
+        | null;
+      location: import('./../../../common/connections').Node;
+    }>;
+  }> => {
     const setup = await setupRequest(resources);
     const { environment, offset, numBuckets, kuery, start, end } =
       resources.params.query;
@@ -86,7 +137,59 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    services: Array<{
+      currentStats: {
+        latency: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+        throughput: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+        errorRate: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+        totalTime: {
+          value: number | null;
+          timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
+        };
+      } & { impact: number };
+      previousStats:
+        | ({
+            latency: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+            throughput: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+            errorRate: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+            totalTime: {
+              value: number | null;
+              timeseries: Array<
+                import('./../../../typings/timeseries').Coordinate
+              >;
+            };
+          } & { impact: number })
+        | null;
+      location: import('./../../../common/connections').Node;
+    }>;
+  }> => {
     const setup = await setupRequest(resources);
     const {
       query: {
@@ -141,7 +244,11 @@ const backendMetadataRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    metadata: { spanType: string | undefined; spanSubtype: string | undefined };
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
 
@@ -172,7 +279,12 @@ const backendLatencyChartsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentTimeseries: Array<{ x: number; y: number }>;
+    comparisonTimeseries: Array<{ x: number; y: number }> | null;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName, kuery, environment, offset, start, end } =
@@ -218,7 +330,12 @@ const backendThroughputChartsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentTimeseries: Array<{ x: number; y: number | null }>;
+    comparisonTimeseries: Array<{ x: number; y: number | null }> | null;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName, kuery, environment, offset, start, end } =
@@ -264,7 +381,12 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    currentTimeseries: Array<{ x: number; y: number }>;
+    comparisonTimeseries: Array<{ x: number; y: number }> | null;
+  }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { backendName, kuery, environment, offset, start, end } =
@@ -296,10 +418,11 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   },
 });
 
-export const backendsRouteRepository = createApmServerRouteRepository()
-  .add(topBackendsRoute)
-  .add(upstreamServicesForBackendRoute)
-  .add(backendMetadataRoute)
-  .add(backendLatencyChartsRoute)
-  .add(backendThroughputChartsRoute)
-  .add(backendFailedTransactionRateChartsRoute);
+export const backendsRouteRepository = {
+  ...topBackendsRoute,
+  ...upstreamServicesForBackendRoute,
+  ...backendMetadataRoute,
+  ...backendLatencyChartsRoute,
+  ...backendThroughputChartsRoute,
+  ...backendFailedTransactionRateChartsRoute,
+};

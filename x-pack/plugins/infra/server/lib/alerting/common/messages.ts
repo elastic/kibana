@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Comparator, AlertStates } from './types';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
   'xpack.infra.metrics.alerting.threshold.documentCount',

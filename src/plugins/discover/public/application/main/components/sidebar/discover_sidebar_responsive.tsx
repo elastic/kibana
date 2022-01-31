@@ -26,12 +26,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { DiscoverServices } from '../../../../build_services';
 import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../utils/use_saved_search';
@@ -81,10 +81,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   selectedIndexPattern?: DataView;
   /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
-  /**
    * Discover App state
    */
   state: AppState;
@@ -107,6 +103,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onEditRuntimeField: () => void;
   /**
+   * callback to execute on create dataview
+   */
+  onDataViewCreated: (dataView: DataView) => void;
+  /**
    * Discover view mode
    */
   viewMode: VIEW_MODE;
@@ -118,7 +118,14 @@ export interface DiscoverSidebarResponsiveProps {
  * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
-  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
+  const services = useDiscoverServices();
+  const {
+    selectedIndexPattern,
+    onEditRuntimeField,
+    useNewFieldsApi,
+    onChangeIndexPattern,
+    onDataViewCreated,
+  } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -149,11 +156,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [selectedIndexPattern]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
     const cleanup = () => {
       if (closeFieldEditor?.current) {
         closeFieldEditor?.current();
+      }
+      if (closeDataViewEditor?.current) {
+        closeDataViewEditor?.current();
       }
     };
     return () => {
@@ -166,11 +177,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     closeFieldEditor.current = ref;
   }, []);
 
+  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
+    closeDataViewEditor.current = ref;
+  }, []);
+
   const closeFlyout = useCallback(() => {
     setIsFlyoutVisible(false);
   }, []);
 
-  const { dataViewFieldEditor } = props.services;
+  const { dataViewFieldEditor, dataViewEditor } = services;
 
   const editField = useCallback(
     (fieldName?: string) => {
@@ -206,6 +221,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
+  const createNewDataView = useCallback(() => {
+    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!indexPatternFieldEditPermission) {
+      return;
+    }
+    const ref = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        onDataViewCreated(dataView);
+      },
+    });
+    if (setDataViewEditorRef) {
+      setDataViewEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
+  }, [dataViewEditor, setDataViewEditorRef, closeFlyout, onDataViewCreated]);
+
   if (!selectedIndexPattern) {
     return null;
   }
@@ -221,6 +254,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
+            createNewDataView={createNewDataView}
           />
         </EuiHideFor>
       )}
@@ -244,10 +278,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverIndexPatternManagement
-                  services={props.services}
                   selectedIndexPattern={selectedIndexPattern}
                   editField={editField}
                   useNewFieldsApi={useNewFieldsApi}
+                  createNewDataView={createNewDataView}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -311,6 +345,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   setFieldEditorRef={setFieldEditorRef}
                   closeFlyout={closeFlyout}
                   editField={editField}
+                  createNewDataView={createNewDataView}
                 />
               </div>
             </EuiFlyout>

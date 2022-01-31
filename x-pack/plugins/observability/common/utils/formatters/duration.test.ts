@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { asDuration, asTransactionRate, toMicroseconds, asMillisecondDuration } from './duration';
+import {
+  asDuration,
+  asTransactionRate,
+  toMicroseconds,
+  asMillisecondDuration,
+  formatDurationFromTimeUnitChar,
+} from './duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -124,6 +130,39 @@ describe('duration formatters', () => {
 
     it('formats correctly with undefined values', () => {
       expect(asMillisecondDuration(undefined)).toEqual('N/A');
+    });
+  });
+
+  describe('formatDurationFromTimeUnitChar', () => {
+    it('Convert "s" to "secs".', () => {
+      expect(formatDurationFromTimeUnitChar(30, 's')).toEqual('30 secs');
+    });
+    it('Convert "s" to "sec."', () => {
+      expect(formatDurationFromTimeUnitChar(1, 's')).toEqual('1 sec');
+    });
+
+    it('Convert "m" to "mins".', () => {
+      expect(formatDurationFromTimeUnitChar(10, 'm')).toEqual('10 mins');
+    });
+
+    it('Convert "m" to "min."', () => {
+      expect(formatDurationFromTimeUnitChar(1, 'm')).toEqual('1 min');
+    });
+
+    it('Convert "h" to "hrs."', () => {
+      expect(formatDurationFromTimeUnitChar(5, 'h')).toEqual('5 hrs');
+    });
+
+    it('Convert "h" to "hr"', () => {
+      expect(formatDurationFromTimeUnitChar(1, 'h')).toEqual('1 hr');
+    });
+
+    it('Convert "d" to "days"', () => {
+      expect(formatDurationFromTimeUnitChar(2, 'd')).toEqual('2 days');
+    });
+
+    it('Convert "d" to "day"', () => {
+      expect(formatDurationFromTimeUnitChar(1, 'd')).toEqual('1 day');
     });
   });
 });

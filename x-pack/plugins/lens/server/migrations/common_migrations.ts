@@ -22,8 +22,9 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  LensDocShape810,
 } from './types';
-import { CustomPaletteParams, layerTypes } from '../../common';
+import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -162,13 +163,31 @@ export const commonMakeReversePaletteAsCustom = (
   return newAttributes;
 };
 
-export const commonRenameFilterReferences = (attributes: LensDocShape715<VisState716>) => {
+export const commonRenameRecordsField = (attributes: LensDocShape810) => {
+  const newAttributes = cloneDeep(attributes);
+  Object.keys(newAttributes.state?.datasourceStates?.indexpattern?.layers || {}).forEach(
+    (layerId) => {
+      newAttributes.state.datasourceStates.indexpattern.layers[layerId].columnOrder.forEach(
+        (columnId) => {
+          const column =
+            newAttributes.state.datasourceStates.indexpattern.layers[layerId].columns[columnId];
+          if (column && column.operationType === 'count') {
+            column.sourceField = DOCUMENT_FIELD_NAME;
+          }
+        }
+      );
+    }
+  );
+  return newAttributes;
+};
+
+export const commonRenameFilterReferences = (attributes: LensDocShape715): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   for (const filter of newAttributes.state.filters) {
     filter.meta.index = filter.meta.indexRefName;
     delete filter.meta.indexRefName;
   }
-  return newAttributes;
+  return newAttributes as LensDocShape810;
 };
 
 const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter[]>) => {

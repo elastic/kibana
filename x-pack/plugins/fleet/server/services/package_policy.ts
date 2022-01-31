@@ -1369,7 +1369,7 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
 
     // Ensure that any value from the original object is persisted on the newly merged resulting object,
     // even if we merge other data about the given variable
-    if (keepOriginalValue && originalVar?.value) {
+    if (keepOriginalValue && originalVar?.value !== undefined) {
       result.vars[name].value = originalVar.value;
     }
   }

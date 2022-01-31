@@ -55,7 +55,6 @@ import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
@@ -126,6 +125,7 @@ import {
   FILTER_OPEN,
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -666,7 +666,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
         <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
           <Display show={!globalFullScreen}>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
                 path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
@@ -728,7 +728,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </DetectionEngineHeaderPage>
+            </HeaderPage>
             {ruleError}
             {getLegacyUrlConflictCallout}
             <EuiSpacer />

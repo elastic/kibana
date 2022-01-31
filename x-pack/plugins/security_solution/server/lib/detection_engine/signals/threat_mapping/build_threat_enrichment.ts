@@ -14,7 +14,6 @@ import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 export const buildThreatEnrichment = ({
   buildRuleMessage,
   exceptionItems,
-  listClient,
   logger,
   services,
   threatFilters,
@@ -40,10 +39,7 @@ export const buildThreatEnrichment = ({
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
-      listClient,
       searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
       logger,
       buildRuleMessage,
       perPage: undefined,

@@ -8,12 +8,22 @@
 // eslint-disable-next-line max-classes-per-file
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { IField, IVectorSource } from '../../../maps/public';
 import { FIELD_ORIGIN } from '../../../maps/common';
 import { TileMetaFeature } from '../../../maps/common/descriptor_types';
 import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
-import { Filter } from '../../../../../src/plugins/data/public';
+
+export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
+  defaultMessage: 'Actual',
+});
+export const TYPICAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {
+  defaultMessage: 'Typical',
+});
+export const TYPICAL_TO_ACTUAL = i18n.translate('xpack.ml.maps.anomalyLayerTypicalToActualLabel', {
+  defaultMessage: 'Typical to actual',
+});
 
 export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
   record_score: {
@@ -40,15 +50,51 @@ export const ANOMALY_SOURCE_FIELDS: Record<string, Record<string, string>> = {
     }),
     type: 'string',
   },
+  // this value is only used to place the point on the map
+  actual: {},
   actualDisplay: {
-    label: i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
-      defaultMessage: 'Actual',
+    label: ACTUAL_LABEL,
+    type: 'string',
+  },
+  // this value is only used to place the point on the map
+  typical: {},
+  typicalDisplay: {
+    label: TYPICAL_LABEL,
+    type: 'string',
+  },
+  partition_field_name: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerPartitionFieldNameLabel', {
+      defaultMessage: 'Partition field name',
     }),
     type: 'string',
   },
-  typicalDisplay: {
-    label: i18n.translate('xpack.ml.maps.anomalyLayerTypicalLabel', {
-      defaultMessage: 'Typical',
+  partition_field_value: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerPartitionFieldValueLabel', {
+      defaultMessage: 'Partition field value',
+    }),
+    type: 'string',
+  },
+  by_field_name: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerByFieldNameLabel', {
+      defaultMessage: 'By field name',
+    }),
+    type: 'string',
+  },
+  by_field_value: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerByFieldValueLabel', {
+      defaultMessage: 'By field value',
+    }),
+    type: 'string',
+  },
+  over_field_name: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerOverFieldNameLabel', {
+      defaultMessage: 'Over field name',
+    }),
+    type: 'string',
+  },
+  over_field_value: {
+    label: i18n.translate('xpack.ml.maps.anomalyLayerOverFieldValueLabel', {
+      defaultMessage: 'Over field value',
     }),
     type: 'string',
   },

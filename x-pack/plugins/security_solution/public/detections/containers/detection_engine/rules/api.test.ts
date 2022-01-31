@@ -131,11 +131,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: 'hello world',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: false,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -157,11 +159,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: false,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -183,11 +187,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: true,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -209,11 +215,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: false,
           tags: ['hello', 'world'],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -235,11 +243,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '',
-          sortField: 'updated_at',
-          sortOrder: 'desc',
           showCustomRules: false,
           showElasticRules: false,
           tags: ['hello', 'world'],
+        },
+        sortingOptions: {
+          field: 'updated_at',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -261,8 +271,6 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: 'ruleName',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: ['('],
@@ -284,11 +292,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '"test"',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: [],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -307,11 +317,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: '"test"',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: ['"test"'],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
@@ -330,11 +342,13 @@ describe('Detections Rules API', () => {
       await fetchRules({
         filterOptions: {
           filter: 'ruleName',
-          sortField: 'enabled',
-          sortOrder: 'desc',
           showCustomRules: true,
           showElasticRules: true,
           tags: ['hello', 'world'],
+        },
+        sortingOptions: {
+          field: 'enabled',
+          order: 'desc',
         },
         signal: abortCtrl.signal,
       });
