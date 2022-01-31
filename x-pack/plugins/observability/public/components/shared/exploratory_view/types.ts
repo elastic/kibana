@@ -65,6 +65,7 @@ export interface SeriesConfig {
         filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
       }
   >;
+  textDefinitionFields?: string[];
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
@@ -75,6 +76,7 @@ export interface SeriesConfig {
 }
 
 export type URLReportDefinition = Record<string, string[]>;
+export type URLTextReportDefinition = Record<string, string>;
 
 export interface SeriesUrl {
   name: string;
@@ -88,6 +90,7 @@ export interface SeriesUrl {
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  textReportDefinitions?: URLTextReportDefinition;
   selectedMetricField?: string;
   hidden?: boolean;
   color?: string;

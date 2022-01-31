@@ -57,7 +57,7 @@ export const createLoadedUseLogSourceMock: CreateUseLogSource =
     ...createUninitializedUseLogSourceMock({ sourceId })(args),
     sourceConfiguration: createBasicSourceConfiguration(sourceId),
     sourceStatus: {
-      logIndexFields: [],
+      indices: 'test-index',
       logIndexStatus: 'available',
     },
   });
@@ -80,5 +80,6 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
 });
 
 export const createAvailableSourceStatus = (): LogSourceStatus => ({
+  indices: 'test-index',
   logIndexStatus: 'available',
 });

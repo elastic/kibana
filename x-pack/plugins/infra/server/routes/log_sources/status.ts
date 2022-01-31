@@ -52,6 +52,7 @@ export const initLogSourceStatusRoutes = ({
           body: getLogSourceStatusSuccessResponsePayloadRT.encode({
             data: {
               logIndexStatus,
+              indices: resolvedLogSourceConfiguration.indices,
             },
           }),
         });

@@ -30,6 +30,7 @@ import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getMetricsKPIConfig } from './configurations/infra_metrics/kpi_over_time_config';
+import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 
 export const DataTypesLabels = {
   [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
@@ -45,6 +46,10 @@ export const DataTypesLabels = {
 
   [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
     defaultMessage: 'Infra metrics',
+  }),
+
+  [DataTypes.LOGS]: i18n.translate('xpack.observability.overview.exploratoryView.logsLabel', {
+    defaultMessage: 'Infra logs',
   }),
 
   [DataTypes.MOBILE]: i18n.translate(
@@ -66,6 +71,10 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
     id: DataTypes.METRICS,
     label: DataTypesLabels[DataTypes.METRICS],
+  },
+  {
+    id: DataTypes.LOGS,
+    label: DataTypesLabels[DataTypes.LOGS],
   },
   {
     id: DataTypes.MOBILE,
@@ -92,6 +101,7 @@ export const obsvReportConfigMap = {
     getMobileDeviceDistributionConfig,
   ],
   [DataTypes.METRICS]: [getMetricsKPIConfig],
+  [DataTypes.LOGS]: [getLogsKPIConfig],
 };
 
 export function ObservabilityExploratoryView() {

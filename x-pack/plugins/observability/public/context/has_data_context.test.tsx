@@ -110,7 +110,10 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: false }) },
-          { appName: 'infra_logs', hasData: async () => false },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: false, indices: 'test-index' }),
+          },
           { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
             appName: 'synthetics',
@@ -166,7 +169,10 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
-          { appName: 'infra_logs', hasData: async () => false },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: false, indices: 'test-index' }),
+          },
           {
             appName: 'infra_metrics',
             hasData: async () => ({ hasData: false, indices: 'metric-*' }),
@@ -227,7 +233,10 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
-          { appName: 'infra_logs', hasData: async () => true },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: true, indices: 'test-index' }),
+          },
           {
             appName: 'infra_metrics',
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
@@ -390,7 +399,10 @@ describe('HasDataContextProvider', () => {
               throw new Error('BOOMMMMM');
             },
           },
-          { appName: 'infra_logs', hasData: async () => true },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: true, indices: 'test-index' }),
+          },
           {
             appName: 'infra_metrics',
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),

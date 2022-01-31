@@ -359,3 +359,7 @@ export const NUMBER_OF_DEVICES = i18n.translate(
     defaultMessage: 'Number of Devices',
   }
 );
+
+export const LOG_RATE = i18n.translate('xpack.observability.expView.fieldLabels.logRate', {
+  defaultMessage: 'Log rate',
+});

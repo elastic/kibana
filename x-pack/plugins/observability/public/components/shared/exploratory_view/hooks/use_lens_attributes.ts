@@ -26,12 +26,14 @@ import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/commo
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
-export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
+export const getFiltersFromDefs = (
+  reportDefinitions: SeriesUrl['reportDefinitions'] | SeriesUrl['textReportDefinitions']
+) => {
   return Object.entries(reportDefinitions ?? {})
     .map(([field, value]) => {
       return {
         field,
-        values: value,
+        values: Array.isArray(value) ? value : [value],
       };
     })
     .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
@@ -63,7 +65,8 @@ export function getLayerConfigs(
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
-        getFiltersFromDefs(series.reportDefinitions)
+        getFiltersFromDefs(series.reportDefinitions),
+        getFiltersFromDefs(series.textReportDefinitions)
       );
 
       const color = `euiColorVis${seriesIndex}`;

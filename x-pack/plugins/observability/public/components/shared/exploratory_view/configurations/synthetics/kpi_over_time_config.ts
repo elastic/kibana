@@ -66,7 +66,7 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
       },
     ],
     hasOperationType: false,
-    filterFields: ['observer.geo.name', 'monitor.type', 'tags'],
+    filterFields: ['observer.geo.name', 'monitor.type', 'tags', 'url.full'],
     breakdownFields: [
       'observer.geo.name',
       'monitor.type',

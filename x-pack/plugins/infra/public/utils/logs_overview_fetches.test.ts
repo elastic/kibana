@@ -102,7 +102,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexStatus: 'available' },
+        data: { logIndexStatus: 'available', indices: 'test-index' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -116,7 +116,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexStatus: 'empty' },
+        data: { logIndexStatus: 'empty', indices: 'test-index' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -130,7 +130,7 @@ describe('Logs UI Observability Homepage Functions', () => {
       const { mockedGetStartServices } = setup();
 
       mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexStatus: 'missing' },
+        data: { logIndexStatus: 'missing', indices: 'test-index' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);

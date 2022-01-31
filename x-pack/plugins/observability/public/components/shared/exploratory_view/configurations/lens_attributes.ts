@@ -627,6 +627,7 @@ export class LensAttributes {
     });
 
     const urlFilters = urlFiltersToKueryString(filters ?? []);
+
     if (!baseFilters) {
       return urlFilters;
     }
@@ -681,7 +682,6 @@ export class LensAttributes {
       const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
       const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
       const mainYAxis = this.getMainYAxis(layerConfig, layerId, columnFilter);
-
       const { sourceField } = seriesConfig.xAxisColumn;
 
       const label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;

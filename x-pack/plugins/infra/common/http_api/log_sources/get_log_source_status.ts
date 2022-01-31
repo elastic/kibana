@@ -48,6 +48,7 @@ export type LogIndexStatus = rt.TypeOf<typeof logIndexStatusRT>;
 
 const logSourceStatusRT = rt.strict({
   logIndexStatus: logIndexStatusRT,
+  indices: rt.string,
 });
 
 export type LogSourceStatus = rt.TypeOf<typeof logSourceStatusRT>;
