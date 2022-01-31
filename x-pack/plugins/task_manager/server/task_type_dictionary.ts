@@ -117,6 +117,11 @@ export class TaskTypeDictionary {
       throw new Error(`Task ${duplicate} is already defined!`);
     }
 
+    const removed = Object.keys(taskDefinitions).find((type) => REMOVED_TYPES.indexOf(type) >= 0);
+    if (removed) {
+      throw new Error(`Task ${removed} has been removed from registration!`);
+    }
+
     try {
       for (const definition of sanitizeTaskDefinitions(taskDefinitions)) {
         this.definitions.set(definition.type, definition);
