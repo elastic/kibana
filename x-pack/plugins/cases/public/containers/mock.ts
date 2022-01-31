@@ -36,6 +36,8 @@ import { covertToSnakeCase } from './utils';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
+export const caseWithAlertsId = 'case-with-alerts-id';
+export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
 export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
@@ -167,6 +169,20 @@ export const basicCase: Case = {
     syncAlerts: true,
   },
   subCaseIds: [],
+};
+
+export const caseWithAlerts = {
+  ...basicCase,
+  totalAlerts: 2,
+  id: caseWithAlertsId,
+};
+export const caseWithAlertsSyncOff = {
+  ...basicCase,
+  totalAlerts: 2,
+  settings: {
+    syncAlerts: false,
+  },
+  id: caseWithAlertsSyncOffId,
 };
 
 export const basicResolvedCase: ResolvedCase = {
@@ -314,6 +330,8 @@ export const cases: Case[] = [
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
+  caseWithAlerts,
+  caseWithAlertsSyncOff,
 ];
 
 export const allCases: AllCases = {
@@ -378,6 +396,20 @@ export const basicCaseSnake: CaseResponse = {
   owner: SECURITY_SOLUTION_OWNER,
 } as CaseResponse;
 
+export const caseWithAlertsSnake = {
+  ...basicCaseSnake,
+  totalAlerts: 2,
+  id: caseWithAlertsId,
+};
+export const caseWithAlertsSyncOffSnake = {
+  ...basicCaseSnake,
+  totalAlerts: 2,
+  settings: {
+    syncAlerts: false,
+  },
+  id: caseWithAlertsSyncOffId,
+};
+
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
   count_in_progress_cases: 40,
@@ -423,6 +455,8 @@ export const casesSnake: CasesResponse = [
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
+  caseWithAlertsSnake,
+  caseWithAlertsSyncOffSnake,
 ];
 
 export const allCasesSnake: CasesFindResponse = {
