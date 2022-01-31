@@ -242,8 +242,8 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       const cursorMouseLine = lineChartGroup
         .append('g')
-        .attr('class', 'cursor-line')
-        .selectAll('.ml-explorer-mouse-line')
+        .attr('class', 'ml-anomaly-chart-cursor')
+        .selectAll('.ml-anomaly-chart-cursor-line')
         .data(cursorData);
 
       cursorMouseLine.exit().remove();
@@ -251,14 +251,15 @@ export class ExplorerChartSingleMetric extends React.Component {
       cursorMouseLine
         .enter()
         .append('path')
-        .attr('class', 'ml-explorer-mouse-line')
+        .attr('class', 'ml-anomaly-chart-cursor-line')
         .attr('d', (ts) => {
           const xPosition = lineChartXScale(ts);
           return `M${xPosition},${chartHeight} ${xPosition},0`;
         })
+        // Use elastic chart's cursor line style if possible
         .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
         .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash);
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
     }
 
     function drawLineChartAxes() {

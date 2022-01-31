@@ -145,12 +145,13 @@ function ExplorerChartContainer({
 
   return (
     <React.Fragment>
+      {/* Creating an empty elastic chart container here */}
+      {/* so that we can use chart's ref which controls the activeCursor api */}
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
           <Settings noResults={<div />} />
         </Chart>
       </div>
-
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
