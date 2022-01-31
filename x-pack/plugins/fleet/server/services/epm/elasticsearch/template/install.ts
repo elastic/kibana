@@ -272,12 +272,6 @@ function buildComponentTemplates(params: {
     // @ts-expect-error 2339
     delete registrySettingsForTemplate.index.mapping;
   }
-  templatesMap[settingsTemplateName] = {
-    template: {
-      settings: merge(defaultSettings, registrySettingsForTemplate),
-    },
-    _meta,
-  };
 
   templatesMap[mappingsTemplateName] = {
     template: {
@@ -292,6 +286,13 @@ function buildComponentTemplates(params: {
         },
       },
       mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
+    },
+    _meta,
+  };
+
+  templatesMap[settingsTemplateName] = {
+    template: {
+      settings: merge(defaultSettings, registrySettingsForTemplate),
     },
     _meta,
   };
