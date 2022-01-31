@@ -35,7 +35,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.jobsManagementLabel', {
-        defaultMessage: 'Jobs Management',
+        defaultMessage: 'Jobs',
       }),
     },
   ],

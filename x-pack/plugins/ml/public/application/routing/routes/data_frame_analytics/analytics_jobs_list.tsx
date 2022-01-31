@@ -26,7 +26,7 @@ export const analyticsJobsListRouteFactory = (
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.jobsManagementLabel', {
-        defaultMessage: 'Jobs Management',
+        defaultMessage: 'Jobs',
       }),
     },
   ],
