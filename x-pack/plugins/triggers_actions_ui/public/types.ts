@@ -106,6 +106,9 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   actionConnector?: ActionConnector;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  showEmailSubjectAndMessage?: boolean;
 }
 
 export interface Pagination {
