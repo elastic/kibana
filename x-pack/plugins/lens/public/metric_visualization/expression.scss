@@ -11,11 +11,81 @@
     font-size: $euiSizeXXL * 2;
     font-weight: $euiFontWeightSemiBold;
     border-radius: $euiBorderRadius;
-    padding: 0 $euiSize;
   }
 
   .lnsMetricExpression__title {
     font-size: $euiSizeXL;
     color: $euiTextColor;
+    &.reversOrder {
+      order: 1;
+    }
+  }
+
+  .lnsMetricExpression_title_container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    &.rowDirection {
+      flex-direction: row;
+    }
+    &.alignStart {
+      align-items: start;
+    }
+    &.alignEnd {
+      align-items: end;
+    }
+    &.alignCenter {
+      align-items: center;
+    }
+    &.titleSizeXS {
+      .lnsMetricExpression__title {
+        font-size: $euiSizeXS;
+      }
+      .lnsMetricExpression__value {
+        font-size: $euiSizeS * 2;
+      }
+    }
+    &.titleSizeS {
+      .lnsMetricExpression__title {
+        font-size: $euiSizeS * 1.5;
+        font-weight: 700;
+      }
+      .lnsMetricExpression__value {
+        font-size: $euiSizeM * 2.25;
+      }
+    }
+    &.titleSizeM {
+      .lnsMetricExpression__title {
+        font-size: $euiSizeM * 1.5;
+      }
+      .lnsMetricExpression__value {
+        font-size: $euiSizeL * 2;
+      }
+    }
+    &.titleSizeL {
+      .lnsMetricExpression__title {
+        font-size: $euiSizeL;
+      }
+      .lnsMetricExpression__value {
+        font-size: $euiSizeXL * 2;
+      }
+    }
+    &.titleSizeXL {
+      .lnsMetricExpression__title {
+        font-size: $euiSizeXL;
+      }
+      .lnsMetricExpression__value {
+        font-size: $euiSizeXXL * 2;
+      }
+    }
+
+    &.titleSizeXXL {
+      .lnsMetricExpression__title {
+        font-size: $euiSizeXXL;
+      }
+      .lnsMetricExpression__value {
+        font-size: $euiSizeXXL * 3;
+      }
+    }
   }
 }

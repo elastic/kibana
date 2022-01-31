@@ -38,6 +38,24 @@ export const metricChart: ExpressionFunctionDefinition<
         defaultMessage: 'The chart title.',
       }),
     },
+    titleSize: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.metric.titleSize.help', {
+        defaultMessage: 'The chart title size.',
+      }),
+    },
+    titlePosition: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.metric.titlePosition.help', {
+        defaultMessage: 'The chart title position.',
+      }),
+    },
+    titleAlignPosition: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.metric.titleAlignPosition.help', {
+        defaultMessage: 'The chart title align position.',
+      }),
+    },
     description: {
       types: ['string'],
       help: '',
