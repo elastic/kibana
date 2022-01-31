@@ -141,7 +141,7 @@ export class TelemetrySender {
         // ... periodically
         interval(60000),
         // ... when it regains `focus`
-        fromEvent(document, 'focus')
+        fromEvent(window, 'focus') // Using `window` instead of `document` because Chrome only emits on the first one.
       )
         .pipe(exhaustMap(this.sendIfDue))
         .subscribe();
