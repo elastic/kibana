@@ -100,10 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
       log.debug(`Making reporting indices unmanaged`);
-      await reportingAPI.makeAllReportingIndicesUnmanaged(
-        reportingAPI.REPORTING_USER_USERNAME,
-        reportingAPI.REPORTING_USER_PASSWORD
-      );
+      await reportingAPI.makeAllReportingIndicesUnmanaged();
 
       // TODO: Remove "any" when no longer through type issue "policy_id" missing
       log.debug(`Deleting ILM policy`);
@@ -123,10 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
-      await reportingAPI.makeAllReportingIndicesUnmanaged(
-        reportingAPI.REPORTING_USER_USERNAME,
-        reportingAPI.REPORTING_USER_PASSWORD
-      );
+      await reportingAPI.makeAllReportingIndicesUnmanaged();
       await supertestWithoutAuth
         .post(`/api/reporting/generate/csv_searchsource`)
         .auth(reportingAPI.REPORTING_USER_USERNAME, reportingAPI.REPORTING_USER_PASSWORD)
