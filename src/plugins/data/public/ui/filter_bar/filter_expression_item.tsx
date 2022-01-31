@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiIcon,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
@@ -49,8 +50,8 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
-  savedQueryService: SavedQueryService;
-  onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  savedQueryService?: SavedQueryService;
+  onFilterSave?: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   customLabel?: string;
 }
 
@@ -151,14 +152,6 @@ export const FilterExpressionItem: FC<Props> = ({
         'data-test-subj': 'disableFilter',
       },
       {
-        name: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
-          defaultMessage: `Save as filter`,
-        }),
-        icon: 'save',
-        panel: 2,
-        'data-test-subj': 'saveAsFilter',
-      },
-      {
         name: i18n.translate('data.filter.filterBar.deleteFilterButtonLabel', {
           defaultMessage: `Remove`,
         }),
@@ -171,31 +164,10 @@ export const FilterExpressionItem: FC<Props> = ({
       },
     ];
 
-    return [
+    const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
         items: mainPanelItems,
-      },
-      {
-        id: 2,
-        title: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
-          defaultMessage: `Save as filter`,
-        }),
-        content: (
-          <div style={{ padding: 16 }}>
-            <SaveQueryForm
-              savedQueryService={savedQueryService}
-              onSave={(savedQueryMeta) => {
-                onFilterSave(savedQueryMeta, true);
-                setIsPopoverOpen(false);
-              }}
-              onClose={() => setIsPopoverOpen(false)}
-              showTimeFilterOption={false}
-              showFilterOption={false}
-              filters={filters}
-            />
-          </div>
-        ),
       },
       // {
       //   id: 1,
@@ -215,6 +187,44 @@ export const FilterExpressionItem: FC<Props> = ({
       //   ),
       // },
     ];
+
+    if (!customLabel && savedQueryService && onFilterSave) {
+      const saveAsFilterPanelItem = {
+        name: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
+          defaultMessage: `Save as filter`,
+        }),
+        icon: 'save',
+        panel: 2,
+        'data-test-subj': 'saveAsFilter',
+      };
+
+      const saveAsFilterPanelContent = {
+        id: 2,
+        title: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
+          defaultMessage: `Save as filter`,
+        }),
+        content: (
+          <div style={{ padding: 16 }}>
+            <SaveQueryForm
+              savedQueryService={savedQueryService}
+              onSave={(savedQueryMeta) => {
+                onFilterSave(savedQueryMeta, true);
+                setIsPopoverOpen(false);
+              }}
+              onClose={() => setIsPopoverOpen(false)}
+              showTimeFilterOption={false}
+              showFilterOption={false}
+              filters={filters}
+            />
+          </div>
+        ),
+      };
+
+      mainPanelItems.splice(mainPanelItems.length - 1, 0, saveAsFilterPanelItem);
+      panels.push(saveAsFilterPanelContent);
+    }
+
+    return panels;
   }
   /**
    * Checks if filter field exists in any of the index patterns provided,
