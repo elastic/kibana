@@ -11,6 +11,10 @@ export const CLOUD_POSTURE = i18n.translate('xpack.csp.cloud_posture', {
   defaultMessage: 'Cloud Posture',
 });
 
+export const CLOUD_POSTURE_SCORE = i18n.translate('xpack.csp.cloud_posture_score', {
+  defaultMessage: 'Cloud Posture Score',
+});
+
 export const TOP_5_CHART_TITLE = i18n.translate('xpack.csp.top_5_chart_title', {
   defaultMessage: 'Top 5 Resources Types At Risk',
 });
@@ -21,10 +25,6 @@ export const SCORE_PER_CLUSTER_CHART_TITLE = i18n.translate(
     defaultMessage: 'Score Per Account / Cluster',
   }
 );
-
-export const NON_COMPLIANT_FIRST = i18n.translate('xpack.csp.non_compliant_first', {
-  defaultMessage: 'Non compliant first',
-});
 
 export const COMPLIANCE_SCORE = i18n.translate('xpack.csp.compliance_score', {
   defaultMessage: 'Compliance Score',
