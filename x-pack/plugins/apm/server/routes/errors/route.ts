@@ -35,9 +35,6 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      t.type({
-        transactionType: t.string,
-      }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -57,21 +54,13 @@ const errorsMainStatisticsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const {
-      environment,
-      transactionType,
-      kuery,
-      sortField,
-      sortDirection,
-      start,
-      end,
-    } = params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } =
+      params.query;
 
     const errorGroups = await getErrorGroupMainStatistics({
       environment,
       kuery,
       serviceName,
-      transactionType,
       sortField,
       sortDirection,
       setup,

@@ -105,7 +105,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               kuery,
               start,
               end,
-              transactionType,
             },
           },
         }
@@ -131,7 +130,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       start,
       end,
       serviceName,
-      transactionType,
       pageIndex,
       direction,
       field,

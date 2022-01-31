@@ -82,7 +82,7 @@ export function ErrorGroupOverview() {
         const normalizedSortDirection =
           sortDirection === 'asc' ? 'asc' : 'desc';
 
-        if (start && end && transactionType) {
+        if (start && end) {
           return callApmApi(
             'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
             {
@@ -92,7 +92,6 @@ export function ErrorGroupOverview() {
                 },
                 query: {
                   environment,
-                  transactionType,
                   kuery,
                   start,
                   end,
@@ -110,16 +109,7 @@ export function ErrorGroupOverview() {
           });
         }
       },
-      [
-        environment,
-        kuery,
-        serviceName,
-        transactionType,
-        start,
-        end,
-        sortField,
-        sortDirection,
-      ]
+      [environment, kuery, serviceName, start, end, sortField, sortDirection]
     );
 
   const { requestId, errorGroupMainStatistics } = errorGroupListData;
