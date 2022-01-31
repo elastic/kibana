@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -116,7 +116,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="hideSeries"
-                icon={series.hidden ? 'eyeClosed' : 'eye'}
+                icon={series.hidden ? 'eye' : 'eyeClosed'}
                 onClick={toggleSeries}
                 aria-label={series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
               >
