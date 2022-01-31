@@ -40,15 +40,6 @@ const sorting = {
   },
 };
 
-const search = {
-  box: {
-    incremental: true,
-    schema: {
-      fields: { title: { type: 'string' } },
-    },
-  },
-};
-
 const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
   defaultMessage: 'Data Views',
 });
@@ -71,6 +62,8 @@ interface Props extends RouteComponentProps {
   showCreateDialog?: boolean;
 }
 
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
 export const IndexPatternTable = ({
   history,
   canSave,
@@ -85,9 +78,27 @@ export const IndexPatternTable = ({
     IndexPatternEditor,
     spaces,
   } = useKibana<IndexPatternManagmentContext>().services;
+  const [query, setQuery] = useState('');
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
+
+  const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
+
+  const search = {
+    query,
+    onChange: handleOnChange,
+    box: {
+      incremental: true,
+      schema: {
+        fields: { title: { type: 'string' } },
+      },
+    },
+  };
 
   const loadDataViews = useCallback(async () => {
     setIsLoadingIndexPatterns(true);
@@ -116,8 +127,6 @@ export const IndexPatternTable = ({
   chrome.docTitle.change(title);
 
   const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
-
-  const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
   const ContextWrapper = useMemo(
     () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
