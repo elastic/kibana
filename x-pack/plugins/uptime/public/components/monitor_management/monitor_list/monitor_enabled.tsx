@@ -17,7 +17,7 @@ interface Props {
   id: string;
   monitor: SyntheticsMonitor;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
-  isDisabled: boolean;
+  isDisabled?: boolean;
 }
 
 export const MonitorEnabled = ({ id, monitor, setRefresh, isDisabled }: Props) => {

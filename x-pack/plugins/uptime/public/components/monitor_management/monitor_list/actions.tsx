@@ -16,7 +16,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 interface Props {
   id: string;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
-  isDisabled: boolean;
+  isDisabled?: boolean;
 }
 
 export const Actions = ({ id, setRefresh, isDisabled }: Props) => {
