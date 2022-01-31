@@ -23,6 +23,7 @@ import {
   ActionTypes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isEmptyString } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -69,6 +70,10 @@ export const create = async (
     throw Boom.badRequest(
       `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
     );
+  }
+
+  if (query.tags.some(isEmptyString)) {
+    throw Boom.badRequest('A tag must not be empty');
   }
 
   try {

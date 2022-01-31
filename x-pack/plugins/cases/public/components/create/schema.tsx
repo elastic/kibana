@@ -6,6 +6,7 @@
  */
 
 import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import { isEmptyString } from '../../../common/utils/validators';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import {
   FIELD_TYPES,
@@ -17,8 +18,6 @@ import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
 const { emptyField, maxLengthField } = fieldValidators;
-
-const isEmptyString = (value: string) => value.trim() === '';
 
 export const schemaTags = {
   type: FIELD_TYPES.COMBO_BOX,

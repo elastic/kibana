@@ -230,6 +230,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
       });
+
+      describe('tags', async () => {
+        it('400s if the a tag is empty', async () => {
+          const tags = ['test', ' '];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is of length zero', async () => {
+          const tags = ['test', ''];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+      });
     });
 
     describe('rbac', () => {
