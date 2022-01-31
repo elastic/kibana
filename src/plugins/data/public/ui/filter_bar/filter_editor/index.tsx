@@ -91,7 +91,7 @@ class FilterEditorUI extends Component<Props, State> {
             <EuiFlexItem>
               <FormattedMessage
                 id="data.filter.filterEditor.editFilterPopupTitle"
-                defaultMessage="Edit filter and update"
+                defaultMessage="Edit filter"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
