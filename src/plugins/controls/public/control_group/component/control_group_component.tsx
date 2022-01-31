@@ -46,6 +46,7 @@ import { forwardAllContext } from '../editor/forward_all_context';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
+import { ControlsIllustration } from './controls_illustration';
 
 export const ControlGroup = () => {
   // Controls Services Context
@@ -108,8 +109,8 @@ export const ControlGroup = () => {
     return null;
   }
 
-  let panelBg: 'subdued' | 'primary' | 'success' = 'subdued';
-  if (emptyState) panelBg = 'primary';
+  let panelBg: 'subdued' | 'plain' | 'success' = 'subdued';
+  if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
   return (
@@ -201,10 +202,18 @@ export const ControlGroup = () => {
       ) : (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
-            <EuiFlexItem grow={1}>
-              <EuiText className="emptyStateText eui-textCenter" size="s">
-                <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
-              </EuiText>
+            <EuiFlexItem grow={1} className="controlsIllustration__container">
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <ControlsIllustration />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {' '}
+                  <EuiText className="emptyStateText" size="s">
+                    <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div className="addControlButton">

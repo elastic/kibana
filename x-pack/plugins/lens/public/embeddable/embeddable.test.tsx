@@ -17,7 +17,7 @@ import {
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange, IndexPatternsContract } from 'src/plugins/data/public';
+import { Query, TimeRange, IndexPatternsContract, FilterManager } from 'src/plugins/data/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable';
@@ -70,6 +70,16 @@ const options = {
   saveMethod: defaultSaveMethod,
   unwrapMethod: defaultUnwrapMethod,
   checkForDuplicateTitle: defaultCheckForDuplicateTitle,
+};
+
+const mockInjectFilterReferences: FilterManager['inject'] = (filters, references) => {
+  return filters.map((filter) => ({
+    ...filter,
+    meta: {
+      ...filter.meta,
+      index: 'injected!',
+    },
+  }));
 };
 
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
@@ -139,6 +149,7 @@ describe('embeddable', () => {
         getTrigger,
         theme: themeServiceMock.createStartContract(),
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         documentToExpression: () =>
           Promise.resolve({
             ast: {
@@ -180,6 +191,7 @@ describe('embeddable', () => {
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -226,6 +238,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -283,6 +296,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -329,6 +343,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -370,6 +385,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -414,6 +430,7 @@ describe('embeddable', () => {
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -465,6 +482,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -514,6 +532,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -570,6 +589,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -592,7 +612,7 @@ describe('embeddable', () => {
       expect.objectContaining({
         timeRange,
         query: [query, savedVis.state.query],
-        filters,
+        filters: mockInjectFilterReferences(filters, []),
       })
     );
 
@@ -627,6 +647,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -663,9 +684,7 @@ describe('embeddable', () => {
       state: {
         ...savedVis.state,
         query: { language: 'kquery', query: 'saved filter' },
-        filters: [
-          { meta: { alias: 'test', negate: false, disabled: false, indexRefName: 'filter-0' } },
-        ],
+        filters: [{ meta: { alias: 'test', negate: false, disabled: false, index: 'filter-0' } }],
       },
       references: [{ type: 'index-pattern', name: 'filter-0', id: 'my-index-pattern-id' }],
     };
@@ -687,6 +706,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -708,11 +728,14 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
       timeRange,
       query: [query, { language: 'kquery', query: 'saved filter' }],
-      filters: [
-        filters[0],
-        // actual index pattern id gets injected
-        { meta: { alias: 'test', negate: false, disabled: false, index: 'my-index-pattern-id' } },
-      ],
+      // actual index pattern id gets injected
+      filters: mockInjectFilterReferences(
+        [
+          filters[0],
+          { meta: { alias: 'test', negate: false, disabled: false, index: 'injected!' } },
+        ],
+        []
+      ),
     });
   });
 
@@ -731,6 +754,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -775,6 +799,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -819,6 +844,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -878,6 +904,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -953,6 +980,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -1003,6 +1031,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -1053,6 +1082,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         visualizationMap: {},
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         theme: themeServiceMock.createStartContract(),
         documentToExpression: () =>
           Promise.resolve({
@@ -1124,6 +1154,7 @@ describe('embeddable', () => {
         },
         getTrigger,
         theme: themeServiceMock.createStartContract(),
+        injectFilterReferences: jest.fn(mockInjectFilterReferences),
         visualizationMap: {
           [visDocument.visualizationType as string]: {
             onEditAction: onEditActionMock,

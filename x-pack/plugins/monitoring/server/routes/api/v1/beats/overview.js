@@ -41,7 +41,7 @@ export function beatsOverviewRoute(server) {
         const [latest, stats, metrics] = await Promise.all([
           getLatestStats(req, beatsIndexPattern, clusterUuid),
           getStats(req, beatsIndexPattern, clusterUuid),
-          getMetrics(req, beatsIndexPattern, metricSet),
+          getMetrics(req, 'beats', metricSet),
         ]);
 
         return {

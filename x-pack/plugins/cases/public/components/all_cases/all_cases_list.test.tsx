@@ -792,8 +792,10 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const solutionHeader = wrapper.find({ children: 'Solution' });
-    expect(solutionHeader.exists()).toBeTruthy();
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeTruthy();
+    });
   });
 
   it('hides Solution column if there is a set owner', async () => {
@@ -805,8 +807,10 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const solutionHeader = wrapper.find({ children: 'Solution' });
-    expect(solutionHeader.exists()).toBeFalsy();
+    await waitFor(() => {
+      const solutionHeader = wrapper.find({ children: 'Solution' });
+      expect(solutionHeader.exists()).toBeFalsy();
+    });
   });
 
   it('should deselect cases when refreshing', async () => {

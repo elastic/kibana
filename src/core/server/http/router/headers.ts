@@ -61,7 +61,7 @@ export function filterHeaders(
   headers: Headers,
   fieldsToKeep: string[],
   fieldsToExclude: string[] = []
-) {
+): Headers {
   const fieldsToExcludeNormalized = fieldsToExclude.map(normalizeHeaderField);
   // Normalize list of headers we want to allow in upstream request
   const fieldsToKeepNormalized = fieldsToKeep

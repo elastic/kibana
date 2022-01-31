@@ -41,6 +41,7 @@ import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
 import { getStubPluginServices } from '../../../../presentation_util/public';
 
 const presentationUtil = getStubPluginServices();
+const theme = coreMock.createStart().theme;
 
 const options: DashboardContainerServices = {
   // TODO: clean up use of any
@@ -55,7 +56,7 @@ const options: DashboardContainerServices = {
   uiActions: {} as any,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   http: coreMock.createStart().http,
-  theme: coreMock.createStart().theme,
+  theme,
   presentationUtil,
 };
 
@@ -251,6 +252,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
             overlays={{} as any}
             inspector={inspector}
             SavedObjectFinder={() => null}
+            theme={theme}
           />
         </presentationUtil.ContextProvider>
       </KibanaContextProvider>

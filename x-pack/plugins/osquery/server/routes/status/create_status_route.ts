@@ -31,14 +31,11 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
-      const packageService = osqueryContext.service.getPackageService();
+      const packageService = osqueryContext.service.getPackageService()?.asInternalUser;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-      const packageInfo = await osqueryContext.service.getPackageService()?.getInstallation({
-        savedObjectsClient: internalSavedObjectsClient,
-        pkgName: OSQUERY_INTEGRATION_NAME,
-      });
+      const packageInfo = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
       if (packageInfo?.install_version && satisfies(packageInfo?.install_version, '<0.6.0')) {
         try {
@@ -102,8 +99,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           );
 
           await packageService?.ensureInstalledPackage({
-            esClient,
-            savedObjectsClient: internalSavedObjectsClient,
             pkgName: OSQUERY_INTEGRATION_NAME,
           });
 

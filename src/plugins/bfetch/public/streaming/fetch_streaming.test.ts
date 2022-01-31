@@ -22,6 +22,7 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 const setup = () => {
   const { xhr, XMLHttpRequest } = mockXMLHttpRequest();
   window.XMLHttpRequest = XMLHttpRequest;
+  (xhr as any).status = 200;
   return { xhr };
 };
 

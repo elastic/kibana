@@ -24,18 +24,18 @@ import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  id: 'anomaly_detection',
+  title: i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
+    defaultMessage: 'Anomaly Detection',
+  }),
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
-        defaultMessage: 'Job Management',
-      }),
-      href: '',
-    },
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB'),
   ],
+  'data-test-subj': 'mlPageJobManagement',
+  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

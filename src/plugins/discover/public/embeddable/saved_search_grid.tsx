@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import React, { useState, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import { getServices } from '../kibana_services';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { ElasticSearchHit } from '../types';
 
@@ -17,9 +16,7 @@ export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
 }
 
-export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
-  <DiscoverGrid {...props} />
-));
+export const DataGridMemoized = memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
@@ -33,12 +30,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
           </EuiFlexItem>
         )}
         <EuiFlexItem style={{ minHeight: 0 }}>
-          <DataGridMemoized
-            {...props}
-            setExpandedDoc={setExpandedDoc}
-            expandedDoc={expandedDoc}
-            services={getServices()}
-          />
+          <DataGridMemoized {...props} setExpandedDoc={setExpandedDoc} expandedDoc={expandedDoc} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </I18nProvider>

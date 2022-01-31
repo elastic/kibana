@@ -13,36 +13,25 @@ import type {
   UpdateExceptionListItemSchema,
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import { Immutable } from '../../../../../common/endpoint/types';
 
-import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 import { EventFiltersService } from '../types';
+import {
+  addEventFilters,
+  getList,
+  getOne,
+  updateOne,
+  deleteOne,
+  getSummary,
+} from './service_actions';
 
+/**
+ * @deprecated Don't use this class for future implementations, use the service_actions module instead!
+ */
 export class EventFiltersHttpService implements EventFiltersService {
-  private listHasBeenCreated: boolean;
-
   constructor(private http: HttpStart) {
-    this.listHasBeenCreated = false;
-  }
-
-  private async createEndpointEventList() {
-    try {
-      await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-        body: JSON.stringify(EVENT_FILTER_LIST),
-      });
-      this.listHasBeenCreated = true;
-    } catch (err) {
-      // Ignore 409 errors. List already created
-      if (err.response.status === 409) this.listHasBeenCreated = true;
-      else throw err;
-    }
-  }
-
-  private async httpWrapper() {
-    if (!this.listHasBeenCreated) await this.createEndpointEventList();
-    return this.http;
+    this.http = http;
   }
 
   async getList({
@@ -58,87 +47,28 @@ export class EventFiltersHttpService implements EventFiltersService {
     sortOrder: string;
     filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
-    const http = await this.httpWrapper();
-    return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
-      query: {
-        page,
-        per_page: perPage,
-        sort_field: sortField,
-        sort_order: sortOrder,
-        list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
-        namespace_type: ['agnostic'],
-        filter,
-      },
-    });
+    return getList({ http: this.http, perPage, page, sortField, sortOrder, filter });
   }
 
   async addEventFilters(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
-    return (await this.httpWrapper()).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(exception),
-    });
+    return addEventFilters(this.http, exception);
   }
 
   async getOne(id: string) {
-    return (await this.httpWrapper()).get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      query: {
-        id,
-        namespace_type: 'agnostic',
-      },
-    });
+    return getOne(this.http, id);
   }
 
   async updateOne(
     exception: Immutable<UpdateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema> {
-    return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(EventFiltersHttpService.cleanEventFilterToUpdate(exception)),
-    });
+    return updateOne(this.http, exception);
   }
 
   async deleteOne(id: string): Promise<ExceptionListItemSchema> {
-    return (await this.httpWrapper()).delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      query: {
-        id,
-        namespace_type: 'agnostic',
-      },
-    });
+    return deleteOne(this.http, id);
   }
 
-  async getSummary(): Promise<ExceptionListSummarySchema> {
-    return (await this.httpWrapper()).get<ExceptionListSummarySchema>(
-      `${EXCEPTION_LIST_URL}/summary`,
-      {
-        query: {
-          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          namespace_type: 'agnostic',
-        },
-      }
-    );
-  }
-
-  static cleanEventFilterToUpdate(
-    exception: Immutable<UpdateExceptionListItemSchema>
-  ): UpdateExceptionListItemSchema {
-    const exceptionToUpdateCleaned = { ...exception };
-    // Clean unnecessary fields for update action
-    [
-      'created_at',
-      'created_by',
-      'created_at',
-      'created_by',
-      'list_id',
-      'tie_breaker_id',
-      'updated_at',
-      'updated_by',
-    ].forEach((field) => {
-      delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
-    });
-
-    exceptionToUpdateCleaned.comments = exceptionToUpdateCleaned.comments?.map((comment) => ({
-      comment: comment.comment,
-      id: comment.id,
-    }));
-
-    return exceptionToUpdateCleaned as UpdateExceptionListItemSchema;
+  async getSummary(filter?: string): Promise<ExceptionListSummarySchema> {
+    return getSummary({ http: this.http, filter });
   }
 }

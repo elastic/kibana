@@ -37,21 +37,17 @@ export const configSchema = schema.object({
     defaultValue: 'http://localhost:9200',
   }),
   username: schema.maybe(
-    schema.conditional(
-      schema.contextRef('dist'),
-      false,
-      schema.string({
-        validate: (rawConfig) => {
-          if (rawConfig === 'elastic') {
-            return (
-              'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-              'privilege-related issues. You should use the "kibana_system" user instead.'
-            );
-          }
-        },
-      }),
-      schema.string()
-    )
+    schema.string({
+      validate: (rawConfig) => {
+        if (rawConfig === 'elastic') {
+          return (
+            'value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to ' +
+            'function. Use a service account token instead. Learn more: ' +
+            'https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html' // we don't have a way to pass a branch into the config schema; hardcoding this one link to the 8.0 docs is OK
+          );
+        }
+      },
+    })
   ),
   password: schema.maybe(schema.string()),
   serviceAccountToken: schema.maybe(
@@ -178,7 +174,7 @@ const deprecations: ConfigDeprecationProvider = () => [
       return;
     }
 
-    if (es.username === 'elastic' || es.username === 'kibana') {
+    if (es.username === 'kibana') {
       const username = es.username;
       addDeprecation({
         configPath: `${fromPath}.username`,
@@ -250,6 +246,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     if (es.logQueries === true) {
       addDeprecation({
         configPath: `${fromPath}.logQueries`,
+        level: 'warning',
         message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
         correctiveActions: {
           manualSteps: [

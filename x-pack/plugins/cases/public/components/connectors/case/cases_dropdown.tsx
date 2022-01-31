@@ -69,5 +69,6 @@ const CasesDropdownComponent: React.FC<CaseDropdownProps> = ({
     </EuiFormRow>
   );
 };
+CasesDropdownComponent.displayName = 'CasesDropdown';
 
 export const CasesDropdown = memo(CasesDropdownComponent);

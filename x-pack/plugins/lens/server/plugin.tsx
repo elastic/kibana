@@ -7,11 +7,16 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
+import {
+  PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+} from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
+import { getUiSettings } from './ui_settings';
 import {
   registerLensUsageCollector,
   initializeLensTelemetry,
@@ -19,24 +24,26 @@ import {
 } from './usage';
 import { setupSavedObjects } from './saved_objects';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
-import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
 import { setupExpressions } from './expressions';
+import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsServerSetup;
+  data: DataPluginSetup;
 }
 
 export interface PluginStartContract {
   taskManager?: TaskManagerStartContract;
   fieldFormats: FieldFormatsStart;
   data: DataPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export interface LensServerPluginSetup {
-  lensEmbeddableFactory: typeof lensEmbeddableFactory;
+  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory>;
 }
 
 export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
@@ -47,9 +54,11 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
   }
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
-    setupSavedObjects(core);
+    const filterMigrations = plugins.data.query.filterManager.getAllMigrations();
+    setupSavedObjects(core, filterMigrations);
     setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
+    core.uiSettings.register(getUiSettings());
 
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(
@@ -61,6 +70,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
       initializeLensTelemetry(this.telemetryLogger, core, plugins.taskManager);
     }
 
+    const lensEmbeddableFactory = makeLensEmbeddableFactory(filterMigrations);
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
     return {
       lensEmbeddableFactory,

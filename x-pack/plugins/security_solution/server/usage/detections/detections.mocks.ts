@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+
 export const getMockJobSummaryResponse = () => [
   {
     id: 'linux_anomalous_network_activity_ecs',
@@ -287,7 +289,9 @@ export const getMockMlDatafeedStatsResponse = () => ({
   ],
 });
 
-export const getMockRuleSearchResponse = (immutableTag: string = '__internal_immutable:true') => ({
+export const getMockRuleSearchResponse = (
+  immutableTag: string = '__internal_immutable:true'
+): SearchResponse<unknown, unknown> => ({
   took: 2,
   timed_out: false,
   _shards: {
@@ -387,7 +391,7 @@ export const getMockRuleSearchResponse = (immutableTag: string = '__internal_imm
   },
 });
 
-export const getMockRuleAlertsResponse = (docCount: number) => ({
+export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<unknown, unknown> => ({
   took: 7,
   timed_out: false,
   _shards: {

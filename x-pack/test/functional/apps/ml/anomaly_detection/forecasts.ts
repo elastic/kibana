@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       });
 
       it('opens a job from job list link', async () => {

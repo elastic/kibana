@@ -35,7 +35,7 @@ jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
@@ -139,10 +139,6 @@ describe('CaseViewPage', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-    ).toEqual(data.createdAt);
-
-    expect(
       wrapper
         .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
         .first()
@@ -178,9 +174,6 @@ describe('CaseViewPage', () => {
     );
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-      ).toEqual(basicCaseClosed.closedAt);
       expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
         'Closed'
       );
@@ -506,7 +499,7 @@ describe('CaseViewPage', () => {
       expect(
         wrapper
           .find(
-            '[data-test-subj="comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
+            '[data-test-subj="user-action-alert-comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
           )
           .first()
           .text()

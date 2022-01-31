@@ -1392,6 +1392,42 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should combine multiple partial params if the column supports multiple fields', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'alphabetical', fallback: true },
+          orderDirection: 'desc',
+          size: 5,
+        },
+      };
+
+      replaceColumn({
+        layer: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: termsColumn,
+          },
+        },
+        indexPattern,
+        columnId: 'col1',
+        op: 'cumulative_sum',
+        visualizationGroups: [],
+        field: indexPattern.getFieldByName(termsColumn.sourceField),
+        initialParams: {
+          params: { secondaryFields: ['dest'] },
+        },
+        shouldCombineField: true,
+      });
+    });
+
     describe('switching from non-reference to reference test cases', () => {
       it('should wrap around the previous operation as a reference if possible (case new1)', () => {
         const expectedColumn = {
