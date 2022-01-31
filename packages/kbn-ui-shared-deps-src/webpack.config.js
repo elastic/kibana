@@ -74,6 +74,7 @@ module.exports = {
     extensions: ['.js', '.ts'],
     symlinks: false,
     alias: {
+      '@elastic/eui$': '@elastic/eui/optimize/es',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4

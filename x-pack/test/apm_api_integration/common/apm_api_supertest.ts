@@ -12,7 +12,7 @@ import { parseEndpoint } from '../../../plugins/apm/common/apm_api/parse_endpoin
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
-} from '../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../plugins/apm/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '../../../plugins/apm/server';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
