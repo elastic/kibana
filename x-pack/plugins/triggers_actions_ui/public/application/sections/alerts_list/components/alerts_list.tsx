@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -201,10 +201,6 @@ export const AlertsList: React.FunctionComponent = () => {
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
-
-  const onPercentileOptionsChange = useCallback((options: EuiSelectableOption[]) => {
-    setPercentileOptions(options);
-  }, []);
 
   useEffect(() => {
     loadAlertsData();
@@ -415,7 +411,7 @@ export const AlertsList: React.FunctionComponent = () => {
         </EuiToolTip>
         <PercentileSelectablePopover
           options={percentileOptions}
-          onOptionsChange={onPercentileOptionsChange}
+          onOptionsChange={setPercentileOptions}
         />
       </span>
     );
