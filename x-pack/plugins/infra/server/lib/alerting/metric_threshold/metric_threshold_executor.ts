@@ -32,6 +32,7 @@ import {
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -147,7 +148,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const groups = [...new Set([...prevGroups, ...resultGroups])];
 
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
-
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -286,6 +286,8 @@ const formatAlertResult = <AlertResult>(
     comparator: Comparator;
     warningThreshold?: number[];
     warningComparator?: Comparator;
+    timeSize: number;
+    timeUnit: TimeUnitChar;
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
@@ -305,6 +307,7 @@ const formatAlertResult = <AlertResult>(
   const formatter = createFormatter('percent');
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
   const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
+
   return {
     ...alertResult,
     currentValue:
