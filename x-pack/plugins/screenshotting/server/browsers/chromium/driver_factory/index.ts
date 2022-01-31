@@ -37,6 +37,12 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
+  defaultViewport?: {
+    /** Size in pixels */
+    width?: number;
+    /** Size in pixels */
+    height?: number;
+  };
   openUrlTimeout: number;
 }
 
@@ -119,7 +125,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     // FIXME: 'create' is deprecated
@@ -140,6 +146,14 @@ export class HeadlessChromiumDriverFactory {
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
+
+          // We optionally set this at page creation so that there is minimal
+          // reflow required when setting the page size just before a screenshot
+          // is taken.
+          defaultViewport: {
+            ...DEFAULT_VIEWPORT,
+            ...defaultViewport,
+          },
           env: {
             TZ: browserTimezone,
           },
