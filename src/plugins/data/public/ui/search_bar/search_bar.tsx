@@ -634,6 +634,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           toggleAddFilterModal={this.toggleAddFilterModal}
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
+          onNewFiltersSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
         />
       );
     }

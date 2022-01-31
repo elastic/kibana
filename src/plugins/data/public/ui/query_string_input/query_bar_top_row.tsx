@@ -38,6 +38,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
 import { SavedQuery } from '../..';
 import { AddFilterModal, FilterGroup } from './add_filter_modal';
+import { SavedQueryMeta } from '../saved_query_form';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -86,6 +87,7 @@ export interface QueryBarTopRowProps {
   toggleAddFilterModal?: (value: boolean) => void;
   isAddFilterModalOpen?: boolean;
   addFilterMode?: string;
+  onNewFiltersSave: (savedQueryMeta: SavedQueryMeta) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -457,6 +459,7 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               savedQueryManagement={props.savedQueryManagement}
               initialAddFilterMode={props.addFilterMode}
+              saveFilters={props.onNewFiltersSave}
             />
           )}
         </EuiFlexItem>
