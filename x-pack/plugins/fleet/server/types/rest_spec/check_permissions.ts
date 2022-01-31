@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useStartServices } from './use_core';
+import { schema } from '@kbn/config-schema';
 
-export function useCapabilities() {
-  const core = useStartServices();
-  return core.application.capabilities.fleet;
-}
+export const CheckPermissionsRequestSchema = {
+  query: schema.object({
+    fleetServerSetup: schema.maybe(schema.boolean()),
+  }),
+};

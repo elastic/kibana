@@ -6,14 +6,20 @@
  */
 
 import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common';
 import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetAuthzRouter } from '../security';
+import type { FleetRequestHandler } from '../../types';
+import { CheckPermissionsRequestSchema } from '../../types';
 
-export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
+export const getCheckPermissionsHandler: FleetRequestHandler<
+  unknown,
+  TypeOf<typeof CheckPermissionsRequestSchema.query>
+> = async (context, request, response) => {
   const missingSecurityBody: CheckPermissionsResponse = {
     success: false,
     error: 'MISSING_SECURITY',
@@ -22,24 +28,31 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
   if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
-    const security = appContextService.getSecurity();
-    const user = security.authc.getCurrentUser(request);
-
-    // Defensively handle situation where user is undefined (should only happen when ES security is disabled)
-    // This should be covered by the `getSecurityLicense().isEnabled()` check above, but we leave this for robustness.
-    if (!user) {
-      return response.ok({
-        body: missingSecurityBody,
-      });
-    }
-
-    if (!user?.roles.includes('superuser')) {
+    if (!context.fleet.authz.fleet.all) {
       return response.ok({
         body: {
           success: false,
-          error: 'MISSING_SUPERUSER_ROLE',
+          error: 'MISSING_PRIVILEGES',
         } as CheckPermissionsResponse,
       });
+    }
+    // check the manage_service_account cluster privilege
+    else if (request.query.fleetServerSetup) {
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const {
+        body: { has_all_requested: hasAllPrivileges },
+      } = await esClient.security.hasPrivileges({
+        body: { cluster: ['manage_service_account'] },
+      });
+
+      if (!hasAllPrivileges) {
+        return response.ok({
+          body: {
+            success: false,
+            error: 'MISSING_FLEET_SERVER_SETUP_PRIVILEGES',
+          } as CheckPermissionsResponse,
+        });
+      }
     }
 
     return response.ok({ body: { success: true } as CheckPermissionsResponse });
@@ -77,9 +90,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
-      validate: {},
+      validate: CheckPermissionsRequestSchema,
       options: { tags: [] },
-      // no permission check for that route
     },
     getCheckPermissionsHandler
   );

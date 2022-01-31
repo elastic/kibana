@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './fleet_server_cloud_unhealthy_callout';
-export * from './fleet_server_on_prem_unhealthy_callout';
-export * from './fleet_server_on_prem_required_callout';
-export * from './fleet_server_missing_privileges';
+import { useStartServices } from './use_core';
+
+// Expose authz object, containing the privileges for Fleet and Integrations
+export function useAuthz() {
+  const core = useStartServices();
+  return core.authz;
+}

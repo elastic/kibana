@@ -85,7 +85,7 @@ describe('when on integration detail', () => {
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
-    it('should NOT the Policies tab', async () => {
+    it('should NOT display the Policies tab', async () => {
       await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
