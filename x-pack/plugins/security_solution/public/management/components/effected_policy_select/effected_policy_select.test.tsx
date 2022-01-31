@@ -149,5 +149,12 @@ describe('when using EffectedPolicySelect component', () => {
         selected: [componentProps.options[0]],
       });
     });
+
+    it('should show loader only when by polocy selected', () => {
+      const { queryByTestId } = render({ isLoading: true });
+      expect(queryByTestId('loading-spinner')).toBeNull();
+      selectPerPolicy();
+      expect(queryByTestId('loading-spinner')).not.toBeNull();
+    });
   });
 });

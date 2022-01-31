@@ -403,7 +403,7 @@ export class MapEmbeddable
     render(
       <Provider store={this._savedMap.getStore()}>
         <I18nContext>
-          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>;
+          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
         </I18nContext>
       </Provider>,
       this._domNode

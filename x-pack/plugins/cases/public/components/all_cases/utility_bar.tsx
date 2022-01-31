@@ -161,3 +161,4 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
     </UtilityBar>
   );
 };
+CasesTableUtilityBar.displayName = 'CasesTableUtilityBar';

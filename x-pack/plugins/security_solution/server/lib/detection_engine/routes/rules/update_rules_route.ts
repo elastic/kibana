@@ -44,13 +44,9 @@ export const updateRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const rulesClient = context.alerting?.getRulesClient();
+        const rulesClient = context.alerting.getRulesClient();
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const siemClient = context.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -59,8 +55,6 @@ export const updateRulesRoute = (
           savedObjectsClient,
         });
         throwHttpError(await mlAuthz.validateRuleType(request.body.type));
-
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
 
         const existingRule = await readRules({
           isRuleRegistryEnabled,
@@ -82,11 +76,13 @@ export const updateRulesRoute = (
         });
 
         if (rule != null) {
-          const ruleStatus = await ruleStatusClient.getCurrentStatus({
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
-          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
+          const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(rule.id);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleExecutionSummary,
+            isRuleRegistryEnabled
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {
