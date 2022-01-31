@@ -58,7 +58,7 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
   closeFieldsBrowser();
 };
 
-export const openExceptionModalFromRuleSettings = () => {
+export const openExceptionFlyoutFromRuleSettings = () => {
   cy.get(ADD_EXCEPTIONS_BTN).click();
   cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(FIELD_INPUT).should('be.visible');
