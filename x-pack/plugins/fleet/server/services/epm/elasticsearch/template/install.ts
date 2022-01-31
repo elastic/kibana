@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { merge, cloneDeep } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
 
@@ -260,6 +260,25 @@ function buildComponentTemplates(params: {
   const templatesMap: TemplateMap = {};
   const _meta = getESAssetMetadata({ packageName });
 
+  const registrySettings = registryElasticsearch?.['index_template.settings'] ?? {};
+  // @ts-expect-error 2339
+  const mappingSettings = registrySettings?.index?.mapping;
+
+  const registrySettingsForTemplate = cloneDeep(registrySettings);
+
+  // index.mapping settings must go on the mapping component template otherwise
+  // the template may be rejected e.g if nested_fields.limit has been increased
+  if (mappingSettings) {
+    // @ts-expect-error 2339
+    delete registrySettingsForTemplate.index.mapping;
+  }
+  templatesMap[settingsTemplateName] = {
+    template: {
+      settings: merge(defaultSettings, registrySettingsForTemplate),
+    },
+    _meta,
+  };
+
   templatesMap[mappingsTemplateName] = {
     template: {
       settings: {
@@ -268,17 +287,11 @@ function buildComponentTemplates(params: {
             total_fields: {
               limit: '10000',
             },
+            ...mappingSettings,
           },
         },
       },
       mappings: merge(mappings, registryElasticsearch?.['index_template.mappings'] ?? {}),
-    },
-    _meta,
-  };
-
-  templatesMap[settingsTemplateName] = {
-    template: {
-      settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
     },
     _meta,
   };
