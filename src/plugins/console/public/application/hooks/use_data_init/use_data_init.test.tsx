@@ -35,7 +35,7 @@ describe('useDataInit', () => {
     text: string;
   }
 
-  const callMockFuncWithArg = (arg: MockObjectData[] | Function ) => ({
+  const callMockFuncWithArg = (arg: MockObjectData[] | Function) => ({
     ...mockContextValue,
     services: {
       ...mockContextValue.services,
@@ -146,5 +146,14 @@ describe('useDataInit', () => {
     jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
 
     expect(setErrorMock).toHaveBeenCalledWith(error);
+  });
+
+  it('call done function', async () => {
+    const setDoneMock = jest.fn();
+    const useDoneMock: UseStateMock = (state: any) => [state, setDoneMock];
+
+    jest.spyOn(React, 'useState').mockImplementationOnce(useDoneMock);
+
+    expect(setDoneMock).toHaveBeenCalledWith(true);
   });
 });
