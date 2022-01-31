@@ -64,6 +64,11 @@ export const FilterExpressionItem: FC<Props> = ({
   onFilterSave,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const filters: Filter[] = groupedFilters.map((filter: Filter) => ({
+    $state: filter.$state,
+    meta: filter.meta,
+    query: filter.query,
+  }));
   function handleBadgeClick() {
     // if (e.shiftKey) {
     //   onToggleDisabled();
@@ -184,6 +189,7 @@ export const FilterExpressionItem: FC<Props> = ({
               onClose={() => setIsPopoverOpen(false)}
               showTimeFilterOption={false}
               showFilterOption={false}
+              filters={filters}
             />
           </div>
         ),

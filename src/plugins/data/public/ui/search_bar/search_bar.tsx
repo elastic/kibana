@@ -266,7 +266,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       query: this.state.query,
     };
 
-    if (savedQueryMeta.shouldIncludeFilters) {
+    if (savedQueryMeta.filters) {
+      savedQueryAttributes.filters = savedQueryMeta.filters;
+    } else {
       savedQueryAttributes.filters = this.props.filters;
     }
 
@@ -308,7 +310,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         openFilterSetPopover: false,
       });
 
-      if (this.props.onSaved) {
+      if (!savedQueryMeta.filters && this.props.onSaved) {
         this.props.onSaved(response);
       }
     } catch (error) {
