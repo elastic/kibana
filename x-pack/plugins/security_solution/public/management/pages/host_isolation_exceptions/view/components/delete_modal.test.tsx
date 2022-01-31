@@ -119,7 +119,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      '"some name" has been removed from the Host isolation exceptions list.'
+      '"some name" has been removed from the host isolation exceptions list.'
     );
     expect(onCancel).toHaveBeenCalledWith(true);
   });
@@ -140,7 +140,7 @@ describe('When on the host isolation exceptions delete modal', () => {
     await waitFor(expect(deleteOneHostIsolationExceptionItemMock).toHaveBeenCalled);
 
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Unable to remove "some name" from the Host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
+      'Unable to remove "some name" from the host isolation exceptions list. Reason: That\'s not true. That\'s impossible'
     );
     expect(onCancel).toHaveBeenCalledWith(true);
   });
