@@ -409,7 +409,7 @@
     "vega-lite": "^5.2.0",
     "vega-schema-url-parser": "^2.2.0",
     "vega-spec-injector": "^0.0.2",
-    "vega-tooltip": "^0.27.0",
+    "vega-tooltip": "^0.28.0",
     "venn.js": "0.2.20",
     "vinyl": "^2.2.0",
     "vt-pbf": "^3.1.1",
