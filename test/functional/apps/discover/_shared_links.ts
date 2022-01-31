@@ -172,7 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const timeBeforeReload = await PageObjects.timePicker.getTimeConfig();
         await browser.clearSessionStorage();
         await browser.get(currentUrl, false);
         await retry.waitFor('discover to open', async () => {
@@ -183,10 +182,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
           await toasts.dismissAllToasts();
-          const timeAfterReload = await PageObjects.timePicker.getTimeConfig();
-          expect(timeBeforeReload.start).not.to.be(timeAfterReload.start);
-          expect(timeBeforeReload.end).not.to.be(timeAfterReload.end);
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
           return true;
         });
       });
