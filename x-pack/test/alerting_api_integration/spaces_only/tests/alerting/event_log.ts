@@ -610,6 +610,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
+  if (event?.event?.action === 'execute' && status === 'active') {
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
+  }
+
   if (status) {
     expect(event?.kibana?.alerting?.status).to.be(status);
   }
