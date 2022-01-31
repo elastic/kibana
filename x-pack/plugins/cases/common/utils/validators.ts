@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const isEmptyString = (value: string) => value.trim() === '';
+export const isInvalidTag = (value: string) => value.trim() === '';

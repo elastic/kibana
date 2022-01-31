@@ -23,7 +23,7 @@ import {
   ActionTypes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isEmptyString } from '../../../common/utils/validators';
+import { isInvalidTag } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -72,8 +72,8 @@ export const create = async (
     );
   }
 
-  if (query.tags.some(isEmptyString)) {
-    throw Boom.badRequest('A tag must not be empty');
+  if (query.tags.some(isInvalidTag)) {
+    throw Boom.badRequest('A tag must contain at least one non-space character');
   }
 
   try {

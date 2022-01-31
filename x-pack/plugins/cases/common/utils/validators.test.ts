@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { isEmptyString } from './validators';
+import { isInvalidTag } from './validators';
 
 describe('validators', () => {
-  describe('isEmptyString', () => {
-    it('validates an empty string correctly', () => {
-      expect(isEmptyString(' ')).toBe(true);
+  describe('isInvalidTag', () => {
+    it('validates a whitespace correctly', () => {
+      expect(isInvalidTag(' ')).toBe(true);
     });
 
-    it('validates a string of length zero correctly', () => {
-      expect(isEmptyString('')).toBe(true);
+    it('validates an empty string correctly', () => {
+      expect(isInvalidTag('')).toBe(true);
     });
 
     it('returns false if the string is not empty', () => {
-      expect(isEmptyString('string')).toBe(false);
+      expect(isInvalidTag('string')).toBe(false);
     });
 
     it('returns false if the string contains spaces', () => {
       // Ending space has been put intentionally
-      expect(isEmptyString('my string ')).toBe(false);
+      expect(isInvalidTag('my string ')).toBe(false);
     });
   });
 });

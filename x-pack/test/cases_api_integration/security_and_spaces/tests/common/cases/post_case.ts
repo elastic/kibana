@@ -232,13 +232,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('tags', async () => {
-        it('400s if the a tag is empty', async () => {
+        it('400s if the a tag is a whitespace', async () => {
           const tags = ['test', ' '];
 
           await createCase(supertest, getPostCaseRequest({ tags }), 400);
         });
 
-        it('400s if the a tag is of length zero', async () => {
+        it('400s if the a tag is an empty string', async () => {
           const tags = ['test', ''];
 
           await createCase(supertest, getPostCaseRequest({ tags }), 400);

@@ -6,7 +6,7 @@
  */
 
 import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
-import { isEmptyString } from '../../../common/utils/validators';
+import { isInvalidTag } from '../../../common/utils/validators';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import {
   FIELD_TYPES,
@@ -28,8 +28,8 @@ export const schemaTags = {
     {
       validator: ({ value }: { value: string | string[] }) => {
         if (
-          (!Array.isArray(value) && isEmptyString(value)) ||
-          (Array.isArray(value) && value.length > 0 && value.find(isEmptyString))
+          (!Array.isArray(value) && isInvalidTag(value)) ||
+          (Array.isArray(value) && value.length > 0 && value.find(isInvalidTag))
         ) {
           return {
             message: i18n.TAGS_EMPTY_ERROR,
