@@ -1755,6 +1755,10 @@
               "path": "x-pack/plugins/actions/server/plugin.ts"
             },
             {
+              "plugin": "cloud",
+              "path": "x-pack/plugins/cloud/server/routes/chat.ts"
+            },
+            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },

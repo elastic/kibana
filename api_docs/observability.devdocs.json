@@ -99,7 +99,7 @@
             "section": "def-public.AllSeries",
             "text": "AllSeries"
           },
-          "; }, baseHref: string) => string"
+          "; }, baseHref: string, appId: string) => string"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
         "deprecated": false,
@@ -155,6 +155,20 @@
             "type": "string",
             "tags": [],
             "label": "baseHref",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.createExploratoryViewUrl.$3",
+            "type": "string",
+            "tags": [],
+            "label": "appId",
             "description": [],
             "signature": [
               "string"
@@ -847,75 +861,11 @@
         "label": "useChartTheme",
         "description": [],
         "signature": [
-          "() => { chartMargins: { left: number; right: number; top: number; bottom: number; }; background: { color: string; }; lineSeriesStyle: { point: { visible: boolean; }; line?: ",
+          "() => ",
           "RecursivePartial",
           "<",
-          "LineStyle",
-          "> | undefined; fit?: ",
-          "RecursivePartial",
-          "<{ line: ",
-          "LineFitStyle",
-          "; }> | undefined; }; areaSeriesStyle: { point: { visible: boolean; }; area?: ",
-          "RecursivePartial",
-          "<",
-          "AreaStyle",
-          "> | undefined; line?: ",
-          "RecursivePartial",
-          "<",
-          "LineStyle",
-          "> | undefined; fit?: ",
-          "RecursivePartial",
-          "<{ line: ",
-          "LineFitStyle",
-          "; area: ",
-          "AreaFitStyle",
-          "; }> | undefined; }; chartPaddings?: ",
-          "RecursivePartial",
-          "<",
-          "PerSideDistance",
-          "> | undefined; barSeriesStyle?: ",
-          "RecursivePartial",
-          "<",
-          "BarSeriesStyle",
-          "> | undefined; bubbleSeriesStyle?: ",
-          "RecursivePartial",
-          "<",
-          "BubbleSeriesStyle",
-          "> | undefined; arcSeriesStyle?: ",
-          "RecursivePartial",
-          "<",
-          "ArcSeriesStyle",
-          "> | undefined; sharedStyle?: ",
-          "RecursivePartial",
-          "<",
-          "SharedGeometryStateStyle",
-          "> | undefined; axes?: ",
-          "RecursivePartial",
-          "<",
-          "AxisStyle",
-          "> | undefined; scales?: ",
-          "RecursivePartial",
-          "<",
-          "ScalesConfig",
-          "> | undefined; colors?: ",
-          "RecursivePartial",
-          "<",
-          "ColorConfig",
-          "> | undefined; legend?: ",
-          "RecursivePartial",
-          "<",
-          "LegendStyle",
-          "> | undefined; crosshair?: ",
-          "RecursivePartial",
-          "<",
-          "CrosshairStyle",
-          "> | undefined; markSizeRatio?: ",
-          "RecursivePartial",
-          "<number | undefined>; goal?: ",
-          "RecursivePartial",
-          "<",
-          "GoalStyles",
-          "> | undefined; }"
+          "Theme",
+          ">[]"
         ],
         "path": "x-pack/plugins/observability/public/hooks/use_chart_theme.tsx",
         "deprecated": false,
@@ -1776,6 +1726,34 @@
             "signature": [
               "ReportConfigMap",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.withActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "withActions",
+            "description": [],
+            "signature": [
+              "boolean | ",
+              "ActionTypes",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ExploratoryEmbeddableProps.appId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "appId",
+            "description": [],
+            "signature": [
+              "\"security\" | \"observability\" | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false
@@ -4286,7 +4264,7 @@
           "section": "def-public.AllSeries",
           "text": "AllSeries"
         },
-        "; }, baseHref?: string) => string; ExploratoryViewEmbeddable: (props: ",
+        "; }, baseHref?: string, appId?: string) => string; ExploratoryViewEmbeddable: (props: ",
         {
           "pluginId": "observability",
           "scope": "public",

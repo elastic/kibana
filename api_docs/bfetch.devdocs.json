@@ -86,6 +86,20 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-public.DISABLE_BFETCH",
+        "type": "string",
+        "tags": [],
+        "label": "DISABLE_BFETCH",
+        "description": [],
+        "signature": [
+          "\"bfetch:disable\""
+        ],
+        "path": "src/plugins/bfetch/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1319,6 +1333,20 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.DISABLE_BFETCH",
+        "type": "string",
+        "tags": [],
+        "label": "DISABLE_BFETCH",
+        "description": [],
+        "signature": [
+          "\"bfetch:disable\""
+        ],
+        "path": "src/plugins/bfetch/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "bfetch",
         "id": "def-common.DISABLE_BFETCH_COMPRESSION",

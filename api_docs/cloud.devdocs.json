@@ -9,7 +9,9 @@
         "type": "Function",
         "tags": [],
         "label": "Chat",
-        "description": [],
+        "description": [
+          "\nA lazily-loaded component that will display a trigger that will allow the user to chat with a\nhuman operator when the service is enabled; otherwise, it renders nothing."
+        ],
         "signature": [
           "() => JSX.Element"
         ],
@@ -128,7 +130,9 @@
             "type": "Object",
             "tags": [],
             "label": "chat",
-            "description": [],
+            "description": [
+              "Configuration to enable live chat in Cloud-enabled instances of Kibana."
+            ],
             "signature": [
               "{ enabled: boolean; chatURL: string; }"
             ],
