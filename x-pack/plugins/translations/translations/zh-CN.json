@@ -24438,7 +24438,6 @@
     "xpack.securitySolution.overview.filebeatSystemModuleTitle": "系统模块",
     "xpack.securitySolution.overview.fileBeatZeekTitle": "Zeek",
     "xpack.securitySolution.overview.hostsAction": "查看主机",
-    "xpack.securitySolution.overview.hostsRiskError": "提取主机风险时出错",
     "xpack.securitySolution.overview.hostStatGroupAuditbeat": "Auditbeat",
     "xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity": "Endpoint Security",
     "xpack.securitySolution.overview.hostStatGroupFilebeat": "Filebeat",
