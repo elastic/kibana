@@ -407,7 +407,7 @@ export const DiscoverGrid = ({
 
   const { gridStyle, gridDensityClass } = useGridStyles({ rowDensityState, onUpdateDensity });
 
-  if (!rowCount && isLoading) {
+  if (isLoading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
