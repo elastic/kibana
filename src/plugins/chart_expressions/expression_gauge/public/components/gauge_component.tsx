@@ -50,18 +50,12 @@ function normalizeColors(
     correctMax = min + rangeMax * ((max - min) / 100);
   }
 
-  if (correctMin !== min && isFinite(correctMin)) {
-    updatedColors = [
-      ...(correctMin > min ? [`rgba(255,255,255,0)`] : [updatedColors[0]]),
-      ...updatedColors,
-    ];
+  if (correctMin > min && isFinite(correctMin)) {
+    updatedColors = [`rgba(255,255,255,0)`, ...updatedColors];
   }
 
-  if (correctMax !== max && isFinite(correctMax)) {
-    updatedColors = [
-      ...updatedColors,
-      ...(correctMax < max ? [`rgba(255,255,255,0)`] : [updatedColors[updatedColors.length - 1]]),
-    ];
+  if (correctMax < max && isFinite(correctMax)) {
+    updatedColors = [...updatedColors, `rgba(255,255,255,0)`];
   }
 
   return updatedColors;
@@ -84,16 +78,16 @@ function normalizeBands(
     correctMax = min + rangeMax * ((max - min) / 100);
   }
 
-  if (correctMin !== min && isFinite(correctMin)) {
-    firstRanges = correctMin > min ? [min, correctMin] : [correctMin, min];
+  if (correctMin > min && isFinite(correctMin)) {
+    firstRanges = [min, correctMin];
   }
 
-  if (correctMax !== max && isFinite(correctMax)) {
-    lastRanges = correctMax > max ? [max, correctMax] : [correctMax, max];
+  if (correctMax < max && isFinite(correctMax)) {
+    lastRanges = [correctMax, max];
   }
 
   if (range === 'percent') {
-    const filteredStops = stops.filter((stop) => stop >= 0 && stop <= 100);
+    const filteredStops = stops.filter((stop) => stop > 0 && stop < 100);
     return [
       ...firstRanges,
       ...filteredStops.map((step) => min + step * ((max - min) / 100)),
