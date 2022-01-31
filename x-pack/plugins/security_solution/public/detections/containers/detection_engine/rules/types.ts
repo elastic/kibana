@@ -30,8 +30,10 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
+  BulkActionEditPayload,
   ruleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
+
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -171,16 +173,33 @@ export interface PaginationOptions {
 }
 
 export interface FetchRulesProps {
-  pagination?: PaginationOptions;
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
-  signal: AbortSignal;
+  sortingOptions?: SortingOptions;
+  signal?: AbortSignal;
 }
 
-export type RulesSortingFields = 'enabled' | 'updated_at' | 'name' | 'created_at';
+export type RulesSortingFields =
+  | 'created_at'
+  | 'enabled'
+  | 'execution_summary.last_execution.date'
+  | 'execution_summary.last_execution.metrics.execution_gap_duration_s'
+  | 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
+  | 'execution_summary.last_execution.metrics.total_search_duration_ms'
+  | 'execution_summary.last_execution.status'
+  | 'name'
+  | 'risk_score'
+  | 'severity'
+  | 'updated_at'
+  | 'version';
+
+export interface SortingOptions {
+  field: RulesSortingFields;
+  order: SortOrder;
+}
+
 export interface FilterOptions {
   filter: string;
-  sortField: RulesSortingFields;
-  sortOrder: SortOrder;
   showCustomRules: boolean;
   showElasticRules: boolean;
   tags: string[];
@@ -213,7 +232,9 @@ export interface DuplicateRulesProps {
 
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
-  query: string;
+  query?: string;
+  ids?: string[];
+  edit?: BulkActionEditPayload[];
 }
 
 export interface BulkActionResult {

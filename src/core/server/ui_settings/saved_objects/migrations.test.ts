@@ -283,4 +283,30 @@ describe('ui_settings 8.1.0 migrations', () => {
       geo_point: { id: 'geo_point', params: { transform: 'wkt' } },
     });
   });
+
+  test('removes idleTimeout option from rulesTableRefresh', () => {
+    const initialRulesTableRefresh = {
+      on: true,
+      value: 60000,
+      idleTimeout: 2700000,
+    };
+
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'securitySolution:rulesTableRefresh': JSON.stringify(initialRulesTableRefresh),
+      },
+      references: [],
+      updated_at: '2022-01-19T11:26:54.645Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated.attributes.buildNum).toBe(9007199254740991);
+    expect(JSON.parse(migrated.attributes['securitySolution:rulesTableRefresh'])).toEqual({
+      on: true,
+      value: 60000,
+    });
+  });
 });

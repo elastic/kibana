@@ -55,8 +55,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
   const { data: longTaskData, status } = useFetcher(
     (callApmApi) => {
       if (uxQuery) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/ux/long-task-metrics',
+        return callApmApi('GET /internal/apm/ux/long-task-metrics', {
           params: {
             query: {
               ...uxQuery,

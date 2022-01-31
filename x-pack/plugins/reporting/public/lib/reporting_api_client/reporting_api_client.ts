@@ -192,7 +192,10 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
+    return this.http.post(`${API_GENERATE_IMMEDIATE}`, {
+      asResponse: true,
+      body: JSON.stringify(params),
+    });
   }
 
   public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {

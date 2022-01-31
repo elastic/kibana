@@ -7,7 +7,7 @@
 import React from 'react';
 import { AgentConfigurationPageStep } from '../../../../common/agent_configuration/constants';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { AgentConfigurationCreateEdit } from '../../app/Settings/agent_configurations/AgentConfigurationCreateEdit';
+import { AgentConfigurationCreateEdit } from '../../app/settings/agent_configurations/agent_configuration_create_edit';
 
 export function CreateAgentConfigurationRouteView() {
   const {

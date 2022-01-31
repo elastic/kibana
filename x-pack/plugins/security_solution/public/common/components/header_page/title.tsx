@@ -22,12 +22,13 @@ StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
   margin-left: 10px;
-` as unknown as typeof EuiBadge;
+`;
 Badge.displayName = 'Badge';
 
 const Header = styled.h1`
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-gap: 12px;
+  grid-auto-flow: column;
 `;
 Header.displayName = 'Header';
 
