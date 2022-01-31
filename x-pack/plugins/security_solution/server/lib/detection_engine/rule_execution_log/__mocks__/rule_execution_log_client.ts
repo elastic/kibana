@@ -23,6 +23,7 @@ const ruleExecutionLogClientMock = {
 const ruleExecutionLoggerMock = {
   create: (context: Partial<RuleExecutionContext> = {}): jest.Mocked<IRuleExecutionLogger> => ({
     context: {
+      executionId: context.executionId ?? 'some execution id',
       ruleId: context.ruleId ?? 'some rule id',
       ruleName: context.ruleName ?? 'Some rule',
       ruleType: context.ruleType ?? 'some rule type',

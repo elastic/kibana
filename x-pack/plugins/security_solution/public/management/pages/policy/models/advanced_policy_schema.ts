@@ -820,4 +820,24 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.etw',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
+      {
+        defaultMessage: 'Enable collection of ETW events. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.diagnostic.rollback_telemetry_enabled',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.rollback_telemetry_enabled',
+      {
+        defaultMessage: 'Enable diagnostic rollback telemetry. Default: true',
+      }
+    ),
+  },
 ];

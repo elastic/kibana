@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/json_rt",
-  "types": "../target_types/json_rt"
-}

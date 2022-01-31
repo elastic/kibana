@@ -7,6 +7,7 @@
 
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
+import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
   AlertExecutorOptions,
   AlertTypeParams,
@@ -41,6 +42,10 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
 
+jest.mock('uuid', () => ({
+  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
@@ -54,6 +59,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -109,6 +117,7 @@ describe('Task Runner', () => {
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
+    usageCounter: mockUsageCounter,
   };
 
   function testAgainstEphemeralSupport(
@@ -323,6 +332,13 @@ describe('Task Runner', () => {
           "kind": "alert",
         },
         "kibana": Object {
+          "alert": Object {
+            "rule": Object {
+              "execution": Object {
+                "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+              },
+            },
+          },
           "saved_objects": Array [
             Object {
               "id": "1",
@@ -386,6 +402,7 @@ describe('Task Runner', () => {
       },
       expect.any(Function)
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   testAgainstEphemeralSupport(
@@ -438,6 +455,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "1",
           "params": Object {
             "foo": true,
@@ -484,6 +502,13 @@ describe('Task Runner', () => {
             kind: 'alert',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             task: {
               schedule_delay: 0,
               scheduled: '1970-01-01T00:00:00.000Z',
@@ -515,6 +540,13 @@ describe('Task Runner', () => {
             start: '1970-01-01T00:00:00.000Z',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             alerting: {
               action_group_id: 'default',
               action_subgroup: 'subDefault',
@@ -549,6 +581,13 @@ describe('Task Runner', () => {
             start: '1970-01-01T00:00:00.000Z',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             alerting: {
               action_group_id: 'default',
               action_subgroup: 'subDefault',
@@ -576,6 +615,13 @@ describe('Task Runner', () => {
             kind: 'alert',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             alerting: {
               instance_id: '1',
               action_group_id: 'default',
@@ -611,6 +657,13 @@ describe('Task Runner', () => {
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
           event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             alerting: {
               status: 'active',
             },
@@ -637,6 +690,7 @@ describe('Task Runner', () => {
             ruleset: 'alerts',
           },
         });
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -707,6 +761,13 @@ describe('Task Runner', () => {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
         },
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -734,6 +795,13 @@ describe('Task Runner', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -767,6 +835,13 @@ describe('Task Runner', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
@@ -799,6 +874,13 @@ describe('Task Runner', () => {
         outcome: 'success',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           status: 'active',
         },
@@ -825,6 +907,7 @@ describe('Task Runner', () => {
         ruleset: 'alerts',
       },
     });
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   testAgainstEphemeralSupport(
@@ -891,6 +974,7 @@ describe('Task Runner', () => {
           4,
           'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
         );
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -963,6 +1047,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -998,6 +1089,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1033,6 +1131,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -1062,6 +1167,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   testAgainstEphemeralSupport(
@@ -1123,6 +1229,7 @@ describe('Task Runner', () => {
         });
         await taskRunner.run();
         expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1192,6 +1299,7 @@ describe('Task Runner', () => {
         });
         await taskRunner.run();
         expect(enqueueFunction).toHaveBeenCalledTimes(1);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1263,6 +1371,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "1",
           "params": Object {
             "foo": true,
@@ -1302,6 +1411,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1337,6 +1453,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1373,6 +1496,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1407,6 +1537,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1448,6 +1585,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -1477,6 +1621,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1597,6 +1742,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -1633,6 +1785,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "2",
               },
@@ -1668,6 +1827,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1702,6 +1868,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "recovered",
                 "instance_id": "2",
@@ -1742,6 +1915,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1783,6 +1963,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -1818,6 +2005,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "2",
           "params": Object {
             "isResolved": true,
@@ -1841,6 +2029,7 @@ describe('Task Runner', () => {
         },
       ]
     `);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -1940,6 +2129,7 @@ describe('Task Runner', () => {
         expect(enqueueFunction).toHaveBeenCalledTimes(2);
         expect((enqueueFunction as jest.Mock).mock.calls[1][0].id).toEqual('1');
         expect((enqueueFunction as jest.Mock).mock.calls[0][0].id).toEqual('2');
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -2051,6 +2241,7 @@ describe('Task Runner', () => {
       Array [
         Object {
           "apiKey": "MTIzOmFiYw==",
+          "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
           "id": "2",
           "params": Object {
             "isResolved": true,
@@ -2074,6 +2265,7 @@ describe('Task Runner', () => {
         },
       ]
     `);
+        expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
       }
   );
 
@@ -2165,6 +2357,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2201,6 +2400,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -2237,6 +2443,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -2272,6 +2485,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -2301,6 +2521,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('validates params before executing the alert type', async () => {
@@ -2357,6 +2578,7 @@ describe('Task Runner', () => {
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
       `Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('uses API key when provided', async () => {
@@ -2391,6 +2613,7 @@ describe('Task Runner', () => {
       request,
       '/'
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test(`doesn't use API key when not provided`, async () => {
@@ -2423,6 +2646,7 @@ describe('Task Runner', () => {
       request,
       '/'
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {
@@ -2473,6 +2697,7 @@ describe('Task Runner', () => {
         },
       }
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
@@ -2546,6 +2771,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2584,6 +2816,13 @@ describe('Task Runner', () => {
               "reason": "execute",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2612,6 +2851,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
@@ -2666,6 +2906,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2704,6 +2951,13 @@ describe('Task Runner', () => {
               "reason": "decrypt",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2732,6 +2986,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
@@ -2795,6 +3050,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2833,6 +3095,13 @@ describe('Task Runner', () => {
               "reason": "license",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2861,6 +3130,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
@@ -2924,6 +3194,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -2962,6 +3239,13 @@ describe('Task Runner', () => {
               "reason": "unknown",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -2990,6 +3274,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
@@ -3052,6 +3337,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3090,6 +3382,13 @@ describe('Task Runner', () => {
               "reason": "read",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "error",
               },
@@ -3118,6 +3417,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('recovers gracefully when the Runner of a legacy Alert task which has no schedule throws an exception when fetching attributes', async () => {
@@ -3168,6 +3468,7 @@ describe('Task Runner', () => {
         "state": Object {},
       }
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test(`doesn't change previousStartedAt when it fails to run`, async () => {
@@ -3214,6 +3515,7 @@ describe('Task Runner', () => {
     expect(runnerResult.state.previousStartedAt).toEqual(
       new Date(originalAlertSate.previousStartedAt)
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
@@ -3255,7 +3557,64 @@ describe('Task Runner', () => {
         `Unable to execute rule "1" in the "foo" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
       );
       expect(isUnrecoverableError(ex)).toBeTruthy();
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
+  });
+
+  test('reschedules for next schedule interval if es connectivity error encountered and schedule interval is less than connectivity retry', async () => {
+    rulesClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.schedule!.interval).toEqual(mockedTaskInstance.schedule!.interval);
+  });
+
+  test('reschedules for smaller interval if es connectivity error encountered and schedule interval is greater than connectivity retry', async () => {
+    rulesClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      ruleType,
+      {
+        ...mockedTaskInstance,
+        schedule: {
+          interval: '1d',
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult.schedule!.interval).toEqual('5m');
   });
 
   test('correctly logs warning when Alert Task Runner throws due to failing to fetch the alert in a space', async () => {
@@ -3296,6 +3655,7 @@ describe('Task Runner', () => {
         1,
         `Unable to execute rule "1" in the "test space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
       );
+      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -3358,6 +3718,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3393,6 +3760,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3429,6 +3803,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3465,6 +3846,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3501,6 +3889,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3536,6 +3931,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -3565,6 +3967,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('duration is updated for active alerts when alert state contains start time', async () => {
@@ -3643,6 +4046,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3678,6 +4088,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3714,6 +4131,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3749,6 +4173,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -3778,6 +4209,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('duration is not calculated for active alerts when alert state does not contain start time', async () => {
@@ -3848,6 +4280,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -3881,6 +4320,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3915,6 +4361,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3950,6 +4403,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "active",
               },
@@ -3979,6 +4439,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
@@ -4044,6 +4505,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -4080,6 +4548,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "1",
               },
@@ -4116,6 +4591,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "2",
               },
@@ -4150,6 +4632,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "ok",
               },
@@ -4179,6 +4668,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('end calculation is skipped for active alerts when alert state does not contain start time and alert recovers', async () => {
@@ -4246,6 +4736,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "saved_objects": Array [
                 Object {
                   "id": "1",
@@ -4279,6 +4776,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "1",
               },
@@ -4312,6 +4816,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "2",
               },
@@ -4346,6 +4857,13 @@ describe('Task Runner', () => {
               "outcome": "success",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "status": "ok",
               },
@@ -4375,6 +4893,7 @@ describe('Task Runner', () => {
         ],
       ]
     `);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('successfully executes the task with ephemeral tasks enabled', async () => {
@@ -4506,6 +5025,13 @@ describe('Task Runner', () => {
           "kind": "alert",
         },
         "kibana": Object {
+          "alert": Object {
+            "rule": Object {
+              "execution": Object {
+                "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+              },
+            },
+          },
           "saved_objects": Array [
             Object {
               "id": "1",
@@ -4558,6 +5084,7 @@ describe('Task Runner', () => {
       },
       { refresh: false, namespace: undefined }
     );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('successfully bails on execution if the rule is disabled', async () => {
@@ -4596,6 +5123,13 @@ describe('Task Runner', () => {
         category: ['alerts'],
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
         ],
@@ -4618,6 +5152,13 @@ describe('Task Runner', () => {
         outcome: 'failure',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
         ],
@@ -4638,6 +5179,7 @@ describe('Task Runner', () => {
       },
       message: 'test:1: execution failed',
     });
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   test('successfully stores successful runs', async () => {

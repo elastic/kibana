@@ -60,6 +60,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         return withSecuritySpan('scurityRuleTypeExecutor', async () => {
           const {
             alertId,
+            executionId,
             params,
             previousStartedAt,
             startedAt,
@@ -81,6 +82,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             eventLogService,
             logger,
             {
+              executionId,
               ruleId: alertId,
               ruleName: rule.name,
               ruleType: rule.ruleTypeId,
@@ -104,6 +106,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const buildRuleMessage = buildRuleMessageFactory({
             id: alertId,
+            executionId,
             ruleId,
             name,
             index: spaceId,

@@ -459,30 +459,33 @@ async function deleteTransforms(
       if (transformInfo.state === TRANSFORM_STATE.FAILED) {
         needToForceDelete = true;
       }
-      // Grab destination index info to delete
-      try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
-          transform_id: transformId,
-        });
-        const transformConfig = body.transforms[0];
-        // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-        destinationIndex = Array.isArray(transformConfig.dest.index)
-          ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-            transformConfig.dest.index[0]
-          : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-            transformConfig.dest.index;
-      } catch (getTransformConfigError) {
-        transformDeleted.error = getTransformConfigError.meta.body.error;
-        results[transformId] = {
-          transformDeleted,
-          destIndexDeleted,
-          destIndexPatternDeleted,
-          destinationIndex,
-        };
-        // No need to perform further delete attempts
-        continue;
+      if (!shouldForceDelete) {
+        // Grab destination index info to delete
+        try {
+          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
+            {
+              transform_id: transformId,
+            }
+          );
+          const transformConfig = body.transforms[0];
+          // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+          destinationIndex = Array.isArray(transformConfig.dest.index)
+            ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+              transformConfig.dest.index[0]
+            : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+              transformConfig.dest.index;
+        } catch (getTransformConfigError) {
+          transformDeleted.error = getTransformConfigError.meta.body.error;
+          results[transformId] = {
+            transformDeleted,
+            destIndexDeleted,
+            destIndexPatternDeleted,
+            destinationIndex,
+          };
+          // No need to perform further delete attempts
+          continue;
+        }
       }
-
       // If user checks box to delete the destinationIndex associated with the job
       if (destinationIndex && deleteDestIndex) {
         try {

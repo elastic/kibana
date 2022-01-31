@@ -9,6 +9,7 @@ import { combineReducers, createStore } from 'redux';
 import type {
   FoundExceptionListItemSchema,
   ExceptionListItemSchema,
+  ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { Ecs } from '../../../../../common/ecs';
@@ -25,6 +26,7 @@ import {
 } from '../../../../common/mock/endpoint/http_handler_mock_factory';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getSummaryExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_summary_schema.mock';
 
 export const createGlobalNoMiddlewareStore = () => {
   return createStore(
@@ -107,6 +109,7 @@ export type EventFiltersListQueryHttpMockProviders = ResponseProvidersInterface<
   eventFiltersGetOne: () => ExceptionListItemSchema;
   eventFiltersCreateOne: () => ExceptionListItemSchema;
   eventFiltersUpdateOne: () => ExceptionListItemSchema;
+  eventFiltersGetSummary: () => ExceptionListSummarySchema;
 }>;
 
 export const esResponseData = () => ({
@@ -253,6 +256,14 @@ export const eventFiltersListQueryHttpMock =
       path: `${EXCEPTION_LIST_ITEM_URL}`,
       handler: (): ExceptionListItemSchema => {
         return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersGetSummary',
+      method: 'get',
+      path: `${EXCEPTION_LIST_URL}/summary`,
+      handler: (): ExceptionListSummarySchema => {
+        return getSummaryExceptionListSchemaMock();
       },
     },
   ]);

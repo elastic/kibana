@@ -23,7 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
-import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import type { JobFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 
@@ -287,7 +288,12 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           if (item.type === JOB_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
-              return <IndexBasedNumberContentPreview config={item} />;
+              // If the cardinality is only low, show the top values instead of a distribution chart
+              return item.stats?.distribution?.percentiles.length <= 2 ? (
+                <TopValuesPreview config={item} isNumeric={true} />
+              ) : (
+                <IndexBasedNumberContentPreview config={item} />
+              );
             } else {
               return <FileBasedNumberContentPreview config={item} />;
             }

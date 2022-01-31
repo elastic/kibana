@@ -28,7 +28,7 @@ export const createRuleExecutionLogger = (
   logger: Logger,
   context: RuleExecutionContext
 ): IRuleExecutionLogger => {
-  const { ruleId, ruleName, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleName, ruleType, spaceId } = context;
 
   const ruleExecutionLogger: IRuleExecutionLogger = {
     get context() {
@@ -44,7 +44,7 @@ export const createRuleExecutionLogger = (
         ]);
       } catch (e) {
         const logMessage = 'Error logging rule execution status change';
-        const logAttributes = `status: "${args.newStatus}", rule id: "${ruleId}", rule name: "${ruleName}"`;
+        const logAttributes = `status: "${args.newStatus}", rule id: "${ruleId}", rule name: "${ruleName}", execution uuid: "${executionId}"`;
         const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
         const logMeta: ExtMeta = {
           rule: {
@@ -53,6 +53,7 @@ export const createRuleExecutionLogger = (
             type: ruleType,
             execution: {
               status: args.newStatus,
+              uuid: executionId,
             },
           },
           kibana: {
@@ -65,6 +66,7 @@ export const createRuleExecutionLogger = (
     },
   };
 
+  // TODO: Add executionId to new status SO?
   const writeStatusChangeToSavedObjects = async (
     args: NormalizedStatusChangeArgs
   ): Promise<void> => {
@@ -86,6 +88,7 @@ export const createRuleExecutionLogger = (
 
     if (metrics) {
       eventsWriter.logExecutionMetrics({
+        executionId,
         ruleId,
         ruleName,
         ruleType,
@@ -95,6 +98,7 @@ export const createRuleExecutionLogger = (
     }
 
     eventsWriter.logStatusChange({
+      executionId,
       ruleId,
       ruleName,
       ruleType,
