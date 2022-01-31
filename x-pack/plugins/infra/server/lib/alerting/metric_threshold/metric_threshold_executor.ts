@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { first, last, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { first, isEqual, last } from 'lodash';
+import moment from 'moment';
 import {
   ActionGroupIdsOf,
-  RecoveredActionGroup,
-  AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RecoveredActionGroup,
 } from '../../../../../alerting/common';
 import {
-  AlertTypeState as RuleTypeState,
   AlertInstance as Alert,
+  AlertTypeState as RuleTypeState,
 } from '../../../../../alerting/server';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
-  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
-import { createFormatter } from '../../../../common/formatters';
-import { AlertStates, Comparator } from './types';
-import { evaluateRule, EvaluatedRuleParams } from './lib/evaluate_rule';
+import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -118,6 +118,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
+    const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
     const previousGroupBy = state.groupBy;
     const previousFilterQuery = state.filterQuery;
@@ -135,7 +136,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       config,
-      prevGroups
+      prevGroups,
+      compositeSize
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
@@ -248,7 +250,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
-
     return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 

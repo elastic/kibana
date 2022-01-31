@@ -40,13 +40,10 @@ export const updateRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = context.alerting.getRulesClient();
+      const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution?.getAppClient();
-
-      if (!siemClient || !rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+      const siemClient = context.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
         license: context.licensing.license,
@@ -55,7 +52,6 @@ export const updateRulesBulkRoute = (
         savedObjectsClient,
       });
 
-      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
@@ -91,11 +87,15 @@ export const updateRulesBulkRoute = (
               ruleUpdate: payloadRule,
             });
             if (rule != null) {
-              const ruleStatus = await ruleStatusClient.getCurrentStatus({
-                ruleId: rule.id,
-                spaceId: context.securitySolution.getSpaceId(),
-              });
-              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
+              const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
+                rule.id
+              );
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleExecutionSummary,
+                isRuleRegistryEnabled
+              );
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

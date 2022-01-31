@@ -7,25 +7,36 @@
 
 import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-import { MONITOR_MANAGEMENT } from '../../../../common/constants';
+import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { TestRun } from '../test_now_mode/test_now_mode';
 
-interface Props {
+export interface ActionBarProps {
   monitor: SyntheticsMonitor;
   isValid: boolean;
+  testRun?: TestRun;
   onSave?: () => void;
+  onTestNow?: () => void;
 }
 
-export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
+export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: ActionBarProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { basePath } = useContext(UptimeSettingsContext);
 
@@ -81,22 +92,42 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   }, [data, status, notifications.toasts, isSaving, isValid, monitorId]);
 
   return status === FETCH_STATUS.SUCCESS ? (
-    <Redirect to={MONITOR_MANAGEMENT} />
+    <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
+      <EuiFlexItem>
+        <WarningText>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</WarningText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
+          {onTestNow && (
+            <EuiFlexItem grow={false} style={{ marginRight: 20 }}>
+              <EuiToolTip content={TEST_NOW_DESCRIPTION}>
+                <EuiButton
+                  fill
+                  size="s"
+                  color="success"
+                  iconType="play"
+                  onClick={() => onTestNow()}
+                  disabled={!isValid}
+                >
+                  {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="ghost"
               size="s"
               iconType="cross"
-              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT}`}
+              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiButton
               color="primary"
@@ -116,6 +147,11 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   );
 };
 
+const WarningText = euiStyled(EuiText)`
+    box-shadow: -4px 0 ${(props) => props.theme.eui.euiColorWarning};
+    padding-left: 8px;
+`;
+
 const DISCARD_LABEL = i18n.translate('xpack.uptime.monitorManagement.discardLabel', {
   defaultMessage: 'Discard',
 });
@@ -126,6 +162,14 @@ const SAVE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.saveMo
 
 const UPDATE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.updateMonitorLabel', {
   defaultMessage: 'Update monitor',
+});
+
+const RUN_TEST_LABEL = i18n.translate('xpack.uptime.monitorManagement.runTest', {
+  defaultMessage: 'Run test',
+});
+
+const RE_RUN_TEST_LABEL = i18n.translate('xpack.uptime.monitorManagement.reRunTest', {
+  defaultMessage: 'Re-run test',
 });
 
 const VALIDATION_ERROR_LABEL = i18n.translate('xpack.uptime.monitorManagement.validationError', {
@@ -153,3 +197,7 @@ const MONITOR_FAILURE_LABEL = i18n.translate(
     defaultMessage: 'Monitor was unable to be saved. Please try again later.',
   }
 );
+
+const TEST_NOW_DESCRIPTION = i18n.translate('xpack.uptime.testRun.description', {
+  defaultMessage: 'Test your monitor and verify the results before saving',
+});

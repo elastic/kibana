@@ -59,8 +59,6 @@ import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeli
 import {
   goToManageAlertsDetectionRules,
   investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
   changeRowsPerPageTo100,
@@ -115,7 +113,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -412,8 +410,6 @@ describe('indicator match', () => {
       });
 
       it('Creates and activates a new Indicator Match rule', () => {
-        waitForAlertsPanelToBeLoaded();
-        waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();

@@ -36,5 +36,6 @@ const UserActionCopyLinkComponent = ({ id: commentId }: UserActionCopyLinkProps)
     </EuiToolTip>
   );
 };
+UserActionCopyLinkComponent.displayName = 'UserActionCopyLink';
 
 export const UserActionCopyLink = memo(UserActionCopyLinkComponent);

@@ -54,7 +54,7 @@ export const alertsFieldMap: FieldMap = {
     required: false,
   },
   'kibana.alert.group.index': {
-    type: 'keyword',
+    type: 'integer',
     array: false,
     required: false,
   },

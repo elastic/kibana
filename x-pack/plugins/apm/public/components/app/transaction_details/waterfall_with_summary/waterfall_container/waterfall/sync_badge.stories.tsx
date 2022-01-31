@@ -15,10 +15,27 @@ export default {
     sync: {
       control: { type: 'inline-radio', options: [true, false, undefined] },
     },
+    agentName: {
+      control: {
+        type: 'select',
+        options: [
+          'nodejs',
+          'js-base',
+          'rum-js',
+          'php',
+          'python',
+          'dotnet',
+          'iOS/swift',
+          'ruby',
+          'java',
+          'go',
+        ],
+      },
+    },
   },
 };
 
-export function Example({ sync }: SyncBadgeProps) {
-  return <SyncBadge sync={sync} />;
+export function Example({ sync, agentName }: SyncBadgeProps) {
+  return <SyncBadge sync={sync} agentName={agentName} />;
 }
-Example.args = { sync: true } as SyncBadgeProps;
+Example.args = { sync: true, agentName: 'nodejs' } as SyncBadgeProps;

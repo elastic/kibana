@@ -42,7 +42,7 @@ import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
-import { EndpointFleetServicesInterface } from '../../services/endpoint_fleet_services';
+import { EndpointFleetServicesInterface } from '../../services/fleet/endpoint_fleet_services_factory';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;

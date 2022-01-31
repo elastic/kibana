@@ -46,7 +46,7 @@ import {
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { registerLayerWizard } from './classes/layers';
+import { registerLayerWizardExternal } from './classes/layers';
 import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
@@ -182,7 +182,7 @@ export class MapsPlugin
     plugins.visualizations.createBaseVisualization(tileMapVisType);
 
     return {
-      registerLayerWizard,
+      registerLayerWizard: registerLayerWizardExternal,
       registerSource,
     };
   }

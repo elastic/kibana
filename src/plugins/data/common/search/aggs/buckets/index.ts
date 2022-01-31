@@ -40,6 +40,8 @@ export * from './terms_fn';
 export * from './terms';
 export * from './multi_terms_fn';
 export * from './multi_terms';
+export * from './rare_terms_fn';
+export * from './rare_terms';
 export * from './sampler_fn';
 export * from './sampler';
 export * from './diversified_sampler_fn';

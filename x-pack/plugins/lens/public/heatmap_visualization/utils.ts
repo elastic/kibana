@@ -9,7 +9,7 @@ import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { Datatable } from 'src/plugins/expressions';
 import { applyPaletteParams, findMinMaxByColumnId } from '../shared_components';
 import { DEFAULT_PALETTE_NAME } from './constants';
-import type { HeatmapVisualizationState } from './types';
+import type { HeatmapVisualizationState, Palette } from './types';
 
 export function getSafePaletteParams(
   paletteService: PaletteRegistry,
@@ -18,9 +18,9 @@ export function getSafePaletteParams(
   activePalette?: HeatmapVisualizationState['palette']
 ) {
   if (currentData == null || accessor == null) {
-    return { displayStops: [], activePalette: {} as HeatmapVisualizationState['palette'] };
+    return { displayStops: [], activePalette };
   }
-  const finalActivePalette: HeatmapVisualizationState['palette'] = activePalette ?? {
+  const finalActivePalette: Palette = activePalette ?? {
     type: 'palette',
     name: DEFAULT_PALETTE_NAME,
     accessor,

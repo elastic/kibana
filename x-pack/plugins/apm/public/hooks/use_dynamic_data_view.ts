@@ -9,8 +9,7 @@ import { useFetcher } from './use_fetcher';
 
 export function useDynamicDataViewFetcher() {
   const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi({
-      endpoint: 'GET /internal/apm/data_view/dynamic',
+    return callApmApi('GET /internal/apm/data_view/dynamic', {
       isCachable: true,
     });
   }, []);

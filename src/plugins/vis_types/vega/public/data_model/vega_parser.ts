@@ -11,7 +11,7 @@ import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion } from 'vega';

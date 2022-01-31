@@ -211,7 +211,7 @@ export function SpanFlyout({
 
                 <FailureBadge outcome={span.event?.outcome} />
 
-                <SyncBadge sync={span.span.sync} />
+                <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
               </ContainerWithMarginRight>,
             ]}
           />

@@ -38,10 +38,13 @@ export type {
   OverallSumIndexPatternColumn,
 } from './operations';
 
+export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';
+
 export type DraggedField = DragDropIdentifier & {
   field: IndexPatternField;
   indexPatternId: string;
 };
+
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
@@ -79,6 +82,7 @@ export interface IndexPatternPersistedState {
 }
 
 export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId'>;
+
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;

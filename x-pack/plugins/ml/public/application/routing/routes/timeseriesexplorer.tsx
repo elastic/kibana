@@ -45,6 +45,7 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
 import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
 import type { TimeRangeBounds } from '../../util/time_buckets';
+import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -155,6 +156,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
+
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
   if (Array.isArray(selectedJobIds)) {
     selectedJobIds.sort();
@@ -253,6 +255,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     ]
   );
 
+  const getJobSelection = useJobSelectionFlyout();
+
   // Use a side effect to clear appState when changing jobs.
   useEffect(() => {
     if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
@@ -263,7 +267,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       jobsWithTimeRange,
       selectedJobIds,
       setGlobalState,
-      toasts
+      toasts,
+      getJobSelection
     );
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
@@ -326,14 +331,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   if (timeSeriesJobs.length === 0) {
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
         <TimeseriesexplorerNoJobsFound />
       </TimeSeriesExplorerPage>
     );
-  }
-
-  if (selectedJobId === undefined || autoZoomDuration === undefined || bounds === undefined) {
-    return null;
   }
 
   const zoomProp: AppStateZoom | undefined =

@@ -5,6 +5,16 @@
  * 2.0.
  */
 
-export * from './rule_execution_log_client';
-export * from './types';
+export { ruleExecutionInfoType } from './rule_execution_info/saved_object';
+export type {
+  RuleExecutionInfoSavedObject,
+  RuleExecutionInfoAttributes,
+} from './rule_execution_info/saved_object';
+
+export * from './rule_execution_log_client/client_interface';
+export * from './rule_execution_logger/logger_interface';
+export * from './rule_execution_log_factory';
+
+export { registerEventLogProvider } from './rule_execution_events/register_event_log_provider';
+export { mergeRuleExecutionSummary } from './merge_rule_execution_summary';
 export * from './utils/normalization';
