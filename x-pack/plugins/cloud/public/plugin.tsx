@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import {
   CoreSetup,
   CoreStart,
@@ -15,17 +16,24 @@ import {
   ApplicationStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import {
+  ELASTIC_SUPPORT_LINK,
+  CLOUD_SNAPSHOTS_PATH,
+  GET_CHAT_USER_DATA_ROUTE_PATH,
+} from '../common/constants';
+import type { GetChatUserDataResponseBody } from '../common/types';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
+import { ChatConfig, ServicesProvider } from './services';
 
 export interface CloudConfigType {
   id?: string;
@@ -38,6 +46,13 @@ export interface CloudConfigType {
     enabled: boolean;
     org_id?: string;
   };
+  /** Configuration to enable live chat in Cloud-enabled instances of Kibana. */
+  chat: {
+    /** Determines if chat is enabled. */
+    enabled: boolean;
+    /** The URL to the remotely-hosted chat application. */
+    chatURL: string;
+  };
 }
 
 interface CloudSetupDependencies {
@@ -47,6 +62,13 @@ interface CloudSetupDependencies {
 
 interface CloudStartDependencies {
   security?: SecurityPluginStart;
+}
+
+export interface CloudStart {
+  /**
+   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
+   */
+  CloudContextProvider: FC<{}>;
 }
 
 export interface CloudSetup {
@@ -65,10 +87,15 @@ interface SetupFullstoryDeps extends CloudSetupDependencies {
   basePath: IBasePath;
 }
 
+interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
+  http: CoreSetup['http'];
+}
+
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
   private appSubscription?: Subscription;
+  private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -79,6 +106,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const application = core.getStartServices().then(([coreStart]) => {
       return coreStart.application;
     });
+
     this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
@@ -94,6 +122,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     } = this.config;
 
     this.isCloudEnabled = getIsCloudEnabled(id);
+
+    this.setupChat({ http: core.http, security }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up Chat: ${e.toString()}`)
+    );
 
     if (home) {
       home.environment.update({ cloud: this.isCloudEnabled });
@@ -119,7 +152,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
   }
 
-  public start(coreStart: CoreStart, { security }: CloudStartDependencies) {
+  public start(coreStart: CoreStart, { security }: CloudStartDependencies): CloudStart {
     const { deployment_url: deploymentUrl, base_url: baseUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
 
@@ -147,6 +180,17 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // In the event of an unexpected error, fail *open*.
       // Cloud admin console will always perform the actual authorization checks.
       .catch(() => setLinks(true));
+
+    // There's a risk that the request for chat config will take too much time to complete, and the provider
+    // will maintain a stale value.  To avoid this, we'll use an Observable.
+    const CloudContextProvider: FC = ({ children }) => {
+      const chatConfig = useObservable(this.chatConfig$, { enabled: false });
+      return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
+    };
+
+    return {
+      CloudContextProvider,
+    };
   }
 
   public stop() {
@@ -265,6 +309,43 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       kibana_version_str: this.initializerContext.env.packageInfo.version,
       ...memoryInfo,
     });
+  }
+
+  private async setupChat({ http, security }: SetupChatDeps) {
+    if (!this.isCloudEnabled) {
+      return;
+    }
+
+    const { enabled, chatURL } = this.config.chat;
+
+    if (!security || !enabled || !chatURL) {
+      return;
+    }
+
+    try {
+      const {
+        email,
+        id,
+        token: jwt,
+      } = await http.get<GetChatUserDataResponseBody>(GET_CHAT_USER_DATA_ROUTE_PATH);
+
+      if (!email || !id || !jwt) {
+        return;
+      }
+
+      this.chatConfig$.next({
+        enabled,
+        chatURL,
+        user: {
+          email,
+          id,
+          jwt,
+        },
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.debug(`[cloud.chat] Could not retrieve chat config: ${e.res.status} ${e.message}`, e);
+    }
   }
 }
 
