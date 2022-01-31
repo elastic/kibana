@@ -13,10 +13,10 @@ import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
 import { AppMountParameters, DocLinksStart, HttpStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { createCallApmApi } from '../services/rest/createCallApmApi';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { renderApp as renderApmApp } from './';
-import { UXAppRoot } from './uxApp';
-import { disableConsoleWarning } from '../utils/testHelpers';
+import { UXAppRoot } from './ux_app';
+import { disableConsoleWarning } from '../utils/test_helpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
@@ -70,6 +70,7 @@ describe('renderApp (APM)', () => {
       element: document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
+      theme$: new Observable(),
     };
 
     const data = dataPluginMock.createStartContract();

@@ -48,6 +48,9 @@ export const layerTypes: Record<string, LayerType> = {
   REFERENCELINE: 'referenceLine',
 };
 
+// might collide with user-supplied field names, try to make as unique as possible
+export const DOCUMENT_FIELD_NAME = '___records___';
+
 export function getBasePath() {
   return `#/`;
 }
