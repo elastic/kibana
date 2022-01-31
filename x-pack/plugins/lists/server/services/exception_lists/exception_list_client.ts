@@ -103,7 +103,24 @@ export class ExceptionListClient {
   }
 
   private getServerExtensionCallbackContext(): ServerExtensionCallbackContext {
+    const { user, serverExtensionsClient, savedObjectsClient, request } = this;
+    let exceptionListClient: undefined | ExceptionListClient;
+
     return {
+      // Lazy getter so that we only initialize a new instance of the class if needed
+      get exceptionListClient(): ExceptionListClient {
+        if (!exceptionListClient) {
+          exceptionListClient = new ExceptionListClient({
+            enableServerExtensionPoints: false,
+            request,
+            savedObjectsClient,
+            serverExtensionsClient,
+            user,
+          });
+        }
+
+        return exceptionListClient;
+      },
       request: this.request,
     };
   }

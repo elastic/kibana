@@ -15,7 +15,7 @@ import * as useFetcher from '../../../../hooks/use_fetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-} from '../../../../utils/testHelpers';
+} from '../../../../utils/test_helpers';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
