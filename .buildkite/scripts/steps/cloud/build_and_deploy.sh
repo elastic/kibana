@@ -48,7 +48,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   ecctl deployment create --track --output json --file /tmp/deploy.json &> "$JSON_FILE"
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
   CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
-  CLOUD_DEPLOYMENT_ID=$(jq --slurp '.[0].id' "$JSON_FILE")
+  CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$JSON_FILE")
   CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
 
   # Refresh vault token
