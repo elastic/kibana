@@ -131,11 +131,11 @@ export const buildNoDataAlertReason: (alertResult: {
   timeUnit: string;
 }) => string = ({ group, metric, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
-    defaultMessage: '{metric} has reported no data over the past {interval} for {group}',
+    defaultMessage: '{metric} reported no data in the last {interval} for {group}',
     values: {
       metric,
       interval: `${timeSize}${timeUnit}`,
-      group,
+      group: formatGroup(group),
     },
   });
 
