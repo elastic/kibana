@@ -15,14 +15,14 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case, SubCase, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import { CommentRequestAlertType } from '../../../../common/api';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 export interface AllCasesSelectorModalProps {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick: (theCase?: Case | SubCase) => void;
+  onRowClick: (theCase?: Case) => void;
   updateCase?: (newCase: Case) => void;
   onClose?: () => void;
 }
@@ -45,7 +45,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     }, [onClose]);
 
     const onClick = useCallback(
-      (theCase?: Case | SubCase) => {
+      (theCase?: Case) => {
         closeModal();
         onRowClick(theCase);
       },

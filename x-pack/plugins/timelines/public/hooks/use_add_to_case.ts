@@ -9,7 +9,7 @@ import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { Case, SubCase } from '../../../cases/common';
+import { Case } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
 import { TimelineItem } from '../../common/search_strategy';
 import { tGridActions } from '../store/t_grid';
@@ -21,7 +21,7 @@ import { CasesDeepLinkId, generateCaseViewPath } from '../../../cases/public';
 interface UseAddToCase {
   addNewCaseClick: () => void;
   addExistingCaseClick: () => void;
-  onCaseClicked: (theCase?: Case | SubCase) => void;
+  onCaseClicked: (theCase?: Case) => void;
   onCaseSuccess: (theCase: Case) => Promise<void>;
   attachAlertToCase: (
     theCase: Case,
@@ -48,7 +48,6 @@ interface PostCommentArg {
     owner: string;
   };
   updateCase?: (newCase: Case) => void;
-  subCaseId?: string;
 }
 
 export const useAddToCase = ({
@@ -153,7 +152,7 @@ export const useAddToCase = ({
   );
 
   const onCaseClicked = useCallback(
-    (theCase?: Case | SubCase) => {
+    (theCase?: Case) => {
       /**
        * No cases listed on the table.
        * The user pressed the add new case table's button.

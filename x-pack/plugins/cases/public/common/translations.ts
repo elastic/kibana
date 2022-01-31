@@ -241,12 +241,6 @@ export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAdded
   defaultMessage: 'added to case',
 });
 
-export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
-  'xpack.cases.common.allCases.table.selectableMessageCollections',
-  {
-    defaultMessage: 'Cases with sub-cases cannot be selected',
-  }
-);
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });

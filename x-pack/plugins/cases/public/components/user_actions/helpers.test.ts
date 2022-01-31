@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { AssociationType, CommentType } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { Comment } from '../../containers/types';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 
 const comments: Comment[] = [
   {
-    associationType: AssociationType.case,
     type: CommentType.alert,
     alertId: 'alert-id-1',
     index: 'alert-index-1',
@@ -31,7 +30,6 @@ const comments: Comment[] = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    associationType: AssociationType.case,
     type: CommentType.alert,
     alertId: 'alert-id-2',
     index: 'alert-index-2',

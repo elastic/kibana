@@ -104,7 +104,6 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   reporters: [],
   status: StatusAll,
   tags: [],
-  onlyCollectionType: false,
   owner: [],
 };
 

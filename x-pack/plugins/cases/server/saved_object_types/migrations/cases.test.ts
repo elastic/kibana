@@ -15,7 +15,7 @@ import {
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
-import { caseConnectorIdMigration } from './cases';
+import { caseConnectorIdMigration, removeCaseType } from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_case = ({
@@ -348,6 +348,27 @@ describe('case migrations', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('removeCaseType', () => {
+    it('removes the type field from the document', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'individual',
+          title: 'case',
+        },
+        type: 'abc',
+        references: [],
+      };
+
+      expect(removeCaseType(doc)).toEqual({
+        ...doc,
+        attributes: {
+          title: doc.attributes.title,
+        },
+      });
     });
   });
 });
