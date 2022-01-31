@@ -9,7 +9,7 @@ import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
 import { CoreStart } from '../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
-import { delay } from '../utils/testHelpers';
+import { delay } from '../utils/test_helpers';
 import { FetcherResult, useFetcher } from './use_fetcher';
 
 // Wrap the hook with a provider so it can useKibana

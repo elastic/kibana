@@ -17,6 +17,7 @@ import type {
 } from 'kibana/public';
 import type { DataViewsContract } from 'src/plugins/data_views/public';
 
+import { EuiLoadingContent } from '@elastic/eui';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -64,7 +65,9 @@ export interface PageDependencies {
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
-  return context === null ? null : (
+  return context === null ? (
+    <EuiLoadingContent lines={10} />
+  ) : (
     <MlContext.Provider value={context}>{children}</MlContext.Provider>
   );
 };
