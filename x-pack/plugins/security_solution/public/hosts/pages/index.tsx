@@ -22,7 +22,7 @@ const getHostsTabPath = () =>
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
-  `${HostsTableType.alerts}|`;
+  `${HostsTableType.alerts})`;
 
 const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
@@ -31,7 +31,7 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
-  `${HostsTableType.alerts}|`;
+  `${HostsTableType.alerts})`;
 
 export const HostsContainer = React.memo(() => {
   return (
