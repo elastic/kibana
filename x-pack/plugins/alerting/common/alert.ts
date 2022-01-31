@@ -138,13 +138,19 @@ export interface ActionVariable {
   useWithTripleBracesInTemplates?: boolean;
 }
 
+export interface RuleMonitoringHistory extends SavedObjectAttributes {
+  success: boolean;
+  timestamp: number;
+  duration?: number;
+}
+
 export interface RuleMonitoring extends SavedObjectAttributes {
   execution: {
-    history: Array<{
-      success: boolean;
-      timestamp: number;
-    }>;
+    history: RuleMonitoringHistory[];
     calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
       success_ratio: number;
     };
   };

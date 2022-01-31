@@ -96,6 +96,32 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       expect(getResponse.body.monitoring.execution.history[4].success).to.be(false);
       expect(getResponse.body.monitoring.execution.calculated_metrics.success_ratio).to.be(0.6);
     });
+
+    it('should populate rule objects with the calculated percentiles', async () => {
+      const createResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            schedule: { interval: '3s' },
+          })
+        );
+
+      expect(createResponse.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
+
+      // Allow at least three executions
+      await waitForExecutionCount(3, createResponse.body.id);
+
+      const getResponse = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`
+      );
+      expect(getResponse.status).to.eql(200);
+
+      getResponse.body.monitoring.execution.history.forEach((history: any) => {
+        expect(history.duration).to.be.a('number');
+      });
+    });
   });
 
   const MAX_ATTEMPTS = 25;
