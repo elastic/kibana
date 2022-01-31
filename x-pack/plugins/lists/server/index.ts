@@ -22,8 +22,15 @@ export type {
   ListsApiRequestHandlerContext,
   ListsServerExtensionRegistrar,
   ExtensionPoint,
-  ExceptionsListPreCreateItemServerExtension,
   ExceptionsListPreUpdateItemServerExtension,
+  ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreImportServerExtension,
+  ExceptionsListPreSummaryServerExtension,
+  ExceptionsListPreExportServerExtension,
+  ExceptionsListPreMultiListFindServerExtension,
+  ExceptionsListPreSingleListFindServerExtension,
+  ExceptionsListPreDeleteItemServerExtension,
 } from './types';
 export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 
