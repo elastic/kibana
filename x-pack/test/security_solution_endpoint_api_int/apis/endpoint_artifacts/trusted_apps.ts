@@ -8,16 +8,16 @@
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../security_solution_endpoint/services/endpoint_artifacts';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../plugins/security_solution/common/endpoint/service/artifacts';
-import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services//endpoint_artifacts';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
+import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
-} from '../../common/services/security_solution';
+} from '../../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin)', () => {
+  describe('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
