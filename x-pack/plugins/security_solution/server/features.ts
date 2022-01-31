@@ -118,7 +118,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
     all: {
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-all', 'lists-read', 'rac'],
+      api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac'],
       savedObject: {
         all: [
           'alert',

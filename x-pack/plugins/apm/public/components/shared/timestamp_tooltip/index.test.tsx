@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
 import { TimestampTooltip } from './index';
-import { mockNow } from '../../../utils/testHelpers';
+import { mockNow } from '../../../utils/test_helpers';
 
 describe('TimestampTooltip', () => {
   const timestamp = 1570720000123; // Oct 10, 2019, 08:06:40.123 (UTC-7)
