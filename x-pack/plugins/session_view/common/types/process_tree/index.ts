@@ -131,8 +131,7 @@ export interface ProcessEvent {
     category: string;
     action: EventAction;
   };
-  // optional host for now (raw agent output doesn't have server identity)
-  host?: ProcessEventHost;
+  host: ProcessEventHost;
   process: ProcessSelf;
   kibana?: {
     alert: ProcessEventAlert;

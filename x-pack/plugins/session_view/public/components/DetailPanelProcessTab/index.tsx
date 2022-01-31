@@ -58,48 +58,72 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
   ].map((leader, idx) => {
     const listItems: ListItems = [
       {
-        title: 'id',
+        title: <DetailPanelListItem>id</DetailPanelListItem>,
         description: (
-          <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-            {leader.id}
-          </EuiTextColor>
+          <DetailPanelCopy textToCopy={leader.id}>
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {leader.id || '-'}
+            </EuiTextColor>
+          </DetailPanelCopy>
         ),
       },
       {
-        title: 'start',
-        description: leader.start.toISOString(),
+        title: <DetailPanelListItem>start</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={leader.start.toISOString()}>
+            <span css={styles.description}>{leader.start.toISOString()}</span>
+          </DetailPanelCopy>
+        ),
       },
     ];
     if (idx === 0) {
       listItems.push({
-        title: 'entry_meta.type',
+        title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
         description: (
-          <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-            {leader.entryMetaType || '-'}
-          </EuiTextColor>
+          <DetailPanelCopy textToCopy={leader.entryMetaType}>
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {leader.entryMetaType || '-'}
+            </EuiTextColor>
+          </DetailPanelCopy>
         ),
       });
     }
     listItems.push(
       ...[
         {
-          title: 'user.name',
-          description: leader.userName,
+          title: <DetailPanelListItem>user.name</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy textToCopy={leader.userName}>
+              <span css={styles.description}>{leader.userName || '-'}</span>
+            </DetailPanelCopy>
+          ),
         },
         {
-          title: 'interactive',
-          description: leader.interactive ? 'True' : 'False',
+          title: <DetailPanelListItem>interactive</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy textToCopy={leader.interactive ? 'True' : 'False'}>
+              <span css={styles.description}>{leader.interactive ? 'True' : 'False'}</span>
+            </DetailPanelCopy>
+          ),
         },
         {
-          title: 'pid',
-          description: leader.pid.toString(),
+          title: <DetailPanelListItem>pid</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy textToCopy={leader.pid.toString()}>
+              <span css={styles.description}>{leader.pid ? leader.pid.toString() : '-'}</span>
+            </DetailPanelCopy>
+          ),
         },
       ]
     );
     if (idx === 0) {
       listItems.push({
-        title: 'entry_meta.source.ip',
-        description: leader.entryMetaSourceIp,
+        title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy textToCopy={leader.entryMetaSourceIp}>
+            <span css={styles.description}>{leader.entryMetaSourceIp || '-'}</span>
+          </DetailPanelCopy>
+        ),
       });
     }
     return {
@@ -121,8 +145,8 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>id</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.id}>
-                <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                  {processDetail.id}
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processDetail.id || '-'}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -131,7 +155,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>start</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.start.toISOString()}>
-                {processDetail.start.toISOString()}
+                <span css={styles.description}>{processDetail.start.toISOString()}</span>
               </DetailPanelCopy>
             ),
           },
@@ -139,7 +163,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>end</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.end.toISOString()}>
-                {processDetail.end.toISOString()}
+                <span css={styles.description}>{processDetail.end.toISOString()}</span>
               </DetailPanelCopy>
             ),
           },
@@ -147,8 +171,8 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.exit_code.toString()}>
-                <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                  {processDetail.exit_code}
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processDetail.exit_code || '-'}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -157,13 +181,17 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>user</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.user}>
-                {processDetail.user}
+                <span css={styles.description}>{processDetail.user}</span>
               </DetailPanelCopy>
             ),
           },
           {
             title: <DetailPanelListItem>args</DetailPanelListItem>,
-            description: <DetailPanelCopy textToCopy={processArgs}>{processArgs}</DetailPanelCopy>,
+            description: (
+              <DetailPanelCopy textToCopy={processArgs}>
+                <span css={styles.description}>{processArgs}</span>
+              </DetailPanelCopy>
+            ),
           },
           {
             title: <DetailPanelListItem>executable</DetailPanelListItem>,
@@ -180,8 +208,8 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
                 {processDetail.executable.map((execTuple) => {
                   const [executable, eventAction] = execTuple;
                   return (
-                    <div>
-                      <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
+                    <div css={styles.description}>
+                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                         {executable}
                       </EuiTextColor>
                       <EuiTextColor color="subdued" css={styles.executableAction}>
@@ -197,8 +225,8 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>process.pid</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.pid.toString()}>
-                <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                  {processDetail.pid}
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processDetail.pid || '-'}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),

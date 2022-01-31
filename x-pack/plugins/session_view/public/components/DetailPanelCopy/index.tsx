@@ -32,7 +32,7 @@ export const DetailPanelCopy = ({
 
   const props: DetailPanelListItemProps = {
     copy: (
-      <EuiCopy textToCopy={textToCopy} display={display}>
+      <EuiCopy textToCopy={textToCopy || '-'} display={display}>
         {(copy) => (
           <EuiButtonIcon
             css={styles.copyButton}

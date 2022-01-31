@@ -6,7 +6,7 @@
  */
 import React, { useState, ReactNode } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
-import { Process } from '../../../common/types/process_tree';
+import { Process, ProcessEventHost } from '../../../common/types/process_tree';
 import { getDetailPanelProcess } from './helpers';
 import { DetailPanelProcessTab } from '../DetailPanelProcessTab';
 import { DetailPanelHostTab } from '../DetailPanelHostTab';
@@ -35,6 +35,11 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
     return <span>Please select a process</span>;
   }
 
+  let selectedProcessHost = {} as ProcessEventHost;
+  if (selectedProcess.events[0]) {
+    selectedProcessHost = selectedProcess.events[0].host;
+  }
+
   const tabs: EuiTabProps[] = [
     {
       id: 'process',
@@ -44,7 +49,7 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
     {
       id: 'host',
       name: 'Host',
-      content: <DetailPanelHostTab processHost={selectedProcess.events[0]?.host} />,
+      content: <DetailPanelHostTab processHost={selectedProcessHost} />,
     },
     {
       id: 'alerts',

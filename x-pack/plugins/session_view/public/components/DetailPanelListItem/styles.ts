@@ -21,6 +21,7 @@ export const useStyles = ({ display }: StylesDeps) => {
       width: '100%',
       fontSize: 'inherit',
       fontWeight: 'inherit',
+      minHeight: '36px',
     };
 
     const copiableItem: CSSObject = {

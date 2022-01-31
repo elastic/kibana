@@ -125,10 +125,8 @@ export const ProcessTree = ({
   useLayoutEffect(() => {
     if (selectedProcess) {
       selectProcess(selectedProcess);
-    } else {
-      onProcessSelected(sessionLeader);
     }
-  }, [selectedProcess, selectProcess, onProcessSelected, sessionLeader]);
+  }, [selectedProcess, selectProcess]);
 
   useEffect(() => {
     // after 2 pages are loaded (due to bi-directional jump to), auto select the process

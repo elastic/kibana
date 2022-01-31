@@ -10,19 +10,15 @@ import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const cached = useMemo(() => {
-    const tabSection: CSSObject = {
-      padding: '16px',
+    const description: CSSObject = {
+      width: 'calc(100% - 28px)',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     };
 
-    const tabListTitle: CSSObject = {
-      width: '40%',
-    };
-
-    const tabListDescription: CSSObject = {
-      width: '60%',
-    };
-
-    const tabDescriptionSemibold: CSSObject = {
+    const descriptionSemibold: CSSObject = {
+      ...description,
       fontWeight: 500,
     };
 
@@ -31,23 +27,9 @@ export const useStyles = () => {
       paddingLeft: '4px',
     };
 
-    const tabAccordion: CSSObject = {
-      borderTop: '1px solid #D4DAE5',
-    };
-
-    const tabAccordionButton: CSSObject = {
-      height: '56px',
-      paddingLeft: '16px',
-      fontWeight: 700,
-    };
-
     return {
-      tabAccordion,
-      tabAccordionButton,
-      tabSection,
-      tabListTitle,
-      tabListDescription,
-      tabDescriptionSemibold,
+      description,
+      descriptionSemibold,
       executableAction,
     };
   }, []);

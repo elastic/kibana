@@ -9,10 +9,12 @@ import { EuiTextColor } from '@elastic/eui';
 import { ProcessEventHost } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAccordion } from '../DetailPanelAccordion';
+import { DetailPanelCopy } from '../DetailPanelCopy';
 import { DetailPanelDescriptionList } from '../DetailPanelDescriptionList';
+import { DetailPanelListItem } from '../DetailPanelListItem';
 
 interface DetailPanelHostTabDeps {
-  processHost: ProcessEventHost | undefined;
+  processHost: ProcessEventHost;
 }
 
 /**
@@ -26,43 +28,53 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
       <DetailPanelDescriptionList
         listItems={[
           {
-            title: 'hostname',
+            title: <DetailPanelListItem>hostname</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.hostname || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.hostname}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.hostname || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'id',
+            title: <DetailPanelListItem>id</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.id || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.id}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.id || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'ip',
+            title: <DetailPanelListItem>ip</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.ip || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.ip}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.ip || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'mac',
+            title: <DetailPanelListItem>mac</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.mac || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.mac}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.mac || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'name',
+            title: <DetailPanelListItem>name</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.name || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.name}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.name || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
         ]}
@@ -72,59 +84,73 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
         title="Host OS"
         listItems={[
           {
-            title: 'architecture',
+            title: <DetailPanelListItem>architecture</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.architecture || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.architecture}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.architecture || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'os.family',
+            title: <DetailPanelListItem>os.family</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.os.family || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.os.family}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.os.family || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'os.full',
+            title: <DetailPanelListItem>os.full</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.os.full || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.os.full}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.os.full || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'os.kernel',
+            title: <DetailPanelListItem>os.kernel</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.os.kernel || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.os.kernel}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.os.kernel || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'os.name',
+            title: <DetailPanelListItem>os.name</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.os.name || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.os.name}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.os.name || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'os.platform',
+            title: <DetailPanelListItem>os.platform</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.os.platform || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.os.platform}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.os.platform || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
           {
-            title: 'os.version',
+            title: <DetailPanelListItem>os.version</DetailPanelListItem>,
             description: (
-              <EuiTextColor color="subdued" css={styles.tabDescriptionSemibold}>
-                {processHost?.os.version || '-'}
-              </EuiTextColor>
+              <DetailPanelCopy textToCopy={processHost.os.version}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {processHost.os.version || '-'}
+                </EuiTextColor>
+              </DetailPanelCopy>
             ),
           },
         ]}
