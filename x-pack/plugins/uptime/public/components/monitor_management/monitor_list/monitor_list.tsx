@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { SyntheticsMonitorSavedObject } from '../../../../common/types';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { DataStream, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
+import { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { Actions } from './actions';
 import { MonitorLocations } from './monitor_locations';
@@ -66,19 +66,14 @@ export const MonitorManagementList = ({
         defaultMessage: 'Monitor name',
       }),
       render: ({
-        attributes: { name, type },
+        attributes: { name },
         id,
       }: {
         attributes: Partial<MonitorFields>;
         id: string;
       }) => (
         <EuiLink
-          href={`${basePath}/app/uptime/monitor/${Buffer.from(
-            /* Monitor Management currently only supports inline browser monitors.
-             * Inline browser monitors append `inline` to the monitor id */
-            `${id}${type === DataStream.BROWSER ? `-inline` : ''}`,
-            'utf8'
-          ).toString('base64')}`}
+          href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
         >
           {name}
         </EuiLink>
