@@ -72,9 +72,7 @@ describe(`UserActions`, () => {
       patchComment,
     });
 
-    jest
-      .spyOn(routeData, 'useParams')
-      .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
+    jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
@@ -284,7 +282,6 @@ describe(`UserActions`, () => {
       expect(patchComment).toBeCalledWith({
         commentUpdate: sampleData.content,
         caseId: 'case-id',
-        subCaseId: 'sub-case-id',
         commentId: props.data.comments[0].id,
         fetchUserActions,
         updateCase,
