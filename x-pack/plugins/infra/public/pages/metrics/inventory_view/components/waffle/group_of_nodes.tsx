@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
@@ -28,23 +29,27 @@ interface Props {
   currentTime: number;
 }
 
-export const GroupOfNodes: React.FC<Props> = ({
-  group,
-  options,
-  formatter,
-  onDrilldown,
-  isChild = false,
-  bounds,
-  nodeType,
-  currentTime,
-}) => {
-  const width = group.width > 200 ? group.width : 200;
+// custom comparison function for rendering the nodes to prevent unncessary rerendering
+const isEqualGroupOfNodes = (prevProps: Props, nextProps: Props) => {
+  const { bounds: prevBounds, group: prevGroup, ...prevPropsToCompare } = prevProps;
+  const { bounds: nextBounds, group: nextGroup, ...nextPropsToCompare } = nextProps;
+  const { nodes: prevNodes, ...prevGroupToCompare } = prevProps.group;
+  const { nodes: nextNodes, ...nextGroupToCompare } = nextProps.group;
   return (
-    <GroupOfNodesContainer style={{ width }}>
-      <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
-      <Nodes>
-        {group.width
-          ? group.nodes.map((node) => (
+    isEqual(prevPropsToCompare, nextPropsToCompare) &&
+    isEqual(prevGroupToCompare, nextGroupToCompare)
+  );
+};
+
+export const GroupOfNodes = React.memo<Props>(
+  ({ group, options, formatter, onDrilldown, isChild = false, bounds, nodeType, currentTime }) => {
+    const width = group.width > 200 ? group.width : 200;
+    return (
+      <GroupOfNodesContainer style={{ width }}>
+        <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
+        <Nodes>
+          {group.width ? (
+            group.nodes.map((node) => (
               <Node
                 key={`${node.pathId}:${node.name}`}
                 options={options}
@@ -56,11 +61,15 @@ export const GroupOfNodes: React.FC<Props> = ({
                 currentTime={currentTime}
               />
             ))
-          : null}
-      </Nodes>
-    </GroupOfNodesContainer>
-  );
-};
+          ) : (
+            <EuiLoadingSpinner size="xl" />
+          )}
+        </Nodes>
+      </GroupOfNodesContainer>
+    );
+  },
+  isEqualGroupOfNodes
+);
 
 const GroupOfNodesContainer = euiStyled.div`
   margin: 0 10px;
