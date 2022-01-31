@@ -3187,7 +3187,7 @@
               "section": "def-server.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
-            ", user: string, disableServerExtensionPoints?: boolean | undefined) => ",
+            ", user: string, enableServerExtensionPoints?: boolean | undefined) => ",
             {
               "pluginId": "lists",
               "scope": "server",
@@ -3552,7 +3552,7 @@
               "id": "def-server.ListPluginSetup.getExceptionListClient.$3",
               "type": "CompoundType",
               "tags": [],
-              "label": "disableServerExtensionPoints",
+              "label": "enableServerExtensionPoints",
               "description": [],
               "signature": [
                 "boolean | undefined"

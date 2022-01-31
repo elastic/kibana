@@ -621,28 +621,7 @@
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/vis.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
-              }
-            ],
+            "references": [],
             "children": [],
             "returnComment": []
           },
@@ -9567,30 +9546,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
           },
@@ -12345,14 +12300,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -18565,14 +18512,6 @@
               "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
             },
             {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-            },
-            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/build_services.ts"
             },
@@ -18699,14 +18638,6 @@
             {
               "plugin": "infra",
               "path": "x-pack/plugins/infra/public/pages/logs/page_providers.tsx"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
             },
             {
               "plugin": "graph",
@@ -24513,30 +24444,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
           },
@@ -25387,14 +25294,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -35169,20 +35068,7 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/locator.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/locator.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/locator.ts"
-          }
-        ],
+        "references": [],
         "returnComment": [],
         "children": [
           {
@@ -37287,30 +37173,6 @@
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
           },
           {
             "plugin": "monitoring",
@@ -40050,14 +39912,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
           },
           {
             "plugin": "dashboardEnhanced",

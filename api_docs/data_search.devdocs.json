@@ -3320,28 +3320,7 @@
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/vis.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
-              }
-            ],
+            "references": [],
             "children": [],
             "returnComment": []
           },

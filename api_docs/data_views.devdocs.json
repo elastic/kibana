@@ -19147,6 +19147,10 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
           },
           {
@@ -19252,30 +19256,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
           },
           {
             "plugin": "monitoring",
@@ -19440,6 +19420,30 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/query/filter_manager/lib/mappers/map_exists.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/value_input_type.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/value_input_type.tsx"
           }
         ],
         "children": [
