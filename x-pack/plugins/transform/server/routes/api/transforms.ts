@@ -615,9 +615,9 @@ async function resetTransforms(
           transform_id: transformId,
         });
         transformReset.success = true;
-      } catch (deleteTransformJobError) {
-        transformReset.error = deleteTransformJobError.meta.body.error;
-        if (deleteTransformJobError.statusCode === 403) {
+      } catch (resetTransformJobError) {
+        transformReset.error = resetTransformJobError.meta.body.error;
+        if (resetTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
       }

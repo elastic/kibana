@@ -41,7 +41,7 @@ export const ResetActionName: FC<ResetActionNameProps> = ({
   const bulkResetButtonDisabledText = i18n.translate(
     'xpack.transform.transformList.resetBulkActionDisabledToolTipContent',
     {
-      defaultMessage: 'One or more selected transforms must be stopped in order to be reseted.',
+      defaultMessage: 'One or more selected transforms must be stopped to be reset.',
     }
   );
   const resetButtonDisabledText = i18n.translate(
