@@ -56,12 +56,7 @@ describe('request utils', () => {
       const mockConfig = getMockSearchSessionsConfig({
         defaultExpiration: moment.duration(3, 'd'),
       });
-      const params = await getDefaultAsyncSubmitParams(
-        mockUiSettingsClient,
-        mockConfig,
-        { body: {} },
-        {}
-      );
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {}, {});
       expect(params).toHaveProperty('keep_alive', '1m');
     });
 
@@ -75,7 +70,7 @@ describe('request utils', () => {
       const params = await getDefaultAsyncSubmitParams(
         mockUiSettingsClient,
         mockConfig,
-        { body: {} },
+        {},
         {
           sessionId: 'foo',
         }
@@ -94,7 +89,7 @@ describe('request utils', () => {
       const params = await getDefaultAsyncSubmitParams(
         mockUiSettingsClient,
         mockConfig,
-        { body: {} },
+        {},
         {
           sessionId: 'foo',
         }
@@ -110,7 +105,7 @@ describe('request utils', () => {
       const params = await getDefaultAsyncSubmitParams(
         mockUiSettingsClient,
         mockConfig,
-        { body: {} },
+        {},
         {
           sessionId: 'foo',
         }
@@ -129,7 +124,7 @@ describe('request utils', () => {
       const params = await getDefaultAsyncSubmitParams(
         mockUiSettingsClient,
         mockConfig,
-        { body: {} },
+        {},
         {
           sessionId: 'foo',
         }
@@ -145,12 +140,7 @@ describe('request utils', () => {
         defaultExpiration: moment.duration(3, 'd'),
         enabled: false,
       });
-      const params = await getDefaultAsyncSubmitParams(
-        mockUiSettingsClient,
-        mockConfig,
-        { body: {} },
-        {}
-      );
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {}, {});
       expect(params).toHaveProperty('enable_fields_emulation', true);
     });
 
@@ -165,7 +155,7 @@ describe('request utils', () => {
       const params = await getDefaultAsyncSubmitParams(
         mockUiSettingsClient,
         mockConfig,
-        { body: { fields: ['foo'], _source: { excludes: ['bar'] } } },
+        { fields: ['foo'], _source: { excludes: ['bar'] } },
         {}
       );
       expect(params).toHaveProperty('enable_fields_emulation', false);
