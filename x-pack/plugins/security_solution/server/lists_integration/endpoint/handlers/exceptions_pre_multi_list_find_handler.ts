@@ -7,22 +7,30 @@
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../lists/server';
+import { TrustedAppValidator } from '../validators/trusted_app_validator';
 import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
+type ValidatorCallback = ExceptionsListPreMultiListFindServerExtension['callback'];
 export const getExceptionsPreMultiListFindHandler = (
-  endpointAppContext: EndpointAppContextService
-): ExceptionsListPreMultiListFindServerExtension['callback'] => {
+  endpointAppContextService: EndpointAppContextService
+): ValidatorCallback => {
   return async function ({ data, context: { request } }) {
     if (!data.namespaceType.includes('agnostic')) {
+      return data;
+    }
+    // validate Trusted application
+    if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
       return data;
     }
 
     // Validate Host Isolation Exceptions
     if (data.listId.some(HostIsolationExceptionsValidator.isHostIsolationException)) {
       await new HostIsolationExceptionsValidator(
-        endpointAppContext,
+        endpointAppContextService,
         request
       ).validatePreMultiListFind();
+      return data;
     }
 
     return data;
