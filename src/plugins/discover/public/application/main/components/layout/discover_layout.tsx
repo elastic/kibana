@@ -48,7 +48,7 @@ import {
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DataViewType } from '../../../../../../data_views/common';
+import { DataViewType, DataView } from '../../../../../../data_views/common';
 
 /**
  * Local storage key for sidebar persistence state
@@ -204,6 +204,14 @@ export function DiscoverLayout({
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  const onDataViewCreated = useCallback(
+    (dataView: DataView) => {
+      if (dataView.id) {
+        onChangeIndexPattern(dataView.id);
+      }
+    },
+    [onChangeIndexPattern]
+  );
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
@@ -245,6 +253,7 @@ export function DiscoverLayout({
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
               viewMode={viewMode}
+              onDataViewCreated={onDataViewCreated}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
