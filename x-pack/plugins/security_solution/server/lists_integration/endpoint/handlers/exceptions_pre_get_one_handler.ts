@@ -9,6 +9,7 @@ import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types'
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
 import { TrustedAppValidator } from '../validators/trusted_app_validator';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
 type ValidatedReturnType = ExceptionsListPreGetOneItemServerExtension['callback'];
 export const getExceptionsPreGetOneHandler = (
@@ -33,6 +34,14 @@ export const getExceptionsPreGetOneHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId: exceptionItem.list_id })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreGetOneItem();
+      return data;
+    }
+    // validate Host Isolation Exception
+    if (HostIsolationExceptionsValidator.isHostIsolationException(exceptionItem.list_id)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreGetOneItem();
       return data;
     }
 

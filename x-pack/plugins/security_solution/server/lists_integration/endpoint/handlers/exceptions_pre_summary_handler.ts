@@ -8,6 +8,7 @@
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreSummaryServerExtension } from '../../../../../lists/server';
 import { TrustedAppValidator } from '../validators';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
 type ValidatedReturnType = ExceptionsListPreSummaryServerExtension['callback'];
 export const getExceptionsPreSummaryHandler = (
@@ -28,6 +29,14 @@ export const getExceptionsPreSummaryHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreGetListSummary();
+      return data;
+    }
+    // Host Isolation Exceptions
+    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreSummary();
       return data;
     }
 

@@ -8,6 +8,7 @@
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreSingleListFindServerExtension } from '../../../../../lists/server';
 import { TrustedAppValidator } from '../validators/trusted_app_validator';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
 type ValidatedReturnType = ExceptionsListPreSingleListFindServerExtension['callback'];
 export const getExceptionsPreSingleListFindHandler = (
@@ -21,6 +22,13 @@ export const getExceptionsPreSingleListFindHandler = (
     // Validate Host Isolation Exceptions
     if (TrustedAppValidator.isTrustedApp({ listId: data.listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreSingleListFind();
+      return data;
+    }
+    if (HostIsolationExceptionsValidator.isHostIsolationException(data.listId)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreSingleListFind();
       return data;
     }
 

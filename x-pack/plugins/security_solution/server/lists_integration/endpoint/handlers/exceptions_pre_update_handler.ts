@@ -20,6 +20,10 @@ export const getExceptionsPreUpdateItemHandler = (
     data,
     context: { request, exceptionListClient },
   }): Promise<UpdateExceptionListItemOptions> {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     const currentSavedItem = await exceptionListClient.getExceptionListItem({
       id: data.id,
       itemId: data.itemId,
