@@ -72,7 +72,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Auth: `secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME`
+  Vault: \`secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
 
   Image: $CLOUD_IMAGE
 EOF
