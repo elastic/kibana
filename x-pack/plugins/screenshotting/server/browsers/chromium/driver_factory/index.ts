@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
+import _ from 'lodash';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
@@ -117,7 +118,7 @@ export class HeadlessChromiumDriverFactory {
       userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      viewport: DEFAULT_VIEWPORT,
+      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
     });
   }
 
@@ -147,13 +148,11 @@ export class HeadlessChromiumDriverFactory {
           handleSIGHUP: false,
           args: chromiumArgs,
 
-          // We optionally set this at page creation so that there is minimal
-          // reflow required when setting the page size just before a screenshot
-          // is taken.
-          defaultViewport: {
-            ...DEFAULT_VIEWPORT,
-            ...defaultViewport,
-          },
+          // We optionally set this at page creation to reduce the chances of
+          // browser reflow. In most cases only the height needs to be adjusted
+          // before taking a screenshot.
+          // NOTE: _.defaults assigns to the target object, so we copy it.
+          defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
           env: {
             TZ: browserTimezone,
           },
