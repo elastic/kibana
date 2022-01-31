@@ -153,16 +153,19 @@ export class GraphPageObject extends FtrService {
       if (tagName === 'line') {
         const [sourcePosition, targetPosition] = await this.getLinePositions(element);
         const lineStyle = await element.getAttribute('style');
-        // grep out the width of the connection from the style attribute
-        const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
-        edges.push({
-          element,
-          width: strokeWidth,
-          // look up source and target node by matching start and end coordinates
-          // of the edges and the nodes
-          sourceNode: nodes[nodePositionMap[sourcePosition]],
-          targetNode: nodes[nodePositionMap[targetPosition]],
-        });
+        // Skip transparent lines
+        if (!/opacity/.test(lineStyle)) {
+          // grep out the width of the connection from the style attribute
+          const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
+          edges.push({
+            element,
+            width: strokeWidth,
+            // look up source and target node by matching start and end coordinates
+            // of the edges and the nodes
+            sourceNode: nodes[nodePositionMap[sourcePosition]],
+            targetNode: nodes[nodePositionMap[targetPosition]],
+          });
+        }
       }
     }
 

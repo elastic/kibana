@@ -106,6 +106,7 @@ export function GraphVisualization({
                     'gphEdge--selected': edge.isSelected,
                   })}
                   strokeLinecap="round"
+                  style={{ strokeWidth: edge.width }}
                 />
                 <line
                   x1={edge.topSrc.kx}
