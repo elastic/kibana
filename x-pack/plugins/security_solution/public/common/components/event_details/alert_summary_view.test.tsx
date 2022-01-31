@@ -170,6 +170,39 @@ describe('AlertSummaryView', () => {
     });
   });
 
+  test('Malware event category shows file fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.category') {
+          return {
+            ...item,
+            values: ['malware'],
+            originalValue: ['malware'],
+          };
+        }
+        return item;
+      }),
+      { category: 'file', field: 'file.name', values: ['malware.exe'] },
+      {
+        category: 'file',
+        field: 'file.hash.sha256',
+        values: ['3287rhf3847gb38fb3o984g9384g7b3b847gb'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['host.name', 'user.name', 'file.name', 'file.hash.sha256'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test('Ransomware event code resolves fields from the source event', () => {
     const renderProps = {
       ...props,

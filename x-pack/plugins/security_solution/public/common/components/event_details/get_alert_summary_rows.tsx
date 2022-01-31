@@ -66,6 +66,9 @@ function getFieldsByCategory({
       return [{ id: 'dns.query.name' }, { id: 'process.name' }];
     case EventCategory.REGISTRY:
       return [{ id: 'registry.key' }, { id: 'registry.value' }, { id: 'process.name' }];
+    case EventCategory.MALWARE:
+      // The details for malware events can be found in the file fields
+      return getFieldsByCategory({ primaryEventCategory: EventCategory.FILE, allEventCategories });
     default:
       let fields: EventSummaryField[] = [];
 
