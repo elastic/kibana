@@ -95,7 +95,7 @@ const getAppend = (
   if (mode !== 'auto' && validation?.warnings.length) {
     items.push(
       <EuiToolTip position="top" content={getOutsideDataBoundsWarningMessage(validation.warnings)}>
-        <EuiIcon type="alert" size="m" color="warning" />
+        <EuiIcon type="iInCircle" size="m" color="primary" />
       </EuiToolTip>
     );
   }
