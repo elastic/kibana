@@ -33,7 +33,7 @@ import { SavedQueriesItem } from './saved_queries_item';
 import { FilterExpressionItem } from './filter_expression_item';
 
 import { UI_SETTINGS } from '../../../common';
-import { AddFilterModal } from '../query_string_input/add_filter_modal';
+import { EditFilterModal } from '../query_string_input/edit_filter_modal';
 
 interface Props {
   filters: Filter[];
@@ -210,7 +210,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     return (
       <EuiFlexItem grow={false}>
         {isEditFilterPopoverOpen && (
-          <AddFilterModal
+          <EditFilterModal
             onCancel={onEditFilterClick}
             filter={props.filters[0]}
             multipleFilters={filteredFilter}

@@ -70,13 +70,7 @@ const tabs = [
     label: i18n.translate('data.filter.filterEditor.queryBuilderLabel', {
       defaultMessage: 'Query builder',
     }),
-  },
-  {
-    type: 'saved_filters',
-    label: i18n.translate('data.filter.filterEditor.savedFiltersLabel', {
-      defaultMessage: 'Saved filters',
-    }),
-  },
+  }
 ];
 
 export interface FilterGroup {
@@ -89,7 +83,7 @@ export interface FilterGroup {
   subGroupId?: number;
 }
 
-export function AddFilterModal({
+export function EditFilterModal({
   onSubmit,
   onMultipleFiltersSubmit,
   onCancel,
@@ -423,6 +417,12 @@ export function AddFilterModal({
     }
   };
 
+  const onApplyChangesFilter = () => {};
+
+  const onDeliteFilter = () => {
+    onRemoveFilterGroup(multipleFilters[0]?.groupId);
+  };
+
   const renderGroupedFilters = () => {
     const groupedFiltersNew = groupBy(localFilters, 'groupId');
     const GroupComponent: JSX.Element[] = [];
@@ -627,8 +627,8 @@ export function AddFilterModal({
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
-            {i18n.translate('data.filter.addFilterModal.headerTitle', {
-              defaultMessage: 'Add filter',
+            {i18n.translate('data.filter.editFilterModal.headerTitle', {
+              defaultMessage: 'Edit filter',
             })}
           </h3>
         </EuiModalHeaderTitle>
@@ -687,18 +687,32 @@ export function AddFilterModal({
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  iconType="plusInCircleFilled"
-                  fill
-                  onClick={onAddFilter}
+                  iconType="trash"
+                  onClick={onDeliteFilter}
                   data-test-subj="canvasCustomElementForm-submit"
+                  color="danger"
                 >
-                  {i18n.translate('data.filter.addFilterModal.addFilterBtnLabel', {
-                    defaultMessage: 'Add filter',
+                  {i18n.translate('data.filter.addFilterModal.deleteFilterBtnLabel', {
+                    defaultMessage: 'Delete filter',
                   })}
                 </EuiButton>
-              </EuiFlexItem>  
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="checkInCircleFilled"
+                  fill
+                  onClick={onApplyChangesFilter}
+                  data-test-subj="canvasCustomElementForm-submit"
+                >
+                  {i18n.translate('data.filter.addFilterModal.applyChangesFilterBtnLabel', {
+                    defaultMessage: 'Apply changes',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
