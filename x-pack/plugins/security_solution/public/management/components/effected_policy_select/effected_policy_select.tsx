@@ -46,6 +46,20 @@ const StyledEuiSelectable = styled.div`
   }
 `;
 
+const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
+  @media only screen and (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    align-items: center;
+  }
+`;
+
+const StyledButtonGroup = styled(EuiButtonGroup)`
+  display: flex;
+  justify-content: right;
+  .euiButtonGroupButton {
+    padding-right: ${(props) => props.theme.eui.paddingSizes.l};
+  }
+`;
+
 const EffectivePolicyFormContainer = styled.div`
   .policy-name .euiSelectableListItem__text {
     text-decoration: none !important;
@@ -99,7 +113,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
-          iconType: isGlobal ? 'checkInCircleFilled' : '',
+          iconType: isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('global'),
         },
         {
@@ -107,7 +121,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
-          iconType: !isGlobal ? 'checkInCircleFilled' : '',
+          iconType: !isGlobal ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('perPolicy'),
         },
       ],
@@ -208,19 +222,18 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <StyledEuiFlexItemButtonGroup grow={1}>
             <EuiFormRow fullWidth>
-              <EuiButtonGroup
+              <StyledButtonGroup
                 legend="Global Policy Toggle"
                 options={toggleGlobal}
                 idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
                 onChange={handleGlobalButtonChange}
                 color="primary"
-                isFullWidth
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
               />
             </EuiFormRow>
-          </EuiFlexItem>
+          </StyledEuiFlexItemButtonGroup>
         </EuiFlexGroup>
         <EuiSpacer />
         {!isGlobal &&

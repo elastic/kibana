@@ -22,7 +22,6 @@ export class DocLinksService {
     // Documentation for `main` branches is still published at a `master` URL.
     const DOC_LINK_VERSION = kibanaBranch === 'main' ? 'master' : kibanaBranch;
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
-    const STACK_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/${DOC_LINK_VERSION}/`;
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
@@ -41,7 +40,8 @@ export class DocLinksService {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
         elasticStackGetStarted: `${STACK_GETTING_STARTED}get-started-elastic-stack.html`,
         upgrade: {
-          upgradingElasticStack: `${STACK_DOCS}upgrading-elastic-stack.html`,
+          upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrading-elastic-stack-on-prem.html`,
+          upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrade-elastic-stack-for-elastic-cloud.html`,
         },
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
@@ -226,6 +226,7 @@ export class DocLinksService {
         kibana: {
           guide: `${KIBANA_DOCS}index.html`,
           autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
+          xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
         },
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
@@ -238,6 +239,7 @@ export class DocLinksService {
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          hiddenIndices: `${ELASTICSEARCH_DOCS}multi-index.html#hidden`,
           ilm: `${ELASTICSEARCH_DOCS}index-lifecycle-management.html`,
           ilmForceMerge: `${ELASTICSEARCH_DOCS}ilm-forcemerge.html`,
           ilmFreeze: `${ELASTICSEARCH_DOCS}ilm-freeze.html`,
@@ -508,9 +510,9 @@ export class DocLinksService {
           changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
-          registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
-          registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
-          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
+          registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-filesystem-repository.html#filesystem-repository-settings`,
+          registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-source-only-repository.html#source-only-repository-settings`,
+          registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.html#read-only-url-repository-settings`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
           restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
           searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
@@ -611,7 +613,8 @@ export interface DocLinksStart {
     readonly settings: string;
     readonly elasticStackGetStarted: string;
     readonly upgrade: {
-      readonly upgradingElasticStack: string;
+      readonly upgradingStackOnPrem: string;
+      readonly upgradingStackOnCloud: string;
     };
     readonly apm: {
       readonly kibanaSettings: string;
@@ -797,6 +800,7 @@ export interface DocLinksStart {
     readonly kibana: {
       readonly guide: string;
       readonly autocompleteSuggestions: string;
+      readonly xpackSecurity: string;
     };
     readonly upgradeAssistant: {
       readonly overview: string;

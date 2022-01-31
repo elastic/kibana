@@ -51,8 +51,7 @@ async function fetchDocuments(esClient: ElasticsearchClient, index: string) {
 
 const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 
-// dataArchive not compatible with ES 8.0+
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;

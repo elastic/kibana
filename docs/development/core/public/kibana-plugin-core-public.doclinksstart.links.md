@@ -11,7 +11,8 @@ readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
         readonly upgrade: {
-            readonly upgradingElasticStack: string;
+            readonly upgradingStackOnPrem: string;
+            readonly upgradingStackOnCloud: string;
         };
         readonly apm: {
             readonly kibanaSettings: string;
@@ -197,6 +198,7 @@ readonly links: {
         readonly kibana: {
             readonly guide: string;
             readonly autocompleteSuggestions: string;
+            readonly xpackSecurity: string;
         };
         readonly upgradeAssistant: {
             readonly overview: string;
