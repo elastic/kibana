@@ -30,7 +30,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   createExamplePlugins: boolean;
-  useSnapshotRegistry: boolean;
+  useSnapshotEpr: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {

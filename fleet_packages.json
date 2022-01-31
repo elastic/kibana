@@ -6,7 +6,7 @@
   When adding or updating a package to this file, download the appropriate `.zip` archive from the EPR service,
   e.g. "https://epr.elastic.co/epr/apm/apm-8.0.0.zip` and generate a checksum from that `.zip`, e.g:
 
-  You may opt in to using the "snapshot" environment of the EPR service by passing the `--use-snapshot-registry` flag to `yarn build`. This will
+  You may opt in to using the "snapshot" environment of the EPR service by passing the `--use-epr-snapshot-registry` flag to `yarn build`. This will
   cause the package archive download to pull from the "spapshot" environment instead of the "production" environment. This will cause all checksums
   to be considered invalid, however, so be sure to remove other bundled packages if you are testing the bundling functionality around a single development
   package from the snapshot registry.
