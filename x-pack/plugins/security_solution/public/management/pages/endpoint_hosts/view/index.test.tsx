@@ -133,8 +133,7 @@ const timepickerRanges = [
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 
-// FLAKY: https://github.com/elastic/kibana/issues/115489
-describe.skip('when on the endpoint list page', () => {
+describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
   const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
 
@@ -296,17 +295,6 @@ describe.skip('when on the endpoint list page', () => {
   });
 
   describe('when there is no selected host in the url', () => {
-    it('should not show the flyout', () => {
-      setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: [],
-      });
-
-      const renderResult = render();
-      expect.assertions(1);
-      return renderResult.findByTestId('endpointDetailsFlyout').catch((e) => {
-        expect(e).not.toBeNull();
-      });
-    });
     describe('when list data loads', () => {
       const generatedPolicyStatuses: Array<
         HostInfo['metadata']['Endpoint']['policy']['applied']['status']
