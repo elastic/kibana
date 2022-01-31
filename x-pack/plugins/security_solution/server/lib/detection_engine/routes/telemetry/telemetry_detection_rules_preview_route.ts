@@ -57,8 +57,8 @@ export const telemetryDetectionRulesPreviewRoute = (
 
       return response.ok({
         body: {
-          detectionRules,
-          securityLists,
+          detection_rules: detectionRules,
+          security_lists: securityLists,
           endpoints,
           diagnostics,
         },

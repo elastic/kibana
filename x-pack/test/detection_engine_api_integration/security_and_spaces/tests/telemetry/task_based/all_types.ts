@@ -45,8 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
         expect(stats).to.eql({
-          detectionRules: [],
-          securityLists: [],
+          detection_rules: [],
+          security_lists: [],
           endpoints: [],
           diagnostics: [],
         });
