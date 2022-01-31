@@ -177,26 +177,26 @@ export const getStatusMessage = (
 ) => {
   let statusMessage = '';
   if (downMonParams?.info) {
-    statusMessage = `${statusCheckTranslations.downMonitorsLabel(
+    statusMessage = statusCheckTranslations.downMonitorsLabel(
       downMonParams.count!,
       downMonParams.interval!,
       downMonParams.numTimes
-    )}.`;
+    );
   }
   let availabilityMessage = '';
 
   if (availMonInfo) {
-    availabilityMessage = `${statusCheckTranslations.availabilityBreachLabel(
+    availabilityMessage = statusCheckTranslations.availabilityBreachLabel(
       (availMonInfo.availabilityRatio! * 100).toFixed(2),
       availability?.threshold!,
       getInterval(availability?.range!, availability?.rangeUnit!)
-    )}.`;
+    );
   }
   if (availMonInfo && downMonParams?.info) {
-    return `${statusCheckTranslations.downMonitorsAndAvailabilityBreachLabel(
+    return statusCheckTranslations.downMonitorsAndAvailabilityBreachLabel(
       statusMessage,
       availabilityMessage
-    )}`;
+    );
   }
   return statusMessage + availabilityMessage;
 };
