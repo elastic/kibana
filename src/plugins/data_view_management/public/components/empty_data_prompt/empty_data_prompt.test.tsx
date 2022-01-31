@@ -7,17 +7,13 @@
  */
 
 import React from 'react';
-import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
+import { EmptyDataPrompt } from '.';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 
-describe('EmptyIndexPatternPrompt', () => {
+describe('EmptyDataPrompt', () => {
   it('should render normally', () => {
     const component = shallowWithI18nProvider(
-      <EmptyIndexPatternPrompt
-        goToCreate={() => {}}
-        canSaveIndexPattern={true}
-        indexPatternsIntroUrl={'http://elastic.co/'}
-      />
+      <EmptyDataPrompt goToCreate={() => {}} canAddData={true} addDataUrl={'http://elastic.co/'} />
     );
 
     expect(component).toMatchSnapshot();

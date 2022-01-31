@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
+export { EmptyDataViewPrompt } from './empty_data_view_prompt';

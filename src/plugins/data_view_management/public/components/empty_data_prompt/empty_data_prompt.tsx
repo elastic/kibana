@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './empty_index_pattern_prompt.scss';
+import './empty_data_prompt.scss';
 
 import React, { lazy, Suspense } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,63 +17,52 @@ import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui'
 import { EuiLink, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 interface Props {
   goToCreate: () => void;
-  canSaveIndexPattern: boolean;
-  indexPatternsIntroUrl: string;
+  canAddData: boolean;
+  addDataUrl: string;
 }
 
-const Illustration = lazy(() => import('./assets/index_pattern_illustration'));
+const Illustration = lazy(() => import('./assets/data_illustration'));
 
-export const EmptyIndexPatternPrompt = ({
-  goToCreate,
-  canSaveIndexPattern,
-  indexPatternsIntroUrl,
-}: Props) => {
+export const EmptyDataPrompt = ({ goToCreate, canAddData, addDataUrl }: Props) => {
   return (
     <EuiPageContent
-      data-test-subj="emptyIndexPatternPrompt"
-      className="inpEmptyIndexPatternPrompt"
+      data-test-subj="emptyDataPrompt"
+      className="inpEmptyDataPrompt"
       grow={false}
       verticalPosition="center"
       horizontalPosition="center"
       color="subdued"
     >
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
-        <EuiFlexItem grow={1} className="inpEmptyIndexPatternPrompt__illustration">
+        <EuiFlexItem grow={1} className="inpEmptyDataPrompt__illustration">
           <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
             <Illustration />
           </Suspense>
         </EuiFlexItem>
-        <EuiFlexItem grow={2} className="inpEmptyIndexPatternPrompt__text">
+        <EuiFlexItem grow={2} className="inpEmptyDataPrompt__text">
           <EuiText grow={false}>
             <h2>
               <FormattedMessage
-                id="indexPatternEditor.emptyIndexPatternPrompt.youHaveData"
-                defaultMessage="You have data in Elasticsearch."
+                id="dataViewManagement.emptyDataPrompt.toWorkWith"
+                defaultMessage="To work with Data Views,"
               />
               <br />
               <FormattedMessage
-                id="indexPatternEditor.emptyDataViewPrompt.nowCreate"
-                defaultMessage="Now, create a data view."
+                id="dataViewManagement.emptyDataPrompt.youNeedData"
+                defaultMessage="you need data."
               />
             </h2>
             <p>
               <FormattedMessage
-                id="indexPatternEditor.emptyDataViewPrompt.indexPatternExplanation"
-                defaultMessage="Kibana requires a data view to identify which data streams, indices, and index aliases you want to explore. A
-                data view can point to a specific index, for example, your log data from
-                yesterday, or all indices that contain your log data."
+                id="dataViewManagement.emptyDataPrompt.dataExplanation"
+                defaultMessage="The best way to add data to the Elastic Stack is to use one of our many integrations, which are pre-packaged assets that are available for a wide array of popular services and platforms. With integrations, you can add monitoring for logs and metrics, protect systems from security threats, and more."
               />
             </p>
-            {canSaveIndexPattern && (
-              <EuiButton
-                onClick={goToCreate}
-                iconType="plusInCircle"
-                fill={true}
-                data-test-subj="createIndexPatternButtonFlyout"
-              >
+            {canAddData && (
+              <EuiButton onClick={goToCreate} fill={true} data-test-subj="createDataButtonFlyout">
                 <FormattedMessage
-                  id="indexPatternEditor.dataViewTable.createBtn"
-                  defaultMessage="Create data view"
+                  id="dataViewManagement.emptyDataPrompt.addData"
+                  defaultMessage="Add Data"
                 />
               </EuiButton>
             )}
@@ -81,17 +70,17 @@ export const EmptyIndexPatternPrompt = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
-      <EuiDescriptionList className="inpEmptyIndexPatternPrompt__footer" type="responsiveColumn">
-        <EuiDescriptionListTitle className="inpEmptyIndexPatternPrompt__title">
+      <EuiDescriptionList className="inpEmptyDataPrompt__footer" type="responsiveColumn">
+        <EuiDescriptionListTitle className="inpEmptyDataPrompt__title">
           <FormattedMessage
-            id="indexPatternEditor.emptyIndexPatternPrompt.learnMore"
+            id="dataViewManagement.emptyDataPrompt.learnMore"
             defaultMessage="Want to learn more?"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiLink href={indexPatternsIntroUrl} target="_blank" external>
+          <EuiLink href={addDataUrl} target="_blank" external>
             <FormattedMessage
-              id="indexPatternEditor.emptyIndexPatternPrompt.documentation"
+              id="dataViewManagement.emptyDataPrompt.documentation"
               defaultMessage="Read documentation"
             />
           </EuiLink>

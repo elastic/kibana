@@ -25,6 +25,8 @@ import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { EmptyDataPrompt } from '../empty_data_prompt';
+import { EmptyDataViewPrompt } from '../empty_data_view_prompt';
 
 const pagination = {
   initialPageSize: 10,
@@ -80,11 +82,15 @@ export const IndexPatternTable = ({
     indexPatternManagementStart,
     chrome,
     dataViews,
+    docLinks,
     IndexPatternEditor,
+    ...rest
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
+  const [hasIndexPatterns, setHasIndexPatterns] = useState<boolean>(true);
+  const [hasData, setHasData] = useState<boolean>(true);
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
@@ -99,7 +105,13 @@ export const IndexPatternTable = ({
         gettedIndexPatterns.length === 0 ||
         !(await dataViews.hasUserDataView().catch(() => false))
       ) {
-        setShowCreateDialog(true);
+        setHasIndexPatterns(false);
+      }
+      if (
+        gettedIndexPatterns.length === 0 ||
+        !(await dataViews.hasUserDataView().catch(() => false))
+      ) {
+        setHasData(false);
       }
     })();
   }, [indexPatternManagementStart, uiSettings, dataViews]);
@@ -182,8 +194,8 @@ export const IndexPatternTable = ({
     <></>
   );
 
-  return (
-    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+  let displayIndexPatternSection = (
+    <>
       <EuiPageHeader
         pageTitle={title}
         description={
@@ -208,6 +220,34 @@ export const IndexPatternTable = ({
         sorting={sorting}
         search={search}
       />
+    </>
+  );
+  if (!hasIndexPatterns)
+    displayIndexPatternSection = (
+      <>
+        <EuiSpacer size="xxl" />
+        <EmptyDataViewPrompt
+          goToCreate={() => setShowCreateDialog(true)}
+          dataViewsIntroUrl={docLinks.links.indexPatterns.introduction}
+          canSaveDataView={dataViews.getCanSaveSync()}
+        />
+      </>
+    );
+  if (!hasData)
+    displayIndexPatternSection = (
+      <>
+        <EuiSpacer size="xxl" />
+        <EmptyDataPrompt
+          goToCreate={() => setShowCreateDialog(true)}
+          addDataUrl={docLinks.links.addData}
+          canAddData={dataViews.getCanSaveSync()}
+        />
+      </>
+    );
+
+  return (
+    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+      {displayIndexPatternSection}
       {displayIndexPatternEditor}
     </div>
   );

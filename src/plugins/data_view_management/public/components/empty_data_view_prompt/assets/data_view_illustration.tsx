@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import './index_pattern_illustration.scss';
+import './data_view_illustration.scss';
 import React from 'react';
 
-const IndexPatternIllustration = () => (
+const DataViewIllustration = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="226"
@@ -127,7 +127,7 @@ const IndexPatternIllustration = () => (
             <path d="M22.387 163.115a1.171 1.171 0 00.39 1.43c.72-.37 1-.71.81-1.1-.25-.55-.7-.52-1.2-.33z" />
           </g>
         </g>
-        <g fill="#343741" className="indexPatternIllustration__verticalStripes">
+        <g fill="#343741" className="dataViewIllustration__verticalStripes">
           <path d="M121.737 136.495h-6v31h6v-31z" />
           <path d="M109.737 136.495h-6v31h6v-31z" />
         </g>
@@ -137,7 +137,7 @@ const IndexPatternIllustration = () => (
           d="M31.027 162.955a8.91 8.91 0 008.91-8.91 8.91 8.91 0 10-8.91 8.91z"
         />
       </g>
-      <g fill="#ECF0F6" className="indexPatternIllustration__dots">
+      <g fill="#ECF0F6" className="dataViewIllustration__dots">
         <path d="M63.807 81.175a9.64 9.64 0 00-.79 1.91c-.75.13-1.61.36-1.85 1.23a1.829 1.829 0 00.57 1.76c.77-1.79 1.6-3.54 2.49-5.27a1.179 1.179 0 00-.42.37z" />
         <path d="M59.677 89.995a4.26 4.26 0 00.06 1.22c.26-.74.51-1.49.8-2.22a1.12 1.12 0 00-.86 1z" />
         <path d="M61.217 80.415c.06.2.41.39.66.43a.689.689 0 00.57-.33c.2-.49-.07-.82-.57-1-.38.16-.83.35-.66.9z" />
@@ -159,7 +159,7 @@ const IndexPatternIllustration = () => (
         <path d="M57.147 91.625a.81.81 0 00-.41.37.23.23 0 000 .14h.75v-.06c.12-.32-.26-.47-.34-.45z" />
         <path d="M48.327 90.695a.45.45 0 00-.22.57.481.481 0 00.85-.45.52.52 0 00-.63-.12z" />
       </g>
-      <g fill="#ECF0F6 " className="indexPatternIllustration__dots">
+      <g fill="#ECF0F6 " className="dataViewIllustration__dots">
         <path d="M76.787 187.575a.271.271 0 00-.22.25c0 .08.16.2.23.2s.22-.07.23-.18a.259.259 0 00-.066-.183.257.257 0 00-.174-.087z" />
         <path d="M78.497 184.765a.843.843 0 00-.8.87.792.792 0 00.536.751.775.775 0 00.324.039c.54 0 .91-.22.89-.58a1.36 1.36 0 00-.95-1.08z" />
         <path d="M75.847 183.995a.593.593 0 00-.44.48.531.531 0 00.34.41c.12 0 .39-.18.41-.3.02-.12-.06-.59-.31-.59z" />
@@ -258,7 +258,7 @@ const IndexPatternIllustration = () => (
         <path d="M102.517 197.815c-.39 0-.48.24-.54.53-.06.29.18.77.56.72.251-.067.49-.172.71-.31a.809.809 0 00-.73-.94z" />
       </g>
       <g id="circle cross">
-        <g fill="#ECF0F6" className="indexPatternIllustration__dots">
+        <g fill="#ECF0F6" className="dataViewIllustration__dots">
           <path d="M147.567 14.355a.991.991 0 00.52.608 1.001 1.001 0 00.8.032c.64-.15 1.28-.91 1.17-1.39a1.463 1.463 0 00-1.61-1 1.479 1.479 0 00-.88 1.75z" />
           <path d="M147.987 9.895a.62.62 0 00.31-.47c0-.15-.35-.29-.5-.26-.15.03-.5.32-.45.49.05.17.5.34.64.24z" />
           <path d="M208.817 56.285c-.17.5-.35 1-.54 1.46.17 0 .35-.18.53-.56a.897.897 0 00.01-.9z" />
@@ -386,16 +386,16 @@ const IndexPatternIllustration = () => (
           <path d="M191.487 47.265v-7.29h-36.46v7.29h36.46z" />
         </g>
         <path
-          className="indexPatternIllustration__dots"
+          className="dataViewIllustration__dots"
           fill="#DAE0EB"
           d="M144.467 20.225c13-15 39.55-15.93 53.23-1.19 6.52 7 10.22 17 10.53 26.51.19 4.85-.61 9.688-2.35 14.22-2.3 5.83-6.34 9.82-10.37 14.43a.759.759 0 00.92 1.19c9.84-5.32 14.4-18 14.33-28.61-.07-10.61-4.12-21.65-11.4-29.41-14.57-15.53-42.56-14.37-55.4 2.46-.23.3.27.68.51.4z"
         />
       </g>
-      <g id="arrow" className="indexPatternIllustration__dots" fill="#DAE0EB">
+      <g id="arrow" className="dataViewIllustration__dots" fill="#DAE0EB">
         <path d="M173.067 190.155a80.5 80.5 0 0038.84-42.56 83.88 83.88 0 006-29.68c.17-9.9-.86-22-6-30.7a.779.779 0 00-1.42.6c1.79 10.21 4.93 19.54 4.8 30.1a81.542 81.542 0 01-5.48 28.38 86.492 86.492 0 01-37.07 43.28c-.38.22 0 .77.34.58h-.01z" />
         <path d="M225.047 92.925c-.34-1.93-4-3.06-5.45-3.76-2.45-1.18-4.91-2.63-7.47-3.57-1.76-.65-2.74-.46-3.42 1.4a89.035 89.035 0 00-4.07 13.61.47.47 0 00.86.36 40.588 40.588 0 004.59-8.12c.48-1.08.78-2.56 1.23-3.81.32.15.67.27.9.4l4.91 2.56c1.74.9 4.61 2.54 7.33 2.42.61-.06.69-.95.59-1.49z" />
       </g>
-      <g id="arrow_2" className="indexPatternIllustration__dots" fill="#DAE0EB">
+      <g id="arrow_2" className="dataViewIllustration__dots" fill="#DAE0EB">
         <path d="M63.117 87.115c5-11.49 12.33-21.91 22.24-29.7a81.397 81.397 0 0117.09-10.13c6.69-3 14.15-4.33 20.68-7.54a.78.78 0 00-.39-1.45c-7.32.29-15 3.76-21.58 6.77a83.5 83.5 0 00-17 10.26 65.08 65.08 0 00-21.66 31.53c-.12.35.46.61.62.26z" />
         <path d="M114.597 31.305a21.137 21.137 0 006.14 7.33c.87.63 1.19.46 1.11.89-.08.43-1.18 1.22-1.42 1.46-1.69 1.74-5.7 5.51-6.17 7.66-.16.7.61 1.4 1.36 1.37 1.72-.07 3.1-2 4.15-3.14 1.48-1.63 3.14-3.2 4.49-5 1-1.31 1.55-2.61.55-4.14-.9-1.35-3-2.31-4.2-3.28a42.109 42.109 0 00-5.38-3.84.469.469 0 00-.64.64l.01.05z" />
       </g>
@@ -419,7 +419,7 @@ const IndexPatternIllustration = () => (
           fill="#F04E98"
           d="M61.007 123.085a8.91 8.91 0 008.91-8.91 8.91 8.91 0 10-8.91 8.91z"
         />
-        <g fill="#343741" className="indexPatternIllustration__verticalStripes">
+        <g fill="#343741" className="dataViewIllustration__verticalStripes">
           <path d="M145.737 100.495h-6v29h6v-29z" />
           <path d="M133.737 100.495h-6v29h6v-29z" />
         </g>
@@ -538,4 +538,4 @@ const IndexPatternIllustration = () => (
 );
 
 /* eslint-disable import/no-default-export */
-export default IndexPatternIllustration;
+export default DataViewIllustration;

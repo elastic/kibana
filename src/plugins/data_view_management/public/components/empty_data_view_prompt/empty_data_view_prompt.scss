@@ -1,0 +1,31 @@
+@import '../../variables';
+@import '../../templates';
+
+.inpEmptyDataViewPrompt {
+  // override EUI specificity
+  max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
+}
+
+.inpEmptyDataViewPrompt__footer {
+  @extend %inp-empty-state-footer;
+  // override EUI specificity
+  align-items: baseline !important; // sass-lint:disable-line no-important
+}
+
+.inpEmptyDataViewPrompt__title {
+  // override EUI specificity
+  width: auto !important; // sass-lint:disable-line no-important
+}
+
+@include euiBreakpoint('xs', 's') {
+  .inpEmptyDataViewPrompt__illustration>svg {
+    width: $euiSize * 12;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .inpEmptyDataViewPrompt__text {
+    text-align: center;
+    align-items: center;
+  }
+}

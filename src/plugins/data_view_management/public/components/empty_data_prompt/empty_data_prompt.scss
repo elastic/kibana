@@ -1,30 +1,30 @@
 @import '../../variables';
 @import '../../templates';
 
-.inpEmptyIndexPatternPrompt {
+.inpEmptyDataPrompt {
   // override EUI specificity
   max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
 }
 
-.inpEmptyIndexPatternPrompt__footer {
+.inpEmptyDataPrompt__footer {
   @extend %inp-empty-state-footer;
   // override EUI specificity
-  align-items: baseline !important;  // sass-lint:disable-line no-important
+  align-items: baseline !important; // sass-lint:disable-line no-important
 }
 
-.inpEmptyIndexPatternPrompt__title {
+.inpEmptyDataPrompt__title {
   // override EUI specificity
   width: auto !important; // sass-lint:disable-line no-important
 }
 
 @include euiBreakpoint('xs', 's') {
-  .inpEmptyIndexPatternPrompt__illustration > svg {
+  .inpEmptyDataPrompt__illustration>svg {
     width: $euiSize * 12;
     height: auto;
     margin: 0 auto;
   }
 
-  .inpEmptyIndexPatternPrompt__text {
+  .inpEmptyDataPrompt__text {
     text-align: center;
     align-items: center;
   }

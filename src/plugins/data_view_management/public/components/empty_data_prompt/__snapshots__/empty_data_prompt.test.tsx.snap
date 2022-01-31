@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyDataPrompt should render normally 1`] = `
+<EuiPageContent
+  className="inpEmptyDataPrompt"
+  color="subdued"
+  data-test-subj="emptyDataPrompt"
+  grow={false}
+  horizontalPosition="center"
+  verticalPosition="center"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    direction="rowReverse"
+    gutterSize="xl"
+    wrap={true}
+  >
+    <EuiFlexItem
+      className="inpEmptyDataPrompt__illustration"
+      grow={1}
+    >
+      <Suspense
+        fallback={
+          <EuiLoadingSpinner
+            size="xl"
+          />
+        }
+      >
+        <lazy />
+      </Suspense>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="inpEmptyDataPrompt__text"
+      grow={2}
+    >
+      <EuiText
+        grow={false}
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="To work with Data Views,"
+            id="dataViewManagement.emptyDataPrompt.toWorkWith"
+            values={Object {}}
+          />
+          <br />
+          <FormattedMessage
+            defaultMessage="you need data."
+            id="dataViewManagement.emptyDataPrompt.youNeedData"
+            values={Object {}}
+          />
+        </h2>
+        <p>
+          <FormattedMessage
+            defaultMessage="The best way to add data to the Elastic Stack is to use one of our many integrations, which are pre-packaged assets that are available for a wide array of popular services and platforms. With integrations, you can add monitoring for logs and metrics, protect systems from security threats, and more."
+            id="dataViewManagement.emptyDataPrompt.dataExplanation"
+            values={Object {}}
+          />
+        </p>
+        <EuiButton
+          data-test-subj="createDataButtonFlyout"
+          fill={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Add Data"
+            id="dataViewManagement.emptyDataPrompt.addData"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xxl"
+  />
+  <EuiDescriptionList
+    className="inpEmptyDataPrompt__footer"
+    type="responsiveColumn"
+  >
+    <EuiDescriptionListTitle
+      className="inpEmptyDataPrompt__title"
+    >
+      <FormattedMessage
+        defaultMessage="Want to learn more?"
+        id="dataViewManagement.emptyDataPrompt.learnMore"
+        values={Object {}}
+      />
+    </EuiDescriptionListTitle>
+    <EuiDescriptionListDescription>
+      <EuiLink
+        external={true}
+        href="http://elastic.co/"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Read documentation"
+          id="dataViewManagement.emptyDataPrompt.documentation"
+          values={Object {}}
+        />
+      </EuiLink>
+    </EuiDescriptionListDescription>
+  </EuiDescriptionList>
+</EuiPageContent>
+`;
