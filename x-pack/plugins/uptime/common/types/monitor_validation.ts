@@ -8,5 +8,9 @@
 import { ConfigKey, MonitorFields } from '../runtime_types';
 
 export type Validator = (config: Partial<MonitorFields>) => boolean;
+export type NamespaceValidator = (config: Partial<MonitorFields>) => false | string;
 
-export type Validation = Partial<Record<ConfigKey, Validator>>;
+export type ConfigValidation = Omit<Record<ConfigKey, Validator>, ConfigKey.NAMESPACE> &
+  Record<ConfigKey.NAMESPACE, NamespaceValidator>;
+
+export type Validation = Partial<ConfigValidation>;
