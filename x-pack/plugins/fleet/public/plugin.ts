@@ -26,6 +26,8 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 
 import { once } from 'lodash';
 
+import type { CloudStart } from '../../cloud/public';
+
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
@@ -94,12 +96,13 @@ export interface FleetStartDeps {
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  cloud?: CloudStart;
 }
 
-export interface FleetStartServices extends CoreStart, FleetStartDeps {
+export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
   authz: FleetAuthz;
 }
 
@@ -141,11 +144,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
+
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud,
+          cloud,
           authz: await fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
@@ -178,11 +186,15 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
+        const cloud =
+          deps.cloud && startDepsServices.cloud
+            ? { ...deps.cloud, ...startDepsServices.cloud }
+            : undefined;
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
-          cloud: deps.cloud,
+          cloud,
           authz: await fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');

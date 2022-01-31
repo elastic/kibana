@@ -11,6 +11,7 @@ export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   ci_composite: '.ci/.storybook',
+  cloud: 'x-pack/plugins/cloud/.storybook',
   codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
   controls: 'src/plugins/controls/storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',

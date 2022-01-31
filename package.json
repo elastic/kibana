@@ -278,6 +278,7 @@
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.2.0",
     "json-stringify-safe": "5.0.1",
+    "jsonwebtoken": "^8.3.0",
     "jsts": "^1.6.2",
     "kea": "^2.4.2",
     "load-json-file": "^6.2.0",
