@@ -12,7 +12,7 @@ import { dataConfig, generateData } from './generate_data';
 import {
   APIReturnType,
   APIClientRequestParamsOf,
-} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
 import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
 

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -74,7 +74,7 @@ export function TransactionColdstartRateChart({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName, transactionType } = useApmServiceContext();
-  const comparisonChartThem = getComparisonChartTheme(theme);
+  const comparisonChartThem = getComparisonChartTheme();
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
