@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const sampleAttribute = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',

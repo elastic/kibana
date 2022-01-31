@@ -595,7 +595,7 @@ describe('When on the Trusted Apps Page', () => {
 
           it('should show success toast notification', () => {
             expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual({
-              text: '"Generated Exception (3xnng)" has been added to the Trusted Applications list.',
+              text: '"Generated Exception (3xnng)" has been added to the trusted applications list.',
               title: 'Success!',
             });
           });
