@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
-import { ML_APP_NAME } from '../../../../common/constants/app';
 import type { MlRoute } from '../../routing';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
@@ -28,77 +27,11 @@ export interface Tab {
   highlightNestedRoutes?: boolean;
 }
 
-interface TabData {
-  name: string;
-}
-
-export const TAB_DATA: Record<string, TabData> = {
-  overview: {
-    name: i18n.translate('xpack.ml.overviewTabLabel', {
-      defaultMessage: 'Overview',
-    }),
-  },
-  // Note that anomaly detection jobs list is mapped to ml#/jobs.
-  anomaly_detection: {
-    name: i18n.translate('xpack.ml.anomalyDetectionTabLabel', {
-      defaultMessage: 'Anomaly Detection',
-    }),
-  },
-  data_frame_analytics: {
-    name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
-      defaultMessage: 'Data Frame Analytics',
-    }),
-  },
-  trained_models: {
-    name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
-      defaultMessage: 'Trained Models',
-    }),
-  },
-  datavisualizer: {
-    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
-      defaultMessage: 'Data Visualizer',
-    }),
-  },
-  data_view_datavisualizer: {
-    name: i18n.translate('xpack.ml.dataViewDataVisualizerTabLabel', {
-      defaultMessage: 'Data View',
-    }),
-  },
-  filedatavisualizer: {
-    name: i18n.translate('xpack.ml.fileDataVisualizerTabLabel', {
-      defaultMessage: 'File',
-    }),
-  },
-  settings: {
-    name: i18n.translate('xpack.ml.settingsTabLabel', {
-      defaultMessage: 'Settings',
-    }),
-  },
-  'access-denied': {
-    name: i18n.translate('xpack.ml.accessDeniedTabLabel', {
-      defaultMessage: 'Access Denied',
-    }),
-  },
-};
-
 export function useSideNavItems(activeRoute: MlRoute | undefined) {
-  const activeRouteId = activeRoute?.id;
-  const {
-    services: {
-      chrome: { docTitle },
-    },
-  } = useMlKibana();
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
   const mlFeaturesDisabled = !isFullLicense();
-
-  useEffect(() => {
-    const title = TAB_DATA[activeRouteId!]?.name;
-    if (title) {
-      docTitle.change([title, ML_APP_NAME]);
-    }
-  }, [activeRouteId]);
 
   const [globalState] = useUrlState('_g');
 
