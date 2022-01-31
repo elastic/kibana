@@ -9,14 +9,7 @@
 import React, { useState } from 'react';
 import { groupBy } from 'lodash';
 import classNames from 'classnames';
-import {
-  Filter,
-  buildFilter,
-  buildCustomFilter,
-  cleanFilter,
-  getFilterParams,
-  FieldFilter,
-} from '@kbn/es-query';
+import { Filter, buildFilter, buildCustomFilter, cleanFilter } from '@kbn/es-query';
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -45,8 +38,6 @@ import { getIndexPatternFromFilter } from '../../query';
 import {
   getFilterableFields,
   getOperatorOptions,
-  getFieldFromFilter,
-  getOperatorFromFilter,
 } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../filter_bar/filter_editor/lib/filter_operators';
 
@@ -56,7 +47,6 @@ import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_i
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 
 import { IIndexPattern, IFieldType } from '../..';
-import { filter } from '../../../../console/server/lib/spec_definitions/js/filter';
 
 const tabs = [
   {
@@ -95,7 +85,6 @@ export function AddFilterModal({
   onCancel,
   applySavedQueries,
   filter,
-  multipleFilters,
   indexPatterns,
   timeRangeForSuggestionsOverride,
   savedQueryManagement,

@@ -56,7 +56,6 @@ import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_i
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 
 import { IIndexPattern, IFieldType } from '../..';
-import { filter } from '../../../../console/server/lib/spec_definitions/js/filter';
 
 const tabs = [
   {
@@ -84,8 +83,6 @@ export interface FilterGroup {
 }
 
 export function EditFilterModal({
-  onSubmit,
-  onMultipleFiltersSubmit,
   onCancel,
   applySavedQueries,
   filter,
@@ -96,8 +93,6 @@ export function EditFilterModal({
   initialAddFilterMode,
   onRemoveFilterGroup,
 }: {
-  onSubmit: (filters: Filter[]) => void;
-  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -417,7 +412,7 @@ export function EditFilterModal({
     }
   };
 
-  const onApplyChangesFilter = () => {};
+  const onApplyChangesFilter = () => { };
 
   const onDeliteFilter = () => {
     onRemoveFilterGroup(multipleFilters[0]?.groupId);

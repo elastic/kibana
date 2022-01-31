@@ -119,7 +119,9 @@ interface State {
   dateRangeFrom: string;
   dateRangeTo: string;
   isAddFilterModalOpen?: boolean;
+  isEditFilterModalOpen?: boolean;
   addFilterMode?: string;
+  editFilterMode?: string;
   filtersIdsFromSavedQueries?: string[];
   overrideTimeFilterModalShow: boolean;
 }
@@ -208,7 +210,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
     isAddFilterModalOpen: false,
+    isEditFilterModalOpen: false,
     addFilterMode: 'quick_form',
+    editFilterMode: 'quick_form',
     filtersIdsFromSavedQueries: [],
     overrideTimeFilterModalShow: false,
   };
@@ -524,6 +528,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
+  public toggleEditFilterModal = (value: boolean, editFilterMode?: string) => {
+    this.setState({
+      isEditFilterModalOpen: value,
+      editFilterMode: editFilterMode || 'quick_form',
+    });
+  };
+
   public toggleFilterSetPopover = (value: boolean) => {
     this.setState({
       openFilterSetPopover: value,
@@ -695,6 +706,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
             onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
             multipleFilters={this.state.multipleFilters}
+            toggleEditFilterModal={this.toggleEditFilterModal}
+            isEditFilterModalOpen={this.state.isEditFilterModalOpen}
+            editFilterMode={this.state.editFilterMode}
           />
         </div>
       );
