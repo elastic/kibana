@@ -17,6 +17,8 @@ import {
 import { WithoutReservedActionGroups } from '../../../alerting/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
+import { AlertWithCommonFields } from '../../common/schemas';
+import { SearchTypes } from '../../../../../src/plugins/data/common';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -27,7 +29,9 @@ export type PersistenceAlertService = <T>(
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export interface PersistenceAlertServiceResult<T> {
-  createdAlerts: Array<T & { _id: string; _index: string }>;
+  createdAlerts: Array<
+    AlertWithCommonFields<T> & { _id: string; _index: string; [key: string]: SearchTypes }
+  >;
   errors: BulkResponseErrorAggregation;
 }
 

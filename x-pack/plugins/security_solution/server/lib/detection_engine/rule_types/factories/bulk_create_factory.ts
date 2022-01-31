@@ -9,17 +9,23 @@ import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 
 import { Logger } from 'kibana/server';
-import { BaseHit } from '../../../../../common/detection_engine/types';
 import { BuildRuleMessage } from '../../signals/rule_messages';
 import { makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
 import { PersistenceAlertService } from '../../../../../../rule_registry/server';
+import { AlertWithCommonFields } from '../../../../../../rule_registry/common/schemas';
+import {
+  BaseAlert,
+  DetectionAlert,
+  WrappedAlert,
+} from '../../../../../common/detection_engine/schemas/alerts';
+import { BulkResponseErrorAggregation } from '../../signals/types';
 
-export interface GenericBulkCreateResponse<T> {
+export interface GenericBulkCreateResponse<T extends BaseAlert> {
   success: boolean;
   bulkCreateDuration: string;
   createdItemsCount: number;
-  createdItems: Array<T & { _id: string; _index: string }>;
+  createdItems: Array<DetectionAlert<T> & { _id: string; _index: string }>;
   errors: string[];
 }
 
@@ -30,8 +36,8 @@ export const bulkCreateFactory =
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
-  async <T extends Record<string, unknown>>(
-    wrappedDocs: Array<BaseHit<T>>
+  async <T extends BaseAlert>(
+    wrappedDocs: Array<WrappedAlert<T>>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {

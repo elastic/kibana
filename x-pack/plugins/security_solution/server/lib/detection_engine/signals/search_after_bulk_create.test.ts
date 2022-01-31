@@ -28,7 +28,7 @@ import { getRuleRangeTuples } from './utils';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getCompleteRuleMock, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { bulkCreateFactory } from './bulk_create_factory';
-import { wrapHitsFactory } from './wrap_hits_factory';
+import { wrapHitsFactory } from '../rule_types/factories/wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { BuildReasonMessage } from './reason_formatters';
@@ -73,9 +73,9 @@ describe('searchAfterAndBulkCreate', () => {
     );
     wrapHits = wrapHitsFactory({
       completeRule: queryCompleteRule,
-      signalsIndex: DEFAULT_SIGNALS_INDEX,
       mergeStrategy: 'missingFields',
       ignoreFields: [],
+      spaceId: 'default',
     });
   });
 

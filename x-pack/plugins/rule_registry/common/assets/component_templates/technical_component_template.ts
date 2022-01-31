@@ -7,7 +7,7 @@
 
 import { mappingFromFieldMap } from '../../mapping_from_field_map';
 import { ClusterPutComponentTemplateBody } from '../../types';
-import { technicalRuleFieldMap } from '../field_maps/technical_rule_field_map';
+import { technicalRuleFieldMap } from '../field_maps';
 
 export const technicalComponentTemplate: ClusterPutComponentTemplateBody = {
   template: {

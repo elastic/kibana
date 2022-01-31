@@ -61,10 +61,10 @@ import type {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import type { SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { DetectionAlert, WrappedAlert } from '../../../../common/detection_engine/schemas/alerts';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -962,18 +962,18 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
-  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+  return !isWrappedSignalHit(event) && !isWrappedAlert(event);
 };
 
 export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
   return (event as WrappedSignalHit)?._source?.signal != null;
 };
 
-export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
+export const isWrappedAlert = (event: SimpleHit): event is WrappedAlert<DetectionAlert> => {
+  return (event as WrappedAlert<DetectionAlert>)?._source?.[ALERT_UUID] != null;
 };
 
-export const isRACAlert = (event: unknown): event is RACAlert => {
+export const isDetectionAlert = (event: unknown): event is DetectionAlert => {
   return get(event, ALERT_UUID) != null;
 };
 
@@ -1011,7 +1011,7 @@ export const racFieldMappings: Record<string, string> = {
 };
 
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
-  if (isWrappedRACAlert(event)) {
+  if (isWrappedAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     const parts = mappedField.split('.');
     if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {

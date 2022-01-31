@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import { AlertsFieldMap, alertsFieldMap } from './8.0.0/alerts';
-import { RulesFieldMap, rulesFieldMap } from './8.0.0/rules';
-export type { AlertsFieldMap, RulesFieldMap };
-export { alertsFieldMap, rulesFieldMap };
+import type {
+  Ancestor,
+  BaseAlert,
+  DetectionAlert,
+  WrappedAlert,
+  EqlBuildingBlockAlert,
+  EqlShellAlert,
+} from './8.0.0';
+
+export type {
+  Ancestor,
+  BaseAlert,
+  DetectionAlert,
+  WrappedAlert,
+  EqlBuildingBlockAlert,
+  EqlShellAlert,
+};
