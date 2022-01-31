@@ -13,10 +13,7 @@ import {
 } from '../../../../server/lib/alerting/metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
-import {
-  FilterQuery,
-  QUERY_INVALID,
-} from '../../../../common/alerting/metrics';
+import { FilterQuery, QUERY_INVALID } from '../../../../common/alerting/metrics';
 
 export function validateMetricThreshold({
   criteria,

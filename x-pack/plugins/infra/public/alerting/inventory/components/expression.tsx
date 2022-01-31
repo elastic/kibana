@@ -40,10 +40,7 @@ import {
   IErrorObject,
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
-import {
-  FilterQuery,
-  QUERY_INVALID,
-} from '../../../../common/alerting/metrics';
+import { FilterQuery, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
