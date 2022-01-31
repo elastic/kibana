@@ -8,10 +8,11 @@
 
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { debounceTime, tap } from 'rxjs/operators';
+import { concatAll, debounceTime, tap } from 'rxjs/operators';
+import { compareFilters, Filter, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 
 import { DashboardContainer } from '../embeddable';
-import { esFilters, Filter, Query } from '../../services/data';
+import { Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import {
   setControlGroupState,
@@ -19,6 +20,7 @@ import {
   setFullScreenMode,
   setPanels,
   setQuery,
+  setTimeRange,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
@@ -96,13 +98,7 @@ export const applyContainerChangesToState = ({
     return;
   }
   const { filterManager } = query;
-  if (
-    !esFilters.compareFilters(
-      input.filters,
-      filterManager.getFilters(),
-      esFilters.COMPARE_ALL_OPTIONS
-    )
-  ) {
+  if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
     applyFilters(latestState.query, input.filters);
