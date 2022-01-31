@@ -837,6 +837,7 @@ export default function ({
       case 'paren.lparen':
       case 'punctuation.comma':
       case 'punctuation.colon':
+      case 'punctuation.start_triple_quote':
       case 'method':
         break;
       case 'text':
