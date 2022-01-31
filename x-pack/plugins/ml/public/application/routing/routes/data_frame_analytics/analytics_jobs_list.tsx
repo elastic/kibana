@@ -6,9 +6,8 @@
  */
 
 import React, { FC } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
@@ -21,6 +20,9 @@ export const analyticsJobsListRouteFactory = (
 ): MlRoute => ({
   id: 'data_frame_analytics',
   path: '/data_frame_analytics',
+  title: i18n.translate('xpack.ml.dataFrameAnalytics.jobs.docTitle', {
+    defaultMessage: 'Data Frame Analytics Jobs',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
