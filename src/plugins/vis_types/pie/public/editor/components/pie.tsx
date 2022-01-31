@@ -96,9 +96,21 @@ const PieOptions = (props: PieOptionsProps) => {
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
+  const getLegendDisplay = useCallback(
+    (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
+    []
+  );
+
   useEffect(() => {
     setLegendVisibility(legendUiStateValue);
   }, [legendUiStateValue]);
+
+  useEffect(() => {
+    const newLegendDisplay = getLegendDisplay(legendVisibility);
+    if (newLegendDisplay !== stateParams.legendDisplay) {
+      setValue('legendDisplay', newLegendDisplay);
+    }
+  }, [getLegendDisplay, legendVisibility, setValue, stateParams.legendDisplay]);
 
   useEffect(() => {
     const fetchPalettes = async () => {
@@ -186,9 +198,10 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="legendDisplay"
               value={legendVisibility}
-              setValue={(paramName, value) => {
-                setLegendVisibility(value);
-                setValue(paramName, value ? LegendDisplay.SHOW : LegendDisplay.HIDE);
+              setValue={(paramName, show) => {
+                props.uiState?.set('vis.legendOpen', show);
+                setLegendVisibility(show);
+                setValue(paramName, getLegendDisplay(show));
               }}
               data-test-subj="visTypePieAddLegendSwitch"
             />
