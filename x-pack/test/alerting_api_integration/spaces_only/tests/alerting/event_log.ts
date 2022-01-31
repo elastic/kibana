@@ -124,10 +124,14 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // validate each event
           let executeCount = 0;
+          let currentExecutionId;
+          const executionIds = [];
           const executeStatuses = ['ok', 'active', 'active'];
           for (const event of events) {
             switch (event?.event?.action) {
               case 'execute-start':
+                currentExecutionId = event?.kibana?.alert?.rule?.execution?.uuid;
+                executionIds.push(currentExecutionId);
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
@@ -135,6 +139,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   ],
                   message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
+                  executionId: currentExecutionId,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -153,6 +158,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
+                  executionId: currentExecutionId,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -172,6 +178,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
                   instanceId: 'instance',
                   actionGroupId: 'default',
+                  executionId: currentExecutionId,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -182,16 +189,27 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
-                validateInstanceEvent(event, `created new alert: 'instance'`, false);
+                validateInstanceEvent(
+                  event,
+                  `created new alert: 'instance'`,
+                  false,
+                  currentExecutionId
+                );
                 break;
               case 'recovered-instance':
-                validateInstanceEvent(event, `alert 'instance' has recovered`, true);
+                validateInstanceEvent(
+                  event,
+                  `alert 'instance' has recovered`,
+                  true,
+                  currentExecutionId
+                );
                 break;
               case 'active-instance':
                 validateInstanceEvent(
                   event,
                   `active alert: 'instance' in actionGroup: 'default'`,
-                  false
+                  false,
+                  currentExecutionId
                 );
                 break;
               // this will get triggered as we add new event actions
@@ -214,6 +232,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           for (const event of actionEvents) {
             switch (event?.event?.action) {
               case 'execute':
+                expect(event?.kibana?.alert?.rule?.execution?.uuid).not.to.be(undefined);
+                expect(
+                  executionIds.indexOf(event?.kibana?.alert?.rule?.execution?.uuid)
+                ).to.be.greaterThan(-1);
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
@@ -231,7 +253,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           function validateInstanceEvent(
             event: IValidatedEvent,
             subMessage: string,
-            shouldHaveEventEnd: boolean
+            shouldHaveEventEnd: boolean,
+            executionId?: string
           ) {
             validateEvent(event, {
               spaceId: space.id,
@@ -242,6 +265,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               instanceId: 'instance',
               actionGroupId: 'default',
               shouldHaveEventEnd,
+              executionId,
               rule: {
                 id: alertId,
                 category: response.body.rule_type_id,
@@ -335,10 +359,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // validate each event
           let executeCount = 0;
+          let currentExecutionId;
           const executeStatuses = ['ok', 'active', 'active'];
           for (const event of events) {
             switch (event?.event?.action) {
               case 'execute-start':
+                currentExecutionId = event?.kibana?.alert?.rule?.execution?.uuid;
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
@@ -346,6 +372,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   ],
                   message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
+                  executionId: currentExecutionId,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -364,6 +391,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
+                  executionId: currentExecutionId,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -388,6 +416,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
                   instanceId: 'instance',
                   actionGroupId: 'default',
+                  executionId: currentExecutionId,
                   rule: {
                     id: alertId,
                     category: response.body.rule_type_id,
@@ -398,10 +427,20 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
-                validateInstanceEvent(event, `created new alert: 'instance'`, false);
+                validateInstanceEvent(
+                  event,
+                  `created new alert: 'instance'`,
+                  false,
+                  currentExecutionId
+                );
                 break;
               case 'recovered-instance':
-                validateInstanceEvent(event, `alert 'instance' has recovered`, true);
+                validateInstanceEvent(
+                  event,
+                  `alert 'instance' has recovered`,
+                  true,
+                  currentExecutionId
+                );
                 break;
               case 'active-instance':
                 expect(
@@ -412,7 +451,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateInstanceEvent(
                   event,
                   `active alert: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
-                  false
+                  false,
+                  currentExecutionId
                 );
                 break;
               // this will get triggered as we add new event actions
@@ -424,7 +464,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           function validateInstanceEvent(
             event: IValidatedEvent,
             subMessage: string,
-            shouldHaveEventEnd: boolean
+            shouldHaveEventEnd: boolean,
+            executionId?: string
           ) {
             validateEvent(event, {
               spaceId: space.id,
@@ -435,6 +476,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               instanceId: 'instance',
               actionGroupId: 'default',
               shouldHaveEventEnd,
+              executionId,
               rule: {
                 id: alertId,
                 category: response.body.rule_type_id,
@@ -541,6 +583,7 @@ interface ValidateEventLogParams {
   actionGroupId?: string;
   instanceId?: string;
   reason?: string;
+  executionId?: string;
   rule?: {
     id: string;
     name?: string;
@@ -555,7 +598,16 @@ interface ValidateEventLogParams {
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
-  const { spaceId, savedObjects, outcome, message, errorMessage, rule, shouldHaveTask } = params;
+  const {
+    spaceId,
+    savedObjects,
+    outcome,
+    message,
+    errorMessage,
+    rule,
+    shouldHaveTask,
+    executionId,
+  } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
   if (status) {
@@ -572,6 +624,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (reason) {
     expect(event?.event?.reason).to.be(reason);
+  }
+
+  if (executionId) {
+    expect(event?.kibana?.alert?.rule?.execution?.uuid).to.be(executionId);
   }
 
   const duration = event?.event?.duration;

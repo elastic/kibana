@@ -57,6 +57,7 @@ import { apiService } from './state/api/utils';
 import { useInspectorContext } from '../../observability/public';
 import { UptimeConfig } from '../common/config';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
+import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 
 interface PageRouterProps {
   config: UptimeConfig;
@@ -114,6 +115,8 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
           <FormattedMessage id="xpack.uptime.settings.heading" defaultMessage="Uptime settings" />
         ),
       },
+      bottomBar: <SettingsBottomBar />,
+      bottomBarProps: { paddingSize: 'm' as const },
     },
     {
       title: i18n.translate('xpack.uptime.certificatesRoute.title', {
