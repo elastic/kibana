@@ -70,6 +70,6 @@ const monitorManagementPageReducer: Reducer<
     case 'refresh':
       return { ...state };
     default:
-      throw new Error(`Action "${(action as unknown)?.type}" not recognizable`);
+      throw new Error(`Action "${(action as MonitorManagementPageAction)?.type}" not recognizable`);
   }
 };
