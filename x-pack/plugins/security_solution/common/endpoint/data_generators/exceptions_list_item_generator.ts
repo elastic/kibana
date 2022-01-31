@@ -210,4 +210,12 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       ...overrides,
     };
   }
+  generateHostIsolationExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateHostIsolationException()),
+      ...overrides,
+    };
+  }
 }

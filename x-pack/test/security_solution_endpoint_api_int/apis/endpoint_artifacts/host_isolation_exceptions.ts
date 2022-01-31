@@ -6,6 +6,8 @@
  */
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -19,10 +21,10 @@ import {
   getImportExceptionsListSchemaMock,
   toNdJsonString,
 } from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
+import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 
 export default function ({ getService }: FtrProviderContext) {
   const USER = ROLES.detections_admin;
-
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
@@ -40,6 +42,43 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let existingExceptionData: ArtifactTestData;
+
+    const exceptionsGenerator = new ExceptionsListItemGenerator();
+
+    const anEndpointArtifactError = (res: { body: { message: string } }) => {
+      expect(res.body.message).to.match(/EndpointArtifactError/);
+    };
+
+    const anErrorMessageWith = (
+      value: string | RegExp
+    ): ((res: { body: { message: string } }) => void) => {
+      return (res) => {
+        if (value instanceof RegExp) {
+          expect(res.body.message).to.match(value);
+        } else {
+          expect(res.body.message).to.be(value);
+        }
+      };
+    };
+
+    const apiCalls: ApiCallsInterface<
+      Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>
+    > = [
+      {
+        method: 'post',
+        path: EXCEPTION_LIST_ITEM_URL,
+        getBody: () => exceptionsGenerator.generateHostIsolationExceptionForCreate(),
+      },
+      {
+        method: 'put',
+        path: EXCEPTION_LIST_ITEM_URL,
+        getBody: () =>
+          exceptionsGenerator.generateHostIsolationExceptionForUpdate({
+            id: existingExceptionData.artifact.id,
+            item_id: existingExceptionData.artifact.item_id,
+          }),
+      },
+    ];
 
     before(async () => {
       // Create an endpoint policy in fleet we can work with
@@ -88,6 +127,115 @@ export default function ({ getService }: FtrProviderContext) {
           message:
             'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions',
         });
+    });
+
+    describe('and has authorization to manage endpoint security', () => {
+      for (const apiCall of apiCalls) {
+        it(`should error on [${apiCall.method}] if invalid condition entry fields are used`, async () => {
+          const body = apiCall.getBody();
+
+          body.entries[0].field = 'some.invalid.field';
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(400)
+            .expect(anEndpointArtifactError)
+            .expect(anErrorMessageWith(/types that failed validation:/));
+        });
+
+        it(`should error on [${apiCall.method}] if a condition entry field is used more than once`, async () => {
+          const body = apiCall.getBody();
+
+          body.entries.push({ ...body.entries[0] });
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(400)
+            .expect(anEndpointArtifactError)
+            .expect(anErrorMessageWith(/Duplicate/));
+        });
+
+        it(`should error on [${apiCall.method}] if an invalid hash is used`, async () => {
+          const body = apiCall.getBody();
+
+          body.entries = [
+            {
+              field: 'process.hash.md5',
+              operator: 'included',
+              type: 'match',
+              value: '1',
+            },
+          ];
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(400)
+            .expect(anEndpointArtifactError)
+            .expect(anErrorMessageWith(/invalid hash/));
+        });
+
+        it(`should error on [${apiCall.method}] if signer is set for a non windows os entry item`, async () => {
+          const body = apiCall.getBody();
+
+          body.os_types = ['linux'];
+          body.entries = [
+            {
+              field: 'process.Ext.code_signature',
+              entries: [
+                {
+                  field: 'trusted',
+                  value: 'true',
+                  type: 'match',
+                  operator: 'included',
+                },
+                {
+                  field: 'subject_name',
+                  value: 'foo',
+                  type: 'match',
+                  operator: 'included',
+                },
+              ],
+              type: 'nested',
+            },
+          ];
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(400)
+            .expect(anEndpointArtifactError)
+            .expect(anErrorMessageWith(/^.*(?!process\.Ext\.code_signature)/));
+        });
+
+        it(`should error on [${apiCall.method}] if more than one OS is set`, async () => {
+          const body = apiCall.getBody();
+
+          body.os_types = ['linux', 'windows'];
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(400)
+            .expect(anEndpointArtifactError)
+            .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
+        });
+
+        it(`should error on [${apiCall.method}] if policy id is invalid`, async () => {
+          const body = apiCall.getBody();
+
+          body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(400)
+            .expect(anEndpointArtifactError)
+            .expect(anErrorMessageWith(/invalid policy ids/));
+        });
+      }
     });
 
     describe(`and user (${USER}) DOES NOT have authorization to manage endpoint security`, () => {
