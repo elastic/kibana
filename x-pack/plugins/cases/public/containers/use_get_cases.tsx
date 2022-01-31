@@ -235,7 +235,7 @@ export const useGetCases = (
             toasts.addSuccess({
               title: i18n.UPDATED_CASE(caseData.title),
               text:
-                updateKey === 'status' && caseData.totalAlerts > 0
+                updateKey === 'status' && caseData.totalAlerts > 0 && caseData.settings.syncAlerts
                   ? i18n.STATUS_CHANGED_TOASTER_TEXT
                   : undefined,
             });
