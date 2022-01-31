@@ -9,21 +9,21 @@
     "summary_count_field_name" : "doc_count",
     "detectors" : [
       {
-        "detector_description" : "high latency by transaction type for an APM service",
+        "detector_description" : "For each service.name, detects high mean transaction_latency values by transaction.type.",
         "function" : "high_mean",
         "field_name" : "transaction_latency",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       },
       {
-        "detector_description" : "transaction throughput for an APM service",
+        "detector_description" : "For each service.name, detects mean transaction_throughput values by transaction.type.",
         "function" : "mean",
         "field_name" : "transaction_throughput",
         "by_field_name" : "transaction.type",
         "partition_field_name" : "service.name"
       },
       {
-        "detector_description" : "failed transaction rate for an APM service",
+        "detector_description" : "For each service.name, detects high mean failed_transaction_rate values by transaction.type.",
         "function" : "high_mean",
         "field_name" : "failed_transaction_rate",
         "by_field_name" : "transaction.type",
