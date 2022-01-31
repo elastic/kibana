@@ -7,7 +7,7 @@
 
 import { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, FC } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -17,6 +17,9 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import type { NavigationSection } from '../../../services/navigation_registry';
+
+import { Chat } from '../../../../../cloud/public';
+
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
@@ -41,6 +44,7 @@ export interface ObservabilityPageTemplateDependencies {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
+  Context?: FC;
 }
 
 export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
@@ -53,6 +57,7 @@ export function ObservabilityPageTemplate({
   navigateToApp,
   navigationSections$,
   showSolutionNav = true,
+  Context = ({ children: contextChildren }) => <>{contextChildren}</>,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -118,22 +123,29 @@ export function ObservabilityPageTemplate({
     [currentAppId, currentPath, getUrlForApp, navigateToApp, sections]
   );
 
+  const chat = pageTemplateProps.noDataConfig ? (
+    <Context>
+      <Chat />
+    </Context>
+  ) : null;
+
   return (
-    <KibanaPageTemplate
-      restrictWidth={false}
-      {...pageTemplateProps}
-      solutionNav={
-        showSolutionNav
-          ? {
-              icon: 'logoObservability',
-              items: sideNavItems,
-              name: sideNavTitle,
-            }
-          : undefined
-      }
-    >
-      {children}
-    </KibanaPageTemplate>
+    <>
+      <KibanaPageTemplate
+        restrictWidth={false}
+        {...pageTemplateProps}
+        solutionNav={
+          showSolutionNav
+            ? {
+                icon: 'logoObservability',
+                items: sideNavItems,
+                name: sideNavTitle,
+              }
+            : undefined
+        }
+      />
+      {chat}
+    </>
   );
 }
 

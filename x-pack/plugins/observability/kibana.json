@@ -17,7 +17,8 @@
     "lens",
     "licensing",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "cloud"
   ],
   "requiredPlugins": [
     "alerting",
@@ -35,7 +36,8 @@
     "data",
     "dataViews",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "cloud"
   ],
   "extraPublicDirs": [
     "common"

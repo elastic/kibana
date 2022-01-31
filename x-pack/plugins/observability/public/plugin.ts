@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CloudStart } from '../../cloud/public';
 import { ConfigSchema } from '.';
 import {
   AppDeepLink,
@@ -62,6 +63,7 @@ export interface ObservabilityPublicPluginsStart {
   data: DataPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
+  cloud?: CloudStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -260,6 +262,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      Context: pluginsStart.cloud?.CloudContextProvider,
     });
 
     return {
