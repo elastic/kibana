@@ -20,6 +20,7 @@ export const getExceptionsPreMultiListFindHandler = (
     // validate Trusted application
     if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
+      return data;
     }
 
     return data;

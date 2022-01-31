@@ -21,6 +21,7 @@ export const getExceptionsPreSingleListFindHandler = (
     // Validate Host Isolation Exceptions
     if (TrustedAppValidator.isTrustedApp({ listId: data.listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreSingleListFind();
+      return data;
     }
 
     return data;

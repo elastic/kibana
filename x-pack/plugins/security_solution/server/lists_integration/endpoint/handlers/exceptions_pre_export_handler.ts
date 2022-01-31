@@ -28,6 +28,7 @@ export const getExceptionsPreExportHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreExport();
+      return data;
     }
 
     return data;
