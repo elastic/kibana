@@ -100,7 +100,6 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
   initialAddFilterMode,
-  onRemoveFilterGroup
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
@@ -112,7 +111,6 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
-  onRemoveFilterGroup: (groupId: string) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -120,38 +118,18 @@ export function AddFilterModal({
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [customLabel, setCustomLabel] = useState<string>(filter.meta.alias || '');
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
-  const [localFilters, setLocalFilters] = useState<FilterGroup[]>(
-    convertFilterToFilterGroup(multipleFilters)
-  );
+  const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
+    {
+      field: undefined,
+      operator: undefined,
+      value: undefined,
+      groupId: 1,
+      id: 0,
+      subGroupId: 1,
+      relationship: undefined,
+    },
+  ]);
   const [groupsCount, setGroupsCount] = useState<number>(1);
-
-  function convertFilterToFilterGroup(convertibleFilters: Filter[] | undefined): FilterGroup[] {
-    if (!convertibleFilters) {
-      return [
-        {
-          field: undefined,
-          operator: undefined,
-          value: undefined,
-          groupId: 1,
-          id: 0,
-          subGroupId: 1,
-          relationship: undefined,
-        },
-      ];
-    }
-
-    return convertibleFilters.map((convertedfilter) => {
-      return {
-        field: getFieldFromFilter(convertedfilter as FieldFilter, selectedIndexPattern),
-        operator: getOperatorFromFilter(convertedfilter),
-        value: getFilterParams(convertedfilter),
-        groupId: convertedfilter.groupId,
-        id: convertedfilter.id,
-        subGroupId: convertedfilter.subGroupId,
-        relationship: convertedfilter.relationship
-      };
-    });
-  }
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -698,7 +676,7 @@ export function AddFilterModal({
                     defaultMessage: 'Add filter',
                   })}
                 </EuiButton>
-              </EuiFlexItem>  
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

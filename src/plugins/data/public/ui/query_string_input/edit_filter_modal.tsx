@@ -94,7 +94,7 @@ export function EditFilterModal({
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
   initialAddFilterMode,
-  onRemoveFilterGroup
+  onRemoveFilterGroup,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
