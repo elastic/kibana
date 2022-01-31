@@ -15,6 +15,7 @@ import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../../data/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AvailableFields$ } from '../services/use_saved_search';
 
 function getDataSubjects() {
   return {
@@ -22,6 +23,9 @@ function getDataSubjects() {
     documents$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
     totalHits$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
     charts$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+    }) as AvailableFields$,
   };
 }
 
