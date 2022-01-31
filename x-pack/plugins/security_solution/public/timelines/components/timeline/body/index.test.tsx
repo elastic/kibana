@@ -22,7 +22,7 @@ import { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
 jest.mock('../../../../common/lib/kibana/hooks');
@@ -154,6 +154,10 @@ describe('Body', () => {
   };
 
   describe('rendering', () => {
+    beforeEach(() => {
+      mockDispatch.mockClear();
+    });
+
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
@@ -206,6 +210,28 @@ describe('Body', () => {
         });
       });
     }, 20000);
+
+    test('it dispatches the `REMOVE_COLUMN` action when there is a field removed from the custom fields', async () => {
+      const customFieldId = 'my.custom.runtimeField';
+      const extraFieldProps = {
+        ...props,
+        columnHeaders: [
+          ...defaultHeaders,
+          { id: customFieldId, category: 'my' } as ColumnHeaderOptions,
+        ],
+      };
+      mount(
+        <TestProviders>
+          <BodyComponent {...extraFieldProps} />
+        </TestProviders>
+      );
+
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch).toBeCalledWith({
+        payload: { columnId: customFieldId, id: 'timeline-test' },
+        type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
+      });
+    });
   });
 
   describe('action on event', () => {
