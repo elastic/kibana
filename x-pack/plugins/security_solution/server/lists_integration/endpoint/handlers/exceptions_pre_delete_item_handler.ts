@@ -39,7 +39,7 @@ export const getExceptionsPreDeleteItemHandler = (
     // Host Isolation Exception
     if (HostIsolationExceptionsValidator.isHostIsolationException(exceptionItem.list_id)) {
       await new HostIsolationExceptionsValidator(
-        endpointAppContext,
+        endpointAppContextService,
         request
       ).validatePreDeleteItem();
       return data;
