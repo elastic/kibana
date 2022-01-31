@@ -9,7 +9,7 @@ import { setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 
 import {
   EuiButton,
@@ -25,9 +25,10 @@ import { StartCrawlContextMenu } from './start_crawl_context_menu';
 
 const MOCK_ACTIONS = {
   startCrawl: jest.fn(),
+  showModal: jest.fn(),
 };
 
-describe('CrawlerStatusIndicator', () => {
+describe('StartCrawlContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);
@@ -40,22 +41,36 @@ describe('CrawlerStatusIndicator', () => {
     expect(wrapper.prop('isOpen')).toEqual(false);
   });
 
-  it('can be opened to stop crawls', () => {
-    const wrapper = mountWithIntl(<StartCrawlContextMenu />);
+  describe('user actions', () => {
+    let wrapper: ReactWrapper;
+    let menuItems: ReactWrapper;
 
-    wrapper.find(EuiButton).simulate('click');
+    beforeEach(() => {
+      wrapper = mountWithIntl(<StartCrawlContextMenu />);
 
-    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+      wrapper.find(EuiButton).simulate('click');
 
-    const menuItem = wrapper
-      .find(EuiContextMenuPanel)
-      .find(EuiResizeObserver)
-      .find(EuiContextMenuItem);
+      menuItems = wrapper
+        .find(EuiContextMenuPanel)
+        .find(EuiResizeObserver)
+        .find(EuiContextMenuItem);
+    });
 
-    expect(menuItem).toHaveLength(1);
+    it('can be opened', () => {
+      expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+      expect(menuItems.length).toEqual(2);
+    });
 
-    menuItem.simulate('click');
+    it('can start crawls', () => {
+      menuItems.at(0).simulate('click');
 
-    expect(MOCK_ACTIONS.startCrawl).toHaveBeenCalled();
+      expect(MOCK_ACTIONS.startCrawl).toHaveBeenCalled();
+    });
+
+    it('can open a modal to start a crawl with selected domains', () => {
+      menuItems.at(1).simulate('click');
+
+      expect(MOCK_ACTIONS.showModal).toHaveBeenCalled();
+    });
   });
 });

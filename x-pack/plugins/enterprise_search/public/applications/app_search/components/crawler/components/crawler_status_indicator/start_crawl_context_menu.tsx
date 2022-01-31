@@ -13,8 +13,11 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../../crawler_logic';
 
+import { CrawlSomeDomainsModalLogic } from './crawl_some_domains_modal/crawl_some_domains_modal_logic';
+
 export const StartCrawlContextMenu: React.FC = ({}) => {
   const { startCrawl } = useActions(CrawlerLogic);
+  const { showModal: showCrawlSomeDomainsModal } = useActions(CrawlSomeDomainsModalLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -42,7 +45,7 @@ export const StartCrawlContextMenu: React.FC = ({}) => {
       <EuiContextMenuPanel
         items={[
           <EuiContextMenuItem
-            key="cancel crawl"
+            key="crawl all domains"
             icon="cross"
             onClick={() => {
               closePopover();
@@ -53,6 +56,21 @@ export const StartCrawlContextMenu: React.FC = ({}) => {
               'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlAllDomainsMenuLabel',
               {
                 defaultMessage: 'Crawl all domains on this engine',
+              }
+            )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="crawl some domains"
+            icon="cross"
+            onClick={() => {
+              closePopover();
+              showCrawlSomeDomainsModal();
+            }}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlSomeDomainsMenuLabel',
+              {
+                defaultMessage: 'Crawl some domains',
               }
             )}
           </EuiContextMenuItem>,
