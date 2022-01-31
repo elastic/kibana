@@ -137,11 +137,11 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideDeleteConfirmation,
     });
 
-    const [isBulkEditConfirmationVisible, showBulkEditonfirmation, hideBulkEditConfirmation] =
+    const [isBulkEditConfirmationVisible, showBulkEditConfirmation, hideBulkEditConfirmation] =
       useBoolState();
 
     const [confirmBulkEdit, handleBulkEditConfirm, handleBulkEditCancel] = useAsyncConfirmation({
-      onInit: showBulkEditonfirmation,
+      onInit: showBulkEditConfirmation,
       onFinish: hideBulkEditConfirmation,
     });
 

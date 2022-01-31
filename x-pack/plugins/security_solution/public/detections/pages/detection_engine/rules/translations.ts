@@ -255,7 +255,7 @@ export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
+export const BULK_EDIT_ERROR_TOAST_DESCRIPTION = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
     {
