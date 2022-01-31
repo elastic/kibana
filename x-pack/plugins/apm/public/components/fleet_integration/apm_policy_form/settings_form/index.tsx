@@ -123,8 +123,14 @@ export function SettingsForm({ settingsSection, vars, onChange }: Props) {
                       defaultMessage: 'Platinum',
                     }
                   )}
+                  title={i18n.translate(
+                    'xpack.apm.fleet_integration.settings.platinumBadgeTooltipTitle',
+                    {
+                      defaultMessage: 'Platinum license required',
+                    }
+                  )}
                   tooltipContent={i18n.translate(
-                    'xpack.apm.fleet_integration.settings.platinumBadgeDescription',
+                    'xpack.apm.fleet_integration.settings.platinumBadgeTooltipDescription',
                     {
                       defaultMessage:
                         'Configurations are saved but ignored if your Kibana licence is not Platinum.',

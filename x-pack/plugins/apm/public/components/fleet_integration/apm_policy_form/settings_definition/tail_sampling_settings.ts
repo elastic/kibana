@@ -45,12 +45,6 @@ export function getTailSamplingSettings(): SettingsRow[] {
                 'Interval for synchronization between multiple APM Servers. Should be in the order of tens of seconds or low minutes.',
             }
           ),
-          placeholder: i18n.translate(
-            'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingIntervalPlaceholder',
-            {
-              defaultMessage: '1m',
-            }
-          ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
           validation: getDurationRt({ min: '1s' }),
@@ -73,8 +67,6 @@ export function getTailSamplingSettings(): SettingsRow[] {
                 'Policies map trace events to a sample rate. Each policy must specify a sample rate. Trace events are matched to policies in the order specified. All policy conditions must be true for a trace event to match. Each policy list should conclude with a policy that only specifies a sample rate. This final policy is used to catch remaining trace events that don’t match a stricter policy.',
             }
           ),
-          placeholder:
-            'service.name: string\nservice.environment: string\ntrace.name: string\ntrace.outcome: string\nsample_rate: number',
           labelAppendLink: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingHelpText',
             {
@@ -82,7 +74,6 @@ export function getTailSamplingSettings(): SettingsRow[] {
             }
           ),
           required: true,
-          defaultValue: 'policies:\n  - sample_rate: 0.1',
         },
       ],
     },

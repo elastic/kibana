@@ -18,7 +18,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
         tail_sampling_enabled: { value: true, type: 'bool' },
         tail_sampling_interval: { value: '3s', type: 'text' },
         tail_sampling_policies: {
-          value: 'policies:\n  - sample_rate: 0.1',
+          value: 'testValue',
           type: 'yaml',
         },
       },
@@ -34,7 +34,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
         tail_sampling_enabled: { value: true, type: 'bool' },
         tail_sampling_interval: { value: '1ms', type: 'text' },
         tail_sampling_policies: {
-          value: 'policies:\n  - sample_rate: 0.1',
+          value: 'testValue',
           type: 'yaml',
         },
       },

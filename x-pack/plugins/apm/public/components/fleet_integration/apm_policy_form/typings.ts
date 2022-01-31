@@ -49,7 +49,6 @@ export interface BasicSettingRow {
   validation?: SettingValidation;
   required?: boolean;
   readOnly?: boolean;
-  defaultValue?: any;
 }
 
 export type SettingsRow = BasicSettingRow | AdvancedSettingRow;
