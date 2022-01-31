@@ -7,7 +7,7 @@
 
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   asDecimal,
   asInteger,
