@@ -8,7 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { EuiButtonEmpty, EuiResizableContainer, EuiTitle, EuiPanel } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiResizableContainer,
+  EuiTitle,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
@@ -108,6 +115,19 @@ export function ExploratoryView({
 
                 return (
                   <>
+                    <EuiFlexGroup alignItems="flexStart">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          {...(hiddenPanel === 'chartPanel'
+                            ? { iconType: 'arrowRight' }
+                            : { iconType: 'arrowDown' })}
+                          onClick={() => onChange('chartPanel')}
+                        >
+                          {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
                     <EuiResizablePanel
                       initialSize={40}
                       minSize={'30%'}
@@ -123,7 +143,7 @@ export function ExploratoryView({
                         <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
                       )}
                     </EuiResizablePanel>
-                    <EuiResizableButton />
+
                     <EuiResizablePanel
                       initialSize={60}
                       minSize="10%"
@@ -132,11 +152,6 @@ export function ExploratoryView({
                       color="subdued"
                       className="paddingTopSmall"
                     >
-                      <ChartToggle
-                        isCollapsed={hiddenPanel === 'chartPanel'}
-                        onClick={() => onChange('chartPanel')}
-                      />
-
                       <SeriesViews
                         seriesBuilderRef={seriesBuilderRef}
                         onSeriesPanelCollapse={onChange}
@@ -193,23 +208,6 @@ const Wrapper = styled(EuiPanel)`
 const ShowPreview = styled(EuiButtonEmpty)`
   position: absolute;
   bottom: 34px;
-`;
-
-const ChartToggle = styled(({ isCollapsed, ...rest }) => (
-  <EuiButtonEmpty
-    {...(isCollapsed ? { iconType: 'arrowDown' } : { iconType: 'arrowUp', color: 'text' })}
-    {...rest}
-  >
-    {isCollapsed ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
-  </EuiButtonEmpty>
-))`
-  &:focus,
-  &:focus:enabled {
-    background: none;
-  }
-  position: absolute;
-  top: -30px;
-  right: 0;
 `;
 
 const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {

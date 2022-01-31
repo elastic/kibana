@@ -50,7 +50,7 @@ export class SyntheticsService {
     this.server = server;
     this.config = config;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
@@ -232,6 +232,7 @@ export class SyntheticsService {
 
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
+      namespaces: ['*'],
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
