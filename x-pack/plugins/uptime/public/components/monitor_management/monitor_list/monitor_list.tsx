@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Criteria, EuiBasicTable, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  Criteria,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -13,25 +20,28 @@ import {
   ConfigKey,
   DataStream,
   FetchMonitorManagementListQueryArgs,
+  ICMPSimpleFields,
+  MonitorFields,
+  ServiceLocations,
   SyntheticsMonitorWithId,
+  TCPSimpleFields,
 } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { MonitorManagementPageAction } from '../../../pages/monitor_management/monitor_management';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { DataStream, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
-import { UptimeSettingsContext } from '../../../contexts';
+import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
+import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
-import { MonitorEnabled } from './monitor_enabled';
-import * as labels from '../../overview/monitor_list/translations';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface MonitorManagementListPageState {
   pageIndex: number;
   pageSize: number;
-  sortField: keyof typeof CommonFields;
-  sortOrder: FetchMonitorManagementListQueryArgs['sortOrder'];
+  sortField: keyof MonitorFields;
+  sortOrder: NonNullable<FetchMonitorManagementListQueryArgs['sortOrder']>;
 }
 
 interface Props {
@@ -60,14 +70,17 @@ export const MonitorManagementList = ({
   );
 
   const handleOnChange = useCallback(
-    ({ page = {}, sort = {} }: Criteria) => {
+    ({
+      page = { index: 0, size: 10 },
+      sort = { field: ConfigKey.NAME, direction: 'asc' },
+    }: Criteria<SyntheticsMonitorWithId>) => {
       const { index, size } = page;
       const { field, direction } = sort;
 
       onPageStateChange({
         pageIndex: index + 1, // page index for Saved Objects is base 1
         pageSize: size,
-        sortField: field,
+        sortField: field as keyof MonitorFields,
         sortOrder: direction,
       });
     },
@@ -83,22 +96,22 @@ export const MonitorManagementList = ({
 
   const sorting: EuiTableSortingType<SyntheticsMonitorWithId> = {
     sort: {
-      field: sortField,
+      field: sortField as keyof SyntheticsMonitorWithId,
       direction: sortOrder,
     },
   };
 
   const canEdit: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
-  const columns: EuiBasicTableColumn<SyntheticsMonitorWithId> = [
+  const columns = [
     {
       align: 'left' as const,
-      field: ConfigKey.NAME,
+      field: ConfigKey.NAME as string,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorName', {
         defaultMessage: 'Monitor name',
       }),
       sortable: true,
-      render: (name, { id }) => (
+      render: (name: string, { id }: SyntheticsMonitorWithId) => (
         <EuiLink
           href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
         >
@@ -120,7 +133,7 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.tags', {
         defaultMessage: 'Tags',
       }),
-      render: (tags) => (tags ? <MonitorTags tags={tags} /> : null),
+      render: (tags: string[]) => (tags ? <MonitorTags tags={tags} /> : null),
     },
     {
       align: 'left' as const,
@@ -128,7 +141,8 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.locations', {
         defaultMessage: 'Locations',
       }),
-      render: (locations) => (locations ? <MonitorLocations locations={locations} /> : null),
+      render: (locations: ServiceLocations) =>
+        locations ? <MonitorLocations locations={locations} /> : null,
     },
     {
       align: 'left' as const,
@@ -136,7 +150,8 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.schedule', {
         defaultMessage: 'Schedule',
       }),
-      render: (schedule) => `@every ${schedule?.number}${schedule?.unit}`,
+      render: (schedule: CommonFields[ConfigKey.SCHEDULE]) =>
+        `@every ${schedule?.number}${schedule?.unit}`,
     },
     {
       align: 'left' as const,
@@ -145,17 +160,17 @@ export const MonitorManagementList = ({
         defaultMessage: 'URL',
       }),
       sortable: true,
-      render: (urls, { hosts }) => urls || hosts,
+      render: (urls: string, { hosts }: TCPSimpleFields | ICMPSimpleFields) => urls || hosts,
       truncateText: true,
       textOnly: true,
     },
     {
       align: 'left' as const,
-      field: ConfigKey.ENABLED,
+      field: ConfigKey.ENABLED as string,
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
-      render: (_enabled, monitor) => (
+      render: (_enabled: boolean, monitor: SyntheticsMonitorWithId) => (
         <MonitorEnabled id={monitor.id} monitor={monitor} isDisabled={!canEdit} onUpdate={onUpdate} />
       ),
     },
@@ -167,7 +182,7 @@ export const MonitorManagementList = ({
       }),
       render: (id: string) => <Actions id={id} isDisabled={!canEdit} onUpdate={onUpdate} />,
     },
-  ];
+  ] as Array<EuiBasicTableColumn<SyntheticsMonitorWithId>>;
 
   return (
     <EuiPanel hasBorder>

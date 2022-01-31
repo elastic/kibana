@@ -18,15 +18,15 @@ import {
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const MonitorManagementPage: React.FC = () => {
-  const [pageState, dispatchPageAction] = useReducer<
-    typeof monitorManagementPageReducer,
-    MonitorManagementListPageState
-  >(monitorManagementPageReducer, {
-    pageIndex: 1, // saved objects page index is base 1
-    pageSize: 10,
-    sortOrder: 'asc',
-    sortField: ConfigKey.NAME,
-  });
+  const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
+    monitorManagementPageReducer,
+    {
+      pageIndex: 1, // saved objects page index is base 1
+      pageSize: 10,
+      sortOrder: 'asc',
+      sortField: ConfigKey.NAME,
+    }
+  );
 
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
@@ -34,7 +34,7 @@ export const MonitorManagementPage: React.FC = () => {
   const dispatch = useDispatch();
   const monitorList = useSelector(monitorManagementListSelector);
 
-  const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementPageState;
+  const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
   useEffect(() => {
     dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
@@ -58,9 +58,9 @@ type MonitorManagementPageAction =
   | { type: 'refresh' };
 
 const monitorManagementPageReducer: Reducer<
-  MonitorManagementPageState,
+  MonitorManagementListPageState,
   MonitorManagementPageAction
-> = (state: MonitorManagementPageState, action: MonitorManagementPageAction) => {
+> = (state: MonitorManagementListPageState, action: MonitorManagementPageAction) => {
   switch (action.type) {
     case 'update':
       return {
@@ -70,6 +70,6 @@ const monitorManagementPageReducer: Reducer<
     case 'refresh':
       return { ...state };
     default:
-      throw new Error(`Action "${action.type}" not recognizable`);
+      throw new Error(`Action "${(action as unknown)?.type}" not recognizable`);
   }
 };

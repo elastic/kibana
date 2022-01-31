@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { ConfigKey, DataStream, HTTPFields, ScheduleUnit } from '../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { DataStream, HTTPFields, ScheduleUnit } from '../../../../common/runtime_types';
-import { MonitorManagementList } from './monitor_list';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
+import { MonitorManagementList, MonitorManagementListPageState } from './monitor_list';
 
-describe('<ActionBar />', () => {
-  const setRefresh = jest.fn();
-  const setPageSize = jest.fn();
-  const setPageIndex = jest.fn();
+describe('<MonitorManagementList />', () => {
+  const onUpdate = jest.fn();
+  const onPageStateChange = jest.fn();
   const monitors = [];
   for (let i = 0; i < 12; i++) {
     monitors.push({
@@ -53,13 +52,24 @@ describe('<ActionBar />', () => {
     } as MonitorManagementListState,
   };
 
+  const pageState: MonitorManagementListPageState = {
+    pageIndex: 1,
+    pageSize: 10,
+    sortField: ConfigKey.NAME,
+    sortOrder: 'asc',
+  };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it.each(monitors)('navigates to edit monitor flow on edit pencil', (monitor) => {
     render(
       <MonitorManagementList
-        setRefresh={setRefresh}
-        setPageSize={setPageSize}
-        setPageIndex={setPageIndex}
+        onUpdate={onUpdate}
+        onPageStateChange={onPageStateChange}
         monitorList={state.monitorManagementList}
+        pageState={pageState}
       />,
       { state }
     );
@@ -79,10 +89,10 @@ describe('<ActionBar />', () => {
   it('handles changing per page', () => {
     render(
       <MonitorManagementList
-        setRefresh={setRefresh}
-        setPageSize={setPageSize}
-        setPageIndex={setPageIndex}
+        onUpdate={onUpdate}
+        onPageStateChange={onPageStateChange}
         monitorList={state.monitorManagementList}
+        pageState={pageState}
       />,
       { state }
     );
@@ -91,23 +101,79 @@ describe('<ActionBar />', () => {
 
     userEvent.click(screen.getByText('10 rows'));
 
-    expect(setPageSize).toBeCalledWith(10);
+    expect(onPageStateChange).toBeCalledWith(expect.objectContaining({ pageSize: 10 }));
   });
 
   it('handles refreshing and changing page when navigating to the next page', () => {
     render(
       <MonitorManagementList
-        setRefresh={setRefresh}
-        setPageSize={setPageSize}
-        setPageIndex={setPageIndex}
+        onUpdate={onUpdate}
+        onPageStateChange={onPageStateChange}
         monitorList={state.monitorManagementList}
+        pageState={{ ...pageState, pageIndex: 1 }}
       />,
       { state }
     );
 
     userEvent.click(screen.getByTestId('pagination-button-next'));
 
-    expect(setPageIndex).toBeCalledWith(2);
-    expect(setRefresh).toBeCalledWith(true);
+    expect(onPageStateChange).toBeCalledWith(expect.objectContaining({ pageIndex: 2 }));
   });
+
+  it.each([
+    [DataStream.BROWSER, ConfigKey.SOURCE_INLINE],
+    [DataStream.HTTP, ConfigKey.URLS],
+    [DataStream.TCP, ConfigKey.HOSTS],
+    [DataStream.ICMP, ConfigKey.HOSTS],
+  ])(
+    'appends inline to the monitor id for browser monitors and omits for lightweight checks',
+    (type, configKey) => {
+      const id = '123456';
+      const name = 'sample monitor';
+      const browserState = {
+        monitorManagementList: {
+          ...state.monitorManagementList,
+          list: {
+            ...state.monitorManagementList.list,
+            monitors: [
+              {
+                id,
+                attributes: {
+                  name,
+                  schedule: {
+                    unit: ScheduleUnit.MINUTES,
+                    number: '1',
+                  },
+                  [configKey]: 'test',
+                  type,
+                  tags: [`tag-1`],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      render(
+        <MonitorManagementList
+          onUpdate={onUpdate}
+          onPageStateChange={onPageStateChange}
+          monitorList={browserState.monitorManagementList as unknown as MonitorManagementListState}
+          pageState={{ ...pageState, pageIndex: 1 }}
+        />,
+        { state: browserState }
+      );
+
+      const link = screen.getByText(name) as HTMLAnchorElement;
+
+      expect(link.href).toEqual(
+        expect.stringContaining(
+          `/app/uptime/monitor/${Buffer.from(
+            `${id}${type === DataStream.BROWSER ? `-inline` : ''}`,
+            'utf8'
+          ).toString('base64')}`
+        )
+      );
+    }
+  );
 });
