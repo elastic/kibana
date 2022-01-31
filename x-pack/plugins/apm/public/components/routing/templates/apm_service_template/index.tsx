@@ -21,6 +21,7 @@ import {
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
+  isServerlessAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -144,7 +145,8 @@ export function isMetricsTabHidden({
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
     isIosAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
+    isJRubyAgent(agentName, runtimeName) ||
+    isServerlessAgent(runtimeName)
   );
 }
 
@@ -155,7 +157,10 @@ export function isJVMsTabHidden({
   agentName?: string;
   runtimeName?: string;
 }) {
-  return !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName));
+  return (
+    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
+    isServerlessAgent(runtimeName)
+  );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {

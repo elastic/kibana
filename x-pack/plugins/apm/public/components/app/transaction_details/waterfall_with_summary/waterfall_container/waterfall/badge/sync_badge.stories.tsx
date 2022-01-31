@@ -9,7 +9,7 @@ import React from 'react';
 import { SyncBadge, SyncBadgeProps } from './sync_badge';
 
 export default {
-  title: 'app/TransactionDetails/SyncBadge',
+  title: 'app/TransactionDetails/Waterfall/Badge/SyncBadge',
   component: SyncBadge,
   argTypes: {
     sync: {
