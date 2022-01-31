@@ -227,7 +227,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'nodes_overview',
             pathId: ML_PAGES.TRAINED_MODELS_NODES,
             name: i18n.translate('xpack.ml.navMenu.nodesOverviewText', {
-              defaultMessage: 'Nodes Overview',
+              defaultMessage: 'Nodes',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab nodesOverview',

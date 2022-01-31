@@ -28,7 +28,7 @@ export const nodesListRouteFactory = (
     getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.nodeOverviewLabel', {
-        defaultMessage: 'Nodes Overview',
+        defaultMessage: 'Nodes',
       }),
     },
   ],
@@ -51,7 +51,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
           <EuiFlexItem grow={false}>
             <FormattedMessage
               id="xpack.ml.modelManagement.nodesOverviewHeader"
-              defaultMessage="Nodes Overview"
+              defaultMessage="Nodes"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
