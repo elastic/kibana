@@ -10,7 +10,10 @@ import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
 import { ConditionEntryField } from '../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
@@ -182,6 +185,86 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       /* eslint-enable @typescript-eslint/naming-convention */
     } = this.generateTrustedApp();
 
+    return {
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version: _version ?? 'some value',
+      ...overrides,
+    };
+  }
+
+  generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    const eventFilter = this.generate(overrides);
+
+    return {
+      ...eventFilter,
+      name: `Event filter (${this.randomString(5)})`,
+      list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+    };
+  }
+
+  generateEventFilterForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateEventFilter();
+    return {
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      ...overrides,
+    };
+  }
+
+  generateEventFilterForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateEventFilter();
     return {
       description,
       entries,
