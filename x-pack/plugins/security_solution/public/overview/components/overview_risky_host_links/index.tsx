@@ -10,13 +10,31 @@ import React from 'react';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
 import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
-export interface RiskyHostLinksProps {
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+export interface RiskyHostLinksProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   timerange: { to: string; from: string };
 }
 
-const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = ({ timerange }) => {
-  const [_, { data, isModuleEnabled }] = useHostRiskScore({
+const QUERY_ID = HostRiskScoreQueryId.OVERVIEW_RISKY_HOSTS;
+
+const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = ({
+  timerange,
+  deleteQuery,
+  setQuery,
+}) => {
+  const [loading, { data, isModuleEnabled, inspect, refetch }] = useHostRiskScore({
     timerange,
+  });
+
+  useQueryInspector({
+    queryId: QUERY_ID,
+    loading,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect,
   });
 
   switch (isModuleEnabled) {

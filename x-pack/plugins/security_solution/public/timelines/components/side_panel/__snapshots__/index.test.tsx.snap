@@ -143,13 +143,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       }
     }
     handleOnEventClosed={[Function]}
-    hostRisk={
-      Object {
-        "isModuleEnabled": undefined,
-        "loading": false,
-        "result": Array [],
-      }
-    }
+    hostRisk={null}
     isAlert={false}
     isDraggable={false}
     loading={true}
@@ -371,13 +365,7 @@ Array [
                       }
                     }
                     handleOnEventClosed={[Function]}
-                    hostRisk={
-                      Object {
-                        "isModuleEnabled": undefined,
-                        "loading": false,
-                        "result": Array [],
-                      }
-                    }
+                    hostRisk={null}
                     isAlert={false}
                     isDraggable={false}
                     loading={true}
@@ -661,13 +649,7 @@ Array [
                     }
                   }
                   handleOnEventClosed={[Function]}
-                  hostRisk={
-                    Object {
-                      "isModuleEnabled": undefined,
-                      "loading": false,
-                      "result": Array [],
-                    }
-                  }
+                  hostRisk={null}
                   isAlert={false}
                   isDraggable={false}
                   loading={true}

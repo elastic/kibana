@@ -88,6 +88,7 @@ export const SeverityFilterGroup: React.FC<{
   const button = useMemo(
     () => (
       <EuiFilterButton
+        data-test-subj="host-risk-filter-button"
         hasActiveFilters={!!items.find((item) => item.checked === 'on')}
         iconType="arrowDown"
         isSelected={isPopoverOpen}
@@ -112,6 +113,7 @@ export const SeverityFilterGroup: React.FC<{
         <div className="euiFilterSelect__items">
           {items.map((item, index) => (
             <EuiFilterSelectItem
+              data-test-subj={`host-risk-filter-item-${item.risk}`}
               checked={item.checked}
               key={index + item.risk}
               onClick={() => updateSeverityFilter(item.risk)}

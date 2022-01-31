@@ -12,18 +12,18 @@ import { HostsKpiAuthentications } from './authentications';
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
 import { HostsKpiProps } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
+import { useHostRiskScore } from '../../containers/host_risk_score';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
-    const riskyHostsExperimentEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+    const [_, { isModuleEnabled }] = useHostRiskScore({});
 
     return (
       <>
-        {!riskyHostsExperimentEnabled && (
+        {isModuleEnabled === false && (
           <>
             <CallOutSwitcher
               namespace="hosts"

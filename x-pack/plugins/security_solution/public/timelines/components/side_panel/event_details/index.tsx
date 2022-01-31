@@ -134,11 +134,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     },
   });
 
-  const hostRisk: HostRisk = {
-    loading: hostRiskLoading,
-    isModuleEnabled,
-    result: data,
-  };
+  const hostRisk: HostRisk | null = data
+    ? {
+        loading: hostRiskLoading,
+        isModuleEnabled,
+        result: data,
+      }
+    : null;
 
   const timestamp = useMemo(
     () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),

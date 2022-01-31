@@ -64,6 +64,8 @@ describe('RiskyHostLinks', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostLinks
+              setQuery={jest.fn()}
+              deleteQuery={jest.fn()}
               timerange={{
                 to: 'now',
                 from: 'now-30d',
@@ -91,6 +93,8 @@ describe('RiskyHostLinks', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostLinks
+              setQuery={jest.fn()}
+              deleteQuery={jest.fn()}
               timerange={{
                 to: 'now',
                 from: 'now-30d',

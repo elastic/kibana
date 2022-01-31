@@ -27,6 +27,7 @@ import type { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/s
 import { useKibana } from '../../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import { ESTermQuery } from '../../../../../common/typed_json';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export type RiskyHostsScoreRequestOptions = RequestBasicOptions;
 
@@ -92,6 +93,7 @@ export const useRiskScoreKpi = ({
   to,
   skip,
 }: UseRiskyHostProps): RiskScoreKpi => {
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const { error, result, start, loading } = useRiskyHostsComplete();
   const { data, spaces } = useKibana().services;
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
@@ -104,7 +106,7 @@ export const useRiskScoreKpi = ({
   }, [spaces]);
 
   useEffect(() => {
-    if (!skip && spaceId) {
+    if (!skip && spaceId && riskyHostsFeatureEnabled) {
       start({
         data,
         timerange: { to, from, interval: '' },
@@ -112,7 +114,7 @@ export const useRiskScoreKpi = ({
         defaultIndex: [getHostRiskIndex(spaceId)],
       });
     }
-  }, [data, spaceId, start, filterQuery, to, from, skip]);
+  }, [data, spaceId, start, filterQuery, to, from, skip, riskyHostsFeatureEnabled]);
 
   const severityCount = useMemo(
     () => ({

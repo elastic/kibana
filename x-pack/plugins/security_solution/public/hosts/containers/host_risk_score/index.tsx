@@ -34,10 +34,11 @@ import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 type LoadPage = (newActivePage: number) => void;
 export interface HostRiskScoreState {
-  data: HostsRiskScore[];
+  data?: HostsRiskScore[];
   inspect: InspectResponse;
   loadPage: LoadPage;
   isInspected: boolean;
@@ -80,7 +81,8 @@ export const useHostRiskScore = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const [loading, setLoading] = useState<boolean>(riskyHostsFeatureEnabled);
   const [riskScoreRequest, setHostRiskScoreRequest] = useState<HostsRiskScoreRequestOptions | null>(
     null
   );
@@ -110,7 +112,7 @@ export const useHostRiskScore = ({
   const { addError, addWarning } = useAppToasts();
 
   const [riskScoreResponse, setHostRiskScoreResponse] = useState<HostRiskScoreState>({
-    data: [],
+    data: undefined,
     inspect: {
       dsl: [],
       response: [],
@@ -119,7 +121,8 @@ export const useHostRiskScore = ({
     loadPage: wrappedLoadMore,
     isModuleEnabled: undefined,
     refetch: refetch.current,
-    totalCount: -1,
+    totalCount: 0,
+    isModuleEnabled: undefined,
   });
 
   const riskScoreSearch = useCallback(
@@ -171,11 +174,11 @@ export const useHostRiskScore = ({
             error: (error) => {
               setLoading(false);
               if (isIndexNotFoundError(error)) {
-                setHostRiskScoreRequest((prevRequest) =>
-                  !prevRequest
-                    ? prevRequest
+                setHostRiskScoreResponse((prevResponse) =>
+                  !prevResponse
+                    ? prevResponse
                     : {
-                        ...prevRequest,
+                        ...prevResponse,
                         isModuleEnabled: false,
                       }
                 );
@@ -191,10 +194,13 @@ export const useHostRiskScore = ({
       };
       searchSubscription.current.unsubscribe();
       abortCtrl.current.abort();
-      asyncSearch();
+      if (riskyHostsFeatureEnabled) {
+        asyncSearch();
+      }
+
       refetch.current = asyncSearch;
     },
-    [skip, data.search, onlyLatest, addWarning, addError]
+    [addError, addWarning, data.search, onlyLatest, riskyHostsFeatureEnabled, skip]
   );
   const [spaceId, setSpaceId] = useState<string>();
 

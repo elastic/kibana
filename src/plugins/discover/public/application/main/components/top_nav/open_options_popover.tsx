@@ -23,9 +23,10 @@ import {
 } from '@elastic/eui';
 import './open_options_popover.scss';
 import { Observable } from 'rxjs';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { DiscoverServices } from '../../../../build_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
-import { getServices } from '../../../../kibana_services';
-import { KibanaThemeProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -39,7 +40,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   const {
     core: { uiSettings },
     addBasePath,
-  } = getServices();
+  } = useDiscoverServices();
   const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
 
   const mode = isLegacy
@@ -128,10 +129,12 @@ export function openOptionsPopover({
   I18nContext,
   anchorElement,
   theme$,
+  services,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
   theme$: Observable<CoreTheme>;
+  services: DiscoverServices;
 }) {
   if (isOpen) {
     onClose();
@@ -143,9 +146,11 @@ export function openOptionsPopover({
 
   const element = (
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
-      </KibanaThemeProvider>
+      <KibanaContextProvider services={services}>
+        <KibanaThemeProvider theme$={theme$}>
+          <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
+        </KibanaThemeProvider>
+      </KibanaContextProvider>
     </I18nContext>
   );
   ReactDOM.render(element, container);
