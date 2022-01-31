@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'kibana/server';
+import type { EnvironmentMode, StartServicesAccessor } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
@@ -85,7 +85,8 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  previewTelemetryReceiver: ITelemetryReceiver
+  previewTelemetryReceiver: ITelemetryReceiver,
+  envMode: EnvironmentMode
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
@@ -165,6 +166,8 @@ export const initRoutes = (
   createSourcererDataViewRoute(router, getStartServices);
   getSourcererDataViewRoute(router, getStartServices);
 
-  // telemetry preview endpoint for e2e integration tests and any UI/UX
-  telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  if (envMode.dev) {
+    // telemetry preview endpoint for e2e integration tests only at the moment
+    telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
 };
