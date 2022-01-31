@@ -136,13 +136,10 @@ export interface GetThreatListOptions {
   exceptionItems: ExceptionListItemSchema[];
   index: string[];
   language: ThreatLanguageOrUndefined;
-  listClient: ListClient;
   logger: Logger;
   perPage?: number;
   query: string;
-  searchAfter: string[] | undefined;
-  sortField: string | undefined;
-  sortOrder: SortOrderOrUndefined;
+  searchAfter: estypes.SortResults | undefined;
   threatFilters: unknown[];
 }
 
@@ -153,13 +150,6 @@ export interface ThreatListCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   threatFilters: unknown[];
-}
-
-export interface GetSortWithTieBreakerOptions {
-  index: string[];
-  listItemIndex: string;
-  sortField: string | undefined;
-  sortOrder: SortOrderOrUndefined;
 }
 
 export interface ThreatListDoc {
@@ -194,7 +184,6 @@ export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
 export interface BuildThreatEnrichmentOptions {
   buildRuleMessage: BuildRuleMessage;
   exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
   logger: Logger;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
