@@ -242,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Define a new array that includes the prior set from above, plus additional API calls that
       // only have Authz validations setup
       const allApiCalls: ApiCallsInterface = [
+        ...apiCalls,
         {
           method: 'get',
           info: 'single item',
