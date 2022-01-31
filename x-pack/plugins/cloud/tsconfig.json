@@ -7,9 +7,11 @@
     "declarationMap": true,
   },
   "include": [
+    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../typings/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

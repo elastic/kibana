@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   getLatencyChartSelector,
   LatencyChartsResponse,
 } from './latency_chart_selectors';
-
-const theme = {
-  eui: {
-    euiColorVis1: 'blue',
-    euiColorVis5: 'red',
-    euiColorVis7: 'black',
-    euiColorVis9: 'yellow',
-    euiColorMediumShade: 'green',
-  },
-} as EuiTheme;
+import * as timeSeriesColor from '../components/shared/charts/helper/get_timeseries_color';
 
 const latencyChartData = {
   currentPeriod: {
@@ -34,9 +24,18 @@ const latencyChartData = {
 } as LatencyChartsResponse;
 
 describe('getLatencyChartSelector', () => {
+  beforeAll(() => {
+    jest.spyOn(timeSeriesColor, 'getTimeSeriesColor').mockImplementation(() => {
+      return {
+        currentPeriodColor: 'green',
+        previousPeriodColor: 'black',
+      };
+    });
+  });
+
   describe('without anomaly', () => {
     it('returns default values when data is undefined', () => {
-      const latencyChart = getLatencyChartSelector({ theme });
+      const latencyChart = getLatencyChartSelector({});
       expect(latencyChart).toEqual({
         currentPeriod: undefined,
         previousPeriod: undefined,
@@ -46,7 +45,6 @@ describe('getLatencyChartSelector', () => {
     it('returns average timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.avg,
       });
       expect(latencyTimeseries).toEqual({
@@ -55,11 +53,11 @@ describe('getLatencyChartSelector', () => {
           data: [{ x: 1, y: 10 }],
           legendValue: '1 μs',
           type: 'linemark',
-          color: 'blue',
+          color: 'green',
         },
 
         previousPeriod: {
-          color: 'green',
+          color: 'black',
           data: [{ x: 1, y: 10 }],
           type: 'area',
           title: 'Previous period',
@@ -70,7 +68,6 @@ describe('getLatencyChartSelector', () => {
     it('returns 95th percentile timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.p95,
       });
       expect(latencyTimeseries).toEqual({
@@ -79,12 +76,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '95th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: 'red',
+          color: 'green',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: 'green',
+          color: 'black',
           title: 'Previous period',
         },
       });
@@ -93,7 +90,6 @@ describe('getLatencyChartSelector', () => {
     it('returns 99th percentile timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.p99,
       });
 
@@ -103,12 +99,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '99th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: 'black',
+          color: 'green',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: 'green',
+          color: 'black',
           title: 'Previous period',
         },
       });
@@ -119,7 +115,6 @@ describe('getLatencyChartSelector', () => {
     it('returns latency time series and anomaly timeseries', () => {
       const latencyTimeseries = getLatencyChartSelector({
         latencyChart: latencyChartData,
-        theme,
         latencyAggregationType: LatencyAggregationType.p99,
       });
       expect(latencyTimeseries).toEqual({
@@ -128,12 +123,12 @@ describe('getLatencyChartSelector', () => {
           titleShort: '99th',
           data: [{ x: 1, y: 10 }],
           type: 'linemark',
-          color: 'black',
+          color: 'green',
         },
         previousPeriod: {
           data: [{ x: 1, y: 10 }],
           type: 'area',
-          color: 'green',
+          color: 'black',
           title: 'Previous period',
         },
       });

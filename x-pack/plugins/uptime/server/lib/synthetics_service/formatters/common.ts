@@ -24,6 +24,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.APM_SERVICE_NAME]: null,
   [ConfigKey.TAGS]: (fields) => arrayFormatter(fields[ConfigKey.TAGS]),
   [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
+  [ConfigKey.NAMESPACE]: null,
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);

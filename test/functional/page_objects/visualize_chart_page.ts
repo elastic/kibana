@@ -364,7 +364,7 @@ export class VisualizeChartPageObject extends FtrService {
   public async getTableVisContent({ stripEmptyRows = true } = {}) {
     return await this.retry.try(async () => {
       const container = await this.testSubjects.find('tbvChart');
-      const allTables = await this.testSubjects.findAllDescendant('dataGridWrapper', container);
+      const allTables = await this.testSubjects.findAllDescendant('euiDataGridBody', container);
 
       if (allTables.length === 0) {
         return [];

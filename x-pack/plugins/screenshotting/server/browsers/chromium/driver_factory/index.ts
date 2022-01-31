@@ -16,7 +16,16 @@ import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
-import { catchError, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs/operators';
+import {
+  catchError,
+  ignoreElements,
+  map,
+  concatMap,
+  mergeMap,
+  reduce,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../../config';
@@ -241,18 +250,55 @@ export class HeadlessChromiumDriverFactory {
     });
   }
 
+  /**
+   * In certain cases the browser will emit an error object to console. To ensure
+   * we extract the message from the error object we need to go the browser's context
+   * and look at the error there.
+   *
+   * If we don't do this we we will get a string that says "JSHandle@error" from
+   * line.text().
+   *
+   * See https://github.com/puppeteer/puppeteer/issues/3397.
+   */
+  private async getErrorMessage(message: ConsoleMessage): Promise<undefined | string> {
+    for (const arg of message.args()) {
+      const errorMessage = await arg
+        .executionContext()
+        .evaluate<undefined | string>((_arg: unknown) => {
+          /* !! We are now in the browser context !! */
+          if (_arg instanceof Error) {
+            return _arg.message;
+          }
+          return undefined;
+          /* !! End of browser context !! */
+        }, arg);
+      if (errorMessage) {
+        return errorMessage;
+      }
+    }
+  }
+
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
-      map((line) => {
-        const formatLine = () => `{ text: "${line.text()?.trim()}", url: ${line.location()?.url} }`;
-
+      concatMap(async (line) => {
         if (line.type() === 'error') {
-          logger.get('headless-browser-console').error(`Error in browser console: ${formatLine()}`);
-        } else {
           logger
-            .get(`headless-browser-console:${line.type()}`)
-            .debug(`Message in browser console: ${formatLine()}`);
+            .get('headless-browser-console')
+            .error(
+              `Error in browser console: { message: "${
+                (await this.getErrorMessage(line)) ?? line.text()
+              }", url: "${line.location()?.url}" }`
+            );
+          return;
         }
+
+        logger
+          .get(`headless-browser-console:${line.type()}`)
+          .debug(
+            `Message in browser console: { text: "${line.text()?.trim()}", url: ${
+              line.location()?.url
+            } }`
+          );
       })
     );
 
