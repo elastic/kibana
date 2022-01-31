@@ -167,7 +167,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as AlertParams['criteria']);
     },
     [ruleParams.criteria, setRuleParams]
