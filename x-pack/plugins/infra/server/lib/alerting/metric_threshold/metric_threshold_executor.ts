@@ -306,6 +306,7 @@ const formatAlertResult = <AlertResult>(
   const formatter = createFormatter('percent');
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
   const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
+
   return {
     ...alertResult,
     currentValue:

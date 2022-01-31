@@ -346,8 +346,8 @@ describe('The metric threshold alert type', () => {
       expect(reasons[1]).toContain('test.metric.2');
       expect(reasons[0]).toContain('is 1');
       expect(reasons[1]).toContain('is 3');
-      expect(reasons[0]).toContain('Alert when >= 1%');
-      expect(reasons[1]).toContain('Alert when >= 3%');
+      expect(reasons[0]).toContain('Alert when >= 1');
+      expect(reasons[1]).toContain('Alert when >= 3');
       expect(reasons[0]).toContain('in the last 1 min');
       expect(reasons[1]).toContain('in the last 1 min');
       expect(reasons[0]).toContain('for all hosts');
