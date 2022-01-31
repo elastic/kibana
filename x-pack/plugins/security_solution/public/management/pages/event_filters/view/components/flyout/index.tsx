@@ -257,7 +257,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.docsLink"
-                defaultMessage="Event Filters documentation."
+                defaultMessage="Event filters documentation."
               />
             </EuiLink>
           </EuiCallOut>

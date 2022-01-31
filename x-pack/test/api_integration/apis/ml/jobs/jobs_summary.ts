@@ -304,7 +304,10 @@ export default ({ getService }: FtrProviderContext) => {
             if (expectedJob.fullJob) {
               expect(actualJob).to.have.property('fullJob');
               expect(actualJob.fullJob).to.have.property('analysis_config');
-              expect(actualJob.fullJob.analysis_config).to.eql(expectedJob.fullJob.analysis_config);
+              // only validate the expected parts of the analysis_config, ignore additional fields
+              for (const [key, value] of Object.entries(expectedJob.fullJob.analysis_config)) {
+                expect(actualJob.fullJob.analysis_config).to.have.property(key).eql(value);
+              }
             } else {
               expect(actualJob).not.to.have.property('fullJob');
             }
