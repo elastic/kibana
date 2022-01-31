@@ -326,12 +326,12 @@ const basicAction = {
 
 export const cases: Case[] = [
   basicCase,
-  caseWithAlerts,
-  caseWithAlertsSyncOff,
   { ...pushedCase, id: '1', totalComment: 0, comments: [] },
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
+  caseWithAlerts,
+  caseWithAlertsSyncOff,
 ];
 
 export const allCases: AllCases = {
@@ -396,6 +396,20 @@ export const basicCaseSnake: CaseResponse = {
   owner: SECURITY_SOLUTION_OWNER,
 } as CaseResponse;
 
+export const caseWithAlertsSnake = {
+  ...basicCaseSnake,
+  totalAlerts: 2,
+  id: caseWithAlertsId,
+};
+export const caseWithAlertsSyncOffSnake = {
+  ...basicCaseSnake,
+  totalAlerts: 2,
+  settings: {
+    syncAlerts: false,
+  },
+  id: caseWithAlertsSyncOffId,
+};
+
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
   count_in_progress_cases: 40,
@@ -441,6 +455,8 @@ export const casesSnake: CasesResponse = [
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
+  caseWithAlertsSnake,
+  caseWithAlertsSyncOffSnake,
 ];
 
 export const allCasesSnake: CasesFindResponse = {
