@@ -207,10 +207,6 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateCanManageEndpointArtifacts();
   }
 
-  async validatePreDeleteItemById(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
-  }
-
   async validatePreGetListSummary(): Promise<void> {
     await this.validateCanManageEndpointArtifacts();
   }

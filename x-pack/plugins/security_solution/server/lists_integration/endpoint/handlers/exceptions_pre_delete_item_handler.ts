@@ -32,16 +32,7 @@ export const getExceptionsPreDeleteItemHandler = (
 
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId: exceptionItem.list_id })) {
-      const trustedAppValidatorInstance = new TrustedAppValidator(
-        endpointAppContextService,
-        request
-      );
-
-      if (data.itemId) {
-        await trustedAppValidatorInstance.validatePreDeleteItemById();
-      } else {
-        await trustedAppValidatorInstance.validatePreDeleteItem();
-      }
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreDeleteItem();
       return data;
     }
 
