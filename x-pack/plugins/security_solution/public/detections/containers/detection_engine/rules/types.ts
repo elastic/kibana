@@ -30,8 +30,10 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
+  BulkActionEditPayload,
   ruleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
+
 import {
   CreateRulesSchema,
   PatchRulesSchema,
@@ -230,7 +232,9 @@ export interface DuplicateRulesProps {
 
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
-  query: string;
+  query?: string;
+  ids?: string[];
+  edit?: BulkActionEditPayload[];
 }
 
 export interface BulkActionResult {
