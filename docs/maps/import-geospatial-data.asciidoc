@@ -69,7 +69,7 @@ To create a new index for drawing:
 . Click *Add layer*.
 . Select *Create index*.
 . Set *Index name*.
-. Click *Create index* button.
+. Click *Create index*.
 
 To open an existing index for drawing:
 
