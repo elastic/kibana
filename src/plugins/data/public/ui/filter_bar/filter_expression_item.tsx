@@ -13,6 +13,7 @@ import {
   EuiTextColor,
   EuiPopover,
   EuiContextMenu,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
@@ -50,6 +51,7 @@ interface Props {
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
   savedQueryService: SavedQueryService;
   onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  customLabel?: string;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -62,6 +64,7 @@ export const FilterExpressionItem: FC<Props> = ({
   onUpdate,
   savedQueryService,
   onFilterSave,
+  customLabel,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const filters: Filter[] = groupedFilters.map((filter: Filter) => ({
@@ -446,9 +449,16 @@ export const FilterExpressionItem: FC<Props> = ({
         onClick={handleBadgeClick}
       >
         <div ref={ref}>
-          {filterExpression.map((expression) => {
-            return <>{expression}</>;
-          })}
+          {customLabel ? (
+            <>
+              <EuiIcon type="save" />
+              {customLabel}
+            </>
+          ) : (
+            filterExpression.map((expression) => {
+              return <>{expression}</>;
+            })
+          )}
         </div>
       </EuiBadge>
     </EuiFlexItem>

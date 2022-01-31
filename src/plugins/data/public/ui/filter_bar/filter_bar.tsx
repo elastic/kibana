@@ -102,7 +102,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderMultipleFilters() {
-    const firstDepthGroupedFilters = groupBy(props.multipleFilters, 'groupId');
+    const groupedByAlias = groupBy(props.multipleFilters, 'meta.alias');
+    const filtersWithoutLabel = groupedByAlias.null || groupedByAlias.undefined;
+    const labels = Object.keys(groupedByAlias).filter(
+      (key) => key !== 'null' && key !== 'undefined'
+    );
+
+    const firstDepthGroupedFilters = groupBy(filtersWithoutLabel, 'groupId');
     const GroupBadge: JSX.Element[] = [];
     for (const [groupId, groupedFilters] of Object.entries(firstDepthGroupedFilters)) {
       const badge = (
@@ -120,6 +126,27 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       );
       GroupBadge.push(badge);
     }
+
+    let groupId: string;
+    labels.map((label) => {
+      // we should have same groupIds on our labeled filters group
+      groupId = (groupedByAlias[label][0] as any).groupId;
+      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = groupId));
+      const labelBadge = (
+        <FilterExpressionItem
+          groupId={groupId}
+          groupedFilters={groupedByAlias[label]}
+          indexPatterns={props?.indexPatterns}
+          onClick={() => {}}
+          onRemove={onRemoveFilterGroup}
+          onUpdate={onUpdateFilterGroup}
+          filtersGroupsCount={1}
+          customLabel={label}
+        />
+      );
+      GroupBadge.push(labelBadge);
+    });
+
     return GroupBadge;
   }
 
