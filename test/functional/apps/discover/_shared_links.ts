@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/goto/.+$');
+          const re = new RegExp(baseUrl + '/app/r/s/.+$');
           await PageObjects.share.checkShortenUrl();
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
