@@ -54,7 +54,6 @@ interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
-  const [editFilterGropId, setEditFilterGropId] = useState(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
@@ -67,8 +66,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     }
   }
 
-  const onEditFilterClick = (groupId: string) => {
-    setEditFilterGropId(groupId);
+  const onEditFilterClick = () => {
     props.toggleEditFilterModal?.(true);
   };
 
@@ -147,8 +145,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderEditFilter() {
-    const filteredFilter = props.multipleFilters?.filter(({ groupId }) => groupId === Number(editFilterGropId));
-
     return (
       <EuiFlexItem grow={false}>
         {props.isEditFilterModalOpen && (
@@ -156,7 +152,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={props.filters[0]}
-            multipleFilters={filteredFilter}
+            multipleFilters={props.multipleFilters}
             indexPatterns={props.indexPatterns!}
             onRemoveFilterGroup={onDeleteFilterGroup}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}

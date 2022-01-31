@@ -46,7 +46,7 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
-  onEditFilterClick: (groupId: string) => void;
+  onEditFilterClick: () => void;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -76,7 +76,7 @@ export const FilterExpressionItem: FC<Props> = ({
     // const finalFilters = [...multipleUpdatedFilters, ...groupedFilters];
     // onUpdate?.(finalFilters, groupId, false);
 
-    onEditFilterClick(groupId);
+    onEditFilterClick();
   }
 
   function onDuplicate() {
