@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [typedoc_interfaces](../modules/typedoc_interfaces.md) / ICasesResponse
+[Cases Client API Interface](../README.md) / [typedoc\_interfaces](../modules/typedoc_interfaces.md) / ICasesResponse
 
 # Interface: ICasesResponse
 
@@ -6,6 +6,6 @@
 
 ## Hierarchy
 
-- *CasesResponse*
+- [`CasesResponse`](../modules/typedoc_interfaces.__internalNamespace.md#casesresponse)
 
-  ↳ **ICasesResponse**
+  ↳ **`ICasesResponse`**

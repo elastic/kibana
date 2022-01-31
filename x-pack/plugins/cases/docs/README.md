@@ -7,12 +7,17 @@ or parameters are added.
 ## TypeDoc Info
 
 See more info at: <https://typedoc.org/>
-and: <https://www.npmjs.com/package/typedoc-plugin-markdown> for the markdown plugin
+markdown plugin: <https://www.npmjs.com/package/typedoc-plugin-markdown>
+missing exports plugin: <https://github.com/Gerrit0/typedoc-plugin-missing-exports>
 
 ## Install dependencies
 
+Ensure that your global typescript version is the same as kibana's
+
+You can run `npx tsc --version` to find the global compiler version and then check the version under `node_modules/typescript/lib`.
+
 ```bash
-yarn global add typedoc typedoc-plugin-markdown
+yarn global add typedoc typedoc-plugin-markdown typedoc-plugin-missing-exports
 ```
 
 ## Generate the docs

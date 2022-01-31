@@ -1,4 +1,4 @@
-[Cases Client API Interface](../cases_client_api.md) / [typedoc_interfaces](../modules/typedoc_interfaces.md) / ICasesPatchRequest
+[Cases Client API Interface](../README.md) / [typedoc\_interfaces](../modules/typedoc_interfaces.md) / ICasesPatchRequest
 
 # Interface: ICasesPatchRequest
 
@@ -6,20 +6,22 @@
 
 ## Hierarchy
 
-- *CasesPatchRequest*
+- [`CasesPatchRequest`](../modules/typedoc_interfaces.__internalNamespace.md#casespatchrequest)
 
-  ↳ **ICasesPatchRequest**
+  ↳ **`ICasesPatchRequest`**
 
 ## Table of contents
 
 ### Properties
 
-- [cases](typedoc_interfaces.icasespatchrequest.md#cases)
+- [cases](typedoc_interfaces.ICasesPatchRequest.md#cases)
 
 ## Properties
 
 ### cases
 
-• **cases**: { `connector`: *undefined* \| { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { issueType: string \| null; priority: string \| null; parent: string \| null; } ; `type`: jira  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` ; `type`: none  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { incidentTypes: string[] \| null; severityCode: string \| null; } ; `type`: resilient  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { impact: string \| null; severity: string \| null; urgency: string \| null; category: string \| null; subcategory: string \| null; } ; `type`: serviceNowITSM  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { category: string \| null; destIp: boolean \| null; malwareHash: boolean \| null; malwareUrl: boolean \| null; priority: string \| null; sourceIp: boolean \| null; subcategory: string \| null; } ; `type`: serviceNowSIR  } & { `id`: *string* ; `name`: *string*  } & { `fields`: ``null`` \| { caseId: string \| null; } ; `type`: swimlane  } ; `description`: *undefined* \| *string* ; `owner`: *undefined* \| *string* ; `settings`: *undefined* \| { `syncAlerts`: *boolean*  } ; `status`: *undefined* \| open \| *any*[*any*] \| closed ; `tags`: *undefined* \| *string*[] ; `title`: *undefined* \| *string* ; `type`: *undefined* \| collection \| individual  } & { `id`: *string* ; `version`: *string*  }[]
+• **cases**: { `connector`: `undefined` \| { `id`: `string` = rt.string } & { `fields`: ``null`` \| { issueType: string \| null; priority: string \| null; parent: string \| null; } ; `type`: [`jira`](../modules/client.__internalNamespace.md#jira)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` = rt.null; `type`: [`none`](../modules/client.__internalNamespace.md#none)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { incidentTypes: string[] \| null; severityCode: string \| null; } ; `type`: [`resilient`](../modules/client.__internalNamespace.md#resilient)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { impact: string \| null; severity: string \| null; urgency: string \| null; category: string \| null; subcategory: string \| null; } ; `type`: [`serviceNowITSM`](../modules/client.__internalNamespace.md#servicenowitsm)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { category: string \| null; destIp: boolean \| null; malwareHash: boolean \| null; malwareUrl: boolean \| null; priority: string \| null; sourceIp: boolean \| null; subcategory: string \| null; } ; `type`: [`serviceNowSIR`](../modules/client.__internalNamespace.md#servicenowsir)  } & { `name`: `string` = rt.string } & { `id`: `string` = rt.string } & { `fields`: ``null`` \| { caseId: string \| null; } ; `type`: [`swimlane`](../modules/client.__internalNamespace.md#swimlane)  } & { `name`: `string` = rt.string } = CaseConnectorRt; `description`: `undefined` \| `string` = rt.string; `owner`: `undefined` \| `string` = rt.string; `settings`: `undefined` \| { `syncAlerts`: `boolean` = rt.boolean } = SettingsRt; `status`: `undefined` \| [`open`](../enums/client.__internalNamespace.CaseStatuses.md#open) \| `any`[`any`] \| [`closed`](../enums/client.__internalNamespace.CaseStatuses.md#closed) = CaseStatusRt; `tags`: `undefined` \| `string`[] ; `title`: `undefined` \| `string` = rt.string } & { `id`: `string` = rt.string; `version`: `string` = rt.string }[]
 
-Inherited from: CasesPatchRequest.cases
+#### Inherited from
+
+CasesPatchRequest.cases
