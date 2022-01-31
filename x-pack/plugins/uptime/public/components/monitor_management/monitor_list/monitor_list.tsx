@@ -60,7 +60,7 @@ export const MonitorManagementList = ({
     [setPageIndex, setPageSize, setRefresh]
   );
 
-  const canEdit: boolean = !!useKibana().services?.application?.capabilities.uptime.save || false;
+  const canEdit: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
   const columns = [
     {

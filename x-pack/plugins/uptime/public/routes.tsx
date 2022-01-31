@@ -269,7 +269,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 };
 
 export const PageRouter: FC<PageRouterProps> = ({ config = {} }) => {
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save || false;
+  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
 
   const routes = getRoutes(config, canSave);
   const { addInspectorRequest } = useInspectorContext();
