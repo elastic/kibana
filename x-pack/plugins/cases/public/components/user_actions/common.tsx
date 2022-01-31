@@ -51,10 +51,8 @@ export const createCommonUpdateUserActionBuilder = ({
   label,
   icon,
   handleOutlineComment,
-}: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  build: () => [
+}: BuilderArgs): ReturnType<UserActionBuilder> => {
+  const CommonUpdateUserActionBuilder = () => [
     {
       username: (
         <UserActionUsernameWithAvatar
@@ -83,5 +81,9 @@ export const createCommonUpdateUserActionBuilder = ({
         </EuiFlexGroup>
       ),
     },
-  ],
-});
+  ];
+  CommonUpdateUserActionBuilder.displayName = 'CommonUpdateUserActionBuilder';
+  return {
+    build: CommonUpdateUserActionBuilder,
+  };
+};
