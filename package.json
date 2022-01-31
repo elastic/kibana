@@ -454,6 +454,7 @@
     "@elastic/synthetics": "^1.0.0-beta.16",
     "@emotion/babel-preset-css-prop": "^11.2.0",
     "@emotion/jest": "^11.3.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@istanbuljs/schema": "^0.1.2",
     "@jest/console": "^26.6.2",
     "@jest/reporters": "^26.6.2",
