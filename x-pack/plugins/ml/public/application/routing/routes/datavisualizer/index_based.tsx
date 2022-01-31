@@ -27,6 +27,9 @@ export const indexBasedRouteFactory = (
 ): MlRoute => ({
   id: 'data_view_datavisualizer',
   path: '/jobs/new_job/datavisualizer',
+  title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
+    defaultMessage: 'Date View Data Visualizer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
