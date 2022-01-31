@@ -58,15 +58,23 @@ const filterAriaLabel = i18n.translate(
   }
 );
 
-const schemaAriaLabel = i18n.translate('dataViewManagement.editIndexPattern.fields.schema', {
+const schemaAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.schema', {
   defaultMessage: 'Schema',
 });
-const schemaOptionRuntime = i18n.translate('dataViewManagement.editIndexPattern.fields.runtime', {
-  defaultMessage: 'Runtime Fields',
-});
-const schemaOptionIndexed = i18n.translate('dataViewManagement.editIndexPattern.fields.indexed', {
-  defaultMessage: 'Indexed Fields',
-});
+
+const schemaOptionRuntime = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.runtime',
+  {
+    defaultMessage: 'Runtime Fields',
+  }
+);
+
+const schemaOptionIndexed = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.indexed',
+  {
+    defaultMessage: 'Indexed Fields',
+  }
+);
 
 const filterPlaceholder = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.filterPlaceholder',
