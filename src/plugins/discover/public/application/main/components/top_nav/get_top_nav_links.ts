@@ -53,6 +53,7 @@ export const getTopNavLinks = ({
         I18nContext: services.core.i18n.Context,
         anchorElement,
         theme$: services.core.theme.theme$,
+        services,
       }),
     testId: 'discoverOptionsButton',
   };
@@ -97,6 +98,7 @@ export const getTopNavLinks = ({
         onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
+        services,
       }),
   };
 
