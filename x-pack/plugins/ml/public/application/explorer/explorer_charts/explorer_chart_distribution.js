@@ -36,6 +36,7 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { TRANSPARENT_BACKGROUND } from './constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 
@@ -299,7 +300,7 @@ export class ExplorerChartDistribution extends React.Component {
             x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
           });
         })
-        .style('fill', 'rgba(0, 128, 0, 0)');
+        .style('fill', TRANSPARENT_BACKGROUND);
 
       const cursorData =
         cursor &&
@@ -315,8 +316,6 @@ export class ExplorerChartDistribution extends React.Component {
         .selectAll('.ml-anomaly-chart-cursor-line')
         .data(cursorData);
 
-      cursorMouseLine.exit().remove();
-
       cursorMouseLine
         .enter()
         .append('path')
@@ -329,6 +328,8 @@ export class ExplorerChartDistribution extends React.Component {
         .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
         .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
         .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
+
+      cursorMouseLine.exit().remove();
     }
 
     function drawRareChartAxes() {
