@@ -8,6 +8,7 @@
 import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
@@ -15,6 +16,7 @@ import {
   ExceptionsListPreDeleteItemServerExtension,
   ExceptionsListPreExportServerExtension,
   ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreImportServerExtension,
   ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreSummaryServerExtension,
@@ -44,6 +46,8 @@ export interface ExtensionPointStorageContextMock {
   /** an exception list pre-delete extension */
   exceptionPreDelete: jest.Mocked<ExceptionsListPreDeleteItemServerExtension>;
   callbackContext: jest.Mocked<ServerExtensionCallbackContext>;
+  /** An Exception List pre-import extension point */
+  exceptionPreImport: jest.Mocked<ExceptionsListPreImportServerExtension>;
 }
 
 export const createExtensionPointStorageMock = (
@@ -102,6 +106,11 @@ export const createExtensionPointStorageMock = (
     type: 'exceptionsListPreDeleteItem',
   };
 
+  const exceptionPreImport: ExtensionPointStorageContextMock['exceptionPreImport'] = {
+    callback: jest.fn(async ({ data }) => data),
+    type: 'exceptionsListPreImport',
+  };
+
   extensionPointStorage.add(exceptionPreCreate);
   extensionPointStorage.add(exceptionPreUpdate);
   extensionPointStorage.add(exceptionPreGetOne);
@@ -110,15 +119,18 @@ export const createExtensionPointStorageMock = (
   extensionPointStorage.add(exceptionPreExport);
   extensionPointStorage.add(exceptionPreSummary);
   extensionPointStorage.add(exceptionPreDelete);
+  extensionPointStorage.add(exceptionPreImport);
 
   return {
     callbackContext: {
+      exceptionListClient: {} as unknown as ExceptionListClient,
       request: httpServerMock.createKibanaRequest(),
     },
     exceptionPreCreate,
     exceptionPreDelete,
     exceptionPreExport,
     exceptionPreGetOne,
+    exceptionPreImport,
     exceptionPreMultiListFind,
     exceptionPreSingleListFind,
     exceptionPreSummary,

@@ -11,7 +11,6 @@ import { getSuggestions } from '../suggestions/get_suggestions';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 
 const suggestionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/suggestions',
@@ -19,7 +18,7 @@ const suggestionsRoute = createApmServerRoute({
     query: t.type({ field: t.string, string: t.string }),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (resources): Promise<{ terms: string[] }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
     const { field, string } = params.query;
@@ -43,5 +42,4 @@ const suggestionsRoute = createApmServerRoute({
   },
 });
 
-export const suggestionsRouteRepository =
-  createApmServerRouteRepository().add(suggestionsRoute);
+export const suggestionsRouteRepository = suggestionsRoute;

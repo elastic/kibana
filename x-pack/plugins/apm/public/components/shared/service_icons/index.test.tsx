@@ -8,7 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
-// import { renderWithTheme } from '../../../../utils/testHelpers';
+// import { renderWithTheme } from '../../../../utils/test_helpers';
 import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
@@ -180,8 +180,7 @@ describe('ServiceIcons', () => {
 
   describe('details', () => {
     const callApmApi =
-      (apisMockData: Record<string, object>) =>
-      ({ endpoint }: { endpoint: string }) => {
+      (apisMockData: Record<string, object>) => (endpoint: string) => {
         return apisMockData[endpoint];
       };
     it('Shows loading spinner while fetching data', () => {
