@@ -13,7 +13,7 @@ import {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '../../actions/server';
-import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common/constants';
+import { APP_ID } from '../common/constants';
 
 import { initCaseApi } from './routes/api';
 import {
@@ -22,11 +22,9 @@ import {
   caseConnectorMappingsSavedObjectType,
   createCaseSavedObjectType,
   caseUserActionSavedObjectType,
-  subCaseSavedObjectType,
 } from './saved_object_types';
 
 import { CasesClient } from './client';
-import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
@@ -104,15 +102,6 @@ export class CasePlugin {
       logger: this.log,
       router,
     });
-
-    if (ENABLE_CASE_CONNECTOR) {
-      core.savedObjects.registerType(subCaseSavedObjectType);
-      registerConnectors({
-        registerActionType: plugins.actions.registerType,
-        logger: this.log,
-        factory: this.clientFactory,
-      });
-    }
   }
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {

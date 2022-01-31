@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup, UiSettingsParams } from '../../../../src/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -20,7 +20,6 @@ import {
   DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
@@ -34,15 +33,31 @@ import {
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
+  RULES_TABLE_ADVANCED_FILTERING_THRESHOLD,
+  DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD,
 } from '../common/constants';
 import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
+
+type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
+
+/**
+ * This helper is used to preserve settings order in the UI
+ *
+ * @param settings - UI settings config
+ * @returns Settings config with the order field added
+ */
+const orderSettings = (settings: SettingsConfig): SettingsConfig => {
+  return Object.fromEntries(
+    Object.entries(settings).map(([id, setting], index) => [id, { ...setting, order: index }])
+  );
+};
 
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  uiSettings.register({
+  const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {
@@ -163,16 +178,30 @@ export const initUiSettings = (
       type: 'json',
       value: `{
   "on": ${DEFAULT_RULE_REFRESH_INTERVAL_ON},
-  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE},
-  "idleTimeout": ${DEFAULT_RULE_REFRESH_IDLE_VALUE}
+  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE}
 }`,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
-        idleTimeout: schema.number({ min: 300000 }),
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
+    },
+    [RULES_TABLE_ADVANCED_FILTERING_THRESHOLD]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.advancedFilteringMaxRules', {
+        defaultMessage: 'Experimental sorting and filtering capabilities threshold',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.advancedFilteringMaxRulesDescription',
+        {
+          defaultMessage: `<p>Experimental sorting and filtering is enabled on the Rules and Rule Monitoring tables when the total number of rules in the current Kibana space doesn't exceed this threshold</p>`,
+        }
+      ),
+      type: 'number',
+      value: DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.number({ min: 0, max: 10000 }),
     },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
@@ -230,5 +259,7 @@ export const initUiSettings = (
           },
         }
       : {}),
-  });
+  };
+
+  uiSettings.register(orderSettings(securityUiSettings));
 };

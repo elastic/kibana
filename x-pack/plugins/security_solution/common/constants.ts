@@ -6,7 +6,6 @@
  */
 
 import type { TransformConfigSchema } from './transforms/types';
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 /**
  * as const
@@ -64,7 +63,7 @@ export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
-export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000 as const; // ms
+export const DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD = 3000; // rules
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -76,7 +75,7 @@ export const DEFAULT_INDICATOR_SOURCE_PATH = 'threat.indicator' as const;
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
-export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
+export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 
 export enum SecurityPageName {
   administration = 'administration',
@@ -177,6 +176,10 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
 
+/** This Kibana Advanced Setting sets the threshold number of rules for which in-memory implementation is enabled */
+export const RULES_TABLE_ADVANCED_FILTERING_THRESHOLD =
+  'securitySolution:advancedFilteringMaxRules' as const;
+
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl' as const;
 
@@ -264,8 +267,10 @@ export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/pre
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
-export const INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL =
-  `${INTERNAL_DETECTION_ENGINE_URL}/rules/_find_status` as const;
+export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
+export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
+  `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
 
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
@@ -334,10 +339,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.webhook',
 ];
 
-if (ENABLE_CASE_CONNECTOR) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
-
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
 
@@ -405,3 +406,13 @@ export const WARNING_TRANSFORM_STATES = new Set([
 export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
+
+/**
+ * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
+ * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
+ * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
+ * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
+ * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ */
+export const RULES_TABLE_MAX_PAGE_SIZE = 100;
+export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];

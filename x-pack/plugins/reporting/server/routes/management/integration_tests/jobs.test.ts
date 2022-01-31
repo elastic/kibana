@@ -48,6 +48,8 @@ describe('GET /api/reporting/jobs/download', () => {
     };
   };
 
+  const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
+
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
@@ -56,14 +58,9 @@ describe('GET /api/reporting/jobs/download', () => {
       () => ({ usesUiCapabilities: jest.fn() })
     );
 
-    const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
-
     mockSetupDeps = createMockPluginSetup({
       security: {
         license: { isEnabled: () => true },
-        authc: {
-          getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
-        },
       },
       router: httpSetup.createRouter(''),
     });
@@ -73,6 +70,11 @@ describe('GET /api/reporting/jobs/download', () => {
         licensing: {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+        },
+        security: {
+          authc: {
+            getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+          },
         },
       },
       mockConfigSchema
@@ -128,19 +130,17 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on unauthenticated users', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps = {
-      // @ts-ignore
-      ...core.pluginSetupDeps,
-      security: {
-        license: {
-          isEnabled: () => true,
+    mockStartDeps = await createMockPluginStart(
+      {
+        licensing: {
+          ...licensingMock.createStart(),
+          license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
         },
-        authc: {
-          getCurrentUser: () => undefined,
-        },
+        security: { authc: { getCurrentUser: () => undefined } },
       },
-    } as unknown as ReportingInternalSetup;
+      mockConfigSchema
+    );
+    core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -330,25 +330,27 @@ describe('GET /api/reporting/jobs/download', () => {
 
   describe('Deprecated: role-based access control', () => {
     it('fails on users without the appropriate role', async () => {
-      const deprecatedConfig = createMockConfigSchema({ roles: { enabled: true } });
-      core = await createMockReportingCore(deprecatedConfig, mockSetupDeps);
-      // @ts-ignore
-      core.pluginSetupDeps = {
-        // @ts-ignore
-        ...core.pluginSetupDeps,
-        security: {
-          license: {
-            isEnabled: () => true,
+      mockStartDeps = await createMockPluginStart(
+        {
+          licensing: {
+            ...licensingMock.createStart(),
+            license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          authc: {
-            getCurrentUser: () => ({
-              id: '123',
-              roles: ['peasant'],
-              username: 'Tom Riddle',
-            }),
+          security: {
+            authc: {
+              getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
+            },
           },
         },
-      } as unknown as ReportingInternalSetup;
+        mockConfigSchema
+      );
+
+      core = await createMockReportingCore(
+        createMockConfigSchema({ roles: { enabled: true } }),
+        mockSetupDeps,
+        mockStartDeps
+      );
+
       registerJobInfoRoutes(core);
 
       await server.start();
