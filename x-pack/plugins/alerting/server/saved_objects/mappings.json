@@ -120,6 +120,9 @@
       },
       "executionStatus": {
         "properties": {
+          "numberOfTriggeredActions": {
+            "type": "long"
+          },
           "status": {
             "type": "keyword"
           },
