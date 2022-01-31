@@ -75,7 +75,14 @@ export type ContextProviderReturn = Promise<ListsApiRequestHandlerContext>;
 
 export type {
   ExtensionPoint,
-  ExceptionListPreUpdateItemServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreImportServerExtension,
+  ExceptionsListPreSummaryServerExtension,
+  ExceptionsListPreExportServerExtension,
+  ExceptionsListPreMultiListFindServerExtension,
+  ExceptionsListPreSingleListFindServerExtension,
+  ExceptionsListPreDeleteItemServerExtension,
   ListsServerExtensionRegistrar,
 } from './services/extension_points';

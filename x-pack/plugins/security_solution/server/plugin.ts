@@ -67,7 +67,10 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
+import {
+  registerEventLogProvider,
+  ruleExecutionLoggerFactory,
+} from './lib/detection_engine/rule_execution_log';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
@@ -90,6 +93,7 @@ import type {
   PluginInitializerContext,
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
+import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -227,6 +231,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       ruleDataClient,
       eventLogService,
+      ruleExecutionLoggerFactory,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -394,18 +399,30 @@ export class Plugin implements ISecuritySolutionPlugin {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
 
+    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      plugins.fleet!;
+
     this.endpointAppContextService.start({
-      agentService: plugins.fleet?.agentService,
-      packageService: plugins.fleet?.packageService,
-      packagePolicyService: plugins.fleet?.packagePolicyService,
-      agentPolicyService: plugins.fleet?.agentPolicyService,
+      fleetAuthzService: authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.agentPolicyService!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.packagePolicyService!,
+        agentPolicyService,
+        packagePolicyService,
         logger
+      ),
+      endpointFleetServicesFactory: new EndpointFleetServicesFactory(
+        {
+          agentService,
+          packageService,
+          packagePolicyService,
+          agentPolicyService,
+        },
+        core.savedObjects
       ),
       security: plugins.security,
       alerting: plugins.alerting,

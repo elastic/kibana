@@ -6,7 +6,7 @@
  */
 
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
-import { InfraConfig } from '../plugin';
+import { InfraConfig } from '../types';
 import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
 import { RulesServiceSetup } from '../services/rules';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';

@@ -1,9 +1,10 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-io-ts-utils"
 PKG_REQUIRE_NAME = "@kbn/io-ts-utils"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__io-ts-utils"
 
 SOURCE_FILES = glob(
   [
@@ -23,17 +24,6 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "deep_exact_rt/package.json",
-  "iso_to_epoch_rt/package.json",
-  "json_rt/package.json",
-  "merge_rt/package.json",
-  "non_empty_string_rt/package.json",
-  "parseable_types/package.json",
-  "props_to_schema/package.json",
-  "strict_keys_rt/package.json",
-  "to_boolean_rt/package.json",
-  "to_json_schema/package.json",
-  "to_number_rt/package.json",
 ]
 
 RUNTIME_DEPS = [
@@ -86,7 +76,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -102,6 +92,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = TYPES_PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

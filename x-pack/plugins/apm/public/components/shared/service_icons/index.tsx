@@ -69,13 +69,15 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/metadata/icons',
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/metadata/icons',
+          {
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          }
+        );
       }
     },
     [serviceName, start, end]
@@ -84,14 +86,16 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (selectedIconPopover && serviceName && start && end) {
-        return callApmApi({
-          isCachable: true,
-          endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/metadata/details',
+          {
+            isCachable: true,
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          }
+        );
       }
     },
     [selectedIconPopover, serviceName, start, end]

@@ -21,7 +21,7 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 
@@ -42,13 +42,13 @@ export const newCalendarRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/new_calendar', navigateToPath),
     },
   ],
 });
@@ -67,7 +67,6 @@ export const editCalendarRouteFactory = (
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/edit_calendar', navigateToPath),
     },
   ],
 });

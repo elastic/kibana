@@ -29,7 +29,7 @@ import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../.
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
-import { applyPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../../shared_components';
+import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
@@ -223,7 +223,7 @@ export const getGaugeVisualization = ({
       const currentMinMax = { min: getMinValue(row, state), max: getMaxValue(row, state) };
 
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
-      palette = getStopsForFixedMode(displayStops, state?.palette?.params?.colorStops);
+      palette = displayStops.map(({ color }) => color);
     }
     const invalidProps = checkInvalidConfiguration(row, state) || {};
 

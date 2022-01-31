@@ -19,9 +19,7 @@ import {
   goToOpenedAlerts,
   openFirstAlert,
   selectNumberOfAlerts,
-  waitForAlertsPanelToBeLoaded,
   waitForAlerts,
-  waitForAlertsIndexToBeCreated,
 } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -35,8 +33,6 @@ describe('Opening alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
