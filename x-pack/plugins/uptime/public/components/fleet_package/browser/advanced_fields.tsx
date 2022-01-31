@@ -27,9 +27,10 @@ import { ThrottlingFields } from './throttling_fields';
 
 interface Props {
   validate: Validation;
+  children?: React.ReactNode;
 }
 
-export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
+export const BrowserAdvancedFields = memo<Props>(({ validate, children }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
   const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
@@ -213,6 +214,7 @@ export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
       </EuiDescribedFormGroup>
 
       <ThrottlingFields validate={validate} />
+      {children}
     </EuiAccordion>
   );
 });
