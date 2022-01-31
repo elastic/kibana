@@ -7,6 +7,7 @@
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreSingleListFindServerExtension } from '../../../../../lists/server';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreSingleListFindHandler = (
@@ -18,6 +19,15 @@ export const getExceptionsPreSingleListFindHandler = (
     }
 
     const { listId } = data;
+
+    // Validate Host Isolation Exceptions
+    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContext,
+        request
+      ).validatePreSingleListFind();
+      return data;
+    }
 
     // Event Filters Exceptions
     if (EventFilterValidator.isEventFilter({ listId })) {

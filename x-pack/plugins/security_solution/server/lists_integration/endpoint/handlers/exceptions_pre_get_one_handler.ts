@@ -8,6 +8,7 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreGetOneHandler = (
@@ -31,10 +32,18 @@ export const getExceptionsPreGetOneHandler = (
 
     const listId = exceptionItem.list_id;
 
+    // validate Host Isolation Exception
+    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreGetOneItem();
+      return data;
+    }
+
     // Event Filters Exception
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem();
-
       return data;
     }
 

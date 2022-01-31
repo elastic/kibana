@@ -7,6 +7,7 @@
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../lists/server';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreMultiListFindHandler = (
@@ -14,6 +15,15 @@ export const getExceptionsPreMultiListFindHandler = (
 ): ExceptionsListPreMultiListFindServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
     if (!data.namespaceType.includes('agnostic')) {
+      return data;
+    }
+
+    // Validate Host Isolation Exceptions
+    if (data.listId.some(HostIsolationExceptionsValidator.isHostIsolationException)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContext,
+        request
+      ).validatePreMultiListFind();
       return data;
     }
 

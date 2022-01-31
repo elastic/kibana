@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCard, EuiToolTip, EuiTitle } from '@elastic/eui';
+import { EuiToolTip, EuiTitle } from '@elastic/eui';
 
 import { AvailableSourcesList } from './available_sources_list';
 
@@ -25,8 +25,8 @@ describe('AvailableSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<AvailableSourcesList sources={mergedAvailableSources} />);
 
-    expect(wrapper.find(EuiCard)).toHaveLength(11);
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="AvailableSourceListItem"]')).toHaveLength(11);
     expect(wrapper.find('[data-test-subj="CustomAPISourceLink"]')).toHaveLength(1);
   });
 

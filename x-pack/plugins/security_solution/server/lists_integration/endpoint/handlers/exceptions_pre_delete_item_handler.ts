@@ -7,6 +7,7 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 import { ExceptionsListPreDeleteItemServerExtension } from '../../../../../lists/server';
 import { EventFilterValidator } from '../validators';
 
@@ -30,6 +31,15 @@ export const getExceptionsPreDeleteItemHandler = (
     }
 
     const { list_id: listId } = exceptionItem;
+
+    // Host Isolation Exception
+    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContext,
+        request
+      ).validatePreDeleteItem();
+      return data;
+    }
 
     // Event Filter validation
     if (EventFilterValidator.isEventFilter({ listId })) {

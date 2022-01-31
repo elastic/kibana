@@ -7,6 +7,7 @@
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreExportServerExtension } from '../../../../../lists/server';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 import { EventFilterValidator } from '../validators';
 
 export const getExceptionsPreExportHandler = (
@@ -22,6 +23,14 @@ export const getExceptionsPreExportHandler = (
 
     if (!listId) {
       return data;
+    }
+
+    // Host Isolation Exceptions validations
+    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreExport();
     }
 
     // Event Filter validations
