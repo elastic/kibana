@@ -20,6 +20,7 @@ interface IndexedFieldsTableProps {
   indexPattern: DataView;
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
+  schemaFieldTypeFilter?: string;
   helpers: {
     editField: (fieldName: string) => void;
     deleteField: (fieldName: string) => void;
@@ -93,7 +94,8 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
     (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
     (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
       props.indexedFieldTypeFilter,
-    (fields, fieldFilter, indexedFieldTypeFilter) => {
+    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.schemaFieldTypeFilter,
+    (fields, fieldFilter, indexedFieldTypeFilter, schemaFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
         fields = fields.filter(
@@ -109,8 +111,22 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
           if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
             return true;
           }
+          if ('runtimeField' in field && field?.runtimeField?.type === indexedFieldTypeFilter) {
+            return true;
+          }
           // match one of multiple types on a field
           return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
+        });
+      }
+
+      if (schemaFieldTypeFilter) {
+        // match fields of schema type
+        fields = fields.filter((field) => {
+          if (schemaFieldTypeFilter === 'runtime') {
+            return 'runtimeField' in field;
+          } else {
+            return !('runtimeField' in field);
+          }
         });
       }
 

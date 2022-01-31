@@ -58,6 +58,16 @@ const filterAriaLabel = i18n.translate(
   }
 );
 
+const schemaAriaLabel = i18n.translate('dataViewManagement.editIndexPattern.fields.schema', {
+  defaultMessage: 'Schema',
+});
+const schemaOptionRuntime = i18n.translate('dataViewManagement.editIndexPattern.fields.runtime', {
+  defaultMessage: 'Runtime Fields',
+});
+const schemaOptionIndexed = i18n.translate('dataViewManagement.editIndexPattern.fields.indexed', {
+  defaultMessage: 'Indexed Fields',
+});
+
 const filterPlaceholder = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.filterPlaceholder',
   {
@@ -84,6 +94,7 @@ export function Tabs({
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
+  const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
   const [indexedFieldTypes, setIndexedFieldType] = useState<EuiSelectOption[]>([]);
   const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<EuiSelectOption[]>([]);
@@ -157,6 +168,21 @@ export function Tabs({
   const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
   const getFilterSection = useCallback(
     (type: string) => {
+      const schemaOptions = [
+        {
+          value: '',
+          text: schemaAriaLabel,
+        },
+        {
+          value: 'runtime',
+          text: schemaOptionRuntime,
+        },
+        {
+          value: 'indexed',
+          text: schemaOptionIndexed,
+        },
+      ];
+
       return (
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
@@ -172,13 +198,26 @@ export function Tabs({
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
             <>
               <EuiFlexItem grow={false}>
-                <EuiSelect
-                  options={indexedFieldTypes}
-                  value={indexedFieldTypeFilter}
-                  onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
-                  data-test-subj="indexedFieldTypeFilterDropdown"
-                  aria-label={filterAriaLabel}
-                />
+                <EuiFlexGroup wrap={false} gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <EuiSelect
+                      options={indexedFieldTypes}
+                      value={indexedFieldTypeFilter}
+                      onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
+                      data-test-subj="indexedFieldTypeFilterDropdown"
+                      aria-label={filterAriaLabel}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSelect
+                      options={schemaOptions}
+                      value={schemaFieldTypeFilter}
+                      onChange={(e) => setSchemaFieldTypeFilter(e.target.value)}
+                      data-test-subj="schemaFieldTypeFilterDropdown"
+                      aria-label={schemaAriaLabel}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               {userEditPermission && (
                 <EuiFlexItem grow={false}>
@@ -206,6 +245,7 @@ export function Tabs({
       fieldFilter,
       indexedFieldTypeFilter,
       indexedFieldTypes,
+      schemaFieldTypeFilter,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
       openFieldEditor,
@@ -230,6 +270,7 @@ export function Tabs({
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
                     indexedFieldTypeFilter={indexedFieldTypeFilter}
+                    schemaFieldTypeFilter={schemaFieldTypeFilter}
                     helpers={{
                       editField: openFieldEditor,
                       deleteField,
@@ -289,6 +330,7 @@ export function Tabs({
       history,
       indexPattern,
       indexedFieldTypeFilter,
+      schemaFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
