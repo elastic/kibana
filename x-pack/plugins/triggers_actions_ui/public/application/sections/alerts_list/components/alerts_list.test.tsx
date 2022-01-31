@@ -11,7 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { AlertsList } from './alerts_list';
+import { AlertsList, percentileFields } from './alerts_list';
 import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
@@ -521,6 +521,36 @@ describe('alerts_list component with items', () => {
       }
     });
 
+    // Click column to sort by P50
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P50],
+          direction: 'asc',
+        },
+      })
+    );
+
+    // Click column again to reverse sort by P50
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P50],
+          direction: 'desc',
+        },
+      })
+    );
+
     // Hover over percentile selection button
     wrapper
       .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
@@ -563,6 +593,36 @@ describe('alerts_list component with items', () => {
         expect(percentiles.at(index).text()).toEqual('N/A');
       }
     });
+
+    // Click column to sort by P95
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P95],
+          direction: 'asc',
+        },
+      })
+    );
+
+    // Click column again to reverse sort by P95
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P95],
+          direction: 'desc',
+        },
+      })
+    );
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();

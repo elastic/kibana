@@ -114,7 +114,7 @@ const percentileOrdinals = {
   [Percentiles.P99]: '99th',
 };
 
-const percentileFields = {
+export const percentileFields = {
   [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
   [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
   [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
@@ -396,14 +396,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const renderPercentileColumnName = () => {
     return (
       <span data-test-subj={`alertsTable-${selectedPercentile}ColumnName`}>
-        {selectedPercentile}&nbsp;
-        <EuiIconTip
-          type="questionInCircle"
-          iconProps={{
-            size: 's',
-            color: 'subdued',
-            className: 'eui-alignTop',
-          }}
+        <EuiToolTip
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.ruleExecutionPercentileTooltip',
             {
@@ -414,7 +407,12 @@ export const AlertsList: React.FunctionComponent = () => {
               },
             }
           )}
-        />
+        >
+          <span>
+            {selectedPercentile}&nbsp;
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
         <PercentileSelectablePopover
           options={percentileOptions}
           onOptionsChange={onPercentileOptionsChange}
