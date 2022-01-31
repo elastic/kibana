@@ -11,13 +11,10 @@ import {
 } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmParams } from './use_apm_params';
-import { useTheme } from './use_theme';
 import { useTimeRange } from './use_time_range';
 
 export function useComparison() {
-  const theme = useTheme();
-
-  const comparisonChartTheme = getComparisonChartTheme(theme);
+  const comparisonChartTheme = getComparisonChartTheme();
   const { query } = useApmParams('/*');
 
   if (!('rangeFrom' in query && 'rangeTo' in query)) {
