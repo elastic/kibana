@@ -64,12 +64,12 @@ export default function ({ getService }: FtrProviderContext) {
       const exceptionsGenerator = new ExceptionsListItemGenerator();
       let trustedAppData: ArtifactTestData;
 
-      type TrustedAppApiCallsInterface = Array<{
+      type TrustedAppApiCallsInterface<BodyReturnType = unknown> = Array<{
         method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         path: string;
         // The body just needs to have the properties we care about in the tests. This should cover most
         // mocks used for testing that support different interfaces
-        getBody: () => Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>;
+        getBody: () => BodyReturnType;
       }>;
 
       beforeEach(async () => {
@@ -84,7 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      const trustedAppApiCalls: TrustedAppApiCallsInterface = [
+      const trustedAppApiCalls: TrustedAppApiCallsInterface<
+        Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>
+      > = [
         {
           method: 'post',
           path: EXCEPTION_LIST_ITEM_URL,
