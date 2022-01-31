@@ -63,7 +63,7 @@ describe('Policy details host isolation exceptions tab', () => {
     render(emptyList);
     expect(
       renderResult.getByTestId('policyDetailsHostIsolationExceptionsSearchCount')
-    ).toHaveTextContent('Showing 0 exceptions');
+    ).toHaveTextContent('Showing 0 host isolation exceptions');
     expect(renderResult.getByTestId('searchField')).toBeTruthy();
   });
 

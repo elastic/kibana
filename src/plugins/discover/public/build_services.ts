@@ -7,6 +7,7 @@
  */
 
 import { History } from 'history';
+import { memoize } from 'lodash';
 
 import {
   Capabilities,
@@ -72,7 +73,7 @@ export interface DiscoverServices {
   spaces?: SpacesApi;
 }
 
-export function buildServices(
+export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
@@ -109,4 +110,4 @@ export function buildServices(
     http: core.http,
     spaces: plugins.spaces,
   };
-}
+});
