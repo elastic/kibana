@@ -31,6 +31,7 @@ NODE_OPTIONS=--max_old_space_size=14336 \
 
 if [[ -d "$KIBANA_DIR/target/kibana-coverage/server" ]]; then
   echo "Server side code coverage collected"
+fi
 
 if [[ -d "$KIBANA_DIR/target/kibana-coverage/functional" ]]; then
   echo "--- Merging code coverage for CI Group $CI_GROUP"
