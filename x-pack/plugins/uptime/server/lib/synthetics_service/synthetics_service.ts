@@ -179,7 +179,7 @@ export class SyntheticsService {
       output: await this.getOutput(request),
     };
 
-    this.logger.info(`${monitors.length} monitors will be pushed to synthetics service.`);
+    this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
     try {
       return await this.apiClient.post(data);
