@@ -10,10 +10,10 @@ import { ExceptionsListPreSummaryServerExtension } from '../../../../../lists/se
 import { TrustedAppValidator } from '../validators';
 import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
-type ValidatedReturnType = ExceptionsListPreSummaryServerExtension['callback'];
+type ValidatorCallback = ExceptionsListPreSummaryServerExtension['callback'];
 export const getExceptionsPreSummaryHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatedReturnType => {
+): ValidatorCallback => {
   return async function ({ data, context: { request, exceptionListClient } }) {
     const { listId: maybeListId, id } = data;
     let listId: string | null | undefined = maybeListId;

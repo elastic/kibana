@@ -12,10 +12,10 @@ import {
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { EventFilterValidator, TrustedAppValidator } from '../validators';
 
-type ValidatedReturnType = ExceptionsListPreUpdateItemServerExtension['callback'];
+type ValidatorCallback = ExceptionsListPreUpdateItemServerExtension['callback'];
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatedReturnType => {
+): ValidatorCallback => {
   return async function ({
     data,
     context: { request, exceptionListClient },

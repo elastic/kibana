@@ -10,10 +10,10 @@ import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../li
 import { TrustedAppValidator } from '../validators/trusted_app_validator';
 import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
-type ValidatedReturnType = ExceptionsListPreMultiListFindServerExtension['callback'];
+type ValidatorCallback = ExceptionsListPreMultiListFindServerExtension['callback'];
 export const getExceptionsPreMultiListFindHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatedReturnType => {
+): ValidatorCallback => {
   return async function ({ data, context: { request } }) {
     if (!data.namespaceType.includes('agnostic')) {
       return data;

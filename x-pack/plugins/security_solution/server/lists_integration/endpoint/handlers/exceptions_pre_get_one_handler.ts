@@ -11,10 +11,10 @@ import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists
 import { TrustedAppValidator } from '../validators/trusted_app_validator';
 import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
-type ValidatedReturnType = ExceptionsListPreGetOneItemServerExtension['callback'];
+type ValidatorCallback = ExceptionsListPreGetOneItemServerExtension['callback'];
 export const getExceptionsPreGetOneHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatedReturnType => {
+): ValidatorCallback => {
   return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
