@@ -22,7 +22,7 @@ interface Props {
   spacesApi: SpacesPluginStart;
   spaceIds: string[];
   jobId: string;
-  jobType: JobType;
+  jobType: JobType | 'model';
   refresh(): void;
 }
 
@@ -45,13 +45,18 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
     const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
 
     if (spacesToAdd.length || spacesToRemove.length) {
-      const resp = await ml.savedObjects.updateJobsSpaces(
-        jobType,
-        [jobId],
-        spacesToAdd,
-        spacesToRemove
-      );
-      handleApplySpaces(resp);
+      if (jobType === 'model') {
+        const resp = await ml.savedObjects.updateModelsSpaces([jobId], spacesToAdd, spacesToRemove);
+        handleApplySpaces(resp);
+      } else {
+        const resp = await ml.savedObjects.updateJobsSpaces(
+          jobType,
+          [jobId],
+          spacesToAdd,
+          spacesToRemove
+        );
+        handleApplySpaces(resp);
+      }
     }
     onClose();
   }

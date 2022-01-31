@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-import type { JobSavedObjectService } from './service';
+import type { JobSavedObjectService, ModelJob } from './service';
 import type { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
 import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
@@ -29,6 +29,7 @@ export interface JobSavedObjectStatus {
 export interface ModelSavedObjectStatus {
   modelId: string;
   namespaces: string[] | undefined;
+  job: null | ModelJob;
   checks: {
     modelExists: boolean;
     dfaJobExists: boolean | null;
@@ -131,15 +132,14 @@ export function checksFactory(
     }, new Map<string, boolean | null>());
 
     const modelSavedObjectsStatus: ModelSavedObjectStatus[] = modelObjects.map(
-      ({ attributes, namespaces }) => {
-        const modelId = attributes.model_id;
-
+      ({ attributes: { job, model_id: modelId }, namespaces }) => {
         const modelExists = models.trained_model_configs.some((m) => m.model_id === modelId);
         const dfaJobExists = modelJobExits.get(modelId) ?? null;
 
         return {
           modelId,
           namespaces,
+          job,
           checks: {
             modelExists,
             dfaJobExists,

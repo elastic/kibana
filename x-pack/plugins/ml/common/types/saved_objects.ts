@@ -37,6 +37,10 @@ export type JobsSpacesResponse = {
   [jobType in JobType]: { [jobId: string]: string[] };
 };
 
+export interface ModelsSpacesResponse {
+  models: { [jobId: string]: string[] };
+}
+
 export interface InitializeSavedObjectResponse {
   jobs: Array<{ id: string; type: JobType }>;
   datafeeds: Array<{ id: string; type: JobType }>;

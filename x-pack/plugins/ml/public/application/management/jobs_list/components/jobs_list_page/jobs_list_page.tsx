@@ -38,6 +38,7 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
+import { ModelsList } from '../../../../trained_models/models_management/models_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import type { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
@@ -49,6 +50,7 @@ import { ListingPageUrlState } from '../../../../../../common/types/common';
 import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { JobType } from '../../../../../../common/types/saved_objects';
+import type { FieldFormatsStart } from '../../../../../../../../../src/plugins/field_formats/public';
 
 interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
@@ -118,6 +120,19 @@ function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | und
           </Fragment>
         ),
       },
+      {
+        'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
+        id: 'trained-models',
+        name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
+          defaultMessage: 'Trained models',
+        }),
+        content: (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <ModelsList isManagementTable={true} />
+          </Fragment>
+        ),
+      },
     ],
     [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateDfaPageState]
   );
@@ -130,7 +145,8 @@ export const JobsListPage: FC<{
   spacesApi?: SpacesPluginStart;
   data: DataPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
-}> = ({ coreStart, share, history, spacesApi, data, usageCollection }) => {
+  fieldFormats: FieldFormatsStart;
+}> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
   const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -138,7 +154,7 @@ export const JobsListPage: FC<{
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace, spacesApi);
-  const [currentTabId, setCurrentTabId] = useState<JobType>('anomaly-detector');
+  const [currentTabId, setCurrentTabId] = useState<JobType | 'trained-models'>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
@@ -228,6 +244,8 @@ export const JobsListPage: FC<{
               share,
               data,
               usageCollection,
+              fieldFormats,
+              spacesApi,
               mlServices: getMlGlobalServices(coreStart.http, usageCollection),
             }}
           >
@@ -274,7 +292,12 @@ export const JobsListPage: FC<{
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <ExportJobsFlyout isDisabled={false} currentTab={currentTabId} />
+                      <ExportJobsFlyout
+                        isDisabled={false}
+                        currentTab={
+                          currentTabId === 'trained-models' ? 'anomaly-detector' : currentTabId
+                        }
+                      />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <ImportJobsFlyout isDisabled={false} />

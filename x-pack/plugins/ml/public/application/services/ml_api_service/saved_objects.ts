@@ -7,6 +7,9 @@
 
 // Service for managing job saved objects
 
+import { useMemo } from 'react';
+import { useMlKibana } from '../../contexts/kibana';
+
 import { HttpService } from '../http_service';
 
 import { basePath } from './index';
@@ -17,6 +20,7 @@ import {
   InitializeSavedObjectResponse,
   SavedObjectResult,
   JobsSpacesResponse,
+  ModelsSpacesResponse,
   SyncCheckResponse,
 } from '../../../../common/types/saved_objects';
 
@@ -79,7 +83,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
     });
   },
   modelsSpaces() {
-    return httpService.http<JobsSpacesResponse>({
+    return httpService.http<ModelsSpacesResponse>({
       path: `${basePath()}/saved_objects/models_spaces`,
       method: 'GET',
     });
@@ -93,3 +97,17 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
     });
   },
 });
+
+type SavedObjectsApiService = ReturnType<typeof savedObjectsApiProvider>;
+
+/**
+ * Hooks for accessing {@link TrainedModelsApiService} in React components.
+ */
+export function useSavedObjectsApiService(): SavedObjectsApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => savedObjectsApiProvider(httpService), [httpService]);
+}
