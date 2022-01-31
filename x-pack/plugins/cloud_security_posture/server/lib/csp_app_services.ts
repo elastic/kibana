@@ -20,10 +20,10 @@ export interface CspAppServiceDependencies {
 }
 
 export class CspAppService {
-  private agentService: AgentService | undefined;
-  private packageService: PackageService | undefined;
-  private packagePolicyService: PackagePolicyServiceInterface | undefined;
-  private agentPolicyService: AgentPolicyServiceInterface | undefined;
+  public agentService: AgentService | undefined;
+  public packageService: PackageService | undefined;
+  public packagePolicyService: PackagePolicyServiceInterface | undefined;
+  public agentPolicyService: AgentPolicyServiceInterface | undefined;
 
   public start(dependencies: CspAppServiceDependencies) {
     this.agentService = dependencies.agentService;
@@ -33,20 +33,4 @@ export class CspAppService {
   }
 
   public stop() {}
-
-  public getAgentService(): AgentService | undefined {
-    return this.agentService;
-  }
-
-  public getPackageService(): PackageService | undefined {
-    return this.packageService;
-  }
-
-  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
-    return this.packagePolicyService;
-  }
-
-  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
-    return this.agentPolicyService;
-  }
 }
