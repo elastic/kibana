@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { ConfigKey, Validation, CommonFields as CommonFieldsType } from '../types';
 import { CommonFields } from '../common/common_fields';
 import { Enabled } from '../common/enabled';
@@ -18,12 +18,11 @@ interface Props {
 }
 
 export const SimpleFieldsWrapper = ({ validate, onInputChange, children, fields }: Props) => {
-  const handleInputChange = useCallback(onInputChange, [onInputChange]);
   return (
     <>
       <Enabled fields={fields} onChange={onInputChange} />
       {children}
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
+      <CommonFields fields={fields} onChange={onInputChange} validate={validate} />
     </>
   );
 };
