@@ -64,7 +64,7 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(
               uiSettingsClient,
               searchSessionsClient.getConfig(),
-              request.params,
+              request.params?.body,
               options
             )),
             ...request.params,

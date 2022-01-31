@@ -15,6 +15,7 @@ import {
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
 
 /**
  * @internal
@@ -32,8 +33,8 @@ export async function getIgnoreThrottled(
 export async function getDefaultAsyncSubmitParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>,
   searchSessionsConfig: SearchSessionsConfigSchema | null,
-  params: any,
-  options: ISearchOptions
+  body: SearchRequest['body'] = {},
+  options: ISearchOptions = {}
 ): Promise<
   Pick<
     AsyncSearchSubmit,
@@ -67,7 +68,7 @@ export async function getDefaultAsyncSubmitParams(
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
     keep_alive: keepAlive,
     ...(await getIgnoreThrottled(uiSettingsClient)),
-    ...(await getDefaultSearchParams(uiSettingsClient, params)),
+    ...(await getDefaultSearchParams(uiSettingsClient, body)),
   };
 }
 
