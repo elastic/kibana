@@ -123,7 +123,7 @@ export const HeatmapToolbar = memo(
             >
               <ToolbarPopover
                 title={i18n.translate('xpack.lens.heatmap.verticalAxisLabel', {
-                  defaultMessage: 'Horizontal axis',
+                  defaultMessage: 'Vertical axis',
                 })}
                 type={EuiIconAxisLeft as IconType}
                 groupPosition="left"
