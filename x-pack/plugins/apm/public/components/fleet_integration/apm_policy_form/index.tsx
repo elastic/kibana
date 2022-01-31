@@ -14,6 +14,7 @@ import {
   isRUMFormValid,
 } from './settings_definition/rum_settings';
 import {
+  TAIL_SAMPLING_ENABLED_KEY,
   getTailSamplingSettings,
   isTailBasedSamplingValid,
 } from './settings_definition/tail_sampling_settings';
@@ -71,22 +72,6 @@ export function APMPolicyForm({
 
   const settingsSections: SettingsSection[] = [
     {
-      id: 'tailSampling',
-      title: i18n.translate(
-        'xpack.apm.fleet_integration.settings.tailSampling.settings.title',
-        { defaultMessage: 'Tail-based sampling' }
-      ),
-      subtitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.tailSampling.settings.subtitle',
-        {
-          defaultMessage: 'Manage tail-based sampling for services and traces.',
-        }
-      ),
-      settings: tailSamplingSettings,
-      isBeta: true,
-      isPlatinumLicence: true,
-    },
-    {
       id: 'apm',
       title: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.settings.title',
@@ -130,6 +115,27 @@ export function APMPolicyForm({
       ),
       settings: agentAuthorizationSettings,
     },
+    ...(vars[TAIL_SAMPLING_ENABLED_KEY]
+      ? [
+          {
+            id: 'tailSampling',
+            title: i18n.translate(
+              'xpack.apm.fleet_integration.settings.tailSampling.settings.title',
+              { defaultMessage: 'Tail-based sampling' }
+            ),
+            subtitle: i18n.translate(
+              'xpack.apm.fleet_integration.settings.tailSampling.settings.subtitle',
+              {
+                defaultMessage:
+                  'Manage tail-based sampling for services and traces.',
+              }
+            ),
+            settings: tailSamplingSettings,
+            isBeta: true,
+            isPlatinumLicence: true,
+          },
+        ]
+      : []),
   ];
 
   return (

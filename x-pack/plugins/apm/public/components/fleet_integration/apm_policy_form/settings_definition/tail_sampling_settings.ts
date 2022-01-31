@@ -9,12 +9,12 @@ import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 import { PackagePolicyVars, SettingsRow } from '../typings';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 
-const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
+export const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
 export function getTailSamplingSettings(): SettingsRow[] {
   return [
     {
-      key: TAIL_SAMPLING_ENABLED_KEY, // change to tail sampling key!!!
+      key: TAIL_SAMPLING_ENABLED_KEY,
       rowTitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingEnabledTitle',
         { defaultMessage: 'Enable tail-based sampling' }
