@@ -57,7 +57,6 @@ export function FormRowSetting({ row, value, onChange }: Props) {
       return (
         <EuiFieldText
           readOnly={row.readOnly}
-          placeholder={row.placeholder}
           value={value}
           prepend={row.readOnly ? <EuiIcon type="lock" /> : undefined}
           onChange={(e) => {
@@ -69,9 +68,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'area': {
       return (
         <EuiTextArea
-          placeholder={row.placeholder}
           value={value}
-          defaultValue={row.defaultValue}
           onChange={(e) => {
             onChange(row.key, e.target.value);
           }}
@@ -82,7 +79,6 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'integer': {
       return (
         <EuiFieldNumber
-          placeholder={row.placeholder}
           value={value}
           onChange={(e) => {
             onChange(row.key, e.target.value);
@@ -123,7 +119,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
             languageId="yaml"
             width="100%"
             height="300px"
-            value={value || row.defaultValue}
+            value={value}
             onChange={(val) => {
               onChange(row.key, val);
             }}
