@@ -179,7 +179,7 @@ export class SyntheticsService {
       output: await this.getOutput(request),
     };
 
-    this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+    this.logger.info(`${monitors.length} monitors will be pushed to synthetics service.`);
 
     try {
       return await this.apiClient.post(data);
@@ -232,6 +232,7 @@ export class SyntheticsService {
 
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
+      namespaces: ['*'],
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
