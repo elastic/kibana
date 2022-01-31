@@ -20,7 +20,7 @@ with {kib} Spaces are on-by-default, with almost no configuration effort.
 When you run {kib} for the first time, you'll be presented with a new interactive
 UI that will help you set up {kib} and connect it securely to {es}.
 Simply paste the enrollment token that you received when you ran
-{es}, and {kib} will set up all the previous security features
+{es}, and {kib} will set up all {stack} security features
 and connect {es} over TLS.
 
 [role="screenshot"]
