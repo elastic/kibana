@@ -7,10 +7,7 @@
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
