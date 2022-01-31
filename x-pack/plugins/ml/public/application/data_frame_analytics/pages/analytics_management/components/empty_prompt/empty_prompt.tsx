@@ -71,13 +71,26 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
             title={
               <FormattedMessage
                 id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
-                defaultMessage="Data frame analytics requires specifically structured source data. Use {transforms} to create data frames before you create the jobs."
+                defaultMessage="Data frame analytics requires {sourcedata}. Use {transforms} to create data frames before you create the jobs."
                 values={{
+                  sourcedata: (
+                    <EuiLink
+                      href={docLinks.links.ml.dFAPrepareData}
+                      target="blank"
+                      color={'accent'}
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.overview.gettingStartedSectionSourceData"
+                        defaultMessage="specifically structured source data"
+                      />
+                    </EuiLink>
+                  ),
                   transforms: (
                     <EuiLink href={transformsLink} target="blank" color={'accent'}>
                       <FormattedMessage
                         id="xpack.ml.overview.gettingStartedSectionTransforms"
-                        defaultMessage="Elasticsearch's transforms"
+                        defaultMessage="transforms"
                       />
                     </EuiLink>
                   ),
