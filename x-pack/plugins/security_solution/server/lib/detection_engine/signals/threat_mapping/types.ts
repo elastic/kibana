@@ -13,7 +13,7 @@ import type {
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
   ItemsPerSearch,
-  ThreatIndicatorPathOrUndefined,
+  ThreatIndicatorPath,
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -59,7 +59,7 @@ export interface CreateThreatSignalsOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
@@ -130,6 +130,11 @@ export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
 }
 
+interface ThreatListConfig {
+  _source: string[] | boolean;
+  fields: string[] | undefined;
+}
+
 export interface GetThreatListOptions {
   buildRuleMessage: BuildRuleMessage;
   esClient: ElasticsearchClient;
@@ -141,6 +146,7 @@ export interface GetThreatListOptions {
   query: string;
   searchAfter: estypes.SortResults | undefined;
   threatFilters: unknown[];
+  threatListConfig: ThreatListConfig;
 }
 
 export interface ThreatListCountOptions {
@@ -165,7 +171,7 @@ export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
   indicator: Record<string, unknown>;
-  matched: Record<string, unknown>;
+  matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
 export interface SortWithTieBreaker {
@@ -188,7 +194,7 @@ export interface BuildThreatEnrichmentOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
 }
