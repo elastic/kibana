@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import './document_explorer_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,10 +29,10 @@ export const DocumentExplorerCallout = () => {
   const { storage, capabilities, addBasePath } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
 
-  const onCloseCallout = () => {
+  const onCloseCallout = useCallback(() => {
     updateStoredCalloutState(true, storage);
     setCalloutClosed(true);
-  };
+  }, [storage]);
 
   if (calloutClosed || !capabilities.advancedSettings.save) {
     return null;
@@ -47,8 +47,7 @@ export const DocumentExplorerCallout = () => {
       <p>
         <FormattedMessage
           id="discover.docExplorerCallout.bodyMessage"
-          defaultMessage="Did you know Discover has a new Document Explorer with better data sorting, resizable
-          columns, and a full screen view? You can change the view mode in Advanced Settings."
+          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the Document Explorer."
         />
       </p>
       <p>
@@ -73,7 +72,7 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="discover.docExplorerCallout.headerMessage"
-          defaultMessage="Check out new Document Explorer"
+          defaultMessage="A better way to explore"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
