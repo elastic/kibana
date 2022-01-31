@@ -75,10 +75,6 @@ export type Filter = {
   };
   meta: FilterMeta;
   query?: Record<string, any>;
-  groupId?: number;
-  id?: number;
-  relationship?: 'AND' | 'OR' | undefined;
-  subGroupId?: number;
 };
 
 // eslint-disable-next-line
