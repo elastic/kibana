@@ -108,7 +108,7 @@ export class AnomalySource implements IVectorSource {
   destroy(): void {}
 
   getApplyGlobalQuery(): boolean {
-    return false;
+    return true;
   }
 
   getApplyForceRefresh(): boolean {
@@ -323,8 +323,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   isQueryAware(): boolean {
-    // IGNORE: This is only relevant if your source is backed by an index-pattern
-    return false;
+    return true;
   }
 
   isRefreshTimerAware(): boolean {
