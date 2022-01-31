@@ -96,12 +96,14 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
             </EuiToolTip>
           ),
           disabled: true,
+          'data-test-subj': id,
         };
       } else {
         return {
           inputDisplay: label,
           value: id,
           dropdownDisplay: label,
+          'data-test-subj': id,
         };
       }
     })

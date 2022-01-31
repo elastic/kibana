@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should able to open exploratory view from ux app', async () => {
       await testSubjects.exists('uxAnalyzeBtn');
       await testSubjects.click('uxAnalyzeBtn');
-      expect(await find.existsByCssSelector('.euiBasicTable')).to.eql(true);
+      await testSubjects.exists('exploratoryViewSeriesPanel0');
     });
 
     it('renders lens visualization', async () => {
@@ -70,11 +70,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can do a breakdown per series', async () => {
+      await testSubjects.click('editSeriesBtn-0');
       await testSubjects.click('seriesBreakdown');
-
-      expect(await find.existsByCssSelector('[id="user_agent.name"]')).to.eql(true);
-
-      await find.clickByCssSelector('[id="user_agent.name"]');
+      await testSubjects.click('user_agent.name');
+      await testSubjects.click('seriesChangesApplyButton');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 

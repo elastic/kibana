@@ -56,6 +56,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
             aria-label={EDIT_SERIES_LABEL}
             size="s"
             onClick={onEditClick}
+            data-test-subj={`editSeriesBtn-${seriesId}`}
           />
         </EuiToolTip>
       </EuiFlexItem>
