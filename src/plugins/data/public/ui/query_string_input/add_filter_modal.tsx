@@ -268,6 +268,9 @@ export function AddFilterModal({
   };
 
   const renderParamsEditor = (localFilterIndex: number) => {
+    if (!selectedIndexPattern) {
+      return null;
+    }
     const selectedOperator = localFilters.filter(
       (localFilter) => localFilter.id === localFilterIndex
     )[0]?.operator;

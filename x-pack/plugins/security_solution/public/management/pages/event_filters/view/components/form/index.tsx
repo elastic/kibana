@@ -127,11 +127,10 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
         if (
-          (hasFormChanged === false && arg.exceptionItems[0] === undefined) ||
-          (arg.exceptionItems[0] !== undefined &&
-            exception !== undefined &&
-            isEqual(exception?.entries, arg.exceptionItems[0].entries))
+          (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
+          isEqual(arg.exceptionItems[0]?.entries, exception?.entries)
         ) {
+          setHasFormChanged(true);
           return;
         }
         setHasFormChanged(true);
@@ -400,12 +399,13 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           selected={selection.selected}
           options={policies}
           isGlobal={selection.isGlobal}
+          isLoading={arePoliciesLoading}
           isPlatinumPlus={isPlatinumPlus}
           onChange={handleOnChangeEffectScope}
           data-test-subj={'effectedPolicies-select'}
         />
       ),
-      [policies, selection, isPlatinumPlus, handleOnChangeEffectScope]
+      [policies, selection, isPlatinumPlus, handleOnChangeEffectScope, arePoliciesLoading]
     );
 
     const commentsSection = useMemo(
@@ -435,7 +435,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [commentsInputMemo]
     );
 
-    if (isIndexPatternLoading || !exception || arePoliciesLoading) {
+    if (isIndexPatternLoading || !exception) {
       return <Loader size="xl" />;
     }
 
