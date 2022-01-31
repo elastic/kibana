@@ -105,7 +105,6 @@ export const MonitorManagementList = ({
           {name}
         </EuiLink>
       ),
-      truncateText: true,
     },
 
     {
@@ -149,6 +148,7 @@ export const MonitorManagementList = ({
       sortable: true,
       render: (urls, { hosts }) => urls || hosts,
       truncateText: true,
+      textOnly: true,
     },
     {
       align: 'left' as const,
@@ -184,7 +184,7 @@ export const MonitorManagementList = ({
         itemId="monitor_id"
         items={monitors}
         columns={columns}
-        tableLayout={'auto'}
+        tableLayout={'fixed'}
         pagination={pagination}
         sorting={sorting}
         onChange={handleOnChange}
