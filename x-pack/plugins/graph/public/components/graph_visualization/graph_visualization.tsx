@@ -116,7 +116,7 @@ export function GraphVisualization({
                   onClick={() => {
                     edgeClick(edge);
                   }}
-                  className="gphEdge"
+                  className="gphEdge gphEdgeClick"
                   style={{
                     strokeWidth: Math.max(edge.width, 15),
                     fill: 'transparent',
