@@ -255,6 +255,28 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
   });
 
+  it('does not show timeout for browser monitors', () => {
+    const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
+    let timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+    expect(monitorType).toBeInTheDocument();
+    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKey.MONITOR_TYPE]);
+    expect(timeout.value).toEqual(defaultHTTPConfig[ConfigKey.TIMEOUT]);
+
+    // change to browser monitor
+    fireEvent.change(monitorType, { target: { value: DataStream.BROWSER } });
+
+    // expect timeout not to be in the DOM
+    expect(queryByLabelText('Timeout in seconds')).not.toBeInTheDocument();
+
+    // change back to HTTP
+    fireEvent.change(monitorType, { target: { value: DataStream.HTTP } });
+
+    // expect timeout value to be present with the correct value
+    timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+    expect(timeout.value).toEqual(defaultHTTPConfig[ConfigKey.TIMEOUT]);
+  });
+
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
     const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;

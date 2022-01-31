@@ -12,44 +12,14 @@ import {
   BrowserFields,
   MonitorFields,
   ScheduleUnit,
-  ServiceLocations,
 } from '../../../common/runtime_types';
-import { validate, validateCommon } from './validation';
+import { validate } from './validation';
 
 describe('[Monitor Management] validation', () => {
   const commonPropsValid: Partial<MonitorFields> = {
     [ConfigKey.SCHEDULE]: { number: '5', unit: ScheduleUnit.MINUTES },
     [ConfigKey.TIMEOUT]: '3m',
-    [ConfigKey.LOCATIONS]: [
-      {
-        id: 'test-service-location',
-        url: 'https:test-url.com',
-        geo: { lat: 33.33432323, lon: 73.23424221 },
-        label: 'EU West',
-      },
-    ] as ServiceLocations,
-    [ConfigKey.NAME]: 'test-name',
-    [ConfigKey.NAMESPACE]: 'namespace',
   };
-
-  describe('Common monitor fields', () => {
-    it('should return false for all valid props', () => {
-      const result = Object.values(validateCommon).map((validator) => {
-        return validator ? validator(commonPropsValid) : true;
-      });
-
-      expect(result.reduce((previous, current) => previous || current)).toBeFalsy();
-    });
-
-    it('should invalidate on invalid namespace', () => {
-      const validatorFn = validateCommon[ConfigKey.NAMESPACE];
-      const result = [undefined, null, '', '*/&<>:', 'A', 'a'.repeat(101)].map((testValue) =>
-        validatorFn?.({ [ConfigKey.NAMESPACE]: testValue } as Partial<MonitorFields>)
-      );
-
-      expect(result.reduce((previous, current) => previous && current)).toBeTruthy();
-    });
-  });
 
   describe('HTTP', () => {
     const httpPropsValid: Partial<HTTPFields> = {
@@ -66,7 +36,6 @@ describe('[Monitor Management] validation', () => {
       const keysToValidate = [
         ConfigKey.SCHEDULE,
         ConfigKey.TIMEOUT,
-        ConfigKey.LOCATIONS,
         ConfigKey.RESPONSE_STATUS_CHECK,
         ConfigKey.RESPONSE_HEADERS_CHECK,
         ConfigKey.REQUEST_HEADERS_CHECK,
@@ -78,17 +47,6 @@ describe('[Monitor Management] validation', () => {
 
       expect(result).not.toEqual(expect.arrayContaining([true]));
     });
-
-    it('should invalidate when locations is empty', () => {
-      const validators = validate[DataStream.HTTP];
-      const validatorFn = validators[ConfigKey.LOCATIONS];
-      const result = [undefined, null, []].map(
-        (testValue) =>
-          validatorFn?.({ [ConfigKey.LOCATIONS]: testValue } as Partial<MonitorFields>) ?? false
-      );
-
-      expect(result).toEqual([true, true, true]);
-    });
   });
 
   describe.each([
@@ -98,7 +56,7 @@ describe('[Monitor Management] validation', () => {
     const browserProps: Partial<BrowserFields> = {
       ...commonPropsValid,
       [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-      [ConfigKey.TIMEOUT]: undefined,
+      [ConfigKey.TIMEOUT]: null,
       [configKey]: value,
     };
 
@@ -109,17 +67,6 @@ describe('[Monitor Management] validation', () => {
       const result = validatorFns.map((fn) => fn?.(browserProps) ?? true);
 
       expect(result).not.toEqual(expect.arrayContaining([true]));
-    });
-
-    it('should invalidate when locations is empty', () => {
-      const validators = validate[DataStream.BROWSER];
-      const validatorFn = validators[ConfigKey.LOCATIONS];
-      const result = [undefined, null, []].map(
-        (testValue) =>
-          validatorFn?.({ [ConfigKey.LOCATIONS]: testValue } as Partial<MonitorFields>) ?? false
-      );
-
-      expect(result).toEqual([true, true, true]);
     });
   });
 
