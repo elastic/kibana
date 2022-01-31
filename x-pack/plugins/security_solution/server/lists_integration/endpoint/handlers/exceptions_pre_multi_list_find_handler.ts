@@ -6,13 +6,24 @@
  */
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExtensionPoint } from '../../../../../lists/server';
+import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../lists/server';
+import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
 
 export const getExceptionsPreMultiListFindHandler = (
   endpointAppContext: EndpointAppContextService
-): (ExtensionPoint & { type: 'exceptionsListPreMultiListFind' })['callback'] => {
-  return async function ({ data }) {
-    // Individual validators here
+): ExceptionsListPreMultiListFindServerExtension['callback'] => {
+  return async function ({ data, context: { request } }) {
+    if (!data.namespaceType.includes('agnostic')) {
+      return data;
+    }
+
+    // Validate Host Isolation Exceptions
+    if (data.listId.some(HostIsolationExceptionsValidator.isHostIsolationException)) {
+      await new HostIsolationExceptionsValidator(
+        endpointAppContext,
+        request
+      ).validatePreMultiListFind();
+    }
 
     return data;
   };

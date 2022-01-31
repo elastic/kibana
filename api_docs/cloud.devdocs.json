@@ -2,7 +2,24 @@
   "id": "cloud",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-public.Chat",
+        "type": "Function",
+        "tags": [],
+        "label": "Chat",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "x-pack/plugins/cloud/public/components/index.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "cloud",
@@ -11,7 +28,7 @@
         "tags": [],
         "label": "CloudConfigType",
         "description": [],
-        "path": "x-pack/plugins/cloud/public/plugin.ts",
+        "path": "x-pack/plugins/cloud/public/plugin.tsx",
         "deprecated": false,
         "children": [
           {
@@ -24,7 +41,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
           },
           {
@@ -37,7 +54,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
           },
           {
@@ -50,7 +67,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
           },
           {
@@ -63,7 +80,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
           },
           {
@@ -76,7 +93,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
           },
           {
@@ -89,7 +106,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
           },
           {
@@ -102,8 +119,78 @@
             "signature": [
               "{ enabled: boolean; org_id?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.chat",
+            "type": "Object",
+            "tags": [],
+            "label": "chat",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; chatURL: string; }"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloud",
+        "id": "def-public.CloudStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudStart",
+        "description": [],
+        "path": "x-pack/plugins/cloud/public/plugin.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.CloudContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "CloudContextProvider",
+            "description": [
+              "\nA React component that provides a pre-wired `React.Context` which connects components to Cloud services."
+            ],
+            "signature": [
+              "React.FunctionComponent<{}>"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "cloud",
+                "id": "def-public.CloudStart.CloudContextProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "cloud",
+                "id": "def-public.CloudStart.CloudContextProvider.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -119,7 +206,7 @@
       "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "path": "x-pack/plugins/cloud/public/plugin.ts",
+      "path": "x-pack/plugins/cloud/public/plugin.tsx",
       "deprecated": false,
       "children": [
         {
@@ -132,7 +219,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -145,7 +232,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -158,7 +245,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -171,7 +258,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -184,7 +271,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -197,7 +284,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -210,7 +297,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         },
         {
@@ -220,7 +307,7 @@
           "tags": [],
           "label": "isCloudEnabled",
           "description": [],
-          "path": "x-pack/plugins/cloud/public/plugin.ts",
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false
         }
       ],
