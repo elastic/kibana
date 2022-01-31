@@ -9,6 +9,7 @@ import { EndpointAppContextService } from '../../../endpoint/endpoint_app_contex
 import { ExceptionsListPreMultiListFindServerExtension } from '../../../../../lists/server';
 import { TrustedAppValidator } from '../validators/trusted_app_validator';
 import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
+import { EventFilterValidator } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreMultiListFindServerExtension['callback'];
 export const getExceptionsPreMultiListFindHandler = (
@@ -30,6 +31,12 @@ export const getExceptionsPreMultiListFindHandler = (
         endpointAppContextService,
         request
       ).validatePreMultiListFind();
+      return data;
+    }
+
+    // Event Filters Exceptions
+    if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind();
       return data;
     }
 

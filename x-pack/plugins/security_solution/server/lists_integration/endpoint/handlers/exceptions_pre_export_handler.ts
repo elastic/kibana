@@ -9,12 +9,17 @@ import { EndpointAppContextService } from '../../../endpoint/endpoint_app_contex
 import { ExceptionsListPreExportServerExtension } from '../../../../../lists/server';
 import { TrustedAppValidator } from '../validators/trusted_app_validator';
 import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
+import { EventFilterValidator } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreExportServerExtension['callback'];
 export const getExceptionsPreExportHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ValidatorCallback => {
   return async function ({ data, context: { request, exceptionListClient } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     const { listId: maybeListId, id } = data;
     let listId: string | null | undefined = maybeListId;
 
@@ -37,6 +42,12 @@ export const getExceptionsPreExportHandler = (
         endpointAppContextService,
         request
       ).validatePreExport();
+      return data;
+    }
+
+    // Event Filter validations
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreExport();
       return data;
     }
 
