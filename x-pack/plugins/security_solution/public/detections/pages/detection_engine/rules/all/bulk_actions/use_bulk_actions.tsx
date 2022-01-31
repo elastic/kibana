@@ -52,7 +52,6 @@ import type { HTTPError } from '../../../../../../../common/detection_engine/typ
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
   confirmDeletion: () => Promise<boolean>;
-  selectedItemsCount: number;
   confirmBulkEdit: () => Promise<boolean>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
@@ -63,7 +62,6 @@ interface UseBulkActionsArgs {
 export const useBulkActions = ({
   filterOptions,
   confirmDeletion,
-  selectedItemsCount,
   confirmBulkEdit,
   completeBulkEditForm,
   reFetchTags,
@@ -73,7 +71,7 @@ export const useBulkActions = ({
   const rulesTableContext = useRulesTableContext();
   const [, dispatchToaster] = useStateToaster();
   const hasActionsPrivileges = useHasActionsPrivileges();
-  const { api: toastsApi } = useAppToasts();
+  const toasts = useAppToasts();
   const isRulesBulkEditEnabled = useIsExperimentalFeatureEnabled('rulesBulkEditEnabled');
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
@@ -129,7 +127,7 @@ export const useBulkActions = ({
             visibleRuleIds: ruleIds,
             action: BulkAction.enable,
             setLoadingRules,
-            toastsApi,
+            toasts,
           });
 
           await rulesBulkAction.byQuery(filterQuery);
@@ -147,7 +145,7 @@ export const useBulkActions = ({
             visibleRuleIds: activatedIds,
             action: BulkAction.disable,
             setLoadingRules,
-            toastsApi,
+            toasts,
           });
 
           await rulesBulkAction.byQuery(filterQuery);
@@ -170,7 +168,7 @@ export const useBulkActions = ({
             visibleRuleIds: selectedRuleIds,
             action: BulkAction.duplicate,
             setLoadingRules,
-            toastsApi,
+            toasts,
           });
 
           await rulesBulkAction.byQuery(filterQuery);
@@ -197,7 +195,7 @@ export const useBulkActions = ({
             visibleRuleIds: selectedRuleIds,
             action: BulkAction.delete,
             setLoadingRules,
-            toastsApi,
+            toasts,
           });
 
           await rulesBulkAction.byQuery(filterQuery);
@@ -214,7 +212,7 @@ export const useBulkActions = ({
             visibleRuleIds: selectedRuleIds,
             action: BulkAction.export,
             setLoadingRules,
-            toastsApi,
+            toasts,
           });
 
           await rulesBulkAction.byQuery(filterQuery);
@@ -252,7 +250,7 @@ export const useBulkActions = ({
 
           const hideWarningToast = () => {
             if (longTimeWarningToast) {
-              toastsApi.remove(longTimeWarningToast);
+              toasts.api.remove(longTimeWarningToast);
             }
           };
 
@@ -266,7 +264,7 @@ export const useBulkActions = ({
             if (isBulkEditFinished) {
               return;
             }
-            longTimeWarningToast = toastsApi.addWarning(
+            longTimeWarningToast = toasts.addWarning(
               {
                 title: i18n.BULK_EDIT_WARNING_TOAST_TITLE,
                 text: mountReactNode(
@@ -291,11 +289,11 @@ export const useBulkActions = ({
             visibleRuleIds: selectedRuleIds,
             action: BulkAction.edit,
             setLoadingRules,
-            toastsApi,
+            toasts,
             payload: { edit: [editPayload] },
             onSuccess: ({ rulesCount }) => {
               hideWarningToast();
-              toastsApi.addSuccess({
+              toasts.addSuccess({
                 title: i18n.BULK_EDIT_SUCCESS_TOAST_TITLE,
                 text: i18n.BULK_EDIT_SUCCESS_TOAST_DESCRIPTION(rulesCount),
                 iconType: undefined,
@@ -310,11 +308,11 @@ export const useBulkActions = ({
                 ?.rules?.failed;
 
               if (isNaN(failedRulesCount)) {
-                toastsApi.addError(error, { title: i18n.BULK_ACTION_FAILED });
+                toasts.addError(error, { title: i18n.BULK_ACTION_FAILED });
               } else {
                 try {
                   error.stack = JSON.stringify(error.body, null, 2);
-                  toastsApi.addError(error, {
+                  toasts.addError(error, {
                     title: i18n.BULK_EDIT_ERROR_TOAST_TITLE,
                     toastMessage: i18n.BULK_EDIT_ERROR_TOAST_DESCIRPTION(failedRulesCount),
                   });
@@ -504,7 +502,7 @@ export const useBulkActions = ({
       updateRules,
       confirmDeletion,
       isRulesBulkEditEnabled,
-      toastsApi,
+      toasts,
       filterOptions,
       completeBulkEditForm,
       confirmBulkEdit,

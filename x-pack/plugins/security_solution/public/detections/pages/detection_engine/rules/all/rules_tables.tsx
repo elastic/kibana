@@ -171,7 +171,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       filterOptions,
       confirmDeletion,
       confirmBulkEdit,
-      selectedItemsCount,
       completeBulkEditForm,
       reFetchTags,
     });

@@ -6,8 +6,9 @@
  */
 
 import { Dispatch } from 'react';
-import type { ToastsStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import type { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 
+import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import {
   BulkAction,
@@ -178,7 +179,7 @@ export const enableRulesAction = async (
 interface ExecuteRulesBulkActionArgs {
   visibleRuleIds: string[];
   action: BulkAction;
-  toastsApi: ToastsStart;
+  toasts: UseAppToasts;
   search: { query: string } | { ids: string[] };
   payload?: { edit?: BulkActionEditPayload[] };
   onSuccess?: (arg: { rulesCount: number }) => void;
@@ -190,7 +191,7 @@ const executeRulesBulkAction = async ({
   visibleRuleIds,
   action,
   setLoadingRules,
-  toastsApi,
+  toasts,
   search,
   payload,
   onSuccess,
@@ -204,7 +205,7 @@ const executeRulesBulkAction = async ({
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
       const { exported, total } = await getExportedRulesCounts(blob);
 
-      toastsApi.addSuccess(i18n.SUCCESSFULLY_EXPORTED_RULES(exported, total));
+      toasts.addSuccess(i18n.SUCCESSFULLY_EXPORTED_RULES(exported, total));
     } else {
       const response = await performBulkAction({ ...search, action, edit: payload?.edit });
 
@@ -214,7 +215,7 @@ const executeRulesBulkAction = async ({
     if (onError) {
       onError(e);
     } else {
-      toastsApi.addError(e, { title: i18n.BULK_ACTION_FAILED });
+      toasts.addError(e, { title: i18n.BULK_ACTION_FAILED });
     }
   } finally {
     setLoadingRules({ ids: [], action: null });

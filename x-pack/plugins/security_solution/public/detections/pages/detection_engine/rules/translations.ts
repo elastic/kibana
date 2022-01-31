@@ -260,7 +260,7 @@ export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
     {
       values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {is # rule} other {are # rules}} failed to update.',
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to update.',
     }
   );
 
