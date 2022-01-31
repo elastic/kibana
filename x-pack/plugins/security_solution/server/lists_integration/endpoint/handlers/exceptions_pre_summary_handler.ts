@@ -46,7 +46,7 @@ export const getExceptionsPreSummaryHandler = (
 
     // Event Filter Exceptions
     if (EventFilterValidator.isEventFilter({ listId })) {
-      await new EventFilterValidator(endpointAppContext, request).validatePreSummary();
+      await new EventFilterValidator(endpointAppContextService, request).validatePreSummary();
       return data;
     }
 

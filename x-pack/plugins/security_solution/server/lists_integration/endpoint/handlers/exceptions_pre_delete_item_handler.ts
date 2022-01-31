@@ -51,7 +51,7 @@ export const getExceptionsPreDeleteItemHandler = (
 
     // Event Filter validation
     if (EventFilterValidator.isEventFilter({ listId })) {
-      await new EventFilterValidator(endpointAppContext, request).validatePreDeleteItem();
+      await new EventFilterValidator(endpointAppContextService, request).validatePreDeleteItem();
       return data;
     }
 

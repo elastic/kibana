@@ -27,6 +27,8 @@ export const getExceptionsPreSingleListFindHandler = (
       await new TrustedAppValidator(endpointAppContextService, request).validatePreSingleListFind();
       return data;
     }
+
+    // Host Isolation Exceptions
     if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
@@ -37,7 +39,10 @@ export const getExceptionsPreSingleListFindHandler = (
 
     // Event Filters Exceptions
     if (EventFilterValidator.isEventFilter({ listId })) {
-      await new EventFilterValidator(endpointAppContext, request).validatePreSingleListFind();
+      await new EventFilterValidator(
+        endpointAppContextService,
+        request
+      ).validatePreSingleListFind();
       return data;
     }
 

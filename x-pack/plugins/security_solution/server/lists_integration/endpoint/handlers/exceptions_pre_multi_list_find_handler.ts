@@ -36,7 +36,7 @@ export const getExceptionsPreMultiListFindHandler = (
 
     // Event Filters Exceptions
     if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
-      await new EventFilterValidator(endpointAppContext, request).validatePreMultiListFind();
+      await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind();
       return data;
     }
 
