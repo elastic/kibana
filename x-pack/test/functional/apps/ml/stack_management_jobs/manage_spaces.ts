@@ -76,7 +76,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     // AD
     await ml.navigation.navigateToAnomalyDetection();
-    await ml.jobTable.filterWithSearchString(adJobId, shouldBeDisplayed ? 1 : 0);
+
+    if (shouldBeDisplayed) {
+      await ml.jobTable.filterWithSearchString(adJobId, 1);
+    } else {
+      await ml.jobManagement.assertEmptyStateVisible();
+    }
 
     // DFA
     await ml.navigation.navigateToDataFrameAnalytics();

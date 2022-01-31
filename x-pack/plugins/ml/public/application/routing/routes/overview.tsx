@@ -20,7 +20,7 @@ import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capab
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { useTimefilter } from '../../contexts/kibana';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
@@ -41,7 +41,6 @@ export const overviewRouteFactory = (
       text: i18n.translate('xpack.ml.overview.overviewLabel', {
         defaultMessage: 'Overview',
       }),
-      onClick: breadcrumbOnClickFactory('/overview', navigateToPath),
     },
   ],
   'data-test-subj': 'mlPageOverview',

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import {
   InspectButton,
   BUTTON_CLASS as INPECT_BUTTON_CLASS,
@@ -33,7 +33,10 @@ import {
 import { useInspectQuery } from '../../../../common/hooks/use_inspect_query';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { HostRiskScore } from '../../common/host_risk_score';
-import { HostRiskInformation, HOST_RISK_INFO_BUTTON_CLASS } from '../../host_risk_information';
+import {
+  HostRiskInformationButtonIcon,
+  HOST_RISK_INFO_BUTTON_CLASS,
+} from '../../host_risk_information';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 
 const QUERY_ID = 'hostsKpiRiskyHostsQuery';
@@ -80,7 +83,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <HostRiskInformation />
+                <HostRiskInformationButtonIcon />
               </EuiFlexItem>
               {data?.inspect && (
                 <EuiFlexItem>

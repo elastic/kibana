@@ -38,5 +38,6 @@ const UserActionShowAlertComponent = ({
     </EuiToolTip>
   );
 };
+UserActionShowAlertComponent.displayName = 'UserActionShowAlert';
 
 export const UserActionShowAlert = memo(UserActionShowAlertComponent);

@@ -9,11 +9,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { DataStream, HTTPFields, ScheduleUnit } from '../../../../common/runtime_types';
+import { ConfigKey, DataStream, HTTPFields, ScheduleUnit } from '../../../../common/runtime_types';
 import { MonitorManagementList } from './monitor_list';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 
-describe('<ActionBar />', () => {
+describe('<MonitorManagementList />', () => {
   const setRefresh = jest.fn();
   const setPageSize = jest.fn();
   const setPageIndex = jest.fn();
@@ -110,4 +110,64 @@ describe('<ActionBar />', () => {
     expect(setPageIndex).toBeCalledWith(2);
     expect(setRefresh).toBeCalledWith(true);
   });
+
+  it.each([
+    [DataStream.BROWSER, ConfigKey.SOURCE_INLINE],
+    [DataStream.HTTP, ConfigKey.URLS],
+    [DataStream.TCP, ConfigKey.HOSTS],
+    [DataStream.ICMP, ConfigKey.HOSTS],
+  ])(
+    'appends inline to the monitor id for browser monitors and omits for lightweight checks',
+    (type, configKey) => {
+      const id = '123456';
+      const name = 'sample monitor';
+      const browserState = {
+        monitorManagementList: {
+          ...state.monitorManagementList,
+          list: {
+            ...state.monitorManagementList.list,
+            monitors: [
+              {
+                id,
+                attributes: {
+                  name,
+                  schedule: {
+                    unit: ScheduleUnit.MINUTES,
+                    number: '1',
+                  },
+                  [configKey]: 'test',
+                  type,
+                  tags: [`tag-1`],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      render(
+        <MonitorManagementList
+          setRefresh={setRefresh}
+          setPageSize={setPageSize}
+          setPageIndex={setPageIndex}
+          monitorList={browserState.monitorManagementList as unknown as MonitorManagementListState}
+        />,
+        { state: browserState }
+      );
+
+      const link = screen.getByText(name) as HTMLAnchorElement;
+
+      expect(link.href).toEqual(
+        expect.stringContaining(
+          `/app/uptime/monitor/${Buffer.from(
+            `${id}${type === DataStream.BROWSER ? `-inline` : ''}`,
+            'utf8'
+          ).toString('base64')}`
+        )
+      );
+
+      expect(setPageIndex).toBeCalledWith(2);
+      expect(setRefresh).toBeCalledWith(true);
+    }
+  );
 });

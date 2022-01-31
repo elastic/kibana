@@ -33,4 +33,5 @@ export type {
   TooltipFeature,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
+  VectorSourceRequestMeta,
 } from './descriptor_types';

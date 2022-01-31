@@ -36,7 +36,7 @@ import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delet
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
-import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
+import { getRuleExecutionEventsRoute } from '../lib/detection_engine/routes/rules/get_rule_execution_events_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -86,7 +86,7 @@ export const initRoutes = (
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
-  // All REST rule creation, deletion, updating, etc......
+  // All REST rule creation, deletion, updating, etc
   createRulesRoute(router, ml, isRuleRegistryEnabled);
   readRulesRoute(router, logger, isRuleRegistryEnabled);
   updateRulesRoute(router, ml, isRuleRegistryEnabled);
@@ -114,6 +114,8 @@ export const initRoutes = (
   deleteRulesBulkRoute(router, isRuleRegistryEnabled);
   performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
+  getRuleExecutionEventsRoute(router);
+
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
@@ -133,8 +135,6 @@ export const initRoutes = (
 
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
-
-  findRuleStatusInternalRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
