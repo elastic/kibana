@@ -188,7 +188,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       if (updatedAgentPolicy) {
         setAgentPolicy(updatedAgentPolicy);
         if (packageInfo) {
-          setFormState('VALID');
+          setHasAgentPolicyError(false);
         }
       } else {
         setHasAgentPolicyError(true);
@@ -198,7 +198,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       // eslint-disable-next-line no-console
       console.debug('Agent policy updated', updatedAgentPolicy);
     },
-    [packageInfo, setAgentPolicy, setFormState]
+    [packageInfo, setAgentPolicy]
   );
 
   const setPolicyValidation = (
