@@ -12,6 +12,7 @@ import {
   EuiPageContentBody,
   EuiTab,
   EuiTabs,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -114,11 +115,13 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
       <EuiPageBody>
         <EuiPageContent>
           <ActionMenu>
+            <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
             <AlertsDropdown />
           </ActionMenu>
           <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+          <EuiSpacer size="m" />
           {tabs && (
-            <EuiTabs>
+            <EuiTabs size="l">
               {tabs.map((item, idx) => {
                 return (
                   <EuiTab
@@ -135,7 +138,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
               })}
             </EuiTabs>
           )}
-          <div>{renderContent()}</div>
+          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

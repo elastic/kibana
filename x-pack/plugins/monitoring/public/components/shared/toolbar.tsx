@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiPageHeader, EuiSuperDatePicker, EuiTitle, OnRefreshChangeProps } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageHeader,
+  EuiPageBody,
+  EuiSuperDatePicker,
+  EuiTitle,
+  OnRefreshChangeProps,
+} from '@elastic/eui';
 import React, { useContext, useCallback, useMemo } from 'react';
 import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
@@ -77,22 +84,21 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
   );
 
   return (
-    <EuiPageHeader>
-      <EuiTitle size="l">
-        <h1>{pageTitle}</h1>
-      </EuiTitle>
-      <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
-      <EuiSuperDatePicker
-        isDisabled={isDisabled}
-        start={currentTimerange.from}
-        end={currentTimerange.to}
-        onTimeChange={onTimeChange}
-        onRefresh={onRefresh}
-        isPaused={isPaused}
-        refreshInterval={refreshInterval}
-        onRefreshChange={onRefreshChange}
-        commonlyUsedRanges={commonlyUsedRanges}
-      />
-    </EuiPageHeader>
+    <EuiPageHeader
+      pageTitle={pageTitle}
+      rightSideItems={[
+        <EuiSuperDatePicker
+          isDisabled={isDisabled}
+          start={currentTimerange.from}
+          end={currentTimerange.to}
+          onTimeChange={onTimeChange}
+          onRefresh={onRefresh}
+          isPaused={isPaused}
+          refreshInterval={refreshInterval}
+          onRefreshChange={onRefreshChange}
+          commonlyUsedRanges={commonlyUsedRanges}
+        />,
+      ]}
+    />
   );
 };
