@@ -16,7 +16,7 @@ coming[8.0.0]
 === Security on-by-default
 
 Authentication, authorization, and multi-tenancy
-with {kib} Spaces are on-by-default, with almost no configuration effort.
+with {kib} Spaces are enabled by default, with almost no configuration effort.
 When you run {kib} for the first time, you'll be presented with a new interactive
 UI that will help you set up {kib} and connect it securely to {es}.
 Simply paste the enrollment token that you received when you ran
