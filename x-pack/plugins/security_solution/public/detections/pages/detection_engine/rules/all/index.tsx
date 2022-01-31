@@ -7,20 +7,15 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-
-import { SecurityPageName } from '../../../../../app/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
-import { RulesTables } from './rules_tables';
 import * as i18n from '../translations';
+import { RulesTables } from './rules_tables';
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
   hasPermissions: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
-  refetchPrePackagedRulesStatus: () => Promise<void>;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
@@ -60,15 +55,12 @@ export const AllRules = React.memo<AllRulesProps>(
     hasPermissions,
     loading,
     loadingCreatePrePackagedRules,
-    refetchPrePackagedRulesStatus,
     rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
     setRefreshRulesData,
   }) => {
-    const history = useHistory();
-    const { formatUrl } = useFormatUrl(SecurityPageName.rules);
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
 
     const tabs = useMemo(
@@ -87,8 +79,7 @@ export const AllRules = React.memo<AllRulesProps>(
           ))}
         </EuiTabs>
       ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [allRulesTabs, allRulesTab, setAllRulesTab]
+      [allRulesTab]
     );
 
     return (
@@ -96,18 +87,15 @@ export const AllRules = React.memo<AllRulesProps>(
         {tabs}
         <EuiSpacer />
         <RulesTables
-          history={history}
-          formatUrl={formatUrl}
-          selectedTab={allRulesTab}
           createPrePackagedRules={createPrePackagedRules}
           hasPermissions={hasPermissions}
           loading={loading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          refetchPrePackagedRulesStatus={refetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
+          selectedTab={allRulesTab}
           setRefreshRulesData={setRefreshRulesData}
         />
       </>

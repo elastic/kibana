@@ -189,7 +189,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.serialize()) : [];
     return {
       id: this.id,
       title: this.title,

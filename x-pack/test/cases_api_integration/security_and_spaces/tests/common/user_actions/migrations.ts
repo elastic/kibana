@@ -12,7 +12,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
 import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/utils';
-import { CaseUserActionsResponse } from '../../../../../../plugins/cases/common/api';
+import { CaseUserActionsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -661,6 +661,53 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     describe('8.0.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('removes the rule information from alert user action', async () => {
+        const userActions = await getCaseUserActions({
+          supertest,
+          caseID: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+        });
+
+        const userAction = getUserActionById(userActions, 'a5509250-cf9d-11eb-a603-13e7747d215c')!;
+
+        expect(userAction.payload.comment.type).to.be(CommentType.alert);
+        expect(userAction.payload.comment.alertId).to.be(
+          '4eb4cd05b85bc65c7b9f22b776e0136f970f7538eb0d1b2e6e8c7d35b2e875cb'
+        );
+        expect(userAction.payload.comment.index).to.be(
+          '.internal.alerts-security.alerts-default-000001'
+        );
+        expect(userAction.payload.comment.rule.id).to.be(null);
+        expect(userAction.payload.comment.rule.name).to.be(null);
+      });
+
+      it('does not modify non-alert attachments', async () => {
+        const userActions = await getCaseUserActions({
+          supertest,
+          caseID: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+        });
+
+        const userAction = getUserActionById(userActions, 'e5509250-cf9d-11eb-a603-13e7747d215c')!;
+
+        expect(userAction.payload).to.not.have.property('rule');
+        expect(userAction.payload.status).to.be('open');
+        expect(userAction.payload.title).to.be('A case');
+      });
+    });
+
+    describe('8.1.0', () => {
       const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
 
       before(async () => {

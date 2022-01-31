@@ -72,6 +72,7 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
@@ -281,21 +282,26 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: IndexPattern = await this.getIndexPattern();
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
     const topHits: {
       size: number;
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
+      fields: string[];
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirectionNumeric>>;
     } = {
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
+      fields: [this._descriptor.geoField],
     };
 
     if (this._hasSort()) {
@@ -352,6 +358,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
     });
 
     const allHits: any[] = [];
@@ -389,9 +396,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
 
@@ -418,6 +428,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     } else {
       searchSource.setField('source', sourceOnlyFields);
     }
+    searchSource.setField('fields', [this._descriptor.geoField]);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }
@@ -429,6 +440,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
     });
 
     const isTimeExtentForTimeslice =
@@ -590,7 +602,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch({ legacyHitsTotal: false });
+    const resp = await searchSource.fetch({
+      legacyHitsTotal: false,
+      executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+    });
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -800,9 +815,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames,
+      fieldNames,
       'epoch_millis'
     );
 
@@ -893,6 +911,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       abortSignal: abortController.signal,
       sessionId: searchFilters.searchSessionId,
       legacyHitsTotal: false,
+      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
     });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }

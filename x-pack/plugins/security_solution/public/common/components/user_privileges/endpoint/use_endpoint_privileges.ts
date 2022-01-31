@@ -8,7 +8,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
-import { EndpointPrivileges, Immutable } from '../../../../../common/endpoint/types';
+import {
+  EndpointPrivileges,
+  Immutable,
+  MaybeImmutable,
+} from '../../../../../common/endpoint/types';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
@@ -28,17 +32,19 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const licenseService = useLicense();
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
   const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
+  const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
+  const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
-      loading: !fleetCheckDone || !user,
+      loading: !fleetCheckDone || !userRolesCheckDone || !user,
       ...(fleetAuthz
-        ? calculateEndpointAuthz(licenseService, fleetAuthz)
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
         : getEndpointAuthzInitialState()),
     });
 
     return privilegeList;
-  }, [fleetCheckDone, user, fleetAuthz, licenseService]);
+  }, [fleetCheckDone, userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
 
   // Check if user can access fleet
   useEffect(() => {
@@ -63,6 +69,16 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       }
     })();
   }, [fleetServices]);
+
+  // get user roles
+  useEffect(() => {
+    (async () => {
+      if (user && isMounted.current) {
+        setUserRoles(user?.roles);
+        setUserRolesCheckDone(true);
+      }
+    })();
+  }, [user]);
 
   // Capture if component is unmounted
   useEffect(

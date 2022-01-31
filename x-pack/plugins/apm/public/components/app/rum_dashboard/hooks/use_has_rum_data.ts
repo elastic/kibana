@@ -9,8 +9,6 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 
 export function useHasRumData() {
   return useFetcher((callApmApi) => {
-    return callApmApi({
-      endpoint: 'GET /api/apm/observability_overview/has_rum_data',
-    });
+    return callApmApi('GET /api/apm/observability_overview/has_rum_data');
   }, []);
 }

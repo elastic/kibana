@@ -76,7 +76,7 @@ export function HomeApp({ directories, solutions }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               telemetry={telemetry}
-              hasUserIndexPattern={() => indexPatternService.hasUserDataView()}
+              hasUserDataView={() => indexPatternService.hasUserDataView()}
             />
           </Route>
           <Redirect to="/" />

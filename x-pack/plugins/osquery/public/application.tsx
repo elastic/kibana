@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';

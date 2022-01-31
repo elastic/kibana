@@ -47,7 +47,7 @@ export const SIGNALS_TEMPLATE_VERSION = 67;
   UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
-export const SIGNALS_FIELD_ALIASES_VERSION = 1;
+export const SIGNALS_FIELD_ALIASES_VERSION = 2;
 
 /**
   @constant

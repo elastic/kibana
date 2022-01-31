@@ -47,6 +47,7 @@ interface PartitionChartMeta {
   legend: {
     flat?: boolean;
     showValues?: boolean;
+    hideNestedLegendSwitch?: boolean;
     getShowLegendDefault?: (bucketColumns: DatatableColumn[]) => boolean;
   };
   sortPredicate?: (
@@ -235,6 +236,7 @@ export const PartitionChartsMeta: Record<PieChartTypes, PartitionChartMeta> = {
     legend: {
       flat: true,
       showValues: true,
+      hideNestedLegendSwitch: true,
       getShowLegendDefault: () => true,
     },
     sortPredicate:

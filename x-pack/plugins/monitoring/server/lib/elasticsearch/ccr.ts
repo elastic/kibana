@@ -14,9 +14,18 @@ import { ElasticsearchMetric } from '../metrics';
 import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
-export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in checkCcrEnabled');
+export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
+  const dataset = 'cluster_stats';
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs,
+  });
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -25,12 +34,14 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const metricFields = ElasticsearchMetric.getMetricFields();
 
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        type: 'cluster_stats',
+        type: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import * as t from 'io-ts';
-import { createServerRouteRepository } from './create_server_route_repository';
+import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from './typings';
 
@@ -14,18 +14,9 @@ function assertType<TShape = never>(value: TShape) {
   return value;
 }
 
-// Generic arguments for createServerRouteRepository should be set,
-// if not, registering routes should not be allowed
-createServerRouteRepository().add({
-  // @ts-expect-error
-  endpoint: 'any_endpoint',
-  // @ts-expect-error
-  handler: async ({ params }) => {},
-});
-
 // If a params codec is not set, its type should not be available in
 // the request handler.
-createServerRouteRepository<{}, {}>().add({
+createServerRouteFactory<{}, {}>()({
   endpoint: 'endpoint_without_params',
   handler: async (resources) => {
     // @ts-expect-error Argument of type '{}' is not assignable to parameter of type '{ params: any; }'.
@@ -35,7 +26,7 @@ createServerRouteRepository<{}, {}>().add({
 
 // If a params codec is set, its type _should_ be available in the
 // request handler.
-createServerRouteRepository<{}, {}>().add({
+createServerRouteFactory<{}, {}>()({
   endpoint: 'endpoint_with_params',
   params: t.type({
     path: t.type({
@@ -48,7 +39,7 @@ createServerRouteRepository<{}, {}>().add({
 });
 
 // Resources should be passed to the request handler.
-createServerRouteRepository<{ context: { getSpaceId: () => string } }, {}>().add({
+createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
   endpoint: 'endpoint_with_params',
   params: t.type({
     path: t.type({
@@ -62,7 +53,7 @@ createServerRouteRepository<{ context: { getSpaceId: () => string } }, {}>().add
 });
 
 // Create options are available when registering a route.
-createServerRouteRepository<{}, { options: { tags: string[] } }>().add({
+createServerRouteFactory<{}, { options: { tags: string[] } }>()({
   endpoint: 'endpoint_with_params',
   params: t.type({
     path: t.type({
@@ -77,16 +68,18 @@ createServerRouteRepository<{}, { options: { tags: string[] } }>().add({
   },
 });
 
-const repository = createServerRouteRepository<{}, {}>()
-  .add({
+const createServerRoute = createServerRouteFactory<{}, {}>();
+
+const repository = {
+  ...createServerRoute({
     endpoint: 'endpoint_without_params',
     handler: async () => {
       return {
         noParamsForMe: true,
       };
     },
-  })
-  .add({
+  }),
+  ...createServerRoute({
     endpoint: 'endpoint_with_params',
     params: t.type({
       path: t.type({
@@ -98,8 +91,8 @@ const repository = createServerRouteRepository<{}, {}>()
         yesParamsForMe: true,
       };
     },
-  })
-  .add({
+  }),
+  ...createServerRoute({
     endpoint: 'endpoint_with_optional_params',
     params: t.partial({
       query: t.partial({
@@ -111,7 +104,8 @@ const repository = createServerRouteRepository<{}, {}>()
         someParamsForMe: true,
       };
     },
-  });
+  }),
+};
 
 type TestRepository = typeof repository;
 
@@ -146,26 +140,21 @@ const client: TestClient = {} as any;
 // It should respect any additional create options.
 
 // @ts-expect-error Property 'timeout' is missing
-client({
-  endpoint: 'endpoint_without_params',
-});
+client('endpoint_without_params', {});
 
-client({
-  endpoint: 'endpoint_without_params',
+client('endpoint_without_params', {
   timeout: 1,
 });
 
 // It does not allow params for routes without a params codec
-client({
-  endpoint: 'endpoint_without_params',
+client('endpoint_without_params', {
   // @ts-expect-error Object literal may only specify known properties, and 'params' does not exist in type
   params: {},
   timeout: 1,
 });
 
 // It requires params for routes with a params codec
-client({
-  endpoint: 'endpoint_with_params',
+client('endpoint_with_params', {
   params: {
     // @ts-expect-error property 'serviceName' is missing in type '{}'
     path: {},
@@ -174,14 +163,12 @@ client({
 });
 
 // Params are optional if the codec has no required keys
-client({
-  endpoint: 'endpoint_with_optional_params',
+client('endpoint_with_optional_params', {
   timeout: 1,
 });
 
 // If optional, an error will still occur if the params do not match
-client({
-  endpoint: 'endpoint_with_optional_params',
+client('endpoint_with_optional_params', {
   timeout: 1,
   params: {
     // @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
@@ -190,8 +177,7 @@ client({
 });
 
 // The return type is correctly inferred
-client({
-  endpoint: 'endpoint_with_params',
+client('endpoint_with_params', {
   params: {
     path: {
       serviceName: '',

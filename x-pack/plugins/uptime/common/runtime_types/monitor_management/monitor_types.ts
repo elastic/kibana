@@ -51,6 +51,7 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 export const CommonFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.NAME]: t.string,
+    [ConfigKey.NAMESPACE]: t.string,
     [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: Schedule,

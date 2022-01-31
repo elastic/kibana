@@ -48,5 +48,6 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
     </EuiFormRow>
   </EuiDescribedFormGroup>
 );
+ClosureOptionsComponent.displayName = 'ClosureOptions';
 
 export const ClosureOptions = React.memo(ClosureOptionsComponent);

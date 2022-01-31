@@ -7736,6 +7736,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "bfetch:disable": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "visualization:visualize:legacyPieChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -7785,6 +7791,12 @@
           }
         },
         "observability:enableComparisonByDefault": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableInfrastructureView": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
