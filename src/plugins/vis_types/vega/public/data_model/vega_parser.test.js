@@ -227,11 +227,11 @@ describe('VegaParser._resolveEsQueries', () => {
           },
         };
       };
-      const tc = new class extends TimeCache {
+      const tc = new (class extends TimeCache {
         getTimeBounds() {
           return { min: 123456, max: 654321 };
         }
-      };
+      })();
       const vp = new VegaParser(spec, searchApiStub, tc, 0, mockGetServiceSettings);
       await vp._resolveDataUrls();
 
