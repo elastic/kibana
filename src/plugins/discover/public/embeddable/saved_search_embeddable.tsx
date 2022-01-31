@@ -63,6 +63,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
+    onUpdateDensity?: (rowDensity?: string) => void;
   };
 
 interface SearchEmbeddableConfig {
@@ -298,6 +299,10 @@ export class SavedSearchEmbeddable
       onUpdateRowHeight: (rowHeight) => {
         this.updateInput({ rowHeight });
       },
+      rowDensityState: this.input.rowDensity,
+      onUpdateDensity: (rowDensity) => {
+        this.updateInput({ rowDensity });
+      },
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -348,6 +353,7 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
+    searchProps.rowDensityState = this.input.rowDensity;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);

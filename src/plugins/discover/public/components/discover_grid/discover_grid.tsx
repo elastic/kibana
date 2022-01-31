@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { flattenHit, DataView } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -34,7 +35,6 @@ import {
 } from './discover_grid_columns';
 import {
   defaultPageSize,
-  GRID_STYLE,
   pageSizeArr,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from './constants';
@@ -50,6 +50,7 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useGridStyles } from '../../utils/use_grid_styles';
 
 interface SortObj {
   id: string;
@@ -162,6 +163,14 @@ export interface DiscoverGridProps {
    * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
+  /**
+   * Initial row density state
+   */
+  rowDensityState?: string;
+  /**
+   * Update density state
+   */
+  onUpdateDensity?: (density: string) => void;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -197,6 +206,8 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  rowDensityState,
+  onUpdateDensity,
 }: DiscoverGridProps) => {
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -363,7 +374,7 @@ export const DiscoverGrid = ({
     () =>
       !!onUpdateRowHeight
         ? {
-            allowDensity: false,
+            allowDensity: true,
             allowRowHeight: true,
           }
         : undefined,
@@ -392,9 +403,9 @@ export const DiscoverGrid = ({
   const rowHeightsOptions = useRowHeightsOptions({
     rowHeightState,
     onUpdateRowHeight,
-    storage: services.storage,
-    uiSettings: services.uiSettings,
   });
+
+  const { gridStyle, gridDensityClass } = useGridStyles({ rowDensityState, onUpdateDensity });
 
   if (!rowCount && isLoading) {
     return (
@@ -420,6 +431,7 @@ export const DiscoverGrid = ({
     );
   }
 
+  const gridClassNames = classNames(className, gridDensityClass);
   return (
     <DiscoverGridContext.Provider
       value={{
@@ -445,7 +457,7 @@ export const DiscoverGrid = ({
         data-title={searchTitle}
         data-description={searchDescription}
         data-document-number={displayedRows.length}
-        className={className}
+        className={gridClassNames}
       >
         <EuiDataGridMemoized
           aria-describedby={randomId}
@@ -462,7 +474,7 @@ export const DiscoverGrid = ({
           sorting={sorting as EuiDataGridSorting}
           toolbarVisibility={toolbarVisibility}
           rowHeightsOptions={rowHeightsOptions}
-          gridStyle={GRID_STYLE}
+          gridStyle={gridStyle}
         />
 
         {showDisclaimer && (

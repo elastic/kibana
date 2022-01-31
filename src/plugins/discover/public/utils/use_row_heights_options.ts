@@ -7,22 +7,15 @@
  */
 
 import type { EuiDataGridRowHeightOption, EuiDataGridRowHeightsOptions } from '@elastic/eui';
-import { useEffect, useMemo } from 'react';
-import { IUiSettingsClient } from 'kibana/public';
-import { Storage } from '../../../kibana_utils/public';
+import { useMemo } from 'react';
 import { ROW_HEIGHT_OPTION } from '../../common';
 import { isValidRowHeight } from './validate_row_height';
+import { useDiscoverServices } from './use_discover_services';
+import { DataGridOptionsRecord, getStoredRowHeight, updateStoredRowHeight } from './row_heights';
 
 interface UseRowHeightProps {
   rowHeightState?: number;
   onUpdateRowHeight?: (rowHeight: number) => void;
-  storage: Storage;
-  uiSettings: IUiSettingsClient;
-}
-
-interface DataGridOptionsRecord {
-  previousRowHeight: number;
-  previousConfigRowHeight: number;
 }
 
 /**
@@ -33,7 +26,6 @@ interface DataGridOptionsRecord {
  */
 const SINGLE_ROW_HEIGHT_OPTION = 0;
 const AUTO_ROW_HEIGHT_OPTION = -1;
-const ROW_HEIGHT_KEY = 'discover:dataGridRowHeight';
 
 /**
  * Converts rowHeight of EuiDataGrid to rowHeight number (-1 to 20)
@@ -61,44 +53,10 @@ const deserializeRowHeight = (number: number): EuiDataGridRowHeightOption | unde
   return { lineCount: number }; // custom
 };
 
-const getStoredRowHeight = (storage: Storage): DataGridOptionsRecord | null => {
-  const entry = storage.get(ROW_HEIGHT_KEY);
-  if (
-    typeof entry === 'object' &&
-    entry !== null &&
-    isValidRowHeight(entry.previousRowHeight) &&
-    isValidRowHeight(entry.previousConfigRowHeight)
-  ) {
-    return entry;
-  }
-  return null;
-};
+export const useRowHeightsOptions = ({ rowHeightState, onUpdateRowHeight }: UseRowHeightProps) => {
+  const { storage, uiSettings } = useDiscoverServices();
 
-const updateStoredRowHeight = (newRowHeight: number, configRowHeight: number, storage: Storage) => {
-  storage.set(ROW_HEIGHT_KEY, {
-    previousRowHeight: newRowHeight,
-    previousConfigRowHeight: configRowHeight,
-  });
-};
-
-export const useRowHeightsOptions = ({
-  rowHeightState,
-  onUpdateRowHeight,
-  storage,
-  uiSettings,
-}: UseRowHeightProps) => {
-  /**
-   * The following should be removed after EUI update
-   * with https://github.com/elastic/eui/issues/5524
-   */
-  useEffect(() => {
-    if (isValidRowHeight(rowHeightState)) {
-      onUpdateRowHeight?.(rowHeightState);
-      updateStoredRowHeight(rowHeightState, uiSettings.get(ROW_HEIGHT_OPTION), storage);
-    }
-  }, [rowHeightState, onUpdateRowHeight, storage, uiSettings]);
-
-  const defaultRowHeights = useMemo((): EuiDataGridRowHeightsOptions => {
+  return useMemo((): EuiDataGridRowHeightsOptions => {
     const rowHeightFromLS = getStoredRowHeight(storage);
     const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
 
@@ -116,11 +74,6 @@ export const useRowHeightsOptions = ({
       rowHeight = configRowHeight;
     }
 
-    // update local storage value when config has changed
-    if (!configHasNotChanged(rowHeightFromLS)) {
-      updateStoredRowHeight(configRowHeight, configRowHeight, storage);
-    }
-
     return {
       defaultHeight: deserializeRowHeight(rowHeight),
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
@@ -130,6 +83,4 @@ export const useRowHeightsOptions = ({
       },
     };
   }, [rowHeightState, uiSettings, storage, onUpdateRowHeight]);
-
-  return defaultRowHeights;
 };

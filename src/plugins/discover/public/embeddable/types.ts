@@ -24,6 +24,7 @@ export interface SearchInput extends EmbeddableInput {
   columns?: string[];
   sort?: SortOrder[];
   rowHeight?: number;
+  rowDensity?: string;
 }
 
 export interface SearchOutput extends EmbeddableOutput {

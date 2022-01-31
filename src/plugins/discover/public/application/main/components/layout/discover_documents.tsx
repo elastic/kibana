@@ -99,7 +99,7 @@ function DiscoverDocumentsComponent({
   );
 
   const onUpdateRowHeight = useCallback(
-    (newRowHeight?: number) => {
+    (newRowHeight: number) => {
       stateContainer.setAppState({ rowHeight: newRowHeight });
     },
     [stateContainer]
