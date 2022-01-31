@@ -9,7 +9,7 @@ exports[`GaugeComponent renders the chart 1`] = `
     debugState={false}
     theme={Object {}}
   />
-  <Component
+  <Connect(SpecInstance)
     actual={3}
     bandFillColor={[Function]}
     bands={
