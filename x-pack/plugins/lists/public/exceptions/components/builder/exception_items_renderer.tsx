@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
@@ -424,6 +424,8 @@ export const ExceptionBuilderComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}
+
+      <EuiSpacer size="m" />
 
       <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">
