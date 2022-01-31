@@ -106,13 +106,6 @@ const PieOptions = (props: PieOptionsProps) => {
   }, [legendUiStateValue]);
 
   useEffect(() => {
-    const newLegendDisplay = getLegendDisplay(legendVisibility);
-    if (newLegendDisplay !== stateParams.legendDisplay) {
-      setValue('legendDisplay', newLegendDisplay);
-    }
-  }, [getLegendDisplay, legendVisibility, setValue, stateParams.legendDisplay]);
-
-  useEffect(() => {
     const fetchPalettes = async () => {
       const palettes = await props.palettes?.getPalettes();
       setPalettesRegistry(palettes);
@@ -126,6 +119,21 @@ const PieOptions = (props: PieOptionsProps) => {
       setValue('emptySizeRatio', emptySizeRatio);
     },
     [setValue]
+  );
+
+  const handleLegendDisplayChange = useCallback(
+    (name: keyof PartitionVisParams, show: boolean) => {
+      setLegendVisibility(show);
+
+      const legendDisplay = getLegendDisplay(show);
+      if (legendDisplay === stateParams[name]) {
+        setValue(name, getLegendDisplay(!show));
+      }
+      setValue(name, legendDisplay);
+
+      props.uiState?.set('vis.legendOpen', show);
+    },
+    [getLegendDisplay, props.uiState, setValue, stateParams]
   );
 
   return (
@@ -198,11 +206,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="legendDisplay"
               value={legendVisibility}
-              setValue={(paramName, show) => {
-                props.uiState?.set('vis.legendOpen', show);
-                setLegendVisibility(show);
-                setValue(paramName, getLegendDisplay(show));
-              }}
+              setValue={handleLegendDisplayChange}
               data-test-subj="visTypePieAddLegendSwitch"
             />
             <SwitchOption
