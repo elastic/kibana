@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-
-import { SavedObjectsClientContract } from 'kibana/server';
-
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
 } from '../../../../lists/common/schemas/request/import_exceptions_schema.mock';
+import { createExtensionPointStorageMock } from '../extension_points/extension_point_storage.mock';
 
-import { importExceptionsAsStream } from './import_exception_list_and_items';
 import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { getExceptionListSavedObjectClientMock, toReadable } from './exception_list_client.mock';
+import { ExceptionListClient } from './exception_list_client';
 
 jest.mock('./utils/import/import_exception_lists');
 jest.mock('./utils/import/import_exception_list_items');
 
-const toReadable = (items: unknown[]): Readable => {
-  const stringOfExceptions = items.map((item) => JSON.stringify(item));
-
-  return new Readable({
-    read(): void {
-      this.push(stringOfExceptions.join('\n'));
-      this.push(null);
-    },
-  });
-};
-
 describe('import_exception_list_and_items', () => {
+  let exceptionListClient: ExceptionListClient;
+
+  beforeEach(() => {
+    exceptionListClient = new ExceptionListClient({
+      enableServerExtensionPoints: false,
+      savedObjectsClient: getExceptionListSavedObjectClientMock(),
+      serverExtensionsClient: createExtensionPointStorageMock().extensionPointStorage.getClient(),
+      user: 'elastic',
+    });
+  });
+
   beforeEach(() => {
     (importExceptionLists as jest.Mock).mockResolvedValue({
       errors: [],
@@ -53,15 +51,13 @@ describe('import_exception_list_and_items', () => {
       success_count: 1,
     });
 
-    const result = await importExceptionsAsStream({
+    const result = await exceptionListClient.importExceptionListAndItems({
       exceptionsToImport: toReadable([
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
       maxExceptionsImportSize: 10000,
       overwrite: false,
-      savedObjectsClient: {} as SavedObjectsClientContract,
-      user: 'elastic',
     });
     expect(result).toEqual({
       errors: [{ error: { message: 'some error occurred', status_code: 400 } }],
@@ -81,15 +77,13 @@ describe('import_exception_list_and_items', () => {
       success_count: 1,
     });
 
-    const result = await importExceptionsAsStream({
+    const result = await exceptionListClient.importExceptionListAndItems({
       exceptionsToImport: toReadable([
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
       maxExceptionsImportSize: 10000,
       overwrite: false,
-      savedObjectsClient: {} as SavedObjectsClientContract,
-      user: 'elastic',
     });
     expect(result).toEqual({
       errors: [{ error: { message: 'some error occurred', status_code: 400 } }],
@@ -103,15 +97,13 @@ describe('import_exception_list_and_items', () => {
   });
 
   test('it should report success true if no errors occurred importing lists and items', async () => {
-    const result = await importExceptionsAsStream({
+    const result = await exceptionListClient.importExceptionListAndItems({
       exceptionsToImport: toReadable([
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
       maxExceptionsImportSize: 10000,
       overwrite: false,
-      savedObjectsClient: {} as SavedObjectsClientContract,
-      user: 'elastic',
     });
     expect(result).toEqual({
       errors: [],

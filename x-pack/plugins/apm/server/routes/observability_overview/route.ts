@@ -14,13 +14,17 @@ import { getHasData } from './has_data';
 import { rangeRt } from '../default_api_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview/has_data',
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    hasData: boolean;
+    indices: import('./../../../../observability/common/typings').ApmIndicesConfig;
+  }> => {
     const setup = await setupRequest(resources);
     return await getHasData({ setup });
   },
@@ -35,7 +39,14 @@ const observabilityOverviewRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{
+    serviceCount: number;
+    transactionPerMinute:
+      | { value: undefined; timeseries: never[] }
+      | { value: number; timeseries: Array<{ x: number; y: number | null }> };
+  }> => {
     const setup = await setupRequest(resources);
     const { bucketSize, intervalString, start, end } = resources.params.query;
 
@@ -69,7 +80,7 @@ const observabilityOverviewRoute = createApmServerRoute({
   },
 });
 
-export const observabilityOverviewRouteRepository =
-  createApmServerRouteRepository()
-    .add(observabilityOverviewRoute)
-    .add(observabilityOverviewHasDataRoute);
+export const observabilityOverviewRouteRepository = {
+  ...observabilityOverviewRoute,
+  ...observabilityOverviewHasDataRoute,
+};

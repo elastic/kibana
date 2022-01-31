@@ -10,7 +10,10 @@ import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
 import { ConditionEntryField } from '../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
@@ -36,7 +39,7 @@ type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    return {
+    const exceptionItem: ExceptionListItemSchema = {
       _version: this.randomString(5),
       comments: [],
       created_at: this.randomPastDate(),
@@ -44,19 +47,10 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       description: 'created by ExceptionListItemGenerator',
       entries: [
         {
-          field: ConditionEntryField.HASH,
+          field: 'process.hash.md5',
           operator: 'included',
           type: 'match',
-          value: '1234234659af249ddf3e40864e9fb241',
-        },
-        {
-          field: ConditionEntryField.PATH,
-          operator: 'included',
-          type: 'match',
-          value:
-            overrides.os_types && overrides.os_types[0] === 'windows'
-              ? 'c:\\fol\\bin.exe'
-              : '/one/two/three',
+          value: '741462ab431a22233C787BAAB9B653C7',
         },
       ],
       id: this.seededUUIDv4(),
@@ -73,6 +67,19 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       updated_by: this.randomUser(),
       ...(overrides || {}),
     };
+
+    // If the `entries` was not overwritten, then add in the PATH condition with a
+    // value that is OS appropriate
+    if (!overrides.entries) {
+      exceptionItem.entries.push({
+        field: ConditionEntryField.PATH,
+        operator: 'included',
+        type: 'match',
+        value: exceptionItem.os_types[0] === 'windows' ? 'c:\\fol\\bin.exe' : '/one/two/three',
+      });
+    }
+
+    return exceptionItem;
   }
 
   generateForCreate(
@@ -178,6 +185,86 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       /* eslint-enable @typescript-eslint/naming-convention */
     } = this.generateTrustedApp();
 
+    return {
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version: _version ?? 'some value',
+      ...overrides,
+    };
+  }
+
+  generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    const eventFilter = this.generate(overrides);
+
+    return {
+      ...eventFilter,
+      name: `Event filter (${this.randomString(5)})`,
+      list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+    };
+  }
+
+  generateEventFilterForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateEventFilter();
+    return {
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      ...overrides,
+    };
+  }
+
+  generateEventFilterForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      name,
+      type,
+      comments,
+      id,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      _version,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generateEventFilter();
     return {
       description,
       entries,

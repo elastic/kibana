@@ -27,8 +27,6 @@ import {
   SORT_RULES_BTN,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
-  RULE_AUTO_REFRESH_IDLE_MODAL,
-  RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
   rowsPerPageSelector,
   pageSelector,
   DUPLICATE_RULE_ACTION_BTN,
@@ -144,7 +142,6 @@ export const exportFirstRule = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
-  waitForRulesTableToBeRefreshed();
 };
 
 export const goToCreateNewRule = () => {
@@ -196,9 +193,7 @@ export const confirmRulesDelete = () => {
 
 export const sortByActivatedRules = () => {
   cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
-  waitForRulesTableToBeRefreshed();
   cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
-  waitForRulesTableToBeRefreshed();
 };
 
 export const waitForRulesTableToBeLoaded = () => {
@@ -229,32 +224,11 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
   cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should(condition);
 };
 
-export const dismissAllRulesIdleModal = () => {
-  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE)
-    .eq(1)
-    .should('exist')
-    .click({ force: true, multiple: true });
-  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
-};
-
-export const checkAllRulesIdleModal = (condition: string) => {
-  cy.tick(2700000);
-  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should(condition);
-};
-
-export const resetAllRulesIdleModalTimeout = () => {
-  cy.tick(2000000);
-  cy.window().trigger('mousemove', { force: true });
-  cy.tick(700000);
-};
-
 export const changeRowsPerPageTo = (rowsCount: number) => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
   cy.get(rowsPerPageSelector(rowsCount))
     .pipe(($el) => $el.trigger('click'))
     .should('not.be.visible');
-
-  waitForRulesTableToBeRefreshed();
 };
 
 export const changeRowsPerPageTo100 = () => {
@@ -264,7 +238,6 @@ export const changeRowsPerPageTo100 = () => {
 export const goToPage = (pageNumber: number) => {
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
   cy.get(pageSelector(pageNumber)).last().click({ force: true });
-  waitForRulesTableToBeRefreshed();
 };
 
 export const importRules = (rulesFile: string) => {

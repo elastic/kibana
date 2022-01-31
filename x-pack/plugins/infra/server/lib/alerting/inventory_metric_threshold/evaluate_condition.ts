@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { mapValues } from 'lodash';
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
-import { Comparator, InventoryMetricConditions } from './types';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
-import { InfraSource } from '../../sources';
+import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
+import { InfraSource } from '../../sources';
 import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 
