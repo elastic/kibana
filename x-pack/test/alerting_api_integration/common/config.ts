@@ -40,6 +40,7 @@ const enabledActionTypes = [
   '.resilient',
   '.slack',
   '.webhook',
+  '.xmatters',
   'test.authorization',
   'test.failing',
   'test.index-record',

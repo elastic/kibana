@@ -18,6 +18,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe.only('xmatters action', () => {
+    let simulatedActionId = '';
     let xmattersServer: http.Server;
     let xmattersSimulatorURL: string = '';
 
@@ -36,10 +37,12 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'An xMatters action',
+          name: 'An xmatters action',
           connector_type_id: '.xmatters',
           config: {
             url: xmattersSimulatorURL,
+            headers: null,
+            hasAuth: false,
           },
         })
         .expect(200);
@@ -47,199 +50,169 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
-        name: 'A xmatters action',
+        name: 'An xmatters action',
         connector_type_id: '.xmatters',
-        is_missing_secrets: true,
+        is_missing_secrets: false,
         config: {
           url: xmattersSimulatorURL,
+          headers: null,
+          hasAuth: false,
         },
       });
     });
 
-    // it('should return successfully when passed valid create parameters', async () => {
-    //   const { body: createdAction } = await supertest
-    //     .post('/api/actions/connector')
-    //     .set('kbn-xsrf', 'foo')
-    //     .send({
-    //       name: 'A xMatters action',
-    //       connector_type_id: '.xmatters',
-    //       config: {
-    //         url: xmattersSimulatorURL,
-    //       },
-    //       secrets: {
-    //         user: 'username',
-    //         password: 'mypassphrase',
-    //       },
-    //     })
-    //     .expect(200);
+    it('xmatters connector can be executed with valid username and password', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An xmatters action',
+          connector_type_id: '.xmatters',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: xmattersSimulatorURL,
+            headers: null,
+            hasAuth: true,
+          },
+        })
+        .expect(200);
 
-    //   expect(createdAction).to.eql({
-    //     id: createdAction.id,
-    //     is_preconfigured: false,
-    //     name: 'A xMatters action',
-    //     connector_type_id: '.xmatters',
-    //     is_missing_secrets: false,
-    //     config: {
-    //       url: xmattersSimulatorURL,
-    //     },
-    //   });
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        is_preconfigured: false,
+        name: 'An xmatters action',
+        connector_type_id: '.xmatters',
+        is_missing_secrets: false,
+        config: {
+          url: xmattersSimulatorURL,
+          headers: null,
+          hasAuth: true,
+        },
+      });
+    });
 
-    //   expect(typeof createdAction.id).to.be('string');
+    it('should return unsuccessfully when default xmatters url is not present in allowedHosts', async () => {
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A xmatters action',
+          connector_type_id: '.xmatters',
+          config: {
+            url: 'https://events.xmatters.com/v2/enqueue',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type config: error configuring xMatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
+          });
+        });
+    });
 
-    //   const { body: fetchedAction } = await supertest
-    //     .get(`/api/actions/connector/${createdAction.id}`)
-    //     .expect(200);
+    it('should create xmatters simulator action successfully', async () => {
+      const { body: createdSimulatedAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A xmatters simulator',
+          connector_type_id: '.xmatters',
+          config: {
+            url: xmattersSimulatorURL,
+            headers: null,
+            hasAuth: false,
+          },
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+        })
+        .expect(200);
 
-    //   expect(fetchedAction).to.eql({
-    //     id: fetchedAction.id,
-    //     is_preconfigured: false,
-    //     name: 'A xMatters action',
-    //     connector_type_id: '.xmatters',
-    //     is_missing_secrets: false,
-    //     config: {
-    //       url: xmattersSimulatorURL,
-    //     },
-    //   });
-    // });
+      simulatedActionId = createdSimulatedAction.id;
+    });
 
-  //   it('should return unsuccessfully when passed invalid create parameters', async () => {
-  //     await supertest
-  //       .post('/api/actions/connector')
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         name: 'A xmatters action',
-  //         connector_type_id: '.xmatters',
-  //         config: {
-  //           url: xmattersSimulatorURL,
-  //         },
-  //         secrets: {},
-  //         params: {
-  //           alertActionGroupName: 'some group name',
-  //         },
-  //       })
-  //       .expect(400)
-  //       .then((resp: any) => {
-  //         expect(resp.body).to.eql({
-  //           statusCode: 400,
-  //           error: 'Bad Request',
-  //           message:
-  //             'error validating action type parameters: [alertId]: expected value of type [string] but got [undefined]',
-  //         });
-  //       });
-  //   });
+    it('should handle executing with a simulated success', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'success',
+            alertActionGroupName: 'small t-shirt',
+            alertId: 'abcd-1234',
+          },
+        })
+        .expect(200);
 
-  //   it('should return unsuccessfully when default xmatters url is not present in allowedHosts', async () => {
-  //     await supertest
-  //       .post('/api/actions/connector')
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         name: 'A xmatters action',
-  //         connector_type_id: '.xmatters',
-  //         secrets: {},
-  //       })
-  //       .expect(400)
-  //       .then((resp: any) => {
-  //         expect(resp.body).to.eql({
-  //           statusCode: 400,
-  //           error: 'Bad Request',
-  //           message:
-  //             'error validating action type config: error configuring xmatters action: target url "https://events.xmatters.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
-  //         });
-  //       });
-  //   });
+      expect(result).to.eql({
+        status: 'ok',
+        connector_id: simulatedActionId,
+        data: {
+          message: 'Event processed',
+          summary: 'success',
+          alertActionGroupName: 'small t-shirt',
+          alertId: 'abcd-1234',
+        },
+      });
+    });
 
-  //   it('should create xmatters simulator action successfully', async () => {
-  //     const { body: createdSimulatedAction } = await supertest
-  //       .post('/api/actions/connector')
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         name: 'A xmatters simulator',
-  //         connector_type_id: '.xmatters',
-  //         config: {
-  //           url: xmattersSimulatorURL,
-  //         },
-  //         secrets: {
-  //           routingKey: 'pager-duty-routing-key',
-  //         },
-  //       })
-  //       .expect(200);
+    it('should handle a 40x xmatters error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'respond-with-40x',
+            alertActionGroupName: 'small t-shirt',
+            alertId: 'abcd-1234',
+          },
+        })
+        .expect(200);
+      expect(result.status).to.equal('error');
+      expect(result.message).to.match(/error posting xmatters event: unexpected status 418/);
+    });
 
-  //     simulatedActionId = createdSimulatedAction.id;
-  //   });
+    it('should handle a 429 xmatters error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'respond-with-429',
+            alertActionGroupName: 'small t-shirt',
+            alertId: 'abcd-1234',
+          },
+        })
+        .expect(200);
 
-  //   it('should handle executing with a simulated success', async () => {
-  //     const { body: result } = await supertest
-  //       .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         params: {
-  //           summary: 'success',
-  //         },
-  //       })
-  //       .expect(200);
+      expect(result.status).to.equal('error');
+      expect(result.message).to.match(/error posting xmatters event: http status 429, retry later/);
+      expect(result.retry).to.equal(true);
+    });
 
-  //     expect(proxyHaveBeenCalled).to.equal(true);
-  //     expect(result).to.eql({
-  //       status: 'ok',
-  //       connector_id: simulatedActionId,
-  //       data: {
-  //         message: 'Event processed',
-  //         status: 'success',
-  //       },
-  //     });
-  //   });
+    it('should handle a 500 xmatters error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'respond-with-502',
+            alertActionGroupName: 'small t-shirt',
+            alertId: 'abcd-1234',
+          },
+        })
+        .expect(200);
 
-  //   it('should handle a 40x xmatters error', async () => {
-  //     const { body: result } = await supertest
-  //       .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         params: {
-  //           summary: 'respond-with-40x',
-  //         },
-  //       })
-  //       .expect(200);
-  //     expect(result.status).to.equal('error');
-  //     expect(result.message).to.match(/error posting xmatters event: unexpected status 418/);
-  //   });
-
-  //   it('should handle a 429 xmatters error', async () => {
-  //     const { body: result } = await supertest
-  //       .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         params: {
-  //           summary: 'respond-with-429',
-  //         },
-  //       })
-  //       .expect(200);
-
-  //     expect(result.status).to.equal('error');
-  //     expect(result.message).to.match(/error posting xmatters event: http status 429, retry later/);
-  //     expect(result.retry).to.equal(true);
-  //   });
-
-  //   it('should handle a 500 xmatters error', async () => {
-  //     const { body: result } = await supertest
-  //       .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-  //       .set('kbn-xsrf', 'foo')
-  //       .send({
-  //         params: {
-  //           summary: 'respond-with-502',
-  //         },
-  //       })
-  //       .expect(200);
-
-  //     expect(result.status).to.equal('error');
-  //     expect(result.message).to.match(/error posting xmatters event: http status 502/);
-  //     expect(result.retry).to.equal(true);
-  //   });
-
-  //   after(() => {
-  //     if (proxyServer) {
-  //       proxyServer.close();
-  //     }
-  //   });
-  // });
+      expect(result.status).to.equal('error');
+      expect(result.message).to.match(/error posting xmatters event: http status 502/);
+      expect(result.retry).to.equal(true);
+    });
   });
 }

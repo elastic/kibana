@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isUndefined } from 'lodash';
@@ -68,6 +68,19 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
   messageVariables,
   errors,
 }) => {
+  useEffect(() => {
+    if (!actionParams) {
+      editAction(
+        'actionParams',
+        {
+          alertId: '{{alert.id}}',
+          alertActionGroupName: '{{alert.actionGroupName}}',
+        },
+        index
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionParams]);
   return (
     <>
       <EuiFlexGroup>
