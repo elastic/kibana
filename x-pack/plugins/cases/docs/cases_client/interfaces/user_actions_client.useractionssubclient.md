@@ -32,4 +32,4 @@ Retrieves all user actions for a particular case.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/user_actions/client.ts:29](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/user_actions/client.ts#L29)
+[x-pack/plugins/cases/server/client/user_actions/client.ts:29](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/user_actions/client.ts#L29)

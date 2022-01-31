@@ -33,4 +33,4 @@ Retrieves the total number of open, closed, and in-progress cases.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/stats/client.ts:34](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/stats/client.ts#L34)
+[x-pack/plugins/cases/server/client/stats/client.ts:34](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/stats/client.ts#L34)

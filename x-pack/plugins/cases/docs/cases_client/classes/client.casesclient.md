@@ -41,11 +41,11 @@ Client wrapper that contains accessor methods for individual entities within the
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`CasesClientArgs`](../interfaces/client.__internalNamespace.CasesClientArgs.md) |
+| `args` | [`CasesClientArgs`](../interfaces/client._internal_namespace.CasesClientArgs.md) |
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:29](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L29)
+[x-pack/plugins/cases/server/client/client.ts:29](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L29)
 
 ## Properties
 
@@ -55,7 +55,7 @@ Client wrapper that contains accessor methods for individual entities within the
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:23](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L23)
+[x-pack/plugins/cases/server/client/client.ts:23](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L23)
 
 ___
 
@@ -65,17 +65,17 @@ ___
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:22](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L22)
+[x-pack/plugins/cases/server/client/client.ts:22](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L22)
 
 ___
 
 ### \_casesClientInternal
 
-• `Private` `Readonly` **\_casesClientInternal**: [`CasesClientInternal`](client.__internalNamespace.CasesClientInternal.md)
+• `Private` `Readonly` **\_casesClientInternal**: [`CasesClientInternal`](client._internal_namespace.CasesClientInternal.md)
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:21](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L21)
+[x-pack/plugins/cases/server/client/client.ts:21](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L21)
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:25](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L25)
+[x-pack/plugins/cases/server/client/client.ts:25](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L25)
 
 ___
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:27](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L27)
+[x-pack/plugins/cases/server/client/client.ts:27](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L27)
 
 ___
 
@@ -105,7 +105,7 @@ ___
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:26](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L26)
+[x-pack/plugins/cases/server/client/client.ts:26](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L26)
 
 ___
 
@@ -115,7 +115,7 @@ ___
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:24](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L24)
+[x-pack/plugins/cases/server/client/client.ts:24](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L24)
 
 ## Accessors
 
@@ -131,7 +131,7 @@ Retrieves an interface for interacting with attachments (comments) entities.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:49](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L49)
+[x-pack/plugins/cases/server/client/client.ts:49](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L49)
 
 ___
 
@@ -147,7 +147,7 @@ Retrieves an interface for interacting with cases entities.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:42](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L42)
+[x-pack/plugins/cases/server/client/client.ts:42](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L42)
 
 ___
 
@@ -163,7 +163,7 @@ Retrieves an interface for interacting with the configuration of external connec
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:63](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L63)
+[x-pack/plugins/cases/server/client/client.ts:63](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L63)
 
 ___
 
@@ -179,7 +179,7 @@ Retrieves an interface for retrieving metrics related to the cases entities.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:77](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L77)
+[x-pack/plugins/cases/server/client/client.ts:77](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L77)
 
 ___
 
@@ -195,7 +195,7 @@ Retrieves an interface for retrieving statistics related to the cases entities.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:70](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L70)
+[x-pack/plugins/cases/server/client/client.ts:70](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L70)
 
 ___
 
@@ -211,4 +211,4 @@ Retrieves an interface for interacting with the user actions associated with the
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/client.ts:56](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/client.ts#L56)
+[x-pack/plugins/cases/server/client/client.ts:56](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/client.ts#L56)

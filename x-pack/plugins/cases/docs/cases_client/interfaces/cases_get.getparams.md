@@ -23,7 +23,7 @@ Case ID
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:144](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L144)
+[x-pack/plugins/cases/server/client/cases/get.ts:144](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L144)
 
 ___
 
@@ -35,4 +35,4 @@ Whether to include the attachments for a case in the response
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:148](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L148)
+[x-pack/plugins/cases/server/client/cases/get.ts:148](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L148)

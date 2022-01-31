@@ -6,7 +6,7 @@
 
 ### Namespaces
 
-- [\_\_internalNamespace](configure_client.__internalNamespace.md)
+- [\_internal\_namespace](configure_client._internal_namespace.md)
 
 ### Interfaces
 
@@ -20,18 +20,18 @@
 
 ### getConnectors
 
-▸ **getConnectors**(`__namedParameters`): `Promise`<[`FindActionResult`](../interfaces/client.__internalNamespace.FindActionResult.md)[]\>
+▸ **getConnectors**(`__namedParameters`): `Promise`<[`FindActionResult`](../interfaces/client._internal_namespace.FindActionResult.md)[]\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `__namedParameters` | [`CasesClientArgs`](../interfaces/client.__internalNamespace.CasesClientArgs.md) |
+| `__namedParameters` | [`CasesClientArgs`](../interfaces/client._internal_namespace.CasesClientArgs.md) |
 
 #### Returns
 
-`Promise`<[`FindActionResult`](../interfaces/client.__internalNamespace.FindActionResult.md)[]\>
+`Promise`<[`FindActionResult`](../interfaces/client._internal_namespace.FindActionResult.md)[]\>
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/configure/client.ts:206](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/configure/client.ts#L206)
+[x-pack/plugins/cases/server/client/configure/client.ts:206](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L206)

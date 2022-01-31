@@ -22,7 +22,7 @@ API for interacting with the metrics.
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [`CaseMetricsParams`](metrics_client.__internalNamespace.CaseMetricsParams.md) |
+| `params` | [`CaseMetricsParams`](metrics_client._internal_namespace.CaseMetricsParams.md) |
 
 #### Returns
 
@@ -30,4 +30,4 @@ API for interacting with the metrics.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/metrics/client.ts:19](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/metrics/client.ts#L19)
+[x-pack/plugins/cases/server/client/metrics/client.ts:19](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/metrics/client.ts#L19)

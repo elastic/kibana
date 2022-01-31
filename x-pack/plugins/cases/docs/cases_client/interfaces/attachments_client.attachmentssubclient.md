@@ -31,7 +31,7 @@ Adds an attachment to a case.
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [`AddArgs`](attachments_client.__internalNamespace.AddArgs.md) |
+| `params` | [`AddArgs`](attachments_client._internal_namespace.AddArgs.md) |
 
 #### Returns
 
@@ -39,7 +39,7 @@ Adds an attachment to a case.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:35](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L35)
+[x-pack/plugins/cases/server/client/attachments/client.ts:35](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L35)
 
 ___
 
@@ -53,7 +53,7 @@ Deletes a single attachment for a specific case.
 
 | Name | Type |
 | :------ | :------ |
-| `deleteArgs` | [`DeleteArgs`](attachments_client.__internalNamespace.DeleteArgs.md) |
+| `deleteArgs` | [`DeleteArgs`](attachments_client._internal_namespace.DeleteArgs.md) |
 
 #### Returns
 
@@ -61,7 +61,7 @@ Deletes a single attachment for a specific case.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:43](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L43)
+[x-pack/plugins/cases/server/client/attachments/client.ts:43](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L43)
 
 ___
 
@@ -75,7 +75,7 @@ Deletes all attachments associated with a single case.
 
 | Name | Type |
 | :------ | :------ |
-| `deleteAllArgs` | [`DeleteAllArgs`](attachments_client.__internalNamespace.DeleteAllArgs.md) |
+| `deleteAllArgs` | [`DeleteAllArgs`](attachments_client._internal_namespace.DeleteAllArgs.md) |
 
 #### Returns
 
@@ -83,7 +83,7 @@ Deletes all attachments associated with a single case.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:39](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L39)
+[x-pack/plugins/cases/server/client/attachments/client.ts:39](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L39)
 
 ___
 
@@ -97,7 +97,7 @@ Retrieves all comments matching the search criteria.
 
 | Name | Type |
 | :------ | :------ |
-| `findArgs` | [`FindArgs`](attachments_client.__internalNamespace.FindArgs.md) |
+| `findArgs` | [`FindArgs`](attachments_client._internal_namespace.FindArgs.md) |
 
 #### Returns
 
@@ -105,13 +105,13 @@ Retrieves all comments matching the search criteria.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:47](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L47)
+[x-pack/plugins/cases/server/client/attachments/client.ts:47](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L47)
 
 ___
 
 ### get
 
-▸ **get**(`getArgs`): `Promise`<{ `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`user`](../modules/client.__internalNamespace.md#user)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `alertId`: `string` \| `string`[] ; `index`: `string` \| `string`[] ; `owner`: `string` = rt.string; `rule`: { id: string \| null; name: string \| null; } ; `type`: [`alert`](../modules/client.__internalNamespace.md#alert)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`actions`](../modules/client.__internalNamespace.md#actions)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string }\>
+▸ **get**(`getArgs`): `Promise`<{ `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`user`](../modules/client._internal_namespace.md#user)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `alertId`: `string` \| `string`[] ; `index`: `string` \| `string`[] ; `owner`: `string` = rt.string; `rule`: { id: string \| null; name: string \| null; } ; `type`: [`alert`](../modules/client._internal_namespace.md#alert)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`actions`](../modules/client._internal_namespace.md#actions)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string }\>
 
 Retrieves a single attachment for a case.
 
@@ -119,15 +119,15 @@ Retrieves a single attachment for a case.
 
 | Name | Type |
 | :------ | :------ |
-| `getArgs` | [`GetArgs`](attachments_client.__internalNamespace.GetArgs.md) |
+| `getArgs` | [`GetArgs`](attachments_client._internal_namespace.GetArgs.md) |
 
 #### Returns
 
-`Promise`<{ `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`user`](../modules/client.__internalNamespace.md#user)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `alertId`: `string` \| `string`[] ; `index`: `string` \| `string`[] ; `owner`: `string` = rt.string; `rule`: { id: string \| null; name: string \| null; } ; `type`: [`alert`](../modules/client.__internalNamespace.md#alert)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`actions`](../modules/client.__internalNamespace.md#actions)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string }\>
+`Promise`<{ `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`user`](../modules/client._internal_namespace.md#user)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `alertId`: `string` \| `string`[] ; `index`: `string` \| `string`[] ; `owner`: `string` = rt.string; `rule`: { id: string \| null; name: string \| null; } ; `type`: [`alert`](../modules/client._internal_namespace.md#alert)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string } & { `actions`: { targets: { hostname: string; endpointId: string; }[]; type: string; } ; `comment`: `string` = rt.string; `owner`: `string` = rt.string; `type`: [`actions`](../modules/client._internal_namespace.md#actions)  } & { `created_at`: `string` = rt.string; `created_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } = UserRT; `owner`: `string` = rt.string; `pushed_at`: ``null`` \| `string` ; `pushed_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `updated_at`: ``null`` \| `string` ; `updated_by`: ``null`` \| { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; }  } & { `id`: `string` = rt.string; `version`: `string` = rt.string }\>
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:59](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L59)
+[x-pack/plugins/cases/server/client/attachments/client.ts:59](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L59)
 
 ___
 
@@ -141,7 +141,7 @@ Gets all attachments for a single case.
 
 | Name | Type |
 | :------ | :------ |
-| `getAllArgs` | [`GetAllArgs`](attachments_client.__internalNamespace.GetAllArgs.md) |
+| `getAllArgs` | [`GetAllArgs`](attachments_client._internal_namespace.GetAllArgs.md) |
 
 #### Returns
 
@@ -149,7 +149,7 @@ Gets all attachments for a single case.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:55](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L55)
+[x-pack/plugins/cases/server/client/attachments/client.ts:55](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L55)
 
 ___
 
@@ -163,7 +163,7 @@ Retrieves all alerts attach to a case given a single case ID
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [`GetAllAlertsAttachToCase`](attachments_client.__internalNamespace.GetAllAlertsAttachToCase.md) |
+| `params` | [`GetAllAlertsAttachToCase`](attachments_client._internal_namespace.GetAllAlertsAttachToCase.md) |
 
 #### Returns
 
@@ -171,7 +171,7 @@ Retrieves all alerts attach to a case given a single case ID
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:51](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L51)
+[x-pack/plugins/cases/server/client/attachments/client.ts:51](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L51)
 
 ___
 
@@ -187,7 +187,7 @@ The request must include all fields for the attachment. Even the fields that are
 
 | Name | Type |
 | :------ | :------ |
-| `updateArgs` | [`UpdateArgs`](attachments_client.__internalNamespace.UpdateArgs.md) |
+| `updateArgs` | [`UpdateArgs`](attachments_client._internal_namespace.UpdateArgs.md) |
 
 #### Returns
 
@@ -195,4 +195,4 @@ The request must include all fields for the attachment. Even the fields that are
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/attachments/client.ts:65](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/attachments/client.ts#L65)
+[x-pack/plugins/cases/server/client/attachments/client.ts:65](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/attachments/client.ts#L65)

@@ -19,7 +19,7 @@
   "excludeExternals": true,
   "out": "cases_client",
   "theme": "markdown",
-  "internalNamespace": "__internalNamespace",
+  "internalNamespace": "_internal_namespace",
   "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-missing-exports"],
   "readme": "none",
   "name": "Cases Client API Interface",

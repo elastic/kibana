@@ -6,6 +6,6 @@
 
 ## Hierarchy
 
-- [`CasesResponse`](../modules/typedoc_interfaces.__internalNamespace.md#casesresponse)
+- [`CasesResponse`](../modules/typedoc_interfaces._internal_namespace.md#casesresponse)
 
   ↳ **`ICasesResponse`**

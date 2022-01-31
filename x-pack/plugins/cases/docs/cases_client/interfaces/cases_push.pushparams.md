@@ -23,7 +23,7 @@ The ID of a case
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/push.ts:48](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/push.ts#L48)
+[x-pack/plugins/cases/server/client/cases/push.ts:48](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/push.ts#L48)
 
 ___
 
@@ -35,4 +35,4 @@ The ID of an external system to push to
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/push.ts:52](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/push.ts#L52)
+[x-pack/plugins/cases/server/client/cases/push.ts:52](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/push.ts#L52)

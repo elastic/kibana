@@ -23,7 +23,7 @@ The alert ID to search for
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:45](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L45)
+[x-pack/plugins/cases/server/client/cases/get.ts:45](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L45)
 
 ___
 
@@ -41,4 +41,4 @@ The filtering options when searching for associated cases.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:49](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L49)
+[x-pack/plugins/cases/server/client/cases/get.ts:49](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L49)

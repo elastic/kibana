@@ -6,7 +6,7 @@
 
 ### Namespaces
 
-- [\_\_internalNamespace](cases_get.__internalNamespace.md)
+- [\_internal\_namespace](cases_get._internal_namespace.md)
 
 ### Interfaces
 
@@ -23,7 +23,7 @@
 
 ### getReporters
 
-▸ **getReporters**(`params`, `clientArgs`): `Promise`<[`User`](cases_get.__internalNamespace.md#user)[]\>
+▸ **getReporters**(`params`, `clientArgs`): `Promise`<[`User`](cases_get._internal_namespace.md#user)[]\>
 
 Retrieves the reporters from all the cases.
 
@@ -33,15 +33,15 @@ Retrieves the reporters from all the cases.
 | :------ | :------ |
 | `params` | `Object` |
 | `params.owner` | `undefined` \| `string` \| `string`[] |
-| `clientArgs` | [`CasesClientArgs`](../interfaces/client.__internalNamespace.CasesClientArgs.md) |
+| `clientArgs` | [`CasesClientArgs`](../interfaces/client._internal_namespace.CasesClientArgs.md) |
 
 #### Returns
 
-`Promise`<[`User`](cases_get.__internalNamespace.md#user)[]\>
+`Promise`<[`User`](cases_get._internal_namespace.md#user)[]\>
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:301](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L301)
+[x-pack/plugins/cases/server/client/cases/get.ts:301](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L301)
 
 ___
 
@@ -57,7 +57,7 @@ Retrieves the tags from all the cases.
 | :------ | :------ |
 | `params` | `Object` |
 | `params.owner` | `undefined` \| `string` \| `string`[] |
-| `clientArgs` | [`CasesClientArgs`](../interfaces/client.__internalNamespace.CasesClientArgs.md) |
+| `clientArgs` | [`CasesClientArgs`](../interfaces/client._internal_namespace.CasesClientArgs.md) |
 
 #### Returns
 
@@ -65,7 +65,7 @@ Retrieves the tags from all the cases.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:269](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L269)
+[x-pack/plugins/cases/server/client/cases/get.ts:269](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L269)
 
 ___
 
@@ -82,7 +82,7 @@ Retrieves a case resolving its ID and optionally loading its comments.
 | Name | Type |
 | :------ | :------ |
 | `__namedParameters` | [`GetParams`](../interfaces/cases_get.GetParams.md) |
-| `clientArgs` | [`CasesClientArgs`](../interfaces/client.__internalNamespace.CasesClientArgs.md) |
+| `clientArgs` | [`CasesClientArgs`](../interfaces/client._internal_namespace.CasesClientArgs.md) |
 
 #### Returns
 
@@ -90,4 +90,4 @@ Retrieves a case resolving its ID and optionally loading its comments.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/get.ts:208](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/get.ts#L208)
+[x-pack/plugins/cases/server/client/cases/get.ts:208](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/get.ts#L208)

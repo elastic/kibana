@@ -6,6 +6,6 @@
 
 ## Hierarchy
 
-- [`AllCommentsResponse`](../modules/typedoc_interfaces.__internalNamespace.md#allcommentsresponse)
+- [`AllCommentsResponse`](../modules/typedoc_interfaces._internal_namespace.md#allcommentsresponse)
 
   ↳ **`IAllCommentsResponse`**

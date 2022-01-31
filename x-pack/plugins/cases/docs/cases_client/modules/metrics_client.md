@@ -6,7 +6,7 @@
 
 ### Namespaces
 
-- [\_\_internalNamespace](metrics_client.__internalNamespace.md)
+- [\_internal\_namespace](metrics_client._internal_namespace.md)
 
 ### Interfaces
 

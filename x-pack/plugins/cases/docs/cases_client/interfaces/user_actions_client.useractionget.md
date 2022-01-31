@@ -22,4 +22,4 @@ The ID of the case
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/user_actions/client.ts:19](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/user_actions/client.ts#L19)
+[x-pack/plugins/cases/server/client/user_actions/client.ts:19](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/user_actions/client.ts#L19)

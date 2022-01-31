@@ -6,7 +6,7 @@
 
 ### Namespaces
 
-- [\_\_internalNamespace](client.__internalNamespace.md)
+- [\_internal\_namespace](client._internal_namespace.md)
 
 ### Classes
 

@@ -41,7 +41,7 @@ Creates a case.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:51](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L51)
+[x-pack/plugins/cases/server/client/cases/client.ts:51](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L51)
 
 ___
 
@@ -65,7 +65,7 @@ Delete a case and all its comments.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:80](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L80)
+[x-pack/plugins/cases/server/client/cases/client.ts:80](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L80)
 
 ___
 
@@ -89,7 +89,7 @@ If the `owner` field is left empty then all the cases that the user has access t
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:57](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L57)
+[x-pack/plugins/cases/server/client/cases/client.ts:57](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L57)
 
 ___
 
@@ -111,7 +111,7 @@ Retrieves a single case with the specified ID.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:61](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L61)
+[x-pack/plugins/cases/server/client/cases/client.ts:61](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L61)
 
 ___
 
@@ -133,7 +133,7 @@ Retrieves the cases ID and title that have the requested alert attached to them
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:92](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L92)
+[x-pack/plugins/cases/server/client/cases/client.ts:92](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L92)
 
 ___
 
@@ -156,7 +156,7 @@ Retrieves all the reporters across all accessible cases.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:88](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L88)
+[x-pack/plugins/cases/server/client/cases/client.ts:88](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L88)
 
 ___
 
@@ -179,7 +179,7 @@ Retrieves all the tags across all cases the user making the request has access t
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:84](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L84)
+[x-pack/plugins/cases/server/client/cases/client.ts:84](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L84)
 
 ___
 
@@ -201,7 +201,7 @@ Pushes a specific case to an external system.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:70](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L70)
+[x-pack/plugins/cases/server/client/cases/client.ts:70](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L70)
 
 ___
 
@@ -224,7 +224,7 @@ Retrieves a single case resolving the specified ID.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:66](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L66)
+[x-pack/plugins/cases/server/client/cases/client.ts:66](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L66)
 
 ___
 
@@ -246,4 +246,4 @@ Update the specified cases with the passed in values.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/cases/client.ts:74](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/cases/client.ts#L74)
+[x-pack/plugins/cases/server/client/cases/client.ts:74](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/cases/client.ts#L74)

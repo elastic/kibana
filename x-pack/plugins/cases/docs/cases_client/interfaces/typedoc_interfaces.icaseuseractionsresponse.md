@@ -6,6 +6,6 @@
 
 ## Hierarchy
 
-- [`CaseUserActionsResponse`](../modules/typedoc_interfaces.__internalNamespace.md#caseuseractionsresponse)
+- [`CaseUserActionsResponse`](../modules/typedoc_interfaces._internal_namespace.md#caseuseractionsresponse)
 
   ↳ **`ICaseUserActionsResponse`**

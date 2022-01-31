@@ -9,7 +9,7 @@ can be very large. These types are equivalent to the io-ts aliases.
 
 ### Namespaces
 
-- [\_\_internalNamespace](typedoc_interfaces.__internalNamespace.md)
+- [\_internal\_namespace](typedoc_interfaces._internal_namespace.md)
 
 ### Interfaces
 

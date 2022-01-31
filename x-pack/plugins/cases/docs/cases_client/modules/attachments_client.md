@@ -6,7 +6,7 @@
 
 ### Namespaces
 
-- [\_\_internalNamespace](attachments_client.__internalNamespace.md)
+- [\_internal\_namespace](attachments_client._internal_namespace.md)
 
 ### Interfaces
 

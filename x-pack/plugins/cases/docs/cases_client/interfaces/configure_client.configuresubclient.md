@@ -35,7 +35,7 @@ Creates a configuration if one does not already exist. If one exists it is delet
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/configure/client.ts:93](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/configure/client.ts#L93)
+[x-pack/plugins/cases/server/client/configure/client.ts:93](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L93)
 
 ___
 
@@ -58,23 +58,23 @@ Retrieves the external connector configuration for a particular case owner.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/configure/client.ts:75](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/configure/client.ts#L75)
+[x-pack/plugins/cases/server/client/configure/client.ts:75](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L75)
 
 ___
 
 ### getConnectors
 
-▸ **getConnectors**(): `Promise`<[`FindActionResult`](client.__internalNamespace.FindActionResult.md)[]\>
+▸ **getConnectors**(): `Promise`<[`FindActionResult`](client._internal_namespace.FindActionResult.md)[]\>
 
 Retrieves the valid external connectors supported by the cases plugin.
 
 #### Returns
 
-`Promise`<[`FindActionResult`](client.__internalNamespace.FindActionResult.md)[]\>
+`Promise`<[`FindActionResult`](client._internal_namespace.FindActionResult.md)[]\>
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/configure/client.ts:79](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/configure/client.ts#L79)
+[x-pack/plugins/cases/server/client/configure/client.ts:79](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L79)
 
 ___
 
@@ -97,4 +97,4 @@ Updates a particular configuration with new values.
 
 #### Defined in
 
-[x-pack/plugins/cases/server/client/configure/client.ts:86](https://github.com/elastic/kibana/blob/06b0f975f60/x-pack/plugins/cases/server/client/configure/client.ts#L86)
+[x-pack/plugins/cases/server/client/configure/client.ts:86](https://github.com/elastic/kibana/blob/c427bf270ae/x-pack/plugins/cases/server/client/configure/client.ts#L86)

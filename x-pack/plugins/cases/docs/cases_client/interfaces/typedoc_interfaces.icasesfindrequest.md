@@ -6,7 +6,7 @@
 
 ## Hierarchy
 
-- [`CasesFindRequest`](../modules/client.__internalNamespace.md#casesfindrequest)
+- [`CasesFindRequest`](../modules/client._internal_namespace.md#casesfindrequest)
 
   ↳ **`ICasesFindRequest`**
 
@@ -131,7 +131,7 @@ ___
 
 ### status
 
-• **status**: `undefined` \| [`open`](../enums/client.__internalNamespace.CaseStatuses.md#open) \| `any`[`any`] \| [`closed`](../enums/client.__internalNamespace.CaseStatuses.md#closed) = `CaseStatusRt`
+• **status**: `undefined` \| [`open`](../enums/client._internal_namespace.CaseStatuses.md#open) \| `any`[`any`] \| [`closed`](../enums/client._internal_namespace.CaseStatuses.md#closed) = `CaseStatusRt`
 
 #### Inherited from
 
