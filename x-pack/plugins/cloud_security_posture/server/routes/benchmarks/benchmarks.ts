@@ -15,7 +15,7 @@ import {
   AgentService,
 } from '../../../../fleet/server';
 import { GetAgentPoliciesResponseItem, PackagePolicy, AgentPolicy } from '../../../../fleet/common';
-import { BENCHMARKS_ROUTE_PATH, CIS_VANILLA_PACKAGE_NAME } from '../../../common/constants';
+import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 
 // TODO: use the same method from common/ once PR 106 is merged
@@ -43,6 +43,10 @@ export interface Benchmark {
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
+export const getPackageNameQuery = (packageName: string): string => {
+  return `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
+};
+
 export const getPackagePolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface | undefined,
@@ -53,8 +57,10 @@ export const getPackagePolicies = async (
     throw new Error('packagePolicyService is undefined');
   }
 
+  const packageNameQuery = getPackageNameQuery(packageName);
+
   const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`,
+    kuery: packageNameQuery,
     page: queryParams.page,
     perPage: queryParams.per_page,
   })) ?? { items: [] as PackagePolicy[] };
@@ -66,13 +72,13 @@ export const getAgentPolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface | undefined
-): Promise<AgentPolicy[] | undefined> => {
+): Promise<AgentPolicy[]> => {
   if (!agentPolicyService) {
     throw new Error('agentPolicyService is undefined');
   }
 
   const agentPolicyIds = uniq(map(packagePolicies, 'policy_id'));
-  const agentPolicies = await agentPolicyService?.getByIds(soClient, agentPolicyIds);
+  const agentPolicies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
 
   return agentPolicies;
 };
@@ -88,7 +94,7 @@ export const addRunningAgentToAgentPolicy = async (
   if (!agentPolicies?.length) return [];
   return Promise.all(
     agentPolicies.map((agentPolicy) =>
-      agentService?.asInternalUser
+      agentService.asInternalUser
         .getAgentStatusForAgentPolicy(agentPolicy.id)
         .then((agentStatus) => ({
           ...agentPolicy,
@@ -159,7 +165,7 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
         const packagePolicies = await getPackagePolicies(
           soClient,
           packagePolicyService,
-          CIS_VANILLA_PACKAGE_NAME,
+          CIS_KUBERNETES_PACKAGE_NAME,
           query
         );
 

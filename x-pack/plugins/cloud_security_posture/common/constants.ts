@@ -15,7 +15,7 @@ export const CSP_FINDINGS_INDEX_NAME = 'findings';
 
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
-export const CIS_VANILLA_PACKAGE_NAME = 'k8s_cis';
+export const CIS_KUBERNETES_PACKAGE_NAME = 'k8s_cis';
 
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
