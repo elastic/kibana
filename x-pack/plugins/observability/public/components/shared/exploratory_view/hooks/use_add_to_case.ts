@@ -41,7 +41,11 @@ export const useAddToCase = ({
   lensAttributes,
   getToastText,
   timeRange,
-}: AddToCaseProps & { getToastText: (thaCase: Case | SubCase) => MountPoint<HTMLElement> }) => {
+  appId,
+}: AddToCaseProps & {
+  appId?: 'security' | 'observability';
+  getToastText: (thaCase: Case | SubCase) => MountPoint<HTMLElement>;
+}) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isCasesOpen, setIsCasesOpen] = useState(false);
 
@@ -87,13 +91,13 @@ export const useAddToCase = ({
           }
         );
       } else {
-        navigateToApp(observabilityFeatureId, {
+        navigateToApp(appId || observabilityFeatureId, {
           deepLinkId: CasesDeepLinkId.casesCreate,
           openInNewTab: true,
         });
       }
     },
-    [getToastText, http, lensAttributes, navigateToApp, timeRange, toasts]
+    [appId, getToastText, http, lensAttributes, navigateToApp, timeRange, toasts]
   );
 
   return {

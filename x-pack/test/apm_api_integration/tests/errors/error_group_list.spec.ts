@@ -9,7 +9,7 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
