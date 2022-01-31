@@ -8,10 +8,11 @@
 
 import { filter } from 'lodash';
 import React, { useEffect, useState, useCallback } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
   EuiText,
@@ -65,7 +66,7 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { application, uiSettings, overlays, chrome, dataViews } =
+    const { application, uiSettings, overlays, chrome, dataViews, IndexPatternEditor } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -73,6 +74,7 @@ export const EditIndexPattern = withRouter(
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
+    const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
@@ -117,6 +119,23 @@ export const EditIndexPattern = withRouter(
       });
     };
 
+    const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+    const displayIndexPatternEditor = showEditDialog ? (
+      <IndexPatternEditor
+        onSave={(iPattern) => {
+          history.push(`patterns/${iPattern.id}`);
+        }}
+        onCancel={() => setShowEditDialog(false)}
+        defaultTypeIsRollup={isRollup}
+        editData={indexPattern}
+      />
+    ) : (
+      <></>
+    );
+    const editPattern = () => {
+      setShowEditDialog(true);
+    };
+
     const timeFilterHeader = i18n.translate(
       'indexPatternManagement.editIndexPattern.timeFilterHeader',
       {
@@ -150,27 +169,33 @@ export const EditIndexPattern = withRouter(
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
+          {...(userEditPermission
+            ? { deleteIndexPatternClick: removePattern, editIndexPatternClick: editPattern }
+            : {})}
           defaultIndex={defaultIndex}
         >
+          <EuiHorizontalRule margin="none" />
           {showTagsSection && (
-            <EuiFlexGroup wrap gutterSize="s">
-              {Boolean(indexPattern.timeFieldName) && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>{securityDataView}</EuiBadge>
-                </EuiFlexItem>
-              )}
-              {tags.map((tag: any) => (
-                <EuiFlexItem grow={false} key={tag.key}>
-                  <EuiBadge color="hollow">{tag.name}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <>
+              <EuiSpacer size="l" />
+              <EuiFlexGroup wrap gutterSize="s">
+                {Boolean(indexPattern.timeFieldName) && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{securityDataView}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {tags.map((tag: any) => (
+                  <EuiFlexItem grow={false} key={tag.key}>
+                    <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </>
           )}
           <EuiSpacer size="m" />
           <EuiText>
@@ -209,6 +234,7 @@ export const EditIndexPattern = withRouter(
             setFields(indexPattern.getNonScriptedFields());
           }}
         />
+        {displayIndexPatternEditor}
       </div>
     );
   }

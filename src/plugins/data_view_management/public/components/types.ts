@@ -15,6 +15,7 @@ export interface IndexPatternCreationOption {
 export interface IndexPatternTableItem {
   id: string;
   title: string;
+  info?: string;
   default: boolean;
   tag?: string[];
   sort: string;

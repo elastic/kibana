@@ -85,6 +85,8 @@ export class DataView implements IIndexPattern {
    * prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
+  public readableTitle: string = '';
+  public readableTitleDescription: string = '';
 
   constructor({ spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] }: DataViewDeps) {
     // set dependencies
@@ -112,6 +114,8 @@ export class DataView implements IIndexPattern {
     this.fieldAttrs = spec.fieldAttrs || {};
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.readableTitle = spec.readableTitle || '';
+    this.readableTitleDescription = spec.readableTitleDescription || '';
   }
 
   /**
@@ -210,6 +214,8 @@ export class DataView implements IIndexPattern {
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
       allowNoIndex: this.allowNoIndex,
+      readableTitle: this.readableTitle,
+      readableTitleDescription: this.readableTitleDescription,
     };
   }
 
@@ -295,6 +301,8 @@ export class DataView implements IIndexPattern {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      readableTitle: this.readableTitle,
+      readableTitleDescription: this.readableTitleDescription,
     };
   }
 

@@ -19,6 +19,8 @@ const indexPatternContractMock = {
       {
         id: 'test1',
         title: 'test name 1',
+        readableTitle: 'Test Name 1',
+        readableTitleDescription: 'test name 1 description',
       },
     ])
   ),

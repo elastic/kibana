@@ -18,6 +18,7 @@ const IndexPatternFlyoutContentContainer = ({
   onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
+  editData,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
@@ -25,14 +26,31 @@ const IndexPatternFlyoutContentContainer = ({
 
   const onSaveClick = async (indexPatternSpec: IndexPatternSpec) => {
     try {
-      const indexPattern = await dataViews.createAndSave(indexPatternSpec);
+      let indexPattern;
+      if (editData) {
+        const {
+          readableTitle = '',
+          readableTitleDescription = '',
+          timeFieldName,
+          title = '',
+        } = indexPatternSpec;
+        editData.title = title;
+        editData.readableTitle = readableTitle;
+        editData.readableTitleDescription = readableTitleDescription;
+        editData.timeFieldName = timeFieldName;
+        indexPattern = await dataViews.updateSavedObject(editData);
+      } else {
+        indexPattern = await dataViews.createAndSave(indexPatternSpec);
+      }
 
-      const message = i18n.translate('indexPatternEditor.saved', {
-        defaultMessage: "Saved '{indexPatternTitle}'",
-        values: { indexPatternTitle: indexPattern.title },
-      });
-      notifications.toasts.addSuccess(message);
-      await onSave(indexPattern);
+      if (indexPattern && !(indexPattern instanceof Error)) {
+        const message = i18n.translate('indexPatternEditor.saved', {
+          defaultMessage: "Saved '{indexPatternTitle}'",
+          values: { indexPatternTitle: indexPattern.title },
+        });
+        notifications.toasts.addSuccess(message);
+        await onSave(indexPattern);
+      }
     } catch (e) {
       const title = i18n.translate('indexPatternEditor.dataView.unableSaveLabel', {
         defaultMessage: 'Failed to save data view.',
@@ -48,6 +66,7 @@ const IndexPatternFlyoutContentContainer = ({
       onCancel={onCancel}
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
+      editData={editData}
     />
   );
 };

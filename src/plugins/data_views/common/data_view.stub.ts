@@ -57,6 +57,8 @@ export function stubbedSavedObjectDataView(
       timeFieldName: 'time',
       fields: JSON.stringify(stubLogstashFieldSpecMap),
       title: 'title',
+      readableTitle: 'Title',
+      readableTitleDescription: 'Title Description',
     },
     version: '2',
     references: [],

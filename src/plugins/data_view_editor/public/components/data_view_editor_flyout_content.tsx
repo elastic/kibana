@@ -13,6 +13,7 @@ import memoizeOne from 'memoize-one';
 import { DataViewField } from '../../../data_views/public';
 
 import {
+  DataView,
   IndexPatternSpec,
   Form,
   useForm,
@@ -39,6 +40,7 @@ import {
   TimestampField,
   TypeField,
   TitleField,
+  ReadableTitleField,
   schema,
   Footer,
   AdvancedParamsContent,
@@ -58,10 +60,15 @@ export interface Props {
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
+  editData?: DataView;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
   defaultMessage: 'Create data view',
+});
+
+const editorTitleEditMode = i18n.translate('indexPatternEditor.titleEditMode', {
+  defaultMessage: 'Edit data view',
 });
 
 const IndexPatternEditorFlyoutContentComponent = ({
@@ -69,14 +76,29 @@ const IndexPatternEditorFlyoutContentComponent = ({
   onCancel,
   defaultTypeIsRollup,
   requireTimestampField = false,
+  editData,
 }: Props) => {
   const {
     services: { http, dataViews, uiSettings, searchClient },
   } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
+    // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      ...(editData
+        ? {
+            title: editData.title,
+            id: editData.id,
+            readableTitle: editData.readableTitle,
+            readableTitleDescription: editData.readableTitleDescription,
+            ...(editData.timeFieldName
+              ? {
+                  timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
+                }
+              : {}),
+          }
+        : {}),
     },
     schema,
     onSubmit: async (formData, isValid) => {
@@ -88,6 +110,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
         title: formData.title,
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
+        readableTitle: formData.readableTitle,
+        readableTitleDescription: formData.readableTitleDescription,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -152,17 +176,19 @@ const IndexPatternEditorFlyoutContentComponent = ({
     });
   }, [http, allowHidden, searchClient]);
 
-  // loading list of index patterns
+  // loading list of data views
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
       const indexPatternTitles = await dataViews.getTitles();
 
-      setExistingIndexPatterns(indexPatternTitles);
+      setExistingIndexPatterns(
+        editData ? indexPatternTitles.filter((v) => v !== editData.title) : indexPatternTitles
+      );
       setIsLoadingIndexPatterns(false);
     };
     getTitles();
-  }, [http, dataViews, loadSources]);
+  }, [http, dataViews, editData, loadSources]);
 
   // loading rollup info
   useEffect(() => {
@@ -220,11 +246,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     ]
   );
 
-  useEffect(() => {
-    loadTimestampFieldOptions(title);
-    getFields().timestampField?.setValue('');
-  }, [loadTimestampFieldOptions, title, getFields]);
-
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
       const isRollupIndex = (indexName: string) =>
@@ -274,9 +295,25 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
   );
 
+  // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
+  useEffect(() => {
+    if (editData) loadSources();
+  }, [editData, loadSources]);
+
+  useEffect(() => {
+    if (editData) reloadMatchedIndices(editData.title);
+  }, [editData, allSources, reloadMatchedIndices]);
+
+  useEffect(() => {
+    loadTimestampFieldOptions(editData ? editData.title : title);
+    if (!editData) getFields().timestampField?.setValue('');
+  }, [loadTimestampFieldOptions, title, getFields, editData]);
+
   const onTypeChange = useCallback(
     (newType) => {
       form.setFieldValue('title', '');
+      form.setFieldValue('readableTitle', '');
+      form.setFieldValue('readableTitleDescription', '');
       form.setFieldValue('timestampField', '');
       if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
         form.setFieldValue('allowHidden', false);
@@ -296,7 +333,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <TypeField onChange={onTypeChange} />
@@ -321,11 +358,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2>{editorTitle}</h2>
+            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
           </EuiTitle>
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <ReadableTitleField editData={editData} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <TitleField
@@ -337,7 +380,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <TimestampField
@@ -355,6 +398,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             onCancel={onCancel}
             onSubmit={() => form.submit()}
             submitDisabled={form.isSubmitted && !form.isValid}
+            isEdit={!!editData}
           />
         </FlyoutPanels.Item>
         <FlyoutPanels.Item>

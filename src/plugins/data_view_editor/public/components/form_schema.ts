@@ -13,22 +13,37 @@ import { INDEX_PATTERN_TYPE } from '../types';
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
-      defaultMessage: 'Name',
+      defaultMessage: 'Data View',
     }),
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
       defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+        'Enter a data view that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
     }),
     validations: [
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'A name is required.',
+            defaultMessage: 'A Data View is required.',
           })
         ),
       },
     ],
+  },
+  readableTitle: {
+    label: i18n.translate('indexPatternEditor.editor.form.readableTitleLabel', {
+      defaultMessage: 'Title',
+    }),
+    defaultValue: '',
+  },
+  readableTitleDescription: {
+    label: i18n.translate('indexPatternEditor.editor.form.readableTitleDescriptionLabel', {
+      defaultMessage: 'Description',
+    }),
+    defaultValue: '',
+    helpText: i18n.translate('indexPatternEditor.validations.readableTitleDescriptionHelpText', {
+      defaultMessage: '150 characters max',
+    }),
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {

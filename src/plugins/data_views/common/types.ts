@@ -67,6 +67,8 @@ export interface DataViewAttributes {
    * prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
+  readableTitle?: string;
+  readableTitleDescription?: string;
 }
 
 /**
@@ -257,6 +259,8 @@ export interface DataViewSpec {
   runtimeFieldMap?: Record<string, RuntimeField>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  readableTitle?: string;
+  readableTitleDescription?: string;
 }
 
 /**

@@ -62,7 +62,7 @@ const createTitlesNoDupesValidator = (
     if (namesNotAllowed.includes(value)) {
       return {
         message: i18n.translate('indexPatternEditor.dataViewExists.ValidationErrorMessage', {
-          defaultMessage: 'A data view with this title already exists.',
+          defaultMessage: 'A data view with this name already exists.',
         }),
       };
     }
@@ -92,7 +92,7 @@ const createMatchesIndicesValidator = ({
       return;
     }
 
-    // A rollup index pattern needs to match one and only one rollup index.
+    // A rollup data view needs to match one and only one rollup index.
     const rollupIndexMatches = matchedIndicesResult.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
@@ -186,7 +186,7 @@ export const TitleField = ({
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
-            defaultMessage: 'Title field',
+            defaultMessage: 'Data View field',
           }),
         },
       }}

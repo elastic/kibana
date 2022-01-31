@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
@@ -118,6 +119,7 @@ export const IndexPatternTable = ({
         name: string,
         index: {
           id: string;
+          info?: string;
           tags?: Array<{
             key: string;
             name: string;
@@ -128,7 +130,20 @@ export const IndexPatternTable = ({
           <EuiFlexGroup gutterSize="s" wrap>
             <EuiFlexItem grow={false} css={flexItemStyles}>
               <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
-                {name}
+                <span>
+                  {name}
+                  {index.info ? (
+                    <>
+                      &nbsp;
+                      <EuiIconTip
+                        type="iInCircle"
+                        color="text"
+                        aria-label={index.info}
+                        content={index.info}
+                      />{' '}
+                    </>
+                  ) : null}
+                </span>
               </EuiButtonEmpty>
             </EuiFlexItem>
             {index.id && index.id.indexOf(securitySolution) === 0 && (

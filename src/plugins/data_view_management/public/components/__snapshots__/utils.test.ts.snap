@@ -5,6 +5,7 @@ Array [
   Object {
     "default": true,
     "id": "test",
+    "info": undefined,
     "sort": "0test name",
     "tags": Array [
       Object {
@@ -17,9 +18,10 @@ Array [
   Object {
     "default": false,
     "id": "test1",
+    "info": "test name 1 description",
     "sort": "1test name 1",
     "tags": Array [],
-    "title": "test name 1",
+    "title": "Test Name 1",
   },
 ]
 `;
