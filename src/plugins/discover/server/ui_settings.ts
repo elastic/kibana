@@ -265,12 +265,12 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     schema: schema.number({ min: -1 }),
   },
   [TRUNCATE_MAX_HEIGHT]: {
-    name: i18n.translate('discover.advancedSettings.params.truncateHeightTitle', {
-      defaultMessage: 'Maximum height of classic view cell',
+    name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
+      defaultMessage: 'Maximum cell height in the classic table',
     }),
     value: 115,
     category: ['discover'],
-    description: i18n.translate('discover.advancedSettings.params.truncateHeightText', {
+    description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
