@@ -37,7 +37,6 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.risk]: null,
-      [HostsTableType.sessions]: null,
     },
   },
   details: {
@@ -66,7 +65,6 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.risk]: null,
-      [HostsTableType.sessions]: null,
     },
   },
 };

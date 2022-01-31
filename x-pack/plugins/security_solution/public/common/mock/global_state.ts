@@ -84,7 +84,6 @@ export const mockGlobalState: State = {
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
         hostRisk: null,
-        sessions: null,
       },
     },
     details: {
@@ -101,7 +100,6 @@ export const mockGlobalState: State = {
         anomalies: null,
         externalAlerts: { activePage: 0, limit: 10 },
         hostRisk: null,
-        sessions: null,
       },
     },
   },

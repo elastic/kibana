@@ -1,20 +1,11 @@
 {
-    "author": "Elastic",
-    "name": "session_view",
-    "version": "8.0.0",
-    "private": true,
-    "license": "Elastic-License",
-    "scripts": {
-        "test:jest": "node ../../scripts/jest",
-	"test:coverage": "node ../../scripts/jest --coverage",
-        "cypress": "../../../node_modules/.bin/cypress",
-        "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-        "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-        "cypress:open": "yarn cypress open --config-file ./cypress/cypress.json",
-        "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/session_view_cypress/visual_config.ts",
-        "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/session_view_cypress/cli_config.ts",
-        "cypress:run-as-ci:firefox": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/session_view_cypress/config.firefox.ts",
-        "cypress:run:reporter": "yarn cypress run --config-file ./cypress/cypress.json --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
-        "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-session-view/cypress/results/mochawesome*.json > ../../../target/kibana-session-view/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-session-view/cypress/results/output.json --reportDir ../../../target/kibana-session-view/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-session-view/cypress/results/*.xml ../../../target/junit/"
-    }
+  "author": "Elastic",
+  "name": "session_view",
+  "version": "8.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "scripts": {
+    "test:jest": "node ../../scripts/jest",
+    "test:coverage": "node ../../scripts/jest --coverage"
+  }
 }
