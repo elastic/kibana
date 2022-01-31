@@ -58,15 +58,14 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
 
   const loadingIds = useMemo(
-    () =>
-      loadingRulesAction === 'enable' || loadingRulesAction === 'disable' ? loadingRuleIds : [],
+    () => (['disable', 'enable', 'edit'].includes(loadingRulesAction ?? '') ? loadingRuleIds : []),
     [loadingRuleIds, loadingRulesAction]
   );
 
   return useMemo(
     () => ({
       field: 'enabled',
-      name: i18n.COLUMN_ACTIVATE,
+      name: i18n.COLUMN_ENABLE,
       render: (_, rule: Rule) => (
         <EuiToolTip
           position="top"

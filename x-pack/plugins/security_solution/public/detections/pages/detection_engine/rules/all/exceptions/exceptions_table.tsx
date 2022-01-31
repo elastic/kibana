@@ -370,7 +370,7 @@ export const ExceptionListsTable = React.memo(() => {
         ) : (
           <>
             <AllRulesUtilityBar
-              showBulkActions={false}
+              hasBulkActions={false}
               canBulkEdit={hasPermissions}
               paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
               numberSelectedItems={0}

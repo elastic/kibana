@@ -6,9 +6,14 @@
  */
 
 import { Dispatch } from 'react';
-import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import type { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+
+import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { SecurityPageName } from '../../../../../app/types';
 import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
@@ -31,7 +36,7 @@ import {
 import { RulesTableActions } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import { transformOutput } from '../../../../containers/detection_engine/rules/transforms';
 import * as i18n from '../translations';
-import { bucketRulesResponse, getExportedRulesCount } from './helpers';
+import { bucketRulesResponse, getExportedRulesCounts } from './helpers';
 
 export const editRuleAction = (
   ruleId: string,
@@ -84,9 +89,9 @@ export const exportRulesAction = async (
     const blob = await exportRules({ ids: exportRuleId });
     downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
 
-    const exportedRulesCount = await getExportedRulesCount(blob);
+    const { exported } = await getExportedRulesCounts(blob);
     displaySuccessToast(
-      i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, exportRuleId.length),
+      i18n.SUCCESSFULLY_EXPORTED_RULES(exported, exportRuleId.length),
       dispatchToaster
     );
   } catch (e) {
@@ -171,32 +176,67 @@ export const enableRulesAction = async (
   }
 };
 
-export const rulesBulkActionByQuery = async (
-  visibleRuleIds: string[],
-  selectedItemsCount: number,
-  query: string,
-  action: BulkAction,
-  dispatchToaster: Dispatch<ActionToaster>,
-  setLoadingRules: RulesTableActions['setLoadingRules']
-) => {
+interface ExecuteRulesBulkActionArgs {
+  visibleRuleIds: string[];
+  action: BulkAction;
+  toasts: UseAppToasts;
+  search: { query: string } | { ids: string[] };
+  payload?: { edit?: BulkActionEditPayload[] };
+  onSuccess?: (arg: { rulesCount: number }) => void;
+  onError?: (error: Error) => void;
+  setLoadingRules: RulesTableActions['setLoadingRules'];
+}
+
+const executeRulesBulkAction = async ({
+  visibleRuleIds,
+  action,
+  setLoadingRules,
+  toasts,
+  search,
+  payload,
+  onSuccess,
+  onError,
+}: ExecuteRulesBulkActionArgs) => {
   try {
     setLoadingRules({ ids: visibleRuleIds, action });
 
     if (action === BulkAction.export) {
-      const blob = await performBulkAction({ query, action });
+      const blob = await performBulkAction({ ...search, action });
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
+      const { exported, total } = await getExportedRulesCounts(blob);
 
-      const exportedRulesCount = await getExportedRulesCount(blob);
-      displaySuccessToast(
-        i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount),
-        dispatchToaster
-      );
+      toasts.addSuccess(i18n.SUCCESSFULLY_EXPORTED_RULES(exported, total));
     } else {
-      await performBulkAction({ query, action });
+      const response = await performBulkAction({ ...search, action, edit: payload?.edit });
+
+      onSuccess?.({ rulesCount: response.rules_count });
     }
   } catch (e) {
-    displayErrorToast(i18n.BULK_ACTION_FAILED, [e.message], dispatchToaster);
+    if (onError) {
+      onError(e);
+    } else {
+      toasts.addError(e, { title: i18n.BULK_ACTION_FAILED });
+    }
   } finally {
     setLoadingRules({ ids: [], action: null });
   }
+};
+
+export const initRulesBulkAction = (params: Omit<ExecuteRulesBulkActionArgs, 'search'>) => {
+  const byQuery = (query: string) =>
+    executeRulesBulkAction({
+      ...params,
+      search: { query },
+    });
+
+  const byIds = (ids: string[]) =>
+    executeRulesBulkAction({
+      ...params,
+      search: { ids },
+    });
+
+  return {
+    byQuery,
+    byIds,
+  };
 };

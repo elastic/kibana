@@ -168,7 +168,7 @@ export const RulesTableContextProvider = ({
 
   const isActionInProgress = useMemo(() => {
     if (loadingRules.ids.length > 0) {
-      return !(loadingRules.action === 'disable' || loadingRules.action === 'enable');
+      return !['disable', 'enable', 'edit'].includes(loadingRules.action ?? '');
     }
     return false;
   }, [loadingRules.action, loadingRules.ids.length]);

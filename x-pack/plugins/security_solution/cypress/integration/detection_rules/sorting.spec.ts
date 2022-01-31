@@ -17,11 +17,11 @@ import {
 
 import { goToManageAlertsDetectionRules, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
 import {
-  activateRule,
+  enableRule,
   changeRowsPerPageTo,
   checkAutoRefresh,
   goToPage,
-  sortByActivatedRules,
+  sortByEnabledRules,
   waitForRulesTableToBeLoaded,
   waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
@@ -50,19 +50,19 @@ describe('Alerts detection rules', () => {
     createCustomRule(getNewThresholdRule(), '4');
   });
 
-  it('Sorts by activated rules', () => {
+  it('Sorts by enabled rules', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
 
-    activateRule(SECOND_RULE);
+    enableRule(SECOND_RULE);
     waitForRuleToChangeStatus();
-    activateRule(FOURTH_RULE);
+    enableRule(FOURTH_RULE);
     waitForRuleToChangeStatus();
 
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
 
-    sortByActivatedRules();
+    sortByEnabledRules();
 
     cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
