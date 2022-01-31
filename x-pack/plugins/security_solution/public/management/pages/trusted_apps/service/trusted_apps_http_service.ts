@@ -194,11 +194,12 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     };
   }
 
-  async getTrustedAppsSummary() {
+  async getTrustedAppsSummary(filter?: string) {
     return (await this.getHttpService()).get<ExceptionListSummarySchema>(
       `${EXCEPTION_LIST_URL}/summary`,
       {
         query: {
+          filter,
           list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
           namespace_type: 'agnostic',
         },
