@@ -232,6 +232,7 @@ export class SyntheticsService {
 
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
+      namespaces: ['*'],
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
