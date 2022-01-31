@@ -50,7 +50,12 @@ describe('dynamic route', () => {
     const getMetrics = async () => {
       return { foo: 1 };
     };
-    registerDynamicRoute({ router, config: kibanaStatsConfig, overallStatus$, getMetrics });
+    registerDynamicRoute({
+      router,
+      config: kibanaStatsConfig,
+      overallStatus$,
+      getMetrics,
+    });
 
     const [_, handler] = router.get.mock.calls[0];
 

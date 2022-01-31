@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { Observable } from 'rxjs';
+import { JsonObject } from '@kbn/utility-types';
 import { schema } from '@kbn/config-schema';
 import { IRouter, ServiceStatus } from '../../../../../src/core/server';
 import { getESClusterUuid, getKibanaStats } from '../lib';
@@ -29,7 +30,9 @@ export function registerDynamicRoute({
     };
   };
   overallStatus$: Observable<ServiceStatus>;
-  getMetrics: (type: string) => Promise<MetricResult[] | MetricResult | undefined>;
+  getMetrics: (
+    type: string
+  ) => Promise<Array<MetricResult<JsonObject>> | MetricResult<JsonObject> | undefined>;
 }) {
   router.get(
     {

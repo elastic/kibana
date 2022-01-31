@@ -27,8 +27,13 @@ describe('monitoring_collection plugin', () => {
 
     it('should allow registering a collector and getting data from it', async () => {
       const { registerMetric, getMetrics } = plugin.setup(coreSetup);
-      registerMetric({
+      registerMetric<{ name: string }>({
         type: 'test',
+        schema: {
+          name: {
+            type: 'text',
+          },
+        },
         fetch: async () => {
           return [
             {
@@ -44,8 +49,13 @@ describe('monitoring_collection plugin', () => {
 
     it('should allow registering multiple ollectors and getting data from it', async () => {
       const { registerMetric, getMetrics } = plugin.setup(coreSetup);
-      registerMetric({
+      registerMetric<{ name: string }>({
         type: 'test',
+        schema: {
+          name: {
+            type: 'text',
+          },
+        },
         fetch: async () => {
           return [
             {
@@ -54,8 +64,13 @@ describe('monitoring_collection plugin', () => {
           ];
         },
       });
-      registerMetric({
+      registerMetric<{ name: string }>({
         type: 'tester',
+        schema: {
+          name: {
+            type: 'text',
+          },
+        },
         fetch: async () => {
           return [
             {
