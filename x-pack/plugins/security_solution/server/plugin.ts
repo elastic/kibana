@@ -223,6 +223,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
       ilmPolicy: previewIlmPolicy,
+      secondaryAlias: undefined,
     });
 
     const securityRuleTypeOptions = {
