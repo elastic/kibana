@@ -154,7 +154,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'anomaly_detection',
             name: i18n.translate('xpack.ml.navMenu.anomalyDetection.jobsManagementText', {
-              defaultMessage: 'Jobs management',
+              defaultMessage: 'Jobs Management',
             }),
             disabled: disableLinks,
             pathId: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -200,7 +200,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'data_frame_analytics_jobs',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
             name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.jobsManagementText', {
-              defaultMessage: 'Jobs management',
+              defaultMessage: 'Jobs Management',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalytics',
