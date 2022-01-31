@@ -27,6 +27,7 @@ import {
   KibanaPageTemplateSolutionNavAvatar,
   NO_DATA_PAGE_TEMPLATE_PROPS,
 } from '../../../../../../../../src/plugins/kibana_react/public';
+import { Chat } from '../../../../../../cloud/public';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -173,10 +174,9 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
               })}
         </p>
       </EuiText>
-
       <EuiSpacer size="xxl" />
-
       {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
+      <Chat />
     </KibanaPageTemplate>
   );
 };

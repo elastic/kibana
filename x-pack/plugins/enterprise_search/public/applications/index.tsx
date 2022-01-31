@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -43,6 +43,9 @@ export const renderApp = (
   const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
+
   resetContext({ createStore: true });
   const store = getContext().store;
 
@@ -74,12 +77,14 @@ export const renderApp = (
     <I18nProvider>
       <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-              <Toasts />
-            </Router>
-          </Provider>
+          <CloudContext>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
+          </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </I18nProvider>,
