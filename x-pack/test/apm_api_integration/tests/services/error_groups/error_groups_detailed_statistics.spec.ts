@@ -12,7 +12,7 @@ import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finit
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+} from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
