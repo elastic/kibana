@@ -14,6 +14,7 @@ import {
   getTotalCountInUse,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
+  getFailedAndUnrecognizedTasksPerDay,
 } from './alerting_telemetry';
 
 describe('alerting telemetry', () => {
@@ -235,6 +236,56 @@ Object {
         document__test__: 1,
         logs__alert__document__count: 1,
       },
+    });
+  });
+
+  test('getFailedAndUnrecognizedTasksPerDay should aggregations for total count, count by status and count by status and rule type for failed and unrecognized tasks', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          byTaskTypeId: {
+            value: {
+              statuses: {
+                failed: {
+                  '.index-threshold': 2,
+                  'logs.alert.document.count': 1,
+                  'document.test.': 1,
+                },
+                unrecognized: {
+                  'o.l.d.task-type': 1,
+                },
+              },
+            },
+          },
+        },
+        hits: {
+          hits: [],
+        },
+      })
+    );
+
+    const telemetry = await getFailedAndUnrecognizedTasksPerDay(mockEsClient, 'test');
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toStrictEqual({
+      countByStatus: {
+        failed: 4,
+        unrecognized: 1,
+      },
+      countByStatusByRuleType: {
+        failed: {
+          '__index-threshold': 2,
+          document__test__: 1,
+          logs__alert__document__count: 1,
+        },
+        unrecognized: {
+          'o__l__d__task-type': 1,
+        },
+      },
+      countTotal: 5,
     });
   });
 });
