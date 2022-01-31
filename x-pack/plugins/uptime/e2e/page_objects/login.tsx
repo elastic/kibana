@@ -8,12 +8,12 @@ import { Page } from '@elastic/synthetics';
 
 export function loginPageProvider({
   page,
-  isRemote,
+  isRemote = false,
   username = 'elastic',
   password = 'changeme',
 }: {
   page: Page;
-  isRemote: boolean;
+  isRemote?: boolean;
   username?: string;
   password?: string;
 }) {

@@ -8,7 +8,7 @@
 import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { IFieldType } from '../../../../../../../../../../../src/plugins/data/public';
+import type { FieldSpec } from '../../../../../../../../../../../src/plugins/data/common';
 import { QueryStringInput } from '../../../../../../../../../../../src/plugins/data/public';
 import { useStartServices } from '../../../../../hooks';
 
@@ -27,15 +27,15 @@ export const LogQueryBar: React.FunctionComponent<{
   onUpdateQuery: (query: string, runQuery?: boolean) => void;
 }> = memo(({ query, isQueryValid, onUpdateQuery }) => {
   const { data } = useStartServices();
-  const [indexPatternFields, setIndexPatternFields] = useState<IFieldType[]>();
+  const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
   useEffect(() => {
     const fetchFields = async () => {
       try {
         const fields = (
-          ((await data.indexPatterns.getFieldsForWildcard({
+          (await data.dataViews.getFieldsForWildcard({
             pattern: AGENT_LOG_INDEX_PATTERN,
-          })) as IFieldType[]) || []
+          })) || []
         ).filter((field) => {
           return !EXCLUDED_FIELDS.includes(field.name);
         });
@@ -45,7 +45,7 @@ export const LogQueryBar: React.FunctionComponent<{
       }
     };
     fetchFields();
-  }, [data.indexPatterns]);
+  }, [data.dataViews]);
 
   return (
     <QueryStringInput

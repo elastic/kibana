@@ -14,10 +14,10 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
 import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { DiscoverRouteProps } from '../types';
 import { Doc } from './components/doc';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
-export interface SingleDocRouteProps extends DiscoverRouteProps {
+export interface SingleDocRouteProps {
   /**
    * Document id
    */
@@ -29,8 +29,8 @@ export interface DocUrlParams {
   index: string;
 }
 
-const SingleDoc = (props: SingleDocRouteProps) => {
-  const { id, services } = props;
+const SingleDoc = ({ id }: SingleDocRouteProps) => {
+  const services = useDiscoverServices();
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();

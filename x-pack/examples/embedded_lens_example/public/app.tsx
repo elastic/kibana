@@ -32,6 +32,7 @@ import type {
 } from '../../../plugins/lens/public';
 
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
+import { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
@@ -126,6 +127,9 @@ export const App = (props: {
     to: 'now',
   });
 
+  const [enableExtraAction, setEnableExtraAction] = useState(false);
+  const [enableDefaultAction, setEnableDefaultAction] = useState(false);
+
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
@@ -153,7 +157,7 @@ export const App = (props: {
               configuration and navigate to a prefilled editor.
             </p>
 
-            <EuiFlexGroup>
+            <EuiFlexGroup wrap>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="lns-example-change-color"
@@ -238,10 +242,34 @@ export const App = (props: {
                   Change time range
                 </EuiButton>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Enable extra action"
+                  data-test-subj="lns-example-extra-action"
+                  isDisabled={!attributes}
+                  onClick={() => {
+                    setEnableExtraAction((prevState) => !prevState);
+                  }}
+                >
+                  {enableExtraAction ? 'Disable extra action' : 'Enable extra action'}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Enable default actions"
+                  data-test-subj="lns-example-default-action"
+                  isDisabled={!attributes}
+                  onClick={() => {
+                    setEnableDefaultAction((prevState) => !prevState);
+                  }}
+                >
+                  {enableDefaultAction ? 'Disable default action' : 'Enable default action'}
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <LensComponent
               id=""
-              withActions
+              withDefaultActions={enableDefaultAction}
               style={{ height: 500 }}
               timeRange={time}
               attributes={attributes}
@@ -261,6 +289,27 @@ export const App = (props: {
                 // call back event for on table row click event
               }}
               viewMode={ViewMode.VIEW}
+              extraActions={
+                enableExtraAction
+                  ? [
+                      {
+                        id: 'testAction',
+                        type: 'link',
+                        getIconType: () => 'save',
+                        async isCompatible(
+                          context: ActionExecutionContext<object>
+                        ): Promise<boolean> {
+                          return true;
+                        },
+                        execute: async (context: ActionExecutionContext<object>) => {
+                          alert('I am an extra action');
+                          return;
+                        },
+                        getDisplayName: () => 'Extra action',
+                      },
+                    ]
+                  : undefined
+              }
             />
             {isSaveModalVisible && (
               <LensSaveModalComponent
