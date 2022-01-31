@@ -10,8 +10,16 @@ import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
+  DeleteExceptionListItemOptions,
+  ExportExceptionListAndItemsOptions,
+  FindExceptionListItemOptions,
+  FindExceptionListsItemOptions,
+  GetExceptionListItemOptions,
+  GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
+import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
+import type { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 /**
  * The `this` context provided to extension point's callback function
@@ -23,6 +31,13 @@ export interface ServerExtensionCallbackContext {
    * is not triggered via one of the HTTP handlers
    */
   request?: KibanaRequest;
+
+  /**
+   * An `ExceptionListClient` instance that **DOES NOT** execute server extension point callbacks.
+   * This client should be used when needing to access Exception List content from within an Extension
+   * Point to avoid circular infinite loops
+   */
+  exceptionListClient: ExceptionListClient;
 }
 
 export type ServerExtensionCallback<A extends object | void = void, R = A> = (args: {
@@ -54,6 +69,16 @@ interface ServerExtensionPointDefinition<
 }
 
 /**
+ * Extension point is triggered prior processing an import of data into the Exceptions Lists. The callback
+ * in this extension will be called by both the `importExceptionListAndItems()` and
+ * `importExceptionListAndItemsAsArray()`
+ */
+export type ExceptionsListPreImportServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreImport',
+  PromiseFromStreams
+>;
+
+/**
  * Extension point is triggered prior to creating a new Exception List Item. Throw'ing will cause
  * the create operation to fail
  */
@@ -71,9 +96,66 @@ export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDef
   UpdateExceptionListItemOptions
 >;
 
+/**
+ * Extension point is triggered prior to performing a `patch` operation on the exception item
+ */
+export type ExceptionsListPreGetOneItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreGetOneItem',
+  GetExceptionListItemOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a `find` operation against a SINGLE list
+ */
+export type ExceptionsListPreSingleListFindServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreSingleListFind',
+  FindExceptionListItemOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a `find` operation against a multiple lists
+ */
+export type ExceptionsListPreMultiListFindServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreMultiListFind',
+  FindExceptionListsItemOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing an `export` operation against exceptions list and items
+ */
+export type ExceptionsListPreExportServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreExport',
+  ExportExceptionListAndItemsOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a list summary operation
+ */
+export type ExceptionsListPreSummaryServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreSummary',
+  GetExceptionListSummaryOptions
+>;
+
+/**
+ * Extension point is triggered prior to performing a list item deletion. Note, this extension point
+ * is triggered by both `deleteExceptionListItem()` and `deleteExceptionListItemById()` methods of the
+ * `ExceptionListClient` class
+ */
+export type ExceptionsListPreDeleteItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreDeleteItem',
+  DeleteExceptionListItemOptions
+>;
+
 export type ExtensionPoint =
+  | ExceptionsListPreImportServerExtension
   | ExceptionsListPreCreateItemServerExtension
-  | ExceptionsListPreUpdateItemServerExtension;
+  | ExceptionsListPreUpdateItemServerExtension
+  | ExceptionsListPreGetOneItemServerExtension
+  | ExceptionsListPreSingleListFindServerExtension
+  | ExceptionsListPreMultiListFindServerExtension
+  | ExceptionsListPreExportServerExtension
+  | ExceptionsListPreSummaryServerExtension
+  | ExceptionsListPreDeleteItemServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

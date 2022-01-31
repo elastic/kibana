@@ -88,6 +88,7 @@ export function StepFieldTrend({
               }
             : undefined
         }
+        withActions={false}
       />
     </Wrapper>
   );

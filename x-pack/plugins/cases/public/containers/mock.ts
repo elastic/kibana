@@ -175,13 +175,15 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const basicCaseMetricsFeatures: CaseMetricsFeature[] = [
+export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
   'actions.isolateHost',
   'connectors',
 ];
+
+export const basicCaseStatusFeatures: CaseMetricsFeature[] = ['lifespan'];
 
 export const basicCaseMetrics: CaseMetrics = {
   alerts: {
@@ -211,7 +213,7 @@ export const basicCaseMetrics: CaseMetrics = {
     statusInfo: {
       inProgressDuration: 20,
       openDuration: 10,
-      numberOfReopens: 1,
+      reopenDates: [],
     },
   },
 };
