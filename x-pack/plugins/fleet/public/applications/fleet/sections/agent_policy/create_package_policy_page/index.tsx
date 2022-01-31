@@ -641,7 +641,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              {agentPolicy && packageInfo && formState === 'INVALID' ? (
+              {packageInfo && (formState === 'INVALID' || hasAgentPolicyError) ? (
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                   defaultMessage="Your integration policy has errors. Please fix them before saving."
