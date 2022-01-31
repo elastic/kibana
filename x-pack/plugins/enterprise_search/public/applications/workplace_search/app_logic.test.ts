@@ -69,27 +69,39 @@ describe('AppLogic', () => {
   describe('setContext', () => {
     it('sets context', () => {
       AppLogic.actions.setContext(true);
-
-      expect(AppLogic.values.isOrganization).toEqual(true);
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        isOrganization: true,
+      });
     });
   });
 
   describe('setSourceRestriction', () => {
     it('sets property', () => {
-      mount(DEFAULT_INITIAL_APP_DATA);
+      mount({}, DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setSourceRestriction(true);
 
-      expect(AppLogic.values.account.canCreatePrivateSources).toEqual(true);
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        account: {
+          canCreatePrivateSources: true,
+        },
+      });
     });
   });
 
   describe('setOrgName', () => {
     it('sets property', () => {
       const NAME = 'new name';
-      mount(DEFAULT_INITIAL_APP_DATA);
+      mount({}, DEFAULT_INITIAL_APP_DATA);
       AppLogic.actions.setOrgName(NAME);
 
-      expect(AppLogic.values.organization.name).toEqual(NAME);
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        organization: {
+          name: NAME,
+        },
+      });
     });
   });
 });
