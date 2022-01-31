@@ -25,8 +25,8 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: 'anomaly_detection',
-  title: i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
-    defaultMessage: 'Anomaly Detection',
+  title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
+    defaultMessage: 'Anomaly Detection Jobs',
   }),
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
