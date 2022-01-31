@@ -13,6 +13,7 @@ import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { getEventCount } from './get_event_count';
 
 export const createThreatSignals = async ({
   alertId,
@@ -62,6 +63,23 @@ export const createThreatSignals = async ({
     warningMessages: [],
   };
 
+  const eventCount = await getEventCount({
+    esClient: services.scopedClusterClient.asCurrentUser,
+    index: inputIndex,
+    exceptionItems,
+    tuple,
+    query,
+    language,
+    filters,
+  });
+
+  logger.debug(`Total event count: ${eventCount}`);
+
+  if (eventCount === 0) {
+    logger.debug(buildRuleMessage('Indicator matching rule has completed'));
+    return results;
+  }
+
   let threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -70,6 +88,7 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
   });
+
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({

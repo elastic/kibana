@@ -68,8 +68,8 @@ const TopNav = ({
     // start a new session to make sure all data is up to date
     services.data.search.session.start();
 
-    await visInstance.embeddableHandler.reload();
-  }, [visInstance.embeddableHandler, services.data.search.session]);
+    // embeddable handler is subscribed to session service and will refresh
+  }, [services.data.search.session]);
 
   const handleRefresh = useCallback(
     (_payload: any, isUpdate?: boolean) => {
