@@ -17,8 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   describe('Home page', function () {
-    this.onlyEsVersion('<=7');
-
     before(async () => {
       await security.testUser.setRoles(['kibana_admin']);
       await pageObjects.common.navigateToApp('apiKeys');

@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('performance', function () {
-    this.tags('ciGroup8');
-
-    loadTestFile(require.resolve('./home'));
-  });
-}
+export * from './tls_alert_flyouts_in_alerting_app';
+export * from './status_alert_flyouts_in_alerting_app';

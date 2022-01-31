@@ -136,12 +136,9 @@ export const instrumentEsQueryAndDeprecationLogger = ({
             ? 'kibana'
             : 'user';
 
-        const deprecationMsg = `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nQuery:\n${queryMsg}`;
-        if (requestOrigin === 'kibana') {
-          deprecationLogger.info(deprecationMsg);
-        } else {
-          deprecationLogger.debug(deprecationMsg);
-        }
+        deprecationLogger.debug(
+          `Elasticsearch deprecation: ${event.warnings}\nOrigin:${requestOrigin}\nQuery:\n${queryMsg}`
+        );
       }
     }
   });

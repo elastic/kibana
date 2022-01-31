@@ -13,21 +13,29 @@ import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
 
+const listOfJourneys = ['uptime', 'TlsFlyoutInAlertingApp', 'StatusFlyoutInAlertingApp'] as const;
+
 export function playwrightRunTests() {
   return async ({ getService }: any) => {
     const result = await playwrightStart(getService);
 
-    if (result && result.uptime.status !== 'succeeded') {
-      throw new Error('Tests failed');
-    }
+    listOfJourneys.forEach((journey) => {
+      if (result?.[journey] && result[journey].status !== 'succeeded') {
+        throw new Error('Tests failed');
+      }
+    });
   };
 }
 
 async function playwrightStart(getService: any) {
   console.log('Loading esArchiver...');
-  await esArchiverLoad('full_heartbeat');
+  const esArchiver = getService('esArchiver');
+
+  esArchiverLoad('full_heartbeat');
 
   const config = getService('config');
+
+  await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
   const kibanaUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
@@ -41,7 +49,7 @@ async function playwrightStart(getService: any) {
   });
 
   console.log('Removing esArchiver...');
-  await esArchiverUnload('full_heartbeat');
+  esArchiverUnload('full_heartbeat');
 
   return res;
 }

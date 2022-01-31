@@ -6,3 +6,4 @@
  */
 
 export * from './uptime.journey';
+export * from './alerts';

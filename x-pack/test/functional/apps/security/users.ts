@@ -24,8 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   describe('users', function () {
-    this.onlyEsVersion('<=7');
-
     const optionalUser: UserFormValues = {
       username: 'OptionalUser',
       password: 'OptionalUserPwd',
@@ -121,9 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(roles.kibana_user.reserved).to.be(true);
       expect(roles.kibana_user.deprecated).to.be(true);
 
-      expect(roles.kibana_dashboard_only_user.reserved).to.be(true);
-      expect(roles.kibana_dashboard_only_user.deprecated).to.be(true);
-
       expect(roles.kibana_system.reserved).to.be(true);
       expect(roles.kibana_system.deprecated).to.be(false);
 
@@ -206,7 +201,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('Deactivate/Activate user', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/118728
+      describe.skip('Deactivate/Activate user', () => {
         it('deactivates user when confirming', async () => {
           await PageObjects.security.deactivatesUser(optionalUser);
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

@@ -6,7 +6,7 @@ steps:
         key: "performance-test-iteration-count"
         hint: "How many times you want to run tests? "
         required: true
-    if: build.env('ITERATION_COUNT_ENV') == null
+    if: build.env('PERF_TEST_COUNT') == null
 
   - label: ":male-mechanic::skin-tone-2: Pre-Build"
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -19,10 +19,10 @@ steps:
       queue: c2-16
     key: build
 
-  - label: ":muscle: Performance Tests"
-    command: .buildkite/scripts/steps/functional/performance.sh
+  - label: ":muscle: Performance Tests with Playwright config"
+    command: .buildkite/scripts/steps/functional/performance_playwright.sh
     agents:
-      queue: ci-group-6
+      queue: c2-16
     depends_on: build
 
   - wait: ~

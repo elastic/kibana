@@ -109,7 +109,9 @@ export async function runTests(options: RunTestsParams) {
 
         let es;
         try {
-          es = await runElasticsearch({ config, options: { ...options, log } });
+          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
+            es = await runElasticsearch({ config, options: { ...options, log } });
+          }
           await runKibanaServer({ procs, config, options });
           await runFtr({ configPath, options: { ...options, log } });
         } finally {
