@@ -24,6 +24,7 @@ import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { createTimerange } from './create_timerange';
 import { getElasticsearchMetricQuery } from './metric_query';
+import { TimeUnitChar } from '../../../../../../observability/common/utils/formatters/duration';
 
 interface AggregationWithoutIntervals {
   aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };

@@ -32,7 +32,6 @@ import {
 } from '../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
-import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {
@@ -175,7 +174,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group] as any, nextState === AlertStates.WARNING),
+              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
               group,
             })
           )
