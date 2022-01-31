@@ -18,6 +18,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { documentField } from './document_field';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
+import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -254,7 +255,7 @@ describe('IndexPattern Field Item', () => {
   it('should not request field stats for document field', async () => {
     const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} field={documentField} />);
 
-    clickField(wrapper, 'Records');
+    clickField(wrapper, DOCUMENT_FIELD_NAME);
 
     expect(core.http.post).not.toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
