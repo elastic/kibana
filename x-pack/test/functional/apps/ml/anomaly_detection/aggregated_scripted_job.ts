@@ -470,10 +470,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
 
           await ml.testExecution.logTestStep(
-            'should show warning message and redirect single metric viewer to another job'
+            'should show warning message and ask to select another job'
           );
           await ml.singleMetricViewer.assertDisabledJobReasonWarningToastExist();
-          await ml.jobSelection.assertJobSelectionNotContains(testData.jobConfig.job_id);
+          await ml.jobSelection.assertJobSelectionFlyoutOpen();
         });
       });
     }

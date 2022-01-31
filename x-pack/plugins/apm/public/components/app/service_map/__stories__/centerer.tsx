@@ -6,7 +6,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { CytoscapeContext } from '../Cytoscape';
+import { CytoscapeContext } from '../cytoscape';
 
 // Component to center map on load
 export function Centerer() {
