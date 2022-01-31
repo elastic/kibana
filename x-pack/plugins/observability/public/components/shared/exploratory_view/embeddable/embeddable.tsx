@@ -12,11 +12,13 @@ import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
-import { LensPublicStart, XYState } from '../../../../../../lens/public';
+import { LensEmbeddableInput, LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { IndexPatternState } from '../hooks/use_app_index_pattern';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { ActionTypes, useActions } from './use_actions';
+import { AddToCaseAction } from '../header/add_to_case_action';
 
 export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
@@ -28,6 +30,8 @@ export interface ExploratoryEmbeddableProps {
   legendIsVisible?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   reportConfigMap?: ReportConfigMap;
+  withActions?: boolean | ActionTypes[];
+  appId?: 'security' | 'observability';
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -43,17 +47,31 @@ export default function Embeddable({
   appendTitle,
   indexPatterns,
   lens,
+  appId,
   axisTitlesVisibility,
   legendIsVisible,
+  withActions = true,
   reportConfigMap = {},
   showCalculationMethod = false,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
+  const LensSaveModalComponent = lens?.SaveModalComponent;
+
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
+  const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
   const series = Object.entries(attributes)[0][1];
 
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
+  const actions = useActions({
+    withActions,
+    attributes,
+    reportType,
+    appId,
+    setIsSaveOpen,
+    setAddToCaseOpen,
+  });
 
   const layerConfigs: LayerConfig[] = getLayerConfigs(
     attributes,
@@ -107,6 +125,24 @@ export default function Embeddable({
         timeRange={series?.time}
         attributes={attributesJSON}
         onBrushEnd={({ range }) => {}}
+        withDefaultActions={Boolean(withActions)}
+        extraActions={actions}
+      />
+      {isSaveOpen && attributesJSON && (
+        <LensSaveModalComponent
+          initialInput={attributesJSON as unknown as LensEmbeddableInput}
+          onClose={() => setIsSaveOpen(false)}
+          // if we want to do anything after the viz is saved
+          // right now there is no action, so an empty function
+          onSave={() => {}}
+        />
+      )}
+      <AddToCaseAction
+        lensAttributes={attributesJSON}
+        timeRange={series?.time}
+        autoOpen={isAddToCaseOpen}
+        setAutoOpen={setAddToCaseOpen}
+        appId={appId}
       />
     </Wrapper>
   );
@@ -117,6 +153,24 @@ const Wrapper = styled.div`
   &&& {
     > :nth-child(2) {
       height: calc(100% - 32px);
+    }
+    .embPanel--editing {
+      border-style: initial !important;
+      :hover {
+        box-shadow: none;
+      }
+    }
+    .embPanel__title {
+      display: none;
+    }
+    .embPanel__optionsMenuPopover {
+      visibility: collapse;
+    }
+
+    &&&:hover {
+      .embPanel__optionsMenuPopover {
+        visibility: visible;
+      }
     }
   }
 `;

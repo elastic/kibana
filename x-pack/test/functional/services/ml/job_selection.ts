@@ -38,5 +38,9 @@ export function MachineLearningJobSelectionProvider({ getService }: FtrProviderC
         `Job selection should not contain job or group '${jobOrGroupId}' (got '${actualJobOrGroupLabels}')`
       );
     },
+
+    async assertJobSelectionFlyoutOpen() {
+      await testSubjects.existOrFail('mlJobSelectorFlyoutBody');
+    },
   };
 }
