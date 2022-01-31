@@ -22,6 +22,10 @@ import { DataViewEditorPlugin } from './plugin';
 
 export type { PluginStart as DataViewEditorStart, DataViewEditorProps } from './types';
 
+export { getIndices } from './lib';
+
+export { MatchedItem, ResolveIndexResponseItemAlias } from './types';
+
 export function plugin() {
   return new DataViewEditorPlugin();
 }

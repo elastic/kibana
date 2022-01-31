@@ -20,13 +20,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import {
+  MatchedItem,
+  ResolveIndexResponseItemAlias,
+} from '../../../../../plugins/data_view_editor/public';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
+import { getIndices } from '../../../../../plugins/data_view_editor/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { EmptyDataPrompt } from '../empty_data_prompt';
 import { EmptyDataViewPrompt } from '../empty_data_view_prompt';
+import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const pagination = {
   initialPageSize: 10,
@@ -66,9 +72,27 @@ const flexItemStyles = css`
   justify-content: center;
 `;
 
+const removeAliases = (item: MatchedItem) =>
+  !(item as unknown as ResolveIndexResponseItemAlias).indices;
+
 interface Props extends RouteComponentProps {
   canSave: boolean;
   showCreateDialog?: boolean;
+}
+
+function isUserDataIndex(source: MatchedItem) {
+  // filter out indices that start with `.`
+  if (source.name.startsWith('.')) return false;
+
+  // filter out sources from FLEET_ASSETS_TO_IGNORE
+  if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
+
+  // filter out empty sources created by apm server
+  if (source.name.startsWith('apm-')) return false;
+
+  return true;
 }
 
 export const IndexPatternTable = ({
@@ -77,6 +101,7 @@ export const IndexPatternTable = ({
   showCreateDialog: showCreateDialogProp = false,
 }: Props) => {
   const {
+    http,
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
@@ -84,13 +109,15 @@ export const IndexPatternTable = ({
     dataViews,
     docLinks,
     IndexPatternEditor,
-    ...rest
+    data,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
   const [hasIndexPatterns, setHasIndexPatterns] = useState<boolean>(true);
-  const [hasData, setHasData] = useState<boolean>(true);
+  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
+  const [hasCheckedRemoteClusters, setHasCheckedRemoteClusters] = useState<boolean>(false);
+  const [hasDataIndices, setHasDataIndices] = useState<boolean>(false);
 
   setBreadcrumbs(getListBreadcrumbs());
   useEffect(() => {
@@ -107,14 +134,37 @@ export const IndexPatternTable = ({
       ) {
         setHasIndexPatterns(false);
       }
-      if (
-        gettedIndexPatterns.length === 0 ||
-        !(await dataViews.hasUserDataView().catch(() => false))
-      ) {
-        setHasData(false);
+      getIndices({
+        http,
+        isRollupIndex: () => false,
+        pattern: '*',
+        showAllIndices: false,
+        searchClient: data.search.search,
+      }).then((dataSources) => {
+        setHasDataIndices(dataSources.some(isUserDataIndex));
+      });
+      if (!hasDataIndices && !hasCheckedRemoteClusters) {
+        setHasCheckedRemoteClusters(true);
+        getIndices({
+          http,
+          isRollupIndex: () => false,
+          pattern: '*:*',
+          showAllIndices: false,
+          searchClient: data.search.search,
+        }).then((dataSources) => {
+          setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
+        });
       }
     })();
-  }, [indexPatternManagementStart, uiSettings, dataViews]);
+  }, [
+    hasCheckedRemoteClusters,
+    hasDataIndices,
+    http,
+    indexPatternManagementStart,
+    uiSettings,
+    dataViews,
+    data.search.search,
+  ]);
 
   chrome.docTitle.change(title);
 
@@ -233,7 +283,7 @@ export const IndexPatternTable = ({
         />
       </>
     );
-  if (!hasData)
+  if (!hasDataIndices && !remoteClustersExist)
     displayIndexPatternSection = (
       <>
         <EuiSpacer size="xxl" />
