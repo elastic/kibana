@@ -52,7 +52,6 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.risk]: null,
-      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -80,7 +79,6 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.risk]: null,
       [HostsTableType.risk]: null,
     },
   },

@@ -31,7 +31,7 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.alerts}|`;
 
 export const HostsContainer = React.memo(() => {
   return (
