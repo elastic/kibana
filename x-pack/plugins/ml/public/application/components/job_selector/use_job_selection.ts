@@ -14,8 +14,8 @@ import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_j
 
 import { useUrlState } from '../../util/url_state';
 
-import { getTimeRangeFromSelection } from './job_select_service_utils';
 import { useNotifications } from '../../contexts/kibana';
+import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 
 // check that the ids read from the url exist by comparing them to the
 // jobs loaded via mlJobsService.
@@ -34,6 +34,8 @@ export interface JobSelection {
 export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { toasts: toastNotifications } = useNotifications();
+
+  const getJobSelection = useJobSelectionFlyout();
 
   const tmpIds = useMemo(() => {
     const ids = globalState?.ml?.jobIds || [];
@@ -71,23 +73,21 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
   }, [invalidIds]);
 
   useEffect(() => {
-    // if there are no valid ids, warn and then select the first job
+    // if there are no valid ids, ask the user to provide job selection with the flyout
     if (validIds.length === 0 && jobs.length > 0) {
-      toastNotifications.addWarning(
-        i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
-          defaultMessage: 'No jobs selected, auto selecting first job',
+      getJobSelection({ singleSelection: false })
+        .then(({ jobIds, time }) => {
+          const mlGlobalState = globalState?.ml || {};
+          mlGlobalState.jobIds = jobIds;
+
+          setGlobalState({
+            ...{ ml: mlGlobalState },
+            ...(time !== undefined ? { time } : {}),
+          });
         })
-      );
-
-      const mlGlobalState = globalState?.ml || {};
-      mlGlobalState.jobIds = [jobs[0].job_id];
-
-      const time = getTimeRangeFromSelection(jobs, mlGlobalState.jobIds);
-
-      setGlobalState({
-        ...{ ml: mlGlobalState },
-        ...(time !== undefined ? { time } : {}),
-      });
+        .catch(() => {
+          // flyout closed without selection
+        });
     }
   }, [jobs, validIds, setGlobalState, globalState?.ml]);
 
