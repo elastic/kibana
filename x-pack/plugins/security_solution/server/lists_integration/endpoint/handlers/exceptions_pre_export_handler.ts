@@ -14,6 +14,10 @@ export const getExceptionsPreExportHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreExportServerExtension['callback'] => {
   return async function ({ data, context: { request, exceptionListClient } }) {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     const { listId: maybeListId, id } = data;
     let listId: string | null | undefined = maybeListId;
 

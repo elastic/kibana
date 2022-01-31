@@ -16,6 +16,10 @@ export const getExceptionsPreCreateItemHandler = (
   endpointAppContext: EndpointAppContextService
 ): ExceptionsListPreCreateItemServerExtension['callback'] => {
   return async function ({ data, context: { request } }): Promise<CreateExceptionListItemOptions> {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp(data)) {
       return new TrustedAppValidator(endpointAppContext, request).validatePreCreateItem(data);
