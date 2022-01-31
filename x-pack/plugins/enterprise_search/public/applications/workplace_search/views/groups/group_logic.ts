@@ -122,6 +122,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
       {
         showConfirmDeleteModal: () => true,
         hideConfirmDeleteModal: () => false,
+        deleteGroup: () => false,
       },
     ],
     groupNameInputValue: [

@@ -18,9 +18,9 @@ import { EventsTdContent } from '../../../../timelines/components/timeline/style
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../timelines/public';
 import { Ecs } from '../../../../../common/ecs';
 import {
-  AddExceptionModal,
-  AddExceptionModalProps,
-} from '../../../../common/components/exceptions/add_exception_modal';
+  AddExceptionFlyout,
+  AddExceptionFlyoutProps,
+} from '../../../../common/components/exceptions/add_exception_flyout';
 import * as i18n from '../translations';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';
@@ -208,7 +208,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         ruleId != null &&
         ruleName != null &&
         ecsRowData?._id != null && (
-          <AddExceptionModalWrapper
+          <AddExceptionFlyoutWrapper
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
@@ -245,19 +245,19 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const AlertContextMenu = connector(React.memo(AlertContextMenuComponent));
 
-type AddExceptionModalWrapperProps = Omit<
-  AddExceptionModalProps,
+type AddExceptionFlyoutWrapperProps = Omit<
+  AddExceptionFlyoutProps,
   'alertData' | 'isAlertDataLoading'
 > & {
   eventId?: string;
 };
 
 /**
- * This component exists to fetch needed data outside of the AddExceptionModal
- * Due to the conditional nature of the modal and how we use the `ecsData` field,
- * we cannot use the fetch hook within the modal component itself
+ * This component exists to fetch needed data outside of the AddExceptionFlyout
+ * Due to the conditional nature of the flyout and how we use the `ecsData` field,
+ * we cannot use the fetch hook within the flyout component itself
  */
-export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> = ({
+export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
   ruleName,
   ruleId,
   ruleIndices,
@@ -305,7 +305,7 @@ export const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> =
   const isLoading = isLoadingAlertData && isSignalIndexLoading;
 
   return (
-    <AddExceptionModal
+    <AddExceptionFlyout
       ruleName={ruleName}
       ruleId={ruleId}
       ruleIndices={useRuleIndices}
