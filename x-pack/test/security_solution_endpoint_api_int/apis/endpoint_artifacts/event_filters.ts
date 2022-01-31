@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin) event filter', () => {
+  describe('Endpoint artifacts (via lists plugin): Event Filters', () => {
     const USER = ROLES.detections_admin;
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 

@@ -42,10 +42,10 @@ export const CaseView = React.memo(
     refreshRef,
   }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
-    const { detailName: caseId, subCaseId } = useCaseViewParams();
+    const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
     const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
-      useGetCase(caseId, subCaseId);
+      useGetCase(caseId);
 
     useEffect(() => {
       if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
@@ -91,7 +91,6 @@ export const CaseView = React.memo(
             actionsNavigation={actionsNavigation}
             ruleDetailsNavigation={ruleDetailsNavigation}
             showAlertDetails={showAlertDetails}
-            subCaseId={subCaseId}
             updateCase={updateCase}
             useFetchAlertData={useFetchAlertData}
             refreshRef={refreshRef}

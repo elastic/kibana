@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
-require('./index');
+import { schema } from '@kbn/config-schema';
+
+export const CheckPermissionsRequestSchema = {
+  query: schema.object({
+    fleetServerSetup: schema.maybe(schema.boolean()),
+  }),
+};
