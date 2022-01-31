@@ -7,15 +7,15 @@
  */
 
 import JSON5 from 'json5';
+import { readCliArgs } from '../args';
 
 import { Task, read, downloadToDisk } from '../lib';
-
-const EPR_URL = 'https://epr-snapshot.elastic.co';
 
 interface FleetPackage {
   name: string;
   version: string;
   checksum: string;
+  checksum_snapshot: string;
 }
 
 export const BundleFleetPackages: Task = {
@@ -25,13 +25,20 @@ export const BundleFleetPackages: Task = {
     log.info('Fetching fleet packages from package registry');
     log.indent(4);
 
+    // Support the `--use-snapshot-registry` command line argument to fetch from the snapshot registry
+    // in development or test environments
+    const { buildOptions } = readCliArgs(process.argv);
+    const eprUrl = buildOptions?.useSnapshotRegistry
+      ? 'https://epr-snapshot.elastic.co'
+      : 'https://epr.elastic.co';
+
     const configFilePath = config.resolveFromRepo('fleet_packages.json');
     const fleetPackages = (await read(configFilePath)) || '[]';
 
     await Promise.all(
       JSON5.parse(fleetPackages).map(async (fleetPackage: FleetPackage) => {
         const archivePath = `${fleetPackage.name}-${fleetPackage.version}.zip`;
-        const archiveUrl = `${EPR_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
+        const archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
 
         const destination = build.resolvePath(
           'x-pack/plugins/fleet/server/bundled_packages',

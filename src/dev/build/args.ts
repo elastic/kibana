@@ -40,6 +40,7 @@ export function readCliArgs(argv: string[]) {
       'silent',
       'debug',
       'help',
+      'use-snapshot-registry',
     ],
     alias: {
       v: 'verbose',
@@ -115,6 +116,7 @@ export function readCliArgs(argv: string[]) {
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    useSnapshotRegistry: Boolean(flags['use-snapshot-registry']),
   };
 
   return {
