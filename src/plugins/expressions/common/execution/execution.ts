@@ -300,7 +300,11 @@ export class Execution<
       ...(chainArr.map((link) =>
         switchMap((currentInput) => {
           const { function: fnName, arguments: fnArgs } = link;
-          const fn = getByAlias(this.state.get().functions, fnName);
+          const fn = getByAlias(
+            this.state.get().functions,
+            fnName,
+            this.execution.params.namespace
+          );
 
           if (!fn) {
             throw createError({

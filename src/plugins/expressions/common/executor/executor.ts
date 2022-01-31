@@ -146,14 +146,18 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.container.transitions.addFunction(fn);
   }
 
-  public getFunction(name: string): ExpressionFunction | undefined {
-    return this.container.get().functions[name] ?? this.parent?.getFunction(name);
+  public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
+    const fn = this.container.get().functions[name];
+    if (!fn || !fn.namespace || fn.namespace === namespace) return fn;
   }
 
-  public getFunctions(): Record<string, ExpressionFunction> {
+  public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
+    const fns = Object.entries(this.container.get().functions);
+    const filtered = fns.filter(
+      ([key, value]) => !value.namespace || value.namespace === namespace
+    );
     return {
-      ...(this.parent?.getFunctions() ?? {}),
-      ...this.container.get().functions,
+      ...Object.fromEntries(filtered),
     };
   }
 
