@@ -63,7 +63,7 @@ describe('helpers', () => {
       ['tags', true],
       ['title', true],
       ['status', true],
-      ['settings', false],
+      ['settings', true],
       ['create_case', false],
       ['delete_case', false],
     ];
