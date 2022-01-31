@@ -38,7 +38,6 @@ export const indexBasedRouteFactory = (
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataViewLabel', {
         defaultMessage: 'Data View',
       }),
-      href: '',
     },
   ],
 });
