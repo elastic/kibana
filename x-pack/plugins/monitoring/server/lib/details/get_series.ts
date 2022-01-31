@@ -22,7 +22,7 @@ import {
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
-import { Metric } from '../metrics/metrics';
+import type { Metric } from '../metrics/metrics';
 
 type SeriesBucket = Bucket & { metric_mb_deriv?: { normalized_value: number } };
 
