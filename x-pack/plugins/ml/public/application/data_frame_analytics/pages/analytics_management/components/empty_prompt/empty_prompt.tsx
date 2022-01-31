@@ -63,7 +63,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           <p>
             <FormattedMessage
               id="xpack.ml.overview.analyticsList.emptyPromptText"
-              defaultMessage="Perform outlier detection, regression, or classification analysis and put the annotated data in a new index. You can also use trained models for inference in pipelines and aggregations."
+              defaultMessage="Perform outlier detection, regression, or classification analysis and put the annotated data in a new index. Create trained models to add inference in pipelines and aggregations."
             />
           </p>
           <EuiCallOut
