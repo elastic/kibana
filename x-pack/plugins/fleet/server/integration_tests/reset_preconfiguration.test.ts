@@ -189,7 +189,8 @@ describe('Fleet preconfiguration rest', () => {
     await stopServers();
   });
 
-  describe('Reset all policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/123103
+  describe.skip('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
@@ -218,7 +219,7 @@ describe('Fleet preconfiguration rest', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/123103
+  // FLAKY: https://github.com/elastic/kibana/issues/123104
   // FLAKY: https://github.com/elastic/kibana/issues/123105
   describe.skip('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
