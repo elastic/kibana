@@ -34,6 +34,7 @@ describe('Alert Event Details', () => {
 
   it('should be able to run live query', () => {
     const PACK_NAME = 'testpack';
+    const RULE_NAME = 'Test-rule';
     navigateTo('/app/osquery/packs');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
@@ -45,6 +46,14 @@ describe('Alert Event Details', () => {
     findAndClickButton('Update pack');
     closeModalIfVisible();
     cy.contains(PACK_NAME);
+    cy.visit('/app/security/rules');
+    cy.contains(RULE_NAME).click();
+    cy.wait(2000);
+    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+    cy.getBySel('ruleSwitch').click();
+    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+    cy.getBySel('ruleSwitch').click();
+    cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     cy.visit('/app/security/alerts');
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
