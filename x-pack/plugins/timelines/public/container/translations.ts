@@ -28,9 +28,9 @@ export const ERROR_RUNTIME_FIELD_TIMELINE_EVENTS = i18n.translate(
   }
 );
 
-export const ERROR_RUNTIME_FIELD_RESET_SORT = i18n.translate(
+export const ERROR_RUNTIME_FIELD_CLEAR_SORTING = i18n.translate(
   'xpack.timelines.timelineEvents.errorRuntimeFieldSearchButton',
   {
-    defaultMessage: 'Reset sort',
+    defaultMessage: 'Clear sorting',
   }
 );

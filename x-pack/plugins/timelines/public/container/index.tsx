@@ -420,13 +420,13 @@ const getRuntimeFieldSortWarningToast = ({
 }) => ({
   iconType: 'alert',
   title: i18n.ERROR_RUNTIME_FIELD_TIMELINE_EVENTS,
-  toastLifeTimeMs: Infinity,
+  toastLifeTimeMs: 300000,
   text: mountReactNode(
     <>
       <p>{text}</p>
       <div className="eui-textRight">
         <EuiButton size="s" color="warning" onClick={resetSort}>
-          {i18n.ERROR_RUNTIME_FIELD_RESET_SORT}
+          {i18n.ERROR_RUNTIME_FIELD_CLEAR_SORTING}
         </EuiButton>
       </div>
     </>
