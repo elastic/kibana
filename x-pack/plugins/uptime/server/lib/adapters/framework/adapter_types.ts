@@ -50,6 +50,7 @@ export interface UptimeServerSetup {
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   syntheticsService: SyntheticsService;
+  kibanaVersion: string;
 }
 
 export interface UptimeCorePluginsSetup {
