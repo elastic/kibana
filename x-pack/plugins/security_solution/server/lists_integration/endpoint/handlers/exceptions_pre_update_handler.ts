@@ -12,9 +12,10 @@ import {
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { EventFilterValidator, TrustedAppValidator } from '../validators';
 
+type ValidatorCallback = ExceptionsListPreUpdateItemServerExtension['callback'];
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
-): ExceptionsListPreUpdateItemServerExtension['callback'] => {
+): ValidatorCallback => {
   return async function ({
     data,
     context: { request, exceptionListClient },
@@ -37,7 +38,7 @@ export const getExceptionsPreUpdateItemHandler = (
 
     const listId = currentSavedItem.list_id;
 
-    // Validate trusted apps
+    // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       return new TrustedAppValidator(endpointAppContextService, request).validatePreUpdateItem(
         data,
@@ -45,7 +46,7 @@ export const getExceptionsPreUpdateItemHandler = (
       );
     }
 
-    // Validate event filter
+    // Validate Event Filters
     if (EventFilterValidator.isEventFilter({ listId })) {
       return new EventFilterValidator(endpointAppContextService, request).validatePreUpdateItem(
         data,
