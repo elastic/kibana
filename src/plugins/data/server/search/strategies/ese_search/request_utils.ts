@@ -12,10 +12,10 @@ import {
   AsyncSearchSubmit,
   Search,
 } from '@elastic/elasticsearch/api/requestParams';
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
-import { SearchRequest } from '@elastic/elasticsearch/api/types';
 
 /**
  * @internal

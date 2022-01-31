@@ -60,8 +60,9 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     const config = await globalConfig$.pipe(first()).toPromise();
     const timeout = getShardTimeout(config);
 
-    // trackTotalHits is not supported by msearch
-    const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(uiSettings);
+    // track_total_hits/enable_fields_emulation are not supported by msearch
+    const { track_total_hits, enable_fields_emulation, ...defaultParams } =
+      await getDefaultSearchParams(uiSettings);
 
     try {
       const promise = esClient.asCurrentUser.msearch(
