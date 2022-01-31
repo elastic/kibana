@@ -71,63 +71,63 @@ export const Layout = React.memo(
     const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
     const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
 
-    const options = {
-      formatter: InfraFormatterType.percent,
-      formatTemplate: '{{value}}',
-      legend: createLegend(legendPalette, legendSteps, legendReverseColors),
-      metric,
-      sort,
-      groupBy,
-    };
+  const options = {
+    formatter: InfraFormatterType.percent,
+    formatTemplate: '{{value}}',
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors),
+    metric,
+    sort,
+    groupBy,
+  };
 
-    useInterval(
-      () => {
-        if (!loading) {
-          jumpToTime(Date.now());
-        }
-      },
-      isAutoReloading ? 5000 : null
-    );
+  useInterval(
+    () => {
+      if (!loading) {
+        jumpToTime(Date.now());
+      }
+    },
+    isAutoReloading ? 5000 : null
+  );
 
-    const dataBounds = calculateBoundsFromNodes(nodes);
-    const bounds = autoBounds ? dataBounds : boundsOverride;
+  const dataBounds = calculateBoundsFromNodes(nodes);
+  const bounds = autoBounds ? dataBounds : boundsOverride;
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+  const { onViewChange } = useWaffleViewState();
+
+  useEffect(() => {
+    if (currentView) {
+      onViewChange(currentView);
+    }
+  }, [currentView, onViewChange]);
+
+  useEffect(() => {
+    // load snapshot data after default view loaded, unless we're not loading a view
+    if (currentView != null || !shouldLoadDefault) {
+      reload();
+    }
+
+    /**
+     * INFO: why disable exhaustive-deps
+     * We need to wait on the currentView not to be null because it is loaded async and could change the view state.
+     * We don't actually need to watch the value of currentView though, since the view state will be synched up by the
+     * changing params in the reload method so we should only "watch" the reload method.
+     *
+     * TODO: Should refactor this in the future to make it more clear where all the view state is coming
+     * from and it's precedence [query params, localStorage, defaultView, out of the box view]
+     */
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
-    const { onViewChange } = useWaffleViewState();
+  }, [reload, shouldLoadDefault]);
 
-    useEffect(() => {
-      if (currentView) {
-        onViewChange(currentView);
-      }
-    }, [currentView, onViewChange]);
+  useEffect(() => {
+    setShowLoading(true);
+  }, [options.metric, nodeType]);
 
-    useEffect(() => {
-      // load snapshot data after default view loaded, unless we're not loading a view
-      if (currentView != null || !shouldLoadDefault) {
-        reload();
-      }
-
-      /**
-       * INFO: why disable exhaustive-deps
-       * We need to wait on the currentView not to be null because it is loaded async and could change the view state.
-       * We don't actually need to watch the value of currentView though, since the view state will be synched up by the
-       * changing params in the reload method so we should only "watch" the reload method.
-       *
-       * TODO: Should refactor this in the future to make it more clear where all the view state is coming
-       * from and it's precedence [query params, localStorage, defaultView, out of the box view]
-       */
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [reload, shouldLoadDefault]);
-
-    useEffect(() => {
-      setShowLoading(true);
-    }, [options.metric, nodeType]);
-
-    useEffect(() => {
-      const hasNodes = nodes && nodes.length;
-      // Don't show loading screen when we're auto-reloading
-      setShowLoading(!hasNodes);
-    }, [nodes]);
+  useEffect(() => {
+    const hasNodes = nodes && nodes.length;
+    // Don't show loading screen when we're auto-reloading
+    setShowLoading(!hasNodes);
+  }, [nodes]);
 
     const handleLegendControlChange = useCallback(
       (opts: LegendControlOptions) => {

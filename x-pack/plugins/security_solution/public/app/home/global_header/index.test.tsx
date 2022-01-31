@@ -30,9 +30,9 @@ jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
-    useKibana: jest
-      .fn()
-      .mockReturnValue({ services: { http: { basePath: { prepend: jest.fn() } } } }),
+    useKibana: jest.fn().mockReturnValue({
+      services: { theme: { theme$: {} }, http: { basePath: { prepend: jest.fn() } } },
+    }),
     useUiSetting$: jest.fn().mockReturnValue([]),
   };
 });

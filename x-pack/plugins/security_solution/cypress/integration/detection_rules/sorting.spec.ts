@@ -15,17 +15,13 @@ import {
   pageSelector,
 } from '../../screens/alerts_detection_rules';
 
+import { goToManageAlertsDetectionRules, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
 import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsPanelToBeLoaded,
-  waitForAlertsIndexToBeCreated,
-} from '../../tasks/alerts';
-import {
-  activateRule,
+  enableRule,
   changeRowsPerPageTo,
   checkAutoRefresh,
   goToPage,
-  sortByActivatedRules,
+  sortByEnabledRules,
   waitForRulesTableToBeLoaded,
   waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
@@ -48,26 +44,25 @@ describe('Alerts detection rules', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule(), '1');
     createCustomRule(getExistingRule(), '2');
     createCustomRule(getNewOverrideRule(), '3');
     createCustomRule(getNewThresholdRule(), '4');
   });
 
-  it('Sorts by activated rules', () => {
+  it('Sorts by enabled rules', () => {
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
 
-    activateRule(SECOND_RULE);
+    enableRule(SECOND_RULE);
     waitForRuleToChangeStatus();
-    activateRule(FOURTH_RULE);
+    enableRule(FOURTH_RULE);
     waitForRuleToChangeStatus();
 
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
 
-    sortByActivatedRules();
+    sortByEnabledRules();
 
     cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
@@ -79,7 +74,6 @@ describe('Alerts detection rules', () => {
 
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
-
     changeRowsPerPageTo(5);
 
     const FIRST_PAGE_SELECTOR = pageSelector(1);

@@ -23,10 +23,11 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { DataDocuments$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 const mockServices = {
   history: () => ({
@@ -62,7 +63,6 @@ jest.mock('../../../../kibana_services', () => ({
       getTriggerCompatibleActions: jest.fn(() => []),
     };
   }),
-  getServices: () => mockServices,
 }));
 
 jest.mock('../../utils/calc_field_counts', () => ({
@@ -88,23 +88,28 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
+
   return {
     columns: ['extension'],
     documents$: new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: hits as ElasticSearchHit[],
     }) as DataDocuments$,
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      fields: [] as string[],
+    }) as AvailableFields$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
-    services: mockServices,
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
   };
 }
 
@@ -114,7 +119,11 @@ describe('discover responsive sidebar', function () {
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebarResponsive {...props} />);
+    comp = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...props} />
+      </KibanaContextProvider>
+    );
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {

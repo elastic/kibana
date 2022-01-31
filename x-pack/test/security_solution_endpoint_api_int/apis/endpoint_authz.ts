@@ -63,11 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
         body: undefined,
       },
       {
-        method: 'get',
-        path: '/api/endpoint/policy',
-        body: undefined,
-      },
-      {
         method: 'post',
         path: '/api/endpoint/isolate',
         body: { endpoint_ids: ['one'] },
