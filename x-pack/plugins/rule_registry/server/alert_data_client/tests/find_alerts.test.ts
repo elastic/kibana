@@ -24,6 +24,7 @@ const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 const auditLogger = {
   log: jest.fn(),
+  enabled: true,
 } as jest.Mocked<AuditLogger>;
 
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
