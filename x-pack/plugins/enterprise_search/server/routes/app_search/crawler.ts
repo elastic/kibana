@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { skipBodyValidation } from '../../lib/route_config_helpers';
+
 import { RouteDependencies } from '../../plugin';
 
 export function registerCrawlerRoutes({
@@ -57,14 +59,14 @@ export function registerCrawlerRoutes({
   );
 
   router.post(
-    {
+    skipBodyValidation({
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
       validate: {
         params: schema.object({
           name: schema.string(),
         }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/as/v1/engines/:name/crawler/crawl_requests',
     })
