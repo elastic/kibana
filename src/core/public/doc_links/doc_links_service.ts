@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getDocLinks, getDocLinksMeta, DocLinks } from '@kbn/doc-links';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
 export interface StartDeps {
