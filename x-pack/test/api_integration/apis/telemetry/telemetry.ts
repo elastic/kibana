@@ -201,24 +201,25 @@ export default function ({ getService }: FtrProviderContext) {
         cacheLastUpdated = getCacheDetails(body).map(({ updatedAt }) => updatedAt);
       });
       after(() => esArchiver.unload(archive));
+    });
 
-      it('returns cached results by default', async () => {
-        const now = Date.now();
-        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
-          .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
-          .expect(200);
+    it('returns non-cached results when unencrypted', async () => {
+      const now = Date.now();
+      const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+        .post('/api/telemetry/v2/clusters/_stats')
+        .set('kbn-xsrf', 'xxx')
+        .send({ unencrypted: true })
+        .expect(200);
 
-        expect(body).length(2);
+      expect(body).length(1);
 
-        const cacheDetails = getCacheDetails(body);
-        // Check that the fetched payload is actually cached by comparing cache and updatedAt timestamps
-        expect(cacheDetails.map(({ updatedAt }) => updatedAt)).to.eql(cacheLastUpdated);
-        // Check that the fetchedAt timestamp is updated when the data is fethed
-        cacheDetails.forEach(({ fetchedAt }) => {
-          expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
-        });
+      const cacheDetails = getCacheDetails(body);
+      cacheDetails.forEach(({ fetchedAt, updatedAt }) => {
+        // Check that the cache is fresh by comparing updatedAt timestamp with
+        // the timestamp the data was fetched.
+        expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
+        // Check that the fetchedAt timestamp is updated when the data is fetched
+        expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
       });
     });
 
@@ -235,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Check that the cache is fresh by comparing updatedAt timestamp with
         // the timestamp the data was fetched.
         expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
-        // Check that the fetchedAt timestamp is updated when the data is fethed
+        // Check that the fetchedAt timestamp is updated when the data is fetched
         expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
       });
     });
