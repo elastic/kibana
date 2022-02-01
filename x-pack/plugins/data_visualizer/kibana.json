@@ -28,7 +28,8 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "uiActions"
+    "uiActions",
+    "lens"
   ],
   "owner": {
     "name": "Machine Learning UI",
