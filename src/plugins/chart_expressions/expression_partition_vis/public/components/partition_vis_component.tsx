@@ -19,12 +19,7 @@ import {
   TooltipType,
   SeriesIdentifier,
 } from '@elastic/charts';
-import {
-  LegendToggle,
-  ClickTriggerEvent,
-  ChartsPluginSetup,
-  PaletteRegistry,
-} from '../../../../charts/public';
+import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import {
   Datatable,
@@ -66,6 +61,7 @@ import {
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
+import { FilterEvent } from '../types';
 
 declare global {
   interface Window {
@@ -112,7 +108,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
 
-  const showToggleLegendElement = showLegend !== undefined;
+  const showToggleLegendElement = props.uiState !== undefined;
 
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
 
@@ -165,11 +161,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   // handles legend action event data
   const getLegendActionEventData = useCallback(
     (vData: Datatable) =>
-      (series: SeriesIdentifier): ClickTriggerEvent | null => {
+      (series: SeriesIdentifier): FilterEvent => {
         const data = getFilterEventData(vData, series);
 
         return {
-          name: 'filterBucket',
+          name: 'filter',
           data: {
             negate: false,
             data,
@@ -180,7 +176,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const handleLegendAction = useCallback(
-    (event: ClickTriggerEvent, negate = false) => {
+    (event: FilterEvent, negate = false) => {
       props.fireEvent({
         ...event,
         data: {
