@@ -232,6 +232,7 @@ export const config: {
         sniffInterval: Type<false | Duration>;
         sniffOnConnectionFault: Type<boolean>;
         hosts: Type<string | string[]>;
+        compression: Type<boolean>;
         username: Type<string | undefined>;
         password: Type<string | undefined>;
         serviceAccountToken: Type<string | undefined>;
@@ -878,7 +879,7 @@ export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transpo
 };
 
 // @public
-export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
@@ -890,6 +891,7 @@ export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders
 export class ElasticsearchConfig {
     constructor(rawConfig: ElasticsearchConfigType);
     readonly apiVersion: string;
+    readonly compression: boolean;
     // Warning: (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
     readonly customHeaders: ElasticsearchConfigType['customHeaders'];
     readonly healthCheckDelay: Duration;
