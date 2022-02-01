@@ -49,7 +49,7 @@ describe('<Actions />', () => {
 
     userEvent.click(screen.getByLabelText('Delete monitor'));
 
-    expect(onUpdate).toBeCalledWith(true);
+    expect(onUpdate).toHaveBeenCalled();
   });
 
   it('shows loading spinner while waiting for monitor to delete', () => {

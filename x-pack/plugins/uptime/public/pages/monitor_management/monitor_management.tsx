@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, Reducer } from 'react';
+import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../../observability/public';
 import { ConfigKey } from '../../../common/runtime_types';
@@ -28,6 +28,17 @@ export const MonitorManagementPage: React.FC = () => {
     }
   );
 
+  const onPageStateChange = useCallback(
+    (state) => {
+      dispatchPageAction({ type: 'update', payload: state });
+    },
+    [dispatchPageAction]
+  );
+
+  const onUpdate = useCallback(() => {
+    dispatchPageAction({ type: 'refresh' });
+  }, [dispatchPageAction]);
+
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
   useMonitorManagementBreadcrumbs();
@@ -38,14 +49,14 @@ export const MonitorManagementPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
-  }, [dispatch, pageIndex, pageSize, sortField, sortOrder]);
+  }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder]);
 
   return (
     <MonitorManagementList
       pageState={pageState}
       monitorList={monitorList}
-      onPageStateChange={(state) => dispatchPageAction({ type: 'update', payload: state })}
-      onUpdate={() => dispatchPageAction({ type: 'refresh' })}
+      onPageStateChange={onPageStateChange}
+      onUpdate={onUpdate}
     />
   );
 };
