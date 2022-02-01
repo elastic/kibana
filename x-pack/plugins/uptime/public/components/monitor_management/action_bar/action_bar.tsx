@@ -110,6 +110,7 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
                   iconType="play"
                   onClick={() => onTestNow()}
                   disabled={!isValid}
+                  data-test-subj={'monitorTestNowRunBtn'}
                 >
                   {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
                 </EuiButton>

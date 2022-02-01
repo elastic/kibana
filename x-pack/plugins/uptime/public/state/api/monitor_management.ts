@@ -17,7 +17,6 @@ import {
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
 
-// TODO: Type the return type from runtime types
 export const setMonitor = async ({
   monitor,
   id,
@@ -32,7 +31,6 @@ export const setMonitor = async ({
   }
 };
 
-// TODO, change to monitor runtime type
 export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
