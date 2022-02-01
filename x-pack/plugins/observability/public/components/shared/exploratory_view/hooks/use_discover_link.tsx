@@ -38,7 +38,7 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
       const urlFilters = (series.filters ?? []).concat(getFiltersFromDefs(definitions));
 
       const filters = urlFilterToPersistedFilter({
-        indexPattern,
+        dataView: indexPattern,
         urlFilters,
         initFilters: seriesConfig?.baseFilters,
       });
