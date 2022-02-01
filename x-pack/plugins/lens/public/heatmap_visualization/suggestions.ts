@@ -48,6 +48,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     return [];
   }
 
+  if (metrics.length > 1) {
+    return [];
+  }
+
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
 
   /**
@@ -72,6 +76,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: state?.gridConfig?.isYAxisTitleVisible ?? false,
+      isXAxisTitleVisible: state?.gridConfig?.isXAxisTitleVisible ?? false,
     },
   };
 

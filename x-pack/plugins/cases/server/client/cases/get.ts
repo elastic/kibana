@@ -28,7 +28,6 @@ import {
   CasesByAlertIdRt,
   CaseAttributes,
 } from '../../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
 import { CasesClientArgs } from '..';
@@ -147,52 +146,24 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
-  /**
-   * Whether to include the attachments for all children of a case in the response
-   */
-  includeSubCaseComments?: boolean;
 }
 
 /**
- * Retrieves a case and optionally its comments and sub case comments.
+ * Retrieves a case and optionally its comments.
  *
  * @ignore
  */
 export const get = async (
-  { id, includeComments, includeSubCaseComments }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
-    if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
-      throw Boom.badRequest(
-        'The `includeSubCaseComments` is not supported when the case connector feature is disabled'
-      );
-    }
-
-    let theCase: SavedObject<CaseAttributes>;
-    let subCaseIds: string[] = [];
-    if (ENABLE_CASE_CONNECTOR) {
-      const [caseInfo, subCasesForCaseId] = await Promise.all([
-        caseService.getCase({
-          unsecuredSavedObjectsClient,
-          id,
-        }),
-        caseService.findSubCasesByCaseId({
-          unsecuredSavedObjectsClient,
-          ids: [id],
-        }),
-      ]);
-
-      theCase = caseInfo;
-      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
-    } else {
-      theCase = await caseService.getCase({
-        unsecuredSavedObjectsClient,
-        id,
-      });
-    }
+    const theCase: SavedObject<CaseAttributes> = await caseService.getCase({
+      unsecuredSavedObjectsClient,
+      id,
+    });
 
     await authorization.ensureAuthorized({
       operation: Operations.getCase,
@@ -203,7 +174,6 @@ export const get = async (
       return CaseResponseRt.encode(
         flattenCaseSavedObject({
           savedObject: theCase,
-          subCaseIds,
         })
       );
     }
@@ -215,14 +185,12 @@ export const get = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
     });
 
     return CaseResponseRt.encode(
       flattenCaseSavedObject({
         savedObject: theCase,
         comments: theComments.saved_objects,
-        subCaseIds,
         totalComment: theComments.total,
         totalAlerts: countAlertsForID({ comments: theComments, id }),
       })
@@ -233,23 +201,17 @@ export const get = async (
 };
 
 /**
- * Retrieves a case resolving its ID and optionally loading its comments and sub case comments.
+ * Retrieves a case resolving its ID and optionally loading its comments.
  *
  * @experimental
  */
 export const resolve = async (
-  { id, includeComments, includeSubCaseComments }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
-    if (!ENABLE_CASE_CONNECTOR && includeSubCaseComments) {
-      throw Boom.badRequest(
-        'The `includeSubCaseComments` is not supported when the case connector feature is disabled'
-      );
-    }
-
     const {
       saved_object: resolvedSavedObject,
       ...resolveData
@@ -268,21 +230,11 @@ export const resolve = async (
       ],
     });
 
-    let subCaseIds: string[] = [];
-    if (ENABLE_CASE_CONNECTOR) {
-      const subCasesForCaseId = await caseService.findSubCasesByCaseId({
-        unsecuredSavedObjectsClient,
-        ids: [resolvedSavedObject.id],
-      });
-      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
-    }
-
     if (!includeComments) {
       return CaseResolveResponseRt.encode({
         ...resolveData,
         case: flattenCaseSavedObject({
           savedObject: resolvedSavedObject,
-          subCaseIds,
         }),
       });
     }
@@ -294,14 +246,12 @@ export const resolve = async (
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
     });
 
     return CaseResolveResponseRt.encode({
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
-        subCaseIds,
         comments: theComments.saved_objects,
         totalComment: theComments.total,
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),

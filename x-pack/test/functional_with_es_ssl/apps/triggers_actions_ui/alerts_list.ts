@@ -361,6 +361,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
+    it('should render percentile column and cells correctly', async () => {
+      await createAlert({ supertest, objectRemover });
+      await refreshAlertsList();
+
+      await testSubjects.existOrFail('alertsTable-P50ColumnName');
+      await testSubjects.existOrFail('P50Percentile');
+
+      await retry.try(async () => {
+        await testSubjects.click('percentileSelectablePopover-iconButton');
+        await testSubjects.existOrFail('percentileSelectablePopover-selectable');
+        const searchClearButton = await find.byCssSelector(
+          '[data-test-subj="percentileSelectablePopover-selectable"] li:nth-child(2)'
+        );
+        await searchClearButton.click();
+        await testSubjects.missingOrFail('percentileSelectablePopover-selectable');
+        await testSubjects.existOrFail('alertsTable-P95ColumnName');
+        await testSubjects.existOrFail('P95Percentile');
+      });
+    });
+
     it('should delete all selection', async () => {
       const namePrefix = generateUniqueKey();
       const createdAlert = await createAlertManualCleanup({
