@@ -23,6 +23,10 @@ import type {
   FieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/field_histograms';
 import type {
+  ResetTransformsRequestSchema,
+  ResetTransformsResponseSchema,
+} from '../../../common/api_schemas/reset_transforms';
+import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
 } from '../../../common/api_schemas/start_transforms';
@@ -152,6 +156,17 @@ export const useApi = () => {
         try {
           return await http.post(`${API_BASE_PATH}transforms/_preview`, {
             body: JSON.stringify(obj),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
+      async resetTransforms(
+        reqBody: ResetTransformsRequestSchema
+      ): Promise<ResetTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}reset_transforms`, {
+            body: JSON.stringify(reqBody),
           });
         } catch (e) {
           return e;
