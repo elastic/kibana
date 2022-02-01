@@ -32,7 +32,7 @@ import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
-import { useNavigateTo } from '../../../common/lib/kibana';
+import { useNavigateTo } from '../../../common/lib/kibana/hooks';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
