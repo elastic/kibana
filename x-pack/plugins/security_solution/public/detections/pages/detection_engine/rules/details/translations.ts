@@ -99,13 +99,13 @@ export const COLUMN_MESSAGE = i18n.translate(
 );
 
 export const COLUMN_TOTAL_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumn',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.totalAlertsColumn',
   {
     defaultMessage: 'Total Alerts',
   }
 );
 export const COLUMN_TOTAL_HITS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumn',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.totalHitsColumn',
   {
     defaultMessage: 'Total Hits',
   }
