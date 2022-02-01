@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import type { IndexPattern } from '../../../../../src/plugins/data/common';
 import {
   Embeddable,
@@ -12,7 +13,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
-import { Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
+import { Query, TimeRange } from '../../../../../src/plugins/data/common';
 import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';

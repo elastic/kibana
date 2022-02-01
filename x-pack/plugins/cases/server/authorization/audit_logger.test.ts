@@ -32,6 +32,7 @@ describe('audit_logger', () => {
   describe('log function', () => {
     const mockLogger: jest.Mocked<AuditLogger> = {
       log: jest.fn(),
+      enabled: true,
     };
 
     let logger: AuthorizationAuditLogger;

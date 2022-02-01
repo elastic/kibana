@@ -101,4 +101,34 @@ export class EventFilterValidator extends BaseValidator {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }
   }
+
+  async validatePreGetOneItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreSummary(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreDeleteItem(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreExport(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreSingleListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreMultiListFind(): Promise<void> {
+    await this.validateCanManageEndpointArtifacts();
+  }
+
+  async validatePreImport(): Promise<void> {
+    throw new EndpointArtifactExceptionValidationError(
+      'Import is not supported for Endpoint artifact exceptions'
+    );
+  }
 }

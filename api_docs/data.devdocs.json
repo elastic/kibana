@@ -621,28 +621,7 @@
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": true,
             "removeBy": "8.1",
-            "references": [
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/vis.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
-              },
-              {
-                "plugin": "visDefaultEditor",
-                "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
-              }
-            ],
+            "references": [],
             "children": [],
             "returnComment": []
           },
@@ -2945,14 +2924,6 @@
             "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -3015,14 +2986,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
           },
           {
             "plugin": "maps",
@@ -5201,14 +5164,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -9591,30 +9546,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
           },
@@ -12369,14 +12300,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -18589,20 +18512,8 @@
               "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
             },
             {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-            },
-            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/build_services.ts"
-            },
-            {
-              "plugin": "discover",
-              "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
             },
             {
               "plugin": "discover",
@@ -18702,6 +18613,10 @@
             },
             {
               "plugin": "infra",
+              "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/editor.tsx"
+            },
+            {
+              "plugin": "infra",
               "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx"
             },
             {
@@ -18714,10 +18629,6 @@
             },
             {
               "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/editor.tsx"
-            },
-            {
-              "plugin": "infra",
               "path": "x-pack/plugins/infra/public/pages/link_to/redirect_to_node_logs.tsx"
             },
             {
@@ -18727,14 +18638,6 @@
             {
               "plugin": "infra",
               "path": "x-pack/plugins/infra/public/pages/logs/page_providers.tsx"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
             },
             {
               "plugin": "graph",
@@ -21228,14 +21131,6 @@
             "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -21298,14 +21193,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
           },
           {
             "plugin": "maps",
@@ -23794,14 +23681,6 @@
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
@@ -23957,14 +23836,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -24571,30 +24442,6 @@
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
           },
           {
             "plugin": "monitoring",
@@ -25447,14 +25294,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
           },
           {
             "plugin": "dashboardEnhanced",
@@ -29532,10 +29371,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
               },
@@ -31008,14 +30843,6 @@
             "path": "x-pack/plugins/apm/public/components/app/rum_dashboard/local_ui_filters/selected_filters.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/types/index.ts"
           },
@@ -31078,14 +30905,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/server/routes/existing_fields.d.ts"
           },
           {
             "plugin": "maps",
@@ -33266,14 +33085,6 @@
             "path": "x-pack/plugins/maps/server/data_indexing/create_doc_source.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/routes/existing_fields.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
           },
@@ -35257,20 +35068,7 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/locator.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/locator.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/common/locator.ts"
-          }
-        ],
+        "references": [],
         "returnComment": [],
         "children": [
           {
@@ -37375,30 +37173,6 @@
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
           },
           {
             "plugin": "monitoring",
@@ -40138,14 +39912,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/maps/anomaly_source_field.ts"
           },
           {
             "plugin": "dashboardEnhanced",
