@@ -41,7 +41,7 @@ describe('useDataInit', () => {
       ...mockContextValue.services,
       objectStorageClient: {
         text: {
-          findAll: jest.fn(() => arg),
+          findAll: jest.fn(() => (typeof arg === 'function' ? arg() : arg)),
           create: jest.fn((data: any) => mockedObject),
         },
       },
@@ -69,14 +69,18 @@ describe('useDataInit', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     jest.restoreAllMocks();
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
   });
 
   it('should calls dispatch with new objects if no texts are provided', async () => {
     jest.spyOn(React, 'useState').mockImplementation(useStateMock);
 
-    const { result } = renderHook(() => useDataInit(), {});
+    renderHook(() => useDataInit(), {});
 
     await wait(0);
 
@@ -97,7 +101,7 @@ describe('useDataInit', () => {
 
     (useServicesContext as jest.Mock).mockReturnValue(callMockFuncWithArg([mockObj]));
 
-    const { result } = renderHook(() => useDataInit(), {});
+    renderHook(() => useDataInit(), {});
 
     await wait(0);
 
@@ -132,7 +136,7 @@ describe('useDataInit', () => {
     expect(setRetryTokenMock).toHaveBeenCalledWith({});
   });
 
-  it('should update the error state if case of getting an exception while loading data', () => {
+  it('should update the error state if case of getting an exception while loading data', async () => {
     const error = new Error('Message');
 
     (useServicesContext as jest.Mock).mockReturnValue(
@@ -146,14 +150,25 @@ describe('useDataInit', () => {
 
     jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
 
+    const { result } = renderHook(() => useDataInit(), {});
+
+    await wait(0);
+
     expect(setErrorMock).toHaveBeenCalledWith(error);
   });
 
-  it('should update the done state when we get into the finally block', () => {
+  it('should update the done state when we get into the finally block', async () => {
     const setDoneMock = jest.fn();
+    const setErrorMock = jest.fn();
     const useDoneMock: UseStateMock = (state: any) => [state, setDoneMock];
+    const useErrorMock: UseStateMock = (state: any) => [state, setErrorMock];
 
+    jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
     jest.spyOn(React, 'useState').mockImplementationOnce(useDoneMock);
+
+    const { result } = renderHook(() => useDataInit(), {});
+
+    await wait(0);
 
     expect(setDoneMock).toHaveBeenCalledWith(true);
   });
