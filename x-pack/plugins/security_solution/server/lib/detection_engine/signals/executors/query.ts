@@ -17,7 +17,7 @@ import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
+import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
@@ -48,7 +48,7 @@ export const queryExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
