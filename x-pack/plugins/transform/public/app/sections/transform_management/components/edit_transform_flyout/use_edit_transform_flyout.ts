@@ -30,7 +30,7 @@ import {
 
 // The outer most level reducer defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final request object will be nested.
-// For example, `destinationIndex` and `destinationPipeline` will later be nested under `dest`.
+// For example, `destinationIndex` and `destinationIngestPipeline` will later be nested under `dest`.
 type EditTransformFormFields =
   | 'description'
   | 'destinationIndex'
@@ -309,6 +309,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       config,
       {
         dependsOn: ['destinationIndex'],
+        isOptional: true,
       }
     ),
 
