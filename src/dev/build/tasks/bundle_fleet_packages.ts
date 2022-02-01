@@ -45,14 +45,19 @@ export const BundleFleetPackages: Task = {
           archivePath
         );
 
-        await downloadToDisk({
-          log,
-          url: archiveUrl,
-          destination,
-          shaChecksum: fleetPackage.checksum,
-          shaAlgorithm: 'sha512',
-          maxAttempts: 3,
-        });
+        try {
+          await downloadToDisk({
+            log,
+            url: archiveUrl,
+            destination,
+            shaChecksum: fleetPackage.checksum,
+            shaAlgorithm: 'sha512',
+            maxAttempts: 3,
+          });
+        } catch (error) {
+          log.warning(`Failed to download bundled package archive ${archivePath} due to error:`);
+          log.warning(error);
+        }
       })
     );
   },

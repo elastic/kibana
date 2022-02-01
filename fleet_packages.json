@@ -36,7 +36,7 @@
   {
     "name": "fleet_server",
     "version": "1.1.0",
-    "checksum": "b50f390d0baf2d9dffbfa4ee7f9a389f469e9f4b4d0946535506f7433ff1dcd9750ae38baccad4ae3d8265810182e22da76d49aa86ae7ca000cc76f1676cdfd4"
+    "checksum": "9aeec3ca187010fe1f268a2ffa1f1185ed1505d7f048a2997f6dee05ce9e32534fadf912ff644b0f5989c7be1f6e416f02921287355b65d5f045ccb4365ff836"
   },
   {
     "name": "synthetics",
