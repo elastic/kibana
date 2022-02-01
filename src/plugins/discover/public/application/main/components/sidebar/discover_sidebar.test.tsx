@@ -24,6 +24,9 @@ import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { BehaviorSubject } from 'rxjs';
+import { FetchStatus } from '../../../types';
+import { AvailableFields$ } from '../../utils/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
@@ -46,6 +49,11 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
+
   return {
     columns: ['extension'],
     fieldCounts,
@@ -65,6 +73,7 @@ function getCompProps(): DiscoverSidebarProps {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     createNewDataView: jest.fn(),
     onDataViewCreated: jest.fn(),
+    availableFields$,
   };
 }
 

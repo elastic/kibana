@@ -25,6 +25,7 @@ export const getThreatList = async ({
   threatFilters,
   buildRuleMessage,
   logger,
+  threatListConfig,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -43,18 +44,14 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
+
   const { body: response } = await esClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
     body: {
+      ...threatListConfig,
       query: queryFilter,
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-      ],
       search_after: searchAfter,
       sort: ['_doc', { '@timestamp': 'asc' }],
     },
