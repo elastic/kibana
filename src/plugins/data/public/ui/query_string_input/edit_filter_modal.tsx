@@ -83,6 +83,8 @@ export interface FilterGroup {
 }
 
 export function EditFilterModal({
+  onSubmit,
+  onMultipleFiltersSubmit,
   onCancel,
   applySavedQueries,
   filter,
@@ -93,6 +95,8 @@ export function EditFilterModal({
   initialAddFilterMode,
   onRemoveFilterGroup,
 }: {
+  onSubmit: (filters: Filter[]) => void;
+  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -366,7 +370,7 @@ export function EditFilterModal({
     );
   };
 
-  const onAddFilter = () => {
+  const onUpdateFilter = () => {
     const { $state } = filter;
     if (!$state || !$state.store) {
       return; // typescript validation
@@ -412,7 +416,9 @@ export function EditFilterModal({
     }
   };
 
-  const onApplyChangesFilter = () => { };
+  const onApplyChangesFilter = () => {
+    onUpdateFilter();
+  };
 
   const onDeliteFilter = () => {
     onRemoveFilterGroup(multipleFilters[0]?.groupId);

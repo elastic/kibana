@@ -34,6 +34,8 @@ import { FilterExpressionItem } from './filter_expression_item';
 
 import { UI_SETTINGS } from '../../../common';
 import { EditFilterModal } from '../query_string_input/edit_filter_modal';
+import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
+import { FilterGroup } from '../query_string_input/edit_filter_modal';
 
 interface Props {
   filters: Filter[];
@@ -90,6 +92,31 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
     props.toggleEditFilterModal?.(false);
   };
+
+  function onAddMultipleFilters(selectedFilters: Filter[]) {
+    props.toggleEditFilterModal?.(false);
+
+    const filters = [...props.filters, ...selectedFilters];
+    props?.onFiltersUpdated?.(filters);
+  }
+
+  function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+    const mappedFilters = mapAndFlattenFilters(buildFilters);
+    const mergedFilters = mappedFilters.map((filter, idx) => {
+      return {
+        ...filter,
+        groupId: selectedFilters[idx].groupId,
+        id: selectedFilters[idx].id,
+        relationship: selectedFilters[idx].relationship,
+        subGroupId: selectedFilters[idx].subGroupId,
+      };
+    });
+    props.toggleEditFilterModal?.(false);
+    props?.onMultipleFiltersUpdated?.(mergedFilters);
+
+    const filters = [...props.filters, ...buildFilters];
+    props?.onFiltersUpdated?.(filters);
+  }
 
   function renderItems() {
     return props.multipleFilters.map((filter, i) => {
@@ -149,6 +176,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       <EuiFlexItem grow={false}>
         {props.isEditFilterModalOpen && (
           <EditFilterModal
+            onSubmit={onAddMultipleFilters}
+            onMultipleFiltersSubmit={onAddMultipleFiltersANDOR}
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={props.filters[0]}
