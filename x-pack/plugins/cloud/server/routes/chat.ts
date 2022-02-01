@@ -13,6 +13,9 @@ import { generateSignedJwt } from '../util/generate_jwt';
 
 type MetaWithSaml = AuthenticatedUser['metadata'] & {
   saml_name: [string];
+  saml_email: [string];
+  saml_roles: [string];
+  saml_principal: [string];
 };
 
 export const registerChatRoute = ({
@@ -39,7 +42,7 @@ export const registerChatRoute = ({
       const user = security.authc.getCurrentUser(request);
       const { metadata, username } = user || {};
       let userId = username;
-      let [userEmail] = (metadata as MetaWithSaml)?.saml_name || [];
+      let [userEmail] = (metadata as MetaWithSaml)?.saml_email || [];
 
       // In local development, these values are not populated.  This is a workaround
       // to allow for local testing.
