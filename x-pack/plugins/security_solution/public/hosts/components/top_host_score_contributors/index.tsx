@@ -18,19 +18,25 @@ import {
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { Direction } from '../../../../../timelines/common';
 import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
+import { HostRiskScoreFields } from '../../../../common/search_strategy';
+import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
-export interface TopHostScoreContributorsProps {
+import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
+
+export interface TopHostScoreContributorsProps
+  extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
   hostName: string;
   from: string;
   to: string;
 }
-
 interface TableItem {
   rank: number;
   name: string;
+  id?: string; // TODO Remove the '?' when the new transform is delivered
 }
 
 const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
@@ -45,15 +51,20 @@ const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
     field: 'name',
     sortable: true,
     truncateText: true,
+    render: (value: TableItem['name'], { id }: TableItem) =>
+      id ? <RuleLink id={id} name={value} /> : value,
   },
 ];
 
 const PAGE_SIZE = 5;
+const QUERY_ID = HostRiskScoreQueryId.TOP_HOST_SCORE_CONTRIBUTORS;
 
 const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps> = ({
   hostName,
   from,
   to,
+  setQuery,
+  deleteQuery,
 }) => {
   const timerange = useMemo(
     () => ({
@@ -63,25 +74,31 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     [from, to]
   );
 
-  const hostRisk = useHostsRiskScore({
+  const sort = useMemo(
+    () => ({ field: HostRiskScoreFields.timestamp, direction: Direction.desc }),
+    []
+  );
+
+  const [loading, { data, refetch, inspect }] = useHostRiskScore({
     hostName,
     timerange,
     onlyLatest: false,
-    queryId: HostRiskScoreQueryId.TOP_HOST_SCORE_CONTRIBUTORS,
-    limit: 1,
-    sortOrder: Direction.desc,
+    sort,
+    pagination: {
+      querySize: 1,
+      cursorStart: 0,
+    },
   });
 
-  const result = hostRisk?.result;
-
   const items = useMemo(() => {
-    const rules = result && result.length > 0 ? result[0].risk_stats.rule_risks : [];
+    const rules = data && data.length > 0 ? data[0].risk_stats.rule_risks : [];
+
     return rules
       .sort((a, b) => b.rule_risk - a.rule_risk)
-      .map(({ rule_name: name }, i) => ({ rank: i + 1, name }));
-  }, [result]);
+      .map(({ rule_name: name, rule_id: id }, i) => ({ rank: i + 1, name, id }));
+  }, [data]);
 
-  const pagination = useMemo(
+  const tablePagination = useMemo(
     () => ({
       hidePerPageOptions: true,
       pageSize: PAGE_SIZE,
@@ -89,6 +106,15 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     }),
     [items.length]
   );
+
+  useQueryInspector({
+    queryId: QUERY_ID,
+    loading,
+    refetch,
+    setQuery,
+    deleteQuery,
+    inspect,
+  });
 
   return (
     <InspectButtonContainer>
@@ -99,10 +125,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <InspectButton
-              queryId={HostRiskScoreQueryId.TOP_HOST_SCORE_CONTRIBUTORS}
-              title={i18n.TOP_RISK_SCORE_CONTRIBUTORS}
-            />
+            <InspectButton queryId={QUERY_ID} title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -111,8 +134,8 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
             <EuiInMemoryTable
               items={items}
               columns={columns}
-              pagination={pagination}
-              loading={hostRisk?.loading}
+              pagination={tablePagination}
+              loading={loading}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
