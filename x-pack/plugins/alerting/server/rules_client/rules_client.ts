@@ -635,12 +635,16 @@ export class RulesClient {
     const filterKueryNode = options.filter ? esKuery.fromKueryExpression(options.filter) : null;
     const sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
-      validateOperationOnAttributes(
-        filterKueryNode,
-        sortField,
-        options.searchFields,
-        this.fieldsToExcludeFromPublicApi
-      );
+      try {
+        validateOperationOnAttributes(
+          filterKueryNode,
+          sortField,
+          options.searchFields,
+          this.fieldsToExcludeFromPublicApi
+        );
+      } catch (error) {
+        throw Boom.badRequest(`Error find rules: ${error.message}`);
+      }
     }
 
     const {

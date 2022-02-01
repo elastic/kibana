@@ -58,10 +58,14 @@ export const validateFilterKueryNode = ({
   excludedFieldNames,
   hasNestedKey = false,
   nestedKeys,
-  storeValue = false,
+  storeValue,
   path = 'arguments',
 }: ValidateFilterKueryNodeParams) => {
+  let localStoreValue = storeValue;
   let localNestedKeys: string | undefined;
+  if (localStoreValue === undefined) {
+    localStoreValue = astFilter.type === 'function' && astFunctionType.includes(astFilter.function);
+  }
   astFilter.arguments.forEach((ast: KueryNode, index: number) => {
     if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
       localNestedKeys = ast.value;
@@ -86,7 +90,7 @@ export const validateFilterKueryNode = ({
       });
     }
 
-    if (storeValue && index === 0) {
+    if (localStoreValue && index === 0) {
       const fieldName = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
       const fieldNameSplit = fieldName
         .split('.')
