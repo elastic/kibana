@@ -266,7 +266,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       query: this.state.query,
     };
 
-    if (savedQueryMeta.filters) {
+    if (savedQueryMeta.filters !== undefined) {
       savedQueryAttributes.filters = savedQueryMeta.filters;
     } else {
       savedQueryAttributes.filters = this.props.filters;
