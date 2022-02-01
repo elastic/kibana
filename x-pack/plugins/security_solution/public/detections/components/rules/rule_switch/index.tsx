@@ -22,6 +22,7 @@ import { enableRulesAction } from '../../../pages/detection_engine/rules/all/act
 import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
 import { bucketRulesResponse } from '../../../pages/detection_engine/rules/all/helpers';
 import { useRulesTableContextOptional } from '../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useInvalidateRules } from '../../../containers/detection_engine/rules/rules_table/use_find_rules';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -56,6 +57,7 @@ export const RuleSwitchComponent = ({
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
   const [, dispatchToaster] = useStateToaster();
   const rulesTableContext = useRulesTableContextOptional();
+  const invalidateRules = useInvalidateRules();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
@@ -65,8 +67,7 @@ export const RuleSwitchComponent = ({
           [id],
           event.target.checked,
           dispatchToaster,
-          rulesTableContext.actions.setLoadingRules,
-          rulesTableContext.actions.updateRules
+          rulesTableContext.actions.setLoadingRules
         );
       } else {
         const enabling = event.target.checked;
@@ -100,9 +101,10 @@ export const RuleSwitchComponent = ({
           displayErrorToast(title, err.message, dispatchToaster);
         }
       }
+      invalidateRules();
       setMyIsLoading(false);
     },
-    [dispatchToaster, id, onChange, rulesTableContext]
+    [dispatchToaster, id, invalidateRules, onChange, rulesTableContext]
   );
 
   useEffect(() => {

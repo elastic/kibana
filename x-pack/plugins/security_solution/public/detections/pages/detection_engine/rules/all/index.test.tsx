@@ -51,7 +51,7 @@ describe('AllRules', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="allRulesTableTab-rules"]')).toHaveLength(1);
+    expect(wrapper.find('RulesTables')).toHaveLength(1);
   });
 
   describe('tabs', () => {

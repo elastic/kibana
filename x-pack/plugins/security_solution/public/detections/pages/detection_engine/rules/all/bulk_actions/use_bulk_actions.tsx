@@ -48,6 +48,7 @@ import { convertRulesFilterToKQL } from '../../../../../containers/detection_eng
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import type { BulkActionPartialErrorResponse } from '../../../../../../../common/detection_engine/schemas/response/perform_bulk_action_schema';
 import type { HTTPError } from '../../../../../../../common/detection_engine/types';
+import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/rules_table/use_find_rules';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -69,6 +70,7 @@ export const useBulkActions = ({
   const queryClient = useQueryClient();
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
+  const invalidateRules = useInvalidateRules();
   const [, dispatchToaster] = useStateToaster();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
@@ -92,7 +94,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { reFetchRules, setLoadingRules, updateRules, setIsRefreshOn },
+    actions: { setLoadingRules, setIsRefreshOn },
   } = rulesTableContext;
 
   return useCallback(
@@ -131,10 +133,10 @@ export const useBulkActions = ({
           });
 
           await rulesBulkAction.byQuery(filterQuery);
-          await reFetchRules();
         } else {
-          await enableRulesAction(ruleIds, true, dispatchToaster, setLoadingRules, updateRules);
+          await enableRulesAction(ruleIds, true, dispatchToaster, setLoadingRules);
         }
+        invalidateRules();
       };
 
       const handleDeactivateActions = async () => {
@@ -149,16 +151,10 @@ export const useBulkActions = ({
           });
 
           await rulesBulkAction.byQuery(filterQuery);
-          await reFetchRules();
         } else {
-          await enableRulesAction(
-            activatedIds,
-            false,
-            dispatchToaster,
-            setLoadingRules,
-            updateRules
-          );
+          await enableRulesAction(activatedIds, false, dispatchToaster, setLoadingRules);
         }
+        invalidateRules();
       };
 
       const handleDuplicateAction = async () => {
@@ -180,7 +176,7 @@ export const useBulkActions = ({
             setLoadingRules
           );
         }
-        await reFetchRules();
+        invalidateRules();
       };
 
       const handleDeleteAction = async () => {
@@ -202,7 +198,7 @@ export const useBulkActions = ({
         } else {
           await deleteRulesAction(selectedRuleIds, dispatchToaster, setLoadingRules);
         }
-        await reFetchRules();
+        invalidateRules();
       };
 
       const handleExportAction = async () => {
@@ -334,9 +330,10 @@ export const useBulkActions = ({
             await rulesBulkAction.byIds(customSelectedRuleIds);
           }
 
+          invalidateRules();
           isBulkEditFinished = true;
           if (getIsMounted()) {
-            await Promise.allSettled([reFetchRules(), resolveTagsRefetch(bulkEditActionType)]);
+            await resolveTagsRefetch(bulkEditActionType);
           }
         } catch (e) {
           // user has cancelled form or error has occured
@@ -492,24 +489,23 @@ export const useBulkActions = ({
       rules,
       selectedRuleIds,
       hasActionsPrivileges,
+      isRulesBulkEditEnabled,
       isAllSelected,
       loadingRuleIds,
       hasMlPermissions,
+      invalidateRules,
       dispatchToaster,
-      filterQuery,
       setLoadingRules,
-      reFetchRules,
-      updateRules,
-      confirmDeletion,
-      isRulesBulkEditEnabled,
       toasts,
-      filterOptions,
-      completeBulkEditForm,
-      confirmBulkEdit,
-      resolveTagsRefetch,
+      filterQuery,
+      confirmDeletion,
       setIsRefreshOn,
-      getIsMounted,
+      confirmBulkEdit,
+      completeBulkEditForm,
       queryClient,
+      getIsMounted,
+      filterOptions,
+      resolveTagsRefetch,
     ]
   );
 };

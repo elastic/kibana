@@ -9,23 +9,6 @@ import { get } from 'lodash';
 import { FilterOptions, Rule, SortingOptions } from '../types';
 
 /**
- * Merge new rules into the currently cached rules
- *
- * @param currentRules
- * @param newRules
- */
-export function mergeRules(currentRules: Rule[], newRules: Rule[]): Rule[] {
-  const currentRuleIds = currentRules.map((r) => r.id);
-  return newRules.reduce(
-    (mergedRules, newRule) =>
-      currentRuleIds.includes(newRule.id)
-        ? mergedRules.map((rule) => (newRule.id === rule.id ? newRule : rule))
-        : [...mergedRules, newRule],
-    currentRules
-  );
-}
-
-/**
  * Returns a comparator function to be used with .sort()
  *
  * @param sortingOptions SortingOptions

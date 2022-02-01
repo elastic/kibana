@@ -33,8 +33,6 @@ import {
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
-  RULES_TABLE_ADVANCED_FILTERING_THRESHOLD,
-  DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD,
 } from '../common/constants';
 import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
@@ -186,22 +184,6 @@ export const initUiSettings = (
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
-    },
-    [RULES_TABLE_ADVANCED_FILTERING_THRESHOLD]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.advancedFilteringMaxRules', {
-        defaultMessage: 'Experimental sorting and filtering capabilities threshold',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.advancedFilteringMaxRulesDescription',
-        {
-          defaultMessage: `<p>Experimental sorting and filtering is enabled on the Rules and Rule Monitoring tables when the total number of rules in the current Kibana space doesn't exceed this threshold</p>`,
-        }
-      ),
-      type: 'number',
-      value: DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD,
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.number({ min: 0, max: 10000 }),
     },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {

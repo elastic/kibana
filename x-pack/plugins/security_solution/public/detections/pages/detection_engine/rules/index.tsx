@@ -28,7 +28,6 @@ import {
   redirectToDetections,
   userHasPermissions,
 } from './helpers';
-import { RulesPageHeader } from './rules_page_header';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
@@ -39,6 +38,7 @@ import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_p
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RulesTableContextProvider } from '../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { HeaderPage } from '../../../../common/components/header_page';
 
 type Func = () => Promise<void>;
 
@@ -164,11 +164,6 @@ const RulesPageComponent: React.FC = () => {
     return null;
   }
 
-  const totalRules =
-    rulesInstalled != null && rulesCustomInstalled != null
-      ? rulesInstalled + rulesCustomInstalled
-      : null;
-
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -195,11 +190,10 @@ const RulesPageComponent: React.FC = () => {
         showCheckBox
       />
       <RulesTableContextProvider
-        totalRules={totalRules}
         refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
       >
         <SecuritySolutionPageWrapper>
-          <RulesPageHeader>
+          <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               {loadPrebuiltRulesAndTemplatesButton && (
                 <EuiFlexItem grow={false}>{loadPrebuiltRulesAndTemplatesButton}</EuiFlexItem>
@@ -244,7 +238,7 @@ const RulesPageComponent: React.FC = () => {
                 </LinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </RulesPageHeader>
+          </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
             prePackagedTimelineStatus === 'timelineNeedUpdate') && (
             <UpdatePrePackagedRulesCallOut

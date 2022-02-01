@@ -17,7 +17,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { partition } from 'lodash/fp';
 
-import { AllRulesTabs } from '.';
+import { AllRulesTabs } from './rules_table_toolbar';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { Loader } from '../../../../../common/components/loader';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
