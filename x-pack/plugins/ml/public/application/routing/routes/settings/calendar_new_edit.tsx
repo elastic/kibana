@@ -36,7 +36,7 @@ export const newCalendarRouteFactory = (
 ): MlRoute => ({
   path: '/settings/calendars_list/new_calendar',
   title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
-    defaultMessage: 'Create Calender',
+    defaultMessage: 'Create Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
@@ -58,7 +58,7 @@ export const editCalendarRouteFactory = (
 ): MlRoute => ({
   path: '/settings/calendars_list/edit_calendar/:calendarId',
   title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
-    defaultMessage: 'Edit Calender',
+    defaultMessage: 'Edit Calendar',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: [

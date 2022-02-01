@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { ML_APP_NAME } from '../../../common/constants/app';
-import { MlRoute } from './router';
+import type { MlRoute } from './router';
 import { useMlKibana } from '../contexts/kibana';
 
 /**
@@ -33,8 +33,6 @@ export const useDocTitle = (activeRoute: MlRoute | undefined) => {
   useEffect(() => {
     if (activeRouteTitle) {
       updateDocTitle(activeRouteTitle);
-    } else {
-      docTitle.reset();
     }
   }, [updateDocTitle, activeRouteTitle]);
 
