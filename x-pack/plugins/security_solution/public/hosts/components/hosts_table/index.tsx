@@ -30,9 +30,9 @@ import {
 import { Direction } from '../../../../common/search_strategy';
 import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
-import { useKibana } from '../../../common/lib/kibana';
+import { useNavigateTo } from '../../../common/lib/kibana';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -83,7 +83,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const { navigateToApp } = useKibana().services.application;
+  const { navigateTo } = useNavigateTo();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
@@ -142,12 +142,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
           hostsType: type,
         })
       );
-      navigateToApp(APP_UI_ID, {
+      navigateTo({
         deepLinkId: SecurityPageName.hosts,
         path: HostsTableType.risk,
       });
     },
-    [dispatch, navigateToApp, type]
+    [dispatch, navigateTo, type]
   );
 
   const hostsColumns = useMemo(
