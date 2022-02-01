@@ -9,7 +9,6 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useRuleExecutionEvents } from './use_rule_execution_events';
