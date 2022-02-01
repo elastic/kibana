@@ -9,7 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
-
 jest.mock('../../static_globals', () => ({
   Globals: {
     app: {
@@ -21,12 +20,14 @@ jest.mock('../../static_globals', () => ({
     },
   },
 }));
+import { Globals } from '../../static_globals';
 
 describe('fetchClusterHealth', () => {
   it('should return the cluster health', async () => {
-    const status = 'green';
-    const clusterUuid = 'sdfdsaj34434';
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    const clusterUuid = 'sdfdsaj34434';
+    const clusters = [{ clusterUuid, clusterName: 'foo' }];
+    const status = 'green';
     esClient.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
@@ -45,8 +46,6 @@ describe('fetchClusterHealth', () => {
       } as estypes.SearchResponse)
     );
 
-    const clusters = [{ clusterUuid, clusterName: 'foo' }];
-
     const health = await fetchClusterHealth(esClient, clusters);
     expect(health).toEqual([
       {
@@ -55,5 +54,59 @@ describe('fetchClusterHealth', () => {
         ccs: undefined,
       },
     ]);
+  });
+  it('should call ES with correct query', async () => {
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    await fetchClusterHealth(esClient, [
+      { clusterUuid: '1', clusterName: 'foo1' },
+      { clusterUuid: '2', clusterName: 'foo2' },
+    ]);
+    expect(esClient.search).toHaveBeenCalledWith({
+      index:
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+      filter_path: [
+        'hits.hits._source.cluster_state.status',
+        'hits.hits._source.cluster_uuid',
+        'hits.hits._index',
+      ],
+      body: {
+        size: 2,
+        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+        query: {
+          bool: {
+            filter: [
+              { terms: { cluster_uuid: ['1', '2'] } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'cluster_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { range: { timestamp: { gte: 'now-2m' } } },
+            ],
+          },
+        },
+        collapse: { field: 'cluster_uuid' },
+      },
+    });
+  });
+
+  it('should call ES with correct query when ccs disabled', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = false;
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+    });
+
+    await fetchClusterHealth(esClient, [{ clusterUuid: '1', clusterName: 'foo1' }]);
+
+    // @ts-ignore
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
   });
 });
