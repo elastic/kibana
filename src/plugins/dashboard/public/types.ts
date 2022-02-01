@@ -19,8 +19,7 @@ import type {
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Query, Filter } from '@kbn/es-query';
-import { IndexPattern, RefreshInterval, TimeRange } from './services/data';
+import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';

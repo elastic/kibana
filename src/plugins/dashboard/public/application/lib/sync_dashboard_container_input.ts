@@ -9,10 +9,9 @@
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
-import { compareFilters, Filter, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 
 import { DashboardContainer } from '../embeddable';
-import { Query } from '../../services/data';
+import { esFilters, Filter, Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import {
   setControlGroupState,
@@ -98,7 +97,13 @@ export const applyContainerChangesToState = ({
     return;
   }
   const { filterManager } = query;
-  if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
+  if (
+    !esFilters.compareFilters(
+      input.filters,
+      filterManager.getFilters(),
+      esFilters.COMPARE_ALL_OPTIONS
+    )
+  ) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
     applyFilters(latestState.query, input.filters);
