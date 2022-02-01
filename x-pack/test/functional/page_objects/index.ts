@@ -20,6 +20,7 @@ import { ObservabilityPageProvider } from './observability_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { GisPageObject } from './gis_page';
+import { GeoFileUploadPageObject } from './geo_file_upload';
 import { StatusPageObject } from './status_page';
 import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
 import { RollupPageObject } from './rollup_page';
@@ -63,6 +64,7 @@ export const pageObjects = {
   infraLogs: InfraLogsPageProvider,
   infraSavedViews: InfraSavedViewsProvider,
   maps: GisPageObject,
+  geoFileUpload: GeoFileUploadPageObject,
   statusPage: StatusPageObject,
   upgradeAssistant: UpgradeAssistantPageObject,
   uptime: UptimePageObject,
