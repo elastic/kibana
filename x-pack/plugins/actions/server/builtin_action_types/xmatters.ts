@@ -11,8 +11,6 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { nullableType } from './lib/nullable';
 import { isOk, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -31,10 +29,8 @@ export type XmattersActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionParamsType
 >;
 
-const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 const configSchemaProps = {
   url: schema.string(),
-  headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
@@ -170,7 +166,6 @@ export async function executor(
       const {
         status,
         statusText,
-        headers: responseHeaders,
         data: { message: responseMessage },
       } = error.response;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
@@ -181,15 +176,6 @@ export async function executor(
       // special handling for 5xx
       if (status >= 500) {
         return retryResult(actionId, message);
-      }
-
-      // special handling for rate limiting
-      if (status === 429) {
-        return pipe(
-          getRetryAfterIntervalFromHeaders(responseHeaders),
-          map((retry) => retryResultSeconds(actionId, message, retry)),
-          getOrElse(() => retryResult(actionId, message))
-        );
       }
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
