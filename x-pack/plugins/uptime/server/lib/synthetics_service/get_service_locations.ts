@@ -12,8 +12,13 @@ import {
   ServiceLocationsApiResponse,
 } from '../../../common/runtime_types';
 
-export async function getServiceLocations({ manifestUrl }: { manifestUrl: string }) {
+export async function getServiceLocations({ manifestUrl }: { manifestUrl?: string }) {
   const locations: ServiceLocations = [];
+
+  if (!manifestUrl) {
+    return { locations };
+  }
+
   try {
     const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(manifestUrl);
 

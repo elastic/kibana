@@ -9,8 +9,9 @@ IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
   buildkite-agent artifact upload 'target/junit/**/*'
-  buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
+  buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
+  buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
   buildkite-agent artifact upload 'target/test-metrics/*'
   buildkite-agent artifact upload 'target/test-suites-ci-plan.json'

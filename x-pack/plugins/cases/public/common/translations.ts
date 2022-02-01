@@ -25,8 +25,8 @@ export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const OPENED_ON = i18n.translate('xpack.cases.caseView.openedOn', {
-  defaultMessage: 'Opened on',
+export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
+  defaultMessage: 'Created on',
 });
 
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
@@ -241,12 +241,6 @@ export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAdded
   defaultMessage: 'added to case',
 });
 
-export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
-  'xpack.cases.common.allCases.table.selectableMessageCollections',
-  {
-    defaultMessage: 'Cases with sub-cases cannot be selected',
-  }
-);
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });

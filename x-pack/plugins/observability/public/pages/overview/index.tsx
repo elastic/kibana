@@ -18,8 +18,9 @@ interface Props {
 
 export function OverviewPage(props: Props) {
   const { config } = usePluginContext();
+  const alpha = props.routeParams.query.alpha;
 
-  if (config.unsafe.overviewNext.enabled) {
+  if (config.unsafe.overviewNext.enabled || alpha) {
     return <NewOverviewPage {...props} />;
   } else {
     return <OldOverviewPage {...props} />;

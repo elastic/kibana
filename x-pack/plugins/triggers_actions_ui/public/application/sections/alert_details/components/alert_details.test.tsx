@@ -57,6 +57,7 @@ const mockAlertApis = {
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
   requestRefresh: jest.fn(),
+  refreshToken: Date.now(),
 };
 
 const authorizedConsumers = {

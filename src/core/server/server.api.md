@@ -19,6 +19,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
+import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
@@ -232,6 +233,7 @@ export const config: {
         sniffInterval: Type<false | Duration>;
         sniffOnConnectionFault: Type<boolean>;
         hosts: Type<string | string[]>;
+        compression: Type<boolean>;
         username: Type<string | undefined>;
         password: Type<string | undefined>;
         serviceAccountToken: Type<string | undefined>;
@@ -445,6 +447,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
     // (undocumented)
+    docLinks: DocLinksServiceSetup;
+    // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     executionContext: ExecutionContextSetup;
@@ -474,6 +478,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // (undocumented)
+    docLinks: DocLinksServiceStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -860,6 +866,16 @@ export interface DiscoveredPlugin {
     readonly type: PluginType;
 }
 
+// @public (undocumented)
+export interface DocLinksServiceSetup {
+    readonly elasticWebsiteUrl: string;
+    readonly links: DocLinks;
+    readonly version: string;
+}
+
+// @public (undocumented)
+export type DocLinksServiceStart = DocLinksServiceSetup;
+
 export { Ecs }
 
 export { EcsEventCategory }
@@ -878,7 +894,7 @@ export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transpo
 };
 
 // @public
-export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
@@ -890,6 +906,7 @@ export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders
 export class ElasticsearchConfig {
     constructor(rawConfig: ElasticsearchConfigType);
     readonly apiVersion: string;
+    readonly compression: boolean;
     // Warning: (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
     readonly customHeaders: ElasticsearchConfigType['customHeaders'];
     readonly healthCheckDelay: Duration;

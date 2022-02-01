@@ -11,8 +11,8 @@ import { ConfigDeprecationProvider } from 'src/core/server';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
-  unused('enabled'),
-  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
+  unused('enabled', { level: 'warning' }),
+  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute', { level: 'warning' }),
 ];
 
 const configSchema = schema.object({
