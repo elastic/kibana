@@ -21,6 +21,7 @@ interface Props {
   showFilterOption: boolean | undefined;
   showTimeFilterOption: boolean | undefined;
   filters?: Filter[];
+  onFilterBadgeSaved?: (alias: string) => void;
 }
 
 export interface SavedQueryMeta {
@@ -40,6 +41,7 @@ export function SaveQueryForm({
   showFilterOption = true,
   showTimeFilterOption = true,
   filters,
+  onFilterBadgeSaved,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
   const [enabledSaveButton, setEnabledSaveButton] = useState(Boolean(savedQuery));
@@ -117,6 +119,7 @@ export function SaveQueryForm({
         shouldIncludeTimefilter,
         filters,
       });
+      if (onFilterBadgeSaved) onFilterBadgeSaved(title);
     }
   }, [
     validate,
@@ -127,6 +130,7 @@ export function SaveQueryForm({
     shouldIncludeFilters,
     shouldIncludeTimefilter,
     filters,
+    onFilterBadgeSaved,
   ]);
 
   const onInputChange = useCallback((event) => {

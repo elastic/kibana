@@ -385,6 +385,21 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     // console.dir(filters);
   };
 
+  public onFilterBadgeSaved = (groupId: number, alias: string) => {
+    const multipleFilters = this.state.multipleFilters.map((filter: any) => {
+      if (Number(filter.groupId) === groupId)
+        return {
+          ...filter,
+          meta: {
+            ...filter.meta,
+            alias,
+          },
+        };
+      return filter;
+    });
+    this.setState({ multipleFilters });
+  };
+
   public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
     const queries = [...(selectedQueries || []), ...this.state.selectedSavedQueries];
     this.setState({ finalSelectedSavedQueries: queries });
@@ -701,6 +716,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             multipleFilters={this.state.multipleFilters}
             savedQueryService={this.savedQueryService}
             onFilterSave={this.onSave}
+            onFilterBadgeSaved={this.onFilterBadgeSaved}
           />
         </div>
       );
