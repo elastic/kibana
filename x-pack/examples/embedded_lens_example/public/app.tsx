@@ -29,19 +29,20 @@ import type {
   LensEmbeddableInput,
   FormulaPublicApi,
   DateHistogramIndexPatternColumn,
-  DatatableVisualizationState,
-  HeatmapVisualizationState,
-  GaugeVisualizationState,
-  TermsIndexPatternColumn,
 } from '../../../plugins/lens/public';
 
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
 
-// @TODO: restore original example code
-function getDataLayer(dataView: DataView, formula: FormulaPublicApi): PersistedIndexPatternLayer {
+// Generate a Lens state based on some app-specific input parameters.
+// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
+function getLensAttributes(
+  color: string,
+  dataView: DataView,
+  formula: FormulaPublicApi
+): TypedLensByValueInput['attributes'] {
   const baseLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1', 'col2'],
+    columnOrder: ['col1'],
     columns: {
       col1: {
         dataType: 'date',
@@ -54,17 +55,36 @@ function getDataLayer(dataView: DataView, formula: FormulaPublicApi): PersistedI
       } as DateHistogramIndexPatternColumn,
     },
   };
-  return formula.insertOrReplaceFormulaColumn('col2', { formula: 'count()' }, baseLayer, dataView)!;
-}
 
-function getBaseAttributes(
-  dataView: DataView,
-  formula: FormulaPublicApi,
-  dataLayer: PersistedIndexPatternLayer = getDataLayer(dataView, formula)
-): Omit<TypedLensByValueInput['attributes'], 'visualizationType' | 'state'> & {
-  state: Omit<TypedLensByValueInput['attributes']['state'], 'visualization'>;
-} {
+  const dataLayer = formula.insertOrReplaceFormulaColumn(
+    'col2',
+    { formula: 'count()' },
+    baseLayer,
+    dataView
+  );
+
+  const xyConfig: XYState = {
+    axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    fittingFunction: 'None',
+    gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    layers: [
+      {
+        accessors: ['col2'],
+        layerId: 'layer1',
+        layerType: 'data',
+        seriesType: 'bar_stacked',
+        xAccessor: 'col1',
+        yConfig: [{ forAccessor: 'col2', color }],
+      },
+    ],
+    legend: { isVisible: true, position: 'right' },
+    preferredSeriesType: 'bar_stacked',
+    tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    valueLabels: 'hide',
+  };
+
   return {
+    visualizationType: 'lnsXY',
     title: 'Prefilled from example app',
     references: [
       {
@@ -88,150 +108,7 @@ function getBaseAttributes(
       },
       filters: [],
       query: { language: 'kuery', query: '' },
-    },
-  };
-}
-
-// Generate a Lens state based on some app-specific input parameters.
-// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
-function getLensAttributes(
-  color: string,
-  dataView: DataView,
-  formula: FormulaPublicApi
-): TypedLensByValueInput['attributes'] {
-  const baseAttributes = getBaseAttributes(dataView, formula);
-
-  const xyConfig: XYState = {
-    axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-    fittingFunction: 'None',
-    gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-    layers: [
-      {
-        accessors: ['col2'],
-        layerId: 'layer1',
-        layerType: 'data',
-        seriesType: 'bar_stacked',
-        xAccessor: 'col1',
-        yConfig: [{ forAccessor: 'col2', color }],
-      },
-    ],
-    legend: { isVisible: true, position: 'right' },
-    preferredSeriesType: 'bar_stacked',
-    tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-    valueLabels: 'hide',
-  };
-
-  return {
-    ...baseAttributes,
-    visualizationType: 'lnsXY',
-    state: {
-      ...baseAttributes.state,
       visualization: xyConfig,
-    },
-  };
-}
-
-function getLensAttributesHeatmap(
-  dataView: DataView,
-  formula: FormulaPublicApi
-): TypedLensByValueInput['attributes'] {
-  const dataLayer = getDataLayer(dataView, formula);
-  const heatmapDataLayer = {
-    columnOrder: ['col1', 'col3', 'col2'],
-    columns: {
-      ...dataLayer.columns,
-      col3: {
-        label: 'Top values of @tags.keyword',
-        dataType: 'string',
-        operationType: 'terms',
-        scale: 'ordinal',
-        sourceField: '@tags.keyword',
-        isBucketed: true,
-        params: {
-          size: 5,
-          orderBy: { type: 'alphabetical', fallback: true },
-          orderDirection: 'desc',
-        },
-      } as TermsIndexPatternColumn,
-    },
-  };
-
-  const baseAttributes = getBaseAttributes(dataView, formula, heatmapDataLayer);
-
-  const heatmapConfig: HeatmapVisualizationState = {
-    layerId: 'layer1',
-    layerType: 'data',
-    shape: 'heatmap',
-    xAccessor: 'col1',
-    yAccessor: 'col3',
-    valueAccessor: 'col2',
-    legend: { isVisible: true, position: 'right', type: 'heatmap_legend' },
-    gridConfig: {
-      isCellLabelVisible: true,
-      isYAxisLabelVisible: true,
-      isXAxisLabelVisible: true,
-      type: 'heatmap_grid',
-    },
-  };
-
-  return {
-    ...baseAttributes,
-    visualizationType: 'lnsHeatmap',
-    state: {
-      ...baseAttributes.state,
-      visualization: heatmapConfig,
-    },
-  };
-}
-
-function getLensAttributesDatatable(
-  dataView: DataView,
-  formula: FormulaPublicApi
-): TypedLensByValueInput['attributes'] {
-  const baseAttributes = getBaseAttributes(dataView, formula);
-
-  const tableConfig: DatatableVisualizationState = {
-    layerId: 'layer1',
-    layerType: 'data',
-    columns: [{ columnId: 'col1' }, { columnId: 'col2' }],
-  };
-
-  return {
-    ...baseAttributes,
-    visualizationType: 'lnsDatatable',
-    state: {
-      ...baseAttributes.state,
-      visualization: tableConfig,
-    },
-  };
-}
-
-function getLensAttributesGauge(
-  dataView: DataView,
-  formula: FormulaPublicApi
-): TypedLensByValueInput['attributes'] {
-  const dataLayer = getDataLayer(dataView, formula);
-  const { col1, ...otherColumns } = dataLayer.columns;
-  const gaugeDataLayer = {
-    columnOrder: ['col2'],
-    columns: otherColumns,
-  };
-
-  const baseAttributes = getBaseAttributes(dataView, formula, gaugeDataLayer);
-  const gaugeConfig: GaugeVisualizationState = {
-    layerId: 'layer1',
-    layerType: 'data',
-    shape: 'horizontalBullet',
-    ticksPosition: 'auto',
-    labelMajorMode: 'auto',
-    metricAccessor: 'col1',
-  };
-  return {
-    ...baseAttributes,
-    visualizationType: 'lnsGauge',
-    state: {
-      ...baseAttributes.state,
-      visualization: gaugeConfig,
     },
   };
 }
@@ -434,37 +311,6 @@ export const App = (props: {
                   : undefined
               }
             />
-            {/* <LensComponent
-                  id="myTable"
-                  style={{ height: 500 }}
-                  timeRange={time}
-                  attributes={getLensAttributesDatatable(props.defaultIndexPattern)}
-                  disableTriggers
-                  onLoad={(val) => {
-                    setIsLoading(val);
-                  }}
-                  viewMode={ViewMode.VIEW}
-                />
-                <LensComponent
-                  id="myHeatmap"
-                  style={{ height: 500 }}
-                  timeRange={time}
-                  attributes={getLensAttributesHeatmap(props.defaultIndexPattern)}
-                  disableTriggers
-                  onLoad={(val) => {
-                    setIsLoading(val);
-                  }}
-                  viewMode={ViewMode.VIEW}
-                /> 
-                <LensComponent
-                  id="myGauge"
-                  style={{ height: 500 }}
-                  attributes={getLensAttributesGauge(props.defaultIndexPattern)}
-                  onLoad={(val) => {
-                    setIsLoading(val);
-                  }}
-                  viewMode={ViewMode.VIEW}
-                />*/}
             {isSaveModalVisible && (
               <LensSaveModalComponent
                 initialInput={attributes as unknown as LensEmbeddableInput}
