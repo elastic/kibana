@@ -11,14 +11,14 @@ import { getServices } from './kibana_services';
 const sampleDataUrl = '/api/sample_data';
 
 function clearIndexPatternsCache() {
-  getServices().indexPatternService.clearCache();
+  getServices().dataViewsService.clearCache();
 }
 
 export async function listSampleDataSets() {
   return await getServices().http.get(sampleDataUrl);
 }
 
-export async function installSampleDataSet(id, sampleDataDefaultIndex) {
+export async function installSampleDataSet(id: string, sampleDataDefaultIndex: string) {
   await getServices().http.post(`${sampleDataUrl}/${id}`);
 
   if (getServices().uiSettings.isDefault('defaultIndex')) {
@@ -28,7 +28,7 @@ export async function installSampleDataSet(id, sampleDataDefaultIndex) {
   clearIndexPatternsCache();
 }
 
-export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
+export async function uninstallSampleDataSet(id: string, sampleDataDefaultIndex: string) {
   await getServices().http.delete(`${sampleDataUrl}/${id}`);
 
   const uiSettings = getServices().uiSettings;
