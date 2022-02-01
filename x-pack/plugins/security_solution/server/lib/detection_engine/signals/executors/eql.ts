@@ -125,13 +125,14 @@ export const eqlExecutor = async ({
     const eqlSignalSearchEnd = performance.now();
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
     result.searchAfterTimes = [eqlSearchDuration];
-    // TODO: Add totalHits to `result`
 
     let newSignals: SimpleHit[] | undefined;
     if (response.hits.sequences !== undefined) {
       newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
+      result.totalHits = response.hits.sequences.length;
     } else if (response.hits.events !== undefined) {
       newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
+      result.totalHits = response.hits.events.length;
     } else {
       throw new Error(
         'eql query response should have either `sequences` or `events` but had neither'

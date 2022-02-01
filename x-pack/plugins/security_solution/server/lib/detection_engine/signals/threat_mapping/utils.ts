@@ -97,7 +97,7 @@ export const combineConcurrentResults = (
       const maxSearchAfterTime = calculateMax(accum.searchAfterTimes, item.searchAfterTimes);
       const maxBulkCreateTimes = calculateMax(accum.bulkCreateTimes, item.bulkCreateTimes);
       const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
-      const totalHits = accum.totalHits + item.totalHits;
+      const totalHits = accum.totalHits + item.createdSignalsCount; // TODO: Seems max_signals circuit breaker is signal based for indicator match rules?
       return {
         success: accum.success && item.success,
         warning: accum.warning || item.warning,

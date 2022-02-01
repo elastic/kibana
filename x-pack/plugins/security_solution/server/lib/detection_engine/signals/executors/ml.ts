@@ -133,13 +133,13 @@ export const mlExecutor = async ({
     });
     return mergeReturns([
       result,
-      // TODO: Add totalHits
       createSearchAfterReturnType({
         success: success && filteredAnomalyResults._shards.failed === 0,
         errors: [...errors, ...searchErrors],
         createdSignalsCount: createdItemsCount,
         createdSignals: createdItems,
         bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+        totalHits: anomalyCount,
       }),
     ]);
   });

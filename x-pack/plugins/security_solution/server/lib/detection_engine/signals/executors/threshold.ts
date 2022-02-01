@@ -177,6 +177,7 @@ export const thresholdExecutor = async ({
         createdSignals: createdItems,
         bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
         searchAfterTimes: [thresholdSearchDuration],
+        totalHits: createdItemsCount, // TODO: Use thresholdResults instead?
       }),
     ]);
 

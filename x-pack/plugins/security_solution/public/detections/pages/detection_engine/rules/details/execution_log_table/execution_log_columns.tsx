@@ -8,7 +8,7 @@
 import { EuiBasicTableColumn, EuiHealth } from '@elastic/eui';
 
 import React from 'react';
-import { RuleExecutionEvent } from '../../../../../../../common/detection_engine/schemas/common';
+import { AggregateRuleExecutionEvent } from '../../../../../../../common/detection_engine/schemas/common';
 import {
   getEmptyTagValue,
   getEmptyValue,
