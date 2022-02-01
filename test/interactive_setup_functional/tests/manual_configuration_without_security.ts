@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getUrl } from '@kbn/test-jest-helpers';
+import { getUrl } from '@kbn/test';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObject }: FtrProviderContext) {

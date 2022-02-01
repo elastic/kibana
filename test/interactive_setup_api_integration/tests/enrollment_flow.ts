@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getUrl } from '@kbn/test-jest-helpers';
+import { getUrl } from '@kbn/test';
 
 import { hasKibanaBooted } from '../fixtures/test_helpers';
 import { getElasticsearchCaCertificate } from '../fixtures/tls_tools';
