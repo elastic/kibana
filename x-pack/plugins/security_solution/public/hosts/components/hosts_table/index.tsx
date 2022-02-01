@@ -30,7 +30,7 @@ import {
 import { Direction } from '../../../../common/search_strategy';
 import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../common/lib/kibana/hooks';
 
