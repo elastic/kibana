@@ -12,16 +12,16 @@ import {
   RuleExecutionStatusOrder,
 } from '../../../../../common/detection_engine/schemas/common';
 
-export const RULE_EXECUTION_INFO_TYPE = 'siem-detection-engine-rule-execution-info';
+export const RULE_EXECUTION_SO_TYPE = 'siem-detection-engine-rule-execution-info';
 
 /**
  * This side-car SO stores information about rule executions (like last status and metrics).
  * Eventually we're going to replace it with data stored in the rule itself:
  * https://github.com/elastic/kibana/issues/112193
  */
-export type RuleExecutionInfoSavedObject = SavedObject<RuleExecutionInfoAttributes>;
+export type RuleExecutionSavedObject = SavedObject<RuleExecutionAttributes>;
 
-export interface RuleExecutionInfoAttributes {
+export interface RuleExecutionAttributes {
   last_execution: {
     date: string;
     status: RuleExecutionStatus;
@@ -31,7 +31,7 @@ export interface RuleExecutionInfoAttributes {
   };
 }
 
-const ruleExecutionInfoMappings: SavedObjectsType['mappings'] = {
+const ruleExecutionMappings: SavedObjectsType['mappings'] = {
   properties: {
     last_execution: {
       type: 'object',
@@ -68,9 +68,9 @@ const ruleExecutionInfoMappings: SavedObjectsType['mappings'] = {
   },
 };
 
-export const ruleExecutionInfoType: SavedObjectsType = {
-  name: RULE_EXECUTION_INFO_TYPE,
-  mappings: ruleExecutionInfoMappings,
+export const ruleExecutionType: SavedObjectsType = {
+  name: RULE_EXECUTION_SO_TYPE,
+  mappings: ruleExecutionMappings,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

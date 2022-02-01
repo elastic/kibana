@@ -7,17 +7,17 @@
 
 import uuidv5 from 'uuid/v5';
 import { SavedObjectReference } from 'src/core/server';
-import { RULE_EXECUTION_INFO_TYPE } from './saved_object';
+import { RULE_EXECUTION_SO_TYPE } from './saved_objects_type';
 
-export const getRuleExecutionInfoId = (ruleId: string): string => {
+export const getRuleExecutionSoId = (ruleId: string): string => {
   // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
-  return uuidv5(`${RULE_EXECUTION_INFO_TYPE}:${ruleId}`, uuidv5.DNS);
+  return uuidv5(`${RULE_EXECUTION_SO_TYPE}:${ruleId}`, uuidv5.DNS);
 };
 
 const RULE_REFERENCE_TYPE = 'alert';
 const RULE_REFERENCE_NAME = 'alert_0';
 
-export const getRuleExecutionInfoReferences = (ruleId: string): SavedObjectReference[] => {
+export const getRuleExecutionSoReferences = (ruleId: string): SavedObjectReference[] => {
   return [
     {
       id: ruleId,
