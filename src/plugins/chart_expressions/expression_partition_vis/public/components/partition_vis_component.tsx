@@ -351,7 +351,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const partitionType = getPartitionType(visType);
 
   return (
-    <div css={chartContainerStyle} data-test-subj="visTypePieChart">
+    <div css={chartContainerStyle} data-test-subj="partitionVisChart">
       {!canShowPieChart ? (
         <VisualizationNoResults hasNegativeValues={hasNegative} />
       ) : (

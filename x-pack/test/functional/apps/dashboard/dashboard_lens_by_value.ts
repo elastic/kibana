@@ -49,8 +49,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
 
-      const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
-      expect(pieExists).to.be(true);
+      const partitionVisContainerExists = await find.existsByCssSelector('.partitionVisContainer');
+      expect(partitionVisContainerExists).to.be(true);
+
+      const partitionVisExists = await testSubjects.exists('partitionVisChart');
+      expect(partitionVisExists).to.be(true);
     });
 
     it('editing and saving a lens by value panel retains number of panels', async () => {
