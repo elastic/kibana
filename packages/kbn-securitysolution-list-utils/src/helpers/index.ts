@@ -29,8 +29,8 @@ import {
   nestedEntryItem,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  IndexPatternBase,
-  IndexPatternFieldBase,
+  DataViewBase,
+  DataViewFieldBase,
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeNested,
 } from '@kbn/es-query';
@@ -283,17 +283,17 @@ export const getUpdatedEntriesOnDelete = (
  * add nested entry, should only show nested fields, if item is the parent
  * field of a nested entry, we only display the parent field
  *
- * @param patterns IndexPatternBase containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param item exception item entry
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
-  patterns: IndexPatternBase,
+  patterns: DataViewBase,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IndexPatternBase, t: ExceptionListType, o?: OsTypeArray) => IndexPatternBase,
+  preFilter?: (i: DataViewBase, t: ExceptionListType, o?: OsTypeArray) => DataViewBase,
   osTypes?: OsTypeArray
-): IndexPatternBase => {
+): DataViewBase => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
@@ -338,7 +338,7 @@ export const getFilteredIndexPatterns = (
  */
 export const getEntryOnFieldChange = (
   item: FormattedBuilderEntry,
-  newField: IndexPatternFieldBase
+  newField: DataViewFieldBase
 ): { index: number; updatedEntry: BuilderEntry } => {
   const { parent, entryIndex, nested } = item;
   const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
@@ -651,9 +651,9 @@ export const getCorrespondingKeywordField = ({
   fields,
   selectedField,
 }: {
-  fields: IndexPatternFieldBase[];
+  fields: DataViewFieldBase[];
   selectedField: string | undefined;
-}): IndexPatternFieldBase | undefined => {
+}): DataViewFieldBase | undefined => {
   const selectedFieldBits =
     selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
   const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
@@ -673,7 +673,7 @@ export const getCorrespondingKeywordField = ({
  * Formats the entry into one that is easily usable for the UI, most of the
  * complexity was introduced with nested fields
  *
- * @param patterns IndexPatternBase containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param item exception item entry
  * @param itemIndex entry index
  * @param parent nested entries hold copy of their parent for use in various logic
@@ -681,7 +681,7 @@ export const getCorrespondingKeywordField = ({
  * was added to ensure that nested items could be identified with their parent entry
  */
 export const getFormattedBuilderEntry = (
-  indexPattern: IndexPatternBase,
+  indexPattern: DataViewBase,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
@@ -727,7 +727,7 @@ export const getFormattedBuilderEntry = (
  * Formats the entries to be easily usable for the UI, most of the
  * complexity was introduced with nested fields
  *
- * @param patterns IndexPatternBase containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param entries exception item entries
  * @param addNested boolean noting whether or not UI is currently
  * set to add a nested field
@@ -736,7 +736,7 @@ export const getFormattedBuilderEntry = (
  * was added to ensure that nested items could be identified with their parent entry
  */
 export const getFormattedBuilderEntries = (
-  indexPattern: IndexPatternBase,
+  indexPattern: DataViewBase,
   entries: BuilderEntry[],
   parent?: EntryNested,
   parentIndex?: number
@@ -758,14 +758,14 @@ export const getFormattedBuilderEntries = (
         entryIndex: index,
         field: isNewNestedEntry
           ? undefined
-          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the IndexPatternFieldBase interface
+          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the DataViewFieldBase interface
             ({
               aggregatable: false,
               esTypes: ['nested'],
               name: item.field != null ? item.field : '',
               searchable: false,
               type: 'string',
-            } as IndexPatternFieldBase),
+            } as DataViewFieldBase),
         id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
         operator: isOperator,

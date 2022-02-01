@@ -53,16 +53,6 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
-  it('makes ProductNotSupportedError a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.ProductNotSupportedError(
-      'reason',
-      elasticsearchClientMock.createApiResponse()
-    );
-    expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
-    expect(decorateEsError(error)).toBe(error);
-    expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
-  });
-
   it('makes Conflict a SavedObjectsClient/Conflict error', () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({ statusCode: 409 })
@@ -117,6 +107,18 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(genericError).not.toBe(error);
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(false);
     expect(SavedObjectsErrorHelpers.isNotFoundError(genericError)).toBe(true);
+  });
+
+  it('makes NotFound errors generic NotFoundEsUnavailableError errors when response is from unsupported server', () => {
+    const error = new esErrors.ResponseError(
+      // explicitly override the headers
+      elasticsearchClientMock.createApiResponse({ statusCode: 404, headers: {} })
+    );
+    expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(false);
+    const genericError = decorateEsError(error);
+    expect(genericError).not.toBe(error);
+    expect(SavedObjectsErrorHelpers.isNotFoundError(genericError)).toBe(false);
+    expect(SavedObjectsErrorHelpers.isEsUnavailableError(genericError)).toBe(true);
   });
 
   it('if saved objects index does not exist makes NotFound a SavedObjectsClient/generalError', () => {

@@ -672,7 +672,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
 
     const jobConfig = jobsResponse.jobs[0];
-    const timefield = jobConfig.data_description.time_field;
+    const timefield = jobConfig.data_description.time_field!;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
     if (datafeedConfig === undefined) {

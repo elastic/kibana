@@ -7,7 +7,7 @@
  */
 
 import { updateSearchSource } from './update_search_source';
-import { IndexPattern } from '../../../../../data/public';
+import { DataView } from '../../../../../data/common';
 import { SavedSearch } from '../../../services/saved_searches';
 import { AppState } from '../services/discover_state';
 import type { SortOrder } from '../../../services/saved_searches';
@@ -28,7 +28,7 @@ export async function persistSavedSearch(
     saveOptions,
     state,
   }: {
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
     onError: (error: Error, savedSearch: SavedSearch) => void;
     onSuccess: (id: string) => void;
     saveOptions: SavedObjectSaveOpts;

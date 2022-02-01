@@ -332,6 +332,7 @@ export class AlertsClient {
       }
 
       const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+        // @ts-expect-error doesn't handle error branch in MGetResponse
         const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
           {

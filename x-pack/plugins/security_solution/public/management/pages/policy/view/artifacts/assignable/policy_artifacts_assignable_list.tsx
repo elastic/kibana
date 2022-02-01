@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiProgress } from '@elastic/eui';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useMemo } from 'react';
 import { GetTrustedAppsListResponse, Immutable } from '../../../../../../../common/endpoint/types';
-import { Loader } from '../../../../../../common/components/loader';
 import {
   AnyArtifact,
   ArtifactEntryCardMinified,
@@ -56,7 +56,14 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
       );
     }, [artifacts, selectedArtifactIdsByKey, selectedArtifactsUpdated]);
 
-    return isListLoading ? <Loader size="xl" /> : <div>{assignableList}</div>;
+    return (
+      <>
+        {isListLoading && (
+          <EuiProgress size="xs" color="primary" data-test-subj="artifactsAssignableListLoader" />
+        )}
+        <div>{assignableList}</div>
+      </>
+    );
   }
 );
 

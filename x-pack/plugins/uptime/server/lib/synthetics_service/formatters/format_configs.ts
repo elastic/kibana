@@ -6,7 +6,7 @@
  */
 
 import { isNil, omitBy } from 'lodash';
-import { ConfigKey, MonitorFields } from '../../../../common/runtime_types/monitor_management';
+import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 import { formatters } from './index';
 
 const UI_KEYS_TO_SKIP = [
@@ -29,11 +29,12 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
   configKeys.forEach((key) => {
     if (!UI_KEYS_TO_SKIP.includes(key)) {
       const value = config[key] ?? null;
-      if (value && formatters[key]) {
-        formattedMonitor[key] = formatters[key]?.(config);
-      } else if (value) {
-        formattedMonitor[key] = value;
+
+      if (value === null || value === '') {
+        return;
       }
+
+      formattedMonitor[key] = !!formatters[key] ? formatters[key]?.(config) : value;
     }
   });
 

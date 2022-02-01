@@ -6,13 +6,11 @@
  */
 
 import React, { FC } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { NavigateToPath } from '../../../contexts/kibana';
-
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { DatavisualizerSelector } from '../../../datavisualizer';
-
 import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
@@ -21,11 +19,15 @@ export const selectorRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'datavisualizer',
   path: '/datavisualizer',
+  title: i18n.translate('xpack.ml.dataVisualizer.docTitle', {
+    defaultMessage: 'Data Visualizer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB'),
   ],
 });
 

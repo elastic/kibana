@@ -77,7 +77,7 @@ export async function getDailyEvents(
     daily: {
       date_histogram: {
         field: 'lens-ui-telemetry.date',
-        calendar_interval: '1d',
+        calendar_interval: '1d' as const,
         min_doc_count: 1,
       },
       aggs: {

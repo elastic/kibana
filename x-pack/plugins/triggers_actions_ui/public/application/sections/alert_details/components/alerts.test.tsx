@@ -24,6 +24,8 @@ const mockAPIs = {
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
   requestRefresh: jest.fn(),
+  numberOfExecutions: 60,
+  onChangeDuration: jest.fn(),
 };
 
 beforeAll(() => {

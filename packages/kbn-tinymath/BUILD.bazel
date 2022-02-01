@@ -1,5 +1,6 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//peggy:index.bzl", "peggy")
+load("//src/dev/bazel:index.bzl", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-tinymath"
 PKG_REQUIRE_NAME = "@kbn/tinymath"
@@ -26,7 +27,7 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-DEPS = [
+RUNTIME_DEPS = [
   "@npm//lodash",
 ]
 
@@ -49,7 +50,7 @@ js_library(
     ":srcs",
     ":grammar"
   ],
-  deps = DEPS,
+  deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

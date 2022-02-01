@@ -34,6 +34,11 @@ export default function ({ getService }) {
         .responseType('blob')
         .expect(200);
 
+      expect(resp.headers['content-encoding']).to.be('gzip');
+      expect(resp.headers['content-disposition']).to.be('inline');
+      expect(resp.headers['content-type']).to.be('application/x-protobuf');
+      expect(resp.headers['cache-control']).to.be('public, max-age=3600');
+
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers.hits;
       expect(layer.length).to.be(2); // 2 docs

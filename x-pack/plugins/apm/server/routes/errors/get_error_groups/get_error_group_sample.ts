@@ -55,7 +55,7 @@ export async function getErrorGroupSample({
         },
       },
       sort: asMutableArray([
-        { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
+        { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
       ] as const),
     },

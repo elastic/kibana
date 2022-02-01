@@ -8,7 +8,6 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -101,8 +100,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let throughputMetricValues: PromiseReturnType<typeof getThroughputValues>;
-  let throughputTransactionValues: PromiseReturnType<typeof getThroughputValues>;
+  let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
+  let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
     describe('when data is loaded ', () => {

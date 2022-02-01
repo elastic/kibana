@@ -7,7 +7,6 @@
 
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
 import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
-import { getImportExceptionsListSchemaDecodedMock } from '../../../../../common/schemas/request/import_exceptions_schema.mock';
 import { findExceptionList } from '../../find_exception_list';
 
 import { findAllListTypes, getAllListTypes, getListFilter } from './find_all_exception_list_types';
@@ -27,8 +26,8 @@ describe('find_all_exception_list_item_types', () => {
       const result = getListFilter({
         namespaceType: 'agnostic',
         objects: [
-          getImportExceptionsListSchemaDecodedMock('1'),
-          getImportExceptionsListSchemaDecodedMock('2'),
+          { listId: '1', namespaceType: 'agnostic' },
+          { listId: '2', namespaceType: 'agnostic' },
         ],
       });
 
@@ -39,8 +38,8 @@ describe('find_all_exception_list_item_types', () => {
       const result = getListFilter({
         namespaceType: 'single',
         objects: [
-          getImportExceptionsListSchemaDecodedMock('1'),
-          getImportExceptionsListSchemaDecodedMock('2'),
+          { listId: '1', namespaceType: 'single' },
+          { listId: '2', namespaceType: 'single' },
         ],
       });
 
@@ -56,11 +55,7 @@ describe('find_all_exception_list_item_types', () => {
     });
 
     it('searches for agnostic lists if no non agnostic lists passed in', async () => {
-      await findAllListTypes(
-        [{ ...getImportExceptionsListSchemaDecodedMock('1'), namespace_type: 'agnostic' }],
-        [],
-        savedObjectsClient
-      );
+      await findAllListTypes([{ listId: '1', namespaceType: 'agnostic' }], [], savedObjectsClient);
 
       expect(findExceptionList).toHaveBeenCalledWith({
         filter: 'exception-list-agnostic.attributes.list_id:(1)',
@@ -74,11 +69,7 @@ describe('find_all_exception_list_item_types', () => {
     });
 
     it('searches for non agnostic lists if no agnostic lists passed in', async () => {
-      await findAllListTypes(
-        [],
-        [{ ...getImportExceptionsListSchemaDecodedMock('1'), namespace_type: 'single' }],
-        savedObjectsClient
-      );
+      await findAllListTypes([], [{ listId: '1', namespaceType: 'single' }], savedObjectsClient);
 
       expect(findExceptionList).toHaveBeenCalledWith({
         filter: 'exception-list.attributes.list_id:(1)',
@@ -93,8 +84,8 @@ describe('find_all_exception_list_item_types', () => {
 
     it('searches for both agnostic an non agnostic lists if some of both passed in', async () => {
       await findAllListTypes(
-        [{ ...getImportExceptionsListSchemaDecodedMock('1'), namespace_type: 'agnostic' }],
-        [{ ...getImportExceptionsListSchemaDecodedMock('2'), namespace_type: 'single' }],
+        [{ listId: '1', namespaceType: 'agnostic' }],
+        [{ listId: '2', namespaceType: 'single' }],
         savedObjectsClient
       );
 
@@ -140,8 +131,8 @@ describe('find_all_exception_list_item_types', () => {
         total: 1,
       });
       const result = await getAllListTypes(
-        [{ ...getImportExceptionsListSchemaDecodedMock('1'), namespace_type: 'agnostic' }],
-        [{ ...getImportExceptionsListSchemaDecodedMock('2'), namespace_type: 'single' }],
+        [{ listId: '1', namespaceType: 'agnostic' }],
+        [{ listId: '2', namespaceType: 'single' }],
         savedObjectsClient
       );
 

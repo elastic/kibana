@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { CoreTheme } from 'kibana/public';
 import { CoreSetup } from '../../../../core/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { getElasticLogo, isValidUrl, defaultTheme$ } from '../../../presentation_util/public';
+import { getElasticLogo, defaultTheme$, isValidUrl } from '../../../presentation_util/public';
 import { ImageRendererConfig } from '../../common/types';
 
 const strings = {

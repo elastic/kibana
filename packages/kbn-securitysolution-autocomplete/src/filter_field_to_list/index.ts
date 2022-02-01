@@ -7,7 +7,7 @@
  */
 
 import { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { typeMatch } from '../type_match';
 
 /**
@@ -22,7 +22,7 @@ import { typeMatch } from '../type_match';
  */
 export const filterFieldToList = (
   lists: ListSchema[],
-  field?: IndexPatternFieldBase & { esTypes?: string[] }
+  field?: DataViewFieldBase & { esTypes?: string[] }
 ): ListSchema[] => {
   if (field != null) {
     const { esTypes = [] } = field;

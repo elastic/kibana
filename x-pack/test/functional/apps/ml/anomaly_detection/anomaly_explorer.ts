@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -146,11 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'y', ['Overall']);
         });
@@ -159,11 +157,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',
@@ -342,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
           await ml.testExecution.logTestStep(
-            'should allow to attach anomaly swimlane embeddable to the dashboard'
+            'should allow to attach anomaly swim lane embeddable to the dashboard'
           );
           await ml.anomalyExplorer.openAddToDashboardControl();
           await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');

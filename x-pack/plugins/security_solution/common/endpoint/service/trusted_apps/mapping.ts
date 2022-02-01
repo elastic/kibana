@@ -6,8 +6,7 @@
  */
 
 import { EffectScope } from '../../types';
-
-export const POLICY_REFERENCE_PREFIX = 'policy:';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../artifacts/constants';
 
 /**
  * Looks at an array of `tags` (attributed defined on the `ExceptionListItemSchema`) and returns back
@@ -15,16 +14,16 @@ export const POLICY_REFERENCE_PREFIX = 'policy:';
  * @param tags
  */
 export const tagsToEffectScope = (tags: string[]): EffectScope => {
-  const policyReferenceTags = tags.filter((tag) => tag.startsWith(POLICY_REFERENCE_PREFIX));
+  const policyReferenceTags = tags.filter((tag) => tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX));
 
-  if (policyReferenceTags.some((tag) => tag === `${POLICY_REFERENCE_PREFIX}all`)) {
+  if (policyReferenceTags.some((tag) => tag === `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`)) {
     return {
       type: 'global',
     };
   } else {
     return {
       type: 'policy',
-      policies: policyReferenceTags.map((tag) => tag.substr(POLICY_REFERENCE_PREFIX.length)),
+      policies: policyReferenceTags.map((tag) => tag.substr(BY_POLICY_ARTIFACT_TAG_PREFIX.length)),
     };
   }
 };

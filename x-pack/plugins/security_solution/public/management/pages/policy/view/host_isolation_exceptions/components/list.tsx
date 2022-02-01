@@ -7,17 +7,20 @@
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../../common/constants';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../../../common/constants';
-import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
+import {
+  getHostIsolationExceptionsListPath,
+  getPolicyHostIsolationExceptionsPath,
+} from '../../../../../common/routing';
 import {
   ArtifactCardGrid,
   ArtifactCardGridProps,
@@ -29,15 +32,15 @@ import { useGetEndpointSpecificPolicies } from '../../../../../services/policies
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyHostIsolationExceptionsDeleteModal } from './delete_modal';
+import { useFetchHostIsolationExceptionsList } from '../../../../host_isolation_exceptions/view/hooks';
 
-export const PolicyHostIsolationExceptionsList = ({
-  exceptions,
-  policyId,
-}: {
-  exceptions: FoundExceptionListItemSchema;
-  policyId: string;
-}) => {
+export const PolicyHostIsolationExceptionsList = ({ policyId }: { policyId: string }) => {
   const history = useHistory();
+  const { getAppUrl } = useAppUrl();
+
+  const privileges = useUserPrivileges().endpointPrivileges;
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -48,11 +51,18 @@ export const PolicyHostIsolationExceptionsList = ({
 
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
 
+  const policySearchedExceptionsListRequest = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+    policies: [policyId, 'all'],
+  });
+
   const pagination = {
-    totalItemCount: exceptions?.total ?? 0,
-    pageSize: exceptions?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
+    totalItemCount: policySearchedExceptionsListRequest?.data?.total ?? 0,
+    pageSize: policySearchedExceptionsListRequest?.data?.per_page ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-    pageIndex: (exceptions?.page ?? 1) - 1,
+    pageIndex: (policySearchedExceptionsListRequest?.data?.page ?? 1) - 1,
   };
 
   const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
@@ -85,32 +95,45 @@ export const PolicyHostIsolationExceptionsList = ({
   const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
     const item = artifact as ExceptionListItemSchema;
     const isGlobal = isGlobalPolicyEffected(item.tags);
+    const deleteAction = {
+      icon: 'trash',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeAction',
+        { defaultMessage: 'Remove from policy' }
+      ),
+      onClick: () => {
+        setExceptionItemToDelete(item);
+      },
+      disabled: isGlobal,
+      toolTipContent: isGlobal
+        ? i18n.translate(
+            'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeActionNotAllowed',
+            {
+              defaultMessage:
+                'Globally applied host isolation exceptions cannot be removed from policy.',
+            }
+          )
+        : undefined,
+      toolTipPosition: 'top' as const,
+      'data-test-subj': 'remove-from-policy-action',
+    };
+    const viewUrlPath = getHostIsolationExceptionsListPath({ filter: item.item_id });
+
+    const fullDetailsAction = {
+      icon: 'controlsHorizontal',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.fullDetailsAction',
+        { defaultMessage: 'View full details' }
+      ),
+      href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+      navigateAppId: APP_UI_ID,
+      navigateOptions: { path: viewUrlPath },
+      'data-test-subj': 'view-full-details-action',
+    };
+
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [
-        {
-          icon: 'trash',
-          children: i18n.translate(
-            'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeAction',
-            { defaultMessage: 'Remove from policy' }
-          ),
-          onClick: () => {
-            setExceptionItemToDelete(item);
-          },
-          disabled: isGlobal,
-          toolTipContent: isGlobal
-            ? i18n.translate(
-                'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeActionNotAllowed',
-                {
-                  defaultMessage:
-                    'Globally applied host isolation exceptions cannot be removed from policy.',
-                }
-              )
-            : undefined,
-          toolTipPosition: 'top',
-          'data-test-subj': 'remove-from-policy-action',
-        },
-      ],
+      actions: privileges.canIsolateHost ? [fullDetailsAction, deleteAction] : [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };
@@ -137,7 +160,8 @@ export const PolicyHostIsolationExceptionsList = ({
     return i18n.translate(
       'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount',
       {
-        defaultMessage: 'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}',
+        defaultMessage:
+          'Showing {totalItemsCount, plural, one {# host isolation exception} other {# host isolation exceptions}}',
         values: { totalItemsCount: pagination.totalItemCount },
       }
     );
@@ -156,7 +180,7 @@ export const PolicyHostIsolationExceptionsList = ({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, description, value, ip',
+            defaultMessage: 'Search on the fields below: name, description, IP',
           }
         )}
         defaultValue={urlParams.filter}
@@ -173,12 +197,16 @@ export const PolicyHostIsolationExceptionsList = ({
       </EuiText>
       <EuiSpacer size="m" />
       <ArtifactCardGrid
-        items={exceptions.data}
+        items={policySearchedExceptionsListRequest?.data?.data || []}
         onPageChange={handlePageChange}
         onExpandCollapse={handleExpandCollapse}
         cardComponentProps={provideCardProps}
         pagination={pagination}
-        loading={policiesRequest.isLoading}
+        loading={
+          policiesRequest.isLoading ||
+          policySearchedExceptionsListRequest.isLoading ||
+          policySearchedExceptionsListRequest.isRefetching
+        }
         data-test-subj={'hostIsolationExceptions-collapsed-list'}
       />
     </>

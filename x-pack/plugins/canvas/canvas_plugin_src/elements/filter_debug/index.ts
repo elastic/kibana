@@ -12,6 +12,7 @@ export const filterDebug: ElementFactory = () => ({
   displayName: 'Debug filter',
   help: 'Shows the underlying global filters in a workpad',
   icon: 'bug',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | render as=debug`,
 });

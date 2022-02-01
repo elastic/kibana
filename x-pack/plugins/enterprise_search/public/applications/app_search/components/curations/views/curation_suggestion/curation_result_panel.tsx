@@ -79,6 +79,7 @@ export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
                 isMetaEngine={isMetaEngine}
                 schemaForTypeHighlights={engine.schema}
                 resultPosition={index + 1}
+                showClick
               />
             </EuiFlexItem>
           ))

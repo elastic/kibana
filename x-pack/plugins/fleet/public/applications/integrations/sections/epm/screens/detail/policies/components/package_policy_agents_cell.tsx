@@ -11,6 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
+import type { AgentPolicy } from '../../../../../../types';
 
 const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
   <EuiButton iconType="plusInCircle" data-test-subj="addAgentButton" onClick={onAddAgent} size="s">
@@ -38,21 +39,21 @@ const AddAgentButtonWithPopover = ({ onAddAgent }: { onAddAgent: () => void }) =
 };
 
 export const PackagePolicyAgentsCell = ({
-  agentPolicyId,
+  agentPolicy,
   agentCount = 0,
   onAddAgent,
   hasHelpPopover = false,
 }: {
-  agentPolicyId: string;
+  agentPolicy: AgentPolicy;
   agentCount?: number;
   hasHelpPopover?: boolean;
   onAddAgent: () => void;
 }) => {
-  if (agentCount > 0) {
+  if (agentCount > 0 || agentPolicy.is_managed) {
     return (
       <LinkedAgentCount
         count={agentCount}
-        agentPolicyId={agentPolicyId}
+        agentPolicyId={agentPolicy.id}
         className="eui-textTruncate"
       />
     );

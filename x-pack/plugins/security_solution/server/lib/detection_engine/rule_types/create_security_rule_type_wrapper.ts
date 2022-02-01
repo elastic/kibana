@@ -35,8 +35,8 @@ import {
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
-import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_log';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { truncateList } from '../rule_execution_log';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
@@ -44,7 +44,7 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLogClientOverride }) =>
+  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLoggerFactory }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -60,6 +60,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         return withSecuritySpan('scurityRuleTypeExecutor', async () => {
           const {
             alertId,
+            executionId,
             params,
             previousStartedAt,
             startedAt,
@@ -76,14 +77,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const esClient = scopedClusterClient.asCurrentUser;
 
-          const ruleStatusClient = ruleExecutionLogClientOverride
-            ? ruleExecutionLogClientOverride
-            : new RuleExecutionLogClient({
-                underlyingClient: config.ruleExecutionLog.underlyingClient,
-                savedObjectsClient,
-                eventLogService,
-                logger,
-              });
+          const ruleExecutionLogger = ruleExecutionLoggerFactory(
+            savedObjectsClient,
+            eventLogService,
+            logger,
+            {
+              executionId,
+              ruleId: alertId,
+              ruleName: rule.name,
+              ruleType: rule.ruleTypeId,
+              spaceId,
+            }
+          );
 
           const completeRule = {
             ruleConfig: rule,
@@ -95,13 +100,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             actions,
             name,
             schedule: { interval },
-            ruleTypeId,
           } = completeRule.ruleConfig;
 
           const refresh = actions.length ? 'wait_for' : false;
 
           const buildRuleMessage = buildRuleMessageFactory({
             id: alertId,
+            executionId,
             ruleId,
             name,
             index: spaceId,
@@ -111,14 +116,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           logger.debug(buildRuleMessage(`interval: ${interval}`));
 
           let wroteWarningStatus = false;
-          const basicLogArguments = {
-            spaceId,
-            ruleId: alertId,
-            ruleName: name,
-            ruleType: ruleTypeId,
-          };
-          await ruleStatusClient.logStatusChange({
-            ...basicLogArguments,
+
+          await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatus['going to run'],
           });
 
@@ -152,11 +151,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndices);
 
               wroteWarningStatus = await hasReadIndexPrivileges({
-                ...basicLogArguments,
                 privileges,
                 logger,
                 buildRuleMessage,
-                ruleStatusClient,
+                ruleExecutionLogger,
               });
 
               if (!wroteWarningStatus) {
@@ -170,13 +168,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   })
                 );
                 wroteWarningStatus = await hasTimestampFields({
-                  ...basicLogArguments,
                   timestampField: hasTimestampOverride
                     ? (timestampOverride as string)
                     : '@timestamp',
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices,
-                  ruleStatusClient,
+                  ruleExecutionLogger,
                   logger,
                   buildRuleMessage,
                 });
@@ -184,11 +181,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           } catch (exc) {
             const errorMessage = buildRuleMessage(`Check privileges failed to execute ${exc}`);
-            logger.error(errorMessage);
-            await ruleStatusClient.logStatusChange({
-              ...basicLogArguments,
-              message: errorMessage,
+            logger.warn(errorMessage);
+            await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatus['partial failure'],
+              message: errorMessage,
             });
             wroteWarningStatus = true;
           }
@@ -212,8 +208,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
             logger.warn(gapMessage);
             hasError = true;
-            await ruleStatusClient.logStatusChange({
-              ...basicLogArguments,
+            await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatus.failed,
               message: gapMessage,
               metrics: { executionGap: remainingGap },
@@ -284,7 +279,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 errors: result.errors.concat(runResult.errors),
                 lastLookbackDate: runResult.lastLookBackDate,
                 searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
-                state: runState,
+                state: runResult.state,
                 success: result.success && runResult.success,
                 warning: warningMessages.length > 0,
                 warningMessages,
@@ -293,11 +288,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
 
             if (result.warningMessages.length) {
-              const warningMessage = buildRuleMessage(
-                truncateMessageList(result.warningMessages).join()
-              );
-              await ruleStatusClient.logStatusChange({
-                ...basicLogArguments,
+              const warningMessage = buildRuleMessage(truncateList(result.warningMessages).join());
+              await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus['partial failure'],
                 message: warningMessage,
               });
@@ -356,14 +348,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               );
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
-                await ruleStatusClient.logStatusChange({
-                  ...basicLogArguments,
+                await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatus.succeeded,
                   message: 'succeeded',
                   metrics: {
-                    indexingDurations: result.bulkCreateTimes,
                     searchDurations: result.searchAfterTimes,
-                    lastLookBackDate: result.lastLookbackDate?.toISOString(),
+                    indexingDurations: result.bulkCreateTimes,
                   },
                 });
               }
@@ -397,17 +387,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
               const errorMessage = buildRuleMessage(
                 'Bulk Indexing of signals failed:',
-                truncateMessageList(result.errors).join()
+                truncateList(result.errors).join()
               );
               logger.error(errorMessage);
-              await ruleStatusClient.logStatusChange({
-                ...basicLogArguments,
+              await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatus.failed,
                 message: errorMessage,
                 metrics: {
-                  indexingDurations: result.bulkCreateTimes,
                   searchDurations: result.searchAfterTimes,
-                  lastLookBackDate: result.lastLookbackDate?.toISOString(),
+                  indexingDurations: result.bulkCreateTimes,
                 },
               });
             }
@@ -437,14 +425,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             );
 
             logger.error(message);
-            await ruleStatusClient.logStatusChange({
-              ...basicLogArguments,
+            await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatus.failed,
               message,
               metrics: {
-                indexingDurations: result.bulkCreateTimes,
                 searchDurations: result.searchAfterTimes,
-                lastLookBackDate: result.lastLookbackDate?.toISOString(),
+                indexingDurations: result.bulkCreateTimes,
               },
             });
           }

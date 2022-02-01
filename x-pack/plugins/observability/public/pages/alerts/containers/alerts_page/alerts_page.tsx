@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -57,7 +57,7 @@ const Divider = euiStyled.div`
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_NAMES: string[] = [];
-const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
+const NO_INDEX_PATTERNS: DataViewBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
   `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*(".+?"|\\*?)|${regExpEscape(
@@ -140,9 +140,8 @@ function AlertsPage() {
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
   const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
-    return callObservabilityApi({
+    return callObservabilityApi('GET /api/observability/rules/alerts/dynamic_index_pattern', {
       signal,
-      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
       params: {
         query: {
           namespace: 'default',
@@ -157,7 +156,7 @@ function AlertsPage() {
     });
   }, []);
 
-  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
       return [];
     }

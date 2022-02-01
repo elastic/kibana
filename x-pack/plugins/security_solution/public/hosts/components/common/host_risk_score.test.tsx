@@ -13,7 +13,7 @@ import { HostRiskScore } from './host_risk_score';
 
 import { EuiHealth, EuiHealthProps } from '@elastic/eui';
 
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -98,5 +98,15 @@ describe('HostRiskScore', () => {
       expect.objectContaining({ color: euiThemeVars.euiColorMediumShade }),
       context
     );
+  });
+
+  it("doesn't render background-color when hideBackgroundColor is true", () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostRiskScore severity={HostRiskSeverity.critical} hideBackgroundColor />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('host-risk-score')).toHaveStyleRule('background-color', undefined);
   });
 });

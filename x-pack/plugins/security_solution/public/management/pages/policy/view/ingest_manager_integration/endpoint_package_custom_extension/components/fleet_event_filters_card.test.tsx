@@ -47,7 +47,8 @@ const mockTheme = getMockTheme({
   },
 });
 
-const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
+// Casting to unknown to avoid ts error because there is an static method in the class
+const EventFiltersHttpServiceMock = EventFiltersHttpService as unknown as jest.Mock;
 const useToastsMock = useToasts as jest.Mock;
 
 const summary: GetExceptionSummaryResponse = {

@@ -105,7 +105,6 @@ describe('When using the Fleet Artifacts Client', () => {
 
   describe('and calling `listArtifacts()`', () => {
     beforeEach(() => {
-      // @ts-expect-error not full interface
       esClientMock.search.mockImplementation(() => {
         return elasticsearchServiceMock.createSuccessTransportRequestPromise(
           generateArtifactEsSearchResultHitsMock()

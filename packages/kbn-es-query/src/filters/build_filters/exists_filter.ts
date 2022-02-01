@@ -7,7 +7,7 @@
  */
 
 import { has } from 'lodash';
-import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 import type { Filter, FilterMeta } from './types';
 
 /** @public */
@@ -44,7 +44,7 @@ export const getExistsFilterField = (filter: ExistsFilter) => {
  *
  * @public
  */
-export const buildExistsFilter = (field: IndexPatternFieldBase, indexPattern: IndexPatternBase) => {
+export const buildExistsFilter = (field: DataViewFieldBase, indexPattern: DataViewBase) => {
   return {
     meta: {
       index: indexPattern.id,

@@ -13,7 +13,8 @@ export const lineChart: ElementFactory = () => ({
   type: 'chart',
   help: 'A customizable line chart',
   icon: 'visLine',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | pointseries x="time" y="mean(price)"
 | plot defaultStyle={seriesStyle lines=3}

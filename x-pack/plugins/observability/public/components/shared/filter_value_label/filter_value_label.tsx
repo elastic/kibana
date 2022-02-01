@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { injectI18n } from '@kbn/i18n-react';
-import { esFilters, Filter, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import { FilterItem, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export function buildFilterLabel({
@@ -27,8 +28,8 @@ export function buildFilterLabel({
 
   const filter =
     value instanceof Array && value.length > 1
-      ? esFilters.buildPhrasesFilter(indexField, value, indexPattern)
-      : esFilters.buildPhraseFilter(indexField, value as string, indexPattern);
+      ? buildPhrasesFilter(indexField, value, indexPattern)
+      : buildPhraseFilter(indexField, value as string, indexPattern);
 
   filter.meta.type = value instanceof Array && value.length > 1 ? 'phrases' : 'phrase';
 
@@ -61,7 +62,7 @@ export function FilterValueLabel({
   removeFilter,
   allowExclusion = true,
 }: FilterValueLabelProps) {
-  const FilterItem = injectI18n(esFilters.FilterItem);
+  const FilterItemI18n = injectI18n(FilterItem);
 
   const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
 
@@ -70,7 +71,7 @@ export function FilterValueLabel({
   } = useKibana();
 
   return indexPattern ? (
-    <FilterItem
+    <FilterItemI18n
       indexPatterns={[indexPattern]}
       id={`${field}-${value}-${negate}`}
       filter={filter}

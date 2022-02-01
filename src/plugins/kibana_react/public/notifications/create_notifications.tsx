@@ -24,8 +24,8 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
       throw new TypeError('Could not show notification as notifications service is not available.');
     }
     services.notifications!.toasts.add({
-      title: toMountPoint(title),
-      text: toMountPoint(<>{body || null}</>),
+      title: toMountPoint(title, { theme$: services.theme?.theme$ }),
+      text: toMountPoint(<>{body || null}</>, { theme$: services.theme?.theme$ }),
       color,
       iconType,
       toastLifeTimeMs,

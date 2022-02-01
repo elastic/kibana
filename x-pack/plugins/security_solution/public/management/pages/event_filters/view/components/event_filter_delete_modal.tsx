@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiModal,
@@ -18,20 +16,25 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { i18n } from '@kbn/i18n';
-import { useEventFiltersSelector } from '../hooks';
+import { AutoFocusButton } from '../../../../../common/components/autofocus_button/autofocus_button';
+import { useToasts } from '../../../../../common/lib/kibana';
+import { AppAction } from '../../../../../common/store/actions';
+import {
+  getArtifactPoliciesIdByTag,
+  isGlobalPolicyEffected,
+} from '../../../../components/effected_policy_select/utils';
 import {
   getDeleteError,
   getItemToDelete,
   isDeletionInProgress,
   wasDeletionSuccessful,
 } from '../../store/selector';
-import { AppAction } from '../../../../../common/store/actions';
-import { useToasts } from '../../../../../common/lib/kibana';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { useEventFiltersSelector } from '../hooks';
 
 export const EventFilterDeleteModal = memo<{}>(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -55,7 +58,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
     if (wasDeleted) {
       toasts.addSuccess(
         i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteSuccess', {
-          defaultMessage: '"{name}" has been removed from the Event Filters list.',
+          defaultMessage: '"{name}" has been removed from the event filters list.',
           values: { name: eventFilter?.name },
         })
       );
@@ -70,7 +73,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
       toasts.addDanger(
         i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteFailure', {
           defaultMessage:
-            'Unable to remove "{name}" from the Event Filters list. Reason: {message}',
+            'Unable to remove "{name}" from the event filters list. Reason: {message}',
           values: { name: eventFilter?.name, message: deleteError.message },
         })
       );
@@ -109,7 +112,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
                 values={{
                   count: isGlobalPolicyEffected(Array.from(eventFilter?.tags || []))
                     ? 'all'
-                    : eventFilter?.tags?.length || 0,
+                    : getArtifactPoliciesIdByTag(eventFilter?.tags as string[]).length,
                 }}
               />
             </p>
@@ -136,7 +139,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
           />
         </EuiButtonEmpty>
 
-        <EuiButton
+        <AutoFocusButton
           fill
           color="danger"
           onClick={onConfirm}
@@ -147,7 +150,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
             id="xpack.securitySolution.eventFilters.deletionDialog.confirmButton"
             defaultMessage="Delete"
           />
-        </EuiButton>
+        </AutoFocusButton>
       </EuiModalFooter>
     </EuiModal>
   );

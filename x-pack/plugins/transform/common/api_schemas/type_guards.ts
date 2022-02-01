@@ -16,6 +16,7 @@ import { isPopulatedObject } from '../shared_imports';
 import type { FieldHistogramsResponseSchema } from './field_histograms';
 import type { GetTransformsAuditMessagesResponseSchema } from './audit_messages';
 import type { DeleteTransformsResponseSchema } from './delete_transforms';
+import type { ResetTransformsResponseSchema } from './reset_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
 import type {
@@ -56,6 +57,15 @@ export const isDeleteTransformsResponseSchema = (
   );
 };
 
+export const isResetTransformsResponseSchema = (
+  arg: unknown
+): arg is ResetTransformsResponseSchema => {
+  return (
+    isPopulatedObject(arg) &&
+    Object.values(arg).every((d) => isPopulatedObject(d, ['transformReset']))
+  );
+};
+
 export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
 };
@@ -74,7 +84,7 @@ export const isEsSearchResponseWithAggregations = (
 
 export const isMultiBucketAggregate = <TBucket = unknown>(
   arg: unknown
-): arg is estypes.AggregationsMultiBucketAggregate<TBucket> => {
+): arg is estypes.AggregationsMultiBucketAggregateBase<TBucket> => {
   return isPopulatedObject(arg, ['buckets']);
 };
 

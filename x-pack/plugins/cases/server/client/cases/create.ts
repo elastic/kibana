@@ -17,13 +17,12 @@ import {
   excess,
   CaseResponseRt,
   CaseResponse,
-  CasesClientPostRequestRt,
   CasePostRequest,
-  CaseType,
-  OWNER_FIELD,
+  ActionTypes,
+  CasePostRequestRt,
 } from '../../../common/api';
-import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -48,20 +47,9 @@ export const create = async (
     authorization: auth,
   } = clientArgs;
 
-  // default to an individual case if the type is not defined.
-  const { type = CaseType.individual, ...nonTypeCaseFields } = data;
-
-  if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
-    throw Boom.badRequest(
-      'Case type cannot be collection when the case connector feature is disabled'
-    );
-  }
-
   const query = pipe(
-    // decode with the defaulted type field
-    excess(CasesClientPostRequestRt).decode({
-      type,
-      ...nonTypeCaseFields,
+    excess(CasePostRequestRt).decode({
+      ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)
   );
@@ -72,6 +60,10 @@ export const create = async (
     );
   }
 
+  if (query.tags.some(isInvalidTag)) {
+    throw Boom.badRequest('A tag must contain at least one non-space character');
+  }
+
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -80,36 +72,22 @@ export const create = async (
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
-    const createdDate = new Date().toISOString();
-
     const newCase = await caseService.postNewCase({
       unsecuredSavedObjectsClient,
       attributes: transformNewCase({
-        createdDate,
+        user,
         newCase: query,
-        username,
-        full_name,
-        email,
-        connector: query.connector,
       }),
       id: savedObjectID,
     });
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.create_case,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCaseUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
-          caseId: newCase.id,
-          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-          newValue: query,
-          owner: newCase.attributes.owner,
-        }),
-      ],
+      caseId: newCase.id,
+      user,
+      payload: query,
+      owner: newCase.attributes.owner,
     });
 
     return CaseResponseRt.encode(

@@ -11,33 +11,15 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { DiscoverField } from './discover_field';
-import { IndexPatternField } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data/common';
 import { stubIndexPattern } from '../../../../../../data/common/stubs';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
     return {
       getTriggerCompatibleActions: jest.fn(() => []),
     };
-  }),
-  getServices: () => ({
-    history: () => ({
-      location: {
-        search: '',
-      },
-    }),
-    capabilities: {
-      visualize: {
-        show: true,
-      },
-    },
-    uiSettings: {
-      get: (key: string) => {
-        if (key === 'fields:popularLimit') {
-          return 5;
-        }
-      },
-    },
   }),
 }));
 
@@ -48,11 +30,11 @@ function getComponent({
 }: {
   selected?: boolean;
   showDetails?: boolean;
-  field?: IndexPatternField;
+  field?: DataViewField;
 }) {
   const finalField =
     field ??
-    new IndexPatternField({
+    new DataViewField({
       name: 'bytes',
       type: 'number',
       esTypes: ['long'],
@@ -73,7 +55,30 @@ function getComponent({
     showDetails,
     selected,
   };
-  const comp = mountWithIntl(<DiscoverField {...props} />);
+  const services = {
+    history: () => ({
+      location: {
+        search: '',
+      },
+    }),
+    capabilities: {
+      visualize: {
+        show: true,
+      },
+    },
+    uiSettings: {
+      get: (key: string) => {
+        if (key === 'fields:popularLimit') {
+          return 5;
+        }
+      },
+    },
+  };
+  const comp = mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverField {...props} />
+    </KibanaContextProvider>
+  );
   return { comp, props };
 }
 
@@ -94,7 +99,7 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
   it('should not allow clicking on _source', function () {
-    const field = new IndexPatternField({
+    const field = new DataViewField({
       name: '_source',
       type: '_source',
       esTypes: ['_source'],
@@ -110,7 +115,7 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).not.toHaveBeenCalled();
   });
   it('displays warning for conflicting fields', function () {
-    const field = new IndexPatternField({
+    const field = new DataViewField({
       name: 'troubled_field',
       type: 'conflict',
       esTypes: ['integer', 'text'],

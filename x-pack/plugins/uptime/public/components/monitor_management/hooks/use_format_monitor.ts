@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useEffect, useRef, useState } from 'react';
-import { ConfigKey, DataStream, Validation, MonitorFields } from '../../fleet_package/types';
+import { ConfigKey, DataStream, MonitorFields } from '../../../../common/runtime_types';
+import { Validation } from '../../../../common/types';
 
 interface Props {
   monitorType: DataStream;

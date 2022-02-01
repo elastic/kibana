@@ -211,10 +211,19 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate(
       'discover.advancedSettings.discover.showFieldStatisticsDescription',
       {
-        defaultMessage: `Enable "Field statistics" table in Discover.`,
+        defaultMessage: `Enable the {fieldStatisticsDocs} to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.`,
+        values: {
+          fieldStatisticsDocs:
+            `<a href="https://www.elastic.co/guide/en/kibana/current/show-field-statistics.html"
+            target="_blank" rel="noopener">` +
+            i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
+              defaultMessage: 'Field statistics view',
+            }) +
+            '</a>',
+        },
       }
     ),
-    value: false,
+    value: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {

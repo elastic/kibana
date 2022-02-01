@@ -31,7 +31,7 @@ type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService, St
 const TIMEOUT = 500;
 const promiseTimeout = (time: number) => () => new Promise((resolve) => setTimeout(resolve, time));
 
-const { findNoTemplates, findNoWorkpads, findSomeTemplates } = stubs;
+const { findNoTemplates, findNoWorkpads, findSomeTemplates, importWorkpad } = stubs;
 
 const getRandomName = () => {
   const lorem =
@@ -84,6 +84,10 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
   findTemplates: () => {
     action('workpadService.findTemplates')();
     return (hasTemplates ? findSomeTemplates() : findNoTemplates())();
+  },
+  import: (workpad) => {
+    action('workpadService.import')(workpad);
+    return importWorkpad(workpad);
   },
   create: (workpad) => {
     action('workpadService.create')(workpad);

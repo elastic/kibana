@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { SecurityServiceProvider } from '../../../../test/common/services/security';
 
-type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
+type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
 
 export enum ApmUser {
   noAccessUser = 'no_access_user',

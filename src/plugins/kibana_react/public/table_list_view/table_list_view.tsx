@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpFetchError, ToastsStart } from 'kibana/public';
+import { ThemeServiceStart, HttpFetchError, ToastsStart } from 'kibana/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
@@ -57,6 +57,7 @@ export interface TableListViewProps<V> {
    */
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
+  theme: ThemeServiceStart;
 }
 
 export interface TableListViewState<V> {
@@ -177,7 +178,8 @@ class TableListView<V extends {}> extends React.Component<
             id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName: this.props.entityName }}
-          />
+          />,
+          { theme$: this.props.theme.theme$ }
         ),
         text: `${error}`,
       });

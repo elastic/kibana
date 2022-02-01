@@ -14,6 +14,7 @@ import { useFetchIndex } from '../../../../../../common/containers/source';
 import { ecsEventMock } from '../../../test_utils';
 import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
 import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
+import { licenseService } from '../../../../../../common/hooks/use_license';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -22,9 +23,21 @@ import { EventFiltersListPageState } from '../../../types';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
 import { GetPolicyListResponse } from '../../../../policy/types';
 import userEvent from '@testing-library/user-event';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
+jest.mock('../../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('Event filter form', () => {
   let component: RenderResult;
@@ -32,11 +45,14 @@ describe('Event filter form', () => {
   let render: (
     props?: Partial<React.ComponentProps<typeof EventFiltersForm>>
   ) => ReturnType<AppContextTestRender['render']>;
-  let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderWithData: (
+    customEventFilterProps?: Partial<ExceptionListItemSchema>
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let getState: () => EventFiltersListPageState;
   let policiesRequest: GetPolicyListResponse;
 
   beforeEach(async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
     getState = () => mockedContext.store.getState().management.eventFilters;
@@ -44,13 +60,14 @@ describe('Event filter form', () => {
       mockedContext.render(
         <EventFiltersForm policies={policiesRequest.items} arePoliciesLoading={false} {...props} />
       );
-    renderWithData = async () => {
+    renderWithData = async (customEventFilterProps = {}) => {
       const renderResult = render();
       const entry = getInitialExceptionFromEvent(ecsEventMock());
+
       act(() => {
         mockedContext.store.dispatch({
           type: 'eventFiltersInitForm',
-          payload: { entry },
+          payload: { entry: { ...entry, ...customEventFilterProps } },
         });
       });
       await waitFor(() => {
@@ -145,6 +162,22 @@ describe('Event filter form', () => {
     expect(getState().form.hasNameError).toBeTruthy();
   });
 
+  it('should change description', async () => {
+    component = await renderWithData();
+
+    const nameInput = component.getByTestId('eventFilters-form-description-input');
+
+    act(() => {
+      fireEvent.change(nameInput, {
+        target: {
+          value: 'Exception description',
+        },
+      });
+    });
+
+    expect(getState().form.entry?.description).toBe('Exception description');
+  });
+
   it('should change comments', async () => {
     component = await renderWithData();
 
@@ -207,5 +240,35 @@ describe('Event filter form', () => {
     expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute('aria-selected', 'true');
     // on change called with the previous policy
     expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
+  });
+
+  it('should hide assignment section when no license', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    component = await renderWithData();
+    expect(component.queryByTestId('perPolicy')).toBeNull();
+  });
+
+  it('should hide assignment section when create mode and no license even with by policy', async () => {
+    const policyId = policiesRequest.items[0].id;
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    component = await renderWithData({ tags: [`policy:${policyId}`] });
+    expect(component.queryByTestId('perPolicy')).toBeNull();
+  });
+
+  it('should show disabled assignment section when edit mode and no license with by policy', async () => {
+    const policyId = policiesRequest.items[0].id;
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    component = await renderWithData({ tags: [`policy:${policyId}`], item_id: '1' });
+    expect(component.queryByTestId('perPolicy')).not.toBeNull();
+    expect(component.getByTestId(`policy-${policyId}`).getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('should change from by policy to global when edit mode and no license with by policy', async () => {
+    const policyId = policiesRequest.items[0].id;
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    component = await renderWithData({ tags: [`policy:${policyId}`], item_id: '1' });
+    userEvent.click(component.getByTestId('globalPolicy'));
+    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+    expect(getState().form.entry?.tags).toEqual([`policy:all`]);
   });
 });

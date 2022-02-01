@@ -41,6 +41,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
     const {
       dataViewFieldEditor,
       data: { dataViews },
+      application: { capabilities },
     } = useKibana().services;
 
     useEffect(() => {
@@ -53,11 +54,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       if (dataView) {
         dataViewFieldEditor?.openEditor({
           ctx: { dataView },
-          onSave: (field: DataViewField) => {
+          onSave: async (field: DataViewField) => {
             // Fetch the updated list of fields
-            indexFieldsSearch(selectedDataViewId);
+            await indexFieldsSearch(selectedDataViewId);
 
-            // Add the new field to the event table
+            // Add the new field to the event table, after waiting for browserFields to be stored
             dispatch(
               upsertColumn({
                 column: {
@@ -83,7 +84,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       timelineId,
     ]);
 
-    if (!dataViewFieldEditor?.userPermissions.editIndexPattern()) {
+    if (
+      !dataViewFieldEditor?.userPermissions.editIndexPattern() ||
+      // remove below check once resolved: https://github.com/elastic/kibana/issues/122462
+      !capabilities.indexPatterns.save
+    ) {
       return null;
     }
 

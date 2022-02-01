@@ -45,11 +45,11 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-safer-lodash-set",
+  "//packages/elastic-safer-lodash-set:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-logging",
-  "//packages/kbn-std",
-  "//packages/kbn-utility-types",
+  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "@npm//load-json-file",
   "@npm//rxjs",

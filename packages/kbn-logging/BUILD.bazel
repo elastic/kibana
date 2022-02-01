@@ -32,7 +32,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-std",
+  "//packages/kbn-std:npm_module_types",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { CoreStart, Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
-
-function isAbortError(error: Error) {
-  return error.message === 'Request aborted' || error.message === 'Aborted';
-}
+import { isAbortError } from './util';
+import { makeExecutionContext } from '../../common/execution_context';
 
 export async function getEsGridTile({
+  url,
+  core,
   logger,
   context,
   index,
@@ -26,6 +27,8 @@ export async function getEsGridTile({
   gridPrecision,
   abortController,
 }: {
+  url: string;
+  core: CoreStart;
   x: number;
   y: number;
   z: number;
@@ -37,7 +40,7 @@ export async function getEsGridTile({
   requestType: RENDER_AS.GRID | RENDER_AS.POINT;
   gridPrecision: number;
   abortController: AbortController;
-}): Promise<Buffer | null> {
+}): Promise<Stream | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
@@ -51,17 +54,28 @@ export async function getEsGridTile({
       fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
     };
-    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request(
-      {
-        method: 'GET',
-        path,
-        body,
-      },
-      {
-        signal: abortController.signal,
+
+    const tile = await core.executionContext.withContext(
+      makeExecutionContext('mvt:get_grid_tile', url),
+      async () => {
+        return await context.core.elasticsearch.client.asCurrentUser.transport.request(
+          {
+            method: 'GET',
+            path,
+            body,
+          },
+          {
+            signal: abortController.signal,
+            headers: {
+              'Accept-Encoding': 'gzip',
+            },
+            asStream: true,
+          }
+        );
       }
     );
-    return tile.body as unknown as Buffer;
+
+    return tile.body as Stream;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions

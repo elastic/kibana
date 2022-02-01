@@ -28,6 +28,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   EVENT_FILTERS,
   TRUSTED_APPLICATIONS,
+  POLICIES,
   ENDPOINTS,
 } from '../translations';
 import {
@@ -40,6 +41,7 @@ import {
   TIMELINES_PATH,
   CASES_PATH,
   ENDPOINTS_PATH,
+  POLICIES_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
   UEBA_PATH,
@@ -122,7 +124,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exceptions',
+            defaultMessage: 'Exception lists',
           }),
         ],
         searchable: true,
@@ -326,6 +328,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: ENDPOINTS,
         order: 9006,
         path: ENDPOINTS_PATH,
+      },
+      {
+        id: SecurityPageName.policies,
+        title: POLICIES,
+        path: POLICIES_PATH,
+        experimentalKey: 'policyListEnabled',
       },
       {
         id: SecurityPageName.trustedApps,

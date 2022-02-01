@@ -297,6 +297,7 @@ export const DashboardListing = ({
         listingLimit,
         tableColumns,
       }}
+      theme={core.theme}
     >
       <DashboardUnsavedListing
         redirectTo={redirectTo}

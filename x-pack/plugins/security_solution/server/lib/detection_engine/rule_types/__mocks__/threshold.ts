@@ -77,6 +77,7 @@ export const mockThresholdResults = {
   },
 };
 
+// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
   _index: 'some-index',
@@ -155,10 +156,6 @@ export const sampleThresholdAlert = {
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
-      status_date: '2020-02-22T16:47:50.047Z',
-      last_success_at: '2020-02-22T16:47:50.047Z',
-      last_success_message: 'succeeded',
       max_signals: 100,
       language: 'kuery',
       rule_id: 'f88a544c-1d4e-4652-ae2a-c953b38da5d0',
