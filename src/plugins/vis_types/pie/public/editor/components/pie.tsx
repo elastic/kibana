@@ -96,6 +96,11 @@ const PieOptions = (props: PieOptionsProps) => {
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
+  const getLegendDisplay = useCallback(
+    (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
+    []
+  );
+
   useEffect(() => {
     setLegendVisibility(legendUiStateValue);
   }, [legendUiStateValue]);
@@ -114,6 +119,21 @@ const PieOptions = (props: PieOptionsProps) => {
       setValue('emptySizeRatio', emptySizeRatio);
     },
     [setValue]
+  );
+
+  const handleLegendDisplayChange = useCallback(
+    (name: keyof PartitionVisParams, show: boolean) => {
+      setLegendVisibility(show);
+
+      const legendDisplay = getLegendDisplay(show);
+      if (legendDisplay === stateParams[name]) {
+        setValue(name, getLegendDisplay(!show));
+      }
+      setValue(name, legendDisplay);
+
+      props.uiState?.set('vis.legendOpen', show);
+    },
+    [getLegendDisplay, props.uiState, setValue, stateParams]
   );
 
   return (
@@ -186,10 +206,7 @@ const PieOptions = (props: PieOptionsProps) => {
               })}
               paramName="legendDisplay"
               value={legendVisibility}
-              setValue={(paramName, value) => {
-                setLegendVisibility(value);
-                setValue(paramName, value ? LegendDisplay.SHOW : LegendDisplay.HIDE);
-              }}
+              setValue={handleLegendDisplayChange}
               data-test-subj="visTypePieAddLegendSwitch"
             />
             <SwitchOption

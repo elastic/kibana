@@ -105,10 +105,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [services.fieldFormats.deserialize, visData, visParams]
   );
 
-  const [showLegend, setShowLegend] = useState<boolean | undefined>(() => {
-    const bwcLegendStateDefault = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
-  });
+  const showLegendDefault = useCallback(() => {
+    const showLegendDef = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+    return props.uiState?.get('vis.legendOpen', showLegendDef) ?? showLegendDef;
+  }, [bucketColumns, props.uiState, visParams.legendDisplay, visType]);
+
+  const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
 
   const showToggleLegendElement = showLegend !== undefined;
 
@@ -123,6 +125,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       setDimensions({ width: parentWidth, height: parentHeight });
     }
   }, [parentRef]);
+
+  useEffect(() => {
+    const legendShow = showLegendDefault();
+    setShowLegend(legendShow);
+    props.uiState?.set('vis.legendOpen', legendShow);
+  }, [showLegendDefault, props.uiState]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -191,20 +199,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       return newValue;
     });
   }, [props.uiState]);
-
-  useEffect(() => {
-    if (props.uiState) {
-      const show = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
-      setShowLegend(show);
-      props.uiState.set('vis.legendOpen', show);
-    }
-  }, [
-    bucketColumns,
-    props.uiState,
-    props.visParams.legendDisplay,
-    visParams.legendDisplay,
-    visType,
-  ]);
 
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number) => {
@@ -377,7 +371,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
             <ChartSplit
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}
-              splitDimension={splitChartDimension}
             />
             <Settings
               debugState={window._echDebugStateFlag ?? false}
@@ -436,7 +429,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 visParams.labels.valuesFormat === ValueFormats.VALUE ||
                 !visParams.labels.values
                   ? undefined
-                  : 'percent'
+                  : ValueFormats.PERCENT
               }
               valueFormatter={(d: number) =>
                 !visParams.labels.show || !visParams.labels.values

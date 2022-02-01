@@ -81,7 +81,6 @@ const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
   withSteps: true,
-  hideConnectorServiceNowSir: false,
 };
 
 const defaultPostPushToService = {
