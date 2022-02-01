@@ -456,6 +456,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           {extensionView && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <extensionView.Component
+                packageInfo={packageInfo}
+                validationResults={validationResults!}
                 newPolicy={packagePolicy}
                 onChange={handleExtensionViewOnChange}
               />

@@ -14,6 +14,7 @@ import type {
   CoreStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { LazyFleetServerPackagePolicyConfigExtension } from './components/fleet_server/lazy_fleet_server_policy_config_editor'
 
 import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 
@@ -46,6 +47,7 @@ import {
   setupRouteService,
   appRoutesService,
   calculateAuthz,
+  FLEET_SERVER_PACKAGE,
 } from '../common';
 import type { CheckPermissionsResponse, PostFleetSetupResponse, FleetAuthz } from '../common';
 
@@ -243,6 +245,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
     );
+
+    //Register Fleet Server integration config
+    registerExtension({
+        package: FLEET_SERVER_PACKAGE,
+        view: 'package-policy-edit',
+        Component: LazyFleetServerPackagePolicyConfigExtension,
+    })
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,

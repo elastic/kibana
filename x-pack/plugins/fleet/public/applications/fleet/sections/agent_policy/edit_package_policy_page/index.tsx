@@ -526,12 +526,16 @@ export const EditPackagePolicyForm = memo<{
               <ExtensionWrapper>
                 {selectedTab > 0 && tabsViews ? (
                   React.createElement(tabsViews[selectedTab - 1].Component, {
+                    validationResults: validationResults!,
+                    packageInfo: packageInfo,
                     policy: originalPackagePolicy,
                     newPolicy: packagePolicy,
                     onChange: handleExtensionViewOnChange,
                   })
                 ) : (
                   <extensionView.Component
+                    validationResults={validationResults!}
+                    packageInfo={packageInfo}
                     policy={originalPackagePolicy}
                     newPolicy={packagePolicy}
                     onChange={handleExtensionViewOnChange}
