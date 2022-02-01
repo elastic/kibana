@@ -39,7 +39,8 @@ export type GetListClientType = (
 export type GetExceptionListClientType = (
   savedObjectsClient: SavedObjectsClientContract,
   user: string,
-  disableServerExtensionPoints?: boolean
+  /** Default is `true` - processing of server extension points are always on by default */
+  enableServerExtensionPoints?: boolean
 ) => ExceptionListClient;
 
 export interface ListPluginSetup {
