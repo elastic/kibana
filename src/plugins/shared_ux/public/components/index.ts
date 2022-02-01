@@ -15,6 +15,8 @@ import { withSuspense } from './utility';
  */
 export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_screen_button'));
 
+export const RedirectAppLinks = React.lazy(() => import('./app_links'));
+
 /**
  * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
  * be used directly by consumers and will load the `LazyExitFullScreenButton` component lazily with
