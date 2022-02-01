@@ -26,12 +26,11 @@ const alwaysImportedTests = [
     '../test/interactive_setup_functional/manual_configuration_without_tls.config.ts'
   ),
   require.resolve('../test/api_integration/config.js'),
-];
-// eslint-disable-next-line no-restricted-syntax
-const onlyNotInCoverageTests = [
   require.resolve('../test/interpreter_functional/config.ts'),
   require.resolve('../test/examples/config.js'),
 ];
+// eslint-disable-next-line no-restricted-syntax
+const onlyNotInCoverageTests = [];
 
 require('../src/setup_node_env');
 require('@kbn/test').runTestsCli([
