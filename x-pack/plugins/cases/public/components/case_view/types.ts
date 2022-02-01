@@ -9,14 +9,14 @@ import { CasesTimelineIntegration } from '../timeline_context';
 import { CasesNavigation } from '../links';
 import { CaseViewRefreshPropInterface, Case } from '../../../common';
 import { UseGetCase } from '../../containers/use_get_case';
-import { FetchAlertDataFunction } from '../types';
+import { UseFetchAlertData } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
   onComponentInitialized?: () => void;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  useFetchAlertData: FetchAlertDataFunction;
+  useFetchAlertData: UseFetchAlertData;
   /**
    * A React `Ref` that Exposes data refresh callbacks.
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale

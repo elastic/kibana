@@ -8,14 +8,13 @@
 import { EuiCommentProps } from '@elastic/eui';
 import { SnakeToCamelCase } from '../../../common/types';
 import { ActionTypes, UserActionWithResponse } from '../../../common/api';
-import { Case, CaseUserActions, Comment } from '../../containers/types';
+import { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { AddCommentRefObject } from '../add_comment';
 import { UserActionMarkdownRefObject } from './markdown_form';
 import { CasesNavigation } from '../links';
 import { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
-import { FetchAlertDataFunction } from '../types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -32,7 +31,7 @@ export interface UserActionTreeProps {
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
-  useFetchAlertData: FetchAlertDataFunction;
+  useFetchAlertData: UseFetchAlertData;
   userCanCrud: boolean;
 }
 
