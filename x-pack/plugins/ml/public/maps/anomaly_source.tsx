@@ -274,7 +274,6 @@ export class AnomalySource implements IVectorSource {
 
   // -----------------
   // API ML probably can ignore
-  // API ML probably can ignore
   getAttributionProvider() {
     return null;
   }
