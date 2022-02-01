@@ -10,29 +10,45 @@ import {
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { TrustedAppValidator } from '../validators';
+import { EventFilterValidator, TrustedAppValidator } from '../validators';
 
+type ValidatorCallback = ExceptionsListPreUpdateItemServerExtension['callback'];
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
-): ExceptionsListPreUpdateItemServerExtension['callback'] => {
-  return async function ({ data, context: { request } }): Promise<UpdateExceptionListItemOptions> {
-    const currentSavedItem = await endpointAppContextService
-      .getExceptionListsClient()
-      .getExceptionListItem({
-        id: data.id,
-        itemId: data.itemId,
-        namespaceType: data.namespaceType,
-      });
+): ValidatorCallback => {
+  return async function ({
+    data,
+    context: { request, exceptionListClient },
+  }): Promise<UpdateExceptionListItemOptions> {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
 
-    // We don't want to `throw` here becuase we don't know for sure that the item is one we care about.
+    const currentSavedItem = await exceptionListClient.getExceptionListItem({
+      id: data.id,
+      itemId: data.itemId,
+      namespaceType: data.namespaceType,
+    });
+
+    // We don't want to `throw` here because we don't know for sure that the item is one we care about.
     // So we just return the data and the Lists plugin will likely error out because it can't find the item
     if (!currentSavedItem) {
       return data;
     }
 
-    // Validate trusted apps
-    if (TrustedAppValidator.isTrustedApp({ listId: currentSavedItem.list_id })) {
+    const listId = currentSavedItem.list_id;
+
+    // Validate Trusted Applications
+    if (TrustedAppValidator.isTrustedApp({ listId })) {
       return new TrustedAppValidator(endpointAppContextService, request).validatePreUpdateItem(
+        data,
+        currentSavedItem
+      );
+    }
+
+    // Validate Event Filters
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      return new EventFilterValidator(endpointAppContextService, request).validatePreUpdateItem(
         data,
         currentSavedItem
       );
