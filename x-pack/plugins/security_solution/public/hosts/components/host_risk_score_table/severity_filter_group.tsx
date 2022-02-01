@@ -56,11 +56,10 @@ export const SeverityFilterGroup: React.FC<{
   );
 
   const items: SeverityItems[] = useMemo(() => {
-    const checked: FilterChecked = 'on';
     return (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
       risk: k,
       count: severityCount[k],
-      checked: severitySelectionRedux.includes(k) ? checked : undefined,
+      checked: severitySelectionRedux.includes(k) ? 'on' : undefined,
     }));
   }, [severityCount, severitySelectionRedux]);
 

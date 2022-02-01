@@ -5,40 +5,15 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes, HostRiskScoreFields } from '../..';
-import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../../../../../../../src/plugins/data/common';
+import { AggregationsTopMetrics } from '@elastic/elasticsearch/lib/api/types';
+import { HostRiskScoreFields, RequestOptionsPaginated } from '../..';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
-import { ESQuery } from '../../../../typed_json';
-import {
-  CursorType,
-  Hit,
-  Hits,
-  Inspect,
-  Maybe,
-  PageInfoPaginated,
-  PaginationInputPaginated,
-  SortField,
-  StringOrNumber,
-  TimerangeInput,
-} from '../../../common';
+import { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
 
-export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
-  defaultIndex: string[];
-  factoryQueryType?: FactoryQueryTypes;
+export interface HostsRiskScoreRequestOptions extends RequestOptionsPaginated<HostRiskScoreFields> {
   hostNames?: string[];
-  timerange?: TimerangeInput;
   onlyLatest?: boolean;
-  pagination?:
-    | PaginationInputPaginated
-    | {
-        cursorStart: number;
-        querySize: number;
-      };
-  sort?: HostRiskScoreSortField;
-  filterQuery?: ESQuery | string | undefined;
 }
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
@@ -72,14 +47,11 @@ export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): s
 
 export type HostRiskScoreSortField = SortField<HostRiskScoreFields>;
 
-export interface HostRiskHit extends Hit {
-  _source: HostsRiskScore;
-  sort?: StringOrNumber[];
-}
-type HostRiskHits = Hits<number, HostRiskHit>;
 export interface HostRiskScoreBuckets {
   key: string;
-  latest_risk_hit: HostRiskHits;
+  latest_risk_hit: {
+    top: AggregationsTopMetrics[];
+  };
 }
 
 export interface HostRiskScoreEdges {

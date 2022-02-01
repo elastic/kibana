@@ -10,9 +10,18 @@ import { HostRiskScoreBuckets, HostRiskScoreEdges } from '../../../../../../comm
 
 export const formatHostRisksEdges = (buckets: HostRiskScoreBuckets[]): HostRiskScoreEdges[] =>
   buckets.map((bucket: HostRiskScoreBuckets) => {
+    const metrics = get('latest_risk_hit.top[0].metrics', bucket);
     const edge: HostRiskScoreEdges = {
       node: {
-        ...get('latest_risk_hit.hits.hits[0]._source', bucket),
+        '@timestamp': get('@timestamp', metrics),
+        host: {
+          name: get('host.name', metrics),
+        },
+        risk_stats: {
+          risk_score: get('risk_stats.risk_score', metrics),
+          rule_risks: [],
+        },
+        risk: get('risk.keyword', metrics),
       },
       cursor: {
         value: bucket.key,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Direction,
   HostsRiskScoreRequestOptions,
@@ -22,10 +21,7 @@ export const buildHostsRiskScoreQuery = ({
   hostNames,
   filterQuery,
   defaultIndex,
-  pagination: { querySize, cursorStart } = {
-    querySize: QUERY_SIZE,
-    cursorStart: 0,
-  },
+  pagination: { querySize, cursorStart },
   sort,
   onlyLatest = true,
 }: HostsRiskScoreRequestOptions) => {
@@ -46,8 +42,7 @@ export const buildHostsRiskScoreQuery = ({
   if (hostNames) {
     filter.push({ terms: { 'host.name': hostNames } });
   }
-  const sortOrder = getQueryOrder(sort);
-  const sortAggs = { field: Object.keys(sortOrder)[0], direction: Object.values(sortOrder)[0] };
+  const sortOrder = getQuerySort(sort);
   const dslQuery = {
     index: defaultIndex,
     allow_no_indices: false,
@@ -57,33 +52,25 @@ export const buildHostsRiskScoreQuery = ({
     from: cursorStart,
     body: {
       query: { bool: { filter } },
-      ...(!onlyLatest ? { sort: sortOrder } : {}),
+      ...(!onlyLatest ? { sort: [{ [sortOrder.field]: sortOrder.direction }] } : {}),
       ...(onlyLatest
         ? {
             aggregations: {
               hosts: {
                 terms: {
                   field: 'host.name',
-                  order: {
-                    risk_score: sortAggs.direction,
-                  },
+                  order: { [`latest_risk_hit[${sortOrder.field}]`]: sortOrder.direction },
                 },
                 aggs: {
                   latest_risk_hit: {
-                    top_hits: {
-                      size: 1,
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
+                    top_metrics: {
+                      metrics: [
+                        { field: 'host.name' },
+                        { field: 'risk_stats.risk_score' },
+                        { field: '@timestamp' },
+                        { field: 'risk.keyword' },
                       ],
-                    },
-                  },
-                  risk_score: {
-                    max: {
-                      field: sortAggs.field, // sort field
+                      sort: { '@timestamp': 'desc' },
                     },
                   },
                 },
@@ -99,18 +86,20 @@ export const buildHostsRiskScoreQuery = ({
   return dslQuery;
 };
 
-const getQueryOrder = (sort?: HostRiskScoreSortField): Sort => {
+const getQuerySort = (sort?: HostRiskScoreSortField): HostRiskScoreSortField => {
   if (!sort) {
-    return [
-      {
-        '@timestamp': Direction.desc,
-      },
-    ];
+    return {
+      field: HostRiskScoreFields.timestamp,
+      direction: Direction.desc,
+    };
   }
 
   if (sort.field === HostRiskScoreFields.risk) {
-    return [{ [HostRiskScoreFields.riskScore]: sort.direction }];
+    return {
+      field: HostRiskScoreFields.riskScore,
+      direction: sort.direction,
+    };
   }
 
-  return [{ [sort.field]: sort.direction }];
+  return sort;
 };

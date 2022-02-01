@@ -42,7 +42,7 @@ export interface HostRiskScoreState {
   inspect: InspectResponse;
   loadPage: LoadPage;
   isInspected: boolean;
-  isModuleEnabled: boolean | undefined;
+  isModuleEnabled?: boolean;
   refetch: inputsModel.Refetch;
   totalCount: number;
   pageInfo?: PageInfoPaginated;
@@ -119,10 +119,8 @@ export const useHostRiskScore = ({
     },
     isInspected: false,
     loadPage: wrappedLoadMore,
-    isModuleEnabled: undefined,
     refetch: refetch.current,
     totalCount: 0,
-    isModuleEnabled: undefined,
   });
 
   const riskScoreSearch = useCallback(
@@ -144,7 +142,6 @@ export const useHostRiskScore = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 const hits = response?.rawResponse?.hits?.hits;
-                debugger;
                 setHostRiskScoreResponse((prevResponse) => ({
                   ...prevResponse,
                   data:

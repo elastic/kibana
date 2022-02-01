@@ -14,6 +14,7 @@ export const buildHostsKpiRiskyHostsQuery = ({
   timerange,
 }: HostsKpiRiskyHostsRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
+  console.log('KPI timerange', timerange);
   if (timerange) {
     filter.push({
       range: {
@@ -53,6 +54,7 @@ export const buildHostsKpiRiskyHostsQuery = ({
       size: 0,
     },
   };
+  console.log('dslQuerydslQuerydslQuery', JSON.stringify(dslQuery.body));
 
   return dslQuery;
 };

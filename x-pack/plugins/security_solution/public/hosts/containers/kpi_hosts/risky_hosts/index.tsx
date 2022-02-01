@@ -111,7 +111,7 @@ export const useRiskScoreKpi = ({
         data,
         timerange: { to, from, interval: '' },
         filterQuery,
-        defaultIndex: [getHostRiskIndex(spaceId)],
+        defaultIndex: [getHostRiskIndex(spaceId, false)],
       });
     }
   }, [data, spaceId, start, filterQuery, to, from, skip, riskyHostsFeatureEnabled]);

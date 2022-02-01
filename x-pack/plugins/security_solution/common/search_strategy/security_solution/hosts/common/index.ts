@@ -133,8 +133,6 @@ export const enum HostRiskScoreFields {
   hostName = 'host.name',
   riskScore = 'risk_stats.risk_score',
   risk = 'risk',
-  // TODO: Steph/Host Risk
-  // ruleRisks = 'rule_risks',
 }
 
 export interface HostRiskScoreItem {
@@ -142,6 +140,4 @@ export interface HostRiskScoreItem {
   [HostRiskScoreFields.hostName]: Maybe<string>;
   [HostRiskScoreFields.risk]: Maybe<HostRiskSeverity>;
   [HostRiskScoreFields.riskScore]: Maybe<number>;
-  // TODO: Steph/Host Risk
-  // [HostRiskScoreFields.ruleRisks]: Maybe<RuleRisk[]>;
 }

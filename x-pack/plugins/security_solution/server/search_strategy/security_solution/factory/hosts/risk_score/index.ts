@@ -51,7 +51,6 @@ const formatAggs = (
   response: IEsSearchResponse<unknown>
 ) => {
   const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-  console.log('options.pagination~~~', options.pagination);
   const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
   const buckets: HostRiskScoreBuckets[] = getOr(
     [],

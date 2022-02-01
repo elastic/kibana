@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { getOr, noop } from 'lodash/fp';
+import React from 'react';
+import { getOr } from 'lodash/fp';
 import { useHostRiskScore } from '../../containers/host_risk_score';
 import { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
