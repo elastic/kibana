@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124104
-  describe.skip('console app', function describeIndexTests() {
+  describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -105,6 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.pressEnter();
       await PageObjects.console.promptAutocomplete();
+      await retry.waitFor('autocomplete to be visible', () =>
+        PageObjects.console.hasAutocompleter()
+      );
       await PageObjects.console.pressEnter();
 
       const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
