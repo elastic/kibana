@@ -23126,7 +23126,6 @@
     "xpack.securitySolution.detectionEngine.rules.allExceptionLists.search.placeholder": "搜索例外列表",
     "xpack.securitySolution.detectionEngine.rules.allExceptions.filters.noListsBody": "我们找不到任何例外列表。",
     "xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle": "例外",
-    "xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitleDescription": "异常自动分组为异常列表。",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription": "无法执行批量操作",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteeRuleDescription": "删除规则",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription": "复制规则",
