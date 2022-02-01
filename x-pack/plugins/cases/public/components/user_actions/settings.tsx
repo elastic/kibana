@@ -13,14 +13,11 @@ import { createCommonUpdateUserActionBuilder } from './common';
 import { DISABLED_SETTING, ENABLED_SETTING, SYNC_ALERTS_LC } from './translations';
 
 function getSettingsLabel(userAction: UserActionResponse<SettingsUserAction>): ReactNode {
-  if (userAction?.payload?.settings?.syncAlerts !== undefined) {
-    if (userAction.payload.settings.syncAlerts) {
-      return `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
-    } else {
-      return `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`;
-    }
+  if (userAction.payload.settings.syncAlerts) {
+    return `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
+  } else {
+    return `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`;
   }
-  return '';
 }
 
 export const createSettingsUserActionBuilder: UserActionBuilder = ({
@@ -28,13 +25,19 @@ export const createSettingsUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const commonBuilder = createCommonUpdateUserActionBuilder({
-      userAction,
-      handleOutlineComment,
-      label: getSettingsLabel(userAction as UserActionResponse<SettingsUserAction>),
-      icon: 'gear',
-    });
+    const action = userAction as UserActionResponse<SettingsUserAction>;
+    if (action?.payload?.settings?.syncAlerts !== undefined) {
+      const commonBuilder = createCommonUpdateUserActionBuilder({
+        userAction,
+        handleOutlineComment,
+        label: getSettingsLabel(action),
+        icon: 'gear',
+      });
 
-    return commonBuilder.build();
+      return commonBuilder.build();
+    }
+
+    // if new settings are introduced. they won't be rendered
+    return [];
   },
 });
