@@ -10,6 +10,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import type { CloudStart } from '../../cloud/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { Plugin } from '../../../../src/core/public';
 
 import { setStartServices } from './kibana_services';
@@ -32,6 +33,7 @@ export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
+  discover: DiscoverSetup;
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
@@ -40,6 +42,7 @@ export interface DataVisualizerStartDependencies {
   embeddable: EmbeddableStart;
   security?: SecurityPluginSetup;
   share: SharePluginStart;
+  discover: DiscoverStart;
   lens?: LensPublicStart;
   charts: ChartsPluginStart;
   dataViewFieldEditor?: IndexPatternFieldEditorStart;

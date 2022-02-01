@@ -9,10 +9,6 @@ import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../src/plugins/discover/public';
 import { TimeRange, RefreshInterval } from '../../../../../../../../src/plugins/data/public';
 import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 import type { FileUploadPluginStart } from '../../../../../../file_upload/public';
@@ -61,9 +57,7 @@ export const ResultsLinks: FC<Props> = ({
     services: {
       fileUpload,
       application: { getUrlForApp, capabilities },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
+      discover,
     },
   } = useDataVisualizerKibana();
 
@@ -83,32 +77,14 @@ export const ResultsLinks: FC<Props> = ({
 
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
-      if (!isDiscoverAvailable) {
-        return;
-      }
-
-      const state: DiscoverUrlGeneratorState = {
+      if (!isDiscoverAvailable) return;
+      if (!discover.locator) return;
+      const discoverUrl = await discover.locator.getUrl({
         indexPatternId,
-      };
-
-      if (globalState?.time) {
-        state.timeRange = globalState.time;
-      }
-
-      let discoverUrlGenerator;
-      try {
-        discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-      } catch (error) {
-        // ignore error thrown when url generator is not available
-      }
-
-      if (!discoverUrlGenerator) {
-        return;
-      }
-      const discoverUrl = await discoverUrlGenerator.createUrl(state);
-      if (!unmounted) {
-        setDiscoverLink(discoverUrl);
-      }
+        timeRange: globalState?.time ? globalState.time : undefined,
+      });
+      if (unmounted) return;
+      setDiscoverLink(discoverUrl);
     };
 
     getDiscoverUrl();
@@ -148,7 +124,7 @@ export const ResultsLinks: FC<Props> = ({
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPatternId, getUrlGenerator, JSON.stringify(globalState)]);
+  }, [indexPatternId, discover, JSON.stringify(globalState)]);
 
   useEffect(() => {
     updateTimeValues();
