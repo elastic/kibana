@@ -50,6 +50,7 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   typeof ExceptionItem
 >;
 
+/* eslint-disable complexity */
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
   const privileges = useUserPrivileges().endpointPrivileges;
@@ -76,7 +77,7 @@ export const HostIsolationExceptionsList = () => {
 
   const includedPoliciesParam = location.included_policies;
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+  const { isLoading, isRefetching, data, error, refetch } = useFetchHostIsolationExceptionsList({
     filter: location.filter,
     page: location.page_index,
     perPage: location.page_size,
@@ -198,7 +199,9 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
-  if ((isLoading || isLoadingAll) && !hasDataToShow) {
+  const isSearchLoading = isLoading || isRefetching;
+
+  if ((isSearchLoading || isLoadingAll) && !hasDataToShow) {
     return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
   }
 
@@ -278,7 +281,7 @@ export const HostIsolationExceptionsList = () => {
         itemComponentProps={handleItemComponentProps}
         onChange={handlePaginatedContentChange}
         error={error?.message}
-        loading={isLoading}
+        loading={isSearchLoading}
         pagination={pagination}
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"

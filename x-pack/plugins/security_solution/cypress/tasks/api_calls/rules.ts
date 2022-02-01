@@ -79,7 +79,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       threat_language: 'kuery',
       threat_filters: [],
       threat_index: rule.indicatorIndexPattern,
-      threat_indicator_path: '',
+      threat_indicator_path: rule.threatIndicatorPath,
       from: 'now-50000h',
       index: rule.index,
       query: rule.customQuery || '*:*',
