@@ -284,6 +284,9 @@
 #CC# /src/plugins/home/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
+# Kibana Docs
+/packages/kbn-doc-links/ @elastic/kibana-docs
+
 # Kibana Telemetry
 /packages/kbn-analytics/ @elastic/kibana-core
 /packages/kbn-telemetry-tools/ @elastic/kibana-core

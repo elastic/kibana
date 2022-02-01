@@ -9,23 +9,23 @@ import { ExceptionsListPreImportServerExtension } from '../../../../../lists/ser
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
-export const getExceptionsPreImportHandler =
-  (): ExceptionsListPreImportServerExtension['callback'] => {
-    return async ({ data }) => {
-      const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
-        if ('list_id' in item) {
-          return ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(item.list_id);
-        }
-
-        return false;
-      });
-
-      if (hasEndpointArtifactListOrListItems) {
-        throw new EndpointArtifactExceptionValidationError(
-          'Import is not supported for Endpoint artifact exceptions'
-        );
+type ValidatorCallback = ExceptionsListPreImportServerExtension['callback'];
+export const getExceptionsPreImportHandler = (): ValidatorCallback => {
+  return async ({ data }) => {
+    const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
+      if ('list_id' in item) {
+        return ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(item.list_id);
       }
 
-      return data;
-    };
+      return false;
+    });
+
+    if (hasEndpointArtifactListOrListItems) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Import is not supported for Endpoint artifact exceptions'
+      );
+    }
+
+    return data;
   };
+};

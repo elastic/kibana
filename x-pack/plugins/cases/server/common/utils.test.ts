@@ -822,7 +822,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        makeLensEmbeddableFactory({}),
+        makeLensEmbeddableFactory(() => ({})),
         commentString
       );
 
@@ -921,7 +921,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const updatedReferences = getOrUpdateLensReferences(
-        makeLensEmbeddableFactory({}),
+        makeLensEmbeddableFactory(() => ({})),
         newCommentString,
         {
           references: currentCommentReferences,
