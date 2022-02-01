@@ -10,9 +10,8 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { Filter } from '@kbn/es-query';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -339,11 +338,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
     });
     if (topHitsSplitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
-        topHitsSplitField,
-        '',
-        indexPattern
-      );
+      const entityIsNotEmptyFilter = buildPhraseFilter(topHitsSplitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       searchSource.setField('filter', [
         ...(searchSource.getField('filter') as Filter[]),

@@ -6,14 +6,10 @@
  */
 
 import _ from 'lodash';
-import { Filter } from '@kbn/es-query';
+import { type Filter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
-import {
-  esFilters,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../../../../src/plugins/data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../src/plugins/data/public';
 
 export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
@@ -98,13 +94,13 @@ export class ESTooltipProperty implements ITooltipProperty {
 
     const rawValue = this.getRawValue();
     if (rawValue == null) {
-      const existsFilter = esFilters.buildExistsFilter(indexPatternField, this._indexPattern);
+      const existsFilter = buildExistsFilter(indexPatternField, this._indexPattern);
       existsFilter.meta.negate = true;
       return [existsFilter];
     } else {
       const values = Array.isArray(rawValue) ? (rawValue as string[]) : [rawValue as string];
       return values.map((value) => {
-        return esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern);
+        return buildPhraseFilter(indexPatternField, value, this._indexPattern);
       });
     }
   }
