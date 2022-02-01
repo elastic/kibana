@@ -13,14 +13,14 @@ coming[8.0.0]
 // tag::notable-highlights[]
 
 [float]
-=== Security on-by-default
+=== Security features enabled by default
 
 Authentication, authorization, and multi-tenancy
-with {kib} Spaces are enabled by default, with almost no configuration effort.
+with {kib} Spaces are on-by-default, with almost no configuration effort.
 When you run {kib} for the first time, you'll be presented with a new interactive
-UI that will help you set up {kib} and connect it to a secured {es} cluster.
+UI that will help you set up {kib} and connect it securely to {es}.
 Simply paste the enrollment token that you received when you ran
-{es}, and {kib} will set up all {stack} security features
+{es}, and {kib} will set up all the previous security features
 and connect {es} over TLS.
 
 [role="screenshot"]
@@ -37,7 +37,6 @@ exactly as index patterns did in previous releases.
 === Maps updates vector tiles & basemaps
 
 Elastic is offering full vector tile support, generally available, in {kib} *Maps*.
-Enjoy faster performance and buttery smooth navigation of your data at scale.
 Enjoy faster performance and smooth navigation of your data at scale.
 
 [role="screenshot"]
