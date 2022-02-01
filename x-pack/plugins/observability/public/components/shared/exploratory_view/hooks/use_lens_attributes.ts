@@ -57,7 +57,7 @@ export function getLayerConfigs(
     ) {
       const seriesConfig = getDefaultConfigs({
         reportType,
-        indexPattern,
+        dataView: indexPattern,
         dataType: series.dataType,
         reportConfigMap,
       });

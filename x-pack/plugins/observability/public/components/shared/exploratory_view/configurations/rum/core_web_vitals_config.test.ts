@@ -18,7 +18,7 @@ describe('Core web vital config test', function () {
   const seriesConfig = getDefaultConfigs({
     reportType: 'core-web-vitals',
     dataType: 'ux',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     reportConfigMap: obsvReportConfigMap,
   });
 

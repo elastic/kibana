@@ -18,7 +18,7 @@ describe('ReportMetricOptions', function () {
   const dataViewSeries = getDefaultConfigs({
     dataType: 'ux',
     reportType: 'kpi-over-time',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     reportConfigMap: obsvReportConfigMap,
   });
 

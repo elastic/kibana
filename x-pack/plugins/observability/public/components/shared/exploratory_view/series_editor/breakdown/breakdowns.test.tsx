@@ -17,7 +17,7 @@ import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 describe('Breakdowns', function () {
   const dataViewSeries = getDefaultConfigs({
     reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     dataType: 'ux',
     reportConfigMap: obsvReportConfigMap,
   });
@@ -62,7 +62,7 @@ describe('Breakdowns', function () {
   it('does not show percentile breakdown for records metrics', function () {
     const kpiConfig = getDefaultConfigs({
       reportType: 'kpi-over-time',
-      indexPattern: mockIndexPattern,
+      dataView: mockIndexPattern,
       dataType: 'ux',
       reportConfigMap: obsvReportConfigMap,
     });
