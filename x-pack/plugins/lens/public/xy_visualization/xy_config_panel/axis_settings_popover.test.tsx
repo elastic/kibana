@@ -46,18 +46,6 @@ describe('Axes Settings', () => {
     expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
   });
 
-  it('should show the axes title on the corresponding input text', () => {
-    const component = shallow(<AxisSettingsPopover {...props} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('value')).toBe(
-      'My custom X axis title'
-    );
-  });
-
-  it('should disable the input text if the switch is off', () => {
-    const component = shallow(<AxisSettingsPopover {...props} isAxisTitleVisible={false} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('disabled')).toBe(true);
-  });
-
   it('has the tickLabels switch on by default', () => {
     const component = shallow(<AxisSettingsPopover {...props} />);
     expect(component.find('[data-test-subj="lnsshowxAxisTickLabels"]').prop('checked')).toBe(true);

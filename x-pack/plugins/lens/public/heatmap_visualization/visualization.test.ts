@@ -41,6 +41,8 @@ function exampleState(): HeatmapVisualizationState {
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
     },
     shape: CHART_SHAPES.HEATMAP,
   };
@@ -74,6 +76,8 @@ describe('heatmap', () => {
           isCellLabelVisible: false,
           isYAxisLabelVisible: true,
           isXAxisLabelVisible: true,
+          isYAxisTitleVisible: true,
+          isXAxisTitleVisible: true,
         },
       });
     });
@@ -430,12 +434,16 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
+                        xTitle: [],
+                        yTitle: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
+                        isYAxisTitleVisible: [true],
                         // X-axis
                         isXAxisLabelVisible: [true],
+                        isXAxisTitleVisible: [true],
                       },
                     },
                   ],
@@ -547,8 +555,12 @@ describe('heatmap', () => {
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [false],
+                        isYAxisTitleVisible: [true],
                         // X-axis
                         isXAxisLabelVisible: [false],
+                        isXAxisTitleVisible: [true],
+                        xTitle: [''],
+                        yTitle: [''],
                       },
                     },
                   ],

@@ -439,6 +439,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       },
     };
 
+    const xAxisTitle = args.gridConfig.xTitle ?? xAxisColumn?.name;
+    const yAxisTitle = args.gridConfig.yTitle ?? yAxisColumn?.name;
+
     return (
       <>
         {showLegend !== undefined && (
@@ -487,6 +490,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
             xAxisLabelName={xAxisColumn?.name}
             yAxisLabelName={yAxisColumn?.name}
+            xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
+            yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
             xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
             yAxisLabelFormatter={
               yAxisColumn
