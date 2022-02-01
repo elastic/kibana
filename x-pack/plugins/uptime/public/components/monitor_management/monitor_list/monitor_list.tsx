@@ -18,7 +18,6 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import {
   CommonFields,
   ConfigKey,
-  DataStream,
   FetchMonitorManagementListQueryArgs,
   ICMPSimpleFields,
   MonitorFields,
@@ -29,7 +28,6 @@ import {
 import { UptimeSettingsContext } from '../../../contexts';
 import { useBreakpoints } from '../../../hooks';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { DataStream, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
@@ -172,7 +170,12 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: SyntheticsMonitorWithId) => (
-        <MonitorEnabled id={monitor.id} monitor={monitor} isDisabled={!canEdit} onUpdate={onUpdate} />
+        <MonitorEnabled
+          id={monitor.id}
+          monitor={monitor}
+          isDisabled={!canEdit}
+          onUpdate={onUpdate}
+        />
       ),
     },
     {
