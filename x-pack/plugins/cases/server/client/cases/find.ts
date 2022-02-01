@@ -15,7 +15,6 @@ import {
   CasesFindRequest,
   CasesFindRequestRt,
   throwErrors,
-  caseStatuses,
   CasesFindResponseRt,
   excess,
 } from '../../../common/api';
@@ -36,7 +35,7 @@ export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesFindResponse> => {
-  const { unsecuredSavedObjectsClient, caseService, authorization, logger } = clientArgs;
+  const { caseService, authorization, logger } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -55,35 +54,28 @@ export const find = async (
       owner: queryParams.owner,
     };
 
-    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
-    const cases = await caseService.findCasesGroupedByID({
-      unsecuredSavedObjectsClient,
-      caseOptions: {
-        ...queryParams,
-        ...caseQueries,
-        searchFields:
-          queryParams.searchFields != null
-            ? Array.isArray(queryParams.searchFields)
-              ? queryParams.searchFields
-              : [queryParams.searchFields]
-            : queryParams.searchFields,
-        fields: includeFieldsRequiredForAuthentication(queryParams.fields),
-      },
+    const statusStatsOptions = constructQueryOptions({
+      ...queryArgs,
+      status: undefined,
+      authorizationFilter,
     });
+    const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
-    ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
-
-    // casesStatuses are bounded by us. No need to limit concurrent calls.
-    const [openCases, inProgressCases, closedCases] = await Promise.all([
-      ...caseStatuses.map((status) => {
-        const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
-        return caseService.findCaseStatusStats({
-          unsecuredSavedObjectsClient,
-          caseOptions: statusQuery,
-          ensureSavedObjectsAreAuthorized,
-        });
+    const [cases, statusStats] = await Promise.all([
+      caseService.findCasesGroupedByID({
+        caseOptions: {
+          ...queryParams,
+          ...caseQueryOptions,
+          searchFields: asArray(queryParams.searchFields),
+          fields: includeFieldsRequiredForAuthentication(queryParams.fields),
+        },
+      }),
+      caseService.getCaseStatusStats({
+        searchOptions: statusStatsOptions,
       }),
     ]);
+
+    ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
     return CasesFindResponseRt.encode(
       transformCases({
@@ -91,9 +83,9 @@ export const find = async (
         page: cases.page,
         perPage: cases.perPage,
         total: cases.total,
-        countOpenCases: openCases,
-        countInProgressCases: inProgressCases,
-        countClosedCases: closedCases,
+        countOpenCases: statusStats.open,
+        countInProgressCases: statusStats['in-progress'],
+        countClosedCases: statusStats.closed,
       })
     );
   } catch (error) {
@@ -103,4 +95,12 @@ export const find = async (
       logger,
     });
   }
+};
+
+const asArray = <T>(field?: T | T[] | null): T[] | undefined => {
+  if (field === undefined || field === null) {
+    return;
+  }
+
+  return Array.isArray(field) ? field : [field];
 };

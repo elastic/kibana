@@ -15,7 +15,6 @@ import {
   CasesStatusRequest,
   CasesStatusResponse,
   CasesStatusResponseRt,
-  caseStatuses,
   throwErrors,
   excess,
   CasesStatusRequestRt,
@@ -50,7 +49,7 @@ async function getStatusTotalsByType(
   params: CasesStatusRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesStatusResponse> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const { caseService, logger, authorization } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -58,29 +57,23 @@ async function getStatusTotalsByType(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getCaseStatuses);
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getCaseStatuses
+    );
 
-    // casesStatuses are bounded by us. No need to limit concurrent calls.
-    const [openCases, inProgressCases, closedCases] = await Promise.all([
-      ...caseStatuses.map((status) => {
-        const statusQuery = constructQueryOptions({
-          owner: queryParams.owner,
-          status,
-          authorizationFilter,
-        });
-        return caseService.findCaseStatusStats({
-          unsecuredSavedObjectsClient,
-          caseOptions: statusQuery,
-          ensureSavedObjectsAreAuthorized,
-        });
-      }),
-    ]);
+    const options = constructQueryOptions({
+      owner: queryParams.owner,
+      authorizationFilter,
+    });
+
+    const statusStats = await caseService.getCaseStatusStats({
+      searchOptions: options,
+    });
 
     return CasesStatusResponseRt.encode({
-      count_open_cases: openCases,
-      count_in_progress_cases: inProgressCases,
-      count_closed_cases: closedCases,
+      count_open_cases: statusStats.open,
+      count_in_progress_cases: statusStats['in-progress'],
+      count_closed_cases: statusStats.closed,
     });
   } catch (error) {
     throw createCaseError({ message: `Failed to get status stats: ${error}`, error, logger });

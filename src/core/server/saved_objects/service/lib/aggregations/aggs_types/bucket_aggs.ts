@@ -44,9 +44,24 @@ import { sortOrderSchema } from './common_schemas';
  * - variable_width_histogram
  */
 
+// TODO: this needs to be recursively built somehow
+// note: node_modules/@elastic/elasticsearch/lib/api/typesWithBodyKey.d.ts
+const termSchema = s.object({
+  term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
+});
+
+// TODO: this needs to be recursively built somehow
+// note: node_modules/@elastic/elasticsearch/lib/api/typesWithBodyKey.d.ts
+const boolSchema = s.object({
+  bool: s.object({
+    must_not: s.oneOf([termSchema]),
+  }),
+});
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
-  filter: s.object({
-    term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
+  filter: termSchema,
+  filters: s.object({
+    filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),
   histogram: s.object({
     field: s.maybe(s.string()),

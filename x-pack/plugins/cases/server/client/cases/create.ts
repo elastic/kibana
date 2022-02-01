@@ -68,7 +68,6 @@ export const create = async (
     });
 
     const newCase = await caseService.postNewCase({
-      unsecuredSavedObjectsClient,
       attributes: transformNewCase({
         user,
         newCase: query,
