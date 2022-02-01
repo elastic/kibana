@@ -52,10 +52,10 @@ export const BundleFleetPackages: Task = {
             destination,
             shaChecksum: fleetPackage.checksum,
             shaAlgorithm: 'sha512',
-            maxAttempts: 3,
+            maxAttempts: 1,
           });
         } catch (error) {
-          log.warning(`Failed to download bundled package archive ${archivePath} due to error:`);
+          log.warning(`Failed to download bundled package archive ${archivePath}`);
           log.warning(error);
         }
       })
