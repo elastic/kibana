@@ -52,6 +52,25 @@ describe('SourceLogic', () => {
     meta,
   };
 
+  const setExpectedState = ({ setContentSource = false, setSearchResults = false } = {}) => {
+    const contentSourceState = {
+      contentSource,
+      dataLoading: false,
+    };
+
+    const searchResultState = {
+      contentItems,
+      contentMeta: meta,
+      sectionLoading: false,
+    };
+
+    return {
+      ...defaultValues,
+      ...(setContentSource ? contentSourceState : {}),
+      ...(setSearchResults ? searchResultState : {}),
+    };
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mount();
@@ -65,28 +84,43 @@ describe('SourceLogic', () => {
     it('setContentSource', () => {
       SourceLogic.actions.setContentSource(contentSource);
 
-      expect(SourceLogic.values.contentSource).toEqual(contentSource);
-      expect(SourceLogic.values.dataLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...defaultValues,
+        contentSource,
+        dataLoading: false,
+      });
     });
 
     it('onUpdateSourceName', () => {
       const NAME = 'foo';
       SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
+      const EXPECTED_STATE_BASE = setExpectedState({ setContentSource: true });
 
-      expect(SourceLogic.values.contentSource).toEqual({
-        ...contentSource,
-        name: NAME,
+      expect(SourceLogic.values).toEqual({
+        ...EXPECTED_STATE_BASE,
+        contentSource: {
+          ...contentSource,
+          name: NAME,
+        },
       });
+      // expect(SourceLogic.values.contentSource).toEqual({
+      //   ...contentSource,
+      //   name: NAME,
+      // });
       expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
+      const EXPECTED_STATE_BASE = setExpectedState();
 
-      expect(SourceLogic.values.contentItems).toEqual(contentItems);
-      expect(SourceLogic.values.contentMeta).toEqual(meta);
-      expect(SourceLogic.values.sectionLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...EXPECTED_STATE_BASE,
+        contentItems,
+        contentMeta: meta,
+        sectionLoading: false,
+      });
     });
 
     it('setContentFilterValue', () => {
@@ -95,14 +129,22 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
-      expect(SourceLogic.values.contentMeta).toEqual({
-        ...meta,
-        page: {
-          ...meta.page,
-          current: DEFAULT_META.page.current,
-        },
+      const EXPECTED_STATE_BASE = setExpectedState({
+        setSearchResults: true,
+        setContentSource: true,
       });
-      expect(SourceLogic.values.contentFilterValue).toEqual(VALUE);
+
+      expect(SourceLogic.values).toEqual({
+        ...EXPECTED_STATE_BASE,
+        contentMeta: {
+          ...meta,
+          page: {
+            ...meta.page,
+            current: DEFAULT_META.page.current,
+          },
+        },
+        contentFilterValue: VALUE,
+      });
     });
 
     it('setActivePage', () => {
@@ -110,11 +152,16 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
       SourceLogic.actions.setActivePage(PAGE);
 
-      expect(SourceLogic.values.contentMeta).toEqual({
-        ...meta,
-        page: {
-          ...meta.page,
-          current: PAGE,
+      const EXPECTED_STATE_BASE = setExpectedState({ setSearchResults: true });
+
+      expect(SourceLogic.values).toEqual({
+        ...EXPECTED_STATE_BASE,
+        contentMeta: {
+          ...meta,
+          page: {
+            ...meta.page,
+            current: PAGE,
+          },
         },
       });
     });
@@ -123,14 +170,22 @@ describe('SourceLogic', () => {
       // Set button state to loading
       SourceLogic.actions.removeContentSource(contentSource.id);
       SourceLogic.actions.setButtonNotLoading();
+      const EXPECTED_STATE_BASE = setExpectedState();
 
-      expect(SourceLogic.values.buttonLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...EXPECTED_STATE_BASE,
+        buttonLoading: false,
+      });
     });
 
     it('showDiagnosticDownloadButton', () => {
       SourceLogic.actions.showDiagnosticDownloadButton();
+      const EXPECTED_STATE_BASE = setExpectedState({});
 
-      expect(SourceLogic.values.diagnosticDownloadButtonVisible).toEqual(true);
+      expect(SourceLogic.values).toEqual({
+        ...EXPECTED_STATE_BASE,
+        diagnosticDownloadButtonVisible: true,
+      });
     });
   });
 
