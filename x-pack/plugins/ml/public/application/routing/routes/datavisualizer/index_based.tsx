@@ -28,7 +28,7 @@ export const indexBasedRouteFactory = (
   id: 'data_view_datavisualizer',
   path: '/jobs/new_job/datavisualizer',
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
-    defaultMessage: 'Data View Data Visualizer',
+    defaultMessage: 'Index Data Visualizer',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
