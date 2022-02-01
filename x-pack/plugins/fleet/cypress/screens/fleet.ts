@@ -7,5 +7,7 @@
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
 
+export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
 export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
+export const SETTINGS_TAB = 'fleet-settings-tab';

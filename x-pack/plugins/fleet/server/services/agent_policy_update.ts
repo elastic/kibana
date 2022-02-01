@@ -22,12 +22,13 @@ export async function agentPolicyUpdateEventHandler(
     await generateEnrollmentAPIKey(soRepo, esClient, {
       name: 'Default',
       agentPolicyId,
+      forceRecreate: true,
     });
-    await agentPolicyService.createFleetServerPolicy(soRepo, agentPolicyId);
+    await agentPolicyService.deployPolicy(soRepo, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetServerPolicy(soRepo, agentPolicyId);
+    await agentPolicyService.deployPolicy(soRepo, agentPolicyId);
   }
 
   if (action === 'deleted') {

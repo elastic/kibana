@@ -41,6 +41,12 @@ import {
   DeleteActionName,
   DeleteActionModal,
 } from '../action_delete';
+import {
+  isResetActionDisabled,
+  useResetAction,
+  ResetActionName,
+  ResetActionModal,
+} from '../action_reset';
 import { useStartAction, StartActionName, StartActionModal } from '../action_start';
 import { StopActionName, useStopAction } from '../action_stop';
 
@@ -92,6 +98,7 @@ export const TransformList: FC<TransformListProps> = ({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
+  const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -196,6 +203,19 @@ export const TransformList: FC<TransformListProps> = ({
         <StopActionName items={transformSelection} />
       </EuiButtonEmpty>
     </div>,
+    <div key="resetAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty
+        onClick={() => {
+          bulkResetAction.openModal(transformSelection);
+        }}
+      >
+        <ResetActionName
+          canResetTransform={capabilities.canResetTransform}
+          disabled={isResetActionDisabled(transformSelection, false)}
+          isBulkAction={true}
+        />
+      </EuiButtonEmpty>
+    </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
       <EuiButtonEmpty onClick={() => bulkDeleteAction.openModal(transformSelection)}>
         <DeleteActionName
@@ -283,6 +303,7 @@ export const TransformList: FC<TransformListProps> = ({
       {/* Bulk Action Modals */}
       {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
       {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
+      {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
       {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
 
       {/* Single Action Modals */}
