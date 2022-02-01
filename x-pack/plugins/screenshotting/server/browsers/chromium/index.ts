@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export const getChromiumDisconnectedError = () =>
-  new Error(
-    i18n.translate('xpack.screenshotting.screencapture.browserWasClosed', {
-      defaultMessage: 'Browser was closed unexpectedly! Check the server logs for more info.',
-    })
-  );
+  new Error('Browser was closed unexpectedly! Check the server logs for more info.');
 
 export { HeadlessChromiumDriver } from './driver';
 export type { ConditionalHeaders } from './driver';
