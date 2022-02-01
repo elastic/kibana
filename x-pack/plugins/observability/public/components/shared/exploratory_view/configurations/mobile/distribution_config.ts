@@ -26,7 +26,7 @@ import {
 import { CPU_USAGE, SYSTEM_MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getMobileKPIDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'bar',
@@ -43,7 +43,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
     filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], dataView),
     ],
     labels: {
       ...FieldLabels,

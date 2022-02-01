@@ -17,7 +17,7 @@ import {
 } from '../../../../../lens/public';
 
 import { PersistableFilter } from '../../../../../lens/common';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/common';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -102,7 +102,7 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   series?: SeriesUrl;
 }
 
