@@ -99,6 +99,16 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
   navigate(params: P, navigationParams?: LocatorNavigationParams): Promise<void>;
 
   /**
+   * Synchronous fire-and-forget navigation method. Use it when you want to
+   * navigate without waiting for the navigation to complete and you don't
+   * care to process any async promise errors.
+   *
+   * @param params URL locator parameters.
+   * @param navigationParams Navigation parameters.
+   */
+  navigateSync(params: P, navigationParams?: LocatorNavigationParams): void;
+
+  /**
    * React hook which returns a URL string given locator parameters. Returns
    * empty string if URL is being loaded or an error happened.
    */
