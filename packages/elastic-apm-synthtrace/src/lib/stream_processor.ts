@@ -107,8 +107,61 @@ export class StreamProcessor {
   }
 
   async *streamAsync(...eventSources: SpanIterable[]): AsyncIterator<ApmFields> {
-    yield* this.stream(...eventSources);
+    const maxBufferSize = this.options.maxBufferSize ?? 10000;
+    const maxSourceEvents = this.options.maxSourceEvents;
+    let localBuffer = [];
+    let flushAfter: number | null = null;
+    let sourceEventsYielded = 0;
+    for (const eventSource of eventSources) {
+      const order = eventSource.order();
+      this.options.logger?.info(`order: ${order}`);
+      for (const event of eventSource) {
+        const eventDate = event['@timestamp'] as number;
+        localBuffer.push(event);
+        if (flushAfter === null && eventDate !== null) {
+          flushAfter = this.calculateFlushAfter(eventDate, order);
+        }
+
+        yield StreamProcessor.enrich(event);
+        sourceEventsYielded++;
+        if (maxSourceEvents && sourceEventsYielded % (maxSourceEvents / 10) === 0) {
+          this.options.logger?.info(`Yielded ${sourceEventsYielded} events`);
+        }
+        if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
+          // yielded the maximum source events, we still want the local buffer to generate derivative documents
+          break;
+        }
+        if (
+          localBuffer.length === maxBufferSize ||
+          (flushAfter != null &&
+            ((order === 'asc' && eventDate > flushAfter) ||
+              (order === 'desc' && eventDate < flushAfter)))
+        ) {
+          const e = new Date(eventDate).toISOString();
+          const f = new Date(flushAfter!).toISOString();
+          this.options.logger?.debug(
+            `flush ${localBuffer.length} documents ${order}: ${e} => ${f}`
+          );
+          for (const processor of this.options.processors) {
+            yield* processor(localBuffer).map(StreamProcessor.enrich);
+          }
+          localBuffer = [];
+          flushAfter = this.calculateFlushAfter(flushAfter, order);
+        }
+      }
+      if (maxSourceEvents && sourceEventsYielded >= maxSourceEvents) {
+        this.options.logger?.info(`Yielded maximum number of documents: ${maxSourceEvents}`);
+        break;
+      }
+    }
+    if (localBuffer.length > 0) {
+      this.options.logger?.info(`Processing remaining buffer: ${localBuffer.length} items left`);
+      for (const processor of this.options.processors) {
+        yield* processor(localBuffer).map(StreamProcessor.enrich);
+      }
+    }
   }
+
   *streamToDocument<TDocument>(
     map: (d: ApmFields) => TDocument,
     ...eventSources: SpanIterable[]

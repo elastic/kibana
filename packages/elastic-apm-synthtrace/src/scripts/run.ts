@@ -120,7 +120,7 @@ yargs(process.argv.slice(2))
 
     const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
     const to = new Date(toMs);
-    const defaultTimeRange = !runOptions.maxDocs ? '15m' : '52w';
+    const defaultTimeRange = !runOptions.maxDocs ? '15m' : '520w';
     const fromMs = argv.from
       ? datemath.parse(String(argv.from))!.valueOf()
       : toMs - intervalToMs(defaultTimeRange);

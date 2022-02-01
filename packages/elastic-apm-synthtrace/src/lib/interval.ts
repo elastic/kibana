@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
+import { random } from 'lodash';
 import { ApmFields } from './apm/apm_fields';
 import { SpanIterable } from './span_iterable';
 import { SpanGenerator } from './span_generator';
@@ -18,19 +19,27 @@ export function parseInterval(interval: string): [number, string] {
   return [Number(args[1]), args[2] as any];
 }
 
+export interface IntervalOptions {
+  from: Date;
+  to: Date;
+  interval: string;
+  yieldRate?: number;
+
+  intervalUpper?: number;
+  rateUpper?: number;
+}
+
 export class Interval implements Iterable<number> {
-  constructor(
-    public readonly from: Date,
-    public readonly to: Date,
-    public readonly interval: string,
-    public readonly yieldRate: number = 1
-  ) {
-    [this.intervalAmount, this.intervalUnit] = parseInterval(interval);
+  constructor(public readonly options: IntervalOptions) {
+    [this.intervalAmount, this.intervalUnit] = parseInterval(options.interval);
+    this.from = this.options.from;
+    this.to = this.options.to;
   }
+  public readonly from: Date;
+  public readonly to: Date;
 
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
-
   spans(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
     return new SpanGenerator(this, [
       function* (i) {
@@ -44,12 +53,19 @@ export class Interval implements Iterable<number> {
       },
     ]);
   }
-
   rate(rate: number): Interval {
-    return new Interval(this.from, this.to, this.interval, rate);
+    return new Interval({ ...this.options, yieldRate: rate });
   }
+
+  randomize(rateUpper: number, intervalUpper: number): Interval {
+    return new Interval({ ...this.options, intervalUpper, rateUpper });
+  }
+
   private yieldRateTimestamps(timestamp: number) {
-    return new Array<number>(this.yieldRate).fill(timestamp);
+    const rate = this.options.rateUpper
+      ? random(this.options.yieldRate ?? 1, Math.max(1, this.options.rateUpper))
+      : this.options.yieldRate ?? 1;
+    return new Array<number>(rate).fill(timestamp);
   }
 
   private *_generate(): Iterable<number> {
@@ -57,15 +73,23 @@ export class Interval implements Iterable<number> {
       let now = this.from;
       do {
         yield* this.yieldRateTimestamps(now.getTime());
-        now = new Date(moment(now).subtract(this.intervalAmount, this.intervalUnit).valueOf());
+        const amount = this.interval();
+        now = new Date(moment(now).subtract(amount, this.intervalUnit).valueOf());
       } while (now > this.to);
     } else {
       let now = this.from;
       do {
         yield* this.yieldRateTimestamps(now.getTime());
-        now = new Date(moment(now).add(this.intervalAmount, this.intervalUnit).valueOf());
+        const amount = this.interval();
+        now = new Date(moment(now).add(amount, this.intervalUnit).valueOf());
       } while (now < this.to);
     }
+  }
+
+  private interval() {
+    return this.options.intervalUpper
+      ? random(this.intervalAmount, this.options.intervalUpper)
+      : this.intervalAmount;
   }
 
   [Symbol.iterator]() {

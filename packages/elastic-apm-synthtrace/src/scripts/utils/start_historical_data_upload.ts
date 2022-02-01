@@ -33,9 +33,13 @@ export async function startHistoricalDataUpload(
   if (runOptions.dryRun) {
     const maxDocs = runOptions.maxDocs;
     const stream = new StreamProcessor({
-      processors: StreamProcessor.apmProcessors,
+      // processors: StreamProcessor.apmProcessors,
+      // processors: [StreamProcessor.apmProcessors[0], StreamProcessor.apmProcessors[1]],
+      // processors: [StreamProcessor.apmProcessors[0]],
+      processors: [],
       maxSourceEvents: maxDocs,
       logger,
+      // }).streamToDocument((e) => e, events);
     }).streamToDocument(StreamProcessor.toDocument, events);
     logger.perf('enumerate_scenario', () => {
       // @ts-ignore

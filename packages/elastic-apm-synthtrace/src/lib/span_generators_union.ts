@@ -40,10 +40,9 @@ export class SpanGeneratorsUnion implements SpanIterable {
   }
 
   async *[Symbol.asyncIterator]() {
-    for (const iterator of this.dataGenerators) {
-      for (const fields of iterator) {
-        yield fields;
-      }
+    const iterator = merge(this.dataGenerators);
+    for await (const fields of iterator) {
+      yield fields;
     }
   }
 }
