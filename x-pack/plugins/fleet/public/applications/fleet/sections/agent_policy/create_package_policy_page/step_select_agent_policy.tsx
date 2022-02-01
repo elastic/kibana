@@ -23,7 +23,12 @@ import {
 import { Error } from '../../../components';
 import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
-import { useGetAgentPolicies, sendGetOneAgentPolicy, useFleetStatus } from '../../../hooks';
+import {
+  useGetAgentPolicies,
+  sendGetOneAgentPolicy,
+  useAuthz,
+  useFleetStatus,
+} from '../../../hooks';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {

@@ -27,6 +27,7 @@ import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/da
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
+import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const fieldsOne = [
   {
@@ -640,7 +641,7 @@ describe('IndexPattern Data Panel', () => {
     });
     it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
-      expect(wrapper.find(FieldItem).first().prop('field').name).toEqual('Records');
+      expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -813,7 +814,7 @@ describe('IndexPattern Data Panel', () => {
       wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
 
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
+        DOCUMENT_FIELD_NAME,
       ]);
       expect(wrapper.find(NoFieldsCallout).length).toEqual(3);
     });
