@@ -180,6 +180,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             bulkActions,
             columns,
             dataProviders,
+            dataViewId: selectedDataViewId || undefined,
             defaultCellActions,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,

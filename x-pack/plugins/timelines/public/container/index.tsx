@@ -21,6 +21,8 @@ import {
 
 import type { DataPublicPluginStart, IEsError } from '../../../../../src/plugins/data/public';
 import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { mountReactNode } from '../../../../../src/core/public/utils';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -43,8 +45,6 @@ import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
-import { tGridActions } from '../store/t_grid';
-import { mountReactNode } from '../../../../../src/core/public/utils';
 
 export type InspectResponse = Inspect & { response: string[] };
 
@@ -76,6 +76,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrateg
 export interface UseTimelineEventsProps {
   alertConsumers?: AlertConsumers[];
   data?: DataPublicPluginStart;
+  dataViewId?: string;
   docValueFields?: DocValueFields[];
   endDate: string;
   entityType: EntityType;
@@ -126,6 +127,7 @@ export const useTimelineEvents = ({
   excludeEcsData = false,
   id = ID,
   indexNames,
+  dataViewId,
   fields,
   filterQuery,
   startDate,
@@ -147,6 +149,7 @@ export const useTimelineEvents = ({
     null
   );
   const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
+  const { catchRuntimeFieldError } = useCatchRuntimeFieldError(dataViewId);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -194,7 +197,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning, api: toastsApi } = useAppToasts();
+  const { addError, addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -245,19 +248,7 @@ export const useTimelineEvents = ({
               },
               error: (msg) => {
                 setLoading(false);
-                const runtimeFieldErrorReason = getRuntimeFieldErrorReason(msg.err);
-                if (runtimeFieldErrorReason) {
-                  // show warning toast to reset the sort parameter, otherwise the timeline may become inaccessible
-                  const toast = addWarning(
-                    getRuntimeFieldSortWarningToast({
-                      text: runtimeFieldErrorReason,
-                      resetSort: () => {
-                        dispatch(tGridActions.updateSort({ id, sort: [] }));
-                        toastsApi.remove(toast);
-                      },
-                    })
-                  );
-                }
+                catchRuntimeFieldError(msg.err);
                 addError(msg, {
                   title: i18n.FAIL_TIMELINE_EVENTS,
                 });
@@ -272,7 +263,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, setUpdated, addWarning, addError, toastsApi, dispatch, id]
+    [skip, data, entityType, setUpdated, addWarning, addError, catchRuntimeFieldError]
   );
 
   useEffect(() => {
@@ -395,10 +386,49 @@ export const useTimelineEvents = ({
   return [loading, timelineResponse];
 };
 
+export const useCatchRuntimeFieldError = (dataViewId?: string) => {
+  const { addWarning, api: toastsApi } = useAppToasts();
+  const navigateToApp = useKibana().services.application?.navigateToApp;
+
+  const catchRuntimeFieldError = useCallback(
+    (error: IEsError) => {
+      const runtimeFieldErrorReason = getRuntimeFieldErrorReason(error);
+      if (navigateToApp && dataViewId && runtimeFieldErrorReason) {
+        const toast = addWarning({
+          iconType: 'alert',
+          title: i18n.ERROR_RUNTIME_FIELD_TIMELINE_EVENTS,
+          toastLifeTimeMs: 300000,
+          text: mountReactNode(
+            <>
+              <p>{runtimeFieldErrorReason}</p>
+              <div className="eui-textRight">
+                <EuiButton
+                  size="s"
+                  color="warning"
+                  onClick={() => {
+                    navigateToApp('management', {
+                      path: `kibana/dataViews/dataView/${dataViewId}`,
+                    });
+                    toastsApi.remove(toast);
+                  }}
+                >
+                  {i18n.ERROR_RUNTIME_MANAGE_DATA_VIEW}
+                </EuiButton>
+              </div>
+            </>
+          ),
+        });
+      }
+    },
+    [addWarning, dataViewId, navigateToApp, toastsApi]
+  );
+  return { catchRuntimeFieldError };
+};
+
 /**
  * Returns the reason string if the error is a runtime script missing field error
  */
-const getRuntimeFieldErrorReason = (error: IEsError): string | null => {
+function getRuntimeFieldErrorReason(error: IEsError): string | null {
   const failedShards = error?.attributes?.caused_by?.failed_shards;
   if (failedShards && failedShards.length > 0) {
     const runtimeFieldFailedShard = failedShards?.find((failedShard) =>
@@ -409,26 +439,4 @@ const getRuntimeFieldErrorReason = (error: IEsError): string | null => {
     }
   }
   return null;
-};
-
-const getRuntimeFieldSortWarningToast = ({
-  text,
-  resetSort,
-}: {
-  text: string;
-  resetSort: () => void;
-}) => ({
-  iconType: 'alert',
-  title: i18n.ERROR_RUNTIME_FIELD_TIMELINE_EVENTS,
-  toastLifeTimeMs: 300000,
-  text: mountReactNode(
-    <>
-      <p>{text}</p>
-      <div className="eui-textRight">
-        <EuiButton size="s" color="warning" onClick={resetSort}>
-          {i18n.ERROR_RUNTIME_FIELD_CLEAR_SORTING}
-        </EuiButton>
-      </div>
-    </>
-  ),
-});
+}

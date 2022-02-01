@@ -22,15 +22,15 @@ export const FAIL_TIMELINE_EVENTS = i18n.translate(
 );
 
 export const ERROR_RUNTIME_FIELD_TIMELINE_EVENTS = i18n.translate(
-  'xpack.timelines.timelineEvents.errorRuntimeFieldSearchDescription',
+  'xpack.timelines.timelineEvents.errorRuntimeFieldToastTitle',
   {
     defaultMessage: 'Runtime field error',
   }
 );
 
-export const ERROR_RUNTIME_FIELD_CLEAR_SORTING = i18n.translate(
-  'xpack.timelines.timelineEvents.errorRuntimeFieldSearchButton',
+export const ERROR_RUNTIME_MANAGE_DATA_VIEW = i18n.translate(
+  'xpack.timelines.timelineEvents.errorRuntimeFieldToastButton',
   {
-    defaultMessage: 'Clear sorting',
+    defaultMessage: 'Manage Data View',
   }
 );
