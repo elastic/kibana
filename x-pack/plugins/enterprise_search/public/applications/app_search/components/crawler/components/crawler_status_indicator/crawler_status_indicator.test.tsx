@@ -86,9 +86,7 @@ describe('CrawlerStatusIndicator', () => {
         });
 
         const wrapper = shallow(<CrawlerStatusIndicator />);
-        expect(wrapper.is(EuiButton)).toEqual(true);
-        expect(wrapper.render().text()).toContain('Retry crawl');
-        expect(wrapper.prop('onClick')).toEqual(MOCK_ACTIONS.startCrawl);
+        expect(wrapper.is(StartCrawlContextMenu)).toEqual(true);
       });
     });
   });

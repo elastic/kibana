@@ -21,7 +21,7 @@ import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
 export const CrawlerStatusIndicator: React.FC = () => {
   const { domains, mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
-  const { startCrawl, stopCrawl } = useActions(CrawlerLogic);
+  const { stopCrawl } = useActions(CrawlerLogic);
 
   const disabledButton = (
     <EuiButton disabled>
@@ -40,18 +40,28 @@ export const CrawlerStatusIndicator: React.FC = () => {
 
   switch (mostRecentCrawlRequestStatus) {
     case CrawlerStatus.Success:
-      return <StartCrawlContextMenu />;
+      return (
+        <StartCrawlContextMenu
+          menuButtonLabel={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.startACrawlButtonLabel',
+            {
+              defaultMessage: 'Start a crawl',
+            }
+          )}
+        />
+      );
     case CrawlerStatus.Failed:
     case CrawlerStatus.Canceled:
       return (
-        <EuiButton fill onClick={startCrawl}>
-          {i18n.translate(
+        <StartCrawlContextMenu
+          fill
+          menuButtonLabel={i18n.translate(
             'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusIndicator.retryCrawlButtonLabel',
             {
               defaultMessage: 'Retry crawl',
             }
           )}
-        </EuiButton>
+        />
       );
     case CrawlerStatus.Pending:
     case CrawlerStatus.Suspended:

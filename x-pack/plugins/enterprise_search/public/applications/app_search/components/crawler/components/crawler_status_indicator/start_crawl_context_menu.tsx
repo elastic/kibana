@@ -13,9 +13,14 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../../crawler_logic';
 
-import { CrawlSomeDomainsModalLogic } from './crawl_some_domains_modal/crawl_some_domains_modal_logic';
+import { CrawlSomeDomainsModalLogic } from '../crawl_some_domains_modal/crawl_some_domains_modal_logic';
 
-export const StartCrawlContextMenu: React.FC = ({}) => {
+interface Props {
+  menuButtonLabel?: string;
+  fill?: boolean;
+}
+
+export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }) => {
   const { startCrawl } = useActions(CrawlerLogic);
   const { showModal: showCrawlSomeDomainsModal } = useActions(CrawlSomeDomainsModalLogic);
 
@@ -28,13 +33,8 @@ export const StartCrawlContextMenu: React.FC = ({}) => {
   return (
     <EuiPopover
       button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.startACrawlButtonLabel',
-            {
-              defaultMessage: 'Start a crawl',
-            }
-          )}
+        <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover} fill={fill}>
+          {menuButtonLabel}
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -46,7 +46,6 @@ export const StartCrawlContextMenu: React.FC = ({}) => {
         items={[
           <EuiContextMenuItem
             key="crawl all domains"
-            icon="cross"
             onClick={() => {
               closePopover();
               startCrawl();
@@ -61,7 +60,6 @@ export const StartCrawlContextMenu: React.FC = ({}) => {
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="crawl some domains"
-            icon="cross"
             onClick={() => {
               closePopover();
               showCrawlSomeDomainsModal();
