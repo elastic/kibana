@@ -13,7 +13,7 @@ import { SeverityCount } from '../../containers/kpi_hosts/risky_hosts';
 
 export const SeverityBadges: React.FC<{
   severityCount: SeverityCount;
-}> = ({ severityCount }) => (
+}> = React.memo(({ severityCount }) => (
   <EuiFlexGroup
     justifyContent="spaceBetween"
     gutterSize="m"
@@ -30,20 +30,23 @@ export const SeverityBadges: React.FC<{
       </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
+));
+
+SeverityBadges.displayName = 'SeverityBadges';
+
+const SeverityBadge: React.FC<{ status: HostRiskSeverity; count: number }> = React.memo(
+  ({ status, count }) => (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <HostRiskScore severity={status} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiNotificationBadge size="s" color="subdued">
+          {count}
+        </EuiNotificationBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
 );
 
-const SeverityBadge: React.FC<{ status: HostRiskSeverity; count: number }> = ({
-  status,
-  count,
-}) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <HostRiskScore severity={status} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiNotificationBadge size="s" color="subdued">
-        {count}
-      </EuiNotificationBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+SeverityBadge.displayName = 'SeverityBadge';

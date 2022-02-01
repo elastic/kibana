@@ -55,13 +55,15 @@ export const SeverityFilterGroup: React.FC<{
     getHostRiskScoreFilterQuerySelector(state, type)
   );
 
-  const items: SeverityItems[] = useMemo(() => {
-    return (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
-      risk: k,
-      count: severityCount[k],
-      checked: severitySelectionRedux.includes(k) ? 'on' : undefined,
-    }));
-  }, [severityCount, severitySelectionRedux]);
+  const items: SeverityItems[] = useMemo(
+    () =>
+      (Object.keys(severityCount) as HostRiskSeverity[]).map((k) => ({
+        risk: k,
+        count: severityCount[k],
+        checked: severitySelectionRedux.includes(k) ? 'on' : undefined,
+      })),
+    [severityCount, severitySelectionRedux]
+  );
 
   const updateSeverityFilter = useCallback(
     (selectedSeverity: HostRiskSeverity) => {
