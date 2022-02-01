@@ -1144,6 +1144,10 @@
             {
               "plugin": "actions",
               "path": "x-pack/plugins/actions/server/plugin.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/usage/task.ts"
             }
           ]
         },

@@ -9487,7 +9487,90 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "core",
+        "id": "def-server.mergeSavedObjectMigrationMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSavedObjectMigrationMaps",
+        "description": [
+          "\nMerges two saved object migration maps.\n\nIf there is a migration for a given version on only one of the maps,\nthat migration function will be used:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '4.5.6': g }) -> { '1.2.3': f, '4.5.6': g }\n\nIf there is a migration for a given version on both maps, the migrations will be composed:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '1.2.3': g }) -> { '1.2.3': (doc, context) => f(g(doc, context), context) }\n"
+        ],
+        "signature": [
+          "(map1: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
+          ", map2: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
+          ") => ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          }
+        ],
+        "path": "src/core/server/saved_objects/migrations/utils.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.mergeSavedObjectMigrationMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "map1",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
+            ],
+            "path": "src/core/server/saved_objects/migrations/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.mergeSavedObjectMigrationMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "map2",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
+            ],
+            "path": "src/core/server/saved_objects/migrations/utils.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "core",

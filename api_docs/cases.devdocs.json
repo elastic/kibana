@@ -916,21 +916,6 @@
           },
           {
             "parentPluginId": "cases",
-            "id": "def-server.CasesClient.subCases",
-            "type": "Object",
-            "tags": [],
-            "label": "subCases",
-            "description": [
-              "\nRetrieves an interface for interacting with the case as a connector entities.\n\nCurrently this functionality is disabled and will throw an error if this function is called."
-            ],
-            "signature": [
-              "SubCasesClient"
-            ],
-            "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
             "id": "def-server.CasesClient.configure",
             "type": "Object",
             "tags": [],
@@ -1238,39 +1223,6 @@
           },
           {
             "parentPluginId": "cases",
-            "id": "def-common.Case.subCases",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "subCases",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "cases",
-                "scope": "common",
-                "docId": "kibCasesPluginApi",
-                "section": "def-common.SubCase",
-                "text": "SubCase"
-              },
-              "[] | null | undefined"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.Case.subCaseIds",
-            "type": "Array",
-            "tags": [],
-            "label": "subCaseIds",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
             "id": "def-common.Case.settings",
             "type": "Object",
             "tags": [],
@@ -1291,19 +1243,6 @@
             "description": [],
             "signature": [
               "string[]"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.Case.type",
-            "type": "Enum",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "CaseType"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
@@ -1370,52 +1309,6 @@
               "SignalEcsAAD",
               "; } | undefined"
             ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.SubCase",
-        "type": "Interface",
-        "tags": [],
-        "label": "SubCase",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.SubCase",
-            "text": "SubCase"
-          },
-          " extends BasicCase"
-        ],
-        "path": "x-pack/plugins/cases/common/ui/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.SubCase.associationType",
-            "type": "Enum",
-            "tags": [],
-            "label": "associationType",
-            "description": [],
-            "signature": [
-              "AssociationType"
-            ],
-            "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.SubCase.caseParentId",
-            "type": "string",
-            "tags": [],
-            "label": "caseParentId",
-            "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
           }
@@ -1493,22 +1386,6 @@
           "{ refreshCase: () => Promise<void>; } | null"
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ENABLE_CASE_CONNECTOR",
-        "type": "boolean",
-        "tags": [],
-        "label": "ENABLE_CASE_CONNECTOR",
-        "description": [
-          "\nThis flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete."
-        ],
-        "signature": [
-          "false"
-        ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
