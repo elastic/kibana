@@ -87,7 +87,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'e22a7600-017f-11eb-93f8-d161651bf509',
             case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -110,7 +109,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'a22a7600-017f-11eb-93f8-d161651bf509',
             case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -132,7 +130,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'db027ec0-1ac7-11eb-b5a3-25ee88122510',
             case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
             comment_id: 'da677740-1ac7-11eb-b5a3-25ee88122510',
-            sub_case_id: '',
           },
         ]);
       });
@@ -201,7 +198,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'e5509250-cf9d-11eb-a603-13e7747d215c',
             case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -231,7 +227,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'e6e0f650-cf9d-11eb-a603-13e7747d215c',
             case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -253,7 +248,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'eee3be50-cf9d-11eb-a603-13e7747d215c',
             case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
             comment_id: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
-            sub_case_id: '',
           },
         ]);
       });
@@ -310,7 +304,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'ab43b5f0-005e-11ec-91f1-6daf2ab59fb5',
             case_id: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -338,7 +331,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
             case_id: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
         ]);
       });
@@ -383,7 +375,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -413,7 +404,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'e9471b80-005e-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -435,7 +425,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: 'efe9de50-005e-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: 'ef5f0370-005e-11ec-91f1-6daf2ab59fb5',
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -462,7 +451,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: '16cd9e30-005f-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -492,7 +480,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: '1ea33bb0-005f-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -514,7 +501,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: '29c98ad0-005f-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: '29351300-005f-11ec-91f1-6daf2ab59fb5',
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -541,7 +527,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: '2f6e65a0-005f-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
           {
             owner: 'securitySolution',
@@ -571,7 +556,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             action_id: '32a351e0-005f-11ec-91f1-6daf2ab59fb5',
             case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
             comment_id: null,
-            sub_case_id: '',
           },
         ]);
       });
@@ -758,7 +742,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               title: 'User actions',
               owner: 'securitySolution',
             },
-            sub_case_id: '',
             type: 'create_case',
           },
           {
@@ -780,7 +763,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 type: 'user',
               },
             },
-            sub_case_id: '',
             type: 'comment',
           },
           {
@@ -798,7 +780,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             payload: {
               title: 'User actions!',
             },
-            sub_case_id: '',
             type: 'title',
           },
           {
@@ -816,7 +797,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             payload: {
               description: 'migrating user actions and update!',
             },
-            sub_case_id: '',
             type: 'description',
           },
           {
@@ -838,7 +818,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 type: 'user',
               },
             },
-            sub_case_id: '',
             type: 'comment',
           },
           {
@@ -856,7 +835,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             payload: {
               tags: ['migration'],
             },
-            sub_case_id: '',
             type: 'tags',
           },
           {
@@ -874,7 +852,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             payload: {
               tags: ['user'],
             },
-            sub_case_id: '',
             type: 'tags',
           },
           {
@@ -894,7 +871,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 syncAlerts: false,
               },
             },
-            sub_case_id: '',
             type: 'settings',
           },
           {
@@ -912,7 +888,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             payload: {
               status: 'in-progress',
             },
-            sub_case_id: '',
             type: 'status',
           },
           {
@@ -939,7 +914,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 type: '.jira',
               },
             },
-            sub_case_id: '',
             type: 'connector',
           },
           {
@@ -969,7 +943,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 },
               },
             },
-            sub_case_id: '',
             type: 'pushed',
           },
           {
@@ -995,7 +968,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 type: '.resilient',
               },
             },
-            sub_case_id: '',
             type: 'connector',
           },
           {
@@ -1025,7 +997,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 },
               },
             },
-            sub_case_id: '',
             type: 'pushed',
           },
           {
@@ -1052,7 +1023,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 type: '.jira',
               },
             },
-            sub_case_id: '',
             type: 'connector',
           },
           {
@@ -1074,7 +1044,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 type: 'user',
               },
             },
-            sub_case_id: '',
             type: 'comment',
           },
         ]);

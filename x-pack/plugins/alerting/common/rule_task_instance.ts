@@ -9,6 +9,13 @@ import * as t from 'io-ts';
 import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
 
+const actionSchema = t.partial({
+  group: t.string,
+  id: t.string,
+  actionTypeId: t.string,
+  params: t.record(t.string, t.unknown),
+});
+
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
@@ -16,6 +23,9 @@ export const ruleStateSchema = t.partial({
 });
 
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
+export type RuleTaskStateWithActions = RuleTaskState & {
+  triggeredActions: Array<t.TypeOf<typeof actionSchema>>;
+};
 
 export const ruleParamsSchema = t.intersection([
   t.type({

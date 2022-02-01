@@ -182,6 +182,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -233,6 +235,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -297,6 +301,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
@@ -370,6 +376,8 @@ describe('heatmap suggestions', () => {
               isCellLabelVisible: false,
               isYAxisLabelVisible: true,
               isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
             },
             legend: {
               isVisible: true,
