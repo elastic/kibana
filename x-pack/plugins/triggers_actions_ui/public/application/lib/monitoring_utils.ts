@@ -10,3 +10,8 @@ export function getFormattedSuccessRatio(successRatio: number) {
   const formatted = numeral(successRatio! * 100).format('0,0');
   return `${formatted}%`;
 }
+
+export function getFormattedRuleExecutionPercentile(percentile: number) {
+  const formatted = numeral(percentile).format('0,0');
+  return `${formatted}ms`;
+}
