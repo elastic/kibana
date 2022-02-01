@@ -44,7 +44,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         })}
         valueOfSelected={state.titlePosition ?? 'top'}
         onChange={(value) => {
-          setState({ ...state, titlePosition: value });
+          setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
         }}
         itemLayoutAlign="top"
         hasDividers
