@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../../crawler_logic';
 
-import { CrawlSomeDomainsModalLogic } from '../crawl_some_domains_modal/crawl_some_domains_modal_logic';
+import { CrawlSelectDomainsModalLogic } from '../crawl_select_domains_modal/crawl_select_domains_modal_logic';
 
 interface Props {
   menuButtonLabel?: string;
@@ -22,7 +22,7 @@ interface Props {
 
 export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }) => {
   const { startCrawl } = useActions(CrawlerLogic);
-  const { showModal: showCrawlSomeDomainsModal } = useActions(CrawlSomeDomainsModalLogic);
+  const { showModal: showCrawlSelectDomainsModal } = useActions(CrawlSelectDomainsModalLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -59,16 +59,16 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
             )}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            key="crawl some domains"
+            key="crawl select domains"
             onClick={() => {
               closePopover();
-              showCrawlSomeDomainsModal();
+              showCrawlSelectDomainsModal();
             }}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlSomeDomainsMenuLabel',
+              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlSelectDomainsMenuLabel',
               {
-                defaultMessage: 'Crawl some domains',
+                defaultMessage: 'Crawl select domains',
               }
             )}
           </EuiContextMenuItem>,

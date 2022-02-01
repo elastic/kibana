@@ -24,7 +24,7 @@ import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_fo
 import { AddDomainLogic } from './components/add_domain/add_domain_logic';
 import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
-import { CrawlSomeDomainsModal } from './components/crawl_some_domains_modal/crawl_some_domains_modal';
+import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
@@ -139,7 +139,7 @@ export const CrawlerOverview: React.FC = () => {
         </>
       )}
       <CrawlDetailsFlyout />
-      <CrawlSomeDomainsModal />
+      <CrawlSelectDomainsModal />
     </AppSearchPageTemplate>
   );
 };

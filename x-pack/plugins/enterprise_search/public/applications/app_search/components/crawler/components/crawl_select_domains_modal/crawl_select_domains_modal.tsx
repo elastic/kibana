@@ -28,18 +28,18 @@ import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { CrawlerLogic } from '../../crawler_logic';
 
-import { CrawlSomeDomainsModalLogic } from './crawl_some_domains_modal_logic';
+import { CrawlSelectDomainsModalLogic } from './crawl_select_domains_modal_logic';
 import { SimplifiedSelectable } from './simplified_selectable';
 
-import './crawl_some_domains_modal.scss';
+import './crawl_select_domains_modal.scss';
 
-export const CrawlSomeDomainsModal: React.FC = () => {
+export const CrawlSelectDomainsModal: React.FC = () => {
   const { domains } = useValues(CrawlerLogic);
   const domainUrls = domains.map((domain) => domain.url);
 
-  const crawlSomeDomainsLogic = CrawlSomeDomainsModalLogic({ domains });
-  const { isModalVisible, selectedDomainUrls } = useValues(crawlSomeDomainsLogic);
-  const { hideModal, onSelectDomainUrls } = useActions(crawlSomeDomainsLogic);
+  const crawlSelectDomainsModalLogic = CrawlSelectDomainsModalLogic({ domains });
+  const { isModalVisible, selectedDomainUrls } = useValues(crawlSelectDomainsModalLogic);
+  const { hideModal, onSelectDomainUrls } = useActions(crawlSelectDomainsModalLogic);
 
   const { startCrawl } = useActions(CrawlerLogic);
 
@@ -48,13 +48,13 @@ export const CrawlSomeDomainsModal: React.FC = () => {
   }
 
   return (
-    <EuiModal onClose={hideModal} className="crawlSomeDomainsModal">
+    <EuiModal onClose={hideModal} className="crawlSelectDomainsModal">
       <EuiModalHeader>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiModalHeaderTitle>
               {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.crawlSomeDomainsModal.modalHeaderTitle',
+                'xpack.enterpriseSearch.appSearch.crawler.crawlSelectDomainsModal.modalHeaderTitle',
                 {
                   defaultMessage: 'Crawl select domains',
                 }
@@ -69,7 +69,7 @@ export const CrawlSomeDomainsModal: React.FC = () => {
           </EuiNotificationBadge>
           <EuiFlexItem grow={false}>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.crawler.crawlSomeDomainsModal.selectedDescriptor',
+              'xpack.enterpriseSearch.appSearch.crawler.crawlSelectDomainsModal.selectedDescriptor',
               {
                 defaultMessage: 'selected',
               }
@@ -95,7 +95,7 @@ export const CrawlSomeDomainsModal: React.FC = () => {
           disabled={selectedDomainUrls.length === 0}
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.crawlSomeDomainsModal.startCrawlButtonLabel',
+            'xpack.enterpriseSearch.appSearch.crawler.crawlSelectDomainsModal.startCrawlButtonLabel',
             {
               defaultMessage: 'Apply and crawl now',
             }

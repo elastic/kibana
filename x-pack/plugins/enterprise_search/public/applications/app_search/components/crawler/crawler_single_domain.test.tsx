@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 import { getPageHeaderActions } from '../../../test_helpers';
 
-import { CrawlSomeDomainsModal } from './components/crawl_some_domains_modal/crawl_some_domains_modal';
+import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DeduplicationPanel } from './components/deduplication_panel';
@@ -97,6 +97,6 @@ describe('CrawlerSingleDomain', () => {
   it('contains a modal to start a crawl with selected domains', () => {
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.find(CrawlSomeDomainsModal)).toHaveLength(1);
+    expect(wrapper.find(CrawlSelectDomainsModal)).toHaveLength(1);
   });
 });

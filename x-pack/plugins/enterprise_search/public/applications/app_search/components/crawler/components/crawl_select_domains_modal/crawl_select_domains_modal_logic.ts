@@ -9,29 +9,29 @@ import { kea, MakeLogicType } from 'kea';
 
 import { CrawlerDomain } from '../../types';
 
-export interface CrawlSomeDomainsLogicProps {
+export interface CrawlSelectDomainsLogicProps {
   domains: CrawlerDomain[];
 }
 
-export interface CrawlSomeDomainsLogicValues {
+export interface CrawlSelectDomainsLogicValues {
   isModalVisible: boolean;
   selectedDomainUrls: string[];
 }
 
-export interface CrawlSomeDomainsModalLogicActions {
+export interface CrawlSelectDomainsModalLogicActions {
   hideModal(): void;
   onSelectDomainUrls(domainUrls: string[]): { domainUrls: string[] };
   showModal(): void;
 }
 
-export const CrawlSomeDomainsModalLogic = kea<
+export const CrawlSelectDomainsModalLogic = kea<
   MakeLogicType<
-    CrawlSomeDomainsLogicValues,
-    CrawlSomeDomainsModalLogicActions,
-    CrawlSomeDomainsLogicProps
+    CrawlSelectDomainsLogicValues,
+    CrawlSelectDomainsModalLogicActions,
+    CrawlSelectDomainsLogicProps
   >
 >({
-  path: ['enterprise_search', 'app_search', 'crawler', 'crawl_some_domains_modal'],
+  path: ['enterprise_search', 'app_search', 'crawler', 'crawl_select_domains_modal'],
   actions: () => ({
     hideModal: true,
     onSelectDomainUrls: (domainUrls) => ({ domainUrls }),

@@ -15,25 +15,25 @@ import { EuiModal, EuiModalFooter, EuiButton, EuiButtonEmpty } from '@elastic/eu
 
 import { rerender } from '../../../../../test_helpers';
 
-import { CrawlSomeDomainsModal } from './crawl_some_domains_modal';
+import { CrawlSelectDomainsModal } from './crawl_select_domains_modal';
 import { SimplifiedSelectable } from './simplified_selectable';
 
 const MOCK_VALUES = {
   domains: [{ url: 'https://www.elastic.co' }, { url: 'https://www.swiftype.com' }],
-  // CrawlSomeDomainsModalLogic
+  // CrawlSelectDomainsModalLogic
   selectedDomainUrls: ['https://www.elastic.co'],
   isModalVisible: true,
 };
 
 const MOCK_ACTIONS = {
-  // CrawlSomeDomainsModalLogic
+  // CrawlSelectDomainsModalLogic
   hideModal: jest.fn(),
   onSelectDomainUrls: jest.fn(),
   // CrawlerLogic
   startCrawl: jest.fn(),
 };
 
-describe('CrawlSomeDomainsModal', () => {
+describe('CrawlSelectDomainsModal', () => {
   let wrapper: ShallowWrapper;
 
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('CrawlSomeDomainsModal', () => {
     setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
 
-    wrapper = shallow(<CrawlSomeDomainsModal />);
+    wrapper = shallow(<CrawlSelectDomainsModal />);
   });
 
   it('is empty when the modal is hidden', () => {

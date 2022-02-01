@@ -6,10 +6,10 @@
  */
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import { CrawlSomeDomainsModalLogic } from './crawl_some_domains_modal_logic';
+import { CrawlSelectDomainsModalLogic } from './crawl_select_domains_modal_logic';
 
-describe('CrawlSomeDomainsModalLogic', () => {
-  const { mount } = new LogicMounter(CrawlSomeDomainsModalLogic);
+describe('CrawlSelectDomainsModalLogic', () => {
+  const { mount } = new LogicMounter(CrawlSelectDomainsModalLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -17,7 +17,7 @@ describe('CrawlSomeDomainsModalLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(CrawlSomeDomainsModalLogic.values).toEqual({
+    expect(CrawlSelectDomainsModalLogic.values).toEqual({
       isModalVisible: false,
       selectedDomainUrls: [],
     });
@@ -26,17 +26,17 @@ describe('CrawlSomeDomainsModalLogic', () => {
   describe('actions', () => {
     describe('hideModal', () => {
       it('hides the modal', () => {
-        CrawlSomeDomainsModalLogic.actions.hideModal();
+        CrawlSelectDomainsModalLogic.actions.hideModal();
 
-        expect(CrawlSomeDomainsModalLogic.values.isModalVisible).toBe(false);
+        expect(CrawlSelectDomainsModalLogic.values.isModalVisible).toBe(false);
       });
     });
 
     describe('showModal', () => {
       it('shows the modal', () => {
-        CrawlSomeDomainsModalLogic.actions.showModal();
+        CrawlSelectDomainsModalLogic.actions.showModal();
 
-        expect(CrawlSomeDomainsModalLogic.values.isModalVisible).toBe(true);
+        expect(CrawlSelectDomainsModalLogic.values.isModalVisible).toBe(true);
       });
 
       it('resets the selected options', () => {
@@ -44,9 +44,9 @@ describe('CrawlSomeDomainsModalLogic', () => {
           selectedDomainUrls: ['https://www.elastic.co', 'https://www.swiftype.com'],
         });
 
-        CrawlSomeDomainsModalLogic.actions.showModal();
+        CrawlSelectDomainsModalLogic.actions.showModal();
 
-        expect(CrawlSomeDomainsModalLogic.values.selectedDomainUrls).toEqual([]);
+        expect(CrawlSelectDomainsModalLogic.values.selectedDomainUrls).toEqual([]);
       });
     });
 
@@ -56,12 +56,12 @@ describe('CrawlSomeDomainsModalLogic', () => {
           selectedDomainUrls: [],
         });
 
-        CrawlSomeDomainsModalLogic.actions.onSelectDomainUrls([
+        CrawlSelectDomainsModalLogic.actions.onSelectDomainUrls([
           'https://www.elastic.co',
           'https://www.swiftype.com',
         ]);
 
-        expect(CrawlSomeDomainsModalLogic.values.selectedDomainUrls).toEqual([
+        expect(CrawlSelectDomainsModalLogic.values.selectedDomainUrls).toEqual([
           'https://www.elastic.co',
           'https://www.swiftype.com',
         ]);
