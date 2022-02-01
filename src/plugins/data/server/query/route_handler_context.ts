@@ -142,7 +142,7 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
       perPage: 100,
     });
 
-    const savedObjects: SavedObject<SavedQueryAttributes>[] = [];
+    const savedObjects: Array<SavedObject<SavedQueryAttributes>> = [];
     for await (const response of finder.find()) {
       savedObjects.push(...(response.saved_objects ?? []));
     }
