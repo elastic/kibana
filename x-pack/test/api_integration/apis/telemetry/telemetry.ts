@@ -185,20 +185,16 @@ export default function ({ getService }: FtrProviderContext) {
       const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
-      let cacheLastUpdated: string[] = [];
 
       before(async () => {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
-
         // hit the endpoint to cache results
-        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+        await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
-
-        cacheLastUpdated = getCacheDetails(body).map(({ updatedAt }) => updatedAt);
       });
       after(() => esArchiver.unload(archive));
     });
