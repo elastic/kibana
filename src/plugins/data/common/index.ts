@@ -54,7 +54,6 @@ export type {
 export type {
   IndexPatternsContract,
   DataViewsContract,
-  IndexPatternListItem,
   DataViewListItem,
 } from '../../data_views/common';
 export {
@@ -68,7 +67,6 @@ export {
   DataViewField,
   IndexPatternField,
   DataViewType,
-  IndexPatternType,
   IndexPatternsService,
   DataViewsService,
   IndexPattern,
