@@ -329,7 +329,6 @@ export function DiscoverSidebarComponent({
                 selectedIndexPattern={selectedIndexPattern}
                 indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
                 onChangeIndexPattern={onChangeIndexPattern}
-                services={services}
                 useNewFieldsApi={useNewFieldsApi}
                 editField={editField}
               />
