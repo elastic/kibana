@@ -461,7 +461,7 @@ export const AddFleetServerHostStepContent = ({
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
-            placeholder={'e.g. http://127.0.0.1:8220'}
+            placeholder={'e.g. https://127.0.0.1:8220'}
             value={fleetServerHost}
             isInvalid={!!error}
             onChange={onChange}
