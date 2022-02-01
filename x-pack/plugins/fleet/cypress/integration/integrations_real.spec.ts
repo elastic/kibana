@@ -34,14 +34,14 @@ describe('Add Integration - Real API', () => {
   });
 
   it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat-1.2.1/settings');
+    cy.visit('/app/integrations/detail/tomcat-1.3.0/settings');
 
     cy.get('.euiButton').contains('Install Apache Tomcat assets').click();
     cy.get('.euiCallOut').contains('This action will install 1 assets');
     cy.getBySel(CONFIRM_MODAL_BTN).click();
 
     cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.getBySel('installedVersion').contains('1.2.1');
+    cy.getBySel('installedVersion').contains('1.3.0');
 
     cy.get('.euiButton').contains('Uninstall Apache Tomcat').click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
