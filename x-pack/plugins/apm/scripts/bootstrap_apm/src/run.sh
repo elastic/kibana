@@ -48,13 +48,14 @@ show_msg "[INFO] Creating your deployment ${DEPLOYMENT_NAME}. Please hold, it ta
 
 # create deployment
 `ecctl deployment create -f ./config/deployment.json --version ${VERSION} --name ${DEPLOYMENT_NAME} \
+--output text \
 --format "export DEPLOYMENT_ID={{.ID}} export CLOUD_ID={{(index .Resources 0).CloudID}} export ES_PASS={{(index .Resources 0).Credentials.Password}}" --track > $TMPFILE`;
 
 $(head -n 1 $TMPFILE)
 
 if [ -n "$DEPLOYMENT_ID" ]; then 
    show_msg "[INFO] Deployment status: Being created 👷‍♀️" 
-   `ecctl deployment show $DEPLOYMENT_ID --format "export ES_TARGET=https://elastic:$ES_PASS@{{(index .Resources.Elasticsearch 0).Info.Metadata.AliasedEndpoint}}:{{(index .Resources.Elasticsearch 0).Info.Metadata.Ports.HTTPS}} export KBN_TARGET=https://elastic:$ES_PASS@{{(index .Resources.Kibana 0).Info.Metadata.AliasedEndpoint}}:{{(index .Resources.Kibana 0).Info.Metadata.Ports.HTTPS}}"`;
+   `ecctl deployment show $DEPLOYMENT_ID --output text --format "export ES_TARGET=https://elastic:$ES_PASS@{{(index .Resources.Elasticsearch 0).Info.Metadata.AliasedEndpoint}}:{{(index .Resources.Elasticsearch 0).Info.Metadata.Ports.HTTPS}} export KBN_TARGET=https://elastic:$ES_PASS@{{(index .Resources.Kibana 0).Info.Metadata.AliasedEndpoint}}:{{(index .Resources.Kibana 0).Info.Metadata.Ports.HTTPS}}"`;
 else 
    show_msg "[ERROR] DEPLOYMENT_ID is required" 4
 fi
