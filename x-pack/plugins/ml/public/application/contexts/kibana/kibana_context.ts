@@ -23,6 +23,7 @@ import type { DataVisualizerPluginStart } from '../../../../../data_visualizer/p
 import type { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
 import type { FieldFormatsRegistry } from '../../../../../../../src/plugins/field_formats/common';
 import type { DashboardSetup } from '../../../../../../../src/plugins/dashboard/public';
+import type { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
@@ -36,6 +37,7 @@ interface StartPlugins {
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
+  charts?: ChartsPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {
