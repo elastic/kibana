@@ -14,9 +14,10 @@ import AxiosHttpAdapter from 'axios/lib/adapters/http';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { closeSync, openSync, writeSync } from 'fs';
+import { dirname } from 'path';
 import { readCliArgs } from '../args';
 
-import { Task, read } from '../lib';
+import { Task, read, mkdirp } from '../lib';
 
 const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/server/bundled_packages';
 
@@ -76,10 +77,16 @@ async function downloadPackageArchive({
 }) {
   log.info(`Downloading bundled package from ${url}`);
 
-  const response = await axios.request({ url, responseType: 'stream', adapter: AxiosHttpAdapter });
+  await mkdirp(dirname(destination));
   const file = openSync(destination, 'w');
 
   try {
+    const response = await axios.request({
+      url,
+      responseType: 'stream',
+      adapter: AxiosHttpAdapter,
+    });
+
     await new Promise((resolve, reject) => {
       response.data.on('data', (chunk: Buffer) => {
         writeSync(file, chunk);
