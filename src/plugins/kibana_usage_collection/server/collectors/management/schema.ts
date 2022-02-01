@@ -288,6 +288,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'metrics:allowCheckingForFailedShards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'query:allowLeadingWildcards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

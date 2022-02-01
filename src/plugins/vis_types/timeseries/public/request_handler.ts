@@ -9,7 +9,7 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import type { Adapters } from 'src/plugins/inspector';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
-import { ROUTES, UI_SETTINGS } from '../common/constants';
+import { ROUTES, ALLOW_CHECKING_FOR_FAILED_SHARDS } from '../common/constants';
 import { KibanaContext, handleResponse } from '../../../data/public';
 
 import type { TimeseriesVisParams } from './types';
@@ -34,7 +34,6 @@ export const metricsRequestHandler = async ({
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const data = getDataStart();
-  const theme = getCoreStart().theme;
 
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
@@ -78,8 +77,8 @@ export const metricsRequestHandler = async ({
           .json(query.body)
           .ok({ time: query.time });
 
-        if (query.response && config.get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
-          handleResponse({ body: query.body }, { rawResponse: query.response }, theme);
+        if (query.response && config.get(ALLOW_CHECKING_FOR_FAILED_SHARDS)) {
+          handleResponse({ body: query.body }, { rawResponse: query.response });
         }
       });
 

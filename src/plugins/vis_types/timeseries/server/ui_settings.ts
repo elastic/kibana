@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
 
-import { MAX_BUCKETS_SETTING } from '../common/constants';
+import { MAX_BUCKETS_SETTING, ALLOW_CHECKING_FOR_FAILED_SHARDS } from '../common/constants';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [MAX_BUCKETS_SETTING]: {
@@ -25,7 +25,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     schema: schema.number(),
   },
-  [UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS]: {
+  [ALLOW_CHECKING_FOR_FAILED_SHARDS]: {
     name: i18n.translate('visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsTitle', {
       defaultMessage: 'Show TSVB request shard failures',
     }),
