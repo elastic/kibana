@@ -10,10 +10,7 @@ import { ReactElement } from 'react';
 
 import type { LensPublicStart } from '../../lens/public';
 import type { SecurityPluginSetup } from '../../security/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
-  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
-} from '../../triggers_actions_ui/public';
+import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -29,7 +26,6 @@ import type {
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
-  triggersActionsUi: TriggersActionsSetup;
 }
 
 export interface StartPlugins {
