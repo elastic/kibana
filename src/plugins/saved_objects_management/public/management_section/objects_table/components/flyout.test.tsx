@@ -40,7 +40,7 @@ describe('Flyout', () => {
       close: jest.fn(),
       done: jest.fn(),
       newIndexPatternUrl: '',
-      indexPatterns: {
+      dataViews: {
         getCache: jest.fn().mockImplementation(() => [
           { id: '1', attributes: {} },
           { id: '2', attributes: {} },
