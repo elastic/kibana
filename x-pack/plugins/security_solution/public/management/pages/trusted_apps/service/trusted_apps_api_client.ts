@@ -7,7 +7,7 @@
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { HttpStart } from 'kibana/public';
-import { ExceptionsListApiClient } from '../../../services/exceptionsList/exceptionsListApiClient';
+import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
 
 /**
