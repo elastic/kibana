@@ -10,11 +10,20 @@ import {
   CONFIRM_MODAL_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   FLYOUT_CLOSE_BTN_SEL,
-  INTEGRATION_NAME_LINK,
 } from '../screens/integrations';
 
-export const addIntegration = () => {
+export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_POLICY_BTN).click();
+  if (useExistingPolicy) {
+    cy.get('#existing').click();
+  } else {
+    // speeding up creating with unchecking system and agent integration
+    cy.getBySel('agentPolicyFormSystemMonitoringCheckbox').uncheck({ force: true });
+    cy.getBySel('advancedOptionsBtn').find('.euiAccordion__button').click();
+    cy.get('*[id^="logs_"]').uncheck({ force: true });
+    cy.get('*[id^="metrics_"]').uncheck({ force: true });
+  }
+  cy.getBySel('toastCloseButton').click();
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL_BTN).click();
@@ -33,19 +42,15 @@ export function clickIfVisible(selector: string) {
 
 export const deleteIntegrations = async (integration: string) => {
   const ids: string[] = [];
-  cy.getBySel(INTEGRATION_NAME_LINK)
-    .each(($a) => {
-      const href = $a.attr('href') as string;
-      ids.push(href.substr(href.lastIndexOf('/') + 1));
-    })
-    .then(() => {
-      cy.request({
-        url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress' },
-        body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
-        method: 'POST',
-      });
+  cy.request('/api/fleet/package_policies').then((response: any) => {
+    response.body.items.forEach((policy: any) => ids.push(policy.id));
+    cy.request({
+      url: `/api/fleet/package_policies/delete`,
+      headers: { 'kbn-xsrf': 'cypress' },
+      body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
+      method: 'POST',
     });
+  });
 };
 
 export const installPackageWithVersion = (integration: string, version: string) => {
