@@ -8,9 +8,7 @@
 import React, { useEffect, FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-
 import { NavigateToPath } from '../../contexts/kibana';
-
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useUrlState } from '../../util/url_state';
@@ -25,8 +23,8 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: 'anomaly_detection',
-  title: i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
-    defaultMessage: 'Anomaly Detection',
+  title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
+    defaultMessage: 'Anomaly Detection Jobs',
   }),
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,

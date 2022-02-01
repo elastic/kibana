@@ -21,6 +21,7 @@ import {
   KibanaPageTemplate,
   RedirectAppLinks,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { useDocTitle } from '../../routing/use_doc_title';
 
 export const MlPageControlsContext = createContext<{
   setPageTitle: (v?: React.ReactNode | undefined) => void;
@@ -78,6 +79,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   );
 
   const activeRoute = useActiveRoute(routeList);
+
+  useDocTitle(activeRoute);
 
   return (
     <KibanaPageTemplate

@@ -49,6 +49,9 @@ export const explorerRouteFactory = (
 ): MlRoute => ({
   id: 'explorer',
   path: '/explorer',
+  title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
+    defaultMessage: 'Anomaly Explorer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -57,7 +60,6 @@ export const explorerRouteFactory = (
       text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',
       }),
-      href: '',
     },
   ],
   enableDatePicker: true,
