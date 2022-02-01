@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and has authorization to manage endpoint security', () => {
       for (const eventFilterCall of eventFilterCalls) {
-        it(`should error on [${eventFilterCall.method} if invalid field`, async () => {
+        it(`should error on [${eventFilterCall.method}] if invalid field`, async () => {
           const body = eventFilterCall.getBody({});
 
           body.entries[0].field = 'some.invalid.field';
@@ -148,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send(body)
             .expect(400)
             .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/types that failed validation:/));
+            .expect(anErrorMessageWith(/invalid field: some\.invalid\.field/));
         });
 
         it(`should error on [${eventFilterCall.method}] if more than one OS is set`, async () => {
