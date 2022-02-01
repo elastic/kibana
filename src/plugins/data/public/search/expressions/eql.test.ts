@@ -43,6 +43,7 @@ describe('eql', () => {
         },
         indexPatterns: {
           get: jest.fn(),
+          create: jest.fn(),
         },
       },
     ];
