@@ -24,12 +24,14 @@ import { PageLoading } from '../../components';
 import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
+  toggleSetupMode,
   updateSetupModeData,
 } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { ActionMenu } from '../../components/action_menu';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
+import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
 
 export interface TabMenuItem {
   id: string;
@@ -110,12 +112,17 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     return children;
   };
 
+  const setupModeState = getSetupModeState();
+
   return (
     <EuiPage data-test-subj="monitoringAppContainer">
       <EuiPageBody>
         <EuiPageContent>
           <ActionMenu>
-            <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
+            <SetupModeToggleButton
+              enabled={setupModeState.enabled}
+              toggleSetupMode={toggleSetupMode}
+            />
             <AlertsDropdown />
           </ActionMenu>
           <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />

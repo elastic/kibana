@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { SetupModeEnterButton } from './enter_button';
+import { SetupModeToggleButton } from './toggle_button';
 
-describe('EnterButton', () => {
+describe('ToggleButton', () => {
   it('should render properly', () => {
-    const component = shallow(<SetupModeEnterButton enabled={true} toggleSetupMode={jest.fn()} />);
+    const component = shallow(<SetupModeToggleButton enabled={true} toggleSetupMode={jest.fn()} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should show a loading state', () => {
-    const component = shallow(<SetupModeEnterButton enabled={true} toggleSetupMode={jest.fn()} />);
+    const component = shallow(<SetupModeToggleButton enabled={true} toggleSetupMode={jest.fn()} />);
 
     component.find('EuiButton').simulate('click');
 
@@ -26,18 +26,18 @@ describe('EnterButton', () => {
   it('should call toggleSetupMode', () => {
     const toggleSetupMode = jest.fn();
     const component = shallow(
-      <SetupModeEnterButton enabled={true} toggleSetupMode={toggleSetupMode} />
+      <SetupModeToggleButton enabled={true} toggleSetupMode={toggleSetupMode} />
     );
 
     component.find('EuiButton').simulate('click');
     expect(toggleSetupMode).toHaveBeenCalledWith(true);
   });
 
-  it('should not render if not enabled', () => {
+  it('should render the exit setup mode button when disabled', () => {
     const toggleSetupMode = jest.fn();
     const component = shallow(
-      <SetupModeEnterButton enabled={false} toggleSetupMode={toggleSetupMode} />
+      <SetupModeToggleButton enabled={false} toggleSetupMode={toggleSetupMode} />
     );
-    expect(component.html()).toBe(null);
+    expect(component).toMatchSnapshot();
   });
 });

@@ -27,7 +27,6 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -61,7 +60,6 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -97,7 +95,6 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -135,7 +132,6 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -188,7 +184,6 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -220,7 +215,6 @@ describe('SetupModeRenderer', () => {
   it('should set the top menu items', () => {
     const newProduct = { id: 1 };
 
-    const setSetupModeMenuItem = jest.fn();
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
         enabled: true,
@@ -245,7 +239,6 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
-      setSetupModeMenuItem,
     }));
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
@@ -267,6 +260,5 @@ describe('SetupModeRenderer', () => {
 
     component.setState({ isFlyoutOpen: true });
     component.update();
-    expect(setSetupModeMenuItem).toHaveBeenCalled();
   });
 });

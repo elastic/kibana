@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiPage,
-  EuiPageHeader,
-  EuiPageBody,
-  EuiSuperDatePicker,
-  EuiTitle,
-  OnRefreshChangeProps,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSuperDatePicker, OnRefreshChangeProps } from '@elastic/eui';
 import React, { useContext, useCallback, useMemo } from 'react';
 import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';

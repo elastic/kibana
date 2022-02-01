@@ -10,35 +10,36 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '../../../../observability/public';
 import { TELEMETRY_METRIC_BUTTON_CLICK } from '../../../common/constants';
+import { SetupModeExitButton } from './exit_button';
 
-export interface SetupModeEnterButtonProps {
+export interface SetupModeToggleButtonProps {
   enabled: boolean;
   toggleSetupMode: (state: boolean) => void;
 }
 
-export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
-  props: SetupModeEnterButtonProps
+export const SetupModeToggleButton: React.FC<SetupModeToggleButtonProps> = (
+  props: SetupModeToggleButtonProps
 ) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const trackStat = useUiTracker({ app: 'stack_monitoring' });
 
-  if (!props.enabled) {
-    return null;
-  }
-
-  async function enterSetupMode() {
+  async function toggleSetupMode(enabled: boolean, stat: string) {
     setIsLoading(true);
-    await props.toggleSetupMode(true);
+    await props.toggleSetupMode(enabled);
     trackStat({
-      metric: `${TELEMETRY_METRIC_BUTTON_CLICK}setupmode_enter`,
+      metric: `${TELEMETRY_METRIC_BUTTON_CLICK}setupmode_${stat}`,
       metricType: METRIC_TYPE.CLICK,
     });
     setIsLoading(false);
   }
 
+  if (props.enabled) {
+    return <SetupModeExitButton exitSetupMode={() => toggleSetupMode(false, 'exit')} />;
+  }
+
   return (
     <EuiButton
-      onClick={enterSetupMode}
+      onClick={() => toggleSetupMode(true, 'enter')}
       iconType="flag"
       size="s"
       iconSide="right"

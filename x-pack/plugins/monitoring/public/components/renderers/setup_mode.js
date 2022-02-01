@@ -12,12 +12,10 @@ import {
   updateSetupModeData,
   disableElasticsearchInternalCollection,
   toggleSetupMode,
-  setSetupModeMenuItem,
 } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
 import {
   EuiBottomBar,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
@@ -25,11 +23,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { findNewUuid } from './lib/find_new_uuid';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';
+import { SetupModeExitButton } from '../setup_mode/exit_button';
 
 export class WrappedSetupModeRenderer extends React.Component {
   globalState;
@@ -70,7 +68,6 @@ export class WrappedSetupModeRenderer extends React.Component {
 
       this.setState(newState);
     });
-    setSetupModeMenuItem();
   }
 
   reset() {
@@ -155,19 +152,7 @@ export class WrappedSetupModeRenderer extends React.Component {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="danger"
-                    fill
-                    iconType="flag"
-                    iconSide="right"
-                    size="s"
-                    onClick={() => toggleSetupMode(false)}
-                    data-test-subj="exitSetupModeBtn"
-                  >
-                    {i18n.translate('xpack.monitoring.setupMode.exit', {
-                      defaultMessage: `Exit setup mode`,
-                    })}
-                  </EuiButton>
+                  <SetupModeExitButton exitSetupMode={() => toggleSetupMode(false)} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
