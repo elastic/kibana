@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
+  EuiComboBox,
   EuiLink,
   EuiSwitch,
   EuiFieldText,
@@ -479,12 +480,24 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 }
               )}
             >
-              <EuiSelect
-                options={ingestPipelineNames.map((text: string) => ({ text, value: text }))}
-                value={destinationIngestPipeline}
-                onChange={(e) => setDestinationIngestPipeline(e.target.value)}
-                hasNoInitialSelection={defaults.destinationIngestPipeline === ''}
+              <EuiComboBox
                 data-test-subj="transformDestinationPipelineSelect"
+                aria-label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.destinationIngestPipelineAriaLabel',
+                  {
+                    defaultMessage: 'Select an ingest pipeline',
+                  }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.destinationIngestPipelinComboBoxPlaceholder',
+                  {
+                    defaultMessage: 'Select an ingest pipeline',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={ingestPipelineNames.map((label: string) => ({ label }))}
+                selectedOptions={[{ label: destinationIngestPipeline }]}
+                onChange={(options) => setDestinationIngestPipeline(options[0]?.label ?? '')}
               />
             </EuiFormRow>
           )}
