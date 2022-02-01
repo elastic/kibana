@@ -13,7 +13,7 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '../../../../../src/core/server';
-import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
+import { TaskInstance, TaskInstanceWithDeprecatedFields, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
   migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> };
@@ -36,6 +36,10 @@ export function getMigrations(): SavedObjectMigrationMap {
     '8.0.0': executeMigrationWithErrorHandling(
       pipeMigrations(alertingTaskLegacyIdToSavedObjectIds, actionsTasksLegacyIdToSavedObjectIds),
       '8.0.0'
+    ),
+    '8.1.0': executeMigrationWithErrorHandling(
+      pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule),
+      '8.1.0'
     ),
   };
 }
@@ -145,4 +149,23 @@ function moveIntervalIntoSchedule({
 function pipeMigrations(...migrations: TaskInstanceMigration[]): TaskInstanceMigration {
   return (doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
+}
+
+function resetAttemptsAndStatusForTheTasksWithoutSchedule(
+  doc: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>
+): SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields> {
+  if (doc.attributes.taskType.startsWith('alerting:')) {
+    if (!doc.attributes.schedule?.interval) {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          attempts: 0,
+          status: TaskStatus.Idle,
+        } as TaskInstanceWithDeprecatedFields,
+      };
+    }
+  }
+
+  return doc;
 }

@@ -108,6 +108,25 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('8.1.0', () => {
+    test('resets attempts and status of the alerting tasks without schedule interval', () => {
+      const migration810 = getMigrations()['8.1.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123',
+        schedule: undefined,
+      });
+
+      expect(migration810(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          attempts: 0,
+          status: 'idle',
+        },
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
