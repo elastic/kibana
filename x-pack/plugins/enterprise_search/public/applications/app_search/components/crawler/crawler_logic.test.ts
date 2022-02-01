@@ -284,7 +284,8 @@ describe('CrawlerLogic', () => {
           await nextTick();
 
           expect(http.post).toHaveBeenCalledWith(
-            '/internal/app_search/engines/some-engine/crawler/crawl_requests'
+            '/internal/app_search/engines/some-engine/crawler/crawl_requests',
+            { body: JSON.stringify({ overrides: {} }) }
           );
           expect(CrawlerLogic.actions.fetchCrawlerData).toHaveBeenCalled();
         });
