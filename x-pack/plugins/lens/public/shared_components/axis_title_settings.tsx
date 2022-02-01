@@ -60,7 +60,7 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
           <EuiText size="xs">
             <h4>
               {i18n.translate('xpack.lens.shared.axisNameLabel', {
-                defaultMessage: 'Axis name',
+                defaultMessage: 'Axis title',
               })}
             </h4>
           </EuiText>
