@@ -16,7 +16,7 @@ import {
   useConfig,
   useFleetStatus,
   useBreadcrumbs,
-  useCapabilities,
+  useAuthz,
   useGetSettings,
   useGetAgentPolicies,
 } from '../../hooks';
@@ -32,7 +32,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();
-  const capabilities = useCapabilities();
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
@@ -93,7 +93,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) {
     return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
-  if (!capabilities.read) {
+  if (!hasFleetAllPrivileges) {
     return <NoAccessPage />;
   }
 

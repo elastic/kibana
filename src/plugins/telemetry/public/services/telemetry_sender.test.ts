@@ -66,6 +66,29 @@ describe('TelemetrySender', () => {
   });
 
   describe('shouldSendReport', () => {
+    let hasFocus: jest.SpyInstance;
+
+    beforeEach(() => {
+      hasFocus = jest.spyOn(document, 'hasFocus');
+      hasFocus.mockReturnValue(true); // Return true by default for all tests;
+    });
+
+    afterEach(() => {
+      hasFocus.mockRestore();
+    });
+
+    it('returns false if the page is not visible', async () => {
+      hasFocus.mockReturnValue(false);
+      const telemetryService = mockTelemetryService();
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
+      telemetryService.fetchLastReported = jest.fn().mockResolvedValue(Date.now());
+      const telemetrySender = new TelemetrySender(telemetryService);
+      const shouldSendReport = await telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(false);
+      expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
+      expect(telemetryService.fetchLastReported).toBeCalledTimes(0);
+    });
+
     it('returns false whenever optIn is false', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
@@ -372,9 +395,11 @@ describe('TelemetrySender', () => {
     it('calls sendIfDue every 60000 ms', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
+      telemetrySender['sendIfDue'] = jest.fn().mockResolvedValue(void 0);
       telemetrySender.startChecking();
-      expect(setInterval).toBeCalledTimes(1);
-      expect(setInterval).toBeCalledWith(telemetrySender['sendIfDue'], 60000);
+      expect(telemetrySender['sendIfDue']).toHaveBeenCalledTimes(0);
+      jest.advanceTimersByTime(60000);
+      expect(telemetrySender['sendIfDue']).toHaveBeenCalledTimes(1);
     });
   });
 });
