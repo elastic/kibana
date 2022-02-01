@@ -91,10 +91,18 @@ describe('<RemoteClusterList />', () => {
     ];
 
     for (let i = 0; i < 29; i++) {
-      remoteClusters.push({
-        name: `name${i}`,
-        seeds: [],
-      });
+      if (i % 2 === 0) {
+        remoteClusters.push({
+          name: `cluster-${i}`,
+          seeds: [],
+        });
+      } else {
+        remoteClusters.push({
+          name: `cluster_with_proxy-${i}`,
+          proxyAddress: `127.0.0.1:10${i}`,
+          mode: PROXY_MODE,
+        });
+      }
     }
 
     beforeEach(async () => {

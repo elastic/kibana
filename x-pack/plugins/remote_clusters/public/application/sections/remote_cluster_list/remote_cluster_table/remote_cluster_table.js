@@ -90,6 +90,7 @@ export class RemoteClusterTable extends Component {
   }
 
   onSearch = ({ query }) => {
+    // There's no need to update the state if there arent any search params
     if (!query) {
       return;
     }
