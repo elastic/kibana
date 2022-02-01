@@ -359,6 +359,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformFrequency,
       transformSettingsMaxPageSearchSize,
       destinationIndex,
+      destinationIngestPipeline,
       valid,
       indexPatternTimeField,
       /* eslint-enable react-hooks/exhaustive-deps */
