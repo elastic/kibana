@@ -373,9 +373,7 @@ describe('DatatableComponent', () => {
 
     await waitForWrapperUpdate(wrapper);
 
-    wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
-
-    expect(onDispatchEvent).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="lensDatatableFilterOut"]').exists()).toBe(false);
   });
 
   test('it shows emptyPlaceholder for undefined bucketed data', () => {

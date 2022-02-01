@@ -341,7 +341,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         isTimeBasedSwimLane,
         onClickValue,
         table,
-        xAxisColumn.id,
+        xAxisColumn?.id,
         xAxisColumn?.meta?.field,
         xAxisColumnIndex,
         yAxisColumn,
