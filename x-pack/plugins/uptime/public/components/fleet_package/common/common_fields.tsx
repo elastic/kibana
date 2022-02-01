@@ -5,21 +5,41 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { Validation } from '../types';
+import { Validation, DataStream } from '../types';
 import { ConfigKey, CommonFields as CommonFieldsType } from '../types';
 import { ComboBox } from '../combo_box';
 import { OptionalLabel } from '../optional_label';
+import { usePolicyConfigContext } from '../contexts';
 
 interface Props {
   validate: Validation;
   fields: CommonFieldsType;
-  onChange: ({ value, configKey }: { value: string | string[]; configKey: ConfigKey }) => void;
+  onChange: ({
+    value,
+    configKey,
+  }: {
+    value: string | string[] | null;
+    configKey: ConfigKey;
+  }) => void;
 }
 
 export function CommonFields({ fields, onChange, validate }: Props) {
+  const { monitorType } = usePolicyConfigContext();
+
+  const isBrowser = monitorType === DataStream.BROWSER;
+
+  useEffect(() => {
+    if (monitorType === DataStream.BROWSER) {
+      onChange({
+        value: null,
+        configKey: ConfigKey.TIMEOUT,
+      });
+    }
+  }, [onChange, monitorType]);
+
   return (
     <>
       <EuiFormRow
@@ -48,46 +68,48 @@ export function CommonFields({ fields, onChange, validate }: Props) {
           data-test-subj="syntheticsAPMServiceName"
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label"
-            defaultMessage="Timeout in seconds"
-          />
-        }
-        isInvalid={!!validate[ConfigKey.TIMEOUT]?.(fields)}
-        error={
-          parseInt(fields[ConfigKey.TIMEOUT], 10) < 0 ? (
+      {!isBrowser && (
+        <EuiFormRow
+          label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
-              defaultMessage="Timeout must be greater than or equal to 0"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label"
+              defaultMessage="Timeout in seconds"
             />
-          ) : (
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
-              defaultMessage="Timeout must be less than the monitor interval"
-            />
-          )
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"
-            defaultMessage="The total time allowed for testing the connection and exchanging data."
-          />
-        }
-      >
-        <EuiFieldNumber
-          min={0}
-          value={fields[ConfigKey.TIMEOUT]}
-          onChange={(event) =>
-            onChange({
-              value: event.target.value,
-              configKey: ConfigKey.TIMEOUT,
-            })
           }
-          step={'any'}
-        />
-      </EuiFormRow>
+          isInvalid={!!validate[ConfigKey.TIMEOUT]?.(fields)}
+          error={
+            parseInt(fields[ConfigKey.TIMEOUT] || '', 10) < 0 ? (
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
+                defaultMessage="Timeout must be greater than or equal to 0"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+                defaultMessage="Timeout must be less than the monitor interval"
+              />
+            )
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"
+              defaultMessage="The total time allowed for testing the connection and exchanging data."
+            />
+          }
+        >
+          <EuiFieldNumber
+            min={0}
+            value={fields[ConfigKey.TIMEOUT] || ''}
+            onChange={(event) =>
+              onChange({
+                value: event.target.value,
+                configKey: ConfigKey.TIMEOUT,
+              })
+            }
+            step={'any'}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         label={
           <FormattedMessage

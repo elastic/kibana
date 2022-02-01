@@ -21,9 +21,12 @@ interface Props {
 
 export const BrowserSimpleFields = memo<Props>(({ validate }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
   const onChangeSourceField = useCallback(
     ({
       zipUrl,

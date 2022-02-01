@@ -38,11 +38,9 @@ import {
 } from './cti_details/helpers';
 import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
-
 import { InvestigationGuideView } from './investigation_guide_view';
-
-import { HostRisk } from '../../containers/hosts_risk/use_hosts_risk_score';
 import { Overview } from './overview';
+import { HostRisk } from '../../containers/hosts_risk/types';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -180,7 +178,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     browserFields,
                     isDraggable,
                     timelineId,
-                    title: i18n.DUCOMENT_SUMMARY,
+                    title: i18n.HIGHLIGHTES_FIELDS,
                   }}
                   goToTable={goToTableTab}
                 />
