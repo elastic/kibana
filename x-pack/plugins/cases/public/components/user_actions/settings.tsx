@@ -13,7 +13,7 @@ import { createCommonUpdateUserActionBuilder } from './common';
 import { DISABLED_SETTING, ENABLED_SETTING, SYNC_ALERTS_LC } from './translations';
 
 function getSettingsLabel(userAction: UserActionResponse<SettingsUserAction>): ReactNode {
-  if (typeof userAction?.payload?.settings?.syncAlerts === 'boolean') {
+  if (userAction?.payload?.settings?.syncAlerts !== undefined) {
     if (userAction.payload.settings.syncAlerts) {
       return `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
     } else {
