@@ -87,3 +87,48 @@ export const ruleExecutionEvent = t.type({
 });
 
 export type RuleExecutionEvent = t.TypeOf<typeof ruleExecutionEvent>;
+
+// -------------------------------------------------------------------------------------------------
+// Aggregate Rule execution events
+
+const metrics = t.type({
+  total_alerts: t.number,
+  total_hits: t.number,
+  total_indexing_duration_ms: t.number,
+  total_search_duration_ms: t.number,
+});
+
+const execution = t.type({
+  metrics,
+  status: t.string,
+});
+
+const rule = t.type({
+  execution,
+});
+
+const alert = t.type({
+  rule,
+});
+
+const event = t.type({
+  duration: t.number,
+});
+
+const task = t.type({
+  schedule_delay: t.number,
+});
+
+const kibana = t.type({
+  task,
+  alert,
+});
+
+export const aggregateRuleExecutionEvent = t.type({
+  kibana,
+  event,
+  message: t.string,
+  '@timestamp': IsoDateString,
+});
+
+export type AggregateRuleExecutionEvent = t.TypeOf<typeof aggregateRuleExecutionEvent>;

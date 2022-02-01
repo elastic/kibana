@@ -25,6 +25,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
 } from '../../../../../common/constants';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { RuleAlertType, HapiReadableStream } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
@@ -241,6 +242,11 @@ export const getRuleExecutionEventsRequest = () =>
     path: DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
     params: {
       ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    },
+    query: {
+      start: 'now-30',
+      end: 'now',
+      filters: '',
     },
   });
 
@@ -555,6 +561,62 @@ export const getLastFailures = (): RuleExecutionEvent[] => [
     message: 'Rule failed',
   },
 ];
+
+export const getAggregateExecutionEvents = (): GetAggregateRuleExecutionEventsResponse => ({
+  events: [
+    {
+      kibana: {
+        task: {
+          schedule_delay: 890000000,
+        },
+        alert: {
+          rule: {
+            execution: {
+              metrics: {
+                total_alerts: 0,
+                total_hits: 0,
+                total_indexing_duration_ms: 0,
+                total_search_duration_ms: 5,
+              },
+              status: 'succeeded',
+            },
+          },
+        },
+      },
+      event: {
+        duration: 2035000000,
+      },
+      message: 'succeeded',
+      '@timestamp': '2022-02-01T05:56:27.813Z',
+    },
+    {
+      kibana: {
+        task: {
+          schedule_delay: 13980000000,
+        },
+        alert: {
+          rule: {
+            execution: {
+              metrics: {
+                total_alerts: 0,
+                total_hits: 0,
+                total_indexing_duration_ms: 0,
+                total_search_duration_ms: 9,
+              },
+              status: 'succeeded',
+            },
+          },
+        },
+      },
+      event: {
+        duration: 2065000000,
+      },
+      message: 'succeeded',
+      '@timestamp': '2022-02-01T05:51:27.143Z',
+    },
+  ],
+  maxEvents: 2,
+});
 
 export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
   took: 1,

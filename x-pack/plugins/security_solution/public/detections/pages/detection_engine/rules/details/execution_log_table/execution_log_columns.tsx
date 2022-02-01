@@ -21,7 +21,7 @@ import * as i18n from '../translations';
 
 const ONE_SECOND_AS_NANOSECONDS = 1000000000;
 
-export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionEvent>> = [
+export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> = [
   {
     name: i18n.COLUMN_STATUS,
     field: 'kibana.alert.rule.execution.status',

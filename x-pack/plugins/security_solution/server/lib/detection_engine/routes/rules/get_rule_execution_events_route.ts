@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -15,7 +16,6 @@ import {
   GetRuleExecutionEventsQueryParams,
   GetRuleExecutionEventsRequestParams,
 } from '../../../../../common/detection_engine/schemas/request/get_rule_execution_events_request';
-import type { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 
 /**
  * Returns execution events of a given rule (aggregated by executionId) from Event Log.
@@ -40,16 +40,16 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
 
       try {
         const executionLog = context.securitySolution.getExecutionLogClient();
-        const { events, message } = await executionLog.getAggregateExecutionEvents({
+        const { events, maxEvents } = await executionLog.getAggregateExecutionEvents({
           ruleId,
           start,
           end,
           filters,
         });
 
-        const responseBody: GetRuleExecutionEventsResponse = {
+        const responseBody: GetAggregateRuleExecutionEventsResponse = {
           events,
-          message,
+          maxEvents,
         };
 
         return response.ok({ body: responseBody });

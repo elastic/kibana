@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from 'react-query';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';
@@ -25,7 +26,7 @@ export const useRuleExecutionEvents = ({
 }: UseRuleExecutionEventsArgs) => {
   const { addError } = useAppToasts();
 
-  return useQuery(
+  return useQuery<GetAggregateRuleExecutionEventsResponse>(
     ['ruleExecutionEvents', start, end, filters],
     async ({ signal }) => {
       return fetchRuleExecutionEvents({ ruleId, start, end, filters, signal });

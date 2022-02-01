@@ -24,7 +24,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 import {
   RulesSchema,
-  GetRuleExecutionEventsResponse,
+  GetAggregateRuleExecutionEventsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
 
 import {
@@ -390,9 +390,9 @@ export const fetchRuleExecutionEvents = async ({
   end: string;
   filters?: string;
   signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
+}): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
-  return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
+  return KibanaServices.get().http.fetch<GetAggregateRuleExecutionEventsResponse>(url, {
     method: 'GET',
     query: { start, end, filters },
     signal,

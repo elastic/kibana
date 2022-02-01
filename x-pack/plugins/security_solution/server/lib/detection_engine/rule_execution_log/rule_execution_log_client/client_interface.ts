@@ -9,7 +9,7 @@ import {
   RuleExecutionEvent,
   RuleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
-import { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 
 export interface GetAggregateExecutionEventsArgs {
   ruleId: string;
@@ -37,7 +37,7 @@ export interface IRuleExecutionLogClient {
     start,
     end,
     filters,
-  }: GetAggregateExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
+  }: GetAggregateExecutionEventsArgs): Promise<GetAggregateRuleExecutionEventsResponse>;
 
   /**
    * Fetches a list of current execution summaries of multiple rules.

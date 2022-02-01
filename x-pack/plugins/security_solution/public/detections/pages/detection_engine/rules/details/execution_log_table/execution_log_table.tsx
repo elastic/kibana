@@ -11,7 +11,6 @@ import {
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSearchBarProps,
   EuiSuperDatePicker,
   OnTimeChangeProps,
@@ -36,6 +35,9 @@ interface ExecutionLogTableProps {
   ruleId: string;
 }
 
+// TODO: Hoist to package and share with server in events_reader
+const MAX_EXECUTION_EVENTS_DISPLAYED = 500;
+
 const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({ ruleId }) => {
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
   const [refreshInterval, setRefreshInterval] = useState(1000);
@@ -50,7 +52,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({ ruleId }
     refetch,
   } = useRuleExecutionEvents({ ruleId, start, end, filters });
   const items = events?.events ?? [];
-  const message = events?.message;
+  const maxEvents = events?.maxEvents ?? 0;
 
   const onTimeChangeCallback = useCallback(
     (props: OnTimeChangeProps) => {
@@ -88,7 +90,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({ ruleId }
   );
 
   return (
-    <EuiPanel hasBorder>
+    <>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem style={{ minWidth: '50%' }}>
           <ExecutionLogSearchBar onSearch={onSearchCallback} />
@@ -118,11 +120,11 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({ ruleId }
               {i18n.SHOWING_EXECUTIONS(items.length)}
             </UtilityBarText>
           </UtilityBarGroup>
-          {message && (
+          {maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED && (
             <UtilityBarGroup>
               <UtilityBarText dataTestSubj="exceptionsShowing">
                 <EuiTextColor color="danger">
-                  {i18n.RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED(100)}
+                  {i18n.RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED(maxEvents)}
                 </EuiTextColor>
               </UtilityBarText>
             </UtilityBarGroup>
@@ -136,7 +138,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({ ruleId }
         pagination={true}
         sorting={{ sort: { field: '@timestamp', direction: 'desc' } }}
       />
-    </EuiPanel>
+    </>
   );
 };
 

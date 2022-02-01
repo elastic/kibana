@@ -6,15 +6,23 @@
  */
 
 import * as t from 'io-ts';
-import { ruleExecutionEvent } from '../common';
+import { aggregateRuleExecutionEvent, ruleExecutionEvent } from '../common';
 
-export const GetRuleExecutionEventsResponse = t.intersection([
+export const GetRuleExecutionEventsResponse = t.exact(
   t.type({
     events: t.array(ruleExecutionEvent),
-  }),
-  t.partial({
-    message: t.string,
-  }),
-]);
+  })
+);
 
 export type GetRuleExecutionEventsResponse = t.TypeOf<typeof GetRuleExecutionEventsResponse>;
+
+export const GetAggregateRuleExecutionEventsResponse = t.exact(
+  t.type({
+    events: t.array(aggregateRuleExecutionEvent),
+    maxEvents: t.number,
+  })
+);
+
+export type GetAggregateRuleExecutionEventsResponse = t.TypeOf<
+  typeof GetAggregateRuleExecutionEventsResponse
+>;

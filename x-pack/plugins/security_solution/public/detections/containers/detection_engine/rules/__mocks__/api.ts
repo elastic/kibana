@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
 import {
-  GetRuleExecutionEventsResponse,
+  GetAggregateRuleExecutionEventsResponse,
   RulesSchema,
 } from '../../../../../../common/detection_engine/schemas/response';
 
@@ -62,19 +61,46 @@ export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse
 
 export const fetchRuleExecutionEvents = async ({
   ruleId,
+  start,
+  end,
+  filters,
   signal,
 }: {
   ruleId: string;
+  start: string;
+  end: string;
+  filters?: string;
   signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
+}): Promise<GetAggregateRuleExecutionEventsResponse> => {
   return Promise.resolve({
     events: [
       {
-        date: '2021-12-29T10:42:59.996Z',
-        status: RuleExecutionStatus.succeeded,
-        message: 'Rule executed successfully',
+        kibana: {
+          task: {
+            schedule_delay: 13980000000,
+          },
+          alert: {
+            rule: {
+              execution: {
+                metrics: {
+                  total_alerts: 0,
+                  total_hits: 0,
+                  total_indexing_duration_ms: 0,
+                  total_search_duration_ms: 9,
+                },
+                status: 'succeeded',
+              },
+            },
+          },
+        },
+        event: {
+          duration: 2065000000,
+        },
+        message: 'succeeded',
+        '@timestamp': '2022-02-01T05:51:27.143Z',
       },
     ],
+    maxEvents: 1,
   });
 };
 

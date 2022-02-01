@@ -11,10 +11,11 @@ import { get, set } from 'lodash';
 import { IEventLogClient } from '../../../../../../event_log/server';
 
 import {
+  AggregateRuleExecutionEvent,
   RuleExecutionEvent,
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
-import { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { invariant } from '../../../../../common/utils/invariant';
 import {
   RULE_SAVED_OBJECT_TYPE,
@@ -25,7 +26,7 @@ import {
 export interface IRuleExecutionEventsReader {
   getAggregateExecutionEvents(
     args: GetAggregateExecutionEventsArgs
-  ): Promise<GetRuleExecutionEventsResponse>;
+  ): Promise<GetAggregateRuleExecutionEventsResponse>;
 
   getLastStatusChanges(args: GetLastStatusChangesArgs): Promise<RuleExecutionEvent[]>;
 }
@@ -43,6 +44,9 @@ export interface GetLastStatusChangesArgs {
   includeStatuses?: RuleExecutionStatus[];
 }
 
+// TODO: Hoist to package and share with UI in execution_log_table
+const MAX_EXECUTION_EVENTS_DISPLAYED = 500;
+
 export const createRuleExecutionEventsReader = (
   eventLogClient: IEventLogClient,
   logger: Logger
@@ -50,7 +54,7 @@ export const createRuleExecutionEventsReader = (
   return {
     async getAggregateExecutionEvents(
       args: GetAggregateExecutionEventsArgs
-    ): Promise<GetRuleExecutionEventsResponse> {
+    ): Promise<GetAggregateRuleExecutionEventsResponse> {
       const { ruleId, start, end, filters } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
@@ -60,7 +64,7 @@ export const createRuleExecutionEventsReader = (
       invariant(startDate?.isValid(), `Required "start" field is not valid: ${start}`);
       invariant(endDate?.isValid(), `Required "end" field is not valid: ${end}`);
 
-      // Fetch total unique executions per filters/daterange to get max execution events
+      // Fetch total unique executions per daterange to get max execution events
       const { total: uniqueExecutionEventsResults = 0 } =
         await eventLogClient.findEventsBySavedObjectIds(soType, soIds, {
           start: startDate?.utc().toISOString(),
@@ -69,18 +73,29 @@ export const createRuleExecutionEventsReader = (
           per_page: 0,
           sort_field: '@timestamp',
           sort_order: 'desc',
-          filter: `event.action:execute-start `,
+          filter: `event.action:execute-start`,
         });
 
+      // Fetch all events to aggregate into individual execution events for each unique executionId
       const findResult = await eventLogClient.findEventsBySavedObjectIds(soType, soIds, {
         start: startDate?.utc().toISOString(),
         end: endDate?.utc().toISOString(),
         page: 1,
-        per_page: 10000,
+        per_page: 10000, // TODO: Possibly constrain to 5x MAX_EXECUTION_EVENTS_DISPLAYED (i.e. max events per execution)
         sort_field: '@timestamp',
         sort_order: 'desc',
         filter: filters,
       });
+
+      const executeStartFields = ['@timestamp'];
+      const executeFields = ['kibana.task.schedule_delay', 'event.duration'];
+      const metricsFields = [
+        'kibana.alert.rule.execution.metrics.total_alerts',
+        'kibana.alert.rule.execution.metrics.total_hits',
+        'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
+        'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+        'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+      ];
 
       // TODO: Rework to ensure all fields are included from necessary event types
       // Maybe use `objectArrayIntersection` from EQL sequence building?
@@ -93,40 +108,21 @@ export const createRuleExecutionEventsReader = (
           aggregatedResults[uuid] = {};
         }
 
-        if (eventAction === 'execute') {
-          set(aggregatedResults[uuid], '@timestamp', get(event, '@timestamp'));
-          set(
-            aggregatedResults[uuid],
-            'kibana.task.schedule_delay',
-            get(event, 'kibana.task.schedule_delay')
-          );
-          set(aggregatedResults[uuid], 'event.duration', get(event, 'event.duration'));
+        // Merge different event types into a single execution event.
+        // @timestamp comes from initial `execute-start` event from platform
+        // Remaining fields filled in from platform `execute` and security `metric`/`status-change` events
+        if (eventAction === 'execute-start') {
+          executeStartFields.forEach((field) => {
+            set(aggregatedResults[uuid], field, get(event, field));
+          });
+        } else if (eventAction === 'execute') {
+          executeFields.forEach((field) => {
+            set(aggregatedResults[uuid], field, get(event, field));
+          });
         } else if (eventAction === 'execution-metrics') {
-          set(
-            aggregatedResults[uuid],
-            'kibana.alert.rule.execution.metrics.total_alerts',
-            get(event, 'kibana.alert.rule.execution.metrics.total_alerts')
-          );
-          set(
-            aggregatedResults[uuid],
-            'kibana.alert.rule.execution.metrics.total_hits',
-            get(event, 'kibana.alert.rule.execution.metrics.total_hits')
-          );
-          set(
-            aggregatedResults[uuid],
-            'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
-            get(event, 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms')
-          );
-          set(
-            aggregatedResults[uuid],
-            'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-            get(event, 'kibana.alert.rule.execution.metrics.total_search_duration_ms')
-          );
-          set(
-            aggregatedResults[uuid],
-            'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
-            get(event, 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms')
-          );
+          metricsFields.forEach((field) => {
+            set(aggregatedResults[uuid], field, get(event, field));
+          });
         } else if (eventAction === 'status-change' && status !== 'going to run') {
           if (status != null) {
             set(aggregatedResults[uuid], 'kibana.alert.rule.execution.status', status);
@@ -139,9 +135,15 @@ export const createRuleExecutionEventsReader = (
         }
       });
 
+      const aggEvents = Object.values(aggregatedResults);
+      // Constrain length as not supporting pagination through in-memory aggregations in MVP
+      if (aggEvents.length > MAX_EXECUTION_EVENTS_DISPLAYED) {
+        aggEvents.length = MAX_EXECUTION_EVENTS_DISPLAYED;
+      }
+
       return {
-        events: Object.values(aggregatedResults) as RuleExecutionEvent[],
-        message: `${uniqueExecutionEventsResults}`,
+        events: aggEvents as AggregateRuleExecutionEvent[],
+        maxEvents: uniqueExecutionEventsResults,
       };
     },
     async getLastStatusChanges(args) {
