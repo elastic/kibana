@@ -27,4 +27,5 @@ export const partitionVisContainerStyleFactory = (theme: EuiThemeComputed) => cs
   padding: ${theme.size.s};
   margin-left: auto;
   margin-right: auto;
+  overflow: hidden;
 `;
