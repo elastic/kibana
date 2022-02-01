@@ -100,91 +100,84 @@ export function ExploratoryView({
     }
   };
 
-  return (
-    <Wrapper>
-      {lens ? (
-        <>
-          <LensWrapper ref={wrapperRef} height={height}>
-            <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
-              {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
-                collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
+  return lens ? (
+    <>
+      <LensWrapper ref={wrapperRef} height={height}>
+        <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
+          {(EuiResizablePanel, _EuiResizableButton, { togglePanel }) => {
+            collapseFn.current = (id, direction) => togglePanel?.(id, { direction });
 
-                return (
-                  <>
-                    <EuiFlexGroup alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          {...(hiddenPanel === 'chartPanel'
-                            ? { iconType: 'arrowRight' }
-                            : { iconType: 'arrowDown' })}
-                          onClick={() => onChange('chartPanel')}
-                        >
-                          {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
-                        </EuiButtonEmpty>
+            return (
+              <>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      {...(hiddenPanel === 'chartPanel'
+                        ? { iconType: 'arrowRight' }
+                        : { iconType: 'arrowDown' })}
+                      onClick={() => onChange('chartPanel')}
+                    >
+                      {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  {hiddenPanel === 'chartPanel' ? null : (
+                    <>
+                      <EuiFlexItem style={{ textAlign: 'right' }}>
+                        <LastUpdated chartTimeRange={chartTimeRangeContext} />
                       </EuiFlexItem>
-                      {hiddenPanel === 'chartPanel' ? null : (
-                        <>
-                          <EuiFlexItem style={{ textAlign: 'right' }}>
-                            <LastUpdated chartTimeRange={chartTimeRangeContext} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              iconType="refresh"
-                              onClick={() => setLastRefresh(Date.now())}
-                            >
-                              {REFRESH_LABEL}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        </>
-                      )}
-                    </EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
+                          {REFRESH_LABEL}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </>
+                  )}
+                </EuiFlexGroup>
 
-                    <EuiResizablePanel
-                      initialSize={40}
-                      minSize={'30%'}
-                      mode={'collapsible'}
-                      id="chartPanel"
-                    >
-                      {lensAttributes ? (
-                        <LensEmbeddable
-                          setChartTimeRangeContext={setChartTimeRangeContext}
-                          lensAttributes={lensAttributes}
-                        />
-                      ) : (
-                        <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
-                      )}
-                    </EuiResizablePanel>
+                <EuiResizablePanel
+                  initialSize={40}
+                  minSize={'30%'}
+                  mode={'collapsible'}
+                  id="chartPanel"
+                >
+                  {lensAttributes ? (
+                    <LensEmbeddable
+                      setChartTimeRangeContext={setChartTimeRangeContext}
+                      lensAttributes={lensAttributes}
+                    />
+                  ) : (
+                    <EmptyView series={firstSeries} loading={loading} reportType={reportType} />
+                  )}
+                </EuiResizablePanel>
 
-                    <EuiResizablePanel
-                      initialSize={60}
-                      minSize="10%"
-                      mode={'main'}
-                      id="seriesPanel"
-                      color="subdued"
-                      className="paddingTopSmall"
-                    >
-                      <SeriesViews
-                        seriesBuilderRef={seriesBuilderRef}
-                        onSeriesPanelCollapse={onChange}
-                      />
-                    </EuiResizablePanel>
-                  </>
-                );
-              }}
-            </ResizableContainer>
-            {hiddenPanel === 'seriesPanel' && (
-              <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
-                {PREVIEW_LABEL}
-              </ShowPreview>
-            )}
-          </LensWrapper>
-        </>
-      ) : (
-        <EuiTitle>
-          <h2>{LENS_NOT_AVAILABLE}</h2>
-        </EuiTitle>
-      )}
-    </Wrapper>
+                <EuiResizablePanel
+                  initialSize={60}
+                  minSize="10%"
+                  mode={'main'}
+                  id="seriesPanel"
+                  color="subdued"
+                  className="paddingTopSmall"
+                >
+                  <SeriesViews
+                    seriesBuilderRef={seriesBuilderRef}
+                    onSeriesPanelCollapse={onChange}
+                  />
+                </EuiResizablePanel>
+              </>
+            );
+          }}
+        </ResizableContainer>
+        {hiddenPanel === 'seriesPanel' && (
+          <ShowPreview onClick={() => onChange('seriesPanel')} iconType="arrowUp">
+            {PREVIEW_LABEL}
+          </ShowPreview>
+        )}
+      </LensWrapper>
+    </>
+  ) : (
+    <EuiTitle>
+      <h2>{LENS_NOT_AVAILABLE}</h2>
+    </EuiTitle>
   );
 }
 const LensWrapper = styled.div<{ height: string }>`
@@ -200,19 +193,6 @@ const ResizableContainer = styled(EuiResizableContainer)`
   height: 100%;
   &&& .paddingTopSmall {
     padding-top: 8px;
-  }
-`;
-
-const Wrapper = styled(EuiPanel)`
-  max-width: 1800px;
-  min-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-  overflow-x: auto;
-  position: relative;
-
-  .echLegendItem__action {
-    display: none;
   }
 `;
 
