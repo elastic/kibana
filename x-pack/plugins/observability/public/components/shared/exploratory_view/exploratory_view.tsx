@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiResizableContainer,
   EuiTitle,
@@ -27,7 +28,7 @@ import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
-import type { ChartTimeRange } from './header/last_updated';
+import { ChartTimeRange, LastUpdated } from './header/last_updated';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
@@ -53,7 +54,7 @@ export function ExploratoryView({
 
   const { loadIndexPattern, loading } = useAppIndexPatternContext();
 
-  const { firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
+  const { firstSeries, allSeries, lastRefresh, reportType, setLastRefresh } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
 
@@ -115,7 +116,7 @@ export function ExploratoryView({
 
                 return (
                   <>
-                    <EuiFlexGroup alignItems="flexStart">
+                    <EuiFlexGroup alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           {...(hiddenPanel === 'chartPanel'
@@ -126,6 +127,21 @@ export function ExploratoryView({
                           {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
                         </EuiButtonEmpty>
                       </EuiFlexItem>
+                      {hiddenPanel === 'chartPanel' ? null : (
+                        <>
+                          <EuiFlexItem style={{ textAlign: 'right' }}>
+                            <LastUpdated chartTimeRange={chartTimeRangeContext} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              iconType="refresh"
+                              onClick={() => setLastRefresh(Date.now())}
+                            >
+                              {REFRESH_LABEL}
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </>
+                      )}
                     </EuiFlexGroup>
 
                     <EuiResizablePanel
@@ -220,6 +236,10 @@ const SHOW_CHART_LABEL = i18n.translate('xpack.observability.overview.explorator
 
 const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
   defaultMessage: 'Preview',
+});
+
+const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
+  defaultMessage: 'Refresh',
 });
 
 const LENS_NOT_AVAILABLE = i18n.translate(

@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ExpViewActionMenu } from '../components/action_menu';
 import { useExpViewTimeRange } from '../hooks/use_time_range';
-import { LastUpdated } from './last_updated';
 import type { ChartTimeRange } from './last_updated';
 
 interface Props {
@@ -20,9 +18,7 @@ interface Props {
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props) {
-  const { setLastRefresh } = useSeriesStorage();
-
+export function ExploratoryViewHeader({ lensAttributes }: Props) {
   const timeRange = useExpViewTimeRange();
 
   return (
@@ -38,19 +34,7 @@ export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props)
             </h2>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LastUpdated chartTimeRange={chartTimeRange} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
-            {REFRESH_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
 }
-
-const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
-  defaultMessage: 'Refresh',
-});
