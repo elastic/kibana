@@ -50,7 +50,15 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   typeof ExceptionItem
 >;
 
-const getPaginationObject = (total?: number, perPage?: number, page?: number) => ({
+const getPaginationObject = ({
+  total,
+  perPage,
+  page,
+}: {
+  total?: number;
+  perPage?: number;
+  page?: number;
+}) => ({
   totalItemCount: total ?? 0,
   pageSize: perPage ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
   pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
@@ -108,7 +116,11 @@ export const HostIsolationExceptionsList = () => {
     },
   });
 
-  const pagination = getPaginationObject(data?.total, data?.per_page, data?.page);
+  const pagination = getPaginationObject({
+    total: data?.total,
+    perPage: data?.per_page,
+    page: data?.page,
+  });
 
   const listItems = data?.data || [];
   const allListItems = allData?.data || [];
