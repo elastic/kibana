@@ -51,6 +51,11 @@ handlebars.registerHelper(
   createSerializationHelper('rison', (v) => encode(v as RisonValue))
 );
 
+handlebars.registerHelper('encodeURIComponent', (component: unknown) => {
+  const str = String(component);
+  return encodeURIComponent(str);
+});
+
 export function replaceVars(
   str: string,
   args: Record<string, unknown> = {},
@@ -62,10 +67,10 @@ export function replaceVars(
      * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
     const template = handlebars.compile(str.split(emptyLabel).join(`[${emptyLabel}]`), {
       strict: true,
-      noEscape: true,
       knownHelpersOnly: true,
       knownHelpers: {
         rison: true,
+        encodeURIComponent: true,
       },
       ...compileOptions,
     });
