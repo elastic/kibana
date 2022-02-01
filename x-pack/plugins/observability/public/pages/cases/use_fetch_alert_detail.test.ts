@@ -117,8 +117,6 @@ describe('useFetchAlertDetail', () => {
               "event.action": "active",
               "event.kind": "signal",
               "kibana.alert.duration.us": 13793555000,
-              "kibana.alert.evaluation.threshold": undefined,
-              "kibana.alert.evaluation.value": undefined,
               "kibana.alert.instance.id": "*",
               "kibana.alert.reason": "Document count has reported no data over the past 1h for *",
               "kibana.alert.rule.category": "Metric threshold",
