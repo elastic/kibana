@@ -95,15 +95,15 @@ export class Plugin
       title: i18n.translate('xpack.observability.rulesLinkTitle', {
         defaultMessage: 'Rules',
       }),
-      order: 8003,
+      order: 8002,
       path: '/rules',
-      navLinkStatus: AppNavLinkStatus.visible,
+      navLinkStatus: AppNavLinkStatus.hidden,
     },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
         [CasesDeepLinkId.cases]: {
-          order: 8002,
+          order: 8003,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         [CasesDeepLinkId.casesCreate]: {
