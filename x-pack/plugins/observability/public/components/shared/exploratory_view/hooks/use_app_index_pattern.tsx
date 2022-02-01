@@ -48,7 +48,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
     services: { dataViews },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { indexPatterns: indexPatternsList } = useExploratoryView();
+  const { dataViews: indexPatternsList } = useExploratoryView();
 
   const loadIndexPattern: IndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
