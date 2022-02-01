@@ -146,19 +146,17 @@ describe('CaseDetailsLink', () => {
   });
 
   test('it calls navigateToCaseViewClick on click', () => {
-    render(<CaseDetailsLink {...props} subCaseId="sub-case-id" />);
+    render(<CaseDetailsLink {...props} />);
     userEvent.click(screen.getByText('test detail name'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: props.detailName,
-      subCaseId: 'sub-case-id',
     });
   });
 
   test('it set the href correctly', () => {
-    render(<CaseDetailsLink {...props} subCaseId="sub-case-id" />);
+    render(<CaseDetailsLink {...props} />);
     expect(getCaseViewUrl).toHaveBeenCalledWith({
       detailName: props.detailName,
-      subCaseId: 'sub-case-id',
     });
     expect(screen.getByRole('link')).toHaveAttribute('href', '/cases/test');
   });

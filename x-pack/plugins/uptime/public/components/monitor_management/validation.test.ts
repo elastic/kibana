@@ -9,6 +9,7 @@ import {
   ConfigKey,
   DataStream,
   HTTPFields,
+  BrowserFields,
   MonitorFields,
   ScheduleUnit,
   ServiceLocations,
@@ -80,6 +81,38 @@ describe('[Monitor Management] validation', () => {
 
     it('should invalidate when locations is empty', () => {
       const validators = validate[DataStream.HTTP];
+      const validatorFn = validators[ConfigKey.LOCATIONS];
+      const result = [undefined, null, []].map(
+        (testValue) =>
+          validatorFn?.({ [ConfigKey.LOCATIONS]: testValue } as Partial<MonitorFields>) ?? false
+      );
+
+      expect(result).toEqual([true, true, true]);
+    });
+  });
+
+  describe.each([
+    [ConfigKey.SOURCE_INLINE, 'step(() => {});'],
+    [ConfigKey.SOURCE_ZIP_URL, 'https://test.zip'],
+  ])('Browser', (configKey, value) => {
+    const browserProps: Partial<BrowserFields> = {
+      ...commonPropsValid,
+      [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+      [ConfigKey.TIMEOUT]: undefined,
+      [configKey]: value,
+    };
+
+    it('should return false for all valid props', () => {
+      const validators = validate[DataStream.BROWSER];
+      const keysToValidate = [ConfigKey.SCHEDULE, ConfigKey.TIMEOUT, configKey];
+      const validatorFns = keysToValidate.map((key) => validators[key]);
+      const result = validatorFns.map((fn) => fn?.(browserProps) ?? true);
+
+      expect(result).not.toEqual(expect.arrayContaining([true]));
+    });
+
+    it('should invalidate when locations is empty', () => {
+      const validators = validate[DataStream.BROWSER];
       const validatorFn = validators[ConfigKey.LOCATIONS];
       const result = [undefined, null, []].map(
         (testValue) =>
