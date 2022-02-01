@@ -17,7 +17,6 @@ import {
   EuiIcon,
   EuiColorPickerSwatch,
   EuiButtonIcon,
-  EuiToolTip,
   EuiFieldNumberProps,
 } from '@elastic/eui';
 
@@ -39,7 +38,6 @@ import {
   checkIsMaxContinuity,
   checkIsMinContinuity,
 } from '../../../../../../../src/plugins/charts/common';
-import { getOutsideDataBoundsWarningMessage } from './color_ranges_validation';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -81,23 +79,11 @@ const getActionButton = (mode: ColorRangeItemMode) => {
   return mode === 'edit' ? ColorRangeAutoDetectButton : ColorRangeEditButton;
 };
 
-const getAppend = (
-  rangeType: CustomPaletteParams['rangeType'],
-  mode: ColorRangeItemMode,
-  validation?: ColorRangeValidation
-) => {
+const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
   const items: EuiFieldNumberProps['append'] = [];
 
   if (rangeType === 'percent' && mode !== 'auto') {
     items.push('%');
-  }
-
-  if (mode !== 'auto' && validation?.warnings.length) {
-    items.push(
-      <EuiToolTip position="top" content={getOutsideDataBoundsWarningMessage(validation.warnings)}>
-        <EuiIcon type="iInCircle" size="m" color="primary" />
-      </EuiToolTip>
-    );
   }
 
   return items;
@@ -216,7 +202,7 @@ export function ColorRangeItem({
           disabled={isDisabled}
           onChange={onValueChange}
           placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
-          append={getAppend(rangeType, mode, validation)}
+          append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
           prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}

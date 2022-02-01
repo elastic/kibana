@@ -52,12 +52,10 @@ export function CustomizablePalette({
 
   useDebounce(
     () => {
-      const rangeType =
-        localState.activePalette?.params?.rangeType ?? defaultPaletteParams.rangeType;
       if (
         (localState.activePalette !== activePalette ||
           colorRangesToShow !== localState.colorRanges) &&
-        isAllColorRangesValid(localState.colorRanges, dataBounds, rangeType)
+        isAllColorRangesValid(localState.colorRanges)
       ) {
         setPalette(localState.activePalette);
       }
