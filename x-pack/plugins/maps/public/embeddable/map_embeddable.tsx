@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   Embeddable,
   IContainer,
@@ -72,6 +73,7 @@ import {
   getChartsPaletteServiceGetColor,
   getSpacesApi,
   getSearchService,
+  getTheme,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -400,7 +402,9 @@ export class MapEmbeddable
     const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>{content}</I18nContext>
+        <I18nContext>
+          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
+        </I18nContext>
       </Provider>,
       this._domNode
     );

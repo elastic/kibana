@@ -28,6 +28,11 @@ import {
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
 import {
+  resetTransformsRequestSchema,
+  ResetTransformsRequestSchema,
+  ResetTransformsResponseSchema,
+} from '../../../common/api_schemas/reset_transforms';
+import {
   startTransformsRequestSchema,
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -62,9 +67,10 @@ import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';
 
 enum TRANSFORM_ACTIONS {
+  DELETE = 'delete',
+  RESET = 'reset',
   STOP = 'stop',
   START = 'start',
-  DELETE = 'delete',
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
@@ -319,6 +325,46 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
+   * @api {post} /api/transform/reset_transforms Post reset transforms
+   * @apiName ResetTransforms
+   * @apiDescription resets transforms
+   *
+   * @apiSchema (body) resetTransformsRequestSchema
+   */
+  router.post<undefined, undefined, ResetTransformsRequestSchema>(
+    {
+      path: addBasePath('reset_transforms'),
+      validate: {
+        body: resetTransformsRequestSchema,
+      },
+    },
+    license.guardApiRoute<undefined, undefined, ResetTransformsRequestSchema>(
+      async (ctx, req, res) => {
+        try {
+          const body = await resetTransforms(req.body, ctx, res);
+
+          if (body && body.status) {
+            if (body.status === 404) {
+              return res.notFound();
+            }
+            if (body.status === 403) {
+              return res.forbidden();
+            }
+          }
+
+          return res.ok({
+            body,
+          });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
+      }
+    )
+  );
+
+  /**
+   * @apiGroup Transforms
+   *
    * @api {post} /api/transform/transforms/_preview Preview transform
    * @apiName PreviewTransform
    * @apiDescription Previews transform
@@ -459,30 +505,33 @@ async function deleteTransforms(
       if (transformInfo.state === TRANSFORM_STATE.FAILED) {
         needToForceDelete = true;
       }
-      // Grab destination index info to delete
-      try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
-          transform_id: transformId,
-        });
-        const transformConfig = body.transforms[0];
-        // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-        destinationIndex = Array.isArray(transformConfig.dest.index)
-          ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-            transformConfig.dest.index[0]
-          : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-            transformConfig.dest.index;
-      } catch (getTransformConfigError) {
-        transformDeleted.error = getTransformConfigError.meta.body.error;
-        results[transformId] = {
-          transformDeleted,
-          destIndexDeleted,
-          destIndexPatternDeleted,
-          destinationIndex,
-        };
-        // No need to perform further delete attempts
-        continue;
+      if (!shouldForceDelete) {
+        // Grab destination index info to delete
+        try {
+          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
+            {
+              transform_id: transformId,
+            }
+          );
+          const transformConfig = body.transforms[0];
+          // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+          destinationIndex = Array.isArray(transformConfig.dest.index)
+            ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+              transformConfig.dest.index[0]
+            : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+              transformConfig.dest.index;
+        } catch (getTransformConfigError) {
+          transformDeleted.error = getTransformConfigError.meta.body.error;
+          results[transformId] = {
+            transformDeleted,
+            destIndexDeleted,
+            destIndexPatternDeleted,
+            destinationIndex,
+          };
+          // No need to perform further delete attempts
+          continue;
+        }
       }
-
       // If user checks box to delete the destinationIndex associated with the job
       if (destinationIndex && deleteDestIndex) {
         try {
@@ -542,6 +591,50 @@ async function deleteTransforms(
         });
       }
       results[transformId] = { transformDeleted: { success: false, error: e.meta.body.error } };
+    }
+  }
+  return results;
+}
+
+async function resetTransforms(
+  reqBody: ResetTransformsRequestSchema,
+  ctx: RequestHandlerContext,
+  response: KibanaResponseFactory
+) {
+  const { transformsInfo } = reqBody;
+
+  const results: ResetTransformsResponseSchema = {};
+
+  for (const transformInfo of transformsInfo) {
+    const transformReset: ResponseStatus = { success: false };
+    const transformId = transformInfo.id;
+
+    try {
+      try {
+        await ctx.core.elasticsearch.client.asCurrentUser.transform.resetTransform({
+          transform_id: transformId,
+        });
+        transformReset.success = true;
+      } catch (resetTransformJobError) {
+        transformReset.error = resetTransformJobError.meta.body.error;
+        if (resetTransformJobError.statusCode === 403) {
+          return response.forbidden();
+        }
+      }
+
+      results[transformId] = {
+        transformReset,
+      };
+    } catch (e) {
+      if (isRequestTimeout(e)) {
+        return fillResultsWithTimeouts({
+          results,
+          id: transformInfo.id,
+          items: transformsInfo,
+          action: TRANSFORM_ACTIONS.RESET,
+        });
+      }
+      results[transformId] = { transformReset: { success: false, error: e.meta.body.error } };
     }
   }
   return results;

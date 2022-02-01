@@ -20,6 +20,12 @@ jest.mock('./full_time_range_selector_service', () => ({
     mockSetFullTimeRange(indexPattern, query),
 }));
 
+jest.mock('../../contexts/ml/use_storage', () => {
+  return {
+    useStorage: jest.fn(() => 'exclude-frozen'),
+  };
+});
+
 describe('FullTimeRangeSelector', () => {
   const dataView = {
     id: '0844fc70-5ab5-11e9-935e-836737467b0f',

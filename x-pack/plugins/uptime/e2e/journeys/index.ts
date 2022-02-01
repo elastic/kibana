@@ -5,5 +5,9 @@
  * 2.0.
  */
 
+export * from './data_view_permissions';
 export * from './uptime.journey';
+export * from './monitor_management.journey';
 export * from './step_duration.journey';
+export * from './alerts';
+export * from './monitor_name.journey';

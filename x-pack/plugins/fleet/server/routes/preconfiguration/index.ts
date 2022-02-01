@@ -6,7 +6,10 @@
  */
 
 import { PRECONFIGURATION_API_ROUTES } from '../../constants';
-import { PutPreconfigurationSchema } from '../../types';
+import {
+  PutPreconfigurationSchema,
+  PostResetOnePreconfiguredAgentPoliciesSchema,
+} from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
 import {
@@ -29,7 +32,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
-      validate: false,
+      validate: PostResetOnePreconfiguredAgentPoliciesSchema,
       fleetAuthz: {
         fleet: { all: true },
       },

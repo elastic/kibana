@@ -77,6 +77,7 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { AlertInstance } from '../alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
+import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -217,6 +218,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
 export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
+  numberOfExecutions?: number;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -362,6 +364,7 @@ export class RulesClient {
       mutedInstanceIds: [],
       notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
+      monitoring: getDefaultRuleMonitoring(),
     };
 
     this.auditLogger?.log(
@@ -530,7 +533,11 @@ export class RulesClient {
     }
   }
 
-  public async getAlertSummary({ id, dateStart }: GetAlertSummaryParams): Promise<AlertSummary> {
+  public async getAlertSummary({
+    id,
+    dateStart,
+    numberOfExecutions,
+  }: GetAlertSummaryParams): Promise<AlertSummary> {
     this.logger.debug(`getAlertSummary(): getting alert ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -543,7 +550,7 @@ export class RulesClient {
 
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(rule.schedule.interval) * 60;
+    const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
@@ -551,30 +558,49 @@ export class RulesClient {
 
     this.logger.debug(`getAlertSummary(): search the event log for rule ${id}`);
     let events: IEvent[];
+    let executionEvents: IEvent[];
+
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
-        'alert',
-        [id],
-        {
-          page: 1,
-          per_page: 10000,
-          start: parsedDateStart.toISOString(),
-          end: dateNow.toISOString(),
-          sort_order: 'desc',
-        },
-        rule.legacyId !== null ? [rule.legacyId] : undefined
-      );
+      const [queryResults, executionResults] = await Promise.all([
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            page: 1,
+            per_page: 10000,
+            start: parsedDateStart.toISOString(),
+            sort_order: 'desc',
+            end: dateNow.toISOString(),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            page: 1,
+            per_page: numberOfExecutions ?? 60,
+            filter: 'event.provider: alerting AND event.action:execute',
+            sort_order: 'desc',
+            end: dateNow.toISOString(),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+      ]);
       events = queryResults.data;
+      executionEvents = executionResults.data;
     } catch (err) {
       this.logger.debug(
         `rulesClient.getAlertSummary(): error searching event log for rule ${id}: ${err.message}`
       );
       events = [];
+      executionEvents = [];
     }
 
     return alertSummaryFromEventLog({
       rule,
       events,
+      executionEvents,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });

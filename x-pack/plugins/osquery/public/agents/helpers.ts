@@ -8,12 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
-  PaginationInputPaginated,
-  FactoryQueryTypes,
-  StrategyResponseType,
-  Inspect,
-} from '../../common/search_strategy';
-import {
   AGENT_GROUP_KEY,
   SelectedGroups,
   Overlap,
@@ -24,8 +18,6 @@ import {
   GroupOptionValue,
   GroupOption,
 } from './types';
-
-export type InspectResponse = Inspect & { response: string[] };
 
 export const getNumOverlapped = (
   { policy = {}, platform = {} }: SelectedGroups,
@@ -158,26 +150,3 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
   }
   return { newAgentSelection, selectedGroups, selectedAgents };
 };
-
-export const generateTablePaginationOptions = (
-  activePage: number,
-  limit: number
-): PaginationInputPaginated => {
-  const cursorStart = activePage * limit;
-  return {
-    activePage,
-    cursorStart,
-    fakePossibleCount: 4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5,
-    querySize: limit,
-  };
-};
-
-export const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T>,
-  prevResponse?: InspectResponse
-): InspectResponse => ({
-  dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
-  // @ts-expect-error update types
-  response:
-    response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
-});

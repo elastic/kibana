@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../__mocks__/kea_logic';
+import '../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -49,5 +50,21 @@ describe('ErrorState', () => {
 
     expect(wrapper.find('[data-test-subj="CloudError"]').exists()).toBe(false);
     expect(wrapper.find('[data-test-subj="SelfManagedError"]').exists()).toBe(true);
+  });
+
+  describe('chrome visiblity', () => {
+    it('sets chrome visibility to true when not on personal dashboard route', () => {
+      mockKibanaValues.history.location.pathname = '/overview';
+      mountWithIntl(<ErrorStatePrompt />);
+
+      expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
+    });
+
+    it('sets chrome visibility to false when on personal dashboard route', () => {
+      mockKibanaValues.history.location.pathname = '/p/sources';
+      mountWithIntl(<ErrorStatePrompt />);
+
+      expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(false);
+    });
   });
 });

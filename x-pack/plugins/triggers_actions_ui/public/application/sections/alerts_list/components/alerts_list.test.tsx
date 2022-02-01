@@ -6,14 +6,13 @@
  */
 
 import * as React from 'react';
-
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { AlertsList } from './alerts_list';
-import { RuleTypeModel, ValidationResult } from '../../../../types';
+import { AlertsList, percentileFields } from './alerts_list';
+import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
@@ -176,6 +175,30 @@ describe('alerts_list component with items', () => {
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
+      monitoring: {
+        execution: {
+          history: [
+            {
+              success: true,
+              duration: 100,
+            },
+            {
+              success: true,
+              duration: 200,
+            },
+            {
+              success: false,
+              duration: 300,
+            },
+          ],
+          calculated_metrics: {
+            success_ratio: 0.66,
+            p50: 200,
+            p95: 300,
+            p99: 300,
+          },
+        },
+      },
     },
     {
       id: '2',
@@ -199,6 +222,26 @@ describe('alerts_list component with items', () => {
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
       },
+      monitoring: {
+        execution: {
+          history: [
+            {
+              success: true,
+              duration: 100,
+            },
+            {
+              success: true,
+              duration: 500,
+            },
+          ],
+          calculated_metrics: {
+            success_ratio: 1,
+            p50: 0,
+            p95: 100,
+            p99: 500,
+          },
+        },
+      },
     },
     {
       id: '3',
@@ -221,6 +264,14 @@ describe('alerts_list component with items', () => {
         lastDuration: 30234,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: null,
+      },
+      monitoring: {
+        execution: {
+          history: [{ success: false, duration: 100 }],
+          calculated_metrics: {
+            success_ratio: 0,
+          },
+        },
       },
     },
     {
@@ -431,6 +482,146 @@ describe('alerts_list component with items', () => {
     );
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').last().text()).toEqual(
       'License Error'
+    );
+
+    // Monitoring column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-successRatio"]').length
+    ).toEqual(mockedAlertsData.length);
+    const ratios = wrapper.find(
+      'EuiTableRowCell[data-test-subj="alertsTableCell-successRatio"] span[data-test-subj="successRatio"]'
+    );
+
+    mockedAlertsData.forEach((rule, index) => {
+      if (rule.monitoring) {
+        expect(ratios.at(index).text()).toEqual(
+          `${rule.monitoring.execution.calculated_metrics.success_ratio * 100}%`
+        );
+      } else {
+        expect(ratios.at(index).text()).toEqual(`N/A`);
+      }
+    });
+
+    // P50 column is rendered initially
+    expect(
+      wrapper.find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`).exists()
+    ).toBeTruthy();
+
+    let percentiles = wrapper.find(
+      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="${Percentiles.P50}Percentile"]`
+    );
+
+    mockedAlertsData.forEach((rule, index) => {
+      if (typeof rule.monitoring?.execution.calculated_metrics.p50 === 'number') {
+        expect(percentiles.at(index).text()).toEqual(
+          `${rule.monitoring.execution.calculated_metrics.p50}ms`
+        );
+      } else {
+        expect(percentiles.at(index).text()).toEqual('N/A');
+      }
+    });
+
+    // Click column to sort by P50
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P50],
+          direction: 'asc',
+        },
+      })
+    );
+
+    // Click column again to reverse sort by P50
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P50}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P50],
+          direction: 'desc',
+        },
+      })
+    );
+
+    // Hover over percentile selection button
+    wrapper
+      .find('[data-test-subj="percentileSelectablePopover-iconButton"]')
+      .first()
+      .simulate('click');
+
+    jest.runAllTimers();
+    wrapper.update();
+
+    // Percentile Selection
+    expect(
+      wrapper.find('[data-test-subj="percentileSelectablePopover-selectable"]').exists()
+    ).toBeTruthy();
+
+    const percentileOptions = wrapper.find(
+      '[data-test-subj="percentileSelectablePopover-selectable"] li'
+    );
+    expect(percentileOptions.length).toEqual(3);
+
+    // Select P95
+    percentileOptions.at(1).simulate('click');
+
+    jest.runAllTimers();
+    wrapper.update();
+
+    expect(
+      wrapper.find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`).exists()
+    ).toBeTruthy();
+
+    percentiles = wrapper.find(
+      `EuiTableRowCell[data-test-subj="alertsTableCell-ruleExecutionPercentile"] span[data-test-subj="${Percentiles.P95}Percentile"]`
+    );
+
+    mockedAlertsData.forEach((rule, index) => {
+      if (typeof rule.monitoring?.execution.calculated_metrics.p95 === 'number') {
+        expect(percentiles.at(index).text()).toEqual(
+          `${rule.monitoring.execution.calculated_metrics.p95}ms`
+        );
+      } else {
+        expect(percentiles.at(index).text()).toEqual('N/A');
+      }
+    });
+
+    // Click column to sort by P95
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P95],
+          direction: 'asc',
+        },
+      })
+    );
+
+    // Click column again to reverse sort by P95
+    wrapper
+      .find(`[data-test-subj="alertsTable-${Percentiles.P95}ColumnName"]`)
+      .first()
+      .simulate('click');
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: percentileFields[Percentiles.P95],
+          direction: 'desc',
+        },
+      })
     );
 
     // Clearing all mocks will also reset fake timers.

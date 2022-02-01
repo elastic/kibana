@@ -31,7 +31,6 @@ import {
   TransformListRow,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
-import { useStopTransforms } from '../../../../hooks';
 import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { CreateTransformButton } from '../create_transform_button';
@@ -42,8 +41,14 @@ import {
   DeleteActionName,
   DeleteActionModal,
 } from '../action_delete';
+import {
+  isResetActionDisabled,
+  useResetAction,
+  ResetActionName,
+  ResetActionModal,
+} from '../action_reset';
 import { useStartAction, StartActionName, StartActionModal } from '../action_start';
-import { StopActionName } from '../action_stop';
+import { StopActionName, useStopAction } from '../action_stop';
 
 import { ItemIdToExpandedRowMap } from './common';
 import { useColumns } from './use_columns';
@@ -52,6 +57,7 @@ import { transformFilters, filterTransforms } from './transform_search_bar_filte
 import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import { StopActionModal } from '../action_stop/stop_action_modal';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
@@ -92,9 +98,10 @@ export const TransformList: FC<TransformListProps> = ({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
+  const bulkResetAction = useResetAction(false);
+  const bulkStopAction = useStopAction(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
-  const stopTransforms = useStopTransforms();
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -189,11 +196,24 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        onClick={() =>
-          stopTransforms(transformSelection.map((t) => ({ id: t.id, state: t.stats.state })))
-        }
+        onClick={() => {
+          bulkStopAction.openModal(transformSelection);
+        }}
       >
         <StopActionName items={transformSelection} />
+      </EuiButtonEmpty>
+    </div>,
+    <div key="resetAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty
+        onClick={() => {
+          bulkResetAction.openModal(transformSelection);
+        }}
+      >
+        <ResetActionName
+          canResetTransform={capabilities.canResetTransform}
+          disabled={isResetActionDisabled(transformSelection, false)}
+          isBulkAction={true}
+        />
       </EuiButtonEmpty>
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
@@ -283,6 +303,8 @@ export const TransformList: FC<TransformListProps> = ({
       {/* Bulk Action Modals */}
       {bulkStartAction.isModalVisible && <StartActionModal {...bulkStartAction} />}
       {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
+      {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
+      {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
 
       {/* Single Action Modals */}
       {singleActionModals}

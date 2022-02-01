@@ -105,7 +105,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const { data: allResultsData, isFetched } = useAllResults({
+  const {
+    data: allResultsData,
+    isFetched,
+    isLoading,
+  } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -232,15 +236,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    if (!allResultsData?.edges?.length) {
+    if (!allResultsData?.columns.length) {
       return;
     }
 
-    const fields = [
-      'agent.name',
-      ...ecsMappingColumns.sort(),
-      ...keys(allResultsData?.edges[0]?.fields || {}).sort(),
-    ];
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
@@ -277,12 +277,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         if (fieldName.startsWith('osquery.')) {
           const displayAsText = fieldName.split('.')[1];
+          const hasNumberType = fields.includes(`${fieldName}.number`);
           if (!seen.has(displayAsText)) {
+            const id = hasNumberType ? fieldName + '.number' : fieldName;
             data.push({
-              id: fieldName,
+              id,
               displayAsText,
               display: getHeaderDisplay(displayAsText),
               defaultSortDirection: Direction.asc,
+              ...(hasNumberType ? { schema: 'numeric' } : {}),
             });
             seen.add(displayAsText);
           }
@@ -298,7 +301,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
     );
     setVisibleColumns(map('id', newColumns));
-  }, [allResultsData?.edges, ecsMappingColumns, getHeaderDisplay]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
   const toolbarVisibility = useMemo(
     () => ({
@@ -347,7 +351,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={5} />;
   }
 

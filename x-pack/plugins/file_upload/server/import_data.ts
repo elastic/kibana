@@ -14,7 +14,7 @@ import {
   Settings,
   Mappings,
   IngestPipelineWrapper,
-} from '../common';
+} from '../common/types';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
@@ -104,7 +104,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     // @ts-expect-error settings.index is not compatible
-    await asCurrentUser.indices.create({ index, body });
+    await asCurrentUser.indices.create({ index, body }, { maxRetries: 0 });
   }
 
   async function indexData(index: string, pipelineId: string, data: InputData) {
@@ -120,7 +120,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         settings.pipeline = pipelineId;
       }
 
-      const { body: resp } = await asCurrentUser.bulk(settings);
+      const { body: resp } = await asCurrentUser.bulk(settings, { maxRetries: 0 });
       if (resp.errors) {
         throw resp;
       } else {

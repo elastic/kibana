@@ -11,6 +11,7 @@ import { useTrackPageview } from '../../../../observability/public';
 import { getMonitors } from '../../state/actions';
 import { monitorManagementListSelector } from '../../state/selectors';
 import { MonitorManagementList } from '../../components/monitor_management/monitor_list/monitor_list';
+import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 
 export const MonitorManagementPage: React.FC = () => {
   const [refresh, setRefresh] = useState(true);
@@ -18,13 +19,14 @@ export const MonitorManagementPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(10); // saved objects page index is base 1
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
+  useMonitorManagementBreadcrumbs();
   const dispatch = useDispatch();
   const monitorList = useSelector(monitorManagementListSelector);
 
   useEffect(() => {
     if (refresh) {
       dispatch(getMonitors({ page: pageIndex, perPage: pageSize }));
-      setRefresh(false); // TODO: avoid extra re-rendering when `refresh` turn to false (pass down the handler instead)
+      setRefresh(false);
     }
   }, [dispatch, refresh, pageIndex, pageSize]);
 

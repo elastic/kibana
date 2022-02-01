@@ -114,10 +114,23 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
     }
 
     if (isEmptyState) {
-      return allEventFilters && allEventFilters.total !== 0 ? (
-        <PolicyEventFiltersEmptyUnassigned policyId={policyItem.id} policyName={policyItem.name} />
-      ) : (
-        <PolicyEventFiltersEmptyUnexisting policyId={policyItem.id} policyName={policyItem.name} />
+      return (
+        <>
+          {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
+            <PolicyEventFiltersFlyout policyItem={policyItem} onClose={handleOnCloseFlyout} />
+          )}
+          {allEventFilters && allEventFilters.total !== 0 ? (
+            <PolicyEventFiltersEmptyUnassigned
+              policyId={policyItem.id}
+              policyName={policyItem.name}
+            />
+          ) : (
+            <PolicyEventFiltersEmptyUnexisting
+              policyId={policyItem.id}
+              policyName={policyItem.name}
+            />
+          )}
+        </>
       );
     }
 

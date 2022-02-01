@@ -8,11 +8,7 @@
 import { ROLES } from '../../../common/test';
 import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
-import {
-  waitForAlertsPanelToBeLoaded,
-  waitForAlertsIndexToBeCreated,
-  goToManageAlertsDetectionRules,
-} from '../../tasks/alerts';
+import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
   waitForListsIndexToBeCreated,
   waitForValueListsModalToBeLoaded,
@@ -36,8 +32,6 @@ describe('value lists', () => {
   describe('management modal', () => {
     beforeEach(() => {
       loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-      waitForAlertsPanelToBeLoaded();
-      waitForAlertsIndexToBeCreated();
       waitForListsIndexToBeCreated();
       goToManageAlertsDetectionRules();
       waitForValueListsModalToBeLoaded();

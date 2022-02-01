@@ -11,7 +11,6 @@ import {
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { ConfigType } from './config';
-import { UnderlyingLogClient } from './lib/detection_engine/rule_execution_log/types';
 
 export const createMockConfig = (): ConfigType => {
   const enableExperimental: string[] = [];
@@ -28,9 +27,6 @@ export const createMockConfig = (): ConfigType => {
     alertIgnoreFields: [],
     prebuiltRulesFromFileSystem: true,
     prebuiltRulesFromSavedObjects: false,
-    ruleExecutionLog: {
-      underlyingClient: UnderlyingLogClient.savedObjects,
-    },
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };

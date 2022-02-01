@@ -27,7 +27,7 @@ import {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
@@ -43,7 +43,7 @@ import type {
   UiActionsStart,
 } from './shared_imports';
 import { AppNavLinkStatus } from './shared_imports';
-import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 
@@ -78,7 +78,6 @@ function handleError(
 export interface ReportingPublicPluginSetupDendencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
-  licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
   screenshotting: ScreenshottingSetup;
   share: SharePluginSetup;
@@ -153,14 +152,7 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const {
-      home,
-      management,
-      licensing: { license$ }, // FIXME: 'license$' is deprecated
-      screenshotting,
-      share,
-      uiActions,
-    } = setupDeps;
+    const { home, management, screenshotting, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
@@ -187,14 +179,15 @@ export class ReportingPublicPlugin
       order: 1,
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        const [[start], { mountManagementSection }] = await Promise.all([
+        const [[start, startDeps], { mountManagementSection }] = await Promise.all([
           getStartServices(),
           import('./management/mount_management_section'),
         ]);
-        const {
-          chrome: { docTitle },
-        } = start;
+
+        const { docTitle } = start.chrome;
         docTitle.change(this.title);
+
+        const { license$ } = startDeps.licensing;
         const umountAppCallback = await mountManagementSection(
           core,
           start,
@@ -227,35 +220,39 @@ export class ReportingPublicPlugin
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    share.register(
-      ReportingCsvShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-        theme: core.theme,
-      })
-    );
+    startServices$.subscribe(([{ application }, { licensing }]) => {
+      licensing.license$.subscribe((license) => {
+        share.register(
+          reportingCsvShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
 
-    share.register(
-      reportingScreenshotShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-        theme: core.theme,
-      })
-    );
+        share.register(
+          reportingScreenshotShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
+      });
+    });
 
     return reportingStart;
   }

@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Lateral Tool Transfer",
-  "query": "sequence by host.id with maxspan=30s\n  [network where event.type == \"start\" and process.pid == 4 and destination.port == 445 and\n   network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n   source.address != \"127.0.0.1\" and source.address != \"::1\"\n  ] by process.entity_id\n  /* add more executable extensions here if they are not noisy in your environment */\n  [file where event.type in (\"creation\", \"change\") and process.pid == 4 and file.extension : (\"exe\", \"dll\", \"bat\", \"cmd\")] by process.entity_id\n",
+  "query": "sequence by host.id with maxspan=30s\n  [network where event.type == \"start\" and process.pid == 4 and destination.port == 445 and\n   network.direction : (\"incoming\", \"ingress\") and\n   network.transport == \"tcp\" and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n  ] by process.entity_id\n  /* add more executable extensions here if they are not noisy in your environment */\n  [file where event.type in (\"creation\", \"change\") and process.pid == 4 and file.extension : (\"exe\", \"dll\", \"bat\", \"cmd\")] by process.entity_id\n",
   "risk_score": 47,
   "rule_id": "58bc134c-e8d2-4291-a552-b4b3e537c60b",
   "severity": "medium",
@@ -41,5 +41,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }
