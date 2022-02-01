@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { MetricExpressionParams } from '../../../../plugins/infra/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
-import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
+
 export default function ({ getService }: FtrProviderContext) {
   const client = getService('es');
   const index = 'test-index';

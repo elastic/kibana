@@ -26,9 +26,11 @@ import { formatMonitorConfig } from './formatters/format_configs';
 import {
   ConfigKey,
   MonitorFields,
+  ServiceLocations,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
+import { getServiceLocations } from './get_service_locations';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -45,14 +47,18 @@ export class SyntheticsService {
 
   private apiKey: SyntheticsServiceApiKey | undefined;
 
+  public locations: ServiceLocations;
+
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
+
+    this.locations = [];
   }
 
   public init() {
@@ -97,6 +103,13 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+
+              const { manifestUrl } = service.config;
+
+              getServiceLocations({ manifestUrl }).then((result) => {
+                service.locations = result.locations;
+                service.apiClient.locations = result.locations;
+              });
 
               await service.pushConfigs();
 
@@ -266,6 +279,7 @@ export class SyntheticsService {
 
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
+      namespaces: ['*'],
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
