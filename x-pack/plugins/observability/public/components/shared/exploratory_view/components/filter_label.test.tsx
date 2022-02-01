@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
+import { mockAppIndexPattern, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
@@ -30,7 +30,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={jest.fn()}
-        dataView={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -55,7 +55,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={removeFilter}
-        dataView={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -79,7 +79,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={removeFilter}
-        dataView={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -106,7 +106,7 @@ describe.skip('FilterLabel', function () {
         negate={true}
         seriesId={0}
         removeFilter={jest.fn()}
-        dataView={mockIndexPattern}
+        dataView={mockDataView}
         series={mockUxSeries}
       />
     );
@@ -126,7 +126,7 @@ describe.skip('FilterLabel', function () {
       buildFilterLabel({
         field: 'user_agent.name',
         label: 'Browser family',
-        dataView: mockIndexPattern,
+        dataView: mockDataView,
         value: 'Firefox',
         negate: false,
       })

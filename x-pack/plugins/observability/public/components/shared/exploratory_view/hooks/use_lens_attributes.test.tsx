@@ -11,7 +11,7 @@ import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_se
 import { renderHook } from '@testing-library/react-hooks';
 import { useLensAttributes } from './use_lens_attributes';
 import { ReportTypes } from '../configurations/constants';
-import { mockIndexPattern } from '../rtl_helpers';
+import { mockDataView } from '../rtl_helpers';
 import { createKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { TRANSACTION_DURATION } from '../configurations/constants/elasticsearch_fieldnames';
 import * as lensAttributes from '../configurations/lens_attributes';
@@ -37,12 +37,12 @@ describe('useExpViewTimeRange', function () {
   // @ts-ignore
   jest.spyOn(indexPattern, 'useAppIndexPatternContext').mockReturnValue({
     indexPatterns: {
-      ux: mockIndexPattern,
-      apm: mockIndexPattern,
-      mobile: mockIndexPattern,
-      infra_logs: mockIndexPattern,
-      infra_metrics: mockIndexPattern,
-      synthetics: mockIndexPattern,
+      ux: mockDataView,
+      apm: mockDataView,
+      mobile: mockDataView,
+      infra_logs: mockDataView,
+      infra_metrics: mockDataView,
+      synthetics: mockDataView,
     },
   });
   jest.spyOn(theme, 'useTheme').mockReturnValue({

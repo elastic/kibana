@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockAppIndexPattern, mockIndexPattern } from '../../rtl_helpers';
+import { mockAppIndexPattern, mockDataView } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
 import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { sampleAttributeCoreWebVital } from '../test_data/sample_attribute_cwv';
@@ -18,7 +18,7 @@ describe('Core web vital config test', function () {
   const seriesConfig = getDefaultConfigs({
     reportType: 'core-web-vitals',
     dataType: 'ux',
-    dataView: mockIndexPattern,
+    dataView: mockDataView,
     reportConfigMap: obsvReportConfigMap,
   });
 
@@ -29,7 +29,7 @@ describe('Core web vital config test', function () {
     color: 'green',
     name: 'test-series',
     breakdown: USER_AGENT_OS,
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataView,
     time: { from: 'now-15m', to: 'now' },
     reportDefinitions: { [SERVICE_NAME]: ['elastic-co'] },
     selectedMetricField: LCP_FIELD,
