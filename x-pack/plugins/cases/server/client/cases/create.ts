@@ -22,6 +22,7 @@ import {
   CasePostRequestRt,
 } from '../../../common/api';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -57,6 +58,10 @@ export const create = async (
     throw Boom.badRequest(
       `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
     );
+  }
+
+  if (query.tags.some(isInvalidTag)) {
+    throw Boom.badRequest('A tag must contain at least one non-space character');
   }
 
   try {
