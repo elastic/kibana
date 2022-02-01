@@ -90,6 +90,15 @@ export class Plugin
       path: '/alerts',
       navLinkStatus: AppNavLinkStatus.hidden,
     },
+    {
+      id: 'rules',
+      title: i18n.translate('xpack.observability.rulesLinkTitle', {
+        defaultMessage: 'Rules',
+      }),
+      order: 8003,
+      path: '/rules',
+      navLinkStatus: AppNavLinkStatus.visible,
+    },
     getCasesDeepLinks({
       basePath: casesPath,
       extend: {
