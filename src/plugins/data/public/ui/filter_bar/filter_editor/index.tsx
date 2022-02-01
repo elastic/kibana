@@ -345,7 +345,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderParamsEditor() {
     const indexPattern = this.state.selectedIndexPattern;
-    if (!indexPattern || !this.state.selectedOperator) {
+    if (!indexPattern || !this.state.selectedOperator || !this.state.selectedField) {
       return '';
     }
 
