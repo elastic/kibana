@@ -9,13 +9,25 @@
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { DISABLE_BFETCH_COMPRESSION } from '../common';
+import { DISABLE_BFETCH_COMPRESSION, DISABLE_BFETCH } from '../common';
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
+    [DISABLE_BFETCH]: {
+      name: i18n.translate('bfetch.disableBfetch', {
+        defaultMessage: 'Disable request batching',
+      }),
+      value: false,
+      description: i18n.translate('bfetch.disableBfetchDesc', {
+        defaultMessage:
+          'Disables requests batching. This increases number of HTTP requests from Kibana, but allows to debug requests individually.',
+      }),
+      schema: schema.boolean(),
+      category: [],
+    },
     [DISABLE_BFETCH_COMPRESSION]: {
       name: i18n.translate('bfetch.disableBfetchCompression', {
-        defaultMessage: 'Disable Batch Compression',
+        defaultMessage: 'Disable batch compression',
       }),
       value: false,
       description: i18n.translate('bfetch.disableBfetchCompressionDesc', {

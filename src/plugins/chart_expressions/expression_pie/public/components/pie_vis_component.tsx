@@ -341,7 +341,6 @@ const PieComponent = (props: PieComponentProps) => {
             <ChartSplit
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}
-              splitDimension={splitChartDimension}
             />
             <Settings
               debugState={window._echDebugStateFlag ?? false}
