@@ -295,7 +295,17 @@ export class DynamicStyleProperty<T>
   }
 
   getFieldMetaOptions() {
-    return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+
+    // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
+    // Saved objects created prior to 8.0 may have a configuration where 
+    // fieldMetaOptions.isEnabled is false and the field does not support fieldMeta from local.
+    // In these cases, force isEnabled to true
+    if (!this._field.supportsFieldMetaFromLocalData()) {
+      fieldMetaOptions.isEnabled = true;
+    }
+
+    return fieldMetaOptions;
   }
 
   getDataMappingFunction() {
