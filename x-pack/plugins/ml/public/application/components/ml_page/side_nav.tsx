@@ -15,6 +15,7 @@ import { isFullLicense } from '../../license';
 import { ML_APP_NAME } from '../../../../common/constants/app';
 import type { MlRoute } from '../../routing';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { checkPermission } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
@@ -92,6 +93,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const navigateToPath = useNavigateToPath();
 
   const mlFeaturesDisabled = !isFullLicense();
+  const canViewMlNodes = checkPermission('canViewMlNodes');
 
   useEffect(() => {
     const title = TAB_DATA[activeRouteId!]?.name;
@@ -154,7 +156,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'anomaly_detection',
             name: i18n.translate('xpack.ml.navMenu.anomalyDetection.jobsManagementText', {
-              defaultMessage: 'Jobs management',
+              defaultMessage: 'Jobs',
             }),
             disabled: disableLinks,
             pathId: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -200,7 +202,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'data_frame_analytics_jobs',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
             name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.jobsManagementText', {
-              defaultMessage: 'Jobs management',
+              defaultMessage: 'Jobs',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalytics',
@@ -227,9 +229,9 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'nodes_overview',
             pathId: ML_PAGES.TRAINED_MODELS_NODES,
             name: i18n.translate('xpack.ml.navMenu.nodesOverviewText', {
-              defaultMessage: 'Nodes Overview',
+              defaultMessage: 'Nodes',
             }),
-            disabled: disableLinks,
+            disabled: disableLinks || !canViewMlNodes,
             testSubj: 'mlMainTab nodesOverview',
           },
         ],
@@ -264,7 +266,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ],
       },
     ];
-  }, [mlFeaturesDisabled]);
+  }, [mlFeaturesDisabled, canViewMlNodes]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {

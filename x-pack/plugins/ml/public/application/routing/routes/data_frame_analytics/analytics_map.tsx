@@ -29,7 +29,6 @@ export const analyticsMapRouteFactory = (
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.analyticsMapLabel', {
         defaultMessage: 'Analytics Map',
       }),
-      href: '',
     },
   ],
 });
