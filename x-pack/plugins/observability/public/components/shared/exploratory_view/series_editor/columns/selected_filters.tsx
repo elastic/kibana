@@ -37,7 +37,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
   const btnProps = {
     seriesId,
     series,
-    indexPattern,
+    dataView: indexPattern,
   };
 
   return (

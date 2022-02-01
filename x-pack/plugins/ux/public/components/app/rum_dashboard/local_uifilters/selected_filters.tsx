@@ -53,7 +53,7 @@ export function SelectedFilters({
           {((uxUiFilters?.[name] ?? []) as string[]).map((value) => (
             <FilterItem key={name + value} grow={false}>
               <FilterValueLabel
-                indexPattern={indexPattern}
+                dataView={indexPattern}
                 removeFilter={() => {
                   onChange(
                     name,

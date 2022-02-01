@@ -30,7 +30,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={jest.fn()}
-        indexPattern={mockIndexPattern}
+        dataView={mockIndexPattern}
         series={mockUxSeries}
       />
     );
@@ -55,7 +55,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={removeFilter}
-        indexPattern={mockIndexPattern}
+        dataView={mockIndexPattern}
         series={mockUxSeries}
       />
     );
@@ -79,7 +79,7 @@ describe.skip('FilterLabel', function () {
         negate={false}
         seriesId={0}
         removeFilter={removeFilter}
-        indexPattern={mockIndexPattern}
+        dataView={mockIndexPattern}
         series={mockUxSeries}
       />
     );
@@ -106,7 +106,7 @@ describe.skip('FilterLabel', function () {
         negate={true}
         seriesId={0}
         removeFilter={jest.fn()}
-        indexPattern={mockIndexPattern}
+        dataView={mockIndexPattern}
         series={mockUxSeries}
       />
     );
@@ -126,7 +126,7 @@ describe.skip('FilterLabel', function () {
       buildFilterLabel({
         field: 'user_agent.name',
         label: 'Browser family',
-        indexPattern: mockIndexPattern,
+        dataView: mockIndexPattern,
         value: 'Firefox',
         negate: false,
       })
