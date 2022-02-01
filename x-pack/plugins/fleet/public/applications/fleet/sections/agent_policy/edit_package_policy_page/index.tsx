@@ -527,7 +527,7 @@ export const EditPackagePolicyForm = memo<{
                 {selectedTab > 0 && tabsViews ? (
                   React.createElement(tabsViews[selectedTab - 1].Component, {
                     validationResults: validationResults!,
-                    packageInfo: packageInfo,
+                    packageInfo,
                     policy: originalPackagePolicy,
                     newPolicy: packagePolicy,
                     onChange: handleExtensionViewOnChange,

@@ -7,7 +7,8 @@
 
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
-import { PackagePolicyValidationResults } from '../services';
+
+import type { PackagePolicyValidationResults } from '../services';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
 
@@ -33,8 +34,8 @@ export interface PackagePolicyEditExtensionComponentProps {
   newPolicy: NewPackagePolicy;
 
   /** The current policy validation state */
-  validationResults: PackagePolicyValidationResults;
-  packageInfo: PackageInfo;
+  validationResults?: PackagePolicyValidationResults;
+  packageInfo?: PackageInfo;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page.
@@ -79,8 +80,8 @@ export type PackagePolicyCreateExtensionComponent =
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
   newPolicy: NewPackagePolicy;
-  packageInfo: PackageInfo;
-  validationResults: PackagePolicyValidationResults;
+  packageInfo?: PackageInfo;
+  validationResults?: PackagePolicyValidationResults;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page

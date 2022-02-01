@@ -6,15 +6,15 @@
  */
 
 import { lazy } from 'react';
-import { PackagePolicyEditExtensionComponent } from '../..';
 
-export const LazyFleetServerPackagePolicyConfigExtension = lazy<PackagePolicyEditExtensionComponent>(
-  async () => {
-  const { FleetServerPackagePolicyConfigExtension  } = await import(
+import type { PackagePolicyEditExtensionComponent } from '../..';
+
+export const LazyFleetServerPackagePolicyConfigExtension =
+  lazy<PackagePolicyEditExtensionComponent>(async () => {
+    const { FleetServerPackagePolicyConfigExtension } = await import(
       './fleet_server_policy_config_editor'
     );
     return {
       default: FleetServerPackagePolicyConfigExtension,
     };
-  }
-);
+  });
