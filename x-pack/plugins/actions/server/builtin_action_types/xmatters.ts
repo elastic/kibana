@@ -9,8 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
 import { isOk, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -56,8 +54,8 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  alertActionGroupName: schema.string(),
-  alertId: schema.string(),
+  alertActionGroupName: schema.nullable(schema.string()),
+  alertId: schema.nullable(schema.string()),
   alertName: schema.maybe(schema.string()),
   date: schema.maybe(schema.string()),
   severity: schema.maybe(schema.string()),
