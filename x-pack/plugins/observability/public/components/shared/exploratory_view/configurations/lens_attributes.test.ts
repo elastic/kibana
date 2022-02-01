@@ -6,7 +6,7 @@
  */
 
 import { LayerConfig, LensAttributes } from './lens_attributes';
-import { mockAppIndexPattern, mockDataView } from '../rtl_helpers';
+import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
 
@@ -21,7 +21,7 @@ import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } fro
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 describe('Lens Attribute', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const reportViewConfig = getDefaultConfigs({
     reportType: 'data-distribution',

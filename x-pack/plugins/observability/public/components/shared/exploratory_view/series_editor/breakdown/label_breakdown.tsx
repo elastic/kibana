@@ -9,7 +9,7 @@ import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { LABEL_FIELDS_BREAKDOWN } from '../../configurations/constants';
 
@@ -19,9 +19,9 @@ interface Props {
   seriesConfig?: SeriesConfig;
 }
 export function LabelsBreakdown({ series, seriesId }: Props) {
-  const { indexPattern } = useAppIndexPatternContext(series.dataType);
+  const { dataView } = useAppDataViewContext(series.dataType);
 
-  const labelFields = indexPattern?.fields.filter((field) => field.name.startsWith('labels.'));
+  const labelFields = dataView?.fields.filter((field) => field.name.startsWith('labels.'));
 
   const { setSeries } = useSeriesStorage();
 

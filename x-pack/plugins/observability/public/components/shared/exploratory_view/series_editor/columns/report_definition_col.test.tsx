@@ -9,7 +9,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import {
-  mockAppIndexPattern,
+  mockAppDataView,
   mockDataView,
   mockUseValuesList,
   mockUxSeries,
@@ -19,7 +19,7 @@ import { ReportDefinitionCol } from './report_definition_col';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('Series Builder ReportDefinitionCol', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
   const seriesId = 0;
 
   const seriesConfig = getDefaultConfigs({
