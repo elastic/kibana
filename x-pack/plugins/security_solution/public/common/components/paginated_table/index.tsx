@@ -39,6 +39,8 @@ import {
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
+import { HostRiskScoreColumns } from '../../../hosts/components/host_risk_score_table';
+
 import { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
@@ -88,7 +90,7 @@ declare type BasicTableColumns =
   | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
   | NetworkTopNFlowColumnsNetworkDetails
-  | NetworkHttpColumns
+  | HostRiskScoreColumns
   | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
@@ -102,6 +104,7 @@ export interface BasicTableProps<T> {
   columns: T;
   dataTestSubj?: string;
   headerCount: number;
+  headerFilters?: string | React.ReactNode;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
@@ -118,6 +121,8 @@ export interface BasicTableProps<T> {
   pageOfItems: any[];
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
+  split?: boolean;
+  stackHeader?: boolean;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
@@ -140,6 +145,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   columns,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   headerCount,
+  headerFilters,
   headerSupplement,
   headerTitle,
   headerTooltip,
@@ -155,6 +161,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   pageOfItems,
   showMorePagesIndicator,
   sorting = null,
+  split,
+  stackHeader,
   totalCount,
   updateActivePage,
   updateLimitPagination,
@@ -255,7 +263,10 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          headerFilters={headerFilters}
           id={id}
+          split={split}
+          stackHeader={stackHeader}
           subtitle={
             !loadingInitial && headerSubtitle
               ? `${i18n.SHOWING}: ${headerSubtitle}`
