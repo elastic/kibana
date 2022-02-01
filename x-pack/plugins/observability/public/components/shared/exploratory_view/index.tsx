@@ -23,6 +23,10 @@ import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
+const PAGE_TITLE = i18n.translate('xpack.observability.expView.heading.label', {
+  defaultMessage: 'Explore data',
+});
+
 export interface ExploratoryViewPageProps {
   useSessionStorage?: boolean;
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
@@ -68,7 +72,7 @@ export function ExploratoryViewPage({
       });
 
   return (
-    <ObservabilityPageTemplate>
+    <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
       <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
           <ExploratoryView saveAttributes={saveAttributes} />

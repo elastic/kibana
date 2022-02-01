@@ -20,7 +20,6 @@ import {
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { ExploratoryViewHeader } from './header/header';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { TypedLensByValueInput } from '../../../../../lens/public';
@@ -105,10 +104,6 @@ export function ExploratoryView({
     <Wrapper>
       {lens ? (
         <>
-          <ExploratoryViewHeader
-            lensAttributes={lensAttributes}
-            chartTimeRange={chartTimeRangeContext}
-          />
           <LensWrapper ref={wrapperRef} height={height}>
             <ResizableContainer direction="vertical" onToggleCollapsed={onCollapse}>
               {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
