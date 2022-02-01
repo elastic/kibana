@@ -65,7 +65,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
-      multiFields: `${KIBANA_DOCS}multi-fields.html`,
     },
     filebeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
