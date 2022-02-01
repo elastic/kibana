@@ -11,7 +11,7 @@ import { ToolbarPopover, TooltipWrapper } from '../../shared_components';
 import { TitlePositionOptions } from './title_position_option';
 import { FramePublicAPI } from '../../types';
 import { MetricState } from '../../../common/expressions';
-import { TitleAlignOptions } from './title_align_option';
+import { AlignOptions } from './align_options';
 import { SizeOptions } from './size_options';
 
 export interface VisualOptionsPopoverProps {
@@ -39,9 +39,9 @@ export const AppearanceOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         groupPosition="none"
         buttonDataTestSubj="lnsMetricAppearanceButton"
       >
+        <AlignOptions state={state} setState={setState} />
         <SizeOptions state={state} setState={setState} />
         <TitlePositionOptions state={state} setState={setState} />
-        <TitleAlignOptions state={state} setState={setState} />
       </ToolbarPopover>
     </TooltipWrapper>
   );
