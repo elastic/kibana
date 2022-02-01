@@ -72,6 +72,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       isCellLabelVisible: false,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: state?.gridConfig?.isYAxisTitleVisible ?? false,
+      isXAxisTitleVisible: state?.gridConfig?.isXAxisTitleVisible ?? false,
     },
   };
 
