@@ -1,0 +1,63 @@
+[[index-patterns-runtime-field-api-create]]
+=== Create runtime field API
+++++
+<titleabbrev>Create runtime field</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-runtime-field-api-create>> instead.]
+
+experimental[] Create a runtime field
+
+[[index-patterns-runtime-field-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
+
+`POST <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<index_pattern_id>/runtime_field`
+
+[[index-patterns-runtime-field-create-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`index_pattern_id`::
+(Required, string) The ID of the index pattern.
+
+[[index-patterns-runtime-field-create-body]]
+==== Request body
+
+`name`:: (Required, string) The name for a runtime field.
+
+`runtimeField`:: (Required, object) The runtime field definition object.
+
+
+[[index-patterns-runtime-field-create-example]]
+==== Examples
+
+Create a runtime field on an index pattern:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/index_patterns/index_pattern/<index_pattern_id>/runtime_field
+{
+  "name": "runtimeFoo",
+  "runtimeField": {
+     "type": "long",
+     "script": {
+        "source": "emit(doc["foo"].value)"
+      }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns created runtime field object and update index pattern object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern": {...},
+    "field": {...}
+}
+--------------------------------------------------

@@ -120,7 +120,7 @@ export function useFetchHostIsolationExceptionsList({
         filter: kql,
       });
     },
-    { enabled }
+    { enabled, keepPreviousData: true }
   );
 }
 

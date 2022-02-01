@@ -52,6 +52,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
+  SECURITY_TELEMETRY_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
 import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
@@ -1848,7 +1849,7 @@ export const getDetectionMetricsFromBody = (
 };
 
 /**
- * Gets the stats from the stats endpoint
+ * Gets the stats from the stats endpoint.
  * @param supertest The supertest agent.
  * @returns The detection metrics
  */
@@ -1868,6 +1869,30 @@ export const getStats = async (
     );
   }
   return getDetectionMetricsFromBody(response.body);
+};
+
+/**
+ * Gets the stats from the stats endpoint within specifically the security_solutions application.
+ * This is considered the "batch" telemetry.
+ * @param supertest The supertest agent.
+ * @returns The detection metrics
+ */
+export const getSecurityTelemetryStats = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
+): Promise<any> => {
+  const response = await supertest
+    .get(SECURITY_TELEMETRY_URL)
+    .set('kbn-xsrf', 'true')
+    .send({ unencrypted: true, refreshCache: true });
+  if (response.status !== 200) {
+    log.error(
+      `Did not get an expected 200 "ok" when getting the batch stats for security_solutions. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return response.body;
 };
 
 /**
