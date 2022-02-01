@@ -27,7 +27,8 @@ import {
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { auditServiceMock } from '../audit/index.mock';
+import type { AuditLogger } from '../audit';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
@@ -43,13 +44,19 @@ function getMockOptions({
   providers,
   http = {},
   selector,
+  auditLogger,
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
+  auditLogger?: AuditLogger;
 } = {}) {
+  const auditService = auditServiceMock.create();
+  if (auditLogger) {
+    auditService.asScoped.mockReturnValue(auditLogger);
+  }
   return {
-    audit: auditServiceMock.create(),
+    audit: auditService,
     getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
@@ -262,16 +269,12 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
-    const auditLogger = {
-      log: jest.fn(),
-      enabled: true,
-    };
+    let auditLogger: AuditLogger;
 
     beforeEach(() => {
-      auditLogger.log.mockClear();
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      auditLogger = auditLoggerMock.create();
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditLogger });
       mockOptions.session.get.mockResolvedValue(null);
-      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -1093,16 +1096,12 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
-    const auditLogger = {
-      log: jest.fn(),
-      enabled: true,
-    };
+    let auditLogger: AuditLogger;
 
     beforeEach(() => {
-      auditLogger.log.mockClear();
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      auditLogger = auditLoggerMock.create();
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditLogger });
       mockOptions.session.get.mockResolvedValue(null);
-      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -1831,16 +1830,12 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
-    const auditLogger = {
-      log: jest.fn(),
-      enabled: true,
-    };
+    let auditLogger: AuditLogger;
 
     beforeEach(() => {
-      auditLogger.log.mockClear();
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      auditLogger = auditLoggerMock.create();
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditLogger });
       mockOptions.session.get.mockResolvedValue(null);
-      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -2010,15 +2005,11 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
-    const auditLogger = {
-      log: jest.fn(),
-      enabled: true,
-    };
+    let auditLogger: AuditLogger;
 
     beforeEach(() => {
-      auditLogger.log.mockClear();
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
+      auditLogger = auditLoggerMock.create();
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditLogger });
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -2147,16 +2138,13 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionValue: SessionValue;
-    const auditLogger = {
-      log: jest.fn(),
-      enabled: true,
-    };
+    let auditLogger: AuditLogger;
 
     beforeEach(() => {
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      auditLogger = auditLoggerMock.create();
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditLogger });
       mockSessionValue = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
       mockOptions.session.get.mockResolvedValue(mockSessionValue);
-      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: true,
