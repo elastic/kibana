@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/to_number_rt",
-  "types": "../target_types/to_number_rt"
-}

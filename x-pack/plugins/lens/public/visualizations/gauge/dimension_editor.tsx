@@ -32,7 +32,6 @@ import {
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   PalettePanelContainer,
   TooltipWrapper,
 } from '../../shared_components/';
@@ -70,6 +69,7 @@ export function GaugeDimensionEditor(
     name: defaultPaletteParams.name,
     params: {
       ...defaultPaletteParams,
+      continuity: 'all',
       colorStops: undefined,
       stops: undefined,
       rangeMin: currentMinMax.min,
@@ -141,14 +141,7 @@ export function GaugeDimensionEditor(
               <EuiFlexItem>
                 <EuiColorPaletteDisplay
                   data-test-subj="lnsGauge_dynamicColoring_palette"
-                  palette={
-                    activePalette.params?.name === CUSTOM_PALETTE
-                      ? getStopsForFixedMode(
-                          activePalette.params.stops!,
-                          activePalette.params.colorStops
-                        )
-                      : displayStops.map(({ color }) => color)
-                  }
+                  palette={displayStops.map(({ color }) => color)}
                   type={FIXED_PROGRESSION}
                   onClick={togglePalette}
                 />
@@ -174,7 +167,7 @@ export function GaugeDimensionEditor(
                     palettes={props.paletteService}
                     activePalette={activePalette}
                     dataBounds={currentMinMax}
-                    showContinuity={false}
+                    disableSwitchingContinuity={true}
                     setPalette={(newPalette) => {
                       // if the new palette is not custom, replace the rangeMin with the artificial one
                       if (

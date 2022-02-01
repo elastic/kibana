@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { ThresholdAnnotations } from './threshold_annotations';
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-// import { Color } from 'x-pack/plugins/infra/common/color_palette';
-import { Color } from '../../../../common/color_palette';
 import { shallow } from 'enzyme';
+import React from 'react';
+import { Comparator } from '../../../../common/alerting/metrics';
+import { Color } from '../../../../common/color_palette';
+import { ThresholdAnnotations } from './threshold_annotations';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
