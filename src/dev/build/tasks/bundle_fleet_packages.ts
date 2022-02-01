@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
+import axios from 'axios';
 import JSON5 from 'json5';
+
+// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
+import AxiosHttpAdapter from 'axios/lib/adapters/http';
+
+import { ToolingLog } from '@kbn/dev-utils';
+import { closeSync, openSync, writeSync } from 'fs';
 import { readCliArgs } from '../args';
 
-import { Task, read, downloadToDisk } from '../lib';
+import { Task, read } from '../lib';
+
+const BUNDLED_PACKAGES_DIR = 'x-pack/plugins/fleet/server/bundled_packages';
 
 interface FleetPackage {
   name: string;
   version: string;
-  checksum: string;
-  checksum_snapshot: string;
 }
 
 export const BundleFleetPackages: Task = {
@@ -40,20 +47,10 @@ export const BundleFleetPackages: Task = {
         const archivePath = `${fleetPackage.name}-${fleetPackage.version}.zip`;
         const archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
 
-        const destination = build.resolvePath(
-          'x-pack/plugins/fleet/server/bundled_packages',
-          archivePath
-        );
+        const destination = build.resolvePath(BUNDLED_PACKAGES_DIR, archivePath);
 
         try {
-          await downloadToDisk({
-            log,
-            url: archiveUrl,
-            destination,
-            shaChecksum: fleetPackage.checksum,
-            shaAlgorithm: 'sha512',
-            maxAttempts: 1,
-          });
+          await downloadPackageArchive({ log, url: archiveUrl, destination });
         } catch (error) {
           log.warning(`Failed to download bundled package archive ${archivePath}`);
           log.warning(error);
@@ -62,3 +59,39 @@ export const BundleFleetPackages: Task = {
     );
   },
 };
+
+/**
+ * We need to skip the checksum process on Fleet's bundled packages for now because we can't reliably generate
+ * a consistent checksum for the `.zip` file returned from the EPR service. This download process should be updated
+ * to verify packages using the proposed package signature field provided in https://github.com/elastic/elastic-package/issues/583
+ */
+async function downloadPackageArchive({
+  log,
+  url,
+  destination,
+}: {
+  log: ToolingLog;
+  url: string;
+  destination: string;
+}) {
+  log.info(`Downloading bundled package from ${url}`);
+
+  const response = await axios.request({ url, responseType: 'stream', adapter: AxiosHttpAdapter });
+  const file = openSync(destination, 'w');
+
+  try {
+    await new Promise((resolve, reject) => {
+      response.data.on('data', (chunk: Buffer) => {
+        writeSync(file, chunk);
+      });
+
+      response.data.on('error', reject);
+      response.data.on('end', resolve);
+    });
+  } catch (error) {
+    log.warning(`Error downloading bundled package from ${url}`);
+    log.warning(error);
+  } finally {
+    closeSync(file);
+  }
+}
