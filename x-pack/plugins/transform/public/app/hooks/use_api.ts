@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
@@ -43,10 +43,10 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../common/api_schemas/update_transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
-import { TransformId } from '../../../common/types/transform';
+import type { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
-import { EsIndex } from '../../../common/types/es_index';
-import { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
+import type { EsIndex } from '../../../common/types/es_index';
+import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
 
 import { useAppDependencies } from '../app_dependencies';
 

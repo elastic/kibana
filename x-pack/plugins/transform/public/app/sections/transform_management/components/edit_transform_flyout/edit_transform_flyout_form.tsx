@@ -59,8 +59,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
     [indexPatternId, indexPatternsClient]
   );
 
-  // fetch pipeline names once for form validation
-  useEffect(() => {
+  useEffect(function fetchPipelinesOnMount() {
     let unmounted = false;
 
     async function getIngestPipelineNames() {
