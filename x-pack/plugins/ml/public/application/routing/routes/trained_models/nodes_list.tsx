@@ -24,7 +24,7 @@ export const nodesListRouteFactory = (
   path: '/trained_models/nodes',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   title: i18n.translate('xpack.ml.modelManagement.nodesOverview.docTitle', {
-    defaultMessage: 'Nodes Overview',
+    defaultMessage: 'Nodes',
   }),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
