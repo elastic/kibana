@@ -18,9 +18,9 @@ export interface MetricState {
   layerType: LayerType;
   colorMode?: ColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
-  titlePosition?: string;
+  titlePosition?: 'top' | 'bottom';
   size?: string;
-  titleAlignPosition?: string;
+  textAlign?: 'left' | 'right' | 'center';
 }
 
 export interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {

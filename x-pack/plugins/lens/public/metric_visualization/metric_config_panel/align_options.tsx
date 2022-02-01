@@ -56,9 +56,9 @@ export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) 
           defaultMessage: 'Align',
         })}
         options={alignButtonIcons}
-        idSelected={state.titleAlignPosition ?? 'center'}
+        idSelected={state.textAlign ?? 'center'}
         onChange={(id) => {
-          setState({ ...state, titleAlignPosition: id });
+          setState({ ...state, textAlign: id as MetricState['textAlign'] });
         }}
         isIconOnly
       />

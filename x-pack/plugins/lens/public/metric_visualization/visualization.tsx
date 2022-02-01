@@ -62,7 +62,7 @@ const toExpression = (
           title: [attributes?.title || ''],
           size: [state?.size || ''],
           titlePosition: [state?.titlePosition || 'top'],
-          titleAlignPosition: [state?.titleAlignPosition || 'center'],
+          textAlign: [state?.textAlign || 'center'],
           description: [attributes?.description || ''],
           metricTitle: [operation?.label || ''],
           accessor: [state.accessor],

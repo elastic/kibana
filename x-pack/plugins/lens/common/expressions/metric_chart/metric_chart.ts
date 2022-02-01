@@ -50,10 +50,10 @@ export const metricChart: ExpressionFunctionDefinition<
         defaultMessage: 'The chart title position.',
       }),
     },
-    titleAlignPosition: {
+    textAlign: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.metric.titleAlignPosition.help', {
-        defaultMessage: 'The chart title align position.',
+      help: i18n.translate('xpack.lens.metric.textAlignPosition.help', {
+        defaultMessage: 'The chart text align position.',
       }),
     },
     description: {
