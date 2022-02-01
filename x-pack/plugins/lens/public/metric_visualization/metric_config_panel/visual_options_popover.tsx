@@ -23,10 +23,15 @@ export interface VisualOptionsPopoverProps {
 
 export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({ state, setState }) => {
   return (
-    <TooltipWrapper tooltipContent={'what'} condition={true}>
+    <TooltipWrapper
+      tooltipContent={i18n.translate('xpack.lens.shared.AppearanceLabel', {
+        defaultMessage: 'Appearance',
+      })}
+      condition={true}
+    >
       <ToolbarPopover
-        title={i18n.translate('xpack.lens.shared.curveLabel', {
-          defaultMessage: 'Visual options',
+        title={i18n.translate('xpack.lens.shared.metric.appearanceLabel', {
+          defaultMessage: 'Appearance',
         })}
         type="visualOptions"
         groupPosition="left"
