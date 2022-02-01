@@ -124,23 +124,17 @@ export function FormRowSetting({ row, value, onChange }: Props) {
               onChange(row.key, val);
             }}
             options={{
-              minimap: {
-                enabled: false,
-              },
               ariaLabel: i18n.translate(
                 'xpack.apm.fleet_integration.settings.yamlCodeEditor',
                 {
                   defaultMessage: 'YAML Code Editor',
                 }
               ),
-              scrollBeyondLastLine: false,
               wordWrap: 'off',
-              wrappingIndent: 'indent',
               tabSize: 2,
               // To avoid left margin
               lineNumbers: 'off',
               lineNumbersMinChars: 0,
-              glyphMargin: false,
               folding: false,
               lineDecorationsWidth: 0,
               overviewRulerBorder: false,
