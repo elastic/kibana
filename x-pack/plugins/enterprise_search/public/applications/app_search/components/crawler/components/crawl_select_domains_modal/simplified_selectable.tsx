@@ -8,6 +8,7 @@ import React from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { i18n } from '@kbn/i18n';
 
 export interface Props {
   options: string[];
@@ -43,7 +44,12 @@ export const SimplifiedSelectable: React.FC<Props> = ({ options, selectedOptions
             onClick={() => onChange(options)}
             disabled={selectedOptions.length === options.length}
           >
-            Select all
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.simplifiedSelectable.selectAllButtonLabel',
+              {
+                defaultMessage: 'Select all',
+              }
+            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -53,7 +59,12 @@ export const SimplifiedSelectable: React.FC<Props> = ({ options, selectedOptions
             onClick={() => onChange([])}
             disabled={selectedOptions.length === 0}
           >
-            Deselect all
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.simplifiedSelectable.deselectAllButtonLabel',
+              {
+                defaultMessage: 'De select all',
+              }
+            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
