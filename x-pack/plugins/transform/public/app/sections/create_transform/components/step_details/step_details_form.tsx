@@ -489,7 +489,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   }
                 )}
                 placeholder={i18n.translate(
-                  'xpack.transform.stepDetailsForm.destinationIngestPipelinComboBoxPlaceholder',
+                  'xpack.transform.stepDetailsForm.destinationIngestPipelineComboBoxPlaceholder',
                   {
                     defaultMessage: 'Select an ingest pipeline',
                   }
