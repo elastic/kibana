@@ -26,6 +26,7 @@ export const AgentPolicySummaryLine = memo<{ policy: AgentPolicy }>(({ policy })
           className={`eui-textTruncate`}
           href={getHref('policy_details', { policyId: id })}
           title={name || id}
+          data-test-subj="agentPolicyNameLink"
         >
           {name || id}
         </EuiLink>

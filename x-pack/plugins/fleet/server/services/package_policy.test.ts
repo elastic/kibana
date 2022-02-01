@@ -49,6 +49,7 @@ import {
   updatePackageInputs,
   packagePolicyService,
   _applyIndexPrivileges,
+  incrementPackageName,
 } from './package_policy';
 import { appContextService } from './app_context';
 import { fetchInfo } from './epm/registry';
@@ -2891,6 +2892,7 @@ describe('Package policy service', () => {
         name: 'apache-1',
         inputs: [{ type: 'logfile', enabled: false }],
         package: { name: 'apache', version: '0.3.3' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -2967,6 +2969,7 @@ describe('Package policy service', () => {
         name: 'aws-1',
         inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
         package: { name: 'aws', version: '1.0.0' },
+        policy_id: '1',
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -3238,5 +3241,26 @@ describe('_applyIndexPrivileges()', () => {
 
     const streamOut = _applyIndexPrivileges(packageStream, inputStream);
     expect(streamOut).toEqual(expectedStream);
+  });
+
+  describe('increment package name', () => {
+    it('should return 1 if no existing policies', async () => {
+      packagePolicyService.list = jest.fn().mockResolvedValue(undefined);
+      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
+      expect(newName).toEqual('apache-1');
+    });
+
+    it('should return 11 if max policy name is 10', async () => {
+      packagePolicyService.list = jest.fn().mockResolvedValue({
+        items: [
+          { name: 'apache-1' },
+          { name: 'aws-11' },
+          { name: 'apache-10' },
+          { name: 'apache-9' },
+        ],
+      });
+      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
+      expect(newName).toEqual('apache-11');
+    });
   });
 });

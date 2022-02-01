@@ -42,7 +42,7 @@ const waitForFleetSetup = async (root: Root) => {
   }
 };
 
-describe('Fleet preconfiguration rest', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
 
@@ -63,6 +63,12 @@ describe('Fleet preconfiguration rest', () => {
         {
           xpack: {
             fleet: {
+              packages: [
+                {
+                  name: 'fleet_server',
+                  version: 'latest',
+                },
+              ],
               // Preconfigure two policies test-12345 and test-456789
               agentPolicies: [
                 {

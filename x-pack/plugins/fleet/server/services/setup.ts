@@ -11,7 +11,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
-import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
+
+import { SO_SEARCH_LIMIT } from '../constants';
 import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import { appContextService } from './app_context';
@@ -26,7 +27,6 @@ import { outputService } from './output';
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetServerAgentPoliciesExists } from './agents';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
 import { getInstallations, installPackage } from './epm/packages';
@@ -93,7 +93,6 @@ async function createSetupSideEffects(
 
   packages = [
     ...packages,
-    ...DEFAULT_PACKAGES.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
     ...autoUpdateablePackages.filter((pkg) => !preconfiguredPackageNames.has(pkg.name)),
   ];
 
@@ -113,9 +112,6 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-
-  logger.debug('Setting up Fleet Server agent policies');
-  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');

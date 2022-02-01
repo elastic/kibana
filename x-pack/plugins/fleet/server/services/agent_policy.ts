@@ -16,8 +16,6 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -134,91 +132,31 @@ class AgentPolicyService {
       is_preconfigured: true,
     };
 
-    let searchParams;
+    if (!id) throw new Error('Missing ID');
 
-    const isDefaultPolicy =
-      preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
-
-    if (isDefaultPolicy) {
-      searchParams = {
-        searchFields: [
-          preconfiguredAgentPolicy.is_default_fleet_server
-            ? 'is_default_fleet_server'
-            : 'is_default',
-        ],
-        search: 'true',
-      };
-    } else if (id) {
-      searchParams = {
-        id: String(id),
-      };
-    }
-
-    if (!searchParams) throw new Error('Missing ID');
-
-    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams, id);
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, id as string);
   }
 
   private async ensureAgentPolicy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
-    searchParams:
-      | { id: string }
-      | {
-          searchFields: string[];
-          search: string;
-        },
-    id?: string | number
+    id: string
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
   }> {
     // For preconfigured policies with a specified ID
-    if ('id' in searchParams) {
-      try {
-        const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
-          AGENT_POLICY_SAVED_OBJECT_TYPE,
-          searchParams.id
-        );
-        return {
-          created: false,
-          policy: {
-            id: agentPolicy.id,
-            ...agentPolicy.attributes,
-          },
-        };
-      } catch (e) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return {
-            created: true,
-            policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
-          };
-        } else throw e;
-      }
-    }
-
-    // For default policies without a specified ID
-    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      ...searchParams,
-    });
-
-    if (agentPolicies.total === 0) {
+    const agentPolicy = await this.get(soClient, id, false).catch(() => null);
+    if (!agentPolicy) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy, {
-          id: id ? String(id) : uuidv5(newAgentPolicy.name, UUID_V5_NAMESPACE),
-        }),
+        policy: await this.create(soClient, esClient, newAgentPolicy, { id }),
       };
     }
-
     return {
       created: false,
-      policy: {
-        id: agentPolicies.saved_objects[0].id,
-        ...agentPolicies.saved_objects[0].attributes,
-      },
+      policy: agentPolicy,
     };
   }
 
@@ -243,9 +181,7 @@ class AgentPolicyService {
       options
     );
 
-    if (!agentPolicy.is_default && !agentPolicy.is_default_fleet_server) {
-      await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
-    }
+    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
     return { id: newSo.id, ...newSo.attributes };
   }
@@ -454,7 +390,7 @@ class AgentPolicyService {
       throw new Error('Copied agent policy not found');
     }
 
-    await this.createFleetServerPolicy(soClient, newAgentPolicy.id);
+    await this.deployPolicy(soClient, newAgentPolicy.id);
 
     return updatedAgentPolicy;
   }
@@ -601,20 +537,6 @@ class AgentPolicyService {
     );
   }
 
-  public async getDefaultAgentPolicyId(soClient: SavedObjectsClientContract) {
-    const agentPolicies = await soClient.find({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      searchFields: ['is_default'],
-      search: 'true',
-    });
-
-    if (agentPolicies.saved_objects.length === 0) {
-      throw new Error('No default agent policy');
-    }
-
-    return agentPolicies.saved_objects[0].id;
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -628,14 +550,6 @@ class AgentPolicyService {
 
     if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
-    }
-
-    if (agentPolicy.is_default && !options?.force) {
-      throw new Error('The default agent policy cannot be deleted');
-    }
-
-    if (agentPolicy.is_default_fleet_server && !options?.force) {
-      throw new Error('The default fleet server agent policy cannot be deleted');
     }
 
     const { total } = await getAgentsByKuery(esClient, {
@@ -688,10 +602,7 @@ class AgentPolicyService {
     };
   }
 
-  public async createFleetServerPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicyId: string
-  ) {
+  public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);

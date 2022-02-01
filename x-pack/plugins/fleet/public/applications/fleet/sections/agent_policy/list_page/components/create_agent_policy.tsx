@@ -48,7 +48,6 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     name: '',
     description: '',
     namespace: 'default',
-    is_default: undefined,
     monitoring_enabled: Object.values(dataTypes),
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -147,6 +146,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 );
               }
             }}
+            data-test-subj="createAgentPolicyFlyoutBtn"
           >
             <FormattedMessage
               id="xpack.fleet.createAgentPolicy.submitButtonLabel"

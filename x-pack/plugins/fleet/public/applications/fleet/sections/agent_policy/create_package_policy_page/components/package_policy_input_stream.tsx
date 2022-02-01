@@ -106,6 +106,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
         <FlexItemWithMaxWidth>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
+              if (!packagePolicyInputStream.vars) return null;
               const { name: varName, type: varType } = varDef;
               const varConfigEntry = packagePolicyInputStream.vars?.[varName];
               const value = varConfigEntry?.value;
@@ -166,6 +167,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                 </EuiFlexItem>
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
+                      if (!packagePolicyInputStream.vars) return null;
                       const { name: varName, type: varType } = varDef;
                       const value = packagePolicyInputStream.vars?.[varName]?.value;
 
