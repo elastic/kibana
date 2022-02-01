@@ -15,6 +15,7 @@ import {
   getApmPackagePolicy,
 } from '../routes/fleet/get_cloud_apm_package_policy';
 import { APMRouteHandlerResources } from '../';
+
 export function getDeprecations({
   cloudSetup,
   fleet,

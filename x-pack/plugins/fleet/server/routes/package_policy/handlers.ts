@@ -9,7 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-
 import { appContextService, packagePolicyService } from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,

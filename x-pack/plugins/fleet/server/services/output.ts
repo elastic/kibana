@@ -6,9 +6,8 @@
  */
 
 import type { SavedObject } from 'src/core/server';
-import uuid from 'uuid/v5';
-
 import type { ISavedObjectsRepository } from 'kibana/server';
+import uuid from 'uuid/v5';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';

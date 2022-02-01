@@ -190,6 +190,7 @@ export class FleetPlugin
   private agentService?: AgentService;
   private packageService?: PackageService;
   private savedObjectsRepo?: ISavedObjectsRepository;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
@@ -400,6 +401,7 @@ export class FleetPlugin
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.savedObjectsRepo = core.savedObjects.createInternalRepository();
+
     const logger = appContextService.getLogger();
 
     const fleetSetupPromise = (async () => {
