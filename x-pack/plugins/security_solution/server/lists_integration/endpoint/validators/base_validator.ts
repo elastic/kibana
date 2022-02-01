@@ -77,6 +77,12 @@ export class BaseValidator {
     }
   }
 
+  protected async validateCanIsolateHosts(): Promise<void> {
+    if (!(await this.endpointAuthzPromise).canIsolateHost) {
+      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 403);
+    }
+  }
+
   /**
    * validates some basic common data that can be found across all endpoint exceptions
    * @param item
