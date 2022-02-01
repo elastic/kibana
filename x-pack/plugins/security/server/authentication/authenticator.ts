@@ -325,6 +325,9 @@ export class Authenticator {
           const auditLogger = this.options.audit.asScoped(request);
           auditLogger.log(
             userLoginEvent({
+              // We must explicitly specify the sessionId for login events because we just created the session, so
+              // it won't automatically get included in the audit event from the request context.
+              sessionId: sessionUpdateResult?.value?.sid,
               authenticationResult,
               authenticationProvider: providerName,
               authenticationType: provider.type,

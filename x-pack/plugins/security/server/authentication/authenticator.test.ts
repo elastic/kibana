@@ -341,14 +341,20 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
       const user = mockAuthenticatedUser();
       mockBasicAuthenticationProvider.login.mockResolvedValue(
-        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
+        AuthenticationResult.succeeded(user, {
+          authHeaders: { authorization: 'Basic .....' },
+          state: 'foo', // to ensure a new session is created
+        })
       );
+      mockOptions.session.create.mockResolvedValue({ ...mockSessVal, sid: '123' });
       await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
 
+      expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: { action: 'user_login', category: ['authentication'], outcome: 'success' },
+          kibana: expect.objectContaining({ authentication_type: 'basic', session_id: '123' }),
         })
       );
     });
@@ -361,10 +367,12 @@ describe('Authenticator', () => {
       );
       await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
 
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: { action: 'user_login', category: ['authentication'], outcome: 'failure' },
+          kibana: expect.objectContaining({ authentication_type: 'basic', session_id: undefined }),
         })
       );
     });
