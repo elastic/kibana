@@ -7,9 +7,11 @@
 
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreSingleListFindServerExtension } from '../../../../../lists/server';
-import { TrustedAppValidator } from '../validators/trusted_app_validator';
-import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
-import { EventFilterValidator } from '../validators';
+import {
+  TrustedAppValidator,
+  HostIsolationExceptionsValidator,
+  EventFilterValidator,
+} from '../validators';
 
 type ValidatorCallback = ExceptionsListPreSingleListFindServerExtension['callback'];
 export const getExceptionsPreSingleListFindHandler = (
@@ -29,7 +31,7 @@ export const getExceptionsPreSingleListFindHandler = (
     }
 
     // Host Isolation Exceptions
-    if (HostIsolationExceptionsValidator.isHostIsolationException(listId)) {
+    if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
