@@ -847,7 +847,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_content_filtering',
       {
         defaultMessage:
-          'Enable or disable the network content filter, this will enable/disable network eventing, additionally host isolation will fail if this option is disabled. Default: true',
+          'Enable or disable the network content filter, this will enable/disable network eventing. Host isolation will fail if this option is disabled. Default: true',
       }
     ),
   },
