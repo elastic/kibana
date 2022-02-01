@@ -7,11 +7,12 @@
 import React, { ReactNode } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { DetailPanelProcess } from '../../types';
-import { useStyles } from './styles';
 import { DetailPanelAccordion } from '../DetailPanelAccordion';
 import { DetailPanelCopy } from '../DetailPanelCopy';
 import { DetailPanelDescriptionList } from '../DetailPanelDescriptionList';
 import { DetailPanelListItem } from '../DetailPanelListItem';
+import { dataOrDash } from '../../utils/data_or_dash';
+import { useStyles } from './styles';
 
 interface DetailPanelProcessTabDeps {
   processDetail: DetailPanelProcess;
@@ -62,7 +63,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         description: (
           <DetailPanelCopy textToCopy={leader.id}>
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {leader.id || '-'}
+              {dataOrDash(leader.id)}
             </EuiTextColor>
           </DetailPanelCopy>
         ),
@@ -82,7 +83,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         description: (
           <DetailPanelCopy textToCopy={leader.entryMetaType}>
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {leader.entryMetaType || '-'}
+              {dataOrDash(leader.entryMetaType)}
             </EuiTextColor>
           </DetailPanelCopy>
         ),
@@ -94,7 +95,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           title: <DetailPanelListItem>user.name</DetailPanelListItem>,
           description: (
             <DetailPanelCopy textToCopy={leader.userName}>
-              <span css={styles.description}>{leader.userName || '-'}</span>
+              <span css={styles.description}>{dataOrDash(leader.userName)}</span>
             </DetailPanelCopy>
           ),
         },
@@ -109,8 +110,8 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         {
           title: <DetailPanelListItem>pid</DetailPanelListItem>,
           description: (
-            <DetailPanelCopy textToCopy={leader.pid.toString()}>
-              <span css={styles.description}>{leader.pid ? leader.pid.toString() : '-'}</span>
+            <DetailPanelCopy textToCopy={leader.pid}>
+              <span css={styles.description}>{dataOrDash(leader.pid)}</span>
             </DetailPanelCopy>
           ),
         },
@@ -121,7 +122,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
         description: (
           <DetailPanelCopy textToCopy={leader.entryMetaSourceIp}>
-            <span css={styles.description}>{leader.entryMetaSourceIp || '-'}</span>
+            <span css={styles.description}>{dataOrDash(leader.entryMetaSourceIp)}</span>
           </DetailPanelCopy>
         ),
       });
@@ -146,7 +147,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             description: (
               <DetailPanelCopy textToCopy={processDetail.id}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processDetail.id || '-'}
+                  {dataOrDash(processDetail.id)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -172,7 +173,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             description: (
               <DetailPanelCopy textToCopy={processDetail.exit_code.toString()}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processDetail.exit_code || '-'}
+                  {dataOrDash(processDetail.exit_code)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -181,7 +182,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>user</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={processDetail.user}>
-                <span css={styles.description}>{processDetail.user}</span>
+                <span css={styles.description}>{dataOrDash(processDetail.user)}</span>
               </DetailPanelCopy>
             ),
           },
@@ -224,9 +225,9 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>process.pid</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processDetail.pid.toString()}>
+              <DetailPanelCopy textToCopy={processDetail.pid}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processDetail.pid || '-'}
+                  {dataOrDash(processDetail.pid)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),

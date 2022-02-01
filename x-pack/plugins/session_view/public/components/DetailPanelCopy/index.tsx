@@ -7,11 +7,12 @@
 import React, { ReactNode } from 'react';
 import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { DetailPanelListItem } from '../DetailPanelListItem';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from './styles';
 
 interface DetailPanelCopyDeps {
   children: ReactNode;
-  textToCopy: string;
+  textToCopy: string | number;
   display?: 'inlineBlock' | 'block' | undefined;
 }
 
@@ -32,7 +33,7 @@ export const DetailPanelCopy = ({
 
   const props: DetailPanelListItemProps = {
     copy: (
-      <EuiCopy textToCopy={textToCopy || '-'} display={display}>
+      <EuiCopy textToCopy={dataOrDash(textToCopy).toString()} display={display}>
         {(copy) => (
           <EuiButtonIcon
             css={styles.copyButton}

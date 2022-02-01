@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, ReactNode } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiTextProps } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { useStyles } from './styles';
 
@@ -15,8 +15,7 @@ interface DetailPanelListItemDeps {
   display?: string;
 }
 
-interface EuiTextProps {
-  size: 's' | 'm' | 'xs' | 'relative' | undefined;
+interface EuiTextPropsCss extends EuiTextProps {
   css: CSSObject;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -33,7 +32,7 @@ export const DetailPanelListItem = ({
   const [isHovered, setIsHovered] = useState(false);
   const styles = useStyles({ display });
 
-  const props: EuiTextProps = {
+  const props: EuiTextPropsCss = {
     size: 's',
     css: !!copy ? styles.copiableItem : styles.item,
   };

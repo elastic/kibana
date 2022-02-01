@@ -7,18 +7,19 @@
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { ProcessEventHost } from '../../../common/types/process_tree';
-import { useStyles } from './styles';
 import { DetailPanelAccordion } from '../DetailPanelAccordion';
 import { DetailPanelCopy } from '../DetailPanelCopy';
 import { DetailPanelDescriptionList } from '../DetailPanelDescriptionList';
 import { DetailPanelListItem } from '../DetailPanelListItem';
+import { dataOrDash } from '../../utils/data_or_dash';
+import { useStyles } from './styles';
 
 interface DetailPanelHostTabDeps {
   processHost: ProcessEventHost;
 }
 
 /**
- * Detail panel in the session view.
+ * Host Panel of  session view detail panel.
  */
 export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
   const styles = useStyles();
@@ -32,7 +33,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.hostname}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.hostname || '-'}
+                  {dataOrDash(processHost.hostname)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -42,7 +43,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.id}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.id || '-'}
+                  {dataOrDash(processHost.id)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -52,7 +53,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.ip}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.ip || '-'}
+                  {dataOrDash(processHost.ip)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -62,7 +63,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.mac}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.mac || '-'}
+                  {dataOrDash(processHost.mac)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -72,7 +73,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.name}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.name || '-'}
+                  {dataOrDash(processHost.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -88,7 +89,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.architecture}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.architecture || '-'}
+                  {dataOrDash(processHost.architecture)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -98,7 +99,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.os.family}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.os.family || '-'}
+                  {dataOrDash(processHost.os.family)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -108,7 +109,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.os.full}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.os.full || '-'}
+                  {dataOrDash(processHost.os.full)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -118,7 +119,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.os.kernel}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.os.kernel || '-'}
+                  {dataOrDash(processHost.os.kernel)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -128,7 +129,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.os.name}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.os.name || '-'}
+                  {dataOrDash(processHost.os.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -138,7 +139,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.os.platform}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.os.platform || '-'}
+                  {dataOrDash(processHost.os.platform)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -148,7 +149,7 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
             description: (
               <DetailPanelCopy textToCopy={processHost.os.version}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {processHost.os.version || '-'}
+                  {dataOrDash(processHost.os.version)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),

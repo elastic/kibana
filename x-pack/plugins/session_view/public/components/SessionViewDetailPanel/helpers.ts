@@ -7,7 +7,7 @@
 import { Process, ProcessFields } from '../../../common/types/process_tree';
 import { DetailPanelProcess } from '../../types';
 
-const geteDetailPanelProcessLeader = (leader: ProcessFields) => ({
+const getDetailPanelProcessLeader = (leader: ProcessFields) => ({
   ...leader,
   id: leader.entity_id,
   entryMetaType: leader.entry_meta?.type || '',
@@ -47,12 +47,10 @@ export const getDetailPanelProcess = (process: Process | null) => {
   });
 
   processData.args = [...args];
-  processData.entryLeader = geteDetailPanelProcessLeader(process.events[0].process.entry_leader);
-  processData.sessionLeader = geteDetailPanelProcessLeader(
-    process.events[0].process.session_leader
-  );
-  processData.groupLeader = geteDetailPanelProcessLeader(process.events[0].process.group_leader);
-  processData.parent = geteDetailPanelProcessLeader(process.events[0].process.parent);
+  processData.entryLeader = getDetailPanelProcessLeader(process.events[0].process.entry_leader);
+  processData.sessionLeader = getDetailPanelProcessLeader(process.events[0].process.session_leader);
+  processData.groupLeader = getDetailPanelProcessLeader(process.events[0].process.group_leader);
+  processData.parent = getDetailPanelProcessLeader(process.events[0].process.parent);
 
   return processData;
 };
