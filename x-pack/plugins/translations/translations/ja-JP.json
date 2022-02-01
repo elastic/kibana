@@ -26109,7 +26109,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle": "メールに送信",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazonSesServerTypeLabel": "Amazon SES",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel": "電子メールアカウントの構成",
-    "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel": "Elastic Cloud",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel": "MS Exchange Server",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel": "Gmail",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel": "その他",

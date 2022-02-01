@@ -9,7 +9,6 @@ import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '../index';
 import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
-import { getEmailServices } from './email';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -27,18 +26,6 @@ describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.iconClass).toEqual('email');
-  });
-});
-
-describe('getEmailServices', () => {
-  test('should return elastic cloud service if isCloudEnabled is true', () => {
-    const services = getEmailServices(true);
-    expect(services.find((service) => service.value === 'elastic_cloud')).toBeTruthy();
-  });
-
-  test('should not return elastic cloud service if isCloudEnabled is false', () => {
-    const services = getEmailServices(false);
-    expect(services.find((service) => service.value === 'elastic_cloud')).toBeFalsy();
   });
 });
 

@@ -56,7 +56,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 
 Config defines information for the connector type.
 
-`service`:: The name of the email service. If `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's https://nodemailer.com/smtp/well-known/[well-known email service providers], the `host`, `port`, and `secure` properties are ignored. If `service` is `other`,  the `host` and `port` properties must be defined. For more information on the `gmail` service value, refer to https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation]. If `service` is `exchange_server`, the `tenantId`, `clientId`, `clientSecret` properties are required instead of `host` and `port`.
+`service`:: The name of the email service. If `service` is one of Nodemailer's https://nodemailer.com/smtp/well-known/[well-known email service providers], the `host`, `port`, and `secure` properties are ignored. If `service` is `other`,  the `host` and `port` properties must be defined. For more information on the `gmail` service value, refer to https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation]. If `service` is `exchange_server`, the `tenantId`, `clientId`, `clientSecret` properties are required instead of `host` and `port`.
 `from`:: An email address that corresponds to *Sender*.
 `host`:: A string that corresponds to *Host*.
 `port`:: A number that corresponds to *Port*.
@@ -117,13 +117,14 @@ For other email servers, you can check the list of well-known services that Node
 
 IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-whitelist[allowlist] the email addresses that notifications get sent.
 
-Use the following connector settings to send email from Elastic Cloud: 
+New Elastic Cloud deployments will contain a preconfigured connector
+for the Elastic Cloud email service, named **Elastic-Cloud-SMTP**, with the
+settings below.  If your deployment is older and does not contain this 
+preconfigured connector, you can create a connector manually using the 
+following settings:
 
 Sender::
-`noreply@watcheralert.found.io`
-
-Service::
-`elastic_cloud`
+`alerts-noreply@elastic.co`
 
 Host::
 `dockerhost`

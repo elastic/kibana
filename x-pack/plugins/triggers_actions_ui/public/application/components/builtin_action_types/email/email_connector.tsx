@@ -33,7 +33,7 @@ const ExchangeFormFields = lazy(() => import('./exchange_form'));
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { docLinks, http, isCloud } = useKibana().services;
+  const { docLinks, http } = useKibana().services;
   const { from, host, port, secure, hasAuth, service } = action.config;
   const { user, password } = action.secrets;
 
@@ -207,7 +207,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               disabled={readOnly}
               isInvalid={isServiceInvalid}
               data-test-subj="emailServiceSelectInput"
-              options={getEmailServices(isCloud)}
+              options={getEmailServices()}
               onChange={(e) => {
                 setEmailService(e.target.value);
               }}

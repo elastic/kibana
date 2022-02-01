@@ -26570,7 +26570,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle": "发送到电子邮件",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazonSesServerTypeLabel": "Amazon SES",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel": "配置电子邮件帐户",
-    "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel": "Elastic Cloud",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel": "MS Exchange Server",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel": "Gmail",
     "xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel": "其他",

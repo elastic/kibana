@@ -46,15 +46,6 @@ const emailServices: EuiSelectOption[] = [
   },
   {
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel',
-      {
-        defaultMessage: 'Elastic Cloud',
-      }
-    ),
-    value: 'elastic_cloud',
-  },
-  {
-    text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
       {
         defaultMessage: 'MS Exchange Server',
@@ -73,10 +64,8 @@ const emailServices: EuiSelectOption[] = [
   },
 ];
 
-export function getEmailServices(isCloudEnabled: boolean) {
-  return isCloudEnabled
-    ? emailServices
-    : emailServices.filter((service) => service.value !== 'elastic_cloud');
+export function getEmailServices() {
+  return emailServices;
 }
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
