@@ -17,7 +17,7 @@ describe('ExpandedSeriesRow', function () {
   const dataViewSeries = getDefaultConfigs({
     reportConfigMap: obsvReportConfigMap,
     reportType: 'kpi-over-time',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     dataType: 'ux',
   });
 

@@ -26,7 +26,7 @@ describe('Lens Attribute', () => {
   const reportViewConfig = getDefaultConfigs({
     reportType: 'data-distribution',
     dataType: 'ux',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     reportConfigMap: obsvReportConfigMap,
   });
 
@@ -58,7 +58,7 @@ describe('Lens Attribute', () => {
     const seriesConfigKpi = getDefaultConfigs({
       reportType: ReportTypes.KPI,
       dataType: 'ux',
-      indexPattern: mockIndexPattern,
+      dataView: mockIndexPattern,
       reportConfigMap: obsvReportConfigMap,
     });
 
@@ -83,7 +83,7 @@ describe('Lens Attribute', () => {
     const seriesConfigKpi = getDefaultConfigs({
       reportType: ReportTypes.KPI,
       dataType: 'ux',
-      indexPattern: mockIndexPattern,
+      dataView: mockIndexPattern,
       reportConfigMap: obsvReportConfigMap,
     });
 

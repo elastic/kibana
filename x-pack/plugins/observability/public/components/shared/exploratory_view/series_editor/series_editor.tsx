@@ -44,7 +44,7 @@ export const getSeriesToEdit = ({
         dataType,
         reportType,
         reportConfigMap,
-        indexPattern: indexPatterns[dataType],
+        dataView: indexPatterns[dataType],
       });
     }
   };

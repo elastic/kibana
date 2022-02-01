@@ -18,7 +18,7 @@ describe('SelectedFilters', function () {
 
   const dataViewSeries = getDefaultConfigs({
     reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     dataType: 'ux',
     reportConfigMap: obsvReportConfigMap,
   });

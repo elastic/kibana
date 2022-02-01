@@ -24,7 +24,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   const seriesConfig = getDefaultConfigs({
     reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
+    dataView: mockIndexPattern,
     dataType: 'ux',
     reportConfigMap: obsvReportConfigMap,
   });
