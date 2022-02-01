@@ -9,7 +9,7 @@ import { sortColorRanges, calculateMaxStep, toColorStops, getValueForContinuity 
 
 describe('utils', () => {
   it('sortColorRanges', () => {
-    const colorRanges = [
+    let colorRanges = [
       { color: '#aaa', start: 55, end: 40 },
       { color: '#bbb', start: 40, end: 60 },
       { color: '#ccc', start: 60, end: 80 },
@@ -18,6 +18,17 @@ describe('utils', () => {
       { color: '#bbb', start: 40, end: 55 },
       { color: '#aaa', start: 55, end: 60 },
       { color: '#ccc', start: 60, end: 80 },
+    ]);
+
+    colorRanges = [
+      { color: '#aaa', start: 55, end: 90 },
+      { color: '#bbb', start: 90, end: 60 },
+      { color: '#ccc', start: 60, end: 80 },
+    ];
+    expect(sortColorRanges(colorRanges)).toEqual([
+      { color: '#aaa', start: 55, end: 60 },
+      { color: '#ccc', start: 60, end: 80 },
+      { color: '#bbb', start: 80, end: 90 },
     ]);
   });
 

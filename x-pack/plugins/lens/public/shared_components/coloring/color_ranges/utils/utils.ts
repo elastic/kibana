@@ -30,9 +30,10 @@ export const sortColorRanges = (colorRanges: ColorRange[]) => {
   return [...colorRanges, { start: lastRange.end, color: lastRange.color }]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
     .reduce((sortedColorRange, newColorRange, i, array) => {
+      const color = i === array.length - 2 ? array[i + 1].color : newColorRange.color;
       if (i !== array.length - 1) {
         sortedColorRange.push({
-          color: newColorRange.color,
+          color,
           start: newColorRange.start,
           end: array[i + 1].start,
         });
