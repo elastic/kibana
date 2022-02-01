@@ -4,6 +4,8 @@
 
 ## DocLinksServiceSetup.version property
 
+The branch/version the docLinks are pointing to
+
 <b>Signature:</b>
 
 ```typescript

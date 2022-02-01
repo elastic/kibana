@@ -4,6 +4,8 @@
 
 ## DocLinksServiceSetup.elasticWebsiteUrl property
 
+The base url for the elastic website
+
 <b>Signature:</b>
 
 ```typescript

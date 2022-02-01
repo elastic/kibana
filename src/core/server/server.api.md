@@ -868,11 +868,8 @@ export interface DiscoveredPlugin {
 
 // @public (undocumented)
 export interface DocLinksServiceSetup {
-    // (undocumented)
     readonly elasticWebsiteUrl: string;
-    // (undocumented)
     readonly links: DocLinks;
-    // (undocumented)
     readonly version: string;
 }
 

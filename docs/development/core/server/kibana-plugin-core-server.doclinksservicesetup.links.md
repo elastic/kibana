@@ -4,6 +4,8 @@
 
 ## DocLinksServiceSetup.links property
 
+A record of all registered doc links
+
 <b>Signature:</b>
 
 ```typescript

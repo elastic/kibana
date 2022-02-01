@@ -15,7 +15,7 @@ export interface DocLinksServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [elasticWebsiteUrl](./kibana-plugin-core-server.doclinksservicesetup.elasticwebsiteurl.md) | string |  |
-|  [links](./kibana-plugin-core-server.doclinksservicesetup.links.md) | DocLinks |  |
-|  [version](./kibana-plugin-core-server.doclinksservicesetup.version.md) | string |  |
+|  [elasticWebsiteUrl](./kibana-plugin-core-server.doclinksservicesetup.elasticwebsiteurl.md) | string | The base url for the elastic website |
+|  [links](./kibana-plugin-core-server.doclinksservicesetup.links.md) | DocLinks | A record of all registered doc links |
+|  [version](./kibana-plugin-core-server.doclinksservicesetup.version.md) | string | The branch/version the docLinks are pointing to |
 
