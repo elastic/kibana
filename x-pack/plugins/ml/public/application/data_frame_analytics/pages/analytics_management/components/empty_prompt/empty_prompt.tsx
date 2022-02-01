@@ -63,7 +63,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           <p>
             <FormattedMessage
               id="xpack.ml.overview.analyticsList.emptyPromptText"
-              defaultMessage="Build and train outlier detection, regression, or classification machine learning models using data frame analytics."
+              defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
             />
           </p>
           <EuiCallOut
@@ -71,7 +71,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
             title={
               <FormattedMessage
                 id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
-                defaultMessage="Before building a data frame analytics job, use {transforms} to construct an {sourcedata} to analyze."
+                defaultMessage="Before building a data frame analytics job, use {transforms} to construct an {sourcedata}."
                 values={{
                   transforms: (
                     <EuiLink href={transformsLink} target="blank" color={'accent'}>
