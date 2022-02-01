@@ -54,12 +54,6 @@ export interface DataViewListItem {
   typeMeta?: TypeMeta;
 }
 
-/**
- * @deprecated Use DataViewListItem. All index pattern interfaces were renamed.
- */
-
-export type IndexPatternListItem = DataViewListItem;
-
 export interface DataViewsServiceDeps {
   uiSettings: UiSettingsCommon;
   savedObjectsClient: SavedObjectsClientCommon;
