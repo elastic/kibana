@@ -14,13 +14,18 @@ exports[`graph_visualization should render to svg elements 1`] = `
       <line
         className="gphEdge gphEdge--selected"
         strokeLinecap="round"
+        style={
+          Object {
+            "strokeWidth": 2,
+          }
+        }
         x1={5}
         x2={7}
         y1={5}
         y2={9}
       />
       <line
-        className="gphEdge"
+        className="gphEdge gphEdgeClick"
         onClick={[Function]}
         style={
           Object {
@@ -37,13 +42,18 @@ exports[`graph_visualization should render to svg elements 1`] = `
       <line
         className="gphEdge gphEdge--selected"
         strokeLinecap="round"
+        style={
+          Object {
+            "strokeWidth": 2.2,
+          }
+        }
         x1={7}
         x2={12}
         y1={9}
         y2={2}
       />
       <line
-        className="gphEdge"
+        className="gphEdge gphEdgeClick"
         onClick={[Function]}
         style={
           Object {

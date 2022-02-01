@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.execute(() => {
         const event = document.createEvent('SVGEvents');
         event.initEvent('click', true, true);
-        return document.getElementsByClassName('gphEdgeClick')[1].dispatchEvent(event);
+        return document.getElementsByClassName('gphEdgeClick')[0].dispatchEvent(event);
       });
       await PageObjects.common.sleep(1000);
       await PageObjects.graph.startLayout();
