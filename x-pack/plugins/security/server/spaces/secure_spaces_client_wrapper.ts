@@ -17,6 +17,7 @@ import type {
   LegacyUrlAliasTarget,
   Space,
 } from '../../../spaces/server';
+import { ALL_SPACES_ID } from '../../common/constants';
 import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
@@ -246,6 +247,10 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.update(id, space);
   }
 
+  public createSavedObjectFinder(id: string) {
+    return this.spacesClient.createSavedObjectFinder(id);
+  }
+
   public async delete(id: string) {
     if (this.useRbac) {
       try {
@@ -262,6 +267,35 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
           })
         );
         throw error;
+      }
+    }
+
+    // Fetch saved objects to be removed for audit logging
+    if (this.auditLogger.enabled) {
+      const finder = this.spacesClient.createSavedObjectFinder(id);
+      try {
+        for await (const response of finder.find()) {
+          response.saved_objects.forEach((savedObject) => {
+            const { namespaces = [] } = savedObject;
+            const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
+            if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(id)) {
+              // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
+              return;
+            }
+            this.auditLogger.log(
+              savedObjectEvent({
+                action: isOnlySpace
+                  ? SavedObjectAction.DELETE
+                  : SavedObjectAction.UPDATE_OBJECTS_SPACES,
+                outcome: 'unknown',
+                savedObject: { type: savedObject.type, id: savedObject.id },
+                deleteFromSpaces: [id],
+              })
+            );
+          });
+        }
+      } finally {
+        await finder.close();
       }
     }
 
