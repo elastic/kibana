@@ -178,7 +178,18 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(anErrorMessageWith(/invalid ip/));
         });
 
-        it(`should error on [${apiCall.method}] if more than one OS is set`, async () => {
+        it(`should work on [${apiCall.method}] and accept all OSs for os_types`, async () => {
+          const body = apiCall.getBody();
+
+          body.os_types = ['linux', 'windows', 'macos'];
+
+          await supertest[apiCall.method](apiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(200);
+        });
+
+        it(`should not work on [${apiCall.method}] if all OSs for os_types are not included`, async () => {
           const body = apiCall.getBody();
 
           body.os_types = ['linux', 'windows'];
@@ -187,8 +198,8 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
+            .expect(anEndpointArtifactError);
+          expect(anErrorMessageWith(/\[osTypes\]: array size is \[3\]/));
         });
 
         it(`should error on [${apiCall.method}] if policy id is invalid`, async () => {
