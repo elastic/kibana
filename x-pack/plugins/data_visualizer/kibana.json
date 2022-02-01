@@ -20,7 +20,8 @@
     "home",
     "lens",
     "dataViewFieldEditor",
-    "customIntegrations"
+    "customIntegrations",
+    "cloud"
   ],
   "requiredBundles": [
     "home",
@@ -28,7 +29,8 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "uiActions"
+    "uiActions",
+    "cloud"
   ],
   "owner": {
     "name": "Machine Learning UI",

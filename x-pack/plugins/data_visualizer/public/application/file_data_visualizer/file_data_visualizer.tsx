@@ -23,7 +23,7 @@ interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
+  const { data, maps, embeddable, share, security, fileUpload, cloud } = getPluginsStart();
   const services = {
     data,
     maps,
@@ -34,17 +34,22 @@ export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
     ...coreStart,
   };
 
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = cloud?.CloudContextProvider || EmptyContext;
+
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
-        <FileDataVisualizerView
-          indexPatterns={data.indexPatterns}
-          savedObjectsClient={coreStart.savedObjects.client}
-          http={coreStart.http}
-          fileUpload={fileUpload}
-          resultsLinks={additionalLinks}
-          capabilities={coreStart.application.capabilities}
-        />
+        <CloudContext>
+          <FileDataVisualizerView
+            indexPatterns={data.indexPatterns}
+            savedObjectsClient={coreStart.savedObjects.client}
+            http={coreStart.http}
+            fileUpload={fileUpload}
+            resultsLinks={additionalLinks}
+            capabilities={coreStart.application.capabilities}
+          />
+        </CloudContext>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );
