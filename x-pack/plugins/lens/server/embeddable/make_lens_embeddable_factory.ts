@@ -17,6 +17,7 @@ import {
   commonRemoveTimezoneDateHistogramParam,
   commonRenameFilterReferences,
   commonRenameOperationsForFormula,
+  commonRenameRecordsField,
   commonUpdateVisLayerType,
   getLensCustomVisualizationMigrations,
   getLensFilterMigrations,
@@ -33,7 +34,7 @@ import { extract, inject } from '../../common/embeddable_factory';
 
 export const makeLensEmbeddableFactory =
   (
-    filterMigrations: MigrateFunctionsObject,
+    getFilterMigrations: () => MigrateFunctionsObject,
     customVisualizationMigrations: CustomVisualizationMigrations
   ) =>
   (): EmbeddableRegistryDefinition => {
@@ -41,7 +42,7 @@ export const makeLensEmbeddableFactory =
       id: DOC_TYPE,
       migrations: () =>
         mergeMigrationFunctionMaps(
-          mergeMigrationFunctionMaps(getLensFilterMigrations(filterMigrations), {
+          mergeMigrationFunctionMaps(getLensFilterMigrations(getFilterMigrations()), {
             // This migration is run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
             '7.13.1': (state) => {
               const lensState = state as unknown as { attributes: LensDocShapePre712 };
@@ -78,8 +79,10 @@ export const makeLensEmbeddableFactory =
               } as unknown as SerializableRecord;
             },
             '8.1.0': (state) => {
-              const lensState = state as unknown as { attributes: LensDocShape715<VisState716> };
-              const migratedLensState = commonRenameFilterReferences(lensState.attributes);
+              const lensState = state as unknown as { attributes: LensDocShape715 };
+              const migratedLensState = commonRenameRecordsField(
+                commonRenameFilterReferences(lensState.attributes)
+              );
               return {
                 ...lensState,
                 attributes: migratedLensState,

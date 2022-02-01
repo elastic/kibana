@@ -9,7 +9,6 @@ import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import { makeLensEmbeddableFactory } from '../../../lens/server/embeddable/make_lens_embeddable_factory';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
-  AssociationType,
   CaseResponse,
   CommentAttributes,
   CommentRequest,
@@ -56,7 +55,6 @@ function createCommentFindResponse(
           type: '',
           attributes: transformNewComment({
             ...comment,
-            associationType: AssociationType.case,
             createdDate: '',
           }),
         });
@@ -111,15 +109,12 @@ describe('common utils', () => {
                 "syncAlerts": true,
               },
               "status": "open",
-              "subCaseIds": undefined,
-              "subCases": undefined,
               "tags": Array [
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -152,15 +147,12 @@ describe('common utils', () => {
                 "syncAlerts": true,
               },
               "status": "open",
-              "subCaseIds": undefined,
-              "subCases": undefined,
               "tags": Array [
                 "Data Destruction",
               ],
               "title": "Damaging Data Destruction Detected",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T22:32:00.900Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -197,15 +189,12 @@ describe('common utils', () => {
                 "syncAlerts": true,
               },
               "status": "open",
-              "subCaseIds": undefined,
-              "subCases": undefined,
               "tags": Array [
                 "LOLBins",
               ],
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -246,15 +235,12 @@ describe('common utils', () => {
                 "syncAlerts": true,
               },
               "status": "closed",
-              "subCaseIds": undefined,
-              "subCases": undefined,
               "tags": Array [
                 "LOLBins",
               ],
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
-              "type": "individual",
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -312,15 +298,12 @@ describe('common utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": undefined,
-          "subCases": undefined,
           "tags": Array [
             "LOLBins",
           ],
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -369,15 +352,12 @@ describe('common utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": undefined,
-          "subCases": undefined,
           "tags": Array [
             "LOLBins",
           ],
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -404,7 +384,6 @@ describe('common utils', () => {
           "closed_by": null,
           "comments": Array [
             Object {
-              "associationType": "case",
               "comment": "Wow, good luck catching that bad meanie!",
               "created_at": "2019-11-25T21:55:00.177Z",
               "created_by": Object {
@@ -450,15 +429,12 @@ describe('common utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": undefined,
-          "subCases": undefined,
           "tags": Array [
             "LOLBins",
           ],
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -505,15 +481,12 @@ describe('common utils', () => {
             "syncAlerts": true,
           },
           "status": "open",
-          "subCaseIds": undefined,
-          "subCases": undefined,
           "tags": Array [
             "defacement",
           ],
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
-          "type": "individual",
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -588,14 +561,12 @@ describe('common utils', () => {
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
         username: 'elastic',
-        associationType: AssociationType.case,
         owner: SECURITY_SOLUTION_OWNER,
       };
 
       const res = transformNewComment(comment);
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "associationType": "case",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -619,14 +590,12 @@ describe('common utils', () => {
         type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         owner: SECURITY_SOLUTION_OWNER,
-        associationType: AssociationType.case,
       };
 
       const res = transformNewComment(comment);
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "associationType": "case",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -653,14 +622,12 @@ describe('common utils', () => {
         full_name: null,
         username: null,
         owner: SECURITY_SOLUTION_OWNER,
-        associationType: AssociationType.case,
       };
 
       const res = transformNewComment(comment);
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "associationType": "case",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -691,30 +658,6 @@ describe('common utils', () => {
           ]).saved_objects[0]
         )
       ).toBe(0);
-    });
-
-    it('returns 3 alerts for a single generated alert comment', () => {
-      expect(
-        countAlerts(
-          createCommentFindResponse([
-            {
-              ids: ['1'],
-              comments: [
-                {
-                  alertId: ['a', 'b', 'c'],
-                  index: '',
-                  type: CommentType.generatedAlert,
-                  rule: {
-                    id: 'rule-id-1',
-                    name: 'rule-name-1',
-                  },
-                  owner: SECURITY_SOLUTION_OWNER,
-                },
-              ],
-            },
-          ]).saved_objects[0]
-        )
-      ).toBe(3);
     });
 
     it('returns 3 alerts for a single alert comment', () => {
@@ -879,7 +822,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        makeLensEmbeddableFactory({}, {}),
+        makeLensEmbeddableFactory(() => ({}), {}),
         commentString
       );
 
@@ -978,7 +921,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const updatedReferences = getOrUpdateLensReferences(
-        makeLensEmbeddableFactory({}, {}),
+        makeLensEmbeddableFactory(() => ({}), {}),
         newCommentString,
         {
           references: currentCommentReferences,

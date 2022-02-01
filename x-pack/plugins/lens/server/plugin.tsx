@@ -68,8 +68,10 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
   }
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
-    const filterMigrations = plugins.data.query.filterManager.getAllMigrations();
-    setupSavedObjects(core, filterMigrations, this.customVisualizationMigrations);
+    const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
+      plugins.data.query.filterManager
+    );
+    setupSavedObjects(core, getFilterMigrations, this.customVisualizationMigrations);
     setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
     core.uiSettings.register(getUiSettings());
@@ -85,7 +87,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
     }
 
     const lensEmbeddableFactory = makeLensEmbeddableFactory(
-      filterMigrations,
+      getFilterMigrations,
       this.customVisualizationMigrations
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
