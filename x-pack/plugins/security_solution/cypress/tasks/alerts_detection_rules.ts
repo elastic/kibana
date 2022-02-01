@@ -157,7 +157,10 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 };
 
 export const loadPrebuiltDetectionRules = () => {
-  cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
+  cy.get(LOAD_PREBUILT_RULES_BTN)
+    .should('exist')
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.disabled');
 };
 
 export const reloadDeletedRules = () => {
