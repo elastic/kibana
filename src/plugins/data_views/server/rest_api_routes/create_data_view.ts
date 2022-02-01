@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
-import { DataViewSpec } from 'src/plugins/data_views/common';
+import { DataViewSpec, DataViewsService } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
 import {
   fieldSpecSchema,
@@ -22,6 +23,27 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
 } from '../constants';
+
+interface CreateDataViewArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  spec: DataViewSpec;
+  override?: boolean;
+  refreshFields?: boolean;
+  counterName: string;
+}
+
+export const createDataView = async ({
+  dataViewsService,
+  usageCollection,
+  spec,
+  override,
+  refreshFields,
+  counterName,
+}: CreateDataViewArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.createAndSave(spec, override, !refreshFields);
+};
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
@@ -59,7 +81,8 @@ const registerCreateDataViewRouteFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
     router.post(
       {
@@ -79,7 +102,8 @@ const registerCreateDataViewRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
+
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
@@ -88,19 +112,22 @@ const registerCreateDataViewRouteFactory =
 
           const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
 
-          const indexPattern = await indexPatternsService.createAndSave(
-            spec as DataViewSpec,
-            body.override,
-            !body.refresh_fields
-          );
+          const dataView = await createDataView({
+            dataViewsService,
+            usageCollection,
+            spec: spec as DataViewSpec,
+            override: body.override,
+            refreshFields: body.refresh_fields,
+            counterName: `${req.route.method} ${path}`,
+          });
 
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              [serviceKey]: indexPattern.toSpec(),
-            }),
+            body: {
+              [serviceKey]: dataView.toSpec(),
+            },
           });
         })
       )

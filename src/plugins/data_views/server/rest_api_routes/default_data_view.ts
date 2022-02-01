@@ -6,11 +6,47 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { handleErrors } from './util/handle_errors';
 import { SERVICE_PATH, SERVICE_PATH_LEGACY, SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
+
+interface GetDefaultArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+}
+
+export const getDefault = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+}: GetDefaultArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.getDefaultId();
+};
+
+interface SetDefaultArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+  newDefaultId: string;
+  force: boolean;
+}
+
+export const setDefault = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+  newDefaultId,
+  force,
+}: SetDefaultArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.setDefault(newDefaultId, force);
+};
 
 const manageDefaultIndexPatternRoutesFactory =
   (path: string, serviceKey: string) =>
@@ -19,7 +55,8 @@ const manageDefaultIndexPatternRoutesFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
     router.get(
       {
@@ -30,17 +67,21 @@ const manageDefaultIndexPatternRoutesFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await dataViewsServiceFactory(
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
         );
 
-        const defaultIndexPatternId = await indexPatternsService.getDefaultId();
+        const id = await getDefault({
+          dataViewsService,
+          usageCollection,
+          counterName: `${req.route.method} ${path}`,
+        });
 
         return res.ok({
           body: {
-            [`${serviceKey}_id`]: defaultIndexPatternId,
+            [`${serviceKey}_id`]: id,
           },
         });
       })
@@ -65,7 +106,7 @@ const manageDefaultIndexPatternRoutesFactory =
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await dataViewsServiceFactory(
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -74,7 +115,13 @@ const manageDefaultIndexPatternRoutesFactory =
         const newDefaultId = req.body[`${serviceKey}_id`] as string;
         const force = req.body.force as boolean;
 
-        await indexPatternsService.setDefault(newDefaultId, force);
+        await setDefault({
+          dataViewsService,
+          usageCollection,
+          counterName: `${req.route.method} ${path}`,
+          newDefaultId,
+          force,
+        });
 
         return res.ok({
           body: {
