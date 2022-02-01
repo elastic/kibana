@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import fetch from 'node-fetch';
-import { getUrl } from '@kbn/test';
+import { getUrl } from '@kbn/test-jest-helpers';
 
 import { FtrService } from '../ftr_provider_context';
 

@@ -8,7 +8,7 @@
 
 import Http from 'http';
 import Url from 'url';
-import { getUrl } from '@kbn/test';
+import { getUrl } from '@kbn/test-jest-helpers';
 import { FtrProviderContext } from '../../services/types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

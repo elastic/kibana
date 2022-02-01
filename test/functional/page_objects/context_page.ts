@@ -7,7 +7,7 @@
  */
 
 import rison from 'rison-node';
-import { getUrl } from '@kbn/test';
+import { getUrl } from '@kbn/test-jest-helpers';
 import { FtrService } from '../ftr_provider_context';
 
 const DEFAULT_INITIAL_STATE = {

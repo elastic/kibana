@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getUrl, kibanaServerTestUser } from '@kbn/test';
+import { kibanaServerTestUser } from '@kbn/test';
+import { getUrl } from '@kbn/test-jest-helpers';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

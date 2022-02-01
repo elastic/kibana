@@ -3942,6 +3942,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-jest-helpers@link:bazel-bin/packages/kbn-test-jest-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-subj-selector@link:bazel-bin/packages/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
@@ -6830,6 +6834,14 @@
   uid ""
 
 "@types/kbn__telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__test-jest-helpers@link:bazel-bin/packages/kbn-test-jest-helpers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
   version "0.0.0"
   uid ""
 
