@@ -78,10 +78,3 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
-
-# TODO or add PR comment body section if more info than URL
-# cat << EOF | buildkite-agent meta-data set pr_comment:deploy_cloud:body
-# ### Cloud Deployment
-
-# yadda yadda
-# EOF
