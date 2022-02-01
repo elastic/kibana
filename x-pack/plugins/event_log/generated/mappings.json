@@ -289,11 +289,14 @@
                                         },
                                         "metrics": {
                                             "properties": {
-                                                "total_alerts": {
+                                                "number_of_triggered_actions": {
                                                     "type": "long"
                                                 },
+                                                "total_alerts": {
+                                                  "type": "long"
+                                                },
                                                 "total_hits": {
-                                                    "type": "long"
+                                                  "type": "long"
                                                 },
                                                 "total_indexing_duration_ms": {
                                                     "type": "long"

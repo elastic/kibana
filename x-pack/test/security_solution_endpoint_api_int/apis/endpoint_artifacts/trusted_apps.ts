@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../security_solution_endpoint/services/endpoint_artifacts';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../plugins/security_solution/common/endpoint/service/artifacts';
-import { ExceptionsListItemGenerator } from '../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services//endpoint_artifacts';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
+import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
-} from '../../common/services/security_solution';
+} from '../../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin)', () => {
+  describe('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       type TrustedAppApiCallsInterface<BodyReturnType = unknown> = Array<{
         method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+        info?: string;
         path: string;
         // The body just needs to have the properties we care about in the tests. This should cover most
         // mocks used for testing that support different interfaces
@@ -213,7 +214,51 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('and user DOES NOT have authorization to manage endpoint security', () => {
-        for (const trustedAppApiCall of trustedAppApiCalls) {
+        const allTrustedAppApiCalls: TrustedAppApiCallsInterface = [
+          ...trustedAppApiCalls,
+          {
+            method: 'get',
+            info: 'single item',
+            get path() {
+              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+            },
+            getBody: () => undefined,
+          },
+          {
+            method: 'get',
+            info: 'list summary',
+            get path() {
+              return `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+            },
+            getBody: () => undefined,
+          },
+          {
+            method: 'delete',
+            info: 'single item',
+            get path() {
+              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+            },
+            getBody: () => undefined,
+          },
+          {
+            method: 'post',
+            info: 'list export',
+            get path() {
+              return `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&id=1`;
+            },
+            getBody: () => undefined,
+          },
+          {
+            method: 'get',
+            info: 'single items',
+            get path() {
+              return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+            },
+            getBody: () => undefined,
+          },
+        ];
+
+        for (const trustedAppApiCall of allTrustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLES.detections_admin, 'changeme')
