@@ -15,7 +15,6 @@ import {
   EuiText,
   EuiTitle,
   EuiBetaBadge,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -66,16 +65,9 @@ function FormRow({
             error={isValid ? undefined : message}
             helpText={<EuiText size="xs">{row.helpText}</EuiText>}
             labelAppend={
-              row.labelAppendLink ? (
-                <EuiText size="xs">
-                  {' '}
-                  <EuiLink>{row.labelAppendLink}</EuiLink>
-                </EuiText>
-              ) : (
-                <EuiText size="xs" color="subdued">
-                  {row.labelAppend}
-                </EuiText>
-              )
+              <EuiText size="xs" color="subdued">
+                {row.labelAppend}
+              </EuiText>
             }
           >
             <FormRowSetting row={row} onChange={onChange} value={value} />
