@@ -23,14 +23,18 @@ export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>
   (alert: Record<string, unknown>): TopAlert => {
     const experimentalFields = Object.keys(experimentalRuleFieldMap);
-    const alertWithExperimentalFields = experimentalFields.reduce(
-      (acc, key) => ({ ...acc, [key]: alert[key] }),
-      {}
-    );
+    const alertWithExperimentalFields = experimentalFields.reduce((acc, key) => {
+      if (alert[key]) {
+        return { ...acc, [key]: alert[key] };
+      }
+      return acc;
+    }, {});
+
     const parsedFields = {
-      ...parseTechnicalFields(alert),
-      ...parseExperimentalFields(alertWithExperimentalFields),
+      ...parseTechnicalFields(alert, true),
+      ...parseExperimentalFields(alertWithExperimentalFields, true),
     };
+
     const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
