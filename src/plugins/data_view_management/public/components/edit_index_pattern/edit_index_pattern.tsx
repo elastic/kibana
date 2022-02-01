@@ -21,11 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView, DataViewField } from '../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { useKibana, toMountPoint } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
+import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
@@ -61,11 +62,17 @@ const securityDataView = i18n.translate(
   }
 );
 
+const deleteMsg = i18n.translate('indexPatternManagement.editIndexPattern.badge.deleteMsg', {
+  defaultMessage: 'Affected spaces:',
+});
+
 const securitySolution = 'security-solution';
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { application, uiSettings, overlays, chrome, dataViews } =
+    const { application, uiSettings, overlays, chrome, dataViews, spaces } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -110,11 +117,32 @@ export const EditIndexPattern = withRouter(
         }
       }
 
-      overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
-        if (isConfirmed) {
-          doRemove();
-        }
-      });
+      const LazySpaceList = spaces?.ui.components.getSpaceList;
+
+      const ContextWrapper = spaces
+        ? spaces.ui.components.getSpacesContextProvider
+        : getEmptyFunctionComponent;
+
+      const spacesList = LazySpaceList ? (
+        <ContextWrapper>
+          {deleteMsg}
+          <LazySpaceList
+            namespaces={indexPattern.namespaces}
+            displayLimit={0}
+            behaviorContext="outside-space"
+          />
+        </ContextWrapper>
+      ) : (
+        <></>
+      );
+
+      overlays
+        .openConfirm(toMountPoint(spacesList), confirmModalOptionsDelete)
+        .then((isConfirmed) => {
+          if (isConfirmed) {
+            doRemove();
+          }
+        });
     };
 
     const timeFilterHeader = i18n.translate(
