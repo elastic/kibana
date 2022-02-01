@@ -124,7 +124,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exceptions',
+            defaultMessage: 'Exception lists',
           }),
         ],
         searchable: true,

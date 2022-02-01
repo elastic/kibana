@@ -14,7 +14,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { CaseType, NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
@@ -32,17 +32,11 @@ const initialCaseValue: FormProps = {
 
 interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  caseType?: CaseType;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
 }
 
-export const FormContext: React.FC<Props> = ({
-  afterCaseCreated,
-  caseType = CaseType.individual,
-  children,
-  onSuccess,
-}) => {
+export const FormContext: React.FC<Props> = ({ afterCaseCreated, children, onSuccess }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { owner } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
@@ -70,7 +64,6 @@ export const FormContext: React.FC<Props> = ({
 
         const updatedCase = await postCase({
           ...userFormData,
-          type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
           owner: selectedOwner ?? owner[0],
@@ -96,7 +89,6 @@ export const FormContext: React.FC<Props> = ({
       isSyncAlertsEnabled,
       connectors,
       postCase,
-      caseType,
       owner,
       afterCaseCreated,
       onSuccess,
