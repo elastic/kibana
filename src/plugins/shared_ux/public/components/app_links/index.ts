@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/* eslint-disable import/no-default-export */
 
 import { RedirectAppLinks } from './redirect_app_link';
 export type { RedirectCrossAppLinksProps } from './redirect_app_link';

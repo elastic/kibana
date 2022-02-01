@@ -16,8 +16,7 @@ import mdx from './redirect_app_link.mdx';
 
 export default {
   title: 'Redirect App Links',
-  description:
-    '',
+  description: '',
   parameters: {
     docs: {
       page: mdx,
@@ -25,14 +24,12 @@ export default {
   },
 };
 
-export const ConnectedComponent = ({ application }: {application: ApplicationStart}) => {
-  return <RedirectAppLinks  application={application} />;
+export const ConnectedComponent = ({ application }: { application: ApplicationStart }) => {
+  return <RedirectAppLinks application={application} />;
 };
 
-ConnectedComponent.argTypes = {
-  
-};
+ConnectedComponent.argTypes = {};
 
 export const PureComponent = () => {
-  return <RedirectAppLinksComponent application={applicationServiceMock.createStartContract()}/>;
+  return <RedirectAppLinksComponent application={applicationServiceMock.createStartContract()} />;
 };

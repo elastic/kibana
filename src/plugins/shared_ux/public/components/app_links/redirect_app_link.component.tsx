@@ -10,24 +10,27 @@ import { ApplicationStart } from 'kibana/public';
 import React, { useRef } from 'react';
 import classNames from 'classnames';
 
-
 /**
  * Props for the Redirect App Link component.
  */
-export interface Props extends React.HTMLAttributes<HTMLDivElement>{
- application: ApplicationStart;
- clickHandler: React.MouseEventHandler<HTMLElement> | undefined;
- className?: string;
- 'data-test-subj'?: string;
+export interface Props extends React.HTMLAttributes<HTMLDivElement> {
+  application: ApplicationStart;
+  clickHandler: React.MouseEventHandler<HTMLElement> | undefined;
+  className?: string;
+  'data-test-subj'?: string;
 }
 
-export const RedirectAppLinksComponent = ({application, clickHandler,
-    children,
-    className,
-    ...otherProps}: Props) => {
-        const containerRef = useRef<HTMLDivElement>(null);
+export const RedirectAppLinksComponent = ({
+  application,
+  clickHandler,
+  children,
+  className,
+  ...otherProps
+}: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-return (
+  return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
       ref={containerRef}
       className={classNames(className, 'kbnRedirectCrossAppLinks')}
@@ -36,4 +39,5 @@ return (
     >
       {children}
     </div>
-)}
+  );
+};

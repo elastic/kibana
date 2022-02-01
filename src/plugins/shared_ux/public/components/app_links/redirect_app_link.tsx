@@ -7,12 +7,12 @@
  */
 
 import React, { FunctionComponent, useRef, useMemo } from 'react';
-import { RedirectAppLinksComponent as Component } from './redirect_app_link.component';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart } from 'src/core/public';
+import { RedirectAppLinksComponent as Component } from './redirect_app_link.component';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
-export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement>{
+export interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
   application: ApplicationStart;
   className?: string;
   'data-test-subj'?: string;
@@ -52,8 +52,8 @@ export const RedirectAppLinks: FunctionComponent<RedirectCrossAppLinksProps> = (
             navigateToUrl: application.navigateToUrl,
           })
         : undefined,
-    [containerRef.current, application, currentAppId]
+    [application, currentAppId]
   );
 
-  return <Component application={application} {...{clickHandler}} />;
+  return <Component application={application} {...{ clickHandler }} />;
 };
