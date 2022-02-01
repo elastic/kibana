@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockDataView, mockUxSeries, render } from '../rtl_helpers';
+import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 
 // FLAKY: https://github.com/elastic/kibana/issues/115324
 describe.skip('FilterLabel', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const invertFilter = jest.fn();
   jest.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({

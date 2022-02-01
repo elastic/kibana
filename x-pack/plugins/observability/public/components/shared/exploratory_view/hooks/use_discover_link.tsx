@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { SeriesConfig, SeriesUrl } from '../types';
-import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { useAppDataViewContext } from './use_app_data_view';
 import { buildExistsFilter, urlFilterToPersistedFilter } from '../configurations/utils';
 import { getFiltersFromDefs } from './use_lens_attributes';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
@@ -24,21 +24,21 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
     application: { navigateToUrl },
   } = kServices;
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { dataViews } = useAppDataViewContext();
 
   const urlGenerator = kServices.discover?.urlGenerator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
-    const indexPattern = indexPatterns?.[series.dataType];
+    const dataView = dataViews?.[series.dataType];
 
-    if (indexPattern) {
+    if (dataView) {
       const definitions = series.reportDefinitions ?? {};
 
       const urlFilters = (series.filters ?? []).concat(getFiltersFromDefs(definitions));
 
       const filters = urlFilterToPersistedFilter({
-        dataView: indexPattern,
+        dataView,
         urlFilters,
         initFilters: seriesConfig?.baseFilters,
       });
@@ -50,7 +50,7 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
         selectedMetricField !== RECORDS_FIELD &&
         selectedMetricField !== RECORDS_PERCENTAGE_FIELD
       ) {
-        filters.push(buildExistsFilter(selectedMetricField, indexPattern)[0]);
+        filters.push(buildExistsFilter(selectedMetricField, dataView)[0]);
       }
 
       const getDiscoverUrl = async () => {
@@ -58,14 +58,14 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
 
         const newUrl = await urlGenerator.createUrl({
           filters,
-          indexPatternId: indexPattern?.id,
+          indexPatternId: dataView?.id,
         });
         setDiscoverUrl(newUrl);
       };
       getDiscoverUrl();
     }
   }, [
-    indexPatterns,
+    dataViews,
     series.dataType,
     series.filters,
     series.reportDefinitions,

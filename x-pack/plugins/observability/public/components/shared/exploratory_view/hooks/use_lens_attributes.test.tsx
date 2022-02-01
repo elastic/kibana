@@ -15,7 +15,7 @@ import { mockDataView } from '../rtl_helpers';
 import { createKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { TRANSACTION_DURATION } from '../configurations/constants/elasticsearch_fieldnames';
 import * as lensAttributes from '../configurations/lens_attributes';
-import * as indexPattern from './use_app_index_pattern';
+import * as useAppDataViewHook from './use_app_data_view';
 import * as theme from '../../../../hooks/use_theme';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_config';
@@ -35,8 +35,8 @@ const mockSingleSeries = [
 describe('useExpViewTimeRange', function () {
   const storage = createKbnUrlStateStorage({ useHash: false });
   // @ts-ignore
-  jest.spyOn(indexPattern, 'useAppIndexPatternContext').mockReturnValue({
-    indexPatterns: {
+  jest.spyOn(useAppDataViewHook, 'useAppDataViewContext').mockReturnValue({
+    dataViews: {
       ux: mockDataView,
       apm: mockDataView,
       mobile: mockDataView,
