@@ -52,7 +52,7 @@ describe('chat route', () => {
     security.authc.getCurrentUser.mockReturnValueOnce({
       username,
       metadata: {
-        saml_name: [email],
+        saml_email: [email],
       },
     });
 
