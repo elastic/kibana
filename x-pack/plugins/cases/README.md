@@ -154,4 +154,4 @@ UI component:
 [all-cases-modal-img]: images/all_cases_selector_modal.png
 [recent-cases-img]: images/recent_cases.png
 [case-view-img]: images/case_view.png
-[cases-client-api-docs]: docs/cases_client/cases_client_api.md
+[cases-client-api-docs]: docs/cases_client/README.md
