@@ -41,13 +41,13 @@ import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
 
-import indexPatternData from './configurations/test_data/test_index_pattern.json';
+import dataViewData from './configurations/test_data/test_data_view.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
 import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
-import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
+import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { dataViewPluginMocks } from '../../../../../../../src/plugins/data_views/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
@@ -147,7 +147,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   core,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const indexPattern = mockIndexPattern;
+  const indexPattern = mockDataView;
 
   setIndexPatterns({
     ...[indexPattern],
@@ -260,12 +260,12 @@ export const mockUseHasData = () => {
 export const mockAppIndexPattern = (props?: Partial<IndexPatternContext>) => {
   const loadIndexPattern = jest.fn();
   const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataView,
     hasData: true,
     loading: false,
     hasAppData: { ux: true } as any,
     loadIndexPattern,
-    indexPatterns: { ux: mockIndexPattern } as unknown as Record<AppDataType, IndexPattern>,
+    indexPatterns: { ux: mockDataView } as unknown as Record<AppDataType, IndexPattern>,
     indexPatternErrors: {} as any,
     ...(props || {}),
   });
@@ -369,12 +369,12 @@ export const mockHistory = {
   },
 };
 
-export const mockIndexPattern = createStubIndexPattern({
+export const mockDataView = createStubDataView({
   spec: {
     id: 'apm-*',
     title: 'apm-*',
     timeFieldName: '@timestamp',
-    fields: JSON.parse(indexPatternData.attributes.fields),
+    fields: JSON.parse(dataViewData.attributes.fields),
   },
 });
 

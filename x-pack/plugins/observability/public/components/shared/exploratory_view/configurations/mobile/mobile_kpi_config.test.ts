@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockAppIndexPattern, mockIndexPattern } from '../../rtl_helpers';
+import { mockAppIndexPattern, mockDataView } from '../../rtl_helpers';
 import { LensAttributes } from '../lens_attributes';
 import { METRIC_SYSTEM_MEMORY_USAGE, SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
@@ -31,7 +31,7 @@ describe('Mobile kpi config test', function () {
     ],
     'kpi-over-time',
     {} as any,
-    { mobile: mockIndexPattern } as IndexPatternState,
+    { mobile: mockDataView } as IndexPatternState,
     obsvReportConfigMap
   );
 

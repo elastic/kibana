@@ -6,7 +6,7 @@
  */
 
 import { LayerConfig, LensAttributes } from './lens_attributes';
-import { mockAppIndexPattern, mockIndexPattern } from '../rtl_helpers';
+import { mockAppIndexPattern, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
 
@@ -26,11 +26,11 @@ describe('Lens Attribute', () => {
   const reportViewConfig = getDefaultConfigs({
     reportType: 'data-distribution',
     dataType: 'ux',
-    dataView: mockIndexPattern,
+    dataView: mockDataView,
     reportConfigMap: obsvReportConfigMap,
   });
 
-  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
+  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockDataView));
 
   let lnsAttr: LensAttributes;
 
@@ -38,7 +38,7 @@ describe('Lens Attribute', () => {
     seriesConfig: reportViewConfig,
     seriesType: 'line',
     operationType: 'count',
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
@@ -58,7 +58,7 @@ describe('Lens Attribute', () => {
     const seriesConfigKpi = getDefaultConfigs({
       reportType: ReportTypes.KPI,
       dataType: 'ux',
-      dataView: mockIndexPattern,
+      dataView: mockDataView,
       reportConfigMap: obsvReportConfigMap,
     });
 
@@ -67,7 +67,7 @@ describe('Lens Attribute', () => {
         seriesConfig: seriesConfigKpi,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: { 'service.name': ['elastic-co'] },
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
@@ -83,7 +83,7 @@ describe('Lens Attribute', () => {
     const seriesConfigKpi = getDefaultConfigs({
       reportType: ReportTypes.KPI,
       dataType: 'ux',
-      dataView: mockIndexPattern,
+      dataView: mockDataView,
       reportConfigMap: obsvReportConfigMap,
     });
 
@@ -95,7 +95,7 @@ describe('Lens Attribute', () => {
           from: 'now-1h',
           to: 'now',
         },
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         name: 'ux-series-1',
         breakdown: 'percentile',
         reportDefinitions: {},
@@ -200,7 +200,7 @@ describe('Lens Attribute', () => {
       seriesConfig: reportViewConfig,
       seriesType: 'line',
       operationType: 'count',
-      indexPattern: mockIndexPattern,
+      indexPattern: mockDataView,
       reportDefinitions: { 'performance.metric': [LCP_FIELD] },
       time: { from: 'now-15m', to: 'now' },
       color: 'green',
@@ -493,7 +493,7 @@ describe('Lens Attribute', () => {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         breakdown: USER_AGENT_NAME,
         time: { from: 'now-15m', to: 'now' },
@@ -507,7 +507,7 @@ describe('Lens Attribute', () => {
       lnsAttr.getBreakdownColumn({
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         labels: layerConfig.seriesConfig.labels,
       });
 
@@ -676,14 +676,14 @@ describe('Lens Attribute', () => {
   describe('Layer Filters', function () {
     it('should return expected filters', function () {
       reportViewConfig.baseFilters?.push(
-        ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockIndexPattern)
+        ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockDataView)
       );
 
       const layerConfig1: LayerConfig = {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         time: { from: 'now-15m', to: 'now' },
         color: 'green',

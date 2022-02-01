@@ -10,7 +10,7 @@ import React from 'react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import {
   mockAppIndexPattern,
-  mockIndexPattern,
+  mockDataView,
   mockUseValuesList,
   mockUxSeries,
   render,
@@ -24,7 +24,7 @@ describe('Series Builder ReportDefinitionCol', function () {
 
   const seriesConfig = getDefaultConfigs({
     reportType: 'data-distribution',
-    dataView: mockIndexPattern,
+    dataView: mockDataView,
     dataType: 'ux',
     reportConfigMap: obsvReportConfigMap,
   });
