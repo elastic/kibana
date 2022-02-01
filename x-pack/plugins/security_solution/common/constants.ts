@@ -6,7 +6,6 @@
  */
 
 import type { TransformConfigSchema } from './transforms/types';
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 /**
  * as const
@@ -339,10 +338,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.teams',
   '.webhook',
 ];
-
-if (ENABLE_CASE_CONNECTOR) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
