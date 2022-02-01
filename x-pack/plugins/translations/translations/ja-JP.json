@@ -22776,7 +22776,6 @@
     "xpack.securitySolution.detectionEngine.rules.allExceptionLists.search.placeholder": "検索例外リスト",
     "xpack.securitySolution.detectionEngine.rules.allExceptions.filters.noListsBody": "例外リストが見つかりませんでした。",
     "xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle": "例外",
-    "xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitleDescription": "例外は自動的に例外リストにグループ化されます。",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription": "一括アクションを実行できませんでした",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteeRuleDescription": "ルールの削除",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription": "ルールの複製",
