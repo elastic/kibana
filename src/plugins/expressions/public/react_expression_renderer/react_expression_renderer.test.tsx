@@ -124,13 +124,13 @@ describe('ExpressionRenderer', () => {
 
     instance.setProps({ expression: 'abc' });
 
-    expect(loaderUpdate).toHaveBeenCalledTimes(1);
+    expect(loaderUpdate).not.toHaveBeenCalled();
 
     act(() => {
       jest.runAllTimers();
     });
 
-    expect(loaderUpdate).toHaveBeenCalledTimes(2);
+    expect(loaderUpdate).toHaveBeenCalledTimes(1);
 
     instance.unmount();
   });
@@ -159,7 +159,7 @@ describe('ExpressionRenderer', () => {
       jest.runAllTimers();
     });
 
-    expect(loaderUpdate).toHaveBeenCalledTimes(1);
+    expect(loaderUpdate).not.toHaveBeenCalled();
 
     instance.unmount();
   });
@@ -191,13 +191,13 @@ describe('ExpressionRenderer', () => {
 
     instance.setProps({ searchContext: { from: 'now-30m', to: 'now' } });
 
-    expect(loaderUpdate).toHaveBeenCalledTimes(1);
+    expect(loaderUpdate).not.toHaveBeenCalled();
 
     act(() => {
       jest.runAllTimers();
     });
 
-    expect(loaderUpdate).toHaveBeenCalledTimes(2);
+    expect(loaderUpdate).toHaveBeenCalledTimes(1);
 
     instance.unmount();
   });
