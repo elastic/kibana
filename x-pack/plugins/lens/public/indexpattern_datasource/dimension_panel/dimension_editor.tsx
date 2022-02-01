@@ -767,6 +767,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
               key={defaultLabel}
               value={selectedColumn.label}
+              defaultValue={defaultLabel}
               onChange={(value) => {
                 updateLayer({
                   columns: {
