@@ -10,9 +10,8 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { Filter } from '@kbn/es-query';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -72,6 +71,7 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
@@ -338,11 +338,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
     });
     if (topHitsSplitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
-        topHitsSplitField,
-        '',
-        indexPattern
-      );
+      const entityIsNotEmptyFilter = buildPhraseFilter(topHitsSplitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       searchSource.setField('filter', [
         ...(searchSource.getField('filter') as Filter[]),
@@ -357,6 +353,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
     });
 
     const allHits: any[] = [];
@@ -438,6 +435,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
     });
 
     const isTimeExtentForTimeslice =
@@ -599,7 +597,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch({ legacyHitsTotal: false });
+    const resp = await searchSource.fetch({
+      legacyHitsTotal: false,
+      executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+    });
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -905,6 +906,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       abortSignal: abortController.signal,
       sessionId: searchFilters.searchSessionId,
       legacyHitsTotal: false,
+      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
     });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }

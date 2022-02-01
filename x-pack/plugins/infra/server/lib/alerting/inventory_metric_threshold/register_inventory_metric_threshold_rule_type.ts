@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '../../../../../alerting/server';
@@ -39,11 +38,12 @@ import {
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(Object.values(Comparator)) as Type<Comparator>,
-  timeUnit: schema.string() as Type<Unit>,
+  timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
