@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
-import './remeasure_fonts';
+import { remeasureFonts } from './remeasure_fonts';
 
 import {
   DARK_THEME,
@@ -335,6 +335,8 @@ export const CodeEditor: React.FC<Props> = ({
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
+
+      remeasureFonts();
 
       _editor.current = editor;
 
