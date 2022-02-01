@@ -11,17 +11,16 @@ import {
   UxFetchDataResponse,
   UXHasDataResponse,
 } from '../../../../../observability/public/';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
-export { createCallApmApi } from '../../../services/rest/createCallApmApi';
+export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
 export const fetchUxOverviewDate = async ({
   absoluteTime,
   relativeTime,
   serviceName,
 }: FetchDataParams): Promise<UxFetchDataResponse> => {
-  const data = await callApmApi({
-    endpoint: 'GET /internal/apm/ux/web-core-vitals',
+  const data = await callApmApi('GET /internal/apm/ux/web-core-vitals', {
     signal: null,
     params: {
       query: {
@@ -41,8 +40,7 @@ export const fetchUxOverviewDate = async ({
 export async function hasRumData(
   params: HasDataParams
 ): Promise<UXHasDataResponse> {
-  return await callApmApi({
-    endpoint: 'GET /api/apm/observability_overview/has_rum_data',
+  return await callApmApi('GET /api/apm/observability_overview/has_rum_data', {
     signal: null,
     params: {
       query: params?.absoluteTime

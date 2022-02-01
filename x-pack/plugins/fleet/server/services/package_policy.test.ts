@@ -1994,6 +1994,10 @@ describe('Package policy service', () => {
                   type: 'text',
                   value: ['/var/log/logfile.log'],
                 },
+                is_value_enabled: {
+                  type: 'bool',
+                  value: false,
+                },
               },
               streams: [],
             },
@@ -2024,6 +2028,10 @@ describe('Package policy service', () => {
                       name: 'path',
                       type: 'text',
                     },
+                    {
+                      name: 'is_value_enabled',
+                      type: 'bool',
+                    },
                   ],
                 },
               ],
@@ -2043,6 +2051,10 @@ describe('Package policy service', () => {
                 type: 'text',
                 value: '/var/log/new-logfile.log',
               },
+              is_value_enabled: {
+                type: 'bool',
+                value: 'true',
+              },
             },
           },
         ];
@@ -2056,6 +2068,7 @@ describe('Package policy service', () => {
           false
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+        expect(result.inputs[0]?.vars?.is_value_enabled.value).toEqual(false);
       });
     });
 

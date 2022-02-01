@@ -15,12 +15,7 @@ import {
   ConnectorTypes,
 } from '../../../../../../plugins/cases/common/api';
 import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
-import {
-  userActionPostResp,
-  postCaseReq,
-  postCommentUserReq,
-  getPostCaseRequest,
-} from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -60,13 +55,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');
       expect(createCaseUserAction.type).to.eql('create_case');
-      expect(createCaseUserAction.payload.description).to.eql(userActionPostResp.description);
+      expect(createCaseUserAction.payload.description).to.eql(postCaseReq.description);
       expect(createCaseUserAction.payload.status).to.eql('open');
-      expect(createCaseUserAction.payload.tags).to.eql(userActionPostResp.tags);
-      expect(createCaseUserAction.payload.title).to.eql(userActionPostResp.title);
-      expect(createCaseUserAction.payload.settings).to.eql(userActionPostResp.settings);
-      expect(createCaseUserAction.payload.owner).to.eql(userActionPostResp.owner);
-      expect(createCaseUserAction.payload.connector).to.eql(userActionPostResp.connector);
+      expect(createCaseUserAction.payload.tags).to.eql(postCaseReq.tags);
+      expect(createCaseUserAction.payload.title).to.eql(postCaseReq.title);
+      expect(createCaseUserAction.payload.settings).to.eql(postCaseReq.settings);
+      expect(createCaseUserAction.payload.owner).to.eql(postCaseReq.owner);
+      expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
     it('creates a delete case user action when a case is deleted', async () => {

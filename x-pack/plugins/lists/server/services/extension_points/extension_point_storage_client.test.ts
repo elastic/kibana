@@ -53,10 +53,15 @@ describe('When using the ExtensionPointStorageClient', () => {
       { data }: A
     ): Promise<A['data']> => {
       callbackRunLog += id;
-      return {
-        ...data,
-        name: `${data.name}-${id}`,
-      };
+
+      if ('name' in data) {
+        return {
+          ...data,
+          name: `${data.name}-${id}`,
+        };
+      }
+
+      return data;
     };
     preCreateExtensionPointMock1 = {
       callback: jest.fn(
@@ -133,9 +138,7 @@ describe('When using the ExtensionPointStorageClient', () => {
         if (extensionPointsMock.type === 'exceptionsListPreCreateItem') {
           expect(extensionPointsMock.callback).toHaveBeenCalledWith(
             expect.objectContaining({
-              context: {
-                request: expect.any(Object),
-              },
+              context: callbackContext,
             })
           );
         }

@@ -26,7 +26,7 @@ export const getSettingsHandler: FleetRequestHandler = async (context, request, 
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Setings not found` },
+        body: { message: `Settings not found` },
       });
     }
 
@@ -55,7 +55,7 @@ export const putSettingsHandler: FleetRequestHandler<
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Setings not found` },
+        body: { message: `Settings not found` },
       });
     }
 
