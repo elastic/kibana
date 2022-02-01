@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-const alwaysImportedTests = [
+require('../../src/setup_node_env');
+require('@kbn/test').runTestsCli([
   require.resolve('../test/functional/config.js'),
   require.resolve('../test/functional_basic/config.ts'),
   require.resolve('../test/security_solution_endpoint/config.ts'),
@@ -91,11 +92,4 @@ const alwaysImportedTests = [
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
   require.resolve('../test/examples/config.ts'),
   require.resolve('../test/functional_execution_context/config.ts'),
-];
-const onlyNotInCoverageTests = [];
-
-require('../../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  ...alwaysImportedTests,
-  ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),
 ]);

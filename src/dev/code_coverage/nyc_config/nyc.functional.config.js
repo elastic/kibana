@@ -7,14 +7,15 @@
  */
 
 const defaultExclude = require('@istanbuljs/schema/default-exclude');
-const extraExclude = ['data/optimize/**', 'src/core/server/**', '**/{test, types}/**/*'];
+const extraExclude = ['data/optimize/**', '**/{test, types}/**/*'];
 const path = require('path');
+const untils = require('@kbn/utils');
 
 module.exports = {
   'temp-dir': process.env.COVERAGE_TEMP_DIR
     ? path.resolve(process.env.COVERAGE_TEMP_DIR, 'functional')
-    : 'target/kibana-coverage/functional',
-  'report-dir': 'target/kibana-coverage/functional-combined',
+    : path.resolve(untils.REPO_ROOT, 'target/kibana-coverage/functional'),
+  'report-dir': path.resolve(untils.REPO_ROOT, 'target/kibana-coverage/functional-combined'),
   reporter: ['html', 'json-summary'],
   exclude: extraExclude.concat(defaultExclude),
 };

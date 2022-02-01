@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+const path = require('path');
+const untils = require('@kbn/utils');
+
 module.exports = {
   extends: '@istanbuljs/nyc-config-typescript',
   reporter: ['json'],
-  'report-dir': 'target/kibana-coverage/server',
+  'report-dir': path.resolve(untils.REPO_ROOT, 'target/kibana-coverage/server'),
 };
