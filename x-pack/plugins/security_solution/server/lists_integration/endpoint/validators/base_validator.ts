@@ -19,7 +19,7 @@ import {
 import { OperatingSystem } from '../../../../common/endpoint/types';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
-const BasicEndpointExceptionDataSchema = schema.object(
+export const BasicEndpointExceptionDataSchema = schema.object(
   {
     // must have a name
     name: schema.string({ minLength: 1, maxLength: 256 }),
