@@ -7,8 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { fetchDiskUsageNodeStats } from './fetch_disk_usage_node_stats';
+import { fetchMemoryUsageNodeStats } from './fetch_memory_usage_node_stats';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -23,44 +22,66 @@ jest.mock('../../static_globals', () => ({
 }));
 import { Globals } from '../../static_globals';
 
-describe('fetchDiskUsageNodeStats', () => {
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-
+describe('fetchMemoryUsageNodeStats', () => {
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
     {
-      clusterUuid: 'cluster123',
-      clusterName: 'test-cluster',
+      clusterUuid: 'abc123',
+      clusterName: 'test',
     },
   ];
-  const duration = '5m';
+  const startMs = 0;
+  const endMs = 0;
   const size = 10;
 
   const esRes = {
     aggregations: {
       clusters: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
         buckets: [
           {
-            key: clusters[0].clusterUuid,
+            key: 'NG2d5jHiSBGPE6HLlUN2Bg',
+            doc_count: 30,
             nodes: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'theNodeId',
-                  index: {
+                  key: 'qrLmmSBMSXGSfciYLjL3GA',
+                  doc_count: 30,
+                  cluster_uuid: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
                     buckets: [
                       {
-                        key: '.monitoring-es-*',
+                        key: 'NG2d5jHiSBGPE6HLlUN2Bg',
+                        doc_count: 30,
                       },
                     ],
+                  },
+                  avg_heap: {
+                    value: 46.3,
                   },
                   name: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
                     buckets: [
                       {
-                        key: 'theNodeName',
+                        key: 'desktop-dca-192-168-162-170.endgames.local',
+                        doc_count: 30,
                       },
                     ],
                   },
-                  usage_ratio_percentile: {
-                    value: 10,
+                  index: {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 0,
+                    buckets: [
+                      {
+                        key: '.monitoring-es-7-2022.01.27',
+                        doc_count: 30,
+                      },
+                    ],
                   },
                 },
               ],
@@ -70,26 +91,32 @@ describe('fetchDiskUsageNodeStats', () => {
       },
     },
   };
-  it('fetch normal stats', async () => {
+
+  it('fetch stats', async () => {
     esClient.search.mockReturnValue(
       // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
     );
-
-    const result = await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
+    const result = await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
       {
-        clusterUuid: clusters[0].clusterUuid,
-        nodeName: 'theNodeName',
-        nodeId: 'theNodeId',
-        diskUsage: 10,
+        memoryUsage: 46,
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
+        nodeId: 'qrLmmSBMSXGSfciYLjL3GA',
+        nodeName: 'desktop-dca-192-168-162-170.endgames.local',
         ccs: null,
       },
     ]);
   });
+
   it('should call ES with correct query', async () => {
-    await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
-    expect(esClient.search).toHaveBeenCalledWith({
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+    });
+    await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
+    expect(params).toStrictEqual({
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
       filter_path: ['aggregations'],
@@ -98,7 +125,7 @@ describe('fetchDiskUsageNodeStats', () => {
         query: {
           bool: {
             filter: [
-              { terms: { cluster_uuid: ['cluster123'] } },
+              { terms: { cluster_uuid: ['abc123'] } },
               {
                 bool: {
                   should: [
@@ -108,30 +135,20 @@ describe('fetchDiskUsageNodeStats', () => {
                   minimum_should_match: 1,
                 },
               },
-              { range: { timestamp: { gte: 'now-5m' } } },
+              { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
             ],
           },
         },
         aggs: {
           clusters: {
-            terms: { field: 'cluster_uuid', size: 10, include: ['cluster123'] },
+            terms: { field: 'cluster_uuid', size: 10 },
             aggs: {
               nodes: {
-                terms: { field: 'node_stats.node_id', size: 10 },
+                terms: { field: 'source_node.uuid', size: 10 },
                 aggs: {
                   index: { terms: { field: '_index', size: 1 } },
-                  total_in_bytes: { max: { field: 'node_stats.fs.total.total_in_bytes' } },
-                  available_in_bytes: { max: { field: 'node_stats.fs.total.available_in_bytes' } },
-                  usage_ratio_percentile: {
-                    bucket_script: {
-                      buckets_path: {
-                        available_in_bytes: 'available_in_bytes',
-                        total_in_bytes: 'total_in_bytes',
-                      },
-                      script:
-                        '100 - Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
-                    },
-                  },
+                  avg_heap: { avg: { field: 'node_stats.jvm.mem.heap_used_percent' } },
+                  cluster_uuid: { terms: { field: 'cluster_uuid', size: 1 } },
                   name: { terms: { field: 'source_node.name', size: 1 } },
                 },
               },
@@ -141,7 +158,7 @@ describe('fetchDiskUsageNodeStats', () => {
       },
     });
   });
-  it('should call ES with correct query when ccs disabled', async () => {
+  it('should call ES with correct query  when ccs disabled', async () => {
     // @ts-ignore
     Globals.app.config.ui.ccs.enabled = false;
     let params = null;
@@ -149,7 +166,7 @@ describe('fetchDiskUsageNodeStats', () => {
       params = args[0];
       return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
     });
-    await fetchDiskUsageNodeStats(esClient, clusters, duration, size);
+    await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     // @ts-ignore
     expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.node_stats-*');
   });
