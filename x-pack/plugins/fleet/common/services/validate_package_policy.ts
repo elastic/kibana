@@ -143,7 +143,7 @@ export const validatePackagePolicy = (
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[inputKey][name],
+              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
               name,
               safeLoadYaml
             )
