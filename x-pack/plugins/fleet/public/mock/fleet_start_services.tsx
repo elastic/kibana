@@ -55,12 +55,18 @@ const configureStartServices = (services: MockedFleetStartServices): void => {
   // Store the http for use by useRequest
   setHttpClient(services.http);
 
-  // Set Fleet available capabilities
+  // Set Fleet and Integrations capabilities
   services.application.capabilities = {
     ...services.application.capabilities,
+    // Fleet
+    fleetv2: {
+      read: true,
+      all: true,
+    },
+    // Integration
     fleet: {
       read: true,
-      write: true,
+      all: true,
     },
   };
 

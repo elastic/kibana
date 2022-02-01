@@ -16,6 +16,7 @@ import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
 import { MonitorEnabled } from './monitor_enabled';
 import * as labels from '../../overview/monitor_list/translations';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
@@ -59,6 +60,8 @@ export const MonitorManagementList = ({
     [setPageIndex, setPageSize, setRefresh]
   );
 
+  const canEdit: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+
   const columns = [
     {
       align: 'left' as const,
@@ -85,7 +88,6 @@ export const MonitorManagementList = ({
       ),
       truncateText: true,
     },
-
     {
       align: 'left' as const,
       field: 'attributes',
@@ -135,7 +137,12 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (attributes: SyntheticsMonitor, record: SyntheticsMonitorSavedObject) => (
-        <MonitorEnabled id={record.id} monitor={attributes} setRefresh={setRefresh} />
+        <MonitorEnabled
+          id={record.id}
+          monitor={attributes}
+          setRefresh={setRefresh}
+          isDisabled={!canEdit}
+        />
       ),
     },
     {
@@ -144,7 +151,7 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (id: string) => <Actions id={id} setRefresh={setRefresh} />,
+      render: (id: string) => <Actions id={id} setRefresh={setRefresh} isDisabled={!canEdit} />,
     },
   ];
 

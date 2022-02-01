@@ -699,10 +699,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
@@ -2400,10 +2396,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found.tsx"
               },
               {
                 "plugin": "ml",
