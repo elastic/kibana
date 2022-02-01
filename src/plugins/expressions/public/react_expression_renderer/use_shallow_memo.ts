@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference, spaced-comment
+/// <reference path="./shallow_equal.d.ts" />
+
 import { useRef } from 'react';
-import { shallowEqual } from 'react-redux';
+import shallowEqual from 'react-redux/lib/utils/shallowEqual';
 
 export function useShallowMemo<T>(value: T): T {
   const previousRef = useRef(value);
