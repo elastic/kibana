@@ -19,12 +19,14 @@ export const hydrateSavedObjects = async ({
 }) => {
   const missingUrlInfoIds: string[] = [];
 
-  monitors.forEach(({ attributes, id }) => {
-    const monitor = attributes as MonitorFields;
-    if (!monitor || !monitor.urls || monitor.urls.length === 0) {
-      missingUrlInfoIds.push(id);
-    }
-  });
+  monitors
+    .filter((monitor) => monitor.type === 'browser')
+    .forEach(({ attributes, id }) => {
+      const monitor = attributes as MonitorFields;
+      if (!monitor || !monitor.urls || monitor.urls.length === 0) {
+        missingUrlInfoIds.push(id);
+      }
+    });
 
   if (missingUrlInfoIds.length > 0 && server.uptimeEsClient) {
     const esDocs: Ping[] = await fetchSampleMonitorDocuments(
@@ -61,6 +63,11 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
               },
             },
             {
+              terms: {
+                'monitor.type': 'browser',
+              },
+            },
+            {
               exists: {
                 field: 'summary',
               },
@@ -73,10 +80,10 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
           ],
         },
       },
-    },
-    _source: ['url', 'config_id'],
-    collapse: {
-      field: 'config_id',
+      _source: ['url', 'config_id'],
+      collapse: {
+        field: 'config_id',
+      },
     },
   });
 
