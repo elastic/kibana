@@ -8,4 +8,5 @@
 
 export { ProviderCollection } from './provider_collection';
 export { readProviderSpec } from './read_provider_spec';
+export { createAsyncInstance } from './async_instance';
 export type { Provider } from './read_provider_spec';
