@@ -79,6 +79,52 @@ describe('heatmap suggestions', () => {
       ).toEqual([]);
     });
 
+    test('when there is more than 1 metric', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column-1',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric 1',
+                },
+              },
+              {
+                columnId: 'metric-column-2',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric 2',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([]);
+    });
+
     test('when there are 3 or more buckets', () => {
       expect(
         getSuggestions({

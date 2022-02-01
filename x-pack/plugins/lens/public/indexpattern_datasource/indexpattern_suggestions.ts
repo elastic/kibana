@@ -619,10 +619,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         noBuckets: false,
       };
 
-      if (availableBucketedColumns.length <= 1) {
-        // Don't simplify when dealing with single-bucket table.
-        return [];
-      } else if (topLevelMetricColumns.length > 1) {
+      if (bucketedColumns.length > 0 && topLevelMetricColumns.length > 1) {
         return [
           {
             ...layer,
@@ -634,9 +631,10 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
             noBuckets: false,
           },
         ];
-      } else {
+      } else if (availableBucketedColumns.length > 1) {
         return allMetricsSuggestion;
       }
+      return [];
     })
   )
     .concat(

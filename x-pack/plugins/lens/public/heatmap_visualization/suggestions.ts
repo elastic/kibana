@@ -48,6 +48,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     return [];
   }
 
+  if (metrics.length > 1) {
+    return [];
+  }
+
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
 
   /**
