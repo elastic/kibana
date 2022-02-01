@@ -76,6 +76,7 @@ export const useRowHeightsOptions = ({ rowHeightState, onUpdateRowHeight }: UseR
 
     return {
       defaultHeight: deserializeRowHeight(rowHeight),
+      lineHeight: '1.6em',
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
         const newSerializedRowHeight = serializeRowHeight(newRowHeight);
         updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage);
