@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { concatAll, debounceTime, tap } from 'rxjs/operators';
+import { debounceTime, tap } from 'rxjs/operators';
 import { compareFilters, Filter, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 
 import { DashboardContainer } from '../embeddable';
@@ -110,6 +110,10 @@ export const applyContainerChangesToState = ({
 
   if (!_.isEqual(input.query, latestState.query)) {
     dispatchDashboardStateChange(setQuery(input.query));
+  }
+
+  if (input.timeRestore && !_.isEqual(input.timeRange, latestState.timeRange)) {
+    dispatchDashboardStateChange(setTimeRange(input.timeRange));
   }
 
   if (!_.isEqual(input.expandedPanelId, latestState.expandedPanelId)) {
