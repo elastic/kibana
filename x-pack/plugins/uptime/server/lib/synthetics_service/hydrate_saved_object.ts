@@ -20,7 +20,7 @@ export const hydrateSavedObjects = async ({
   const missingUrlInfoIds: string[] = [];
 
   monitors
-    .filter((monitor) => monitor.type === 'browser')
+    .filter((monitor) => monitor.attributes.type === 'browser')
     .forEach(({ attributes, id }) => {
       const monitor = attributes as MonitorFields;
       if (!monitor || !monitor.urls || monitor.urls.length === 0) {
@@ -63,7 +63,7 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
               },
             },
             {
-              terms: {
+              term: {
                 'monitor.type': 'browser',
               },
             },
