@@ -125,6 +125,7 @@ filegroup(
       "//packages/kbn-server-route-repository:build_types",
       "//packages/kbn-std:build_types",
       "//packages/kbn-telemetry-tools:build_types",
+      "//packages/kbn-test:build_types",
       "//packages/kbn-ui-shared-deps-npm:build_types",
       "//packages/kbn-ui-shared-deps-src:build_types",
       "//packages/kbn-ui-theme:build_types",
