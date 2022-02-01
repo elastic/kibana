@@ -27,7 +27,7 @@ import {
   TCPSimpleFields,
 } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { MonitorManagementPageAction } from '../../../pages/monitor_management/monitor_management';
+import { useBreakpoints } from '../../../hooks';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { DataStream, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import * as labels from '../../overview/monitor_list/translations';
@@ -62,6 +62,7 @@ export const MonitorManagementList = ({
   onUpdate,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
+  const isXl = useBreakpoints().up('xl');
 
   const { total } = list as MonitorManagementListState['list'];
   const monitors: SyntheticsMonitorWithId[] = useMemo(
@@ -198,7 +199,7 @@ export const MonitorManagementList = ({
         itemId="monitor_id"
         items={monitors}
         columns={columns}
-        tableLayout={'fixed'}
+        tableLayout={isXl ? 'auto' : 'fixed'}
         pagination={pagination}
         sorting={sorting}
         onChange={handleOnChange}
