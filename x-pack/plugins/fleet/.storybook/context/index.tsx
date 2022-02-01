@@ -53,7 +53,10 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
       ...stubbedStartServices,
       application: getApplication(),
       chrome: getChrome(),
-      cloud: getCloud({ isCloudEnabled }),
+      cloud: {
+        ...getCloud({ isCloudEnabled }),
+        CloudContextProvider: () => <></>,
+      },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),
       },
