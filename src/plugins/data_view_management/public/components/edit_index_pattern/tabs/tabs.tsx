@@ -9,15 +9,18 @@
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiSpacer,
   EuiFieldSearch,
-  EuiSelect,
-  EuiSelectOption,
   EuiButton,
+  EuiFilterSelectItem,
+  FilterChecked,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
@@ -34,7 +37,7 @@ import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../
 import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { getTabs, getPath, convertToEuiSelectOption } from './utils';
+import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
@@ -44,12 +47,22 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   refreshFields: () => void;
 }
 
+interface FilterItems {
+  value: string;
+  name: string;
+  checked?: FilterChecked;
+}
+
 const searchAriaLabel = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.searchAria',
   {
     defaultMessage: 'Search fields',
   }
 );
+
+const filterLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.filterAria', {
+  defaultMessage: 'Field type',
+});
 
 const filterAriaLabel = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.filterAria',
@@ -58,21 +71,42 @@ const filterAriaLabel = i18n.translate(
   }
 );
 
-const schemaAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.schema', {
-  defaultMessage: 'Schema',
+const schemaFilterLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.schema', {
+  defaultMessage: 'Schema type',
 });
+
+const schemaAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.schemaAria',
+  {
+    defaultMessage: 'Filter schema types',
+  }
+);
+
+const scriptedFieldFilterLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.scriptedFieldFilter',
+  {
+    defaultMessage: 'All languages',
+  }
+);
+
+const scriptedFieldAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.scriptedFieldFilterAria',
+  {
+    defaultMessage: 'Filter scripted field languages',
+  }
+);
 
 const schemaOptionRuntime = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.runtime',
   {
-    defaultMessage: 'Runtime Fields',
+    defaultMessage: 'Runtime',
   }
 );
 
 const schemaOptionIndexed = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.indexed',
   {
-    defaultMessage: 'Indexed Fields',
+    defaultMessage: 'Indexed',
   }
 );
 
@@ -101,16 +135,52 @@ export function Tabs({
   const { application, uiSettings, docLinks, dataViewFieldEditor, overlays, theme } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
-  const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
-  const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string>('');
-  const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
-  const [indexedFieldTypes, setIndexedFieldType] = useState<EuiSelectOption[]>([]);
-  const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<EuiSelectOption[]>([]);
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
+  const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
+  const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
+  const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<FilterItems[]>([]);
+  const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string[]>([]);
+  const [isIndexedFilterOpen, setIsIndexedFilterOpen] = useState(false);
+  const [indexedFieldTypes, setIndexedFieldTypes] = useState<FilterItems[]>([]);
+  const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
+  const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
+  const [schemaItems, setSchemaItems] = useState<FilterItems[]>([
+    {
+      value: 'runtime',
+      name: schemaOptionRuntime,
+    },
+    {
+      value: 'indexed',
+      name: schemaOptionIndexed,
+    },
+  ]);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
+
+  const updateFilterItem = (
+    items: FilterItems[],
+    index: number,
+    updater: (a: FilterItems[]) => void
+  ) => {
+    if (!items[index]) {
+      return;
+    }
+
+    const newItems = [...items];
+
+    switch (newItems[index].checked) {
+      case 'on':
+        newItems[index].checked = undefined;
+        break;
+
+      default:
+        newItems[index].checked = 'on';
+    }
+
+    updater(newItems);
+  };
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -132,10 +202,8 @@ export function Tabs({
       }
     });
 
-    setIndexedFieldType(convertToEuiSelectOption(tempIndexedFieldTypes, 'indexedFiledTypes'));
-    setScriptedFieldLanguages(
-      convertToEuiSelectOption(tempScriptedFieldLanguages, 'scriptedFieldLanguages')
-    );
+    setIndexedFieldTypes(convertToEuiFilterOptions(tempIndexedFieldTypes));
+    setScriptedFieldLanguages(convertToEuiFilterOptions(tempScriptedFieldLanguages));
   }, [indexPattern]);
 
   const closeFieldEditor = useCallback(() => {
@@ -176,21 +244,6 @@ export function Tabs({
   const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
   const getFilterSection = useCallback(
     (type: string) => {
-      const schemaOptions = [
-        {
-          value: '',
-          text: schemaAriaLabel,
-        },
-        {
-          value: 'runtime',
-          text: schemaOptionRuntime,
-        },
-        {
-          value: 'indexed',
-          text: schemaOptionIndexed,
-        },
-      ];
-
       return (
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
@@ -206,26 +259,82 @@ export function Tabs({
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
             <>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup wrap={false} gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      options={indexedFieldTypes}
-                      value={indexedFieldTypeFilter}
-                      onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
-                      data-test-subj="indexedFieldTypeFilterDropdown"
-                      aria-label={filterAriaLabel}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      options={schemaOptions}
-                      value={schemaFieldTypeFilter}
-                      onChange={(e) => setSchemaFieldTypeFilter(e.target.value)}
-                      data-test-subj="schemaFieldTypeFilterDropdown"
-                      aria-label={schemaAriaLabel}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiFilterGroup>
+                  <EuiPopover
+                    anchorPosition="downCenter"
+                    button={
+                      <EuiFilterButton
+                        aria-label={filterAriaLabel}
+                        iconType="arrowDown"
+                        onClick={() => setIsIndexedFilterOpen(!isIndexedFilterOpen)}
+                        isSelected={isIndexedFilterOpen}
+                        numFilters={indexedFieldTypes.length}
+                        hasActiveFilters={!!indexedFieldTypes.find((item) => item.checked === 'on')}
+                        numActiveFilters={
+                          indexedFieldTypes.filter((item) => item.checked === 'on').length
+                        }
+                      >
+                        {filterLabel}
+                      </EuiFilterButton>
+                    }
+                    isOpen={isIndexedFilterOpen}
+                    closePopover={() => setIsIndexedFilterOpen(false)}
+                  >
+                    {indexedFieldTypes.map((item, index) => (
+                      <EuiFilterSelectItem
+                        checked={item.checked}
+                        key={item.value}
+                        onClick={() => {
+                          setIndexedFieldTypeFilter(
+                            item.checked
+                              ? indexedFieldTypeFilter.filter((f) => f !== item.value)
+                              : [...indexedFieldTypeFilter, item.value]
+                          );
+                          updateFilterItem(indexedFieldTypes, index, setIndexedFieldTypes);
+                        }}
+                      >
+                        {item.name}
+                      </EuiFilterSelectItem>
+                    ))}
+                  </EuiPopover>
+                  <EuiPopover
+                    anchorPosition="downCenter"
+                    button={
+                      <EuiFilterButton
+                        aria-label={schemaAriaLabel}
+                        iconType="arrowDown"
+                        onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
+                        isSelected={isSchemaFilterOpen}
+                        numFilters={schemaItems.length}
+                        hasActiveFilters={!!schemaItems.find((item) => item.checked === 'on')}
+                        numActiveFilters={
+                          schemaItems.filter((item) => item.checked === 'on').length
+                        }
+                      >
+                        {schemaFilterLabel}
+                      </EuiFilterButton>
+                    }
+                    isOpen={isSchemaFilterOpen}
+                    closePopover={() => setIsSchemaFilterOpen(false)}
+                  >
+                    {schemaItems.map((item, index) => (
+                      <EuiFilterSelectItem
+                        checked={item.checked}
+                        key={item.value}
+                        onClick={() => {
+                          setSchemaFieldTypeFilter(
+                            item.checked
+                              ? schemaFieldTypeFilter.filter((f) => f !== item.value)
+                              : [...schemaFieldTypeFilter, item.value]
+                          );
+                          updateFilterItem(schemaItems, index, setSchemaItems);
+                        }}
+                      >
+                        {item.name}
+                      </EuiFilterSelectItem>
+                    ))}
+                  </EuiPopover>
+                </EuiFilterGroup>
               </EuiFlexItem>
               {userEditPermission && (
                 <EuiFlexItem grow={false}>
@@ -238,12 +347,47 @@ export function Tabs({
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiSelect
-                options={scriptedFieldLanguages}
-                value={scriptedFieldLanguageFilter}
-                onChange={(e) => setScriptedFieldLanguageFilter(e.target.value)}
-                data-test-subj="scriptedFieldLanguageFilterDropdown"
-              />
+              <EuiFilterGroup>
+                <EuiPopover
+                  anchorPosition="downCenter"
+                  button={
+                    <EuiFilterButton
+                      aria-label={scriptedFieldAriaLabel}
+                      iconType="arrowDown"
+                      onClick={() => setIsScriptedFieldFilterOpen(!isScriptedFieldFilterOpen)}
+                      isSelected={isScriptedFieldFilterOpen}
+                      numFilters={scriptedFieldLanguages.length}
+                      hasActiveFilters={
+                        !!scriptedFieldLanguages.find((item) => item.checked === 'on')
+                      }
+                      numActiveFilters={
+                        scriptedFieldLanguages.filter((item) => item.checked === 'on').length
+                      }
+                    >
+                      {scriptedFieldFilterLabel}
+                    </EuiFilterButton>
+                  }
+                  isOpen={isScriptedFieldFilterOpen}
+                  closePopover={() => setIsScriptedFieldFilterOpen(false)}
+                >
+                  {scriptedFieldLanguages.map((item, index) => (
+                    <EuiFilterSelectItem
+                      checked={item.checked}
+                      key={item.value}
+                      onClick={() => {
+                        setScriptedFieldLanguageFilter(
+                          item.checked
+                            ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
+                            : [...scriptedFieldLanguageFilter, item.value]
+                        );
+                        updateFilterItem(scriptedFieldLanguages, index, setScriptedFieldLanguages);
+                      }}
+                    >
+                      {item.name}
+                    </EuiFilterSelectItem>
+                  ))}
+                </EuiPopover>
+              </EuiFilterGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -253,9 +397,13 @@ export function Tabs({
       fieldFilter,
       indexedFieldTypeFilter,
       indexedFieldTypes,
-      schemaFieldTypeFilter,
+      isIndexedFilterOpen,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
+      isScriptedFieldFilterOpen,
+      schemaItems,
+      schemaFieldTypeFilter,
+      isSchemaFilterOpen,
       openFieldEditor,
       userEditPermission,
     ]

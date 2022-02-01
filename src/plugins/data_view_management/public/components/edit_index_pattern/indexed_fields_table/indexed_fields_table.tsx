@@ -19,8 +19,8 @@ interface IndexedFieldsTableProps {
   fields: DataViewField[];
   indexPattern: DataView;
   fieldFilter?: string;
-  indexedFieldTypeFilter?: string;
-  schemaFieldTypeFilter?: string;
+  indexedFieldTypeFilter: string[];
+  schemaFieldTypeFilter: string[];
   helpers: {
     editField: (fieldName: string) => void;
     deleteField: (fieldName: string) => void;
@@ -105,28 +105,34 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
         );
       }
 
-      if (indexedFieldTypeFilter) {
+      if (indexedFieldTypeFilter.length) {
         // match conflict fields
         fields = fields.filter((field) => {
-          if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
+          if (indexedFieldTypeFilter.includes('conflict') && field.kbnType === 'conflict') {
             return true;
           }
-          if ('runtimeField' in field && field?.runtimeField?.type === indexedFieldTypeFilter) {
+          if (
+            'runtimeField' in field &&
+            field.runtimeField?.type &&
+            indexedFieldTypeFilter.includes(field.runtimeField?.type)
+          ) {
             return true;
           }
           // match one of multiple types on a field
-          return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
+          return (
+            field.esTypes?.length &&
+            field.esTypes.filter((val) => indexedFieldTypeFilter.includes(val)).length
+          );
         });
       }
 
-      if (schemaFieldTypeFilter) {
+      if (schemaFieldTypeFilter.length) {
         // match fields of schema type
         fields = fields.filter((field) => {
-          if (schemaFieldTypeFilter === 'runtime') {
-            return 'runtimeField' in field;
-          } else {
-            return !('runtimeField' in field);
-          }
+          return (
+            (schemaFieldTypeFilter.includes('runtime') && 'runtimeField' in field) ||
+            (schemaFieldTypeFilter.includes('indexed') && !('runtimeField' in field))
+          );
         });
       }
 
