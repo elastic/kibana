@@ -71,6 +71,12 @@ exports.EcsCustomPropertyMappings = {
                   },
                   metrics: {
                     properties: {
+                      total_alerts: {
+                        type: 'long',
+                      },
+                      total_hits: {
+                        type: 'long',
+                      },
                       total_indexing_duration_ms: {
                         type: 'long',
                       },

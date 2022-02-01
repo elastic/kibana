@@ -494,6 +494,8 @@ export const getRuleExecutionSummarySucceeded = (): RuleExecutionSummary => ({
     status_order: 0,
     message: 'succeeded',
     metrics: {
+      total_alerts: 100,
+      total_hits: 200,
       total_search_duration_ms: 200,
       total_indexing_duration_ms: 800,
       execution_gap_duration_s: 500,
@@ -510,6 +512,8 @@ export const getRuleExecutionSummaryFailed = (): RuleExecutionSummary => ({
     message:
       'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
     metrics: {
+      total_alerts: 100,
+      total_hits: 200,
       total_search_duration_ms: 200,
       total_indexing_duration_ms: 800,
       execution_gap_duration_s: 500,

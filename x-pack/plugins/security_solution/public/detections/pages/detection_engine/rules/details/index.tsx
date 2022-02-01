@@ -109,7 +109,7 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../components/rules/rule_execution_status';
-import { FailureHistory } from './failure_history';
+import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
@@ -138,7 +138,7 @@ const StyledFullHeightContainer = styled.div`
 
 enum RuleDetailTabs {
   alerts = 'alerts',
-  failures = 'failures',
+  executionLogs = 'executionLogs',
   exceptions = 'exceptions',
 }
 
@@ -156,10 +156,10 @@ const ruleDetailTabs = [
     dataTestSubj: 'exceptionsTab',
   },
   {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
+    id: RuleDetailTabs.executionLogs,
+    name: i18n.RULE_EXECUTION_LOGS,
     disabled: false,
-    dataTestSubj: 'failureHistoryTab',
+    dataTestSubj: 'executionLogsTab',
   },
 ];
 
@@ -229,7 +229,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
-  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
+  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.executionLogs);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
@@ -326,7 +326,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.exceptions);
     } else {
       setTabs(ruleDetailTabs);
-      setRuleDetailTab(RuleDetailTabs.alerts);
+      setRuleDetailTab(RuleDetailTabs.executionLogs);
     }
   }, [hasIndexRead]);
 
@@ -834,7 +834,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               onRuleChange={refreshRule}
             />
           )}
-          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory ruleId={ruleId} />}
+          {ruleDetailTab === RuleDetailTabs.executionLogs && <ExecutionLogTable ruleId={ruleId} />}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
 

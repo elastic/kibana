@@ -8,10 +8,13 @@
 import * as t from 'io-ts';
 import { ruleExecutionEvent } from '../common';
 
-export const GetRuleExecutionEventsResponse = t.exact(
+export const GetRuleExecutionEventsResponse = t.intersection([
   t.type({
     events: t.array(ruleExecutionEvent),
-  })
-);
+  }),
+  t.partial({
+    message: t.string,
+  }),
+]);
 
 export type GetRuleExecutionEventsResponse = t.TypeOf<typeof GetRuleExecutionEventsResponse>;

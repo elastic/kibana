@@ -50,6 +50,8 @@ export const durationMetric = PositiveInteger;
 export type DurationMetric = t.TypeOf<typeof durationMetric>;
 
 export const ruleExecutionMetrics = t.partial({
+  total_alerts: durationMetric,
+  total_hits: durationMetric,
   total_search_duration_ms: durationMetric,
   total_indexing_duration_ms: durationMetric,
   execution_gap_duration_s: durationMetric,

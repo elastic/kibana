@@ -43,6 +43,8 @@ export interface StatusChangeArgs {
 }
 
 export interface MetricsArgs {
+  totalAlerts?: number;
+  totalHits?: number;
   searchDurations?: string[];
   indexingDurations?: string[];
   executionGap?: Duration;

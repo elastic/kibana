@@ -14,7 +14,7 @@ import { IRuleExecutionEventsReader } from '../rule_execution_events/events_read
 import { IRuleExecutionInfoSavedObjectsClient } from '../rule_execution_info/saved_objects_client';
 import { IRuleExecutionLogClient } from './client_interface';
 
-const MAX_LAST_FAILURES = 5;
+const MAX_LAST_FAILURES = 100;
 
 export const createRuleExecutionLogClient = (
   savedObjectsClient: IRuleExecutionInfoSavedObjectsClient,
@@ -22,6 +22,15 @@ export const createRuleExecutionLogClient = (
   logger: Logger
 ): IRuleExecutionLogClient => {
   return {
+    getAggregateExecutionEvents({ ruleId, start, end, filters }) {
+      return eventsReader.getAggregateExecutionEvents({
+        ruleId,
+        start,
+        end,
+        filters,
+      });
+    },
+
     async getExecutionSummariesBulk(ruleIds) {
       const savedObjectsByRuleId = await savedObjectsClient.getManyByRuleIds(ruleIds);
       return mapValues(savedObjectsByRuleId, (so) => so?.attributes ?? null);
@@ -36,6 +45,9 @@ export const createRuleExecutionLogClient = (
       await savedObjectsClient.delete(ruleId);
     },
 
+    /**
+     * @deprecated replaced by getAggregateExecutionEvents
+     */
     getLastFailures(ruleId) {
       return eventsReader.getLastStatusChanges({
         ruleId,

@@ -13,6 +13,7 @@ import {
 
 const ruleExecutionLogClientMock = {
   create: (): jest.Mocked<IRuleExecutionLogClient> => ({
+    getAggregateExecutionEvents: jest.fn(),
     getExecutionSummariesBulk: jest.fn(),
     getExecutionSummary: jest.fn(),
     clearExecutionSummary: jest.fn(),

@@ -371,20 +371,30 @@ export const exportRules = async ({
  * Fetch rule execution events (e.g. status changes) from Event Log.
  *
  * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param start
+ * @param end
+ * @param filters
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
  */
 export const fetchRuleExecutionEvents = async ({
   ruleId,
+  start,
+  end,
+  filters,
   signal,
 }: {
   ruleId: string;
+  start: string;
+  end: string;
+  filters?: string;
   signal?: AbortSignal;
 }): Promise<GetRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
   return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
     method: 'GET',
+    query: { start, end, filters },
     signal,
   });
 };

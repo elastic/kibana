@@ -39,6 +39,7 @@ export const createRuleExecutionLogger = (
       try {
         const normalizedArgs = normalizeStatusChangeArgs(args);
         await Promise.all([
+          // TODO: add total hits/alerts
           writeStatusChangeToSavedObjects(normalizedArgs),
           writeStatusChangeToEventLog(normalizedArgs),
         ]);
@@ -127,6 +128,8 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
     message: truncateValue(message) ?? '',
     metrics: metrics
       ? {
+          total_alerts: metrics.totalAlerts,
+          total_hits: metrics.totalHits,
           total_search_duration_ms: normalizeDurations(metrics.searchDurations),
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),

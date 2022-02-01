@@ -18,6 +18,7 @@ export const createResultObject = <TState extends AlertTypeState>(state: TState)
     searchAfterTimes: [],
     state,
     success: true,
+    totalHits: 0,
     warning: false,
     warningMessages: [],
   };

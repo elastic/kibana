@@ -18,6 +18,10 @@ export const decorateRuleExecutionLogClient = (
   logger: Logger
 ): IRuleExecutionLogClient => {
   return {
+    getAggregateExecutionEvents(ruleId) {
+      return client.getAggregateExecutionEvents(ruleId);
+    },
+
     /**
      * Get the current rule execution summary for each of the given rule IDs.
      * This method splits work into chunks so not to owerwhelm Elasticsearch

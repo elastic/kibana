@@ -31,6 +31,7 @@ export function mergeRules(currentRules: Rule[], newRules: Rule[]): Rule[] {
  * @param sortingOptions SortingOptions
  */
 export function getRulesComparator(sortingOptions: SortingOptions) {
+  // eslint-disable-next-line complexity
   return (ruleA: Rule, ruleB: Rule): number => {
     const { field, order } = sortingOptions;
     const direction = order === 'asc' ? 1 : -1;
@@ -44,6 +45,8 @@ export function getRulesComparator(sortingOptions: SortingOptions) {
       }
       case 'version':
       case 'risk_score':
+      case 'execution_summary.last_execution.metrics.total_alerts':
+      case 'execution_summary.last_execution.metrics.total_hits':
       case 'execution_summary.last_execution.metrics.execution_gap_duration_s':
       case 'execution_summary.last_execution.metrics.total_indexing_duration_ms':
       case 'execution_summary.last_execution.metrics.total_search_duration_ms': {

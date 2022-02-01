@@ -364,6 +364,40 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         width: '14%',
       },
       {
+        field: 'execution_summary.last_execution.metrics.total_hits',
+        name: (
+          <TableHeaderTooltipCell
+            title={i18n.COLUMN_TOTAL_HITS}
+            tooltipContent={i18n.COLUMN_TOTAL_HITS_TOOLTIP}
+          />
+        ),
+        render: (value: DurationMetric | undefined) => (
+          <EuiText data-test-subj="total_hits" size="s">
+            {value != null ? value.toFixed() : getEmptyTagValue()}
+          </EuiText>
+        ),
+        sortable: !!isInMemorySorting,
+        truncateText: true,
+        width: '16%',
+      },
+      {
+        field: 'execution_summary.last_execution.metrics.total_alerts',
+        name: (
+          <TableHeaderTooltipCell
+            title={i18n.COLUMN_TOTAL_ALERTS}
+            tooltipContent={i18n.COLUMN_TOTAL_ALERTS_TOOLTIP}
+          />
+        ),
+        render: (value: DurationMetric | undefined) => (
+          <EuiText data-test-subj="total_alerts" size="s">
+            {value != null ? value.toFixed() : getEmptyTagValue()}
+          </EuiText>
+        ),
+        sortable: !!isInMemorySorting,
+        truncateText: true,
+        width: '16%',
+      },
+      {
         field: 'execution_summary.last_execution.status',
         name: i18n.COLUMN_LAST_RESPONSE,
         render: (value: RuleExecutionSummary['last_execution']['status'] | undefined) => (

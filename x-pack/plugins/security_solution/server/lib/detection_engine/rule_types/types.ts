@@ -50,6 +50,7 @@ export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
+  totalHits: number;
   warning: boolean;
   warningMessages: string[];
 }

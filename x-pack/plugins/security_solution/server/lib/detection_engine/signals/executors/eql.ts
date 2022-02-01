@@ -125,6 +125,7 @@ export const eqlExecutor = async ({
     const eqlSignalSearchEnd = performance.now();
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
     result.searchAfterTimes = [eqlSearchDuration];
+    // TODO: Add totalHits to `result`
 
     let newSignals: SimpleHit[] | undefined;
     if (response.hits.sequences !== undefined) {

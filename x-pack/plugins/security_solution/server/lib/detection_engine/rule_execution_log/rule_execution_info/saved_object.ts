@@ -52,6 +52,12 @@ const ruleExecutionInfoMappings: SavedObjectsType['mappings'] = {
         metrics: {
           type: 'object',
           properties: {
+            total_alerts: {
+              type: 'long',
+            },
+            total_hits: {
+              type: 'long',
+            },
             total_search_duration_ms: {
               type: 'long',
             },

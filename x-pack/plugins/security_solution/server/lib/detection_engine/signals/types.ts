@@ -338,6 +338,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  totalHits: number;
   warningMessages: string[];
 }
 

@@ -158,6 +158,8 @@ export default function ({ getService }: FtrProviderContext) {
                 status: 'succeeded',
                 status_order: 10,
                 metrics: {
+                  total_alerts: 100,
+                  total_hits: 200,
                   total_indexing_duration_ms: 1000,
                   total_search_duration_ms: 2000,
                   execution_gap_duration_s: 3000,

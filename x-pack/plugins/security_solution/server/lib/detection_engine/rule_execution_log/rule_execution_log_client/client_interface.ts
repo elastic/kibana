@@ -9,6 +9,14 @@ import {
   RuleExecutionEvent,
   RuleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
+import { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
+
+export interface GetAggregateExecutionEventsArgs {
+  ruleId: string;
+  start: string;
+  end: string;
+  filters: string;
+}
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:
@@ -16,6 +24,21 @@ import {
  *   - execution events such as recent failures and status changes
  */
 export interface IRuleExecutionLogClient {
+  /**
+   * Fetches list of execution events aggregated by executionId, combining data from both alerting
+   * and security-solution event-log documents
+   * @param ruleId Saved object id of the rule (`rule.id`).
+   * @param start start of daterange to filter to
+   * @param end end of daterange to filter to
+   * @param filters array of field-based filters, e.g.  kibana.alert.rule.execution.status:*
+   */
+  getAggregateExecutionEvents({
+    ruleId,
+    start,
+    end,
+    filters,
+  }: GetAggregateExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
+
   /**
    * Fetches a list of current execution summaries of multiple rules.
    * @param ruleIds A list of saved object ids of multiple rules (`rule.id`).

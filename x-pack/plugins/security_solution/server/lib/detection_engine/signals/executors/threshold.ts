@@ -169,6 +169,7 @@ export const thresholdExecutor = async ({
         searchResult: thresholdResults,
         timestampOverride: ruleParams.timestampOverride,
       }),
+      // Add totalHits
       createSearchAfterReturnType({
         success,
         errors: [...errors, ...previousSearchErrors, ...searchErrors],
