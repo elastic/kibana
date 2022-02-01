@@ -25,7 +25,7 @@ export const getDefaultConfigs = ({
   let configResult: SeriesConfig | undefined;
 
   reportConfigMap[dataType]?.some((fn) => {
-    const config = fn({ indexPattern });
+    const config = fn({ dataView: indexPattern });
     if (config.reportType === reportType) {
       configResult = config;
     }
