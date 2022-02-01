@@ -118,7 +118,7 @@ export function MetricChart({
     palette,
     titlePosition,
     titleAlignPosition,
-    titleSize,
+    size,
   } = args;
   const firstTable = Object.values(data.tables)[0];
 
@@ -158,13 +158,13 @@ export function MetricChart({
         key={value}
         titlePosition={titlePosition}
         titleAlignPosition={titleAlignPosition}
-        titleSize={titleSize}
+        size={size}
       >
         {mode === 'full' && (
           <div
             data-test-subj="lns_metric_title"
             className={classNames('lnsMetricExpression__title', {
-              reversOrder: ['bottom', 'right'].includes(titlePosition ?? ''),
+              reverseOrder: ['bottom', 'right'].includes(titlePosition ?? ''),
             })}
             style={colorMode === ColorMode.Background ? color : undefined}
           >

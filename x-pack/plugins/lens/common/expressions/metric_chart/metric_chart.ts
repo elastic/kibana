@@ -38,10 +38,10 @@ export const metricChart: ExpressionFunctionDefinition<
         defaultMessage: 'The chart title.',
       }),
     },
-    titleSize: {
+    size: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.metric.titleSize.help', {
-        defaultMessage: 'The chart title size.',
+      help: i18n.translate('xpack.lens.metric.size.help', {
+        defaultMessage: 'The chart size.',
       }),
     },
     titlePosition: {

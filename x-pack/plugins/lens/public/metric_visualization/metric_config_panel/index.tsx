@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import type { VisualizationToolbarProps } from '../../types';
 
-import { VisualOptionsPopover } from './visual_options_popover';
+import { AppearanceOptionsPopover } from './appearance_options_popover';
 import { MetricState } from '../../../common/expressions';
 
 export const MetricToolbar = memo(function MetricToolbar(
@@ -21,7 +21,7 @@ export const MetricToolbar = memo(function MetricToolbar(
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <VisualOptionsPopover
+          <AppearanceOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}

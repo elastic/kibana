@@ -8,20 +8,20 @@
   text-align: center;
 
   .lnsMetricExpression__value {
-    font-size: $euiSizeXXL * 2;
+    font-size: $euiFontSizeXXL * 2;
     font-weight: $euiFontWeightSemiBold;
     border-radius: $euiBorderRadius;
   }
 
   .lnsMetricExpression__title {
-    font-size: $euiSizeXL;
+    font-size: $euiFontSizeXXL;
     color: $euiTextColor;
-    &.reversOrder {
+    &.reverseOrder {
       order: 1;
     }
   }
 
-  .lnsMetricExpression_title_container {
+  .lnsMetricExpression_container_scale {
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -39,52 +39,51 @@
     }
     &.titleSizeXS {
       .lnsMetricExpression__title {
-        font-size: $euiSizeXS;
+        font-size: $euiFontSizeS;
       }
       .lnsMetricExpression__value {
-        font-size: $euiSizeS * 2;
+        font-size: $euiFontSizeXS * 2;
       }
     }
     &.titleSizeS {
       .lnsMetricExpression__title {
-        font-size: $euiSizeS * 1.5;
-        font-weight: 700;
+        font-size: $euiFontSizeS;
       }
       .lnsMetricExpression__value {
-        font-size: $euiSizeM * 2.25;
+        font-size: $euiFontSizeM * 2.25;
       }
     }
     &.titleSizeM {
       .lnsMetricExpression__title {
-        font-size: $euiSizeM * 1.5;
+        font-size: $euiFontSizeM;
       }
       .lnsMetricExpression__value {
-        font-size: $euiSizeL * 2;
+        font-size: $euiFontSizeL * 2;
       }
     }
     &.titleSizeL {
       .lnsMetricExpression__title {
-        font-size: $euiSizeL;
+        font-size: $euiFontSizeL;
       }
       .lnsMetricExpression__value {
-        font-size: $euiSizeXL * 2;
+        font-size: $euiFontSizeXL * 2;
       }
     }
     &.titleSizeXL {
       .lnsMetricExpression__title {
-        font-size: $euiSizeXL;
+        font-size: $euiFontSizeXL;
       }
       .lnsMetricExpression__value {
-        font-size: $euiSizeXXL * 2;
+        font-size: $euiFontSizeXXL * 2;
       }
     }
 
     &.titleSizeXXL {
       .lnsMetricExpression__title {
-        font-size: $euiSizeXXL;
+        font-size: $euiFontSizeXXL;
       }
       .lnsMetricExpression__value {
-        font-size: $euiSizeXXL * 3;
+        font-size: $euiFontSizeXXL * 3;
       }
     }
   }

@@ -19,7 +19,7 @@ export interface MetricState {
   colorMode?: ColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
   titlePosition?: string;
-  titleSize?: string;
+  size?: string;
   titleAlignPosition?: string;
 }
 

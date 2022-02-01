@@ -16,9 +16,6 @@ export interface TitlePositionProps {
 }
 
 const titleAlignPositions = [
-  { id: 'top', label: 'Top', direction: 'column' },
-  { id: 'bottom', label: 'Bottom', direction: 'column' },
-  { id: 'middle', label: 'Middle', direction: 'column' },
   { id: 'left', label: 'Left', direction: 'row' },
   { id: 'right', label: 'Right', direction: 'row' },
   { id: 'center', label: 'Center', direction: 'row' },

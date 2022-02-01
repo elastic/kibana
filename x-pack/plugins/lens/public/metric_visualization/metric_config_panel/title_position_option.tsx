@@ -18,8 +18,6 @@ export interface TitlePositionProps {
 const titlePositions = [
   { id: 'top', label: 'Top' },
   { id: 'bottom', label: 'Bottom' },
-  { id: 'left', label: 'Left' },
-  { id: 'right', label: 'Right' },
 ];
 
 export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {

@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { ToolbarPopover, TooltipWrapper } from '../../shared_components';
 import { TitlePositionOptions } from './title_position_option';
 import { FramePublicAPI } from '../../types';
 import { MetricState } from '../../../common/expressions';
 import { TitleAlignOptions } from './title_align_option';
-import { TitleSizeOptions } from './title_aize_option';
+import { SizeOptions } from './size_options';
 
 export interface VisualOptionsPopoverProps {
   state: MetricState;
@@ -21,7 +20,10 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({ state, setState }) => {
+export const AppearanceOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
+  state,
+  setState,
+}) => {
   return (
     <TooltipWrapper
       tooltipContent={i18n.translate('xpack.lens.shared.AppearanceLabel', {
@@ -34,11 +36,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({ stat
           defaultMessage: 'Appearance',
         })}
         type="visualOptions"
-        groupPosition="left"
-        buttonDataTestSubj="lnsVisualOptionsButton"
+        groupPosition="none"
+        buttonDataTestSubj="lnsMetricAppearanceButton"
       >
-        <TitleSizeOptions state={state} setState={setState} />
-        <EuiHorizontalRule />
+        <SizeOptions state={state} setState={setState} />
         <TitlePositionOptions state={state} setState={setState} />
         <TitleAlignOptions state={state} setState={setState} />
       </ToolbarPopover>
