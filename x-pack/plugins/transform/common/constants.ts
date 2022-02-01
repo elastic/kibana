@@ -43,7 +43,7 @@ export const API_BASE_PATH = '/api/transform/';
 // In the UI additional privileges are required:
 // - kibana_admin (builtin)
 // - dest index: monitor (applied to df-*)
-// - cluster: monitor
+// - cluster: monitor, read_pipeline
 //
 // Note that users with kibana_admin can see all Kibana data views and saved searches
 // in the source selection modal when creating a transform, but the wizard will trigger
@@ -70,7 +70,7 @@ export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/stats/get',
 ];
 
-// Equivalent of capabilities.canGetTransform
+// Equivalent of capabilities.canCreateTransform
 export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/get',
   'cluster.cluster:monitor/transform/stats/get',

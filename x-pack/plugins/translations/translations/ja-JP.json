@@ -25981,7 +25981,7 @@
     "xpack.transform.transformList.editFlyoutFormDescriptionLabel": "説明",
     "xpack.transform.transformList.editFlyoutFormDestinationButtonContent": "ディスティネーション構成",
     "xpack.transform.transformList.editFlyoutFormDestinationIndexLabel": "デスティネーションインデックス",
-    "xpack.transform.transformList.editFlyoutFormDestinationPipelineLabel": "パイプライン",
+    "xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel": "パイプライン",
     "xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext": "スロットリングを有効にするには、毎秒入力するドキュメントの上限を設定します。",
     "xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel": "毎秒あたりのドキュメント",
     "xpack.transform.transformList.editFlyoutFormFrequencyHelpText": "変換が連続実行されているときにソースインデックスで変更を確認する間の間隔。また、変換が検索またはインデックス中に一時障害が発生した場合に、再試行する間隔も決定します。最小値は1秒で、最大値は1時間です。",
