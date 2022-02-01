@@ -22,7 +22,7 @@ import {
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
-import { useCapabilities } from '../../hooks';
+import { useAuthz } from '../../hooks';
 
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
@@ -77,8 +77,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
     () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
   );
 
-  // Create new agent policy flyout state
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   useEffect(
     function triggerOnAgentPolicyChangeEffect() {
@@ -137,7 +136,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <div>
-                <EuiLink disabled={!hasWriteCapabilites} onClick={onClickCreatePolicy}>
+                <EuiLink disabled={!hasFleetAllPrivileges} onClick={onClickCreatePolicy}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"
