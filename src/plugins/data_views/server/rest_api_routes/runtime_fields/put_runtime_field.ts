@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
@@ -21,17 +23,59 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+import { responseFormatter } from './response_formatter';
 
-const runtimeCreateFieldRouteFactory =
+interface PutRuntimeFieldArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+  id: string;
+  name: string;
+  runtimeField: RuntimeField;
+}
+
+export const putRuntimeField = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+  id,
+  name,
+  runtimeField,
+}: PutRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
+
+  const oldFieldObject = dataView.fields.getByName(name);
+
+  if (oldFieldObject && !oldFieldObject.runtimeField) {
+    throw new Error('Only runtime fields can be updated');
+  }
+
+  if (oldFieldObject) {
+    dataView.removeRuntimeField(name);
+  }
+
+  dataView.addRuntimeField(name, runtimeField);
+
+  await dataViewsService.updateSavedObject(dataView);
+
+  const field = dataView.fields.getByName(name);
+  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
+
+  return { dataView, field };
+};
+
+const putRuntimeFieldRouteFactory =
   (path: string, serviceKey: SERVICE_KEY_TYPE) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
-    router.post(
+    router.put(
       {
         path,
         validate: {
@@ -53,8 +97,8 @@ const runtimeCreateFieldRouteFactory =
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -62,47 +106,26 @@ const runtimeCreateFieldRouteFactory =
         const id = req.params.id;
         const { name, runtimeField } = req.body;
 
-        const indexPattern = await indexPatternsService.get(id);
+        const { dataView, field } = await putRuntimeField({
+          dataViewsService,
+          id,
+          name,
+          runtimeField,
+          usageCollection,
+          counterName: `${req.route.method} ${path}`,
+        });
 
-        if (indexPattern.fields.getByName(name)) {
-          throw new Error(`Field [name = ${name}] already exists.`);
-        }
-
-        indexPattern.addRuntimeField(name, runtimeField);
-
-        const addedField = indexPattern.fields.getByName(name);
-        if (!addedField) throw new Error(`Could not create a field [name = ${name}].`);
-
-        await indexPatternsService.updateSavedObject(indexPattern);
-
-        const savedField = indexPattern.fields.getByName(name);
-        if (!savedField) throw new Error(`Could not create a field [name = ${name}].`);
-
-        const response = {
-          body: {
-            fields: [savedField.toSpec()],
-            [serviceKey]: indexPattern.toSpec(),
-          },
-        };
-
-        const legacyResponse = {
-          body: {
-            [serviceKey]: indexPattern.toSpec(),
-            field: savedField.toSpec(),
-          },
-        };
-
-        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
+        return res.ok(responseFormatter({ serviceKey, dataView, field }));
       })
     );
   };
 
-export const registerCreateRuntimeFieldRoute = runtimeCreateFieldRouteFactory(
+export const registerPutRuntimeFieldRoute = putRuntimeFieldRouteFactory(
   RUNTIME_FIELD_PATH,
   SERVICE_KEY
 );
 
-export const registerCreateRuntimeFieldRouteLegacy = runtimeCreateFieldRouteFactory(
+export const registerPutRuntimeFieldRouteLegacy = putRuntimeFieldRouteFactory(
   RUNTIME_FIELD_PATH_LEGACY,
   SERVICE_KEY_LEGACY
 );

@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import { FieldFormatParams, SerializedFieldFormat } from '../../../../field_formats/common';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -21,13 +24,89 @@ import {
   SERVICE_KEY_LEGACY,
 } from '../../constants';
 
+interface UpdateFieldsArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+  id: string;
+  fields: Record<string, FieldUpdateType>;
+}
+
+export const updateFields = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+  id,
+  fields,
+}: UpdateFieldsArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
+
+  const fieldNames = Object.keys(fields);
+
+  if (fieldNames.length < 1) {
+    throw new Error('No fields provided.');
+  }
+
+  let changeCount = 0;
+  for (const fieldName of fieldNames) {
+    const field = fields[fieldName];
+
+    if (field.customLabel !== undefined) {
+      changeCount++;
+      dataView.setFieldCustomLabel(fieldName, field.customLabel);
+    }
+
+    if (field.count !== undefined) {
+      changeCount++;
+      dataView.setFieldCount(fieldName, field.count);
+    }
+
+    if (field.format !== undefined) {
+      changeCount++;
+      if (field.format) {
+        dataView.setFieldFormat(fieldName, field.format);
+      } else {
+        dataView.deleteFieldFormat(fieldName);
+      }
+    }
+  }
+
+  if (changeCount < 1) {
+    throw new Error('Change set is empty.');
+  }
+
+  await dataViewsService.updateSavedObject(dataView);
+  return dataView;
+};
+
+interface FieldUpdateType {
+  customLabel?: string | null;
+  count?: number | null;
+  format?: SerializedFieldFormat<FieldFormatParams> | null;
+}
+
+const fieldUpdateSchema = schema.object({
+  customLabel: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 1_000,
+      })
+    )
+  ),
+  count: schema.maybe(schema.nullable(schema.number())),
+  format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
+});
+
 const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
   return (
     router: IRouter,
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
     router.post(
       {
@@ -48,18 +127,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
                 minLength: 1,
                 maxLength: 1_000,
               }),
-              schema.object({
-                customLabel: schema.maybe(
-                  schema.nullable(
-                    schema.string({
-                      minLength: 1,
-                      maxLength: 1_000,
-                    })
-                  )
-                ),
-                count: schema.maybe(schema.nullable(schema.number())),
-                format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
-              })
+              fieldUpdateSchema
             ),
           }),
         },
@@ -69,58 +137,29 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
           );
           const id = req.params.id;
           const { fields } = req.body;
-          const fieldNames = Object.keys(fields);
 
-          if (fieldNames.length < 1) {
-            throw new Error('No fields provided.');
-          }
-
-          const indexPattern = await indexPatternsService.get(id);
-
-          let changeCount = 0;
-          for (const fieldName of fieldNames) {
-            const field = fields[fieldName];
-
-            if (field.customLabel !== undefined) {
-              changeCount++;
-              indexPattern.setFieldCustomLabel(fieldName, field.customLabel);
-            }
-
-            if (field.count !== undefined) {
-              changeCount++;
-              indexPattern.setFieldCount(fieldName, field.count);
-            }
-
-            if (field.format !== undefined) {
-              changeCount++;
-              if (field.format) {
-                indexPattern.setFieldFormat(fieldName, field.format);
-              } else {
-                indexPattern.deleteFieldFormat(fieldName);
-              }
-            }
-          }
-
-          if (changeCount < 1) {
-            throw new Error('Change set is empty.');
-          }
-
-          await indexPatternsService.updateSavedObject(indexPattern);
+          const dataView = await updateFields({
+            dataViewsService,
+            usageCollection,
+            id,
+            fields,
+            counterName: `${req.route.method} ${path}`,
+          });
 
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              [serviceKey]: indexPattern.toSpec(),
-            }),
+            body: {
+              [serviceKey]: dataView.toSpec(),
+            },
           });
         })
       )

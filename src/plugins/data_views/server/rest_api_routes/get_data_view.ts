@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
@@ -17,6 +19,23 @@ import {
   SERVICE_KEY_LEGACY,
 } from '../constants';
 
+interface GetDataViewArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+  id: string;
+}
+
+export const getDataView = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+  id,
+}: GetDataViewArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  return dataViewsService.get(id);
+};
+
 const getDataViewRouteFactory =
   (path: string, serviceKey: string) =>
   (
@@ -24,7 +43,8 @@ const getDataViewRouteFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
     router.get(
       {
@@ -46,21 +66,27 @@ const getDataViewRouteFactory =
           const savedObjectsClient = ctx.core.savedObjects.client;
           const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
+          const dataViewsService = await dataViewsServiceFactory(
             savedObjectsClient,
             elasticsearchClient,
             req
           );
           const id = req.params.id;
-          const indexPattern = await indexPatternsService.get(id);
+
+          const dataView = await getDataView({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            id,
+          });
 
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              [serviceKey]: indexPattern.toSpec(),
-            }),
+            body: {
+              [serviceKey]: dataView.toSpec(),
+            },
           });
         })
       )

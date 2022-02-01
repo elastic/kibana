@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { schema } from '@kbn/config-schema';
-import { RuntimeField } from 'src/plugins/data_views/common';
+import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpec, runtimeFieldSpecTypeSchema } from '../util/schemas';
@@ -23,6 +24,45 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+import { responseFormatter } from './response_formatter';
+
+interface UpdateRuntimeFieldArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+  id: string;
+  name: string;
+  runtimeField: Partial<RuntimeField>;
+}
+
+export const updateRuntimeField = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+  id,
+  name,
+  runtimeField,
+}: UpdateRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
+  const existingRuntimeField = dataView.getRuntimeField(name);
+
+  if (!existingRuntimeField) {
+    throw new ErrorIndexPatternFieldNotFound(id, name);
+  }
+
+  dataView.removeRuntimeField(name);
+  dataView.addRuntimeField(name, {
+    ...existingRuntimeField,
+    ...runtimeField,
+  });
+
+  await dataViewsService.updateSavedObject(dataView);
+
+  const field = dataView.fields.getByName(name);
+  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
+  return { dataView, field };
+};
 
 const updateRuntimeFieldRouteFactory =
   (path: string, serviceKey: SERVICE_KEY_TYPE) =>
@@ -31,7 +71,8 @@ const updateRuntimeFieldRouteFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
     router.post(
       {
@@ -61,8 +102,8 @@ const updateRuntimeFieldRouteFactory =
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -71,39 +112,16 @@ const updateRuntimeFieldRouteFactory =
         const name = req.params.name;
         const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const indexPattern = await indexPatternsService.get(id);
-        const existingRuntimeField = indexPattern.getRuntimeField(name);
-
-        if (!existingRuntimeField) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
-
-        indexPattern.removeRuntimeField(name);
-        indexPattern.addRuntimeField(name, {
-          ...existingRuntimeField,
-          ...runtimeField,
+        const { dataView, field } = await updateRuntimeField({
+          dataViewsService,
+          usageCollection,
+          counterName: `${req.route.method} ${path}`,
+          id,
+          name,
+          runtimeField,
         });
 
-        await indexPatternsService.updateSavedObject(indexPattern);
-
-        const fieldObject = indexPattern.fields.getByName(name);
-        if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
-
-        const legacyResponse = {
-          body: {
-            field: fieldObject.toSpec(),
-            [serviceKey]: indexPattern.toSpec(),
-          },
-        };
-
-        const response = {
-          body: {
-            fields: [fieldObject.toSpec()],
-            [serviceKey]: indexPattern.toSpec(),
-          },
-        };
-
-        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
+        return res.ok(responseFormatter({ serviceKey, dataView, field }));
       })
     );
   };

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { DataViewsService } from 'src/plugins/data_views/common';
 import { schema } from '@kbn/config-schema';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
@@ -21,6 +23,38 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
 } from '../../constants';
+import { responseFormatter } from './response_formatter';
+
+interface GetRuntimeFieldArgs {
+  dataViewsService: DataViewsService;
+  usageCollection?: UsageCounter;
+  counterName: string;
+  id: string;
+  name: string;
+}
+
+export const getRuntimeField = async ({
+  dataViewsService,
+  usageCollection,
+  counterName,
+  id,
+  name,
+}: GetRuntimeFieldArgs) => {
+  usageCollection?.incrementCounter({ counterName });
+  const dataView = await dataViewsService.get(id);
+
+  const field = dataView.fields.getByName(name);
+
+  if (!field) {
+    throw new ErrorIndexPatternFieldNotFound(id, name);
+  }
+
+  if (!field.runtimeField) {
+    throw new Error('Only runtime fields can be retrieved.');
+  }
+
+  return { dataView, field };
+};
 
 const getRuntimeFieldRouteFactory =
   (path: string, serviceKey: SERVICE_KEY_TYPE) =>
@@ -29,7 +63,8 @@ const getRuntimeFieldRouteFactory =
     getStartServices: StartServicesAccessor<
       DataViewsServerPluginStartDependencies,
       DataViewsServerPluginStart
-    >
+    >,
+    usageCollection?: UsageCounter
   ) => {
     router.get(
       {
@@ -51,8 +86,8 @@ const getRuntimeFieldRouteFactory =
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req
@@ -60,33 +95,15 @@ const getRuntimeFieldRouteFactory =
         const id = req.params.id;
         const name = req.params.name;
 
-        const indexPattern = await indexPatternsService.get(id);
+        const { dataView, field } = await getRuntimeField({
+          dataViewsService,
+          usageCollection,
+          counterName: `${req.route.method} ${path}`,
+          id,
+          name,
+        });
 
-        const field = indexPattern.fields.getByName(name);
-
-        if (!field) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
-
-        if (!field.runtimeField) {
-          throw new Error('Only runtime fields can be retrieved.');
-        }
-
-        const legacyResponse = {
-          body: {
-            field: field.toSpec(),
-            runtimeField: indexPattern.getRuntimeField(name),
-          },
-        };
-
-        const response = {
-          body: {
-            fields: [field.toSpec()],
-            runtimeField: indexPattern.getRuntimeField(name),
-          },
-        };
-
-        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
+        return res.ok(responseFormatter({ serviceKey, dataView, field }));
       })
     );
   };
