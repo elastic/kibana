@@ -93,3 +93,5 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
+
+/x-pack/plugins/fleet/server/bundled_packages
