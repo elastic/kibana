@@ -34,7 +34,7 @@ import {
 type EditTransformFormFields =
   | 'description'
   | 'destinationIndex'
-  | 'destinationPipeline'
+  | 'destinationIngestPipeline'
   | 'frequency'
   | 'docsPerSecond'
   | 'maxPageSearchSize'
@@ -300,12 +300,17 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
 
     // dest.*
     destinationIndex: initializeField('destinationIndex', 'dest.index', config, {
-      dependsOn: ['destinationPipeline'],
+      dependsOn: ['destinationIngestPipeline'],
       isOptional: false,
     }),
-    destinationPipeline: initializeField('destinationPipeline', 'dest.pipeline', config, {
-      dependsOn: ['destinationIndex'],
-    }),
+    destinationIngestPipeline: initializeField(
+      'destinationIngestPipeline',
+      'dest.pipeline',
+      config,
+      {
+        dependsOn: ['destinationIndex'],
+      }
+    ),
 
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
