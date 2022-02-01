@@ -172,9 +172,7 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // In a future milestone we'll have a page dedicated to rule management in
-  // observability. For now link to the settings page.
-  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
+  const manageRulesHref = prepend('/app/observability/rules');
 
   const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
     return callObservabilityApi('GET /api/observability/rules/alerts/dynamic_index_pattern', {

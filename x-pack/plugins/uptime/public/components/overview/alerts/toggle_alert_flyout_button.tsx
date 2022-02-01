@@ -72,9 +72,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     name: (
       <EuiLink
         color="text"
-        href={kibana.services?.application?.getUrlForApp(
-          'management/insightsAndAlerting/triggersActions/alerts'
-        )}
+        href={kibana.services?.application?.getUrlForApp('observability/rules')}
       >
         <FormattedMessage
           id="xpack.uptime.navigateToAlertingButton.content"

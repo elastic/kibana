@@ -38,8 +38,8 @@ export const AlertDropdown = () => {
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const manageAlertsLinkProps = useLinkProps(
     {
-      app: 'management',
-      pathname: '/insightsAndAlerting/triggersActions/alerts',
+      app: 'observability',
+      pathname: '/rules',
     },
     {
       hrefOnly: true,

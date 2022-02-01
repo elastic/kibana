@@ -85,8 +85,8 @@ export const MetricsAlertDropdown = () => {
   );
 
   const manageAlertsLinkProps = useLinkProps({
-    app: 'management',
-    pathname: '/insightsAndAlerting/triggersActions/alerts',
+    app: 'observability',
+    pathname: '/rules',
   });
 
   const manageAlertsMenuItem = useMemo(

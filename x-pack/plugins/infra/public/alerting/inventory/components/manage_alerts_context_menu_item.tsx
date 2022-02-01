@@ -12,8 +12,8 @@ import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const ManageAlertsContextMenuItem = () => {
   const manageAlertsLinkProps = useLinkProps({
-    app: 'management',
-    pathname: '/insightsAndAlerting/triggersActions/alerts',
+    app: 'observability',
+    pathname: '/rules',
   });
   return (
     <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
