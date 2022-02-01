@@ -1003,6 +1003,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        totalHits: 0,
         warning: false,
         warningMessages: [],
       };
@@ -1023,6 +1024,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
+        totalHits: 0,
         warning: false,
         warningMessages: [],
       };
@@ -1341,6 +1343,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        totalHits: 0,
         warning: false,
         warningMessages: [],
       };
@@ -1356,6 +1359,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        totalHits: 5,
         warning: true,
         warningMessages: ['test warning'],
       });
@@ -1367,6 +1371,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        totalHits: 5,
         warning: true,
         warningMessages: ['test warning'],
       };
@@ -1387,6 +1392,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        totalHits: 0,
         warning: false,
         warningMessages: [],
       };
@@ -1405,6 +1411,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        totalHits: 0,
         warning: false,
         warningMessages: [],
       };
@@ -1461,6 +1468,7 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
+          totalHits: 3,
           warningMessages: ['warning1'],
         }),
         createSearchAfterReturnType({
@@ -1471,6 +1479,7 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
+          totalHits: 2,
           warningMessages: ['warning2'],
           warning: true,
         }),
@@ -1483,6 +1492,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
+        totalHits: 5,
         warning: true,
         warningMessages: ['warning1', 'warning2'],
       };

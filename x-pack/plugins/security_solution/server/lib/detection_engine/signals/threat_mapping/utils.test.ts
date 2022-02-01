@@ -58,6 +58,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -70,6 +71,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -86,6 +88,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -98,6 +101,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -114,6 +118,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -126,6 +131,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -142,6 +148,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -154,6 +161,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -175,6 +183,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: ['error 1', 'error 2', 'error 3'],
         warningMessages: [],
       };
@@ -187,6 +196,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
         warningMessages: [],
       };
@@ -299,6 +309,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -310,6 +321,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -326,6 +338,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -337,6 +350,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 0,
         createdSignals: [],
+        totalHits: 0,
         errors: [],
         warningMessages: [],
       };
@@ -348,6 +362,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -365,6 +380,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -376,6 +392,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
+        totalHits: 5,
         errors: [],
         warningMessages: [],
       };
@@ -387,6 +404,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
+        totalHits: 8,
         errors: [],
         warningMessages: [],
       };
@@ -399,6 +417,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
+        totalHits: 16,
         errors: [],
         warningMessages: [],
       };
@@ -416,6 +435,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -427,6 +447,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
+        totalHits: 5,
         errors: [],
         warningMessages: [],
       };
@@ -438,6 +459,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'),
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
+        totalHits: 8,
         errors: [],
         warningMessages: [],
       };
@@ -450,6 +472,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T04:34:32.390Z'), // max lastLookBackDate
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
+        totalHits: 16,
         errors: [],
         warningMessages: [],
       };
@@ -467,6 +490,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -478,6 +502,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
+        totalHits: 5,
         errors: [],
         warningMessages: [],
       };
@@ -489,6 +514,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         createdSignalsCount: 8,
         createdSignals: Array(8).fill(sampleSignalHit()),
+        totalHits: 8,
         errors: [],
         warningMessages: [],
       };
@@ -501,6 +527,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'), // max lastLookBackDate
         createdSignalsCount: 16, // all the signals counted together (8 + 5 + 3)
         createdSignals: Array(16).fill(sampleSignalHit()),
+        totalHits: 16,
         errors: [],
         warningMessages: [],
       };
@@ -518,6 +545,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -530,6 +558,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -546,6 +575,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -558,6 +588,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -574,6 +605,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -586,6 +618,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -602,6 +635,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -614,6 +648,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: [],
         warningMessages: [],
       };
@@ -635,6 +670,7 @@ describe('utils', () => {
         lastLookBackDate: undefined,
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: ['error 1', 'error 2', 'error 3'],
         warningMessages: [],
       };
@@ -647,6 +683,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
         createdSignalsCount: 3,
         createdSignals: Array(3).fill(sampleSignalHit()),
+        totalHits: 3,
         errors: ['error 4', 'error 1', 'error 3', 'error 5'],
         warningMessages: [],
       };

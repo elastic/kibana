@@ -26,25 +26,25 @@ export const EXECUTION_LOG_SEARCH_SCHEMA = {
       type: 'string',
     },
     'event.duration': {
-      type: 'string',
+      type: 'number',
     },
     message: {
       type: 'string',
     },
     'kibana.alert.rule.execution.metrics.total_alerts': {
-      type: 'string',
+      type: 'number',
     },
     'kibana.alert.rule.execution.metrics.total_hits': {
-      type: 'string',
+      type: 'number',
     },
     'kibana.alert.rule.execution.metrics.execution_gap_duration_s': {
-      type: 'string',
+      type: 'number',
     },
     'kibana.alert.rule.execution.metrics.total_indexing_duration_ms': {
-      type: 'string',
+      type: 'number',
     },
     'kibana.alert.rule.execution.metrics.total_search_duration_ms': {
-      type: 'string',
+      type: 'number',
     },
   },
 };

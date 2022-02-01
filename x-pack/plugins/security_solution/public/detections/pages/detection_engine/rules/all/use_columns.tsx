@@ -42,6 +42,7 @@ import { useHasMlPermissions } from './use_has_ml_permissions';
 import { getRulesTableActions } from './rules_table_actions';
 import { RuleStatusBadge } from '../../../../components/rules/rule_execution_status';
 import {
+  CountMetric,
   DurationMetric,
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
@@ -371,7 +372,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
             tooltipContent={i18n.COLUMN_TOTAL_HITS_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: CountMetric | undefined) => (
           <EuiText data-test-subj="total_hits" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -388,7 +389,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
             tooltipContent={i18n.COLUMN_TOTAL_ALERTS_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: CountMetric | undefined) => (
           <EuiText data-test-subj="total_alerts" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>

@@ -681,19 +681,36 @@ describe('Detections Rules API', () => {
     });
 
     test('calls API with correct parameters', async () => {
-      await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+      await fetchRuleExecutionEvents({
+        ruleId: '42',
+        start: 'now-30',
+        end: 'now',
+        filters: '',
+        signal: abortCtrl.signal,
+      });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/events',
         {
           method: 'GET',
+          query: {
+            end: 'now',
+            filters: '',
+            start: 'now-30',
+          },
           signal: abortCtrl.signal,
         }
       );
     });
 
     test('returns API response as is', async () => {
-      const response = await fetchRuleExecutionEvents({ ruleId: '42', signal: abortCtrl.signal });
+      const response = await fetchRuleExecutionEvents({
+        ruleId: '42',
+        start: 'now-30',
+        end: 'now',
+        filters: '',
+        signal: abortCtrl.signal,
+      });
       expect(response).toEqual(responseMock);
     });
   });

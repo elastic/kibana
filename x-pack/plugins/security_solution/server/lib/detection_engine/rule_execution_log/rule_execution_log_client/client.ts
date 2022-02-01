@@ -14,7 +14,7 @@ import { IRuleExecutionEventsReader } from '../rule_execution_events/events_read
 import { IRuleExecutionInfoSavedObjectsClient } from '../rule_execution_info/saved_objects_client';
 import { IRuleExecutionLogClient } from './client_interface';
 
-const MAX_LAST_FAILURES = 100;
+const MAX_LAST_FAILURES = 5;
 
 export const createRuleExecutionLogClient = (
   savedObjectsClient: IRuleExecutionInfoSavedObjectsClient,

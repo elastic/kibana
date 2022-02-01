@@ -43,7 +43,7 @@ export const UNKNOWN = i18n.translate(
 );
 
 export const RULE_EXECUTION_LOGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLogsTitle',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLogsTab',
   {
     defaultMessage: 'Rule execution logs ',
   }

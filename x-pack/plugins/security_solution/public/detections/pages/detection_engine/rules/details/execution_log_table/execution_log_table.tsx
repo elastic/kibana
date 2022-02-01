@@ -52,7 +52,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({ ruleId }
   const items = events?.events ?? [];
   const message = events?.message;
 
-  // Callback land
   const onTimeChangeCallback = useCallback(
     (props: OnTimeChangeProps) => {
       const recentlyUsedRange = recentlyUsedRanges.filter((range) => {

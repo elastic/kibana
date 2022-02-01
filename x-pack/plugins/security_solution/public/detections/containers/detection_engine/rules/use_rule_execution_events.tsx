@@ -31,7 +31,6 @@ export const useRuleExecutionEvents = ({
       return fetchRuleExecutionEvents({ ruleId, start, end, filters, signal });
     },
     {
-      refetchOnWindowFocus: false,
       onError: (e) => {
         addError(e, { title: i18n.RULE_EXECUTION_FETCH_FAILURE });
       },

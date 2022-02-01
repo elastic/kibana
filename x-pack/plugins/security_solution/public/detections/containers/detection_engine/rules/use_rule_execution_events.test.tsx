@@ -38,20 +38,31 @@ describe('useRuleExecutionEvents', () => {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
-    const { result, waitFor } = renderHook(() => useRuleExecutionEvents('some rule ID'), {
-      wrapper,
-    });
+    const { result, waitFor } = renderHook(
+      () =>
+        useRuleExecutionEvents({
+          ruleId: 'some rule ID',
+          start: 'now-30',
+          end: 'now',
+          filters: '',
+        }),
+      {
+        wrapper,
+      }
+    );
 
     await waitFor(() => result.current.isSuccess);
 
     expect(fetchRuleExecutionEvents).toHaveBeenCalledTimes(1);
     expect(result.current.isLoading).toEqual(false);
-    expect(result.current.data).toEqual([
-      {
-        date: '2021-12-29T10:42:59.996Z',
-        status: RuleExecutionStatus.succeeded,
-        message: 'Rule executed successfully',
-      },
-    ]);
+    expect(result.current.data).toEqual({
+      events: [
+        {
+          date: '2021-12-29T10:42:59.996Z',
+          status: RuleExecutionStatus.succeeded,
+          message: 'Rule executed successfully',
+        },
+      ],
+    });
   });
 });

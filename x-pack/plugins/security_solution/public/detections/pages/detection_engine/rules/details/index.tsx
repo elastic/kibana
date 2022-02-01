@@ -109,10 +109,10 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../components/rules/rule_execution_status';
-import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
+import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -229,7 +229,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
-  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.executionLogs);
+  const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
@@ -326,7 +326,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.exceptions);
     } else {
       setTabs(ruleDetailTabs);
-      setRuleDetailTab(RuleDetailTabs.executionLogs);
+      setRuleDetailTab(RuleDetailTabs.alerts);
     }
   }, [hasIndexRead]);
 
