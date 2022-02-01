@@ -38,7 +38,10 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
-import { ModelsList } from '../../../../trained_models/models_management/models_list';
+import {
+  ModelsList,
+  getDefaultModelsListState,
+} from '../../../../trained_models/models_management/models_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import type { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
@@ -79,6 +82,7 @@ const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) =
 function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | undefined): Tab[] {
   const [adPageState, updateAdPageState] = usePageState(getDefaultAnomalyDetectionJobsListState());
   const [dfaPageState, updateDfaPageState] = usePageState(getDefaultDFAListState());
+  const [modelListState, updateModelListState] = usePageState(getDefaultModelsListState());
 
   return useMemo(
     () => [
@@ -129,12 +133,24 @@ function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | und
         content: (
           <Fragment>
             <EuiSpacer size="m" />
-            <ModelsList isManagementTable={true} />
+            <ModelsList
+              isManagementTable={true}
+              pageState={modelListState}
+              updatePageState={updateModelListState}
+            />
           </Fragment>
         ),
       },
     ],
-    [isMlEnabledInSpace, adPageState, updateAdPageState, dfaPageState, updateDfaPageState]
+    [
+      isMlEnabledInSpace,
+      adPageState,
+      updateAdPageState,
+      dfaPageState,
+      updateDfaPageState,
+      modelListState,
+      updateModelListState,
+    ]
   );
 }
 

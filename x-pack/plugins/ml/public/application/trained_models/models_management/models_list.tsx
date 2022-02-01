@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
   SearchFilterConfig,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -76,9 +77,15 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
 
 interface Props {
   isManagementTable?: boolean;
+  pageState?: ListingPageUrlState;
+  updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-export const ModelsList: FC<Props> = ({ isManagementTable = false }) => {
+export const ModelsList: FC<Props> = ({
+  isManagementTable = false,
+  pageState: pageStateExternal,
+  updatePageState: updatePageStateExternal,
+}) => {
   const {
     services: {
       application: { navigateToUrl, capabilities },
@@ -93,10 +100,18 @@ export const ModelsList: FC<Props> = ({ isManagementTable = false }) => {
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
-  const [pageState, updatePageState] = usePageUrlState(
+  // allow for an internally controlled page state which stores the state in the URL
+  // or an external page state, which is passed in as a prop.
+  // external page state is used on the management page.
+  const [pageStateInternal, updatePageStateInternal] = usePageUrlState(
     ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );
+
+  const [pageState, updatePageState] =
+    pageStateExternal && updatePageStateExternal
+      ? [pageStateExternal, updatePageStateExternal]
+      : [pageStateInternal, updatePageStateInternal];
 
   const refresh = useRefresh();
 
@@ -611,7 +626,7 @@ export const ModelsList: FC<Props> = ({ isManagementTable = false }) => {
   if (isManagementTable) {
     columns.splice(columns.length - 1, 0, {
       field: ModelsTableToConfigMapping.id,
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.spacesLabel', {
         defaultMessage: 'Spaces',
       }),
       render: (id: string) => {
@@ -627,7 +642,7 @@ export const ModelsList: FC<Props> = ({ isManagementTable = false }) => {
         );
       },
       sortable: false,
-      'data-test-subj': 'mlModelsTableColumnCreatedAt',
+      'data-test-subj': 'mlModelsTableColumnSpacesLabel',
     });
   }
 
@@ -738,9 +753,16 @@ export const ModelsList: FC<Props> = ({ isManagementTable = false }) => {
       {isManagementTable ? null : <EuiSpacer size="m" />}
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats && (
-          <EuiFlexItem grow={false}>
-            <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+            </EuiFlexItem>
+            {isManagementTable ? (
+              <EuiFlexItem grow={false}>
+                <RefreshModelsListButton refresh={fetchModelsData} isLoading={isLoading} />
+              </EuiFlexItem>
+            ) : null}
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -778,5 +800,23 @@ export const ModelsList: FC<Props> = ({ isManagementTable = false }) => {
         />
       )}
     </>
+  );
+};
+
+export const RefreshModelsListButton: FC<{ refresh: () => void; isLoading: boolean }> = ({
+  refresh,
+  isLoading,
+}) => {
+  return (
+    <EuiButtonEmpty
+      data-test-subj={`mlTrainedModelsRefreshListButton${isLoading ? ' loading' : ' loaded'}`}
+      onClick={refresh}
+      isLoading={isLoading}
+    >
+      <FormattedMessage
+        id="xpack.ml.trainedModels.modelsList.refreshManagementList"
+        defaultMessage="Refresh"
+      />
+    </EuiButtonEmpty>
   );
 };
