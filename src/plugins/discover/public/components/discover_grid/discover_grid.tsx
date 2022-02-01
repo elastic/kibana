@@ -394,7 +394,7 @@ export const DiscoverGrid = ({
     onUpdateRowHeight,
   });
 
-  if (isLoading) {
+  if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
