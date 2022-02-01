@@ -131,99 +131,105 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('and has authorization to manage endpoint security', () => {
-      for (const apiCall of apiCalls) {
-        it(`should error on [${apiCall.method}] if invalid condition entry fields are used`, async () => {
-          const body = apiCall.getBody();
+      describe('should error on ', () => {
+        for (const apiCall of apiCalls) {
+          it(`[${apiCall.method}] if invalid condition entry fields are used`, async () => {
+            const body = apiCall.getBody();
 
-          body.entries[0].field = 'some.invalid.field';
+            body.entries[0].field = 'some.invalid.field';
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/expected value to equal \[destination.ip\]/));
-        });
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/expected value to equal \[destination.ip\]/));
+          });
 
-        it(`should error on [${apiCall.method}] if more than one entry`, async () => {
-          const body = apiCall.getBody();
+          it(`[${apiCall.method}] if more than one entry`, async () => {
+            const body = apiCall.getBody();
 
-          body.entries.push({ ...body.entries[0] });
+            body.entries.push({ ...body.entries[0] });
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/\[entries\]: array size is \[2\]/));
-        });
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/\[entries\]: array size is \[2\]/));
+          });
 
-        it(`should error on [${apiCall.method}] if an invalid ip is used`, async () => {
-          const body = apiCall.getBody();
+          it(`[${apiCall.method}] if an invalid ip is used`, async () => {
+            const body = apiCall.getBody();
 
-          body.entries = [
-            {
-              field: 'destination.ip',
-              operator: 'included',
-              type: 'match',
-              value: 'not.an.ip',
-            },
-          ];
+            body.entries = [
+              {
+                field: 'destination.ip',
+                operator: 'included',
+                type: 'match',
+                value: 'not.an.ip',
+              },
+            ];
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/invalid ip/));
-        });
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/invalid ip/));
+          });
 
-        it(`should work on [${apiCall.method}] and accept all OSs for os_types`, async () => {
-          const body = apiCall.getBody();
+          it(`[${apiCall.method}] if all OSs for os_types are not included`, async () => {
+            const body = apiCall.getBody();
 
-          body.os_types = ['linux', 'windows', 'macos'];
+            body.os_types = ['linux', 'windows'];
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(200);
-        });
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
+          });
 
-        it(`should not work on [${apiCall.method}] if all OSs for os_types are not included`, async () => {
-          const body = apiCall.getBody();
+          it(`[${apiCall.method}] if policy id is invalid`, async () => {
+            const body = apiCall.getBody();
 
-          body.os_types = ['linux', 'windows'];
+            body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError);
-          expect(anErrorMessageWith(/\[osTypes\]: array size is \[3\]/));
-        });
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/invalid policy ids/));
+          });
+        }
+      });
 
-        it(`should error on [${apiCall.method}] if policy id is invalid`, async () => {
-          const body = apiCall.getBody();
+      describe('should work on ', () => {
+        for (const apiCall of apiCalls) {
+          it(`[${apiCall.method}] if entry is valid`, async () => {
+            const body = apiCall.getBody();
 
-          body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+          });
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(400)
-            .expect(anEndpointArtifactError)
-            .expect(anErrorMessageWith(/invalid policy ids/));
-        });
+          it(`[${apiCall.method}] and accept all OSs for os_types`, async () => {
+            const body = apiCall.getBody();
 
-        it(`should work on [${apiCall.method}] if entry is valid`, async () => {
-          const body = apiCall.getBody();
+            body.os_types = ['linux', 'windows', 'macos'];
 
-          await supertest[apiCall.method](apiCall.path)
-            .set('kbn-xsrf', 'true')
-            .send(body)
-            .expect(200);
-        });
-      }
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+          });
+        }
+      });
     });
 
     describe(`and user (${USER}) DOES NOT have authorization to manage endpoint security`, () => {
