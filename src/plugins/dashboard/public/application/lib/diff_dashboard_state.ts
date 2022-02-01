@@ -60,14 +60,12 @@ export const diffDashboardState = async ({
   getEmbeddable: (id: string) => Promise<IEmbeddable>;
 }): Promise<Partial<DashboardState>> => {
   const {
-    controlGroupInput: originalControlGroupInput,
     options: originalOptions,
     filters: originalFilters,
     panels: originalPanels,
     ...commonCompareOriginal
   } = omit(originalState, stateKeystoIgnore);
   const {
-    controlGroupInput: newControlGroupInput,
     options: newOptions,
     filters: newFilters,
     panels: newPanels,
