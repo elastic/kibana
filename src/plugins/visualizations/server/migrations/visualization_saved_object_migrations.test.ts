@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAllMigrations, updatePieVisApi } from './visualization_saved_object_migrations';
+import { getAllMigrations } from './visualization_saved_object_migrations';
 import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
