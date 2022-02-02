@@ -84,17 +84,12 @@ describe('secrets validation', () => {
 });
 
 describe('config validation', () => {
-  const defaultValues: Record<string, string | null> = {
-    headers: null,
-  };
-
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
       hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
       ...config,
     });
   });
@@ -105,7 +100,6 @@ describe('config validation', () => {
       hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
       ...config,
     });
   });
@@ -121,49 +115,15 @@ describe('config validation', () => {
     );
   });
 
-  test('config validation passes when valid headers are provided', () => {
-    // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      hasAuth: true,
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
-  });
-
-  test('should validate and throw error when headers on config is invalid', () => {
-    const config: Record<string, string> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      headers: 'application/json',
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [headers]: types that failed validation:
-      - [headers.0]: could not parse record value from json input
-      - [headers.1]: expected value to equal [null]"
-    `);
-  });
-
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       hasAuth: true,
     };
 
     expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
       ...config,
     });
   });
@@ -183,9 +143,6 @@ describe('config validation', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     };
 
     expect(() => {
@@ -212,7 +169,7 @@ describe('params validation', () => {
     const params: Record<string, string> = {
       alertActionGroupName: 'Small t-shirt',
       alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
-      alertName: 'Test xMatters',
+      ruleName: 'Test xMatters',
       date: '2022-01-18T19:01:08.818Z',
       severity: 'high',
       spaceId: 'default',
@@ -239,7 +196,6 @@ describe('execute()', () => {
       status: 200,
       statusText: '',
       data: '',
-      headers: [],
       config: {},
     });
   });
@@ -247,9 +203,6 @@ describe('execute()', () => {
   test('execute with username/password sends request with basic auth', async () => {
     const config: ActionTypeConfigType = {
       url: 'https://abc.def/my-xmatters',
-      headers: {
-        aheader: 'a value',
-      },
       hasAuth: true,
     };
     await actionType.executor({
@@ -260,7 +213,7 @@ describe('execute()', () => {
       params: {
         alertActionGroupName: 'Small t-shirt',
         alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
-        alertName: 'Test xMatters',
+        ruleName: 'Test xMatters',
         date: '2022-01-18T19:01:08.818Z',
         severity: 'high',
         spaceId: 'default',
@@ -291,7 +244,7 @@ describe('execute()', () => {
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
-          "alertName": "Test xMatters",
+          "ruleName": "Test xMatters",
           "date": "2022-01-18T19:01:08.818Z",
           "severity": "high",
           "spaceId": "default",
@@ -329,9 +282,6 @@ describe('execute()', () => {
   test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
     const config: ActionTypeConfigType = {
       url: 'https://abc.def/my-xmatters',
-      headers: {
-        aheader: 'a value',
-      },
       hasAuth: true,
     };
     requestMock.mockReset();
@@ -348,7 +298,7 @@ describe('execute()', () => {
       params: {
         alertActionGroupName: 'Small t-shirt',
         alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
-        alertName: 'Test xMatters',
+        ruleName: 'Test xMatters',
         date: '2022-01-18T19:01:08.818Z',
         severity: 'high',
         spaceId: 'default',
@@ -363,9 +313,6 @@ describe('execute()', () => {
   test('execute without username/password sends request without basic auth', async () => {
     const config: ActionTypeConfigType = {
       url: 'https://abc.def/my-xmatters',
-      headers: {
-        aheader: 'a value',
-      },
       hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = { user: null, password: null };
@@ -377,7 +324,7 @@ describe('execute()', () => {
       params: {
         alertActionGroupName: 'Small t-shirt',
         alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
-        alertName: 'Test xMatters',
+        ruleName: 'Test xMatters',
         date: '2022-01-18T19:01:08.818Z',
         severity: 'high',
         spaceId: 'default',
@@ -404,7 +351,7 @@ describe('execute()', () => {
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
-          "alertName": "Test xMatters",
+          "ruleName": "Test xMatters",
           "date": "2022-01-18T19:01:08.818Z",
           "severity": "high",
           "spaceId": "default",

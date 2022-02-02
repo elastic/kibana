@@ -144,7 +144,7 @@ export interface XmattersActionParams {
   alertActionGroupName: string;
   alertId: string;
   alertInstanceId: string;
-  alertName: string;
+  ruleName: string;
   date: string;
   severity: XmattersSeverityOptions;
   spaceId: string;
@@ -153,7 +153,6 @@ export interface XmattersActionParams {
 
 export interface XmattersConfig {
   url: string;
-  headers: Record<string, string>;
   hasAuth: boolean;
 }
 

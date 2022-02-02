@@ -56,7 +56,7 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   alertActionGroupName: schema.nullable(schema.string()),
   alertId: schema.nullable(schema.string()),
-  alertName: schema.maybe(schema.string()),
+  ruleName: schema.maybe(schema.string()),
   date: schema.maybe(schema.string()),
   severity: schema.maybe(schema.string()),
   spaceId: schema.maybe(schema.string()),
@@ -283,7 +283,7 @@ function retryResultSeconds(
 interface XmattersPayload {
   alertActionGroupName: string;
   alertId: string;
-  alertName?: string;
+  ruleName?: string;
   date?: string;
   severity?: string;
   spaceId?: string;
@@ -294,7 +294,7 @@ function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
   const data: XmattersPayload = {
     alertActionGroupName: params.alertActionGroupName,
     alertId: params.alertId,
-    alertName: params.alertName,
+    ruleName: params.ruleName,
     date: params.date,
     severity: params.severity || 'High',
     spaceId: params.spaceId,

@@ -86,10 +86,10 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="xmattersAlertName"
+            id="xmattersRuleName"
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.alertName',
+              'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.ruleName',
               {
                 defaultMessage: 'Rule name',
               }
@@ -99,8 +99,8 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
               index={index}
               editAction={editAction}
               messageVariables={messageVariables}
-              paramsProperty={'alertName'}
-              inputTargetValue={actionParams.alertName}
+              paramsProperty={'ruleName'}
+              inputTargetValue={actionParams.ruleName}
             />
           </EuiFormRow>
         </EuiFlexItem>

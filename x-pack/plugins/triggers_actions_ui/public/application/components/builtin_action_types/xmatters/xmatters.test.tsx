@@ -156,10 +156,9 @@ describe('xmatters connector validation', () => {
 describe('xmatters action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      alertActionGroup: 'small',
       alertActionGroupName: 'Small t-shirt',
       alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
-      alertName: 'Test xMatters',
+      ruleName: 'Test xMatters',
       date: '2022-01-18T19:01:08.818Z',
       severity: 'high',
       spaceId: 'default',
@@ -173,10 +172,9 @@ describe('xmatters action params validation', () => {
 
   test('params validation fails when alertActionGroupName and alertId are not valid', async () => {
     const actionParams = {
-      alertActionGroup: 'small',
       alertActionGroupName: null,
       alertId: null,
-      alertName: 'Test xMatters',
+      ruleName: 'Test xMatters',
       date: '2022-01-18T19:01:08.818Z',
       severity: 'high',
       spaceId: 'default',

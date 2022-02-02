@@ -51,7 +51,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           connector_type_id: '.xmatters',
           config: {
             url: xmattersSimulatorURL,
-            headers: null,
             hasAuth: false,
           },
         })
@@ -65,7 +64,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         is_missing_secrets: false,
         config: {
           url: xmattersSimulatorURL,
-          headers: null,
           hasAuth: false,
         },
       });
@@ -86,7 +84,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           },
           config: {
             url: xmattersSimulatorURL,
-            headers: null,
             hasAuth: true,
           },
         })
@@ -100,7 +97,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         is_missing_secrets: false,
         config: {
           url: xmattersSimulatorURL,
-          headers: null,
           hasAuth: true,
         },
       });
@@ -139,7 +135,6 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           connector_type_id: '.xmatters',
           config: {
             url: xmattersSimulatorURL,
-            headers: null,
             hasAuth: false,
           },
           secrets: {
