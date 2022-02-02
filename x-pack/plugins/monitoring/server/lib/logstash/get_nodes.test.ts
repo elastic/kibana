@@ -23,13 +23,12 @@ jest.mock('../../static_globals', () => ({
 
 describe('getNodes', () => {
   it('ensures collapse key is present query responses', async () => {
-    const response = {};
-
     const configs: { [key: string]: number } = { 'monitoring.ui.max_bucket_size': 10000 };
     const config = {
       get: jest.fn().mockImplementation((key: string) => configs[key]),
     };
 
+    const response = {};
     const callWithRequest = jest.fn().mockResolvedValue(response);
 
     const req = {
