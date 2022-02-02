@@ -8,11 +8,16 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
-import { HostIsolationExceptionsValidator } from '../validators/host_isolation_exceptions_validator';
+import {
+  TrustedAppValidator,
+  HostIsolationExceptionsValidator,
+  EventFilterValidator,
+} from '../validators';
 
+type ValidatorCallback = ExceptionsListPreGetOneItemServerExtension['callback'];
 export const getExceptionsPreGetOneHandler = (
   endpointAppContextService: EndpointAppContextService
-): ExceptionsListPreGetOneItemServerExtension['callback'] => {
+): ValidatorCallback => {
   return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
@@ -29,13 +34,26 @@ export const getExceptionsPreGetOneHandler = (
       return data;
     }
 
+    const listId = exceptionItem.list_id;
+
+    // Validate Trusted Applications
+    if (TrustedAppValidator.isTrustedApp({ listId })) {
+      await new TrustedAppValidator(endpointAppContextService, request).validatePreGetOneItem();
+      return data;
+    }
+
     // validate Host Isolation Exception
-    if (HostIsolationExceptionsValidator.isHostIsolationException(exceptionItem.list_id)) {
+    if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
       ).validatePreGetOneItem();
+      return data;
+    }
 
+    // Event Filters Exception
+    if (EventFilterValidator.isEventFilter({ listId })) {
+      await new EventFilterValidator(endpointAppContextService, request).validatePreGetOneItem();
       return data;
     }
 

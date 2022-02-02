@@ -29,13 +29,13 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getBySel(value: string): Chainable<any>;
+      getBySel(value: string, ...args: any[]): Chainable<any>;
     }
   }
 }
 
 function getBySel(selector: string, ...args: any[]) {
-  return cy.get(`[data-test-subj=${selector}]`, ...args);
+  return cy.get(`[data-test-subj="${selector}"]`, ...args);
 }
 
 Cypress.Commands.add('getBySel', getBySel);
