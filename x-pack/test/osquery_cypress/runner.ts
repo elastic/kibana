@@ -12,16 +12,16 @@ import { withProcRunner } from '@kbn/dev-utils';
 
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { 
-  //AgentManager,
-  AgentManagerParams } from './agent';
+import {
+  // AgentManager,
+  AgentManagerParams,
+} from './agent';
 import { FleetManager } from './fleet_server';
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
   runner: (runnerEnv: Record<string, string>) => Promise<void>
 ) {
-
   const log = getService('log');
   const config = getService('config');
 

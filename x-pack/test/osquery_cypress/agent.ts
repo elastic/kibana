@@ -17,7 +17,6 @@ export interface AgentManagerParams {
   kibanaUrl: string;
   esHost: string;
   esPort: string;
-
 }
 
 export class AgentManager extends Manager {

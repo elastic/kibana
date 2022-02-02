@@ -68,7 +68,7 @@ export class FleetManager extends Manager {
           '--env',
           `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
           '--env',
-          `FLEET_SERVER_POLICY=${policyId}`,          
+          `FLEET_SERVER_POLICY=${policyId}`,
           '--rm',
           artifact,
         ];
