@@ -14,5 +14,5 @@ export function registerTraceEventsTopNStackTracesSearchRoute(
   router: IRouter<DataRequestHandlerContext>
 ) {
   const paths = getRemoteRoutePaths();
-  return queryTopNCommon(router, paths.TopNTraces, 'TraceHash');
+  return queryTopNCommon(router, paths.TopNTraces, 'StackTraceID');
 }

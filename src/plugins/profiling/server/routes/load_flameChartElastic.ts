@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import { getLocalRoutePaths } from '../../common';
+import { getLocalRoutePaths, timeRangeFromRequest } from '../../common';
 import { mapFlamechart } from './mappings';
 
 export function registerFlameChartElasticRoute(router: IRouter<DataRequestHandlerContext>) {
@@ -26,10 +26,8 @@ export function registerFlameChartElasticRoute(router: IRouter<DataRequestHandle
       },
     },
    async (ctx, request, response) => {
-      const timeFrom = parseInt(request.query.timeFrom);
-      const timeTo = parseInt(request.query.timeTo);
-      const seconds = timeTo - timeFrom;
-      const src = await import(`../fixtures/flamechart_${seconds}`);
+      const [timeFrom, timeTo] = timeRangeFromRequest(request);
+      const src = await import(`../fixtures/flamechart_${timeTo - timeFrom}`);
       delete src.default;
       return response.ok({ body: mapFlamechart(src) });
     }

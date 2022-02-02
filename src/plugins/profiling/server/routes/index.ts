@@ -41,7 +41,7 @@ export function getDocID(hi: bigint, lo: bigint) {
   return btoa(bin.join('')).replace('+', '-').replace('/', '_');
 }
 
-export function getOtherDocID(hi: bigint, lo: bigint, other: bigint) {
+export function getOtherDocID(hi: bigint, lo: bigint, other: bigint): string {
   let hex = hi.toString(16);
   const hexLo = lo.toString(16);
   const hexOther = other.toString(16);

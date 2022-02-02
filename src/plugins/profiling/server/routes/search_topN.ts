@@ -96,7 +96,7 @@ export function queryTopNCommon(
           )
           .toPromise();
 
-        if (searchField === 'TraceHash') {
+        if (searchField === 'StackTraceID') {
           const docIDs: string[] = [];
           resTopNStackTraces.rawResponse.aggregations.histogram.buckets.forEach((timeInterval) => {
             timeInterval.group_by.buckets.forEach((stackTraceItem: any) => {
