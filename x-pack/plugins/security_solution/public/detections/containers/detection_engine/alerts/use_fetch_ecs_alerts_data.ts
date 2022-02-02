@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash';
 
@@ -25,10 +25,11 @@ export const useFetchEcsAlertsData = ({
 }): { isLoading: boolean | null; alertsEcsData: Ecs[] | null } => {
   const [isLoading, setIsLoading] = useState<boolean | null>(null);
   const [alertsEcsData, setAlertEcsData] = useState<Ecs[] | null>(null);
+  const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
     let isSubscribed = true;
-    const abortCtrl = new AbortController();
+    const controller = abortCtrl.current;
 
     const fetchAlert = async () => {
       try {
@@ -72,7 +73,7 @@ export const useFetchEcsAlertsData = ({
 
     return (): void => {
       isSubscribed = false;
-      abortCtrl.abort();
+      controller.abort();
     };
   }, [alertIds, onError, skip]);
 

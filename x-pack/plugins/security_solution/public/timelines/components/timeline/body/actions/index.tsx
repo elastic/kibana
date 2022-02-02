@@ -169,6 +169,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             key="investigate-in-timeline"
             alertIds={alertIds}
             ecsRowData={ecsData}
+            timelineId={timelineId}
           />
         )}
 
