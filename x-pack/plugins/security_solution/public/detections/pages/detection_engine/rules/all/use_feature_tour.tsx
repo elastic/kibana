@@ -6,7 +6,7 @@
  */
 
 import { noop } from 'lodash';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 
 import { useEuiTour, EuiStatelessTourStep } from '@elastic/eui';
 import * as i18n from '../translations';
@@ -43,18 +43,16 @@ const STORAGE_KEY = 'securitySolutionFeatureTour';
 
 export const useFeatureTour = () => {
   const { storage } = useKibana().services;
+  const initialStore = useMemo(() => storage.get(STORAGE_KEY) ?? tourConfig, [storage]);
 
-  const [steps, actions, reducerState] = useEuiTour(
-    featuresTourSteps,
-    storage.get(STORAGE_KEY) ?? tourConfig
-  );
+  const [steps, actions, reducerState] = useEuiTour(featuresTourSteps, initialStore);
+
+  const finishTour = useCallback(() => actions.finishTour(), [actions]);
+  const goToNextStep = useCallback(() => actions.incrementStep(), [actions]);
 
   useEffect(() => {
     storage.set(STORAGE_KEY, reducerState);
   }, [reducerState, storage]);
-
-  const finishTour = useCallback(() => actions.finishTour(), [actions]);
-  const goToNextStep = useCallback(() => actions.incrementStep(), [actions]);
 
   return {
     steps: {
