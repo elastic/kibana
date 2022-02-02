@@ -26,7 +26,7 @@ export { runTests, startServers } from './functional_tests/tasks';
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
 export type { CreateTestEsClusterOptions, EsTestCluster, ICluster } from './es';
-export { esTestConfig, createTestEsCluster, convertToKibanaClient } from './es';
+export { esTestConfig, createTestEsCluster } from './es';
 
 export {
   kbnTestConfig,
