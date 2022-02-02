@@ -9,7 +9,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { TimeseriesVisData } from '../../../../common/types';
+import type { TimeseriesVisData, Panel, Series } from '../../../../common/types';
+import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import { isTimerangeModeEnabled } from '../../../../common/check_ui_restrictions';
 import { FormValidationContext } from '../../contexts/form_validation_context';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelModelContext } from '../../contexts/panel_model_context';
@@ -37,6 +39,13 @@ interface FormValidationResults {
 const checkModelValidity = (validationResults: FormValidationResults) =>
   Object.values(validationResults).every((isValid) => isValid);
 
+const switchTimeRangeMode = (model: Panel | Series) => {
+  model.time_range_mode =
+    model.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+      ? TIME_RANGE_DATA_MODES.LAST_VALUE
+      : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
+};
+
 export function PanelConfig(props: PanelConfigProps) {
   const { model, onChange } = props;
   const Component = panelConfigTypes[model.type];
@@ -50,6 +59,34 @@ export function PanelConfig(props: PanelConfigProps) {
 
     return () => visDataSubscription.unsubscribe();
   }, [model.id, props.visData$]);
+
+  // we should update time range mode after we got uiRestrictions
+  // as default time range mode can be not compatible with data
+  useEffect(() => {
+    if (visData.uiRestrictions) {
+      const localModel = { ...model };
+      let isTimeRangeModeChanged = false;
+      if (
+        localModel.time_range_mode &&
+        !isTimerangeModeEnabled(localModel.time_range_mode, visData.uiRestrictions)
+      ) {
+        isTimeRangeModeChanged = true;
+        switchTimeRangeMode(localModel);
+      }
+      localModel.series.forEach((series) => {
+        if (
+          series.time_range_mode &&
+          !isTimerangeModeEnabled(series.time_range_mode, visData.uiRestrictions)
+        ) {
+          isTimeRangeModeChanged = true;
+          switchTimeRangeMode(series);
+        }
+      });
+      if (isTimeRangeModeChanged) {
+        onChange(localModel);
+      }
+    }
+  }, [model.time_range_mode, model.series, visData.uiRestrictions]);
 
   const updateControlValidity = useCallback(
     (controlKey: string, isControlValid: boolean) => {
