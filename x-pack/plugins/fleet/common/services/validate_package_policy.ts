@@ -147,7 +147,6 @@ export const validatePackagePolicy = (
                   defaultMessage: '{inputKey} has no vars in policy template',
                   values: {
                     inputKey,
-                    name,
                   },
                 }),
               ]
