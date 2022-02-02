@@ -125,6 +125,7 @@ filegroup(
       "//packages/kbn-server-http-tools:build_types",
       "//packages/kbn-server-route-repository:build_types",
       "//packages/kbn-std:build_types",
+      "//packages/kbn-storybook:build_types",
       "//packages/kbn-telemetry-tools:build_types",
       "//packages/kbn-test:build_types",
       "//packages/kbn-test-jest-helpers:build_types",
