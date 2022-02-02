@@ -69,6 +69,7 @@ export function OverviewPage({ routeParams }: Props) {
                   rangeTo={relativeTime.end}
                   refreshInterval={refreshInterval}
                   refreshPaused={refreshPaused}
+                  onTimeRangeRefresh={() => {}}
                 />,
               ],
             }
