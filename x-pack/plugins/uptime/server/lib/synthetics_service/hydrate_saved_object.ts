@@ -39,11 +39,9 @@ export const hydrateSavedObjects = async ({
       .map((monitor) => {
         let url = '';
         esDocs.forEach((doc) => {
-          if (
-            doc.config_id === monitor.id &&
-            doc.url?.full &&
-            moment(monitor.updated_at) < moment(doc['@timestamp'])
-          ) {
+          // to make sure the document is ingested after the latest update of the monitor
+          const diff = moment(monitor.updated_at).diff(moment(doc.timestamp), 'minutes');
+          if (doc.config_id === monitor.id && doc.url?.full && diff > 1) {
             url = doc.url?.full;
           }
         });
@@ -100,5 +98,7 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
     },
   });
 
-  return data.body.hits.hits.map((hit) => hit._source as Ping);
+  return data.body.hits.hits.map(
+    ({ _source: doc }) => ({ ...(doc as any), timestamp: (doc as any)['@timestamp'] } as Ping)
+  );
 };
