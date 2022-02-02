@@ -45,6 +45,7 @@ import { GenericComboBox } from '../filter_bar/filter_editor/generic_combo_box';
 import { PhraseValueInput } from '../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
+import { SavedQueryMeta } from '../saved_query_form';
 
 import { IIndexPattern, IFieldType } from '../..';
 
@@ -89,6 +90,7 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride,
   savedQueryManagement,
   initialAddFilterMode,
+  saveFilters,
 }: {
   onSubmit: (filters: Filter[]) => void;
   onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
@@ -100,6 +102,7 @@ export function AddFilterModal({
   timeRangeForSuggestionsOverride?: boolean;
   savedQueryManagement?: JSX.Element;
   initialAddFilterMode?: string;
+  saveFilters: (savedQueryMeta: SavedQueryMeta) => void;
 }) {
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
@@ -264,6 +267,9 @@ export function AddFilterModal({
   };
 
   const renderParamsEditor = (localFilterIndex: number) => {
+    if (!selectedIndexPattern) {
+      return null;
+    }
     const selectedOperator = localFilters.filter(
       (localFilter) => localFilter.id === localFilterIndex
     )[0]?.operator;
@@ -363,6 +369,13 @@ export function AddFilterModal({
         $state.store
       );
       onSubmit([builtCustomFilter]);
+      saveFilters({
+        title: customLabel,
+        description: '',
+        shouldIncludeFilters: false,
+        shouldIncludeTimefilter: false,
+        filters: [builtCustomFilter],
+      });
     } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
       const builtFilters = localFilters.map((localFilter) => {
         if (localFilter.field && localFilter.operator) {
@@ -384,6 +397,15 @@ export function AddFilterModal({
         ) as Filter[];
         // onSubmit(finalFilters);
         onMultipleFiltersSubmit(localFilters, finalFilters);
+        if (alias) {
+          saveFilters({
+            title: customLabel,
+            description: '',
+            shouldIncludeFilters: false,
+            shouldIncludeTimefilter: false,
+            filters: finalFilters,
+          });
+        }
       }
     } else if (addFilterMode === 'saved_filters') {
       applySavedQueries();

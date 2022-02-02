@@ -38,6 +38,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
 import { SavedQuery } from '../..';
 import { AddFilterModal, FilterGroup } from './add_filter_modal';
+import { SavedQueryMeta } from '../saved_query_form';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -49,6 +50,7 @@ const QueryStringInput = withKibana(QueryStringInputUI);
 // @internal
 export interface QueryBarTopRowProps {
   filters: Filter[];
+  multipleFilters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   onMultipleFiltersUpdated?: (filters: Filter[]) => void;
   applySelectedSavedQueries?: () => void;
@@ -85,6 +87,7 @@ export interface QueryBarTopRowProps {
   toggleAddFilterModal?: (value: boolean) => void;
   isAddFilterModalOpen?: boolean;
   addFilterMode?: string;
+  onNewFiltersSave: (savedQueryMeta: SavedQueryMeta) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -394,18 +397,30 @@ export const QueryBarTopRow = React.memo(
     }
 
     function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+      const lastFilter: any = props.multipleFilters[props.multipleFilters.length - 1];
       const mappedFilters = mapAndFlattenFilters(buildFilters);
+      if (lastFilter !== undefined) lastFilter.relationship = 'AND';
       const mergedFilters = mappedFilters.map((filter, idx) => {
+        let groupId = selectedFilters[idx].groupId;
+        let id = selectedFilters[idx].id;
+        // groupId starts from 1; id starts from 0
+
+        if (lastFilter !== undefined) {
+          groupId += lastFilter.groupId;
+          id += lastFilter.id + 1;
+        }
+
         return {
           ...filter,
-          groupId: selectedFilters[idx].groupId,
-          id: selectedFilters[idx].id,
+          groupId,
+          id,
           relationship: selectedFilters[idx].relationship,
           subGroupId: selectedFilters[idx].subGroupId,
         };
       });
       props.toggleAddFilterModal?.(false);
-      props?.onMultipleFiltersUpdated?.(mergedFilters);
+      props?.onMultipleFiltersUpdated?.([...props.multipleFilters, ...mergedFilters]);
+      // props?.onMultipleFiltersUpdated?.(mergedFilters);
 
       const filters = [...props.filters, ...buildFilters];
       props?.onFiltersUpdated?.(filters);
@@ -448,6 +463,7 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               savedQueryManagement={props.savedQueryManagement}
               initialAddFilterMode={props.addFilterMode}
+              saveFilters={props.onNewFiltersSave}
             />
           )}
         </EuiFlexItem>

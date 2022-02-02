@@ -6,36 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { groupBy, isEqual } from 'lodash';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import {
-  buildEmptyFilter,
-  Filter,
-  // enableFilter,
-  // disableFilter,
-  // pinFilter,
-  // toggleFilterDisabled,
-  toggleFilterNegated,
-  // unpinFilter,
-} from '@kbn/es-query';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { Filter, toggleFilterNegated } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-// import { FilterOptions } from './filter_options';
+import { FilterItem } from './filter_item';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
 import type { SavedQuery } from '../../query';
 import { SavedQueriesItem } from './saved_queries_item';
 import { FilterExpressionItem } from './filter_expression_item';
 
-import { UI_SETTINGS } from '../../../common';
 import { EditFilterModal } from '../query_string_input/edit_filter_modal';
 import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { FilterGroup } from '../query_string_input/edit_filter_modal';
+import { SavedQueryMeta } from '../saved_query_form';
+import { SavedQueryService } from '../..';
 
 interface Props {
   filters: Filter[];
@@ -52,6 +42,9 @@ interface Props {
   toggleEditFilterModal: (value: boolean) => void;
   isEditFilterModalOpen?: boolean;
   editFilterMode?: string;
+  savedQueryService: SavedQueryService;
+  onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  onFilterBadgeSave: (groupId: number, alias: string) => void;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -151,7 +144,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderMultipleFilters() {
-    const firstDepthGroupedFilters = groupBy(props.multipleFilters, 'groupId');
+    const groupedByAlias = groupBy(props.multipleFilters, 'meta.alias');
+    const filtersWithoutLabel = groupedByAlias.null || groupedByAlias.undefined;
+    const labels = Object.keys(groupedByAlias).filter(
+      (key) => key !== 'null' && key !== 'undefined'
+    );
+
+    const firstDepthGroupedFilters = groupBy(filtersWithoutLabel, 'groupId');
     const GroupBadge: JSX.Element[] = [];
     for (const [groupId, groupedFilters] of Object.entries(firstDepthGroupedFilters)) {
       const badge = (
@@ -164,10 +163,34 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
           onEditFilterClick={onEditFilterClick}
+          savedQueryService={props.savedQueryService}
+          onFilterSave={props.onFilterSave}
+          onFilterBadgeSave={props.onFilterBadgeSave}
         />
       );
       GroupBadge.push(badge);
     }
+
+    let groupId: string;
+    labels.map((label) => {
+      // we should have same groupIds on our labeled filters group
+      groupId = (groupedByAlias[label][0] as any).groupId;
+      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = groupId));
+      const labelBadge = (
+        <FilterExpressionItem
+          groupId={groupId}
+          groupedFilters={groupedByAlias[label]}
+          indexPatterns={props?.indexPatterns}
+          onClick={() => { }}
+          onRemove={onRemoveFilterGroup}
+          onUpdate={onUpdateFilterGroup}
+          filtersGroupsCount={1}
+          customLabel={label}
+        />
+      );
+      GroupBadge.push(labelBadge);
+    });
+
     return GroupBadge;
   }
 

@@ -7,9 +7,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiHorizontalRule,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DiscoverServices } from '../../../../build_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DataView } from '../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
@@ -17,10 +23,6 @@ export interface DiscoverIndexPatternManagementProps {
    * Currently selected index pattern
    */
   selectedIndexPattern?: DataView;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
   /**
    * Read from the Fields API
    */
@@ -30,11 +32,16 @@ export interface DiscoverIndexPatternManagementProps {
    * @param fieldName
    */
   editField: (fieldName?: string) => void;
+
+  /**
+   * Callback to execute on create new data action
+   */
+  createNewDataView: () => void;
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const { dataViewFieldEditor, core } = props.services;
-  const { useNewFieldsApi, selectedIndexPattern, editField } = props;
+  const { dataViewFieldEditor, core } = useDiscoverServices();
+  const { useNewFieldsApi, selectedIndexPattern, editField, createNewDataView } = props;
   const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);

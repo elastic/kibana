@@ -40,7 +40,6 @@ import type { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../.
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
-// import { FilterOptions } from '../filter_bar/filter_options';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { FilterSetMenu } from '../saved_query_management/filter_set_menu';
@@ -270,7 +269,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       query: this.state.query,
     };
 
-    if (savedQueryMeta.shouldIncludeFilters) {
+    if (savedQueryMeta.filters !== undefined) {
+      savedQueryAttributes.filters = savedQueryMeta.filters;
+    } else {
       savedQueryAttributes.filters = this.props.filters;
     }
 
@@ -312,7 +313,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         openFilterSetPopover: false,
       });
 
-      if (this.props.onSaved) {
+      if (!savedQueryMeta.filters && this.props.onSaved) {
         this.props.onSaved(response);
       }
     } catch (error) {
@@ -385,6 +386,21 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public onMultipleFiltersUpdated = (filters: Filter[]) => {
     this.setState({ multipleFilters: filters });
     // console.dir(filters);
+  };
+
+  public onFilterBadgeSave = (groupId: number, alias: string) => {
+    const multipleFilters = this.state.multipleFilters.map((filter: any) => {
+      if (Number(filter.groupId) === groupId)
+        return {
+          ...filter,
+          meta: {
+            ...filter.meta,
+            alias,
+          },
+        };
+      return filter;
+    });
+    this.setState({ multipleFilters });
   };
 
   public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
@@ -600,6 +616,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
+          multipleFilters={this.state.multipleFilters}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
@@ -642,6 +659,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           toggleAddFilterModal={this.toggleAddFilterModal}
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
+          onNewFiltersSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
         />
       );
     }
@@ -709,6 +727,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             toggleEditFilterModal={this.toggleEditFilterModal}
             isEditFilterModalOpen={this.state.isEditFilterModalOpen}
             editFilterMode={this.state.editFilterMode}
+            savedQueryService={this.savedQueryService}
+            onFilterSave={this.onSave}
+            onFilterBadgeSave={this.onFilterBadgeSave}
           />
         </div>
       );
