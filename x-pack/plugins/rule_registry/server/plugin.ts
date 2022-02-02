@@ -17,6 +17,10 @@ import {
 
 import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SecurityPluginSetup } from '../../security/server';
+import {
+  PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+} from '../../../../src/plugins/data/server';
 
 import { RuleRegistryPluginConfig } from './config';
 import { IRuleDataService, RuleDataService } from './rule_data_plugin_service';
@@ -24,13 +28,16 @@ import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
+import { ruleRegistrySearchStrategyProvider } from './search_strategy';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
+  data: DataPluginSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
   alerting: AlertingStart;
+  data: DataPluginStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
@@ -94,6 +101,18 @@ export class RuleRegistryPlugin
     });
 
     this.ruleDataService.initializeService();
+
+    core.getStartServices().then(([_, depsStart]) => {
+      const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
+        depsStart.data,
+        this.ruleDataService!
+      );
+
+      plugins.data.search.registerSearchStrategy(
+        'ruleRegistrySearchStrategy',
+        ruleRegistrySearchStrategy
+      );
+    });
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();

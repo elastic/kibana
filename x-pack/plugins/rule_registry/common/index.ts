@@ -4,4 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { parseTechnicalFields } from './parse_technical_fields';
+export { ParsedTechnicalFields, parseTechnicalFields } from './parse_technical_fields';
+export { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from './search_strategy';
