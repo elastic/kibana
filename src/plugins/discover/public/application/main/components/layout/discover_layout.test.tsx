@@ -21,6 +21,7 @@ import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_patte
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
+  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
@@ -67,6 +68,11 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     fetchStatus: FetchStatus.COMPLETE,
     result: esHits as ElasticSearchHit[],
   }) as DataDocuments$;
+
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -127,6 +133,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     documents$,
     totalHits$,
     charts$,
+    availableFields$,
   };
 
   const props = {
