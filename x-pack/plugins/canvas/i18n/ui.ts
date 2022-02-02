@@ -717,6 +717,68 @@ export const ModelStrings = {
         defaultMessage: 'Specifies whether or not the X-axis title is visible',
       }),
   },
+  PartitionLabels: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.parititionLabels.title', {
+        defaultMessage: 'Configure chart labels',
+      }),
+    getShowDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.showTitle', {
+        defaultMessage: 'Show labels',
+      }),
+    getShowHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.showDisplayName', {
+        defaultMessage: 'Show labels in a chart',
+      }),
+    getPositionDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.positionDisplayName', {
+        defaultMessage: 'Defines the label position',
+      }),
+    getPositionHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.positionTitle', {
+        defaultMessage: 'Defines the label position',
+      }),
+    getPositionDefaultOption: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.positionDefaultOption', {
+        defaultMessage: 'Default',
+      }),
+    getPositionInsideOption: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.positionInsideOption', {
+        defaultMessage: 'Inside',
+      }),
+    getValuesDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesDisplayName', {
+        defaultMessage: 'Show values in labels',
+      }),
+    getValuesHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesHelp', {
+        defaultMessage: 'Show values in labels',
+      }),
+    getPercentDecimalsDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.percentDecimalsDisplayName', {
+        defaultMessage: 'Percent decimals in in labels',
+      }),
+    getPercentDecimalsHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.percentDecimalsHelp', {
+        defaultMessage: 'Defines the number of decimals that will appear on the values as percent',
+      }),
+    getValuesFormatDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatDisplayName', {
+        defaultMessage: 'Defines the format of the values',
+      }),
+    getValuesFormatHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatHelp', {
+        defaultMessage: 'Defines the format of the values',
+      }),
+    getValuesFormatPercentOption: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatDisplayName', {
+        defaultMessage: 'Percent',
+      }),
+    getValuesFormatValueOption: () =>
+      i18n.translate('xpack.canvas.uis.models.partitionLabels.args.valuesFormatHelp', {
+        defaultMessage: 'Value',
+      }),
+  },
 };
 
 export const TransformStrings = {
@@ -1567,21 +1629,164 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.pieVisTitle', {
         defaultMessage: '(New) Pie Visualization',
       }),
+  },
+  PartitionVis: {
     getMetricColumnDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.pieVis.args.metricDisplayName', {
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.metricDisplayName', {
         defaultMessage: 'Metric',
       }),
     getMetricColumnHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.pieVis.args.metricHelp', {
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.metricHelp', {
         defaultMessage: 'Metric dimension configuration',
       }),
     getBucketColumnDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.views.pieVis.args.bucketDisplayName', {
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.bucketDisplayName', {
         defaultMessage: 'Bucket',
       }),
     getBucketColumnHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.pieVis.args.bucketHelp', {
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.bucketHelp', {
         defaultMessage: 'Bucket dimension configuration',
+      }),
+    getSplitRowDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.splitRowDisplayName', {
+        defaultMessage: 'Split row',
+      }),
+    getSplitRowHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.splitRowHelp', {
+        defaultMessage: 'Split row dimension configuration',
+      }),
+    getSplitColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.splitColumnDisplayName', {
+        defaultMessage: 'Split column',
+      }),
+    getSplitColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.splitColumnHelp', {
+        defaultMessage: 'Split column dimension configuration',
+      }),
+    getAddTooltipDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.addTooltipDisplayName', {
+        defaultMessage: 'Show tooltip',
+      }),
+    getAddTooltipHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.addTooltipHelp', {
+        defaultMessage: 'Show tooltip on hover',
+      }),
+    getLegendPositionDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTitle', {
+        defaultMessage: 'Legend Position',
+      }),
+    getLegendPositionHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionLabel', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
+    getLegendPositionTopOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTopLabel', {
+        defaultMessage: 'Top',
+      }),
+    getLegendPositionBottomOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionBottomLabel', {
+        defaultMessage: 'Bottom',
+      }),
+    getLegendPositionLeftOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionLeftLabel', {
+        defaultMessage: 'Left',
+      }),
+    getLegendPositionRightOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionRightLabel', {
+        defaultMessage: 'Right',
+      }),
+    getLegendDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayTitle', {
+        defaultMessage: 'Legend visibility mode',
+      }),
+    getLegendDisplayHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayLabel', {
+        defaultMessage: 'Specifies the legend visibility.',
+      }),
+    getLegendDisplayDefaultOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayDefaultLabel', {
+        defaultMessage: 'Default',
+      }),
+    getLegendDisplayShowOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayShowLabel', {
+        defaultMessage: 'Show',
+      }),
+    getLegendDisplayHideOption: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayHideLabel', {
+        defaultMessage: 'Hide',
+      }),
+    getNestedLegendDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendDisplayName', {
+        defaultMessage: 'A detailed legend',
+      }),
+    getNestedLegendHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendHelp', {
+        defaultMessage: 'Show a more detailed legend',
+      }),
+    getTruncateLegendDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendDisplayName', {
+        defaultMessage: 'Truncate legend',
+      }),
+    getTruncateLegendHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendHelp', {
+        defaultMessage: 'Defines if the legend items will be truncated or not',
+      }),
+    getMaxLegendLinesDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.maxLegendLinesDisplayName', {
+        defaultMessage: 'Maximum legend lines',
+      }),
+    getMaxLegendLinesHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.maxLegendLinesHelp', {
+        defaultMessage: 'Defines the number of lines per legend item',
+      }),
+    getDistictColorsDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsDisplayName', {
+        defaultMessage: 'Enable distinct colors',
+      }),
+    getDistictColorsHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsHelp', {
+        defaultMessage:
+          'Maps different color per slice. Slices with the same value have the same color',
+      }),
+    getRespectSourceOrderDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderDisplayName', {
+        defaultMessage: 'Save a source order of the data',
+      }),
+    getRespectSourceOrderHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderHelp', {
+        defaultMessage: 'Save a source order of the data',
+      }),
+    getIsDonutDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutDisplayName', {
+        defaultMessage: 'Donut',
+      }),
+    getIsDonutHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutHelp', {
+        defaultMessage: 'Enable donut view',
+      }),
+    getEmptySizeRatioDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioDisplayName', {
+        defaultMessage: 'Size of the donut hole',
+      }),
+    getEmptySizeRatioHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
+        defaultMessage: 'Size of the donut hole',
+      }),
+    getStartFromSecondLargestSliceDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioDisplayName', {
+        defaultMessage: 'Starts placement with the second largest slice',
+      }),
+    getStartFromSecondLargestSliceHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
+        defaultMessage: 'Starts placement with the second largest slice',
+      }),
+    getLabelsDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.labelsDisplayName', {
+        defaultMessage: 'Labels configuration',
+      }),
+    getLabelsHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.labelsHelp', {
+        defaultMessage: 'Set up labels configuration',
       }),
   },
 };

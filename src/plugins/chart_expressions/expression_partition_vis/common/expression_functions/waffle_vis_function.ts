@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
@@ -15,7 +16,7 @@ import {
   PARTITION_VIS_RENDERER_NAME,
   WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
-import { strings } from './i18n';
+import { errors, strings } from './i18n';
 
 export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   name: WAFFLE_VIS_EXPRESSION_NAME,
@@ -56,6 +57,8 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     legendPosition: {
       types: ['string'],
       help: strings.getLegendPositionArgHelp(),
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      default: Position.Right,
     },
     truncateLegend: {
       types: ['boolean'],
@@ -94,6 +97,10 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
         splitRow: args.splitRow,
       },
     };
+
+    if (!Object.values(Position).includes(args.legendPosition)) {
+      throw new Error(errors.invalidLegendPositionError(args.legendPosition));
+    }
 
     if (handlers?.inspectorAdapters?.tables) {
       const logTable = prepareLogTable(context, [

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
@@ -57,6 +58,8 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
     legendPosition: {
       types: ['string'],
       help: strings.getLegendPositionArgHelp(),
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      default: Position.Right,
     },
     nestedLegend: {
       types: ['boolean'],
@@ -87,6 +90,10 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
     const maxSupportedBuckets = 2;
     if ((args.buckets ?? []).length > maxSupportedBuckets) {
       throw new Error(errors.moreThanNBucketsAreNotSupportedError(maxSupportedBuckets));
+    }
+
+    if (!Object.values(Position).includes(args.legendPosition)) {
+      throw new Error(errors.invalidLegendPositionError(args.legendPosition));
     }
 
     const visConfig: PartitionVisParams = {

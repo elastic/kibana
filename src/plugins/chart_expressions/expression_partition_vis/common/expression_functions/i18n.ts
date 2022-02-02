@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
 export const strings = {
@@ -115,7 +116,13 @@ export const strings = {
 export const errors = {
   moreThanNBucketsAreNotSupportedError: (maxLength: number) =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.moreThenNumberBuckets', {
-      defaultMessage: 'More than {maxLength} buckets are not supported',
+      defaultMessage: 'More than {maxLength} buckets are not supported.',
       values: { maxLength },
+    }),
+  invalidLegendPositionError: (legendPosition: string) =>
+    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendPosition', {
+      defaultMessage:
+        "Invalid legend position: '{legendPosition}'. Supported values: {legendPositions}.",
+      values: { legendPosition, legendPositions: Object.values(Position).join(', ') },
     }),
 };
