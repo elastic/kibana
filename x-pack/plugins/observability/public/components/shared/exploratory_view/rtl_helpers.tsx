@@ -44,8 +44,10 @@ import * as useValuesListHook from '../../../hooks/use_values_list';
 import dataViewData from './configurations/test_data/test_data_view.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import type { DataView } from '../../../../../../../src/plugins/data_views/common';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
+import type {
+  DataView,
+  DataViewsContract,
+} from '../../../../../../../src/plugins/data_views/common';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
@@ -148,12 +150,12 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   core,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const indexPattern = mockDataView;
+  const dataView = mockDataView;
 
   setIndexPatterns({
-    ...[indexPattern],
-    get: async () => indexPattern,
-  } as unknown as IndexPatternsContract);
+    ...[dataView],
+    get: async () => dataView,
+  } as unknown as DataViewsContract);
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
