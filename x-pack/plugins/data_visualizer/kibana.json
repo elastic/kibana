@@ -30,7 +30,8 @@
     "esUiShared",
     "fieldFormats",
     "uiActions",
-    "cloud"
+    "cloud",
+    "lens"
   ],
   "owner": {
     "name": "Machine Learning UI",

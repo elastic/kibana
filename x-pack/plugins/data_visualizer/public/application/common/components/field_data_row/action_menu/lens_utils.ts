@@ -19,6 +19,7 @@ import type {
 } from '../../../../../../../lens/public';
 import { FieldVisConfig } from '../../stats_table/types';
 import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
+import { DOCUMENT_FIELD_NAME } from '../../../../../../../lens/common/constants';
 
 interface ColumnsAndLayer {
   columns: Record<string, GenericIndexPatternColumn>;
@@ -52,7 +53,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
         label: COUNT,
         dataType: 'number',
         isBucketed: false,
-        sourceField: 'Records',
+        sourceField: DOCUMENT_FIELD_NAME,
         operationType: 'count',
       },
     };
@@ -107,7 +108,7 @@ export function getDateSettings(item: FieldVisConfig) {
       label: COUNT,
       operationType: 'count',
       scale: 'ratio',
-      sourceField: 'Records',
+      sourceField: DOCUMENT_FIELD_NAME,
     },
     col1: {
       dataType: 'date',
@@ -148,7 +149,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
       label: COUNT,
       dataType: 'number',
       isBucketed: false,
-      sourceField: 'Records',
+      sourceField: DOCUMENT_FIELD_NAME,
       operationType: 'count',
     },
   };
@@ -181,7 +182,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
       label: COUNT,
       dataType: 'number',
       isBucketed: false,
-      sourceField: 'Records',
+      sourceField: DOCUMENT_FIELD_NAME,
       operationType: 'count',
     },
   };
