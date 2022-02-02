@@ -172,7 +172,7 @@ export function App({
           return actions.confirm(
             i18n.translate('xpack.lens.app.goBackModal.message', {
               defaultMessage:
-                'The changes you have made here are not backwards compatible with your original {contextOriginatingApp}. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+                'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
               values: { contextOriginatingApp },
             }),
             i18n.translate('xpack.lens.app.goBackModal.title', {
