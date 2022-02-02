@@ -43,7 +43,7 @@ describe.each([
     clients.rulesClient.create.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // creation succeeds
-    clients.ruleExecutionLogClient.getExecutionSummary.mockResolvedValue(
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
       getRuleExecutionSummarySucceeded()
     );
 

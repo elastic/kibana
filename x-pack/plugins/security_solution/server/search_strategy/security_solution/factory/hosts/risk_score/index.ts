@@ -14,9 +14,17 @@ import {
 import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildHostsRiskScoreQuery } from './query.hosts_risk.dsl';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
+import { getTotalCount } from '../../cti/event_enrichment/helpers';
 
 export const riskScore: SecuritySolutionFactory<HostsQueries.hostsRiskScore> = {
-  buildDsl: (options: HostsRiskScoreRequestOptions) => buildHostsRiskScoreQuery(options),
+  buildDsl: (options: HostsRiskScoreRequestOptions) => {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
+
+    return buildHostsRiskScoreQuery(options);
+  },
   parse: async (
     options: HostsRiskScoreRequestOptions,
     response: IEsSearchResponse<unknown>
@@ -25,9 +33,12 @@ export const riskScore: SecuritySolutionFactory<HostsQueries.hostsRiskScore> = {
       dsl: [inspectStringifyObject(buildHostsRiskScoreQuery(options))],
     };
 
+    const totalCount = getTotalCount(response.rawResponse.hits.total);
+
     return {
       ...response,
       inspect,
+      totalCount,
     };
   },
 };
