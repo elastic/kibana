@@ -29,6 +29,7 @@ export const AlertAttributesExcludedFromAAD = [
   'updatedBy',
   'updatedAt',
   'executionStatus',
+  'monitoring',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -41,7 +42,8 @@ export type AlertAttributesExcludedFromAADType =
   | 'mutedInstanceIds'
   | 'updatedBy'
   | 'updatedAt'
-  | 'executionStatus';
+  | 'executionStatus'
+  | 'monitoring';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

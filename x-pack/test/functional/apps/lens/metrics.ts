@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should change the color of the metric when tweaking the values in the panel', async () => {
       await PageObjects.lens.openPalettePanel('lnsMetric');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_1', '21000', {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_1', '21000', {
         clearWithKeyboard: true,
       });
       await PageObjects.lens.waitForVisualization();
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should change the color when reverting the palette', async () => {
-      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverse');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(204, 86, 66)');

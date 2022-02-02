@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
+import {
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../common/alerting/metrics';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 
 export const METRICS_FEATURE = {

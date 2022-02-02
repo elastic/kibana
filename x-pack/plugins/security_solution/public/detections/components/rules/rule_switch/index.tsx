@@ -17,10 +17,12 @@ import styled from 'styled-components';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { enableRules, RulesTableAction } from '../../../containers/detection_engine/rules';
+import { enableRules } from '../../../containers/detection_engine/rules';
 import { enableRulesAction } from '../../../pages/detection_engine/rules/all/actions';
 import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
 import { bucketRulesResponse } from '../../../pages/detection_engine/rules/all/helpers';
+import { useRulesTableContextOptional } from '../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useInvalidateRules } from '../../../containers/detection_engine/rules/rules_table/use_find_rules';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -32,7 +34,6 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface RuleSwitchProps {
-  dispatch?: React.Dispatch<RulesTableAction>;
   id: string;
   enabled: boolean;
   isDisabled?: boolean;
@@ -45,7 +46,6 @@ export interface RuleSwitchProps {
  * Basic switch component for displaying loader when enabled/disabled
  */
 export const RuleSwitchComponent = ({
-  dispatch,
   id,
   isDisabled,
   isLoading,
@@ -56,12 +56,19 @@ export const RuleSwitchComponent = ({
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
   const [, dispatchToaster] = useStateToaster();
+  const rulesTableContext = useRulesTableContextOptional();
+  const invalidateRules = useInvalidateRules();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
-      if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked, dispatch, dispatchToaster);
+      if (rulesTableContext != null) {
+        await enableRulesAction(
+          [id],
+          event.target.checked,
+          dispatchToaster,
+          rulesTableContext.actions.setLoadingRules
+        );
       } else {
         const enabling = event.target.checked;
         const title = enabling
@@ -94,10 +101,10 @@ export const RuleSwitchComponent = ({
           displayErrorToast(title, err.message, dispatchToaster);
         }
       }
+      invalidateRules();
       setMyIsLoading(false);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dispatch, id]
+    [dispatchToaster, id, invalidateRules, onChange, rulesTableContext]
   );
 
   useEffect(() => {

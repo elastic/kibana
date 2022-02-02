@@ -93,7 +93,7 @@ export class HomePublicPlugin
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
-          indexPatternService: dataViews,
+          dataViewsService: dataViews,
           environmentService: this.environmentService,
           urlForwarding: urlForwardingStart,
           homeConfig: this.initializerContext.config.get(),
@@ -167,6 +167,7 @@ export interface HomePublicPluginSetup {
 
   environment: EnvironmentSetup;
 }
+
 export interface HomePublicPluginStart {
   featureCatalogue: FeatureCatalogueRegistry;
 }

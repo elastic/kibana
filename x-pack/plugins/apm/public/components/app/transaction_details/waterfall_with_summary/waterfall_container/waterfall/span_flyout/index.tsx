@@ -34,7 +34,7 @@ import { DurationSummaryItem } from '../../../../../../shared/summary/duration_s
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { SyncBadge } from '../sync_badge';
+import { SyncBadge } from '../badge/sync_badge';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 import { FailureBadge } from '../failure_badge';
@@ -211,7 +211,7 @@ export function SpanFlyout({
 
                 <FailureBadge outcome={span.event?.outcome} />
 
-                <SyncBadge sync={span.span.sync} />
+                <SyncBadge sync={span.span.sync} agentName={span.agent.name} />
               </ContainerWithMarginRight>,
             ]}
           />

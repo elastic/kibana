@@ -108,7 +108,7 @@ export const rolesManagementApp = Object.freeze({
                 license={license}
                 docLinks={docLinks}
                 uiCapabilities={application.capabilities}
-                indexPatterns={dataViews}
+                dataViews={dataViews}
                 history={history}
                 spacesApiUi={spacesApiUi}
               />

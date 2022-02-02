@@ -9,10 +9,11 @@ import { Logger } from 'kibana/server';
 
 import type {
   ExtensionPoint,
-  ExtensionPointCallbackArgument,
+  ExtensionPointCallbackDataArgument,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
   NarrowExtensionPointToType,
+  ServerExtensionCallbackContext,
 } from './types';
 import { ExtensionPointError } from './errors';
 
@@ -38,6 +39,7 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
    *
    * @param extensionType
    * @param initialCallbackInput The initial argument given to the first extension point callback
+   * @param callbackContext
    * @param callbackResponseValidator A function to validate the returned data from an extension point callback
    */
   async pipeRun<
@@ -46,9 +48,10 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
     P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
-    initialCallbackInput: P[0],
-    callbackResponseValidator?: (data: P[0]) => Error | undefined
-  ): Promise<P[0]> {
+    initialCallbackInput: P[0]['data'],
+    callbackContext: ServerExtensionCallbackContext,
+    callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
+  ): Promise<P[0]['data']> {
     let inputArgument = initialCallbackInput;
     const externalExtensions = this.get(extensionType);
 
@@ -60,26 +63,17 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
       const extensionRegistrationSource =
         this.storage.getExtensionRegistrationSource(externalExtension);
 
-      try {
-        inputArgument = await externalExtension.callback(
-          inputArgument as ExtensionPointCallbackArgument
-        );
-      } catch (error) {
-        // Log the error that the external callback threw and keep going with the running of others
-        this.logger?.error(
-          new ExtensionPointError(
-            `Extension point execution error for ${externalExtension.type}: ${extensionRegistrationSource}`,
-            error
-          )
-        );
-      }
+      inputArgument = await externalExtension.callback({
+        context: callbackContext,
+        data: inputArgument as ExtensionPointCallbackDataArgument,
+      });
 
       if (callbackResponseValidator) {
         // Before calling the next one, make sure the returned payload is valid
         const validationError = callbackResponseValidator(inputArgument);
 
         if (validationError) {
-          this.logger?.error(
+          this.logger.error(
             new ExtensionPointError(
               `Extension point for ${externalExtension.type} returned data that failed validation: ${extensionRegistrationSource}`,
               {
