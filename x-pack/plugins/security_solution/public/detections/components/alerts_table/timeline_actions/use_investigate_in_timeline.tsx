@@ -27,12 +27,14 @@ interface UseInvestigateInTimelineActionProps {
   nonEcsRowData?: TimelineNonEcsData[];
   alertIds?: string[] | null | undefined;
   onInvestigateInTimelineAlertClick?: () => void;
+  timelineId?: string;
 }
 
 export const useInvestigateInTimeline = ({
   ecsRowData,
   alertIds,
   onInvestigateInTimelineAlertClick,
+  timelineId,
 }: UseInvestigateInTimelineActionProps) => {
   const {
     data: { search: searchStrategyClient, query },
@@ -78,7 +80,7 @@ export const useInvestigateInTimeline = ({
   const showInvestigateInTimelineAction = alertIds != null;
   const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
     alertIds,
-    skip: alertIds == null,
+    skip: alertIds == null || timelineId !== undefined,
   });
 
   const investigateInTimelineAlertClick = useCallback(async () => {

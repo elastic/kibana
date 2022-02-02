@@ -248,6 +248,9 @@ export function calculateStop(
   oldInterval: number,
   newInterval: number
 ) {
+  if (oldInterval === 0) {
+    return newInterval + newMin;
+  }
   return roundValue(newMin + ((stopValue - oldMin) * newInterval) / oldInterval);
 }
 

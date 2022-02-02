@@ -14,8 +14,7 @@ exports[`Title it renders 1`] = `
         Test title
       </TruncatableText>
     </TitleWrapper>
-     
-    <StyledEuiBetaBadge
+    <EuiBetaBadge
       label="Beta"
       tooltipContent="Test tooltip"
       tooltipPosition="bottom"
