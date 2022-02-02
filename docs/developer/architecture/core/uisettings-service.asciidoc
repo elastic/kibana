@@ -3,14 +3,68 @@
 
 NOTE: The UI settings service is available both server and client side.
 
-=== Server side usage
+=== Overview
 
-The program interface to <<advanced-options, UI settings>>.
-It makes it possible for Kibana plugins to extend Kibana UI Settings Management with custom settings.
+UI settings are configurable from the Advanced Settings page in Management and control the behavior of {kib}. `uiSettings` are stored in a `config` saved object and, as such, conform to the same conditions as other saved objects.
+
+There are several ways to configure an advanced setting:
+
+- Through the <<advanced-options, Advanced Settings UI>> (security restrictions apply)
+- Locked via kibana.yml's {kib-repo}blob/{branch}/src/core/server/ui_settings/ui_settings_defaults_client.ts[uiSettings.overrides.<key>]
+- Through the client-side `uiSettings` Service
+- Through the server-side `uiSettings` Service
+
+When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and will prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
+
+The `uiSettings` service is the programming interface to {kib} <<advanced-options, Advanced Settings UI>>. {kib} plugins use the service to extend Kibana UI Settings Management with custom settings for their plugin.
+
+=== Client side usage
+
+On the client, the `uiSettings` service is exposed directly from `core`.
+
+Users can adjust the settings via Management Advanced Settings UI. The client-side {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.iuisettingsclient.md[`uiSettings` client] provides plugins access to the `config` entries stored in elasticsearch.
+
+In the interest of performance, `uiSettings` are cached. Any changes that require cache refreshes (or for whatever other reason) should register an instruction to reload the page when settings are configured in Advanced Settings using the `requiresPageReload` parameter.
 
 See:
 
-- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
+- {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.uisettingsparams.md[UiSettings parameters defined by plugins]
+
+[source,typescript]
+----
+import { CoreSetup, Plugin } from 'src/core/public';
+
+export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart> {
+  public setup(core: CoreSetup): MyPluginSetup {
+    …
+    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
+      if (key === 'custom') {
+        // do something with changes...
+        myPluginService.register({
+          …
+        })
+      }
+    });
+    …
+  }
+  
+  public start(core: CoreStart): MyPluginStart {
+    return {
+      …
+      settings: {
+        getCustomValue: () => core.uiSettings.get('custom'),
+        …
+      },
+    };
+  }
+}
+
+----
+
+=== Server side usage
+On the server, `uiSettings` are exposed directly from `core`.
+
+The following example shows how to register a new `uiSetting` that will surface a `Custom` setting with a default value of '42'.
 
 [source,typescript]
 ----
@@ -38,3 +92,66 @@ export class MyPlugin implements Plugin {
 }
 
 ----
+
+Registeration only requires a schema for validation on read and write, all {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsparams.md[other parameters] are optional.
+
+See:
+
+- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
+
+==== Migrations
+Because `uiSettings` are persisted in the `config` saved object, changing or removing a setting requires a migration of the whole saved object. For example, if we wanted to remove the `custom` setting in the example above and then also rename `my_setting:fourtyTwo` to `my_other_setting:fourtyTwo`, we'd have two migration entries, one for each change targeting the required versions:
+[source,typescript]
+----
+export const migrations = {
+  ...
+  '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+  ...doc,
+  ...(doc.attributes && {
+    attributes: Object.keys(doc.attributes).reduce(
+      (acc, key) =>
+        [ // other settings to remove for 8.1.0...
+          // owner: Team:Custom setting team owner
+          'custom',
+        ].includes(key)
+          ? {
+              ...acc,
+            }
+          : {
+              ...acc,
+              [key]: doc.attributes[key],
+            },
+      {}
+    ),
+  }),
+  references: doc.references || [],
+  }),
+  '8.2.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          key.startsWith('my_setting:')
+            ? {
+                ...acc,
+                [key.replace('my_setting', 'my_other_setting')]: doc.attributes[key],
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
+  …
+}
+----
+{kib-repo}blob/{branch}/src/core/server/ui_settings/saved_objects/migrations.ts[`uiSettings` migrations] are declared directly in the `uiSettings` service.
+
+==== Security-related consideration
+Configuration through the Advanced settings UI is restricted to users authorised to access the Advanced Settings page. Users who don't have permissions to change these values default to using the settings configured to the space they are in.
+Config saved objects can be shared between spaces.
+
+
