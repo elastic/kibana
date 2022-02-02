@@ -103,7 +103,7 @@ export function FilterValueButton({
       anchorPosition="rightCenter"
       time={series.time}
       asCombobox={false}
-      indexPatternTitle={dataViews[series.dataType]?.title}
+      dataViewTitle={dataViews[series.dataType]?.title}
     />
   ) : (
     button

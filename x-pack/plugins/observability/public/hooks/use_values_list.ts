@@ -17,7 +17,7 @@ export interface Props {
   sourceField: string;
   label: string;
   query?: string;
-  indexPatternTitle?: string;
+  dataViewTitle?: string;
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
@@ -59,7 +59,7 @@ const getIncludeClause = (sourceField: string, query?: string) => {
 
 export const useValuesList = ({
   sourceField,
-  indexPatternTitle,
+  dataViewTitle,
   query = '',
   filters,
   time,
@@ -91,7 +91,7 @@ export const useValuesList = ({
 
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: indexPatternTitle!,
+      index: dataViewTitle!,
       body: {
         query: {
           bool: {
@@ -135,7 +135,7 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField],
+    [debouncedQuery, from, to, JSON.stringify(filters), dataViewTitle, sourceField],
     { name: `get${label.replace(/\s/g, '')}ValuesList` }
   );
 
