@@ -44,6 +44,7 @@ import {
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useCatchRuntimeFieldError } from '../../common/hooks/useCatchRuntimeFieldError';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -208,6 +209,7 @@ export const useTimelineEvents = ({
     updatedAt: 0,
   });
   const { addError, addWarning } = useAppToasts();
+  const { catchRuntimeFieldError } = useCatchRuntimeFieldError();
 
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
@@ -265,6 +267,7 @@ export const useTimelineEvents = ({
             },
             error: (msg) => {
               setLoading(false);
+              catchRuntimeFieldError(msg.err);
               addError(msg, {
                 title: i18n.FAIL_TIMELINE_EVENTS,
               });
@@ -323,6 +326,7 @@ export const useTimelineEvents = ({
       data.search,
       setUpdated,
       addWarning,
+      catchRuntimeFieldError,
       addError,
       refetchGrid,
       wrappedLoadPage,

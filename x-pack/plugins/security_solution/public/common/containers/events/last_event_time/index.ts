@@ -26,6 +26,7 @@ import {
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useCatchRuntimeFieldError } from '../../../hooks/useCatchRuntimeFieldError';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
@@ -67,6 +68,7 @@ export const useTimelineLastEventTime = ({
       errorMessage: undefined,
     });
   const { addError, addWarning } = useAppToasts();
+  const { catchRuntimeFieldError } = useCatchRuntimeFieldError();
 
   const timelineLastEventTimeSearch = useCallback(
     (request: TimelineEventsLastEventTimeRequestOptions) => {
@@ -99,6 +101,7 @@ export const useTimelineLastEventTime = ({
             },
             error: (msg) => {
               setLoading(false);
+              catchRuntimeFieldError(msg.err);
               addError(msg, {
                 title: i18n.FAIL_LAST_EVENT_TIME,
               });
@@ -114,7 +117,7 @@ export const useTimelineLastEventTime = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addWarning, catchRuntimeFieldError, addError]
   );
 
   useEffect(() => {

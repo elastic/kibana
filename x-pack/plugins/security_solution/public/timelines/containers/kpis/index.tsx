@@ -22,6 +22,7 @@ import {
 import { ESQuery } from '../../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useCatchRuntimeFieldError } from '../../../common/hooks/useCatchRuntimeFieldError';
 import * as i18n from './translations';
 
 export interface UseTimelineKpiProps {
@@ -50,6 +51,7 @@ export const useTimelineKpis = ({
   const [timelineKpiResponse, setTimelineKpiResponse] =
     useState<TimelineKpiStrategyResponse | null>(null);
   const { addError, addWarning } = useAppToasts();
+  const { catchRuntimeFieldError } = useCatchRuntimeFieldError();
 
   const timelineKpiSearch = useCallback(
     (request: TimelineKpiStrategyRequest | null) => {
@@ -79,6 +81,7 @@ export const useTimelineKpis = ({
             },
             error: (msg) => {
               setLoading(false);
+              catchRuntimeFieldError(msg.err);
               addError(msg, { title: i18n.FAIL_TIMELINE_KPI_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
             },
@@ -89,7 +92,7 @@ export const useTimelineKpis = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning]
+    [data.search, addWarning, catchRuntimeFieldError, addError]
   );
 
   useEffect(() => {

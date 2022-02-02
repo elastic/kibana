@@ -25,6 +25,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { EntityType } from '../../../../../timelines/common';
 import { Ecs } from '../../../../common/ecs';
+import { useCatchRuntimeFieldError } from '../../../common/hooks/useCatchRuntimeFieldError';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -61,6 +62,7 @@ export const useTimelineEventsDetails = ({
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
     useState<TimelineEventsDetailsRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();
+  const { catchRuntimeFieldError } = useCatchRuntimeFieldError();
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
     useState<EventsArgs['detailsData']>(null);
@@ -102,6 +104,7 @@ export const useTimelineEventsDetails = ({
             },
             error: (msg) => {
               setLoading(false);
+              catchRuntimeFieldError(msg.err);
               addError(msg, { title: i18n.FAIL_TIMELINE_SEARCH_DETAILS });
               searchSubscription$.current.unsubscribe();
             },
@@ -112,7 +115,7 @@ export const useTimelineEventsDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [skip, data.search, addWarning, catchRuntimeFieldError, addError]
   );
 
   useEffect(() => {
