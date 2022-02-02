@@ -44,13 +44,14 @@ const STORAGE_KEY = 'securitySolutionFeatureTour';
 export const useFeatureTour = () => {
   const { storage } = useKibana().services;
 
-  const state = storage.get(STORAGE_KEY) ?? tourConfig;
-
-  const [steps, actions, reducerState] = useEuiTour(featuresTourSteps, state);
+  const [steps, actions, reducerState] = useEuiTour(
+    featuresTourSteps,
+    storage.get(STORAGE_KEY) ?? tourConfig
+  );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reducerState));
-  }, [reducerState]);
+    storage.set(STORAGE_KEY, reducerState);
+  }, [reducerState, storage]);
 
   const finishTour = useCallback(() => actions.finishTour(), [actions]);
   const goToNextStep = useCallback(() => actions.incrementStep(), [actions]);
