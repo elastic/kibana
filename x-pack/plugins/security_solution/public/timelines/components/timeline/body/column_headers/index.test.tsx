@@ -255,15 +255,12 @@ describe('ColumnHeaders', () => {
     });
   });
 
-  describe('hiding', () => {
-    beforeEach(() => {
-      mockUseCreateFieldButton.mockClear();
-    });
-
-    test('Calls closeEditor ref function when the timeline is closed', () => {
+  describe('Fields', () => {
+    test('Closes field editor when the timeline is closed', () => {
       const mockCloseEditor = jest.fn();
       mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
         fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
+        return <></>;
       });
 
       const wrapper = mount(
@@ -271,11 +268,9 @@ describe('ColumnHeaders', () => {
           <ColumnHeadersComponent {...defaultProps} />
         </TestProviders>
       );
-      act(() => {
-        wrapper.setProps({ ...defaultProps, show: false });
-        wrapper.update();
-      });
+      wrapper.setProps({ ...defaultProps, show: false });
 
+      // let useEffect hook execute
       setTimeout(() => {
         expect(mockCloseEditor).toHaveBeenCalled();
       }, 0);

@@ -109,8 +109,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   unit,
 }) => {
   const dispatch = useDispatch();
-  const editorActionsRef = useRef<CreateFieldEditorActions>(null);
-
   const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
@@ -126,6 +124,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
+  const editorActionsRef = useRef<CreateFieldEditorActions>(null);
+
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({

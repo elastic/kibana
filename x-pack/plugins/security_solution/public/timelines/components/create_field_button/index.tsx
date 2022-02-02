@@ -24,7 +24,7 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 
 export type CreateFieldEditorActions = { closeEditor: () => void } | null;
-export type CreateFieldEditorActionsRef = MutableRefObject<CreateFieldEditorActions>;
+type CreateFieldEditorActionsRef = MutableRefObject<CreateFieldEditorActions>;
 
 interface CreateFieldButtonProps {
   selectedDataViewId: string;
