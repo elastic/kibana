@@ -26,6 +26,7 @@ const listOfJourneys = [
   'MonitorManagement-icmp',
   'MonitorManagement-browser',
   'MonitorManagement breadcrumbs',
+  'Monitor Management read only user',
 ] as const;
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
