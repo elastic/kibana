@@ -13,9 +13,9 @@ import fetch from 'node-fetch';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function useDockerRegistry() {
-  const packageRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || '12345';
+  const packageRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || '8081';
 
-  if (!packageRegistryPort.match(/^[0-9]{5}/)) {
+  if (!packageRegistryPort.match(/^[0-9]{4}/)) {
     throw new Error('Invalid FLEET_PACKAGE_REGISTRY_PORT');
   }
 
