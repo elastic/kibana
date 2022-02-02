@@ -24,11 +24,10 @@ import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { TextValueDisplay } from '../../../components/artifact_entry_card/components/text_value_display';
-import { EndpointPolicyLink } from '../../endpoint_hosts/view/components/endpoint_policy_link';
+import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
 
-const MAX_PAGINATED_ITEM = 9999;
 export const PolicyList = memo(() => {
   const http = useHttp();
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -57,7 +56,7 @@ export const PolicyList = memo(() => {
     return [
       {
         field: '',
-        name: 'Name',
+        name: i18n.translate('xpack.securitySolution.policy.list.name', { defaultMessage: 'Name' }),
         truncateText: true,
         render: (policy: PolicyData) => {
           return (
@@ -75,7 +74,9 @@ export const PolicyList = memo(() => {
       },
       {
         field: 'created_by',
-        name: 'Created by',
+        name: i18n.translate('xpack.securitySolution.policy.list.createdBy', {
+          defaultMessage: 'Created by',
+        }),
         truncateText: true,
         render: (name: string) => {
           return (
@@ -106,7 +107,9 @@ export const PolicyList = memo(() => {
       },
       {
         field: 'updated_by',
-        name: 'Last updated by',
+        name: i18n.translate('xpack.securitySolution.policy.list.lastUpdatedBy', {
+          defaultMessage: 'Last updated by',
+        }),
         truncateText: true,
         render: (name: string) => {
           return (
@@ -135,8 +138,18 @@ export const PolicyList = memo(() => {
           );
         },
       },
-      { field: '-', name: 'Endpoints' },
-      { field: '-', name: 'Actions' },
+      {
+        field: '-',
+        name: i18n.translate('xpack.securitySolution.policy.list.endpoints', {
+          defaultMessage: 'Endpoints',
+        }),
+      },
+      {
+        field: '-',
+        name: i18n.translate('xpack.securitySolution.policy.list.actions', {
+          defaultMessage: 'Actions',
+        }),
+      },
     ];
   }, []);
 
@@ -172,19 +185,11 @@ export const PolicyList = memo(() => {
       {result.data && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
-            {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
-              <FormattedMessage
-                id="xpack.securitySolution.policy.list.totalCount.limited"
-                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# policy} other {# policies}}"
-                values={{ totalItemCount, limit: MAX_PAGINATED_ITEM + 1 }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.policy.list.totalCount"
-                defaultMessage="Showing {totalItemCount, plural, one {# endpoint} other {# policies}}"
-                values={{ totalItemCount }}
-              />
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.policy.list.totalCount"
+              defaultMessage="Showing {totalItemCount, plural, one {# policy} other {# policies}}"
+              values={{ totalItemCount }}
+            />
           </EuiText>
           <EuiHorizontalRule margin="xs" />
           <EuiBasicTable

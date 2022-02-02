@@ -25,7 +25,7 @@ import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import { EndpointPolicyLink } from '../components/endpoint_policy_link';
+import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 

@@ -9,8 +9,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 
-export const PAGE_SIZE_OPTIONS: readonly number[] = [5, 20, 50];
-
 export interface Pagination {
   currentPage: number;
   pageSize: number;
@@ -42,7 +40,7 @@ export function usePagination(
   }
 ) {
   const [pagination, setPagination] = useState<Pagination>(pageInfo);
-  const pageSizeOptions = useMemo(() => [...PAGE_SIZE_OPTIONS], []);
+  const pageSizeOptions = useMemo(() => [...MANAGEMENT_PAGE_SIZE_OPTIONS], []);
 
   return {
     pagination,
