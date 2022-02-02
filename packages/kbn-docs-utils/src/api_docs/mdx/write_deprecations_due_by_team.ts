@@ -29,7 +29,7 @@ export function writeDeprecationDueByTeam(
       const dueDeprecations = deprecationsByPlugin[pluginId].filter(
         (dep) => !!dep.deprecatedApi.removeBy
       );
-      if (!dueDeprecations) return teamMap;
+      if (!dueDeprecations || dueDeprecations.length === 0) return teamMap;
 
       const pluginMetaInfo = plugins.find((p) => p.manifest.id === pluginId);
       if (!pluginMetaInfo || !pluginMetaInfo.manifest.owner.name) return teamMap;

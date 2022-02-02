@@ -165,13 +165,31 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   }
 
   generateEventFilter(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
-    const eventFilter = this.generate(overrides);
-
-    return {
-      ...eventFilter,
+    return this.generate({
       name: `Event filter (${this.randomString(5)})`,
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-    };
+      entries: [
+        {
+          field: 'process.pe.company',
+          operator: 'excluded',
+          type: 'match',
+          value: 'elastic',
+        },
+        {
+          entries: [
+            {
+              field: 'status',
+              operator: 'included',
+              type: 'match',
+              value: 'dfdfd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
+      ...overrides,
+    });
   }
 
   generateEventFilterForCreate(

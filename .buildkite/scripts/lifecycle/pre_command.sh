@@ -110,7 +110,7 @@ export SYNTHETICS_REMOTE_KIBANA_USERNAME
 SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
 export SYNTHETICS_REMOTE_KIBANA_PASSWORD
 
-SYNTHETICS_REMOTE_KIBANA_URL="$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
+SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"}
 export SYNTHETICS_REMOTE_KIBANA_URL
 
 # Setup Failed Test Reporter Elasticsearch credentials
