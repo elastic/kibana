@@ -137,9 +137,9 @@ describe('Telemetry Collection Manager', () => {
           });
 
           it('calls getStats with passed refreshCache config', async () => {
-            // @ts-expect-error spying on private method.
             const getStatsCollectionConfig: jest.SpyInstance<
               TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
             > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
             await setupApi.getStats({ ...config, refreshCache: false });
@@ -253,9 +253,9 @@ describe('Telemetry Collection Manager', () => {
           });
 
           it('calls getStats with config { refreshCache: true } even if set to false', async () => {
-            // @ts-expect-error spying on private method.
             const getStatsCollectionConfig: jest.SpyInstance<
               TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
             > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
 
