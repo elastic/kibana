@@ -724,7 +724,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               },
             },
             vars: {
-              period: ['linux/metrics has no vars in policy template'],
+              period: ['period var definition does not exist'],
             },
           },
         },

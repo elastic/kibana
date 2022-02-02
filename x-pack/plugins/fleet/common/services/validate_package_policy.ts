@@ -141,21 +141,12 @@ export const validatePackagePolicy = (
     if (inputVars.length) {
       inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
-          ? inputVarDefsByPolicyTemplateAndType[inputKey] === undefined
-            ? [
-                i18n.translate('xpack.fleet.packagePolicyValidation.missingInputKeyMessage', {
-                  defaultMessage: '{inputKey} has no vars in policy template',
-                  values: {
-                    inputKey,
-                  },
-                }),
-              ]
-            : validatePackagePolicyConfig(
-                configEntry,
-                inputVarDefsByPolicyTemplateAndType[inputKey][name],
-                name,
-                safeLoadYaml
-              )
+          ? validatePackagePolicyConfig(
+              configEntry,
+              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
+              name,
+              safeLoadYaml
+            )
           : null;
         return results;
       }, {} as ValidationEntry);
@@ -219,10 +210,15 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef === undefined) {
-    // eslint-disable-next-line no-console
-    console.debug(`No variable definition for ${varName} found`);
-
-    return null;
+    errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.nonExistentVarMessage', {
+        defaultMessage: '{varName} var definition does not exist',
+        values: {
+          varName,
+        },
+      })
+    );
+    return errors;
   }
 
   if (varDef.required) {
