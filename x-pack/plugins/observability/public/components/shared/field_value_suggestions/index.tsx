@@ -15,7 +15,7 @@ export function FieldValueSuggestions({
   fullWidth,
   sourceField,
   label,
-  indexPatternTitle,
+  dataViewTitle,
   selectedValue,
   excludedValue,
   filters,
@@ -41,7 +41,7 @@ export function FieldValueSuggestions({
   const [query, setQuery] = useState('');
 
   const { values, loading } = useValuesList({
-    indexPatternTitle,
+    dataViewTitle,
     query,
     sourceField,
     filters,

@@ -86,7 +86,7 @@ export function ReportDefinitionField({
     <FieldValueSuggestions
       label={labels[field] ?? field}
       sourceField={field}
-      indexPatternTitle={dataView.title}
+      dataViewTitle={dataView.title}
       selectedValue={selectedReportDefinitions?.[field]}
       onChange={(val?: string[]) => onChange(field, val)}
       filters={queryFilters}

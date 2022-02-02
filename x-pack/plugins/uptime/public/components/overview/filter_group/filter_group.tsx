@@ -57,7 +57,7 @@ export const FilterGroup = () => {
             <FieldValueSuggestions
               key={field}
               compressed={false}
-              indexPatternTitle={indexPattern.title}
+              dataViewTitle={indexPattern.title}
               sourceField={field}
               label={label}
               selectedValue={selectedItems}

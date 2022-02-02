@@ -36,6 +36,6 @@ export function useFilterValues(
     time: series.time,
     keepHistory: true,
     filters: queryFilters,
-    indexPatternTitle: dataViews[series.dataType]?.title,
+    dataViewTitle: dataViews[series.dataType]?.title,
   });
 }
