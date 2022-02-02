@@ -17,20 +17,21 @@ coming[8.0.0]
 
 Authentication, authorization, and multi-tenancy
 with {kib} Spaces are on-by-default, with almost no configuration effort.
-When you run {kib} for the first time, you'll be presented with a new interactive
-UI that will help you set up {kib} and connect it securely to {es}.
-Simply paste the enrollment token that you received when you ran
-{es}, and {kib} will set up all the previous security features
-and connect {es} over TLS.
+When you use {kib} for the first time, you're presented with a new interactive
+UI that helps you securely set up and connect {kib} to {es}.
+Simply paste the enrollment token that you receive when you start
+{es}, and {kib} sets up all the security features
+and connects to {es} over TLS.
 
 [role="screenshot"]
 image::images/highlights-security.png[Configure Elastic to get started]
 
 
 [float]
+[[index-pattern-rename]]
 === Index patterns are now data views
 Renaming index patterns to data views creates the foundation for building
-new and exciting features in {kib}. Your data views will work
+new and exciting features in {kib}. Your data views work
 exactly as index patterns did in previous releases.
 
 [float]
@@ -60,19 +61,19 @@ image::images/highlights-discover.gif[Fields statistics view in Discover]
 
 [float]
 === Multi-layered time axis redesigned
-The time axis was upgraded across {kib} to solve key readability and
-formatting issues. This redesign affects *Lens*, *TSVB*,
+To solve key readability and
+formatting issues, the time axis was upgraded in *Lens*, *TSVB*,
 aggregation-based visualizations, and *Discover*.
-This multi-layered format enables you to create easier to understand visualizations from your data
+The multi-layered format enables you to create easier to understand visualizations from your data.
 
 [role="screenshot"]
 image::images/highlights-time-axis.gif[Upgraded time axis]
 
 [float]
-=== Lens heatmaps support values mode
+=== Display data labels in heatmaps
 
-Enable *Show* on labels in the editor toolbar and,
-when there’s room, a responsive data label will appear in each heatmap cell.
+Enable *Show* on labels, and
+when there’s room, a data label appears in each heatmap cell.
 
 [role="screenshot"]
 image::images/highlights-lens.png[Show pop-up on heatmap cell]
@@ -81,20 +82,19 @@ image::images/highlights-lens.png[Show pop-up on heatmap cell]
 === Canvas editing toolbar renovated
 This new design brings a set of editing controls in *Canvas*,
 similar to what you see in *Dashboard*.
-Use this toolbar to quickly access the *Visualization Library* and
+Use the toolbar to quickly access the *Visualization Library* and
 create elements and visualizations.
 
 [role="screenshot"]
 image::images/highlights-canvas.png[Editing toolbar in Canvas]
 
-Canvas also has these features similar to *Dashboard*.
+*Canvas* now also has the following new features:
 
-* You can create embedded visualizations in your *Canvas* workpads.
+* Create embedded visualizations in your *Canvas* workpads.
 Promote favorites to the *Visualization Library* for re-use.
 
-* Editing a visualization from *Canvas* will return you to *Canvas* when you
-click *Save and close*. Fewer clicks to author
-and edit existing presentations.
+* For fewer clicks to author and edit existing workpads, editing visualizations in *Canvas* now returns you to *Canvas* when you
+click *Save and close*. 
 
 
 
