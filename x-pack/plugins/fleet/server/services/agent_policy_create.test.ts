@@ -208,4 +208,35 @@ describe('createAgentPolicyWithPackages', () => {
       expect.anything()
     );
   });
+
+  it('should create policy with id', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      newPolicy: { id: 'policy-1', name: 'Agent policy 1', namespace: 'default' },
+      withSysMonitoring: false,
+      spaceId: 'default',
+      monitoringEnabled: [],
+    });
+
+    expect(response.id).toEqual('policy-1');
+  });
+
+  it('should create policy with fleet_server and id', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      newPolicy: {
+        id: 'new_fleet_server_policy',
+        name: 'Fleet Server policy',
+        namespace: 'default',
+      },
+      hasFleetServer: true,
+      withSysMonitoring: false,
+      monitoringEnabled: [],
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_fleet_server_policy');
+  });
 });

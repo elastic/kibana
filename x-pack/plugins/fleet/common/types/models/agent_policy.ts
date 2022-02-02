@@ -14,6 +14,7 @@ import type { Output } from './output';
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
 export interface NewAgentPolicy {
+  id?: string;
   name: string;
   namespace: string;
   description?: string;
@@ -28,7 +29,7 @@ export interface NewAgentPolicy {
   monitoring_output_id?: string;
 }
 
-export interface AgentPolicy extends NewAgentPolicy {
+export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
   package_policies: string[] | PackagePolicy[];

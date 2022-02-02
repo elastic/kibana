@@ -12,6 +12,7 @@ import { agentPolicyStatuses, dataTypes } from '../../../common';
 import { PackagePolicySchema, NamespaceSchema } from './package_policy';
 
 export const AgentPolicyBaseSchema = {
+  id: schema.maybe(schema.string()),
   name: schema.string({ minLength: 1 }),
   namespace: NamespaceSchema,
   description: schema.maybe(schema.string()),
