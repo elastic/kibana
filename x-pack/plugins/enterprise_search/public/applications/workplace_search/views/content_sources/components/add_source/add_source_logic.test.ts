@@ -93,75 +93,124 @@ describe('AddSourceLogic', () => {
     expect(AddSourceLogic.values).toEqual(defaultValues);
   });
 
+  const setupExpectedState = ({ setSourceConfigData = {} } = {}) => {
+    const sourceConfigDataSettings = Object.keys(setSourceConfigData).length > 0
+      ? {
+          dataLoading: false,
+          sourceConfigData: setSourceConfigData,
+        }
+      : {};
+
+    return {
+      ...defaultValues,
+      ...sourceConfigDataSettings,
+    };
+  };
   describe('actions', () => {
     it('setSourceConfigData', () => {
       AddSourceLogic.actions.setSourceConfigData(sourceConfigData);
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.sourceConfigData).toEqual(sourceConfigData);
-      expect(AddSourceLogic.values.dataLoading).toEqual(false);
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
-      expect(AddSourceLogic.values.clientIdValue).toEqual(
-        sourceConfigData.configuredFields.clientId
-      );
-      expect(AddSourceLogic.values.clientSecretValue).toEqual(
-        sourceConfigData.configuredFields.clientSecret
-      );
-      expect(AddSourceLogic.values.baseUrlValue).toEqual(sourceConfigData.configuredFields.baseUrl);
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        sourceConfigData,
+        dataLoading: false,
+        buttonLoading: false,
+        clientIdValue: sourceConfigData.configuredFields.clientId,
+        baseUrlValue: sourceConfigData.configuredFields.baseUrl,
+        clientSecretValue: sourceConfigData.configuredFields.clientSecret,
+      });
     });
 
     it('setSourceConnectData', () => {
       AddSourceLogic.actions.setSourceConnectData(sourceConnectData);
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.sourceConnectData).toEqual(sourceConnectData);
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        sourceConnectData,
+        buttonLoading: false
+      })
     });
 
     it('setClientIdValue', () => {
       AddSourceLogic.actions.setClientIdValue('id');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.clientIdValue).toEqual('id');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        clientIdValue: 'id',
+      });
     });
 
     it('setClientSecretValue', () => {
       AddSourceLogic.actions.setClientSecretValue('secret');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.clientSecretValue).toEqual('secret');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        clientSecretValue: 'secret',
+      });
     });
 
     it('setBaseUrlValue', () => {
       AddSourceLogic.actions.setBaseUrlValue('secret');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.baseUrlValue).toEqual('secret');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        baseUrlValue: 'secret',
+      });
     });
 
     it('setCustomSourceNameValue', () => {
       AddSourceLogic.actions.setCustomSourceNameValue('name');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.customSourceNameValue).toEqual('name');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        customSourceNameValue: 'name',
+      });
     });
 
     it('setSourceLoginValue', () => {
       AddSourceLogic.actions.setSourceLoginValue('login');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.loginValue).toEqual('login');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        loginValue: 'login',
+      });
     });
 
     it('setSourcePasswordValue', () => {
       AddSourceLogic.actions.setSourcePasswordValue('password');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.passwordValue).toEqual('password');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        passwordValue: 'password',
+      });
     });
 
     it('setSourceSubdomainValue', () => {
       AddSourceLogic.actions.setSourceSubdomainValue('subdomain');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.subdomainValue).toEqual('subdomain');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        subdomainValue: 'subdomain',
+      });
     });
 
     it('setSourceIndexPermissionsValue', () => {
       AddSourceLogic.actions.setSourceIndexPermissionsValue(true);
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.indexPermissionsValue).toEqual(true);
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        indexPermissionsValue: true,
+      });
     });
 
     it('setCustomSourceData', () => {
@@ -173,70 +222,105 @@ describe('AddSourceLogic', () => {
       };
 
       AddSourceLogic.actions.setCustomSourceData(newCustomSource);
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.newCustomSource).toEqual(newCustomSource);
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        newCustomSource,
+      });
     });
 
     it('setPreContentSourceConfigData', () => {
       AddSourceLogic.actions.setPreContentSourceConfigData(config);
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.dataLoading).toEqual(false);
-      expect(AddSourceLogic.values.sectionLoading).toEqual(false);
-      expect(AddSourceLogic.values.currentServiceType).toEqual(config.serviceType);
-      expect(AddSourceLogic.values.githubOrganizations).toEqual(config.githubOrganizations);
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        oauthConfigCompleted: true,
+        dataLoading: false,
+        sectionLoading: false,
+        currentServiceType: config.serviceType,
+        githubOrganizations: config.githubOrganizations,
+      });
     });
 
     it('setSelectedGithubOrganizations', () => {
       AddSourceLogic.actions.setSelectedGithubOrganizations('foo');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.selectedGithubOrganizationsMap).toEqual({ foo: true });
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        selectedGithubOrganizationsMap: {
+          foo: true,
+        },
+        selectedGithubOrganizations: [ 'foo' ]
+      });
     });
 
     it('setPreContentSourceId', () => {
       AddSourceLogic.actions.setPreContentSourceId('123');
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.preContentSourceId).toEqual('123');
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        oauthConfigCompleted: false,
+        preContentSourceId: '123',
+      });
     });
 
     it('setButtonNotLoading', () => {
       AddSourceLogic.actions.setButtonNotLoading();
+      const EXPECTED_BASE_STATE = setupExpectedState();
 
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        buttonLoading: false,
+      });
     });
 
     it('resetSourceState', () => {
       AddSourceLogic.actions.resetSourceState();
 
-      expect(AddSourceLogic.values.dataLoading).toEqual(false);
-      expect(AddSourceLogic.values.buttonLoading).toEqual(false);
-      expect(AddSourceLogic.values.clientIdValue).toEqual('');
-      expect(AddSourceLogic.values.clientSecretValue).toEqual('');
-      expect(AddSourceLogic.values.baseUrlValue).toEqual('');
-      expect(AddSourceLogic.values.loginValue).toEqual('');
-      expect(AddSourceLogic.values.passwordValue).toEqual('');
-      expect(AddSourceLogic.values.subdomainValue).toEqual('');
-      expect(AddSourceLogic.values.indexPermissionsValue).toEqual(false);
-      expect(AddSourceLogic.values.customSourceNameValue).toEqual('');
-      expect(AddSourceLogic.values.newCustomSource).toEqual({});
-      expect(AddSourceLogic.values.currentServiceType).toEqual('');
-      expect(AddSourceLogic.values.githubOrganizations).toEqual([]);
-      expect(AddSourceLogic.values.selectedGithubOrganizationsMap).toEqual({});
+      expect(AddSourceLogic.values).toEqual({
+        ...defaultValues,
+        dataLoading: false,
+        buttonLoading: false,
+        customSourceNameValue: '',
+        clientIdValue: '',
+        clientSecretValue: '',
+        baseUrlValue: '',
+        loginValue: '',
+        passwordValue: '',
+        subdomainValue: '',
+        indexPermissionsValue: false,
+        newCustomSource: {},
+        currentServiceType: '',
+        githubOrganizations: [],
+        selectedGithubOrganizationsMap: {},
+        preContentSourceId: '',
+      });
     });
 
     it('handles fallback states', () => {
       const { publicKey, privateKey, consumerKey } = sourceConfigData.configuredFields;
-      AddSourceLogic.actions.setSourceConfigData({
+      const sourceConfigDataMock = {
         ...sourceConfigData,
         configuredFields: {
           publicKey,
           privateKey,
           consumerKey,
         },
-      });
+      }
+      AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
 
-      expect(AddSourceLogic.values.clientIdValue).toEqual('');
-      expect(AddSourceLogic.values.clientSecretValue).toEqual('');
-      expect(AddSourceLogic.values.baseUrlValue).toEqual('');
+      const EXPECTED_BASE_STATE = setupExpectedState({ setSourceConfigData: sourceConfigDataMock });
+
+      expect(AddSourceLogic.values).toEqual({
+        ...EXPECTED_BASE_STATE,
+        clientIdValue: '',
+        clientSecretValue: '',
+        baseUrlValue: '',
+      });
     });
   });
 
