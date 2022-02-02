@@ -24,7 +24,7 @@ export const hydrateSavedObjects = async ({
     .filter((monitor) => monitor.attributes.type === 'browser')
     .forEach(({ attributes, id }) => {
       const monitor = attributes as MonitorFields;
-      if (!monitor || !monitor.urls || monitor.urls.length === 0) {
+      if (!monitor || !monitor.urls) {
         missingUrlInfoIds.push(id);
       }
     });
@@ -46,7 +46,7 @@ export const hydrateSavedObjects = async ({
           }
         });
         if (url) {
-          return { ...monitor, attributes: { ...monitor.attributes, urls: [url] } };
+          return { ...monitor, attributes: { ...monitor.attributes, urls: url } };
         }
         return monitor;
       });

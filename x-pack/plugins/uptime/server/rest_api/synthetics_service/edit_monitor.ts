@@ -41,7 +41,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     try {
       const editMonitor: SavedObjectsUpdateResponse<MonitorFields> =
-        await savedObjectsClient.update(
+        await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
           monitor.type === 'browser' ? { ...monitor, urls: '' } : monitor
