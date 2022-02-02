@@ -28,6 +28,7 @@ import {
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
+  ROW_HEIGHT_OPTION,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -211,7 +212,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate(
       'discover.advancedSettings.discover.showFieldStatisticsDescription',
       {
-        defaultMessage: `Enable {fieldStatisticsDocs} in Discover to explore the fields in your data. This functionality is in beta and is subject to change. `,
+        defaultMessage: `Enable the {fieldStatisticsDocs} to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.`,
         values: {
           fieldStatisticsDocs:
             `<a href="https://www.elastic.co/guide/en/kibana/current/show-field-statistics.html"
@@ -223,7 +224,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         },
       }
     ),
-    value: false,
+    value: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
@@ -251,15 +252,27 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [ROW_HEIGHT_OPTION]: {
+    name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
+      defaultMessage: 'Row height in the Document Explorer',
+    }),
+    value: 3,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
+      defaultMessage:
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
+    }),
+    schema: schema.number({ min: -1 }),
+  },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum table cell height',
+      defaultMessage: 'Maximum cell height in the classic table',
     }),
     value: 115,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
   },

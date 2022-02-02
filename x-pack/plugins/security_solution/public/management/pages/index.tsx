@@ -46,7 +46,7 @@ const NoPermissions = memo(() => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
+              defaultMessage="You must have the superuser role to use this feature. If you do not have the superuser role and do not have permissions to edit user roles, contact your Kibana administrator."
             />
           </EuiText>
         }
