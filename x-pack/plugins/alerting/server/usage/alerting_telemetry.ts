@@ -92,6 +92,35 @@ const ruleTypeExecutionsMetric = {
   },
 };
 
+const taskTypeExecutionsMetric = {
+  scripted_metric: {
+    init_script: 'state.statuses = [:]',
+    map_script: `
+      String status = doc['task.status'].value;
+      String taskType = doc['task.taskType'].value.replace('alerting:', '');
+      Map taskTypes = state.statuses.containsKey(status) ? state.statuses.get(status) : [:];
+      taskTypes.put(taskType, taskTypes.containsKey(taskType) ? taskTypes.get(taskType) + 1 : 1);
+      state.statuses.put(status, taskTypes);
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
+
 const ruleTypeFailureExecutionsMetric = {
   scripted_metric: {
     init_script: 'state.reasons = [:]',
@@ -507,6 +536,102 @@ export async function getExecutionTimeoutsPerDayCount(
     ),
     countByType: replaceDotSymbolsInRuleTypeIds(
       executionsAggregations.byRuleTypeId.value.ruleTypes
+    ),
+  };
+}
+
+export async function getFailedAndUnrecognizedTasksPerDay(
+  esClient: ElasticsearchClient,
+  taskManagerIndex: string
+) {
+  const { body: searchResult } = await esClient.search({
+    index: taskManagerIndex,
+    size: 0,
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'task.status': 'unrecognized',
+                    },
+                  },
+                  {
+                    term: {
+                      'task.status': 'failed',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              wildcard: {
+                'task.taskType': {
+                  value: 'alerting:*',
+                },
+              },
+            },
+            {
+              range: {
+                'task.runAt': {
+                  gte: 'now-1d',
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        byTaskTypeId: taskTypeExecutionsMetric,
+      },
+    },
+  });
+
+  const executionsAggregations = searchResult.aggregations as {
+    byTaskTypeId: { value: { statuses: Record<string, Record<string, string>> } };
+  };
+
+  return {
+    countTotal: Object.keys(executionsAggregations.byTaskTypeId.value.statuses).reduce(
+      (total: number, status: string) => {
+        const byRuleTypesRefs = executionsAggregations.byTaskTypeId.value.statuses[status];
+        const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+          (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+          0
+        );
+        return countByRuleTypes + total;
+      },
+      0
+    ),
+    countByStatus: Object.keys(executionsAggregations.byTaskTypeId.value.statuses).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, status: string) => {
+        const byRuleTypesRefs = executionsAggregations.byTaskTypeId.value.statuses[status];
+        const countByRuleTypes = Object.keys(byRuleTypesRefs).reduce(
+          (totalByType, ruleType) => parseInt(byRuleTypesRefs[ruleType] + totalByType, 10),
+          0
+        );
+        return {
+          ...obj,
+          [status]: countByRuleTypes,
+        };
+      },
+      {}
+    ),
+    countByStatusByRuleType: Object.keys(executionsAggregations.byTaskTypeId.value.statuses).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (obj: any, key: string) => ({
+        ...obj,
+        [key]: replaceDotSymbolsInRuleTypeIds(
+          executionsAggregations.byTaskTypeId.value.statuses[key]
+        ),
+      }),
+      {}
     ),
   };
 }

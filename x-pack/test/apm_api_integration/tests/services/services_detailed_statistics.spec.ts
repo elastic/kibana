@@ -9,7 +9,7 @@ import url from 'url';
 import moment from 'moment';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 
 type ServicesDetailedStatisticsReturn =

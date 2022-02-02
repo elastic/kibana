@@ -43,6 +43,7 @@ export const fromSavedSearchAttributes = (
   hideChart: attributes.hideChart,
   viewMode: attributes.viewMode,
   hideAggregatedPreview: attributes.hideAggregatedPreview,
+  rowHeight: attributes.rowHeight,
 });
 
 export const toSavedSearchAttributes = (
@@ -58,4 +59,5 @@ export const toSavedSearchAttributes = (
   hideChart: savedSearch.hideChart ?? false,
   viewMode: savedSearch.viewMode,
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+  rowHeight: savedSearch.rowHeight,
 });

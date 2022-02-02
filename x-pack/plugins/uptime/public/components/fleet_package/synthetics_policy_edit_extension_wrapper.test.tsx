@@ -643,21 +643,17 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(zipUrl, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Zip URL is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: false,
@@ -668,10 +664,8 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     await waitFor(() => {
       fireEvent.change(zipUrl, { target: { value: 'http://github.com/tests.zip' } });
       fireEvent.change(monitorIntervalNumber, { target: { value: '2' } });
-      fireEvent.change(timeout, { target: { value: '1' } });
       expect(zipUrl.value).toEqual('http://github.com/tests.zip');
       expect(monitorIntervalNumber.value).toEqual('2');
-      expect(timeout.value).toEqual('1');
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
@@ -1088,7 +1082,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(zipUrl).toBeInTheDocument();
     expect(zipUrl.value).toEqual(defaultBrowserConfig[ConfigKey.SOURCE_ZIP_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
@@ -1097,8 +1090,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(monitorIntervalUnit.value).toEqual(defaultBrowserConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
     expect(apmServiceName.value).toEqual(defaultBrowserConfig[ConfigKey.APM_SERVICE_NAME]);
-    expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultBrowserConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Url')).not.toBeInTheDocument();
