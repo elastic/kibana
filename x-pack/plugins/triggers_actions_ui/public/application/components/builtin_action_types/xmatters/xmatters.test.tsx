@@ -25,7 +25,7 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('logoXmatters');
+    expect(actionTypeModel.actionTypeTitle).toEqual('xMatters data');
   });
 });
 
@@ -165,25 +165,6 @@ describe('xmatters action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: { alertActionGroupName: [], alertId: [] },
-    });
-  });
-
-  test('params validation fails when alertActionGroupName and alertId are not valid', async () => {
-    const actionParams = {
-      alertActionGroupName: null,
-      alertId: null,
-      ruleName: 'Test xMatters',
-      date: '2022-01-18T19:01:08.818Z',
-      severity: 'high',
-      spaceId: 'default',
-      tags: 'test1, test2',
-    };
-
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        alertActionGroupName: ['Alert Action Group Name is required.'],
-        alertId: ['Alert Id is required.'],
-      },
     });
   });
 });

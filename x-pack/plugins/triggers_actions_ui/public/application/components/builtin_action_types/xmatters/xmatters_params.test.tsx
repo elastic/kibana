@@ -40,18 +40,12 @@ describe('XmattersParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="alertActionGroupNameInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="alertIdInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleNameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dateInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="spaceIdInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="tagsInput"]').length > 0).toBeTruthy();
 
-    expect(
-      wrapper.find('[data-test-subj="alertActionGroupNameInput"]').first().prop('value')
-    ).toStrictEqual('');
-    expect(wrapper.find('[data-test-subj="alertIdInput"]').first().prop('value')).toStrictEqual('');
     expect(wrapper.find('[data-test-subj="ruleNameInput"]').first().prop('value')).toStrictEqual(
       'Test xMatters'
     );

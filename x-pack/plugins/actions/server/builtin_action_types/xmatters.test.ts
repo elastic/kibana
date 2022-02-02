@@ -244,8 +244,8 @@ describe('execute()', () => {
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
-          "ruleName": "Test xMatters",
           "date": "2022-01-18T19:01:08.818Z",
+          "ruleName": "Test xMatters",
           "severity": "high",
           "spaceId": "default",
           "tags": "test1, test2",
@@ -255,7 +255,7 @@ describe('execute()', () => {
           "debug": [MockFunction] {
             "calls": Array [
               Array [
-                "response from xmatters action \\"some-id\\": [HTTP 200] ",
+                "response from xMatters action \\"some-id\\": [HTTP 200] ",
               ],
             ],
             "results": Array [
@@ -351,8 +351,8 @@ describe('execute()', () => {
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
-          "ruleName": "Test xMatters",
           "date": "2022-01-18T19:01:08.818Z",
+          "ruleName": "Test xMatters",
           "severity": "high",
           "spaceId": "default",
           "tags": "test1, test2",
@@ -362,7 +362,7 @@ describe('execute()', () => {
           "debug": [MockFunction] {
             "calls": Array [
               Array [
-                "response from xmatters action \\"some-id\\": [HTTP 200] ",
+                "response from xMatters action \\"some-id\\": [HTTP 200] ",
               ],
             ],
             "results": Array [
