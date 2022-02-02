@@ -89,21 +89,47 @@ describe('SchemaLogic', () => {
     expect(SchemaLogic.values).toEqual(defaultValues);
   });
 
+  const setupExpectedState = ({ isSchemaSet = false, didInitialize = false, setSchema = schema } = {}) => {
+    const filteredSchemaSettings = {
+      filteredSchemaFields: isSchemaSet || didInitialize ? setSchema : {},
+    };
+    const initializeSettings = didInitialize
+      ? {
+          sourceId: contentSource.id,
+          activeSchema: setSchema,
+          serverSchema: schema,
+          mostRecentIndexJob,
+          dataLoading: false,
+        }
+      : {};
+    return {
+      ...defaultValues,
+      ...filteredSchemaSettings,
+      ...initializeSettings,
+    };
+  };
+
   describe('actions', () => {
     it('onInitializeSchema', () => {
       SchemaLogic.actions.onInitializeSchema(serverResponse);
 
-      expect(SchemaLogic.values.sourceId).toEqual(contentSource.id);
-      expect(SchemaLogic.values.activeSchema).toEqual(schema);
-      expect(SchemaLogic.values.serverSchema).toEqual(schema);
-      expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
-      expect(SchemaLogic.values.dataLoading).toEqual(false);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState({ didInitialize: true }),
+        sourceId: contentSource.id,
+        activeSchema: schema,
+        serverSchema: schema,
+        mostRecentIndexJob,
+        dataLoading: false,
+      });
     });
 
     it('onInitializeSchemaFieldErrors', () => {
       SchemaLogic.actions.onInitializeSchemaFieldErrors({ fieldCoercionErrors });
 
-      expect(SchemaLogic.values.fieldCoercionErrors).toEqual(fieldCoercionErrors);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        fieldCoercionErrors,
+      });
     });
     it('onSchemaSetSuccess', () => {
       SchemaLogic.actions.onSchemaSetSuccess({
@@ -111,72 +137,99 @@ describe('SchemaLogic', () => {
         mostRecentIndexJob,
       });
 
-      expect(SchemaLogic.values.activeSchema).toEqual(schema);
-      expect(SchemaLogic.values.serverSchema).toEqual(schema);
-      expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
-      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Text);
-      expect(SchemaLogic.values.addFieldFormErrors).toEqual(null);
-      expect(SchemaLogic.values.formUnchanged).toEqual(true);
-      expect(SchemaLogic.values.showAddFieldModal).toEqual(false);
-      expect(SchemaLogic.values.dataLoading).toEqual(false);
-      expect(SchemaLogic.values.rawFieldName).toEqual('');
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState({ isSchemaSet: true }),
+        activeSchema: schema,
+        serverSchema: schema,
+        mostRecentIndexJob: mostRecentIndexJob,
+        newFieldType: SchemaType.Text,
+        addFieldFormErrors: null,
+        formUnchanged: true,
+        showAddFieldModal: false,
+        dataLoading: false,
+        rawFieldName: '',
+      });
     });
 
     it('onSchemaSetFormErrors', () => {
       SchemaLogic.actions.onSchemaSetFormErrors(errors);
 
-      expect(SchemaLogic.values.addFieldFormErrors).toEqual(errors);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        addFieldFormErrors: errors,
+      });
     });
 
     it('updateNewFieldType', () => {
       SchemaLogic.actions.updateNewFieldType(SchemaType.Number);
 
-      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Number);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        newFieldType: SchemaType.Number,
+      });
     });
 
     it('onFieldUpdate', () => {
       SchemaLogic.actions.onFieldUpdate({ schema, formUnchanged: false });
 
-      expect(SchemaLogic.values.activeSchema).toEqual(schema);
-      expect(SchemaLogic.values.formUnchanged).toEqual(false);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState({ isSchemaSet: true }),
+        activeSchema: schema,
+        formUnchanged: false,
+      });
     });
 
     it('onIndexingComplete', () => {
       SchemaLogic.actions.onIndexingComplete(1);
 
-      expect(SchemaLogic.values.mostRecentIndexJob).toEqual({
-        ...mostRecentIndexJob,
-        activeReindexJobId: undefined,
-        percentageComplete: 100,
-        hasErrors: true,
-        isActive: false,
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        mostRecentIndexJob: {
+          ...mostRecentIndexJob,
+          activeReindexJobId: undefined,
+          percentageComplete: 100,
+          hasErrors: true,
+          isActive: false,
+        },
       });
     });
 
     it('resetMostRecentIndexJob', () => {
       SchemaLogic.actions.resetMostRecentIndexJob(mostRecentIndexJob);
 
-      expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        mostRecentIndexJob,
+      });
     });
 
     it('setFieldName', () => {
       const NAME = 'name';
       SchemaLogic.actions.setFieldName(NAME);
 
-      expect(SchemaLogic.values.rawFieldName).toEqual(NAME);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        rawFieldName: NAME,
+      });
     });
 
     it('setFilterValue', () => {
       const VALUE = 'string';
       SchemaLogic.actions.setFilterValue(VALUE);
 
-      expect(SchemaLogic.values.filterValue).toEqual(VALUE);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        filterValue: VALUE,
+      });
     });
 
     it('openAddFieldModal', () => {
       SchemaLogic.actions.openAddFieldModal();
 
-      expect(SchemaLogic.values.showAddFieldModal).toEqual(true);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        showAddFieldModal: true,
+      });
     });
 
     it('closeAddFieldModal', () => {
@@ -184,14 +237,20 @@ describe('SchemaLogic', () => {
       SchemaLogic.actions.openAddFieldModal();
       SchemaLogic.actions.closeAddFieldModal();
 
-      expect(SchemaLogic.values.showAddFieldModal).toEqual(false);
-      expect(SchemaLogic.values.addFieldFormErrors).toEqual(null);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        showAddFieldModal: false,
+        addFieldFormErrors: null,
+      });
     });
 
     it('resetSchemaState', () => {
       SchemaLogic.actions.resetSchemaState();
 
-      expect(SchemaLogic.values.dataLoading).toEqual(true);
+      expect(SchemaLogic.values).toEqual({
+        ...setupExpectedState(),
+        dataLoading: true,
+      });
       expect(clearFlashMessages).toHaveBeenCalled();
     });
   });
@@ -456,7 +515,11 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.setFilterValue('baz');
 
-        expect(SchemaLogic.values.filteredSchemaFields).toEqual({});
+        expect(SchemaLogic.values).toEqual({
+          ...setupExpectedState({ didInitialize: true }),
+          filterValue: 'baz',
+          filteredSchemaFields: {},
+        });
       });
 
       it('handles filtered response', () => {
@@ -468,7 +531,12 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.onFieldUpdate({ schema: newSchema, formUnchanged: false });
         SchemaLogic.actions.setFilterValue('foo');
 
-        expect(SchemaLogic.values.filteredSchemaFields).toEqual(schema);
+        expect(SchemaLogic.values).toEqual( {
+        ...setupExpectedState({ didInitialize: true, setSchema: newSchema }),
+        filterValue: 'foo',
+        filteredSchemaFields: schema,
+        formUnchanged: false,
+        });
       });
     });
   });
