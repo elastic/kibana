@@ -154,7 +154,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .send({
           params: {
             alertActionGroupName: 'success',
-            alertId: 'abcd-1234',
+            signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
           },
         })
@@ -165,7 +165,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         connector_id: simulatedActionId,
         data: {
           alertActionGroupName: 'success',
-          alertId: 'abcd-1234',
+          signalId: 'abcd-1234:abcd-1234',
           severity: 'High',
         },
       });
@@ -180,7 +180,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .send({
           params: {
             alertActionGroupName: 'respond-with-400',
-            alertId: 'abcd-1234',
+            signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
           },
         })
@@ -196,7 +196,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .send({
           params: {
             alertActionGroupName: 'respond-with-429',
-            alertId: 'abcd-1234',
+            signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
           },
         })
@@ -213,7 +213,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .send({
           params: {
             alertActionGroupName: 'respond-with-502',
-            alertId: 'abcd-1234',
+            signalId: 'abcd-1234:abcd-1234',
             severity: 'High',
           },
         })

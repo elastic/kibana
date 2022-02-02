@@ -155,7 +155,7 @@ describe('xmatters action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       alertActionGroupName: 'Small t-shirt',
-      alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
+      signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
       ruleName: 'Test xMatters',
       date: '2022-01-18T19:01:08.818Z',
       severity: 'high',
@@ -164,7 +164,7 @@ describe('xmatters action params validation', () => {
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { alertActionGroupName: [], alertId: [] },
+      errors: { alertActionGroupName: [], signalId: [] },
     });
   });
 });

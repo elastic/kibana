@@ -78,12 +78,12 @@ export function getActionType(): ActionTypeModel<
     validateParams: async (
       actionParams: XmattersActionParams
     ): Promise<
-      GenericValidationResult<Pick<XmattersActionParams, 'alertActionGroupName' | 'alertId'>>
+      GenericValidationResult<Pick<XmattersActionParams, 'alertActionGroupName' | 'signalId'>>
     > => {
       const translations = await import('./translations');
       const errors = {
         alertActionGroupName: new Array<string>(),
-        alertId: new Array<string>(),
+        signalId: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;

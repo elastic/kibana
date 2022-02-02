@@ -55,7 +55,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   alertActionGroupName: schema.maybe(schema.string()),
-  alertId: schema.maybe(schema.string()),
+  signalId: schema.maybe(schema.string()),
   ruleName: schema.maybe(schema.string()),
   date: schema.maybe(schema.string()),
   severity: schema.maybe(schema.string()),
@@ -255,7 +255,7 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
 
 interface XmattersPayload {
   alertActionGroupName?: string;
-  alertId?: string;
+  signalId?: string;
   ruleName?: string;
   date?: string;
   severity?: string;
@@ -266,7 +266,7 @@ interface XmattersPayload {
 function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
   const data: XmattersPayload = {
     alertActionGroupName: params.alertActionGroupName,
-    alertId: params.alertId,
+    signalId: params.signalId,
     ruleName: params.ruleName,
     date: params.date,
     severity: params.severity || 'High',

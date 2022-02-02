@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,7 +15,6 @@ import {
 } from 'kibana/server';
 
 export function initPlugin(router: IRouter, path: string) {
-  console.log('bubly1');
   router.post(
     {
       path,
@@ -25,7 +23,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {
         body: schema.object({
-          alertId: schema.string(),
+          signalId: schema.string(),
           alertActionGroupName: schema.string(),
           ruleName: schema.maybe(schema.string()),
           date: schema.maybe(schema.string()),
@@ -40,12 +38,8 @@ export function initPlugin(router: IRouter, path: string) {
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      console.log('bubly2');
       const { body } = req;
       const alertActionGroupName = body?.alertActionGroupName;
-      console.log('bubly3');
-      console.log(body);
-      console.log(alertActionGroupName);
       switch (alertActionGroupName) {
         case 'respond-with-400':
           return jsonErrorResponse(res, 400, new Error(alertActionGroupName));
@@ -54,7 +48,6 @@ export function initPlugin(router: IRouter, path: string) {
         case 'respond-with-502':
           return jsonErrorResponse(res, 502, new Error(alertActionGroupName));
       }
-      console.log('bubly4');
       return jsonResponse(res, 202, {
         status: 'success',
       });

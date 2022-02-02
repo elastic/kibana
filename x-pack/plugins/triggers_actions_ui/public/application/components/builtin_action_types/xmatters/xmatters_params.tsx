@@ -73,8 +73,8 @@ const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersAc
       editAction(
         'actionParams',
         {
-          alertId: '{{alert.id}}',
-          alertActionGroupName: '{{alert.actionGroupName}}',
+          signalId: '{{rule.id}}:{{alert.id}}',
+          ruleActionGroupName: '{{alert.actionGroupName}}',
         },
         index
       );

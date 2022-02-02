@@ -157,18 +157,18 @@ describe('params validation', () => {
   test('param validation passes when only required fields are provided', () => {
     const params: Record<string, string> = {
       alertActionGroupName: 'A groupy group',
-      alertId: 'abcde-12345',
+      signalId: 'abcde-12345:abcd-1234',
     };
     expect(validateParams(actionType, params)).toEqual({
       alertActionGroupName: 'A groupy group',
-      alertId: 'abcde-12345',
+      signalId: 'abcde-12345:abcd-1234',
     });
   });
 
   test('params validation passes when a valid parameters are provided', () => {
     const params: Record<string, string> = {
       alertActionGroupName: 'Small t-shirt',
-      alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
+      signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234',
       ruleName: 'Test xMatters',
       date: '2022-01-18T19:01:08.818Z',
       severity: 'high',
@@ -212,7 +212,7 @@ describe('execute()', () => {
       secrets: { user: 'abc', password: '123' },
       params: {
         alertActionGroupName: 'Small t-shirt',
-        alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
+        signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234',
         ruleName: 'Test xMatters',
         date: '2022-01-18T19:01:08.818Z',
         severity: 'high',
@@ -243,7 +243,7 @@ describe('execute()', () => {
         },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
-          "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
+          "signalId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234",
           "date": "2022-01-18T19:01:08.818Z",
           "ruleName": "Test xMatters",
           "severity": "high",
@@ -297,7 +297,7 @@ describe('execute()', () => {
       secrets: { user: 'abc', password: '123' },
       params: {
         alertActionGroupName: 'Small t-shirt',
-        alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
+        signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234',
         ruleName: 'Test xMatters',
         date: '2022-01-18T19:01:08.818Z',
         severity: 'high',
@@ -323,7 +323,7 @@ describe('execute()', () => {
       secrets,
       params: {
         alertActionGroupName: 'Small t-shirt',
-        alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
+        signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234',
         ruleName: 'Test xMatters',
         date: '2022-01-18T19:01:08.818Z',
         severity: 'high',
@@ -350,7 +350,7 @@ describe('execute()', () => {
         },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
-          "alertId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97",
+          "signalId": "c9437cab-6a5b-45e8-bc8a-f4a8af440e97:abcd-1234",
           "date": "2022-01-18T19:01:08.818Z",
           "ruleName": "Test xMatters",
           "severity": "high",

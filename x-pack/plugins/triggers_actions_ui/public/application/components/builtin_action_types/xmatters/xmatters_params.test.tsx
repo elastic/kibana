@@ -14,7 +14,7 @@ describe('XmattersParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
       alertActionGroupName: 'Small t-shirt',
-      alertId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
+      signalId: 'c9437cab-6a5b-45e8-bc8a-f4a8af440e97',
       ruleName: 'Test xMatters',
       date: new Date().toISOString(),
       severity: XmattersSeverityOptions.HIGH,
@@ -27,7 +27,7 @@ describe('XmattersParamsFields renders', () => {
         actionParams={actionParams}
         errors={{
           alertActionGroupName: [],
-          alertId: [],
+          signalId: [],
         }}
         editAction={() => {}}
         index={0}
