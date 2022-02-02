@@ -9,30 +9,30 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import { SharePluginSetup, SharePluginStart } from '.';
 import { LocatorPublic, UrlService } from '../common/url_service';
+import { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 
 export type Setup = jest.Mocked<SharePluginSetup>;
 export type Start = jest.Mocked<SharePluginStart>;
 
-const url = new UrlService({
+const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
   navigate: async () => {},
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: () => ({
-    get: () => ({
-      create: async () => {
-        throw new Error('Not implemented');
-      },
-      get: async () => {
-        throw new Error('Not implemented');
-      },
-      delete: async () => {
-        throw new Error('Not implemented');
-      },
-      resolve: async () => {
-        throw new Error('Not implemented.');
-      },
-    }),
+  shortUrls: ({ locators }) => ({
+    get: () =>
+      new BrowserShortUrlClient({
+        locators,
+        http: {
+          basePath: {
+            get: () => '',
+          },
+          fetch: async () => {
+            throw new Error('fetch not implemented');
+          },
+        },
+      }),
   }),
 });
 
