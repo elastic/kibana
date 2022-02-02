@@ -13,17 +13,18 @@ import {
   EuiBasicTableColumn,
   EuiLink,
   EuiToolTip,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { PackagePolicy } from '../../../fleet/common';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
+import { PackSavedObject } from './types';
 
 const UpdatedBy = styled.span`
   white-space: nowrap;
@@ -82,7 +83,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: strin
 };
 
 const PacksTableComponent = () => {
-  const { data } = usePacks({});
+  const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
     (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
@@ -112,15 +113,14 @@ const PacksTableComponent = () => {
     );
   }, []);
 
-  // @ts-expect-error update types
-  const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
     () => [
       {
         field: 'attributes.name',
         name: i18n.translate('xpack.osquery.packs.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        sortable: true,
+        sortable: (item) => item.attributes.name.toLowerCase(),
         render: renderName,
       },
       {
@@ -178,8 +178,12 @@ const PacksTableComponent = () => {
     []
   );
 
+  if (isLoading) {
+    return <EuiLoadingContent lines={10} />;
+  }
+
   return (
-    <EuiInMemoryTable<PackagePolicy>
+    <EuiInMemoryTable<PackSavedObject>
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data?.saved_objects ?? []}
       columns={columns}

@@ -8,6 +8,19 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import WebhookParamsFields from './webhook_params';
+import { MockCodeEditor } from '../../../code_editor.mock';
+
+const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
+
+jest.mock(kibanaReactPath, () => {
+  const original = jest.requireActual(kibanaReactPath);
+  return {
+    ...original,
+    CodeEditor: (props: any) => {
+      return <MockCodeEditor {...props} />;
+    },
+  };
+});
 
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {

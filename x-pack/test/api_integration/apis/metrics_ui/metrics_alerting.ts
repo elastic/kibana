@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { MetricExpressionParams } from '../../../../plugins/infra/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
-import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
+
 export default function ({ getService }: FtrProviderContext) {
   const client = getService('es');
   const index = 'test-index';
@@ -37,10 +37,9 @@ export default function ({ getService }: FtrProviderContext) {
             start: moment().subtract(25, 'minutes').valueOf(),
             end: moment().valueOf(),
           };
-          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe);
+          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe, 100);
           const result = await client.search({
             index,
-            // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
             body: searchBody,
           });
 
@@ -58,12 +57,12 @@ export default function ({ getService }: FtrProviderContext) {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
           timeframe,
+          100,
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
         const result = await client.search({
           index,
-          // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
           body: searchBody,
         });
 
@@ -81,11 +80,11 @@ export default function ({ getService }: FtrProviderContext) {
           const searchBody = getElasticsearchMetricQuery(
             getSearchParams(aggType),
             timeframe,
+            100,
             'agent.id'
           );
           const result = await client.search({
             index,
-            // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
             body: searchBody,
           });
 
@@ -101,12 +100,12 @@ export default function ({ getService }: FtrProviderContext) {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
           timeframe,
+          100,
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
         const result = await client.search({
           index,
-          // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
           body: searchBody,
         });
 

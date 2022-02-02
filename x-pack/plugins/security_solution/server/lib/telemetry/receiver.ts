@@ -11,8 +11,23 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  AggregationsAggregate,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+import { TransportResult } from '@elastic/elasticsearch';
+import { Agent, AgentPolicy } from '../../../../fleet/common';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -22,15 +37,95 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
 } from './helpers';
-import {
+import type {
   TelemetryEvent,
   ESLicense,
   ESClusterInfo,
   GetEndpointListResponse,
   RuleSearchResult,
+  ExceptionListItem,
 } from './types';
 
-export class TelemetryReceiver {
+export interface ITelemetryReceiver {
+  start(
+    core?: CoreStart,
+    kibanaIndex?: string,
+    endpointContextService?: EndpointAppContextService,
+    exceptionListClient?: ExceptionListClient
+  ): Promise<void>;
+
+  getClusterInfo(): ESClusterInfo | undefined;
+
+  fetchFleetAgents(): Promise<
+    | {
+        agents: Agent[];
+        total: number;
+        page: number;
+        perPage: number;
+      }
+    | undefined
+  >;
+
+  fetchEndpointPolicyResponses(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchEndpointMetrics(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  >;
+
+  fetchDiagnosticAlerts(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<SearchResponse<TelemetryEvent, Record<string, AggregationsAggregate>>>;
+
+  fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
+
+  fetchTrustedApplications(): Promise<{
+    data: ExceptionListItem[] | undefined;
+    total: number;
+    page: number;
+    per_page: number;
+  }>;
+
+  fetchEndpointList(listId: string): Promise<GetEndpointListResponse>;
+
+  fetchDetectionRules(): Promise<
+    TransportResult<
+      SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
+      unknown
+    >
+  >;
+
+  fetchDetectionExceptionList(
+    listId: string,
+    ruleVersion: number
+  ): Promise<{
+    data: ExceptionListItem[];
+    total: number;
+    page: number;
+    per_page: number;
+  }>;
+
+  fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+
+  copyLicenseFields(lic: ESLicense): {
+    issuer?: string | undefined;
+    issued_to?: string | undefined;
+    uid: string;
+    status: string;
+    type: string;
+  };
+}
+export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
@@ -221,6 +316,9 @@ export class TelemetryReceiver {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
+
     const results = await this.exceptionListClient.findExceptionListItem({
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
@@ -245,7 +343,7 @@ export class TelemetryReceiver {
     }
 
     // Ensure list is created if it does not exist
-    await this.exceptionListClient.createTrustedAppsList();
+    await this.exceptionListClient.createEndpointList();
 
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
@@ -265,6 +363,10 @@ export class TelemetryReceiver {
     };
   }
 
+  /**
+   * Gets the elastic rules which are the rules that have immutable set to true and are of a particular rule type
+   * @returns The elastic rules
+   */
   public async fetchDetectionRules() {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
@@ -278,15 +380,38 @@ export class TelemetryReceiver {
       body: {
         query: {
           bool: {
-            filter: [
-              { term: { 'alert.alertTypeId': 'siem.signals' } },
-              { term: { 'alert.params.immutable': true } },
+            must: [
+              {
+                bool: {
+                  filter: {
+                    terms: {
+                      'alert.alertTypeId': [
+                        SIGNALS_ID,
+                        EQL_RULE_TYPE_ID,
+                        ML_RULE_TYPE_ID,
+                        QUERY_RULE_TYPE_ID,
+                        SAVED_QUERY_RULE_TYPE_ID,
+                        INDICATOR_RULE_TYPE_ID,
+                        THRESHOLD_RULE_TYPE_ID,
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                bool: {
+                  filter: {
+                    terms: {
+                      'alert.params.immutable': [true],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
       },
     };
-
     return this.esClient.search<RuleSearchResult>(query);
   }
 
@@ -316,7 +441,7 @@ export class TelemetryReceiver {
     };
   }
 
-  private async fetchClusterInfo(): Promise<ESClusterInfo> {
+  public async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }

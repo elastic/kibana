@@ -206,7 +206,7 @@ export class DeprecationsService
             ({
               configPath,
               title = `${domainId} has a deprecated setting`,
-              level = 'critical',
+              level,
               message,
               correctiveActions,
               documentationUrl,

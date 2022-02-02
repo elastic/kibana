@@ -7,6 +7,7 @@
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
+import { FILE_FORMATS } from '../../../../../common/constants';
 
 import { Overrides } from './overrides';
 
@@ -48,8 +49,8 @@ describe('Overrides', () => {
   });
 
   test('render overrides and trigger a state change', () => {
-    const FORMAT_1 = 'delimited';
-    const FORMAT_2 = 'ndjson';
+    const FORMAT_1 = FILE_FORMATS.DELIMITED;
+    const FORMAT_2 = FILE_FORMATS.NDJSON;
 
     const props = getProps();
     props.overrides.format = FORMAT_1;

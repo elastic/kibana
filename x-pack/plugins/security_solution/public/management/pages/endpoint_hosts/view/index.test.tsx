@@ -133,7 +133,8 @@ const timepickerRanges = [
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 
-describe('when on the endpoint list page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/115489
+describe.skip('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
   const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
 
@@ -1026,6 +1027,57 @@ describe('when on the endpoint list page', () => {
 
         const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
         expect(activityLogCallout).not.toBeNull();
+      });
+
+      it('should display a callout message if no log data also on refetch', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            getEndpointDetailsPath({
+              page_index: '0',
+              page_size: '10',
+              name: 'endpointActivityLog',
+              selected_endpoint: '1',
+            })
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
+
+        // click refresh button
+        const refreshLogButton = await renderResult.findByTestId('superDatePickerApplyTimeButton');
+        userEvent.click(refreshLogButton);
+
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogNoDataCallout = await renderResult.findByTestId(
+          'activityLogNoDataCallout'
+        );
+        expect(activityLogNoDataCallout).not.toBeNull();
       });
 
       it('should not display scroll trigger when showing callout message', async () => {

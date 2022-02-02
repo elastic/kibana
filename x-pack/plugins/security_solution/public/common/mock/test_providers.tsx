@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
@@ -15,6 +15,7 @@ import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import { Capabilities } from 'src/core/public';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
@@ -50,17 +51,22 @@ export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
-}) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-        </ThemeProvider>
-      </ReduxStoreProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+}) => {
+  const queryClient = new QueryClient();
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <QueryClientProvider client={queryClient}>
+              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 /**
  * A utility for wrapping children in the providers required to run most tests

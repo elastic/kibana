@@ -14,6 +14,7 @@ import { Ping } from '../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { UptimeESClient } from '../lib';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;
@@ -30,6 +31,31 @@ export interface GetMonitorStatusResult {
   count: number;
   monitorInfo: Ping;
 }
+
+export interface GetMonitorDownStatusMessageParams {
+  info: Ping;
+  count: number;
+  interval?: string;
+  numTimes: number;
+}
+
+export const getMonitorDownStatusMessageParams = (
+  info: Ping,
+  count: number,
+  numTimes: number,
+  timerangeCount: number,
+  timerangeUnit: string,
+  oldVersionTimeRange: { from: string; to: string }
+) => {
+  return {
+    info,
+    count,
+    interval: oldVersionTimeRange
+      ? oldVersionTimeRange.from.slice(-3)
+      : formatDurationFromTimeUnitChar(timerangeCount, timerangeUnit as TimeUnitChar),
+    numTimes,
+  };
+};
 
 const getLocationClause = (locations: string[]) => ({
   bool: {

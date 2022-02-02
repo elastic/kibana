@@ -11,9 +11,7 @@
 import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-
-import { IndexPattern } from '../../../../../../../data/public';
-import { flattenHit } from '../../../../../../../data/common';
+import { flattenHit, DataView } from '../../../../../../../data/common';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
@@ -151,7 +149,7 @@ describe('fieldCalculator', function () {
   });
 
   describe('getFieldValueCounts', function () {
-    let params: { hits: any; field: any; count: number; indexPattern: IndexPattern };
+    let params: { hits: any; field: any; count: number; indexPattern: DataView };
     beforeEach(function () {
       params = {
         hits: cloneDeep(realHits),

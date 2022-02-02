@@ -152,6 +152,9 @@ export class MonitorReportsTask implements ReportingTask {
     logger.info(`Rescheduling task:${task.id} to retry.`);
 
     const newTask = await this.reporting.scheduleTask(task);
+
+    this.reporting.getEventLogger({ _id: task.id, ...task }, newTask).logRetry();
+
     return newTask;
   }
 

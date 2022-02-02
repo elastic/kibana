@@ -10,7 +10,7 @@ import { omitBy, isPlainObject, isEmpty } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import Boom from '@hapi/boom';
-import { strictKeysRt } from '@kbn/io-ts-utils/strict_keys_rt';
+import { strictKeysRt } from '@kbn/io-ts-utils';
 import { RouteParamsRT } from './typings';
 
 interface KibanaRequestParams {

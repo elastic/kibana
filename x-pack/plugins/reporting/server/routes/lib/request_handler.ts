@@ -99,6 +99,9 @@ export class RequestHandler {
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
+    // 6. Log the action with event log
+    reporting.getEventLogger(report, task).logScheduleTask();
+
     return report;
   }
 

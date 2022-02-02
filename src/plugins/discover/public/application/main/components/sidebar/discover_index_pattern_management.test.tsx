@@ -12,6 +12,7 @@ import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eu
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 const mockServices = {
   history: () => ({
@@ -49,19 +50,22 @@ const mockServices = {
   },
 } as unknown as DiscoverServices;
 
-describe('Discover IndexPattern Management', () => {
+describe('Discover DataView Management', () => {
   const indexPattern = stubLogstashIndexPattern;
 
   const editField = jest.fn();
+  const createNewDataView = jest.fn();
 
   const mountComponent = () => {
     return mountWithIntl(
-      <DiscoverIndexPatternManagement
-        services={mockServices}
-        editField={editField}
-        selectedIndexPattern={indexPattern}
-        useNewFieldsApi={true}
-      />
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverIndexPatternManagement
+          editField={editField}
+          selectedIndexPattern={indexPattern}
+          useNewFieldsApi={true}
+          createNewDataView={createNewDataView}
+        />
+      </KibanaContextProvider>
     );
   };
 
@@ -79,7 +83,7 @@ describe('Discover IndexPattern Management', () => {
     button.simulate('click');
 
     expect(component.find(EuiContextMenuPanel).length).toBe(1);
-    expect(component.find(EuiContextMenuItem).length).toBe(2);
+    expect(component.find(EuiContextMenuItem).length).toBe(3);
   });
 
   test('click on an add button executes editField callback', () => {
@@ -100,5 +104,15 @@ describe('Discover IndexPattern Management', () => {
     const manageButton = findTestSubject(component, 'indexPattern-manage-field');
     manageButton.simulate('click');
     expect(mockServices.core.application.navigateToApp).toHaveBeenCalled();
+  });
+
+  test('click on add dataView button executes createNewDataView callback', () => {
+    const component = mountComponent();
+    const button = findTestSubject(component, 'discoverIndexPatternActions');
+    button.simulate('click');
+
+    const manageButton = findTestSubject(component, 'dataview-create-new');
+    manageButton.simulate('click');
+    expect(createNewDataView).toHaveBeenCalled();
   });
 });

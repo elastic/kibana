@@ -119,6 +119,7 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
+      ubuntu: true,
       context: true,
       image: false,
       dockerBuildDate,

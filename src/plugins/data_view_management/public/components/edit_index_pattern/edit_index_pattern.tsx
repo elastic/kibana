@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
+import { DataView, DataViewField } from '../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
@@ -28,7 +28,7 @@ import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
 }
 
 const mappingAPILink = i18n.translate(
@@ -65,10 +65,10 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { application, uiSettings, overlays, chrome, data } =
+    const { application, uiSettings, overlays, chrome, dataViews } =
       useKibana<IndexPatternManagmentContext>().services;
-    const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
-    const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
+    const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
+    const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
@@ -93,7 +93,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await data.dataViews.getIdsWithTitle();
+          const indexPatterns = await dataViews.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -104,7 +104,7 @@ export const EditIndexPattern = withRouter(
           }
         }
         if (indexPattern.id) {
-          Promise.resolve(data.dataViews.delete(indexPattern.id)).then(function () {
+          Promise.resolve(dataViews.delete(indexPattern.id)).then(function () {
             history.push('');
           });
         }
@@ -201,7 +201,7 @@ export const EditIndexPattern = withRouter(
         <EuiSpacer />
         <Tabs
           indexPattern={indexPattern}
-          saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
+          saveIndexPattern={dataViews.updateSavedObject.bind(dataViews)}
           fields={fields}
           history={history}
           location={location}

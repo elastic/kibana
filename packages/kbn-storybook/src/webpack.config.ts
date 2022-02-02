@@ -68,7 +68,7 @@ function isDesiredPreset(preset: Preset) {
 
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
-export default function ({ config: storybookConfig }: { config: Configuration }) {
+export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config = {
     devServer: {
       stats,
@@ -117,7 +117,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
@@ -195,4 +195,4 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     config
   );
-}
+};

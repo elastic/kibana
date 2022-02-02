@@ -6,15 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  createCase,
-  createComment,
-  deleteAllCaseItems,
-  getCaseMetrics,
-} from '../../../../common/lib/utils';
+import { deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -46,12 +40,8 @@ export default ({ getService }: FtrProviderContext): void => {
           features: ['lifespan'],
         });
 
-        expect(metrics).to.eql({
-          lifespan: {
-            creationDate: '2021-06-17T18:57:41.682Z',
-            closeDate: '2021-06-17T18:57:42.682Z',
-          },
-        });
+        expect(metrics.lifespan?.creationDate).to.be('2021-06-17T18:57:41.682Z');
+        expect(metrics.lifespan?.closeDate).to.eql('2021-06-17T18:57:42.682Z');
       });
 
       it('returns an error when passing invalid features', async () => {
@@ -67,64 +57,47 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('alerts', () => {
-      afterEach(async () => {
+    describe('status changes', () => {
+      const caseId = '0215ff30-6e39-11ec-8e5f-bf82b2955cf8';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+        );
         await deleteAllCaseItems(es);
       });
 
-      it('counts the alerts attached to a case in two different comments', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({ supertest, caseId: theCase.id, params: postCommentAlertReq });
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: {
-            ...postCommentAlertReq,
-            alertId: ['test-id-2', 'test-id-3'],
-            index: ['test-index-2', 'test-index-2'],
-          },
-        });
-
+      it('returns the lifespan of the case for status changes', async () => {
+        // each status change happens after 10 minutes, these are the changes in the status_changes.json file:
+        // open at "2022-01-05T15:00:00.000Z" -> in-progress 15:10 -> closed 15:20 -> open 15:30 -> closed 15:40 -> open 15:50 -> closed 16:00
         const metrics = await getCaseMetrics({
           supertest,
-          caseId: theCase.id,
-          features: ['alerts.count'],
+          caseId,
+          features: ['lifespan'],
         });
 
         expect(metrics).to.eql({
-          alerts: {
-            count: 3,
-          },
-        });
-      });
-
-      it('counts unique alert ids', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({ supertest, caseId: theCase.id, params: postCommentAlertReq });
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: {
-            ...postCommentAlertReq,
-            alertId: ['test-id-2', 'test-id-2'],
-            index: ['test-index-2', 'test-index-2'],
-          },
-        });
-
-        const metrics = await getCaseMetrics({
-          supertest,
-          caseId: theCase.id,
-          features: ['alerts.count'],
-        });
-
-        expect(metrics).to.eql({
-          alerts: {
-            count: 2,
+          lifespan: {
+            creationDate: '2022-01-05T15:00:00.000Z',
+            closeDate: null,
+            statusInfo: {
+              openDuration: minutesToMilliseconds(30),
+              inProgressDuration: minutesToMilliseconds(10),
+              reopenDates: ['2022-01-05T15:30:00.000Z', '2022-01-05T15:50:00.000Z'],
+            },
           },
         });
       });
     });
   });
 };
+
+function minutesToMilliseconds(minutes: number): number {
+  return minutes * 60 * 1000;
+}

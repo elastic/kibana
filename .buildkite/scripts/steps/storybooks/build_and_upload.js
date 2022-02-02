@@ -14,12 +14,12 @@ const path = require('path');
 const STORYBOOKS = [
   'apm',
   'canvas',
-  'codeeditor',
   'ci_composite',
+  'cloud',
+  'codeeditor',
   'custom_integrations',
-  'url_template_editor',
-  'dashboard',
   'dashboard_enhanced',
+  'dashboard',
   'data_enhanced',
   'embeddable',
   'expression_error',
@@ -31,11 +31,13 @@ const STORYBOOKS = [
   'expression_tagcloud',
   'fleet',
   'infra',
-  'security_solution',
-  'ui_actions_enhanced',
+  'lists',
   'observability',
   'presentation',
-  'lists',
+  'security_solution',
+  'shared_ux',
+  'ui_actions_enhanced',
+  'url_template_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

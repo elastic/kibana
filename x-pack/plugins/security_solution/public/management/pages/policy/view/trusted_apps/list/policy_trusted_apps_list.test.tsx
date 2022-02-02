@@ -86,7 +86,6 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     });
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
-    appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
     waitForAction = appTestContext.middlewareSpy.waitForAction;
     componentRenderProps = {};
 

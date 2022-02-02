@@ -24,9 +24,22 @@ export const createPublicDrilldownManager = (
   dependencies: DrilldownManagerDependencies
 ): PublicDrilldownManagerComponent => {
   const PublicDrilldownManager: PublicDrilldownManagerComponent = (drilldownManagerProps) => {
+    const filteredActionFactories = dependencies.actionFactories.filter((factory) => {
+      const supportedTriggers = factory.supportedTriggers();
+      for (const supportedTrigger of supportedTriggers) {
+        const supportsAtLeastOneTrigger = drilldownManagerProps.triggers.includes(supportedTrigger);
+        if (supportsAtLeastOneTrigger) return true;
+      }
+      return false;
+    });
+
     return (
       <React.Suspense fallback={null}>
-        <LazyDrilldownManager {...dependencies} {...drilldownManagerProps} />
+        <LazyDrilldownManager
+          {...dependencies}
+          {...drilldownManagerProps}
+          actionFactories={filteredActionFactories}
+        />
       </React.Suspense>
     );
   };
