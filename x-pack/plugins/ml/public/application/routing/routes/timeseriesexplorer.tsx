@@ -53,6 +53,9 @@ export const timeSeriesExplorerRouteFactory = (
 ): MlRoute => ({
   id: 'timeseriesexplorer',
   path: '/timeseriesexplorer',
+  title: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
+    defaultMessage: 'Single Metric Viewer',
+  }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -61,7 +64,6 @@ export const timeSeriesExplorerRouteFactory = (
       text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
         defaultMessage: 'Single Metric Viewer',
       }),
-      href: '',
     },
   ],
   enableDatePicker: true,

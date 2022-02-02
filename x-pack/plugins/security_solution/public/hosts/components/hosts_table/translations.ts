@@ -17,6 +17,10 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
   });
 
+export const RISK_SCORE = i18n.translate('xpack.securitySolution.hostsRiskTable.tableTitle', {
+  defaultMessage: 'Host risk',
+});
+
 export const NAME = i18n.translate('xpack.securitySolution.hostsTable.nameTitle', {
   defaultMessage: 'Host name',
 });

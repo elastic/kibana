@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SuperTest, Test } from 'supertest';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -16,16 +17,14 @@ import {
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createGetTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-  describe('get', () => {
-    const objectRemover = new ObjectRemover(supertest);
-
+const getTestUtils = (
+  describeType: 'internal' | 'public',
+  objectRemover: ObjectRemover,
+  supertest: SuperTest<Test>,
+  supertestWithoutAuth: any
+) => {
+  describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
-
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
@@ -38,7 +37,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .get(
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rule/${createdAlert.id}`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -78,7 +81,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
-                monitoring: response.body.monitoring,
+                ...(describeType === 'internal' ? { monitoring: response.body.monitoring } : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -102,7 +105,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .get(
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rule/${createdAlert.id}`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -145,7 +152,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .get(
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rule/${createdAlert.id}`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -199,7 +210,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .get(
+              `${getUrlPrefix(space.id)}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rule/${createdAlert.id}`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -248,7 +263,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerting/rule/${createdAlert.id}`)
+            .get(
+              `${getUrlPrefix('other')}/${
+                describeType === 'public' ? 'api' : 'internal'
+              }/alerting/rule/${createdAlert.id}`
+            )
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -297,5 +316,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
       });
     }
+  });
+};
+
+// eslint-disable-next-line import/no-default-export
+export default function createGetTests({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  describe('get', () => {
+    const objectRemover = new ObjectRemover(supertest);
+    afterEach(() => objectRemover.removeAll());
+
+    getTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
+    getTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });
 }

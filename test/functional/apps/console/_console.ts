@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console']);
   const toasts = getService('toasts');
 
-  describe('console app', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/124104
+  describe.skip('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -92,24 +93,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // Flaky, see https://github.com/elastic/kibana/issues/123556
-    it.skip('should add comma after previous non empty line on autocomplete', async () => {
-      const LINE_NUMBER = 2;
+    it('should add comma after previous non empty line on autocomplete', async () => {
+      const LINE_NUMBER = 4;
 
       await PageObjects.console.dismissTutorial();
       await PageObjects.console.clearTextArea();
+      await PageObjects.console.enterRequest();
+
       await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.pressEnter();
       await PageObjects.console.pressEnter();
       await PageObjects.console.promptAutocomplete();
+      await PageObjects.console.pressEnter();
 
-      await retry.try(async () => {
-        const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
-        log.debug(textOfPreviousNonEmptyLine);
-        const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
-        expect(lastChar).to.be.equal(',');
-      });
+      const textOfPreviousNonEmptyLine = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
+      log.debug(textOfPreviousNonEmptyLine);
+      const lastChar = textOfPreviousNonEmptyLine.charAt(textOfPreviousNonEmptyLine.length - 1);
+      expect(lastChar).to.be.equal(',');
     });
 
     describe('with a data URI in the load_from query', () => {
