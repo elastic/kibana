@@ -99,6 +99,13 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateRowHeight = useCallback(
+    (newRowHeight: number) => {
+      stateContainer.setAppState({ rowHeight: newRowHeight });
+    },
+    [stateContainer]
+  );
+
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [uiSettings, indexPattern.timeFieldName]
@@ -170,6 +177,8 @@ function DiscoverDocumentsComponent({
             onSort={onSort}
             onResize={onResize}
             useNewFieldsApi={useNewFieldsApi}
+            rowHeightState={state.rowHeight}
+            onUpdateRowHeight={onUpdateRowHeight}
           />
         </div>
       )}

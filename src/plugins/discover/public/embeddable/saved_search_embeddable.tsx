@@ -62,6 +62,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     hits?: ElasticSearchHit[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
+    onUpdateRowHeight?: (rowHeight?: number) => void;
   };
 
 interface SearchEmbeddableConfig {
@@ -293,6 +294,10 @@ export class SavedSearchEmbeddable
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
+      rowHeightState: this.input.rowHeight || this.savedSearch.rowHeight,
+      onUpdateRowHeight: (rowHeight) => {
+        this.updateInput({ rowHeight });
+      },
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -342,6 +347,7 @@ export class SavedSearchEmbeddable
           );
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
+    searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
@@ -414,9 +420,9 @@ export class SavedSearchEmbeddable
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
+      savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
-      refs: domNode,
     };
     if (searchProps.services) {
       ReactDOM.render(

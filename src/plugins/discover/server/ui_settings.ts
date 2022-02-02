@@ -28,6 +28,7 @@ import {
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
+  ROW_HEIGHT_OPTION,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -251,15 +252,27 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [ROW_HEIGHT_OPTION]: {
+    name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
+      defaultMessage: 'Row height in the Document Explorer',
+    }),
+    value: 3,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
+      defaultMessage:
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
+    }),
+    schema: schema.number({ min: -1 }),
+  },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum table cell height',
+      defaultMessage: 'Maximum cell height in the classic table',
     }),
     value: 115,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
   },

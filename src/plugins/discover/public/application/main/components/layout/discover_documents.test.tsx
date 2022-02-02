@@ -43,7 +43,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
   };
 
