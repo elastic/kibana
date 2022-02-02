@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
-  uxLocalUIFilterNames,
-  uxLocalUIFilters,
-} from '../../../../common/ux_ui_filter';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../../../typings/ui_filters';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import {
+  uxLocalUIFilterNames,
+  uxLocalUIFilters,
+} from '../../../../../ux/common/ux_ui_filter';
 
 export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
   const localFilterValues = uiFilters;
