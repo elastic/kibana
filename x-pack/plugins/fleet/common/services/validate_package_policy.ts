@@ -141,12 +141,22 @@ export const validatePackagePolicy = (
     if (inputVars.length) {
       inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
-          ? validatePackagePolicyConfig(
-              configEntry,
-              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
-              name,
-              safeLoadYaml
-            )
+          ? inputVarDefsByPolicyTemplateAndType[inputKey] === undefined
+            ? [
+                i18n.translate('xpack.fleet.packagePolicyValidation.missingInputKeyMessage', {
+                  defaultMessage: '{inputKey} has no vars in policy template',
+                  values: {
+                    inputKey,
+                    name,
+                  },
+                }),
+              ]
+            : validatePackagePolicyConfig(
+                configEntry,
+                inputVarDefsByPolicyTemplateAndType[inputKey][name],
+                name,
+                safeLoadYaml
+              )
           : null;
         return results;
       }, {} as ValidationEntry);
