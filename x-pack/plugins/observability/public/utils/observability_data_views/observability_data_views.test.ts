@@ -67,11 +67,11 @@ const fieldFormats = {
   },
 };
 
-describe('ObservabilityIndexPatterns', function () {
+describe('ObservabilityDataViews', function () {
   const { data } = mockCore();
-  data!.indexPatterns.get = jest.fn().mockReturnValue({ title: 'index-*' });
-  data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
-  data!.indexPatterns.updateSavedObject = jest.fn();
+  data!.dataViews.get = jest.fn().mockReturnValue({ title: 'index-*' });
+  data!.dataViews.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
+  data!.dataViews.updateSavedObject = jest.fn();
 
   it('should return index pattern for app', async function () {
     const obsv = new ObservabilityDataViews(data!);
@@ -80,18 +80,18 @@ describe('ObservabilityIndexPatterns', function () {
 
     expect(indexP).toEqual({ id: 'rum_static_index_pattern_id' });
 
-    expect(data?.indexPatterns.get).toHaveBeenCalledWith(
+    expect(data?.dataViews.get).toHaveBeenCalledWith(
       'rum_static_index_pattern_id_heartbeat_8_synthetics_'
     );
-    expect(data?.indexPatterns.get).toHaveBeenCalledTimes(1);
+    expect(data?.dataViews.get).toHaveBeenCalledTimes(1);
   });
 
   it('should creates missing index pattern', async function () {
-    data!.indexPatterns.get = jest.fn().mockImplementation(() => {
+    data!.dataViews.get = jest.fn().mockImplementation(() => {
       throw new SavedObjectNotFound('index_pattern');
     });
 
-    data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
+    data!.dataViews.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
 
     const obsv = new ObservabilityDataViews(data!);
 
@@ -99,14 +99,14 @@ describe('ObservabilityIndexPatterns', function () {
 
     expect(indexP).toEqual({ id: dataViewList.ux });
 
-    expect(data?.indexPatterns.createAndSave).toHaveBeenCalledWith({
+    expect(data?.dataViews.createAndSave).toHaveBeenCalledWith({
       fieldFormats,
       id: 'rum_static_index_pattern_id_trace_apm_',
       timeFieldName: '@timestamp',
       title: '(rum-data-view)*,trace-*,apm-*',
     });
 
-    expect(data?.indexPatterns.createAndSave).toHaveBeenCalledTimes(1);
+    expect(data?.dataViews.createAndSave).toHaveBeenCalledTimes(1);
   });
 
   it('should return getFieldFormats', function () {
@@ -122,8 +122,8 @@ describe('ObservabilityIndexPatterns', function () {
 
     await obsv.validateFieldFormats('ux', mockDataView);
 
-    expect(data?.indexPatterns.updateSavedObject).toHaveBeenCalledTimes(1);
-    expect(data?.indexPatterns.updateSavedObject).toHaveBeenCalledWith(
+    expect(data?.dataViews.updateSavedObject).toHaveBeenCalledTimes(1);
+    expect(data?.dataViews.updateSavedObject).toHaveBeenCalledWith(
       expect.objectContaining({ fieldFormatMap: fieldFormats })
     );
   });

@@ -155,7 +155,7 @@ export class ObservabilityDataViews {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
         // we will get the data view by id
-        const dataView = await this.data?.indexPatterns.get(dataViewId);
+        const dataView = await this.data?.dataViews.get(dataViewId);
 
         // and make sure title matches, otherwise, we will need to create it
         if (dataView.title !== dataViewTitle) {
