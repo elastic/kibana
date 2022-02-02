@@ -105,6 +105,7 @@ const TopNav = ({
     asyncGetTriggerContext();
   }, [vis.params, vis.type]);
 
+  const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
@@ -122,7 +123,7 @@ const TopNav = ({
           stateTransfer: services.stateTransferService,
           embeddableId,
           editInLensConfig,
-          displayEditInLensItem: Boolean(vis.type.navigateToLens),
+          displayEditInLensItem,
           hideLensBadge,
         },
         services
@@ -135,15 +136,15 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
+    setOriginatingApp,
     originatingPath,
     visInstance,
-    setOriginatingApp,
     stateContainer,
     visualizationIdFromUrl,
     services,
     embeddableId,
     editInLensConfig,
-    vis.type.navigateToLens,
+    displayEditInLensItem,
     hideLensBadge,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
@@ -263,7 +264,7 @@ const TopNav = ({
       showSearchBar
       useDefaultBehaviors
       badges={
-        !hideTryInLensBadge
+        !hideTryInLensBadge && displayEditInLensItem
           ? [
               {
                 badgeText: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
