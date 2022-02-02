@@ -16,7 +16,6 @@ import {
   getFindResultWithSingleHit,
   nonRuleFindResult,
   typicalMlRulePayload,
-  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
@@ -45,15 +44,7 @@ describe.each([
     clients.rulesClient.update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // successful update
-    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
-    clients.savedObjectsClient.create.mockResolvedValue({
-      type: 'my-type',
-      id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
-      // TODO: https://github.com/elastic/kibana/pull/121644 clean up
-      attributes: getRuleExecutionSummarySucceeded(),
-      references: [],
-    }); // successful transform
-    clients.ruleExecutionLogClient.getExecutionSummary.mockResolvedValue(
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
       getRuleExecutionSummarySucceeded()
     );
 
