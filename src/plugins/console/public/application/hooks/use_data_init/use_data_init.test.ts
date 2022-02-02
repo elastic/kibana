@@ -150,7 +150,7 @@ describe('useDataInit', () => {
 
     jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
 
-    const { result } = renderHook(() => useDataInit(), {});
+    renderHook(() => useDataInit(), {});
 
     await wait(0);
 
@@ -166,7 +166,7 @@ describe('useDataInit', () => {
     jest.spyOn(React, 'useState').mockImplementationOnce(useErrorMock);
     jest.spyOn(React, 'useState').mockImplementationOnce(useDoneMock);
 
-    const { result } = renderHook(() => useDataInit(), {});
+    renderHook(() => useDataInit(), {});
 
     await wait(0);
 
