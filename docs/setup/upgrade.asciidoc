@@ -56,7 +56,7 @@ For more information, refer to <<upgrade-migrations, upgrade migrations>>.
 
 Before you upgrade {kib}:
 
-* Consult the <<breaking-changes,breaking changes>>.
+* Consult the <<breaking-changes-8.0.0,breaking changes>>.
 * {ref}/snapshots-take-snapshot.html[Take a snapshot] of your data. To roll back to an earlier version, the snapshot must include the `kibana` feature state.
 * Before you upgrade production servers, test the upgrades in a dev environment.
 * See <<preventing-migration-failures, preventing migration failures>> for common reasons upgrades fail and how to prevent these.
