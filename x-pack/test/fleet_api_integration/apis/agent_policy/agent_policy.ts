@@ -141,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             id: 'test-id',
-            name: 'TEST',
+            name: 'TEST ID',
             namespace: 'default',
           })
           .expect(200);
@@ -154,7 +154,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             id: 'test-id',
-            name: 'TEST 2',
+            name: 'TEST 2 ID',
             namespace: 'default',
           })
           .expect(409);
