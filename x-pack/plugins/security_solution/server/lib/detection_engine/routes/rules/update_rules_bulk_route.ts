@@ -41,7 +41,7 @@ export const updateRulesBulkRoute = (
       const siemResponse = buildSiemResponse(response);
 
       const rulesClient = context.alerting.getRulesClient();
-      const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution.getAppClient();
 
@@ -87,9 +87,7 @@ export const updateRulesBulkRoute = (
               ruleUpdate: payloadRule,
             });
             if (rule != null) {
-              const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(
-                rule.id
-              );
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
               return transformValidateBulkError(
                 rule.id,
                 rule,
