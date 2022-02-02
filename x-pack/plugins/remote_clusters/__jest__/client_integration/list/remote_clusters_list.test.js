@@ -77,6 +77,51 @@ describe('<RemoteClusterList />', () => {
     });
   });
 
+  describe('can search', () => {
+    let table;
+    let component;
+    let form;
+
+    const remoteClusters = [
+      {
+        name: 'simple_remote_cluster',
+        seeds: ['127.0.0.1:2000', '127.0.0.2:3000'],
+      },
+      {
+        name: 'remote_cluster_with_proxy',
+        proxyAddress: '192.168.0.1:80',
+        mode: PROXY_MODE,
+      },
+    ];
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+
+      await act(async () => {
+        ({ table, component, form } = setup());
+      });
+
+      component.update();
+    });
+
+    test('without any search params it should show all clusters', () => {
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(2);
+    });
+
+    test('search by seed works', () => {
+      form.setInputValue('remoteClusterSearch', 'simple');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+
+    test('search by proxyAddress works', () => {
+      form.setInputValue('remoteClusterSearch', 'proxy');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+  });
+
   describe('when there are multiple pages of remote clusters', () => {
     let table;
     let actions;
