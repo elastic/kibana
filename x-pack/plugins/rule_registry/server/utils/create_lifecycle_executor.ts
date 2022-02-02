@@ -143,7 +143,7 @@ export const createLifecycleExecutor =
     >
   ): Promise<WrappedLifecycleRuleState<State>> => {
     const {
-      services: { alertInstanceFactory, shouldWriteAlerts },
+      services: { alertFactory, shouldWriteAlerts },
       state: previousState,
     } = options;
 
@@ -165,7 +165,7 @@ export const createLifecycleExecutor =
     > = {
       alertWithLifecycle: ({ id, fields }) => {
         currentAlerts[id] = fields;
-        return alertInstanceFactory(id);
+        return alertFactory.create(id);
       },
     };
 

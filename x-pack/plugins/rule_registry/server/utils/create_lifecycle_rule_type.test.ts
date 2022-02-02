@@ -66,10 +66,12 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
-  const alertInstanceFactory = () => {
-    return {
-      scheduleActions,
-    } as any;
+  const alertFactory = {
+    create: () => {
+      return {
+        scheduleActions,
+      } as any;
+    },
   };
 
   return {
@@ -107,7 +109,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           updatedBy: 'updatedBy',
         },
         services: {
-          alertInstanceFactory,
+          alertFactory,
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,

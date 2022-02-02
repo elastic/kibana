@@ -272,7 +272,7 @@ export class BaseRule {
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
         // quick fix for now so that non node level alerts will use the cluster id
-        const instance = services.alertInstanceFactory(
+        const instance = services.alertFactory.create(
           node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
         );
 

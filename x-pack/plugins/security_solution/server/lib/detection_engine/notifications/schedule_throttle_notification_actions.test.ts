@@ -82,7 +82,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -107,7 +107,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [
@@ -137,7 +137,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -166,7 +166,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -197,7 +197,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -235,7 +235,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -271,7 +271,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [],
@@ -313,7 +313,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [
@@ -375,7 +375,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [
@@ -435,7 +435,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [
@@ -497,7 +497,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [
@@ -559,7 +559,7 @@ describe('schedule_throttle_notification_actions', () => {
           },
         })
       ),
-      alertInstance: alertsMock.createAlertInstanceFactory(),
+      alertInstance: alertsMock.createAlertFactory(),
       notificationRuleParams,
       logger,
       signals: [
