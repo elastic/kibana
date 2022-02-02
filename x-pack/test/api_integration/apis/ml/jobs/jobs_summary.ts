@@ -197,9 +197,6 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('jobs_summary', function () {
-    // FAILING Kibana 7.17 + ES 8.1 compatibility tests: https://github.com/elastic/kibana/issues/123851
-    this.onlyEsVersion('<8.1');
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -306,7 +303,10 @@ export default ({ getService }: FtrProviderContext) => {
             if (expectedJob.fullJob) {
               expect(actualJob).to.have.property('fullJob');
               expect(actualJob.fullJob).to.have.property('analysis_config');
-              expect(actualJob.fullJob.analysis_config).to.eql(expectedJob.fullJob.analysis_config);
+              // only validate the expected parts of the analysis_config, ignore additional fields
+              for (const [key, value] of Object.entries(expectedJob.fullJob.analysis_config)) {
+                expect(actualJob.fullJob.analysis_config).to.have.property(key).eql(value);
+              }
             } else {
               expect(actualJob).not.to.have.property('fullJob');
             }
