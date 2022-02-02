@@ -47,6 +47,9 @@ import { ExecuteOptions } from '../../../actions/server/create_execute_function'
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
 }));
+jest.mock('../lib/wrap_scoped_cluster_client', () => ({
+  wrapScopedClusterClient: jest.fn(),
+}));
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
@@ -197,6 +200,9 @@ describe('Task Runner', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest
+      .requireMock('../lib/wrap_scoped_cluster_client')
+      .wrapScopedClusterClient.mockReturnValue(services.scopedClusterClient);
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
@@ -411,6 +417,9 @@ describe('Task Runner', () => {
       expect.any(Function)
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(
+      jest.requireMock('../lib/wrap_scoped_cluster_client').wrapScopedClusterClient
+    ).toHaveBeenCalled();
   });
 
   test.each(ephemeralTestParams)(
