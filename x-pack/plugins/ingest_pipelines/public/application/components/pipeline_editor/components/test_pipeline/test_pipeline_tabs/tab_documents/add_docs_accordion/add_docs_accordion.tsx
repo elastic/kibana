@@ -43,7 +43,7 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
 
   useEffect(() => {
     const getDiscoverUrl = async (): Promise<void> => {
-      if (!services.discover.locator) {
+      if (!services.discover?.locator) {
         setDiscoverLink(undefined);
         return;
       }
