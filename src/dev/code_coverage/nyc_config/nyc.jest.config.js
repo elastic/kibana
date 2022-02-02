@@ -7,12 +7,11 @@
  */
 
 const path = require('path');
-const untils = require('@kbn/utils');
 
 module.exports = {
   'temp-dir': process.env.COVERAGE_TEMP_DIR
     ? path.resolve(process.env.COVERAGE_TEMP_DIR, 'jest')
-    : path.resolve(untils.REPO_ROOT, 'target/kibana-coverage/jest'),
-  'report-dir': path.resolve(untils.REPO_ROOT, 'target/kibana-coverage/jest-combined'),
+    : 'target/kibana-coverage/jest',
+  'report-dir': 'target/kibana-coverage/jest-combined',
   reporter: ['html', 'json-summary'],
 };

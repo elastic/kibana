@@ -7,10 +7,11 @@
  */
 
 const path = require('path');
-const untils = require('@kbn/utils');
 
 module.exports = {
   extends: '@istanbuljs/nyc-config-typescript',
+  'report-dir': process.env.KIBANA_DIR
+    ? path.resolve(process.env.KIBANA_DIR, 'target/kibana-coverage/server')
+    : 'target/kibana-coverage/server',
   reporter: ['json'],
-  'report-dir': path.resolve(untils.REPO_ROOT, 'target/kibana-coverage/server'),
 };
