@@ -118,7 +118,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let wroteWarningStatus = false;
 
           await ruleExecutionLogger.logStatusChange({
-            newStatus: RuleExecutionStatus['going to run'],
+            newStatus: RuleExecutionStatus.running,
           });
 
           let result = createResultObject(state);

@@ -76,8 +76,8 @@ export const updateRulesRoute = (
         });
 
         if (rule != null) {
-          const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
-          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(rule.id);
+          const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
           const [validated, errors] = transformValidate(
             rule,
             ruleExecutionSummary,

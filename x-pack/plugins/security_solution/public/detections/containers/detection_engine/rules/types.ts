@@ -143,7 +143,6 @@ export const RuleSchema = t.intersection([
     exceptions_list: listArray,
     uuid: t.string,
     version: t.number,
-    // TODO: https://github.com/elastic/kibana/pull/121644 clean up
     execution_summary: ruleExecutionSummary,
   }),
 ]);

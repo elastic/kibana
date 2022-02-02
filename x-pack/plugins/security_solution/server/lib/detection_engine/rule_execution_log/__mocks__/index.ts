@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRuleExecutionLogClient } from '../rule_execution_log_client/client_interface';
+import { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
 import {
-  IRuleExecutionLogger,
+  IRuleExecutionLogForExecutors,
   RuleExecutionContext,
-} from '../rule_execution_logger/logger_interface';
+} from '../client_for_executors/client_interface';
 
-const ruleExecutionLogClientMock = {
-  create: (): jest.Mocked<IRuleExecutionLogClient> => ({
+const ruleExecutionLogForRoutesMock = {
+  create: (): jest.Mocked<IRuleExecutionLogForRoutes> => ({
     getExecutionSummariesBulk: jest.fn(),
     getExecutionSummary: jest.fn(),
     clearExecutionSummary: jest.fn(),
@@ -20,8 +20,10 @@ const ruleExecutionLogClientMock = {
   }),
 };
 
-const ruleExecutionLoggerMock = {
-  create: (context: Partial<RuleExecutionContext> = {}): jest.Mocked<IRuleExecutionLogger> => ({
+const ruleExecutionLogForExecutorsMock = {
+  create: (
+    context: Partial<RuleExecutionContext> = {}
+  ): jest.Mocked<IRuleExecutionLogForExecutors> => ({
     context: {
       executionId: context.executionId ?? 'some execution id',
       ruleId: context.ruleId ?? 'some rule id',
@@ -35,6 +37,6 @@ const ruleExecutionLoggerMock = {
 };
 
 export const ruleExecutionLogMock = {
-  client: ruleExecutionLogClientMock,
-  logger: ruleExecutionLoggerMock,
+  forRoutes: ruleExecutionLogForRoutesMock,
+  forExecutors: ruleExecutionLogForExecutorsMock,
 };

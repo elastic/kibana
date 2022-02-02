@@ -15,54 +15,61 @@ import {
   RuleExecutionMetrics,
 } from '../../../../../common/detection_engine/schemas/common';
 
-import { ExtMeta } from '../utils/logging';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { ExtMeta } from '../utils/console_logging';
 import { truncateValue } from '../utils/normalization';
 
-import { IRuleExecutionEventsWriter } from '../rule_execution_events/events_writer';
-import { IRuleExecutionInfoSavedObjectsClient } from '../rule_execution_info/saved_objects_client';
-import { IRuleExecutionLogger, RuleExecutionContext, StatusChangeArgs } from './logger_interface';
+import { IEventLogWriter } from '../event_log/event_log_writer';
+import { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
+import {
+  IRuleExecutionLogForExecutors,
+  RuleExecutionContext,
+  StatusChangeArgs,
+} from './client_interface';
 
-export const createRuleExecutionLogger = (
-  savedObjectsClient: IRuleExecutionInfoSavedObjectsClient,
-  eventsWriter: IRuleExecutionEventsWriter,
+export const createClientForExecutors = (
+  soClient: IRuleExecutionSavedObjectsClient,
+  eventLog: IEventLogWriter,
   logger: Logger,
   context: RuleExecutionContext
-): IRuleExecutionLogger => {
+): IRuleExecutionLogForExecutors => {
   const { executionId, ruleId, ruleName, ruleType, spaceId } = context;
 
-  const ruleExecutionLogger: IRuleExecutionLogger = {
+  const client: IRuleExecutionLogForExecutors = {
     get context() {
       return context;
     },
 
     async logStatusChange(args) {
-      try {
-        const normalizedArgs = normalizeStatusChangeArgs(args);
-        await Promise.all([
-          writeStatusChangeToSavedObjects(normalizedArgs),
-          writeStatusChangeToEventLog(normalizedArgs),
-        ]);
-      } catch (e) {
-        const logMessage = 'Error logging rule execution status change';
-        const logAttributes = `status: "${args.newStatus}", rule id: "${ruleId}", rule name: "${ruleName}", execution uuid: "${executionId}"`;
-        const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
-        const logMeta: ExtMeta = {
-          rule: {
-            id: ruleId,
-            name: ruleName,
-            type: ruleType,
-            execution: {
-              status: args.newStatus,
-              uuid: executionId,
+      await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
+        try {
+          const normalizedArgs = normalizeStatusChangeArgs(args);
+          await Promise.all([
+            writeStatusChangeToSavedObjects(normalizedArgs),
+            writeStatusChangeToEventLog(normalizedArgs),
+          ]);
+        } catch (e) {
+          const logMessage = 'Error logging rule execution status change';
+          const logAttributes = `status: "${args.newStatus}", rule id: "${ruleId}", rule name: "${ruleName}", execution uuid: "${executionId}"`;
+          const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
+          const logMeta: ExtMeta = {
+            rule: {
+              id: ruleId,
+              name: ruleName,
+              type: ruleType,
+              execution: {
+                status: args.newStatus,
+                uuid: executionId,
+              },
             },
-          },
-          kibana: {
-            spaceId,
-          },
-        };
+            kibana: {
+              spaceId,
+            },
+          };
 
-        logger.error<ExtMeta>(`${logMessage}; ${logAttributes}; ${logReason}`, logMeta);
-      }
+          logger.error<ExtMeta>(`${logMessage}; ${logAttributes}; ${logReason}`, logMeta);
+        }
+      });
     },
   };
 
@@ -72,7 +79,7 @@ export const createRuleExecutionLogger = (
   ): Promise<void> => {
     const { newStatus, message, metrics } = args;
 
-    await savedObjectsClient.createOrUpdate(ruleId, {
+    await soClient.createOrUpdate(ruleId, {
       last_execution: {
         date: nowISO(),
         status: newStatus,
@@ -87,7 +94,7 @@ export const createRuleExecutionLogger = (
     const { newStatus, message, metrics } = args;
 
     if (metrics) {
-      eventsWriter.logExecutionMetrics({
+      eventLog.logExecutionMetrics({
         executionId,
         ruleId,
         ruleName,
@@ -97,7 +104,7 @@ export const createRuleExecutionLogger = (
       });
     }
 
-    eventsWriter.logStatusChange({
+    eventLog.logStatusChange({
       executionId,
       ruleId,
       ruleName,
@@ -108,7 +115,7 @@ export const createRuleExecutionLogger = (
     });
   };
 
-  return ruleExecutionLogger;
+  return client;
 };
 
 const nowISO = () => new Date().toISOString();

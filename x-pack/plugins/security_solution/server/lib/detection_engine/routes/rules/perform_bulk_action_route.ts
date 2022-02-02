@@ -259,7 +259,7 @@ export const performBulkActionRoute = (
 
       try {
         const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
@@ -325,7 +325,7 @@ export const performBulkActionRoute = (
                 await deleteRules({
                   ruleId: rule.id,
                   rulesClient,
-                  ruleExecutionLogClient,
+                  ruleExecutionLog,
                 });
               },
               abortController.signal

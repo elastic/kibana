@@ -15,7 +15,7 @@ import { RuleExecutionStatus } from '../../../../../common/detection_engine/sche
  *   - later - generic messages and any kind of info we'd need to log for rule
  *     monitoring or debugging purposes
  */
-export interface IRuleExecutionLogger {
+export interface IRuleExecutionLogForExecutors {
   context: RuleExecutionContext;
 
   /**

@@ -107,7 +107,7 @@ export const patchRulesRoute = (
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
         const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
@@ -190,7 +190,7 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(rule.id);
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
           const [validated, errors] = transformValidate(
             rule,

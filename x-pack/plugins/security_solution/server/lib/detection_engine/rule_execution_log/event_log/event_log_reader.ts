@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
 import { IEventLogClient } from '../../../../../../event_log/server';
 
 import {
@@ -13,13 +12,14 @@ import {
   RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common';
 import { invariant } from '../../../../../common/utils/invariant';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import {
   RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,
   RuleExecutionLogAction,
 } from './constants';
 
-export interface IRuleExecutionEventsReader {
+export interface IEventLogReader {
   getLastStatusChanges(args: GetLastStatusChangesArgs): Promise<RuleExecutionEvent[]>;
 }
 
@@ -29,10 +29,7 @@ export interface GetLastStatusChangesArgs {
   includeStatuses?: RuleExecutionStatus[];
 }
 
-export const createRuleExecutionEventsReader = (
-  eventLogClient: IEventLogClient,
-  logger: Logger
-): IRuleExecutionEventsReader => {
+export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader => {
   return {
     async getLastStatusChanges(args) {
       const soType = RULE_SAVED_OBJECT_TYPE;
@@ -54,12 +51,14 @@ export const createRuleExecutionEventsReader = (
         .map((item) => `(${item})`)
         .join(' and ');
 
-      const findResult = await eventLogClient.findEventsBySavedObjectIds(soType, soIds, {
-        page: 1,
-        per_page: count,
-        sort_field: '@timestamp',
-        sort_order: 'desc',
-        filter: kqlFilter,
+      const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
+        return eventLog.findEventsBySavedObjectIds(soType, soIds, {
+          page: 1,
+          per_page: count,
+          sort_field: '@timestamp',
+          sort_order: 'desc',
+          filter: kqlFilter,
+        });
       });
 
       return findResult.data.map((event) => {
