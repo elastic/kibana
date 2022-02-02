@@ -608,6 +608,7 @@
     "@types/kbn__server-http-tools": "link:bazel-bin/packages/kbn-server-http-tools/npm_module_types",
     "@types/kbn__server-route-repository": "link:bazel-bin/packages/kbn-server-route-repository/npm_module_types",
     "@types/kbn__std": "link:bazel-bin/packages/kbn-std/npm_module_types",
+    "@types/kbn__storybook": "link:bazel-bin/packages/kbn-storybook/npm_module_types",
     "@types/kbn__telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types",
     "@types/kbn__ui-shared-deps-npm": "link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types",
     "@types/kbn__ui-shared-deps-src": "link:bazel-bin/packages/kbn-ui-shared-deps-src/npm_module_types",
