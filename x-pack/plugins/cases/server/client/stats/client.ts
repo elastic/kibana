@@ -71,8 +71,7 @@ async function getStatusTotalsByType(
         });
         return caseService.findCaseStatusStats({
           unsecuredSavedObjectsClient,
-          caseOptions: statusQuery.case,
-          subCaseOptions: statusQuery.subCase,
+          caseOptions: statusQuery,
           ensureSavedObjectsAreAuthorized,
         });
       }),

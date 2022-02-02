@@ -10,12 +10,21 @@ import {
   ExceptionsListPreCreateItemServerExtension,
 } from '../../../../../lists/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { EventFilterValidator, TrustedAppValidator } from '../validators';
+import {
+  EventFilterValidator,
+  TrustedAppValidator,
+  HostIsolationExceptionsValidator,
+} from '../validators';
 
+type ValidatorCallback = ExceptionsListPreCreateItemServerExtension['callback'];
 export const getExceptionsPreCreateItemHandler = (
   endpointAppContext: EndpointAppContextService
-): ExceptionsListPreCreateItemServerExtension['callback'] => {
+): ValidatorCallback => {
   return async function ({ data, context: { request } }): Promise<CreateExceptionListItemOptions> {
+    if (data.namespaceType !== 'agnostic') {
+      return data;
+    }
+
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp(data)) {
       return new TrustedAppValidator(endpointAppContext, request).validatePreCreateItem(data);
@@ -24,6 +33,14 @@ export const getExceptionsPreCreateItemHandler = (
     // Validate event filter
     if (EventFilterValidator.isEventFilter(data)) {
       return new EventFilterValidator(endpointAppContext, request).validatePreCreateItem(data);
+    }
+
+    // Validate host isolation
+    if (HostIsolationExceptionsValidator.isHostIsolationException(data)) {
+      return new HostIsolationExceptionsValidator(
+        endpointAppContext,
+        request
+      ).validatePreCreateItem(data);
     }
 
     return data;
