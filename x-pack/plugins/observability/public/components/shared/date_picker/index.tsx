@@ -19,7 +19,7 @@ export interface DatePickerProps {
   rangeTo?: string;
   refreshPaused?: boolean;
   refreshInterval?: number;
-  onTimeRangeRefresh: (range: { start: string; end: string }) => void;
+  onTimeRangeRefresh?: (range: { start: string; end: string }) => void;
 }
 
 export function DatePicker({
