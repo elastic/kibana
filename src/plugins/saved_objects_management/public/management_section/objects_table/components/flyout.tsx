@@ -32,11 +32,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HttpStart, IBasePath } from 'src/core/public';
-import {
-  IndexPatternsContract,
-  IndexPattern,
-  DataPublicPluginStart,
-} from '../../../../../data/public';
+import { ISearchStart } from '../../../../../data/public';
+import type { DataViewsContract, DataView } from '../../../../../data_views/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import {
   importFile,
@@ -56,10 +53,10 @@ export interface FlyoutProps {
   close: () => void;
   done: () => void;
   newIndexPatternUrl: string;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   http: HttpStart;
   basePath: IBasePath;
-  search: DataPublicPluginStart['search'];
+  search: ISearchStart;
   allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
@@ -73,7 +70,7 @@ export interface FlyoutState {
   error?: string;
   file?: File;
   importCount: number;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   importMode: ImportMode;
   loadingMessage?: string;
   status: string;
@@ -121,7 +118,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = (await this.props.indexPatterns.getCache())?.map((savedObject) => ({
+    const indexPatterns = (await this.props.dataViews.getCache())?.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
     }));

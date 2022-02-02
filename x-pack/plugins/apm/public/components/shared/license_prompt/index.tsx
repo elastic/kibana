@@ -8,7 +8,7 @@
 import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
+import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
 export interface LicensePromptProps {
   text: string;
