@@ -779,9 +779,6 @@ describe('Fleet - validationHasErrors()', () => {
           type: 'integration',
           categories: ['os_system'],
           release: 'beta',
-          conditions: {
-            'kibana.version': '^7.14.0 || ^8.0.0',
-          },
           policy_templates: [
             {
               name: 'system',
