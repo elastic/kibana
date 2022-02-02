@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import {KibanaRequest} from 'kibana/server';
+
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
@@ -84,4 +86,10 @@ export function groupSamplesByCategory(samples) {
     value.push([v.x, v.y]);
   }
   return series;
+}
+
+export function timeRangeFromRequest(request: any): [number, number] {
+  const timeFrom = parseInt(request.query.timeFrom!, 10);
+  const timeTo = parseInt(request.query.timeTo!, 10);
+  return [timeFrom, timeTo];
 }

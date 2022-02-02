@@ -74,7 +74,7 @@ export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandler
                       aggs: {
                         group_by: {
                           terms: {
-                            field: 'TraceHash',
+                            field: 'StackTraceID',
                             size: 20000,
                           },
                         },
