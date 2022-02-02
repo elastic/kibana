@@ -11,4 +11,4 @@ import { UxPlugin, UxPluginSetup, UxPluginStart } from './plugin';
 export const plugin: PluginInitializer<UxPluginSetup, UxPluginStart> = () =>
   new UxPlugin();
 
-export { UxPluginSetup, UxPluginStart };
+export type { UxPluginSetup, UxPluginStart };
