@@ -6,7 +6,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { SavedObjectsClientContract, IScopedClusterClient } from 'src/core/server';
+import type { SavedObjectsClientContract, IScopedClusterClient, Logger } from 'src/core/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -51,6 +51,7 @@ export interface UptimeServerSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   syntheticsService: SyntheticsService;
   kibanaVersion: string;
+  logger: Logger;
 }
 
 export interface UptimeCorePluginsSetup {
