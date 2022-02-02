@@ -35,6 +35,7 @@ import {
   User,
   CaseAttributes,
   CaseStatuses,
+  caseStatuses,
 } from '../../../common/api';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
@@ -272,8 +273,8 @@ export class CasesService {
         statuses: {
           terms: {
             field: `${CASE_SAVED_OBJECT}.attributes.status`,
-            // there should only be 3 status fields
-            size: 10,
+            // Do 1 more than the actual size we need just in case
+            size: caseStatuses.length + 1,
             order: { _key: 'asc' },
           },
         },
