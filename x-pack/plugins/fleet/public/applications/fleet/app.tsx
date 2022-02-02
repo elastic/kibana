@@ -29,6 +29,8 @@ import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/com
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
+import { useAuthz } from './hooks';
+
 import {
   ConfigContext,
   FleetStatusProvider,
@@ -80,9 +82,9 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
 
-  if (error === 'MISSING_SUPERUSER_ROLE') {
+  if (error === 'MISSING_PRIVILEGES') {
     return (
-      <Panel>
+      <Panel data-test-subj="missingPrivilegesPrompt">
         <EuiEmptyPrompt
           iconType="securityApp"
           title={
@@ -97,8 +99,11 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
             <p>
               <FormattedMessage
                 id="xpack.fleet.permissionDeniedErrorMessage"
-                defaultMessage="You are not authorized to access Fleet. Fleet requires {roleName} privileges."
-                values={{ roleName: <EuiCode>superuser</EuiCode> }}
+                defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
+                values={{
+                  roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
+                  roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
+                }}
               />
             </p>
           }
@@ -124,7 +129,10 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
-  const { notifications } = useStartServices();
+  const core = useStartServices();
+  const { notifications } = core;
+
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -156,6 +164,9 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
+            if (!hasFleetAllPrivileges) {
+              setPermissionsError('MISSING_PRIVILEGES');
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -167,7 +178,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts]);
+  }, [notifications.toasts, hasFleetAllPrivileges]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
