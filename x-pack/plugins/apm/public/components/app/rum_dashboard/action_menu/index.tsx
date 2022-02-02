@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  RECORDS_FIELD,
   createExploratoryViewUrl,
   HeaderMenuPortal,
 } from '../../../../../../observability/public';
@@ -52,7 +53,7 @@ export function UXActionMenu({
           reportDefinitions: {
             [SERVICE_NAME]: serviceName ? [serviceName] : [],
           },
-          selectedMetricField: 'Records',
+          selectedMetricField: RECORDS_FIELD,
         },
       ],
     },

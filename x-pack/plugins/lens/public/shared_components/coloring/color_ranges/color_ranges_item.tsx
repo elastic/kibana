@@ -17,7 +17,6 @@ import {
   EuiIcon,
   EuiColorPickerSwatch,
   EuiButtonIcon,
-  EuiToolTip,
   EuiFieldNumberProps,
 } from '@elastic/eui';
 
@@ -39,7 +38,6 @@ import {
   checkIsMaxContinuity,
   checkIsMinContinuity,
 } from '../../../../../../../src/plugins/charts/common';
-import { getOutsideDataBoundsWarningMessage } from './color_ranges_validation';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -81,23 +79,11 @@ const getActionButton = (mode: ColorRangeItemMode) => {
   return mode === 'edit' ? ColorRangeAutoDetectButton : ColorRangeEditButton;
 };
 
-const getAppend = (
-  rangeType: CustomPaletteParams['rangeType'],
-  mode: ColorRangeItemMode,
-  validation?: ColorRangeValidation
-) => {
+const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
   const items: EuiFieldNumberProps['append'] = [];
 
-  if (rangeType === 'percent') {
+  if (rangeType === 'percent' && mode !== 'auto') {
     items.push('%');
-  }
-
-  if (mode !== 'auto' && validation?.warnings.length) {
-    items.push(
-      <EuiToolTip position="top" content={getOutsideDataBoundsWarningMessage(validation.warnings)}>
-        <EuiIcon type="alert" size="m" color="warning" />
-      </EuiToolTip>
-    );
   }
 
   return items;
@@ -127,8 +113,12 @@ export function ColorRangeItem({
     (e: FocusEvent<HTMLDivElement>) => {
       const prevStartValue = colorRanges[index - 1]?.start ?? Number.NEGATIVE_INFINITY;
       const nextStartValue = colorRanges[index + 1]?.start ?? Number.POSITIVE_INFINITY;
+      const lastEndValue = colorRanges[colorRanges.length - 1]?.end ?? Number.POSITIVE_INFINITY;
 
-      const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
+      const shouldSort =
+        colorRange.start > nextStartValue ||
+        prevStartValue > colorRange.start ||
+        (!isLast && colorRange.start > lastEndValue);
       const isFocusStillInContent =
         (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
 
@@ -136,7 +126,7 @@ export function ColorRangeItem({
         dispatch({ type: 'sortColorRanges', payload: { dataBounds, palettes } });
       }
     },
-    [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes]
+    [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes, isLast]
   );
 
   const onValueChange = useCallback(
@@ -190,6 +180,7 @@ export function ColorRangeItem({
             }
             secondaryInputDisplay="top"
             color={colorRange.color}
+            showAlpha={true}
             onFocus={() => setPopoverInFocus(true)}
             onBlur={() => {
               setPopoverInFocus(false);
@@ -205,11 +196,13 @@ export function ColorRangeItem({
           compressed
           fullWidth={true}
           isInvalid={!isValid}
-          value={mode !== 'auto' ? localValue : ''}
+          value={
+            mode !== 'auto' && localValue !== undefined && isFinite(localValue) ? localValue : ''
+          }
           disabled={isDisabled}
           onChange={onValueChange}
           placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
-          append={getAppend(rangeType, mode, validation)}
+          append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
           prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
@@ -219,6 +212,7 @@ export function ColorRangeItem({
               index: index + 1,
             },
           })}
+          step="any"
         />
       </EuiFlexItem>
       {ActionButton ? (
