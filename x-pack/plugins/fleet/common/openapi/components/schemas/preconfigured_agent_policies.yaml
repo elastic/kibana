@@ -24,8 +24,12 @@ properties:
       - type: number
   is_default:
     type: boolean
+    deprecated: true
   is_default_fleet_server:
     type: boolean
+    deprecated: true
+  has_fleet_server:
+    type: boolean  
   data_output_id:
     type: string
   monitoring_output_id:
