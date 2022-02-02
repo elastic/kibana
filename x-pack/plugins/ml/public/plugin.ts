@@ -50,6 +50,7 @@ import type {
   FieldFormatsStart,
 } from '../../../../src/plugins/field_formats/public';
 import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
+import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -62,6 +63,7 @@ export interface MlStartDependencies {
   dataVisualizer: DataVisualizerPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
+  charts: ChartsPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -109,7 +111,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
@@ -124,7 +128,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
-            dashboard: pluginsStart.dashboard,
           },
           params
         );

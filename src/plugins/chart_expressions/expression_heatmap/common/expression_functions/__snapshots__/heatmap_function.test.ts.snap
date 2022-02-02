@@ -39,7 +39,9 @@ Object {
       "gridConfig": Object {
         "isCellLabelVisible": true,
         "isXAxisLabelVisible": true,
+        "isXAxisTitleVisible": true,
         "isYAxisLabelVisible": true,
+        "isYAxisTitleVisible": true,
         "type": "heatmap_grid",
       },
       "highlightInHover": false,

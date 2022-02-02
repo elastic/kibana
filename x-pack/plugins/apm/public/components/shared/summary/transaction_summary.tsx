@@ -14,11 +14,13 @@ import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
+import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
 
 interface Props {
   transaction: Transaction;
   totalDuration: number | undefined;
   errorCount: number;
+  coldStartBadge?: boolean;
 }
 
 function getTransactionResultSummaryItem(transaction: Transaction) {
@@ -39,7 +41,12 @@ function getTransactionResultSummaryItem(transaction: Transaction) {
   return null;
 }
 
-function TransactionSummary({ transaction, totalDuration, errorCount }: Props) {
+function TransactionSummary({
+  transaction,
+  totalDuration,
+  errorCount,
+  coldStartBadge,
+}: Props) {
   const items = [
     <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
@@ -52,6 +59,7 @@ function TransactionSummary({ transaction, totalDuration, errorCount }: Props) {
     transaction.user_agent ? (
       <UserAgentSummaryItem {...transaction.user_agent} />
     ) : null,
+    coldStartBadge ? <ColdStartBadge /> : null,
   ];
 
   return <Summary items={items} />;

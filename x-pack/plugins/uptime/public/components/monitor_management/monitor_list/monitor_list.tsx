@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { SyntheticsMonitorSavedObject } from '../../../../common/types';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { DataStream, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
+import { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { Actions } from './actions';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
 import { MonitorEnabled } from './monitor_enabled';
 import * as labels from '../../overview/monitor_list/translations';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
@@ -59,6 +60,8 @@ export const MonitorManagementList = ({
     [setPageIndex, setPageSize, setRefresh]
   );
 
+  const canEdit: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+
   const columns = [
     {
       align: 'left' as const,
@@ -66,26 +69,20 @@ export const MonitorManagementList = ({
         defaultMessage: 'Monitor name',
       }),
       render: ({
-        attributes: { name, type },
+        attributes: { name },
         id,
       }: {
         attributes: Partial<MonitorFields>;
         id: string;
       }) => (
         <EuiLink
-          href={`${basePath}/app/uptime/monitor/${Buffer.from(
-            /* Monitor Management currently only supports inline browser monitors.
-             * Inline browser monitors append `inline` to the monitor id */
-            `${id}${type === DataStream.BROWSER ? `-inline` : ''}`,
-            'utf8'
-          ).toString('base64')}`}
+          href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
         >
           {name}
         </EuiLink>
       ),
       truncateText: true,
     },
-
     {
       align: 'left' as const,
       field: 'attributes',
@@ -135,7 +132,12 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (attributes: SyntheticsMonitor, record: SyntheticsMonitorSavedObject) => (
-        <MonitorEnabled id={record.id} monitor={attributes} setRefresh={setRefresh} />
+        <MonitorEnabled
+          id={record.id}
+          monitor={attributes}
+          setRefresh={setRefresh}
+          isDisabled={!canEdit}
+        />
       ),
     },
     {
@@ -144,7 +146,7 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (id: string) => <Actions id={id} setRefresh={setRefresh} />,
+      render: (id: string) => <Actions id={id} setRefresh={setRefresh} isDisabled={!canEdit} />,
     },
   ];
 
