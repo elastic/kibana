@@ -53,7 +53,7 @@ interface Props {
   savedQueryService?: SavedQueryService;
   onFilterSave?: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   customLabel?: string;
-  onFilterBadgeSaved?: (groupId: number, alias: string) => void;
+  onFilterBadgeSave?: (groupId: number, alias: string) => void;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -67,7 +67,7 @@ export const FilterExpressionItem: FC<Props> = ({
   savedQueryService,
   onFilterSave,
   customLabel,
-  onFilterBadgeSaved,
+  onFilterBadgeSave,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const filters: Filter[] = groupedFilters.map((filter: Filter) => ({
@@ -190,7 +190,7 @@ export const FilterExpressionItem: FC<Props> = ({
       // },
     ];
 
-    if (!customLabel && savedQueryService && onFilterSave && onFilterBadgeSaved) {
+    if (!customLabel && savedQueryService && onFilterSave && onFilterBadgeSave) {
       const saveAsFilterPanelItem = {
         name: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
           defaultMessage: `Save as filter`,
@@ -217,7 +217,7 @@ export const FilterExpressionItem: FC<Props> = ({
               showTimeFilterOption={false}
               showFilterOption={false}
               filters={filters}
-              onFilterBadgeSaved={(alias: string) => onFilterBadgeSaved(Number(groupId), alias)}
+              onFilterBadgeSave={(alias: string) => onFilterBadgeSave(Number(groupId), alias)}
             />
           </div>
         ),

@@ -50,7 +50,7 @@ interface Props {
   onMultipleFiltersUpdated?: (filters: Filter[]) => void;
   savedQueryService: SavedQueryService;
   onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
-  onFilterBadgeSaved: (groupId: number, alias: string) => void;
+  onFilterBadgeSave: (groupId: number, alias: string) => void;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -123,7 +123,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
           savedQueryService={props.savedQueryService}
           onFilterSave={props.onFilterSave}
-          onFilterBadgeSaved={props.onFilterBadgeSaved}
+          onFilterBadgeSave={props.onFilterBadgeSave}
         />
       );
       GroupBadge.push(badge);
