@@ -111,7 +111,7 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |---|---|
 |services.scopedClusterClient|This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).|
-|services.alertFactory.create(id)|This [alert factory](#alert-factory) creates alerts and must be used in order to schedule action execution. The id you give to the alert factory create fn() is a unique identifier for the alert.|
+|services.alertFactory|This [alert factory](#alert-factory) creates alerts and must be used in order to schedule action execution. The id you give to the alert factory create function() is a unique identifier for the alert.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
 |services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|

@@ -365,11 +365,11 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >({
-              alerts,
+              alerts /*
               shouldProvideRecoveryUtils: ruleType.doesSetRecoveryContext ?? false,
               originalAlertIds,
               getRecoveredAlertIds,
-              recoveryContext,
+              recoveryContext,*/,
             }),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
             shouldStopExecution: () => this.cancelled,

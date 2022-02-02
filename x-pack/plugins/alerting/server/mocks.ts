@@ -84,9 +84,11 @@ const createAlertServicesMock = <
 >() => {
   const alertFactoryMock = createAlertFactoryMock<InstanceState, InstanceContext>();
   return {
-    alertFactory: jest
-      .fn<jest.Mocked<Alert<InstanceState, InstanceContext>>, [string]>()
-      .mockReturnValue(alertFactoryMock),
+    alertFactory: {
+      create: jest
+        .fn<jest.Mocked<Alert<InstanceState, InstanceContext>>, [string]>()
+        .mockReturnValue(alertFactoryMock),
+    },
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => true,

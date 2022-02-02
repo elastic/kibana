@@ -66,10 +66,12 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
-  const alertFactory = () => {
-    return {
-      scheduleActions,
-    } as any;
+  const alertFactory = {
+    create: () => {
+      return {
+        scheduleActions,
+      } as any;
+    },
   };
 
   return {

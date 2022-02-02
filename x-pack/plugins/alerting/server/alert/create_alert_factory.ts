@@ -14,13 +14,13 @@ export interface CreateAlertFactoryOpts<
   ActionGroupIds extends string
 > {
   alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>;
-  shouldProvideRecoveryUtils: boolean;
-  originalAlertIds: Set<string>;
-  getRecoveredAlertIds: (
+  shouldProvideRecoveryUtils?: boolean;
+  originalAlertIds?: Set<string>;
+  getRecoveredAlertIds?: (
     alerts: Record<string, Alert<InstanceState, InstanceContext, ActionGroupIds>>,
     originalAlertIds: Set<string>
   ) => string[];
-  recoveryContext: Record<string, InstanceContext>;
+  recoveryContext?: Record<string, InstanceContext>;
 }
 
 export function createAlertFactory<
@@ -42,17 +42,17 @@ export function createAlertFactory<
 
       return alerts[id];
     },
-    done: () => {
-      return shouldProvideRecoveryUtils
-        ? {
-            recoveryUtils: {
-              getRecoveredAlertIds: (): string[] => getRecoveredAlertIds(alerts, originalAlertIds),
-              setRecoveryContext: (id: string, context: InstanceContext) => {
-                recoveryContext[id] = context;
-              },
-            },
-          }
-        : {};
-    },
+    // done: () => {
+    //   return shouldProvideRecoveryUtils
+    //     ? {
+    //         recoveryUtils: {
+    //           getRecoveredAlertIds: (): string[] => getRecoveredAlertIds(alerts, originalAlertIds),
+    //           setRecoveryContext: (id: string, context: InstanceContext) => {
+    //             recoveryContext[id] = context;
+    //           },
+    //         },
+    //       }
+    //     : {};
+    // },
   };
 }

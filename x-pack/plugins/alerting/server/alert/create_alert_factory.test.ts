@@ -18,7 +18,7 @@ beforeEach(() => clock.reset());
 afterAll(() => clock.restore());
 
 test('creates new alerts for ones not passed in', () => {
-  const alertFactory = createAlertFactory({});
+  const alertFactory = createAlertFactory({ alerts: {} });
   const result = alertFactory.create('1');
   expect(result).toMatchInlineSnapshot(`
             Object {
@@ -34,7 +34,9 @@ test('reuses existing alerts', () => {
     meta: { lastScheduledActions: { group: 'default', date: new Date() } },
   });
   const alertFactory = createAlertFactory({
-    '1': alert,
+    alerts: {
+      '1': alert,
+    },
   });
   const result = alertFactory.create('1');
   expect(result).toMatchInlineSnapshot(`
@@ -54,7 +56,7 @@ test('reuses existing alerts', () => {
 
 test('mutates given alerts', () => {
   const alerts = {};
-  const alertFactory = createAlertFactory(alerts);
+  const alertFactory = createAlertFactory({ alerts });
   alertFactory.create('1');
   expect(alerts).toMatchInlineSnapshot(`
             Object {
