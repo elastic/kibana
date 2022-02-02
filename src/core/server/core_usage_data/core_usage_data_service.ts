@@ -161,7 +161,6 @@ export class CoreUsageDataService
             index,
           })
           .then(({ body }) => {
-            this.logger.debug(`Saved objects documents count ${body.count} from index: ${index}`);
             return {
               savedObjectsDocsCount: body.count ? body.count : 0,
             };
