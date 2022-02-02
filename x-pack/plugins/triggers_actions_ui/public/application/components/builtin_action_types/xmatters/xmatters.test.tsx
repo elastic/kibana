@@ -42,7 +42,6 @@ describe('xmatters connector validation', () => {
       isPreconfigured: false,
       config: {
         url: 'http://test.com',
-        headers: { 'content-type': 'text' },
         hasAuth: true,
       },
     } as XmattersActionConnector;
@@ -74,7 +73,6 @@ describe('xmatters connector validation', () => {
       isPreconfigured: false,
       config: {
         url: 'http://test.com',
-        headers: { 'content-type': 'text' },
         hasAuth: false,
       },
     } as XmattersActionConnector;

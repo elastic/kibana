@@ -23,7 +23,6 @@ describe('XmattersActionConnectorFields renders', () => {
       name: 'xmatters',
       config: {
         url: 'http:\\test',
-        headers: { 'content-type': 'text' },
         hasAuth: true,
       },
     } as XmattersActionConnector;
@@ -38,9 +37,6 @@ describe('XmattersActionConnectorFields renders', () => {
         isEdit={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="xmattersViewHeadersSwitch"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="xmattersHeaderText"]').length > 0).toBeTruthy();
-    wrapper.find('[data-test-subj="xmattersViewHeadersSwitch"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="xmattersUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="xmattersPasswordInput"]').length > 0).toBeTruthy();
@@ -82,7 +78,6 @@ describe('XmattersActionConnectorFields renders', () => {
       name: 'xmatters',
       config: {
         url: 'http:\\test',
-        headers: { 'content-type': 'text' },
         hasAuth: true,
       },
     } as XmattersActionConnector;
@@ -114,7 +109,6 @@ describe('XmattersActionConnectorFields renders', () => {
       name: 'xmatters',
       config: {
         url: 'http:\\test',
-        headers: { 'content-type': 'text' },
         hasAuth: true,
       },
     } as XmattersActionConnector;

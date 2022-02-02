@@ -36,8 +36,6 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    actionTypeId: .xmatters
    config:
      url: https://test.host
-     headers:
-       testheader: testvalue
    secrets:
      user: testuser
      password: passwordkeystorevalue
@@ -46,7 +44,6 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 Config defines information for the connector type.
 
 `url`:: A URL string that corresponds to *URL*.
-`headers`:: A record<string, string> that corresponds to *Headers*.
 `hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
 Secrets defines sensitive information for the connector type.
