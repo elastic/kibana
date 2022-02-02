@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -29,13 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const LIBRARY_TITLE_FOR_CUSTOM_TESTS = 'Library Title for Custom Title Tests';
   const LIBRARY_TITLE_FOR_EMPTY_TESTS = 'Library Title for Empty Title Tests';
 
-  describe('panel titles', () => {
+  describe.only('panel titles', () => {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
-      );
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
