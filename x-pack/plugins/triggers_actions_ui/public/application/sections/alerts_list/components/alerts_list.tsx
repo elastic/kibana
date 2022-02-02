@@ -356,345 +356,6 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   };
 
-  const alertsTableColumns = [
-    {
-      field: 'enabled',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.enabledTitle',
-        { defaultMessage: 'Enabled' }
-      ),
-      width: '50px',
-      render(_enabled: boolean | undefined, item: AlertTableItem) {
-        return (
-          <RuleEnabledSwitch
-            disableAlert={async () => await disableAlert({ http, id: item.id })}
-            enableAlert={async () => await enableAlert({ http, id: item.id })}
-            item={item}
-            onAlertChanged={() => loadAlertsData()}
-          />
-        );
-      },
-      sortable: true,
-      'data-test-subj': 'alertsTableCell-enabled',
-    },
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle',
-        { defaultMessage: 'Name' }
-      ),
-      sortable: true,
-      truncateText: true,
-      width: '30%',
-      'data-test-subj': 'alertsTableCell-name',
-      render: (name: string, alert: AlertTableItem) => {
-        const ruleType = alertTypesState.data.get(alert.alertTypeId);
-        const checkEnabledResult = checkAlertTypeEnabled(ruleType);
-        const link = (
-          <>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      title={name}
-                      onClick={() => {
-                        history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
-                      }}
-                    >
-                      {name}
-                    </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {!checkEnabledResult.isEnabled && (
-                      <EuiIconTip
-                        anchorClassName="ruleDisabledQuestionIcon"
-                        data-test-subj="ruleDisabledByLicenseTooltip"
-                        type="questionInCircle"
-                        content={checkEnabledResult.message}
-                        position="right"
-                      />
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs">
-                  {alert.alertType}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        );
-        return (
-          <>
-            {link}
-            {alert.enabled && alert.muteAll && (
-              <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.mutedBadge"
-                  defaultMessage="Muted"
-                />
-              </EuiBadge>
-            )}
-          </>
-        );
-      },
-    },
-    {
-      field: 'tags',
-      name: '',
-      sortable: false,
-      width: '50px',
-      'data-test-subj': 'alertsTableCell-tagsPopover',
-      render: (tags: string[], item: AlertTableItem) => {
-        return tags.length > 0 ? (
-          <EuiPopover
-            button={
-              <EuiBadge
-                data-test-subj="ruleTagsBadge"
-                color="hollow"
-                iconType="tag"
-                iconSide="left"
-                tabIndex={-1}
-                onClick={() => setTagPopoverOpenIndex(item.index)}
-                onClickAriaLabel="Tags"
-                iconOnClick={() => setTagPopoverOpenIndex(item.index)}
-                iconOnClickAriaLabel="Tags"
-              >
-                {tags.length}
-              </EuiBadge>
-            }
-            anchorPosition="upCenter"
-            isOpen={tagPopoverOpenIndex === item.index}
-            closePopover={() => setTagPopoverOpenIndex(-1)}
-          >
-            <EuiPopoverTitle data-test-subj="ruleTagsPopoverTitle">Tags</EuiPopoverTitle>
-            <div style={{ width: '300px' }} />
-            {tags.map((tag: string, index: number) => (
-              <EuiBadge
-                data-test-subj="ruleTagsPopoverTag"
-                key={index}
-                color="hollow"
-                iconType="tag"
-                iconSide="left"
-              >
-                {tag}
-              </EuiBadge>
-            ))}
-          </EuiPopover>
-        ) : null;
-      },
-    },
-    {
-      field: 'executionStatus.lastExecutionDate',
-      name: (
-        <EuiToolTip
-          data-test-subj="alertsTableCell-lastExecutionDateTooltip"
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
-            {
-              defaultMessage: 'Start time of the last execution.',
-            }
-          )}
-        >
-          <span>
-            Last run{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
-      sortable: true,
-      width: '15%',
-      'data-test-subj': 'alertsTableCell-lastExecutionDate',
-      render: (date: Date) => {
-        if (date) {
-          return (
-            <>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  {moment(date).format('MMM D, YYYY HH:mm:ssa')}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs">
-                    {moment(date).fromNow()}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          );
-        }
-      },
-    },
-    {
-      field: 'schedule.interval',
-      width: '6%',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.scheduleTitle',
-        { defaultMessage: 'Interval' }
-      ),
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-interval',
-      render: (interval: string) => formatDuration(interval),
-    },
-    {
-      field: 'executionStatus.lastDuration',
-      width: '12%',
-      name: (
-        <EuiToolTip
-          data-test-subj="alertsTableCell-durationTooltip"
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
-            {
-              defaultMessage: 'The length of time it took for the rule to run.',
-            }
-          )}
-        >
-          <span>
-            Duration{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-duration',
-      render: (value: number, item: AlertTableItem) => {
-        const showDurationWarning = shouldShowDurationWarning(
-          alertTypesState.data.get(item.alertTypeId),
-          value
-        );
-
-        return (
-          <>
-            {`${formatMillisForDisplay(value)}`}
-            {showDurationWarning && (
-              <EuiIconTip
-                data-test-subj="ruleDurationWarning"
-                anchorClassName="ruleDurationWarningIcon"
-                type="alert"
-                color="warning"
-                content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertsList.ruleTypeExcessDurationMessage',
-                  {
-                    defaultMessage: `Duration exceeds the rule's expected run time.`,
-                  }
-                )}
-                position="right"
-              />
-            )}
-          </>
-        );
-      },
-    },
-    {
-      field: 'monitoring.execution.calculated_metrics.success_ratio',
-      width: '12%',
-      name: (
-        <EuiToolTip
-          data-test-subj="alertsTableCell-successRatioTooltip"
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.successRatioTitle',
-            {
-              defaultMessage: 'How often this rule executes successfully',
-            }
-          )}
-        >
-          <span>
-            Success ratio{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-successRatio',
-      render: (value: number) => {
-        return (
-          <span data-test-subj="successRatio">
-            {value !== undefined ? getFormattedSuccessRatio(value) : 'N/A'}
-          </span>
-        );
-      },
-    },
-    {
-      field: 'executionStatus.status',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
-        { defaultMessage: 'Status' }
-      ),
-      sortable: true,
-      truncateText: false,
-      width: '120px',
-      'data-test-subj': 'alertsTableCell-status',
-      render: (_executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
-        return renderAlertExecutionStatus(item.executionStatus, item);
-      },
-    },
-    {
-      name: '',
-      width: '10%',
-      render(item: AlertTableItem) {
-        return (
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-            <EuiFlexItem grow={false} className="alertSidebarItem">
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                {item.isEditable && isRuleTypeEditableInContext(item.alertTypeId) ? (
-                  <EuiFlexItem grow={false} data-test-subj="alertSidebarEditAction">
-                    <EuiButtonIcon
-                      color={'primary'}
-                      title={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editButtonTooltip',
-                        { defaultMessage: 'Edit' }
-                      )}
-                      className="alertSidebarItem__action"
-                      data-test-subj="editActionHoverButton"
-                      onClick={() => onRuleEdit(item)}
-                      iconType={'pencil'}
-                      aria-label={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editAriaLabel',
-                        { defaultMessage: 'Edit' }
-                      )}
-                    />
-                  </EuiFlexItem>
-                ) : null}
-                {item.isEditable ? (
-                  <EuiFlexItem grow={false} data-test-subj="alertSidebarDeleteAction">
-                    <EuiButtonIcon
-                      color={'danger'}
-                      title={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteButtonTooltip',
-                        { defaultMessage: 'Delete' }
-                      )}
-                      className="alertSidebarItem__action"
-                      data-test-subj="deleteActionHoverButton"
-                      onClick={() => setAlertsToDelete([item.id])}
-                      iconType={'trash'}
-                      aria-label={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.deleteAriaLabel',
-                        { defaultMessage: 'Delete' }
-                      )}
-                    />
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <CollapsedItemActions
-                key={item.id}
-                item={item}
-                onAlertChanged={() => loadAlertsData()}
-                setAlertsToDelete={setAlertsToDelete}
-                onEditAlert={() => onRuleEdit(item)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
-    },
-  ];
-
   const alertsDataGridColumns: EuiDataGridColumn[] = [
     {
       id: 'enabled',
@@ -724,6 +385,8 @@ export const AlertsList: React.FunctionComponent = () => {
       isSortable: false,
       initialWidth: 50,
       'data-test-subj': 'alertsTableCell-tagsPopover',
+      actions: false,
+      isExpandable: false,
     },
     {
       id: 'executionStatus.lastExecutionDate',
@@ -756,6 +419,7 @@ export const AlertsList: React.FunctionComponent = () => {
         { defaultMessage: 'Interval' }
       ),
       isSortable: false,
+      isExpandable: false,
       'data-test-subj': 'alertsTableCell-interval',
     },
     {
@@ -880,8 +544,9 @@ export const AlertsList: React.FunctionComponent = () => {
           </>
         );
       },
-      tags: ({ tags, index }) =>
-        tags.length > 0 ? (
+      tags: ({ tags: origTags, index }) => {
+        const tags = [...origTags, 'testtag'];
+        return tags.length > 0 ? (
           <EuiPopover
             button={
               <EuiBadge
@@ -916,7 +581,8 @@ export const AlertsList: React.FunctionComponent = () => {
               </EuiBadge>
             ))}
           </EuiPopover>
-        ) : null,
+        ) : null;
+      },
       'executionStatus.lastExecutionDate': ({ executionStatus }) => {
         const date = executionStatus.lastExecutionDate;
         if (date) {
@@ -1375,9 +1041,9 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       />
 
-      <EuiBasicTable
+      {/* <EuiBasicTable
         loading={alertsState.isLoading || alertTypesState.isLoading || isPerformingAction}
-        /* Don't display alerts until we have the alert types initialized */
+        /* Don't display alerts until we have the alert types initialized
         items={
           alertTypesState.isInitialized === false
             ? []
@@ -1402,7 +1068,7 @@ export const AlertsList: React.FunctionComponent = () => {
         pagination={{
           pageIndex: page.index,
           pageSize: page.size,
-          /* Don't display alert count until we have the alert types initialized */
+          /* Don't display alert count until we have the alert types initialized 
           totalItemCount: alertTypesState.isInitialized === false ? 0 : alertsState.totalItemCount,
         }}
         selection={{
@@ -1425,7 +1091,7 @@ export const AlertsList: React.FunctionComponent = () => {
             setSort(changedSort);
           }
         }}
-      />
+      /> */}
       {manageLicenseModalOpts && (
         <ManageLicenseModal
           licenseType={manageLicenseModalOpts.licenseType}
