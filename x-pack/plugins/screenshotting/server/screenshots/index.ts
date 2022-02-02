@@ -51,64 +51,67 @@ const DEFAULT_SETUP_RESULT = {
   timeRange: null,
 };
 
-export function getScreenshots(
-  browserDriverFactory: HeadlessChromiumDriverFactory,
-  logger: Logger,
-  options: ScreenshotOptions
-): Observable<ScreenshotResult> {
-  const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
-  const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
-  const layout = createLayout(options.layout);
-  logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-  apmCreateLayout?.end();
+export class Screenshots {
+  constructor(
+    private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
+    private readonly logger: Logger
+  ) {}
 
-  const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
-  const {
-    browserTimezone,
-    timeouts: { openUrl: openUrlTimeout },
-  } = options;
+  getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
+    const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
+    const layout = createLayout(options.layout);
+    this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
+    apmCreateLayout?.end();
 
-  return browserDriverFactory
-    .createPage(
-      {
-        browserTimezone,
-        openUrlTimeout,
-        defaultViewport: { height: layout.height, width: layout.width },
-      },
-      logger
-    )
-    .pipe(
-      mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
-        apmCreatePage?.end();
-        metrics$.subscribe(({ cpu, memory }) => {
-          apmTrans?.setLabel('cpu', cpu, false);
-          apmTrans?.setLabel('memory', memory, false);
-        });
-        unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
+    const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
+    const {
+      browserTimezone,
+      timeouts: { openUrl: openUrlTimeout },
+    } = options;
 
-        const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
+    return this.browserDriverFactory
+      .createPage(
+        {
+          browserTimezone,
+          openUrlTimeout,
+          defaultViewport: { height: layout.height, width: layout.width },
+        },
+        this.logger
+      )
+      .pipe(
+        mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
+          apmCreatePage?.end();
+          metrics$.subscribe(({ cpu, memory }) => {
+            apmTrans?.setLabel('cpu', cpu, false);
+            apmTrans?.setLabel('memory', memory, false);
+          });
+          unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
-        return from(options.urls).pipe(
-          concatMap((url, index) =>
-            screen.setupPage(index, url, apmTrans).pipe(
-              catchError((error) => {
-                screen.checkPageIsOpen(); // this fails the job if the browser has closed
+          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, options);
 
-                logger.error(error);
-                return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
-              }),
-              takeUntil(unexpectedExit$),
-              screen.getScreenshots()
-            )
-          ),
-          take(options.urls.length),
-          toArray(),
-          mergeMap((results) => {
-            // At this point we no longer need the page, close it.
-            return close().pipe(mapTo({ layout, metrics$, results }));
-          })
-        );
-      }),
-      first()
-    );
+          return from(options.urls).pipe(
+            concatMap((url, index) =>
+              screen.setupPage(index, url, apmTrans).pipe(
+                catchError((error) => {
+                  screen.checkPageIsOpen(); // this fails the job if the browser has closed
+
+                  this.logger.error(error);
+                  return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
+                }),
+                takeUntil(unexpectedExit$),
+                screen.getScreenshots()
+              )
+            ),
+            take(options.urls.length),
+            toArray(),
+            mergeMap((results) => {
+              // At this point we no longer need the page, close it.
+              return close().pipe(mapTo({ layout, metrics$, results }));
+            })
+          );
+        }),
+        first()
+      );
+  }
 }
