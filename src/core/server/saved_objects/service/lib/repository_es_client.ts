@@ -28,7 +28,9 @@ const methods = [
 
 type MethodName = typeof methods[number];
 
-export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName>;
+export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName> &
+  // TODO: remove when the `this: { transport: Transport }` based API is fixed upstream
+  Pick<ElasticsearchClient, 'transport'>;
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {

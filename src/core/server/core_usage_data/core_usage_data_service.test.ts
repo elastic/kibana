@@ -207,37 +207,31 @@ describe('CoreUsageDataService', () => {
         });
         service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
         const elasticsearch = elasticsearchServiceMock.createStart();
-        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
-          body: [
-            {
-              name: '.kibana_task_manager_1',
-              'docs.count': '10',
-              'docs.deleted': '10',
-              'store.size': '1000',
-              'pri.store.size': '2000',
-            },
-          ],
-        } as any);
-        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
-          body: [
-            {
-              name: '.kibana_1',
-              'docs.count': '20',
-              'docs.deleted': '20',
-              'store.size': '2000',
-              'pri.store.size': '4000',
-            },
-          ],
-        } as any);
+        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce([
+          {
+            name: '.kibana_task_manager_1',
+            'docs.count': '10',
+            'docs.deleted': '10',
+            'store.size': '1000',
+            'pri.store.size': '2000',
+          },
+        ] as any);
+        elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce([
+          {
+            name: '.kibana_1',
+            'docs.count': '20',
+            'docs.deleted': '20',
+            'store.size': '2000',
+            'pri.store.size': '4000',
+          },
+        ] as any);
         elasticsearch.client.asInternalUser.search.mockResolvedValueOnce({
-          body: {
-            hits: { total: { value: 6 } },
-            aggregations: {
-              aliases: {
-                buckets: {
-                  active: { doc_count: 1 },
-                  disabled: { doc_count: 2 },
-                },
+          hits: { total: { value: 6 } },
+          aggregations: {
+            aliases: {
+              buckets: {
+                active: { doc_count: 1 },
+                disabled: { doc_count: 2 },
               },
             },
           },
