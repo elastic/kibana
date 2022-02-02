@@ -23,7 +23,7 @@ const SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT = '1m';
 
 export class SavedObjectsSyncService {
   private core: CoreStart | null = null;
-  private log: { [l: string]: (t: string, e?: any) => void };
+  private log: { [l: string]: (t: string, e?: Error) => void };
 
   constructor(logger: Logger) {
     const preText = `Task ${SAVED_OBJECTS_SYNC_TASK_ID}: `;
