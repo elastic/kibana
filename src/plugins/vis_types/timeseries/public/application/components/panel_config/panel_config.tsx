@@ -53,9 +53,9 @@ export function PanelConfig(props: PanelConfigProps) {
   const [visData, setVisData] = useState<TimeseriesVisData>({} as TimeseriesVisData);
 
   useEffect(() => {
-    const visDataSubscription = props.visData$.subscribe((data = {} as TimeseriesVisData) =>
-      setVisData(data)
-    );
+    const visDataSubscription = props.visData$.subscribe((data = {} as TimeseriesVisData) => {
+      setVisData(data);
+    });
 
     return () => visDataSubscription.unsubscribe();
   }, [model.id, props.visData$]);
@@ -86,7 +86,7 @@ export function PanelConfig(props: PanelConfigProps) {
         onChange(localModel);
       }
     }
-  }, [model.time_range_mode, model.series, visData.uiRestrictions]);
+  }, [onChange, model, visData.uiRestrictions]);
 
   const updateControlValidity = useCallback(
     (controlKey: string, isControlValid: boolean) => {
