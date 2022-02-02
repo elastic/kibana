@@ -101,7 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.id,
         transformConfigWithRuntimeMapping
       );
-
       await transform.api.createAndRunTransform(
         transformConfigWithLatest.id,
         transformConfigWithLatest
@@ -224,7 +223,8 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/124326
+      describe.skip(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
