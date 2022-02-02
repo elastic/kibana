@@ -14,6 +14,7 @@ import { withSuspense } from './utility';
  * `withSuspense` HOC to load this component.
  */
 export const LazyExitFullScreenButton = React.lazy(() => import('./exit_full_screen_button'));
+export const LazyToolbarButton = React.lazy(() => import('./toolbar_button'));
 
 /**
  * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
