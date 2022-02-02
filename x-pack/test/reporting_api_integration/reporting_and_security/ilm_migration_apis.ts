@@ -42,8 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('ILM policy migration APIs', function () {
-    this.onlyEsVersion('<=7');
-
     before(async () => {
       await security.role.create(reportingAPI.REPORTING_ROLE, {
         metadata: {},
@@ -51,7 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
           cluster: ['manage_ilm'],
           indices: [
             { names: ['ecommerce'], privileges: ['read'], allow_restricted_indices: false },
-            { names: ['.reporting-*'], privileges: ['all'], allow_restricted_indices: true },
+            {
+              names: ['.reporting-*'],
+              privileges: ['all', 'manage'],
+              allow_restricted_indices: true,
+            },
           ],
           run_as: [],
         },

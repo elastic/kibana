@@ -26,6 +26,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
@@ -222,8 +223,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const settings = {
       'index.lifecycle.name': null,
     };
-    await esSupertest
-      .put('/.reporting-*/_settings?expand_wildcards=all,hidden')
+    await esSupertestWithoutAuth
+      .put('/.reporting-*/_settings?expand_wildcards=all')
+      .auth(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD)
       .send({
         settings,
       })
