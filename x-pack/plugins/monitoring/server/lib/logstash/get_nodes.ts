@@ -81,28 +81,23 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
-  const query = createQuery({
-    type,
-    dsDataset: `${moduleType}.${dataset}`,
-    metricset: dataset,
-    start,
-    end,
-    clusterUuid,
-    metric: LogstashMetric.getMetricFields(),
-  });
-
-  query.bool.filter.push({
-    exists: {
-      field: 'logstash_stats.logstash.uuid',
-    },
-  });
+  const filters = [{ exists: { field: 'logstash_stats.logstash.uuid' } }];
 
   const params = {
     index: indexPatterns,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignore_unavailable: true,
     body: {
-      query,
+      query: createQuery({
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
+        filters,
+        start,
+        end,
+        clusterUuid,
+        metric: LogstashMetric.getMetricFields(),
+      }),
       collapse: {
         field: 'logstash_stats.logstash.uuid',
       },
