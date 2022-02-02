@@ -24,7 +24,6 @@ import { Direction } from '../../../../../../common/search_strategy';
 import { getDefaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
 import { HeaderActions } from '../actions/header_actions';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../common/lib/kibana');
 
