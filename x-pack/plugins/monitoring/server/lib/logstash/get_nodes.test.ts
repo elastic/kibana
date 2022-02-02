@@ -8,7 +8,6 @@
 import { getNodes } from './get_nodes';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { LegacyRequest } from '../../types';
-import sinon from 'sinon';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -26,10 +25,10 @@ describe('getNodes', () => {
   it('ensures collapse key is present query responses', async () => {
     const response = {};
 
+    const configs: { [key: string]: number } = { 'monitoring.ui.max_bucket_size': 10000 };
     const config = {
-      get: sinon.stub(),
+      get: jest.fn().mockImplementation((key: string) => configs[key]),
     };
-    config.get.withArgs('monitoring.ui.max_bucket_size').returns(10000);
 
     const callWithRequest = jest.fn().mockResolvedValue(response);
 
