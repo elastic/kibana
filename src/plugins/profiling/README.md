@@ -14,7 +14,7 @@ A Kibana plugin
 ### Configure local Kibana environment
 
 The easiest way to configure your local Kibana environment is to create a
-`kibana.dev.yml` in the repo's root directory.
+`config/kibana.dev.yml` in the repo's root directory.
 
 Example configuration:
 
