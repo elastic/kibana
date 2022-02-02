@@ -6390,7 +6390,6 @@
     "xpack.apm.alertTypes.transactionErrorRate.description": "サービスのトランザクションエラー率が定義されたしきい値を超過したときにアラートを発行します。",
     "xpack.apm.analyzeDataButton.label": "データの探索",
     "xpack.apm.analyzeDataButton.tooltip": "データの探索では、任意のディメンションの結果データを選択してフィルタリングし、パフォーマンスの問題の原因または影響を調査することができます。",
-    "xpack.apm.analyzeDataButtonLabel.message": "データの探索では、任意のディメンションの結果データを選択してフィルタリングし、パフォーマンスの問題の原因または影響を調査することができます。",
     "xpack.apm.anomaly_detection.error.invalid_license": "異常検知を使用するには、Elastic Platinumライセンスのサブスクリプションが必要です。このライセンスがあれば、機械学習を活用して、サービスを監視できます。",
     "xpack.apm.anomaly_detection.error.missing_read_privileges": "異常検知ジョブを表示するには、機械学習およびAPMの「読み取り」権限が必要です",
     "xpack.apm.anomaly_detection.error.missing_write_privileges": "異常検知ジョブを作成するには、機械学習およびAPMの「書き込み」権限が必要です",

@@ -6442,8 +6442,6 @@
     "xpack.apm.alertTypes.transactionErrorRate.description": "当服务中的事务错误率超过定义的阈值时告警。",
     "xpack.apm.analyzeDataButton.label": "浏览数据",
     "xpack.apm.analyzeDataButton.tooltip": "“浏览数据”允许您选择和筛选任意维度中的结果数据以及查找性能问题的原因或影响",
-    "xpack.apm.analyzeDataButtonLabel": "浏览数据",
-    "xpack.apm.analyzeDataButtonLabel.message": "“浏览数据”允许您选择和筛选任意维度中的结果数据以及查找性能问题的原因或影响。",
     "xpack.apm.anomaly_detection.error.invalid_license": "要使用异常检测，必须订阅 Elastic 白金级许可证。有了该许可证，您便可借助 Machine Learning 监测服务。",
     "xpack.apm.anomaly_detection.error.missing_read_privileges": "必须对 Machine Learning 和 APM 具有“读”权限，才能查看“异常检测”作业",
     "xpack.apm.anomaly_detection.error.missing_write_privileges": "必须对 Machine Learning 和 APM 具有“写”权限，才能创建“异常检测”作业",
