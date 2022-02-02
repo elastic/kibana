@@ -51,7 +51,10 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
       actions: { setIsInMemorySorting },
     } = useRulesTableContext();
 
-    const { tours, goToNextStep } = useFeatureTour();
+    const {
+      steps: { inMemoryTableStepProps },
+      goToNextStep,
+    } = useFeatureTour();
 
     return (
       <ToolbarLayout>
@@ -68,7 +71,7 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
             </EuiTab>
           ))}
         </EuiTabs>
-        <EuiTourStep {...tours[0]}>
+        <EuiTourStep {...inMemoryTableStepProps}>
           <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
             <EuiSwitch
               label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}

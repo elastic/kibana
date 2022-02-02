@@ -57,7 +57,10 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
-    const { tours, finishTour } = useFeatureTour();
+    const {
+      steps: { bulkActionsStepProps },
+      finishTour,
+    } = useFeatureTour();
 
     const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
@@ -138,7 +141,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 {canBulkEdit && (
-                  <EuiTourStep {...tours[1]}>
+                  <EuiTourStep {...bulkActionsStepProps}>
                     <UtilityBarAction
                       disabled={hasDisabledActions}
                       inProgress={isBulkActionInProgress}

@@ -16,7 +16,7 @@ const featuresTourSteps: EuiStatelessTourStep[] = [
   {
     step: 1,
     title: null,
-    content: <p>{i18n.FEATURE_TOUR_ADVANCED_SORTING_STEP}</p>,
+    content: <p>{i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP}</p>,
     stepsTotal: 2,
     children: <></>,
     onFinish: noop,
@@ -46,7 +46,7 @@ export const useFeatureTour = () => {
 
   const state = storage.get(STORAGE_KEY) ?? tourConfig;
 
-  const [tours, actions, reducerState] = useEuiTour(featuresTourSteps, state);
+  const [steps, actions, reducerState] = useEuiTour(featuresTourSteps, state);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(reducerState));
@@ -56,7 +56,10 @@ export const useFeatureTour = () => {
   const goToNextStep = useCallback(() => actions.incrementStep(), [actions]);
 
   return {
-    tours,
+    steps: {
+      inMemoryTableStepProps: steps[0],
+      bulkActionsStepProps: steps[1],
+    },
     finishTour,
     goToNextStep,
   };

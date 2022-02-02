@@ -95,8 +95,8 @@ export const FEATURE_TOUR_TITLE = i18n.translate(
   }
 );
 
-export const FEATURE_TOUR_ADVANCED_SORTING_STEP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.advancedSortingStepDescription',
+export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepDescription',
   {
     defaultMessage: 'Try out our new UI for advanced sorting and filtering capabilities',
   }
