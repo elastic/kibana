@@ -33,7 +33,7 @@ interface ProcessTreeDeps {
 
   // currently selected process
   selectedProcess?: Process | null;
-  onProcessSelected?: (process: Process) => void;
+  onProcessSelected: (process: Process) => void;
   setSearchResults?: (results: Process[]) => void;
 }
 
@@ -134,7 +134,7 @@ export const ProcessTree = ({
     if (jumpToEvent && data.length === 2) {
       const process = processMap[jumpToEvent.process.entity_id];
 
-      if (process && onProcessSelected) {
+      if (process) {
         onProcessSelected(process);
       }
     }
@@ -142,7 +142,7 @@ export const ProcessTree = ({
 
   // auto selects the session leader process if no selection is made yet
   useEffect(() => {
-    if (!selectedProcess && onProcessSelected) {
+    if (!selectedProcess) {
       onProcessSelected(sessionLeader);
     }
   }, [sessionLeader, onProcessSelected, selectedProcess]);

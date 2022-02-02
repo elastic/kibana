@@ -8,27 +8,16 @@
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
 
-interface StylesDeps {
-  height: number | undefined;
-}
-
-export const useStyles = ({ height = 500 }: StylesDeps) => {
+export const useStyles = () => {
   const cached = useMemo(() => {
-    // const { colors, border, font, size } = euiTheme;
-
-    const processTree: CSSObject = {
-      height: `${height}px`,
-    };
-
-    const detailPanel: CSSObject = {
-      height: `${height}px`,
+    const descriptionList: CSSObject = {
+      padding: '8px',
     };
 
     return {
-      processTree,
-      detailPanel,
+      descriptionList,
     };
-  }, [height]);
+  }, []);
 
   return cached;
 };

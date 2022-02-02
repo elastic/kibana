@@ -13,14 +13,14 @@ export enum EventKind {
 export enum EventAction {
   fork = 'fork',
   exec = 'exec',
-  exit = 'exit',
+  end = 'end',
   output = 'output',
 }
 
 export interface EventActionPartition {
   fork: ProcessEvent[];
   exec: ProcessEvent[];
-  exit: ProcessEvent[];
+  end: ProcessEvent[];
   output: ProcessEvent[];
 }
 
@@ -31,6 +31,22 @@ export interface User {
 
 export interface ProcessEventResults {
   events: any[];
+}
+
+export type EntryMetaType =
+  | 'init'
+  | 'sshd'
+  | 'ssm'
+  | 'kubelet'
+  | 'teleport'
+  | 'terminal'
+  | 'console';
+
+export interface EntryMeta {
+  type: EntryMetaType;
+  source: {
+    ip: string;
+  };
 }
 
 export interface Teletype {
@@ -56,6 +72,7 @@ export interface ProcessFields {
   end?: Date;
   user: User;
   exit_code?: number;
+  entry_meta?: EntryMeta;
   tty: Teletype;
 }
 
@@ -114,8 +131,7 @@ export interface ProcessEvent {
     category: string;
     action: EventAction;
   };
-  // optional host for now (raw agent output doesn't have server identity)
-  host?: ProcessEventHost;
+  host: ProcessEventHost;
   process: ProcessSelf;
   kibana?: {
     alert: ProcessEventAlert;

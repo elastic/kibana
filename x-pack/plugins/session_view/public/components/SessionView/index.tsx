@@ -4,8 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiSplitPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useState, ComponentType } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiResizableContainer,
+} from '@elastic/eui';
+import { EuiResizableButtonProps } from '@elastic/eui/src/components/resizable_container/resizable_button';
+import { EuiResizablePanelProps } from '@elastic/eui/src/components/resizable_container/resizable_panel';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
@@ -27,15 +35,12 @@ interface SessionViewDeps {
  */
 export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isDetailMounted, setIsDetailMounted] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
 
   const styles = useStyles({ height });
 
   const onProcessSelected = (process: Process) => {
-    if (selectedProcess !== process) {
-      setSelectedProcess(process);
-    }
+    setSelectedProcess(process);
   };
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,25 +112,36 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     }
   };
 
-  const renderSessionViewDetailPanel = () => {
+  const renderSessionViewDetailPanel = (
+    EuiResizableButton: ComponentType<EuiResizableButtonProps>,
+    EuiResizablePanel: ComponentType<EuiResizablePanelProps>
+  ) => {
     if (isDetailOpen) {
       return (
-        <SessionViewDetailPanel
-          data-test-subj="detailsPanel"
-          isDetailMounted={isDetailMounted}
-          height={height}
-          selectedProcess={selectedProcess}
-          setIsDetailOpen={setIsDetailOpen}
-        />
+        <>
+          <EuiResizableButton />
+
+          <EuiResizablePanel
+            id="session-detail-panel"
+            initialSize={30}
+            minSize="200px"
+            paddingSize="none"
+            css={styles.detailPanel}
+          >
+            <SessionViewDetailPanel
+              selectedProcess={selectedProcess}
+              onProcessSelected={onProcessSelected}
+            />
+          </EuiResizablePanel>
+        </>
       );
     }
+
+    return <></>;
   };
 
   const toggleDetailPanel = () => {
-    setIsDetailMounted(!isDetailMounted);
-    if (!isDetailOpen) {
-      setIsDetailOpen(true);
-    }
+    setIsDetailOpen(!isDetailOpen);
   };
 
   if (!isFetching && !hasData) {
@@ -157,17 +173,21 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSplitPanel.Outer
-        direction="row"
-        color="transparent"
-        borderRadius="none"
-        css={styles.outerPanel}
-      >
-        <EuiSplitPanel.Inner paddingSize="none" css={styles.treePanel}>
-          {renderProcessTree()}
-        </EuiSplitPanel.Inner>
-        {renderSessionViewDetailPanel()}
-      </EuiSplitPanel.Outer>
+      <EuiResizableContainer>
+        {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
+          <>
+            <EuiResizablePanel
+              initialSize={isDetailOpen ? 70 : 100}
+              minSize="600px"
+              paddingSize="none"
+            >
+              {renderProcessTree()}
+            </EuiResizablePanel>
+
+            {renderSessionViewDetailPanel(EuiResizableButton, EuiResizablePanel)}
+          </>
+        )}
+      </EuiResizableContainer>
     </>
   );
 };

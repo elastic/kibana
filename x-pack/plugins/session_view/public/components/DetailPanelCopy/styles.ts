@@ -8,27 +8,20 @@
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
 
-interface StylesDeps {
-  height: number | undefined;
-}
-
-export const useStyles = ({ height = 500 }: StylesDeps) => {
+export const useStyles = () => {
   const cached = useMemo(() => {
-    // const { colors, border, font, size } = euiTheme;
-
-    const processTree: CSSObject = {
-      height: `${height}px`,
-    };
-
-    const detailPanel: CSSObject = {
-      height: `${height}px`,
+    const copyButton: CSSObject = {
+      position: 'absolute',
+      right: '8px',
+      top: 0,
+      bottom: 0,
+      margin: 'auto',
     };
 
     return {
-      processTree,
-      detailPanel,
+      copyButton,
     };
-  }, [height]);
+  }, []);
 
   return cached;
 };
