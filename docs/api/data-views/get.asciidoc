@@ -6,6 +6,7 @@
 
 experimental[] Retrieve a single data view by ID.
 
+[float]
 [[data-views-api-get-request]]
 ==== Request
 
@@ -13,6 +14,7 @@ experimental[] Retrieve a single data view by ID.
 
 `GET <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>`
 
+[float]
 [[data-views-api-get-params]]
 ==== Path parameters
 
@@ -22,6 +24,7 @@ experimental[] Retrieve a single data view by ID.
 `id`::
 (Required, string) The ID of the data view you want to retrieve.
 
+[float]
 [[data-views-api-get-codes]]
 ==== Response code
 
@@ -31,6 +34,7 @@ Indicates a successful call.
 `404`::
 The specified data view and ID doesn't exist.
 
+[float]
 [[data-views-api-get-example]]
 ==== Example
 
