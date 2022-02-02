@@ -318,7 +318,7 @@ describe('embeddable', () => {
     expect(spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict).toHaveBeenCalled();
   });
 
-  it('should not render if timeRange prop is not passed when a referenced indexPattern is time based', async () => {
+  it('should not render if timeRange prop is not passed when a referenced data view is time based', async () => {
     attributeService = attributeServiceMockFromSavedVis({
       ...savedVis,
       references: [
