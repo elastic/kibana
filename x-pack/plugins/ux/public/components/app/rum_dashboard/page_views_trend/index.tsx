@@ -20,8 +20,8 @@ import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
 import { createExploratoryViewUrl } from '../../../../../../observability/public';
-import { BreakdownItem } from '../../../../../../apm/typings/ui_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export function PageViewsTrend() {
   const { http } = useKibanaServices();

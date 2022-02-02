@@ -34,7 +34,7 @@ import { ChartWrapper } from '../chart_wrapper';
 import { PercentileRange } from '../page_load_distribution';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { BreakdownSeries } from '../page_load_distribution/breakdown_series';
-import { BreakdownItem } from '../../../../../../apm/typings/ui_filters';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface PageLoadData {
   pageLoadDistribution: Array<{ x: number; y: number }>;

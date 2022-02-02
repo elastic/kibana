@@ -13,7 +13,6 @@ import { UXAppRoot } from './ux_app';
 import { RumHome } from '../components/app/rum_dashboard/rum_home';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { createObservabilityRuleTypeRegistryMock } from '../../../observability/public';
-import { ConfigSchema } from '../../../apm/public';
 import { merge } from 'lodash';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
@@ -26,13 +25,6 @@ jest.mock('../components/app/rum_dashboard/rum_home', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 
-const mockConfig: ConfigSchema = {
-  serviceMapEnabled: true,
-  ui: {
-    enabled: false,
-  },
-  profilingEnabled: false,
-};
 const mockPlugin = {
   data: {
     query: {
@@ -108,7 +100,6 @@ const mockCore = merge({}, coreStart, {
 
 export const mockApmPluginContextValue = {
   appMountParameters: coreMock.createAppMountParameters('/basepath'),
-  config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),

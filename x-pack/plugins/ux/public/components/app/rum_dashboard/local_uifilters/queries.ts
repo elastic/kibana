@@ -6,11 +6,12 @@
  */
 
 import { ESFilter } from 'src/core/types/elasticsearch';
+
+import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../../apm/common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../../../../apm/common/elasticsearch_fieldnames';
+} from '../../../../../common/environment_filter_values';
 
 type QueryDslQueryContainer = ESFilter;
 

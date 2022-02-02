@@ -10,7 +10,7 @@ import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { enableInspectEsQueries } from '../../../../observability/public';
-import { FetchOptions } from '../../../../apm/common/fetch_options';
+import { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(
   fetchOptions: FetchOptions,

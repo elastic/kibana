@@ -25,18 +25,18 @@ import { SelectedFilters } from './selected_filters';
 import { useDataView } from './use_data_view';
 import { environmentQuery } from './queries';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../../apm/common/transaction_types';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../../apm/common/elasticsearch_fieldnames';
 
-import { ENVIRONMENT_ALL } from '../../../../../../apm/common/environment_filter_values';
 import {
   uxFiltersByName,
   UxLocalUIFilterName,
   uxLocalUIFilterNames,
 } from '../../../../../common/ux_ui_filter';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
 
 const filterNames: UxLocalUIFilterName[] = [
   'location',

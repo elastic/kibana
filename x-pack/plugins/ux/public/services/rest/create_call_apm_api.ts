@@ -25,7 +25,7 @@ import type {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../apm/server';
 import { InspectResponse } from '../../../../observability/typings/common';
-import type { FetchOptions } from '../../../../apm/common/fetch_options';
+import { FetchOptions } from '../../../common/fetch_options';
 
 export type APMClientOptions = Omit<
   FetchOptions,

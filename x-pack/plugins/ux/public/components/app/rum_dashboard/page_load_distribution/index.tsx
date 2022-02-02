@@ -21,8 +21,8 @@ import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageLoadDistChart } from '../charts/page_load_dist_chart';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
 import { createExploratoryViewUrl } from '../../../../../../observability/public';
-import { BreakdownItem } from '../../../../../../apm/typings/ui_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export interface PercentileRange {
   min?: number | null;

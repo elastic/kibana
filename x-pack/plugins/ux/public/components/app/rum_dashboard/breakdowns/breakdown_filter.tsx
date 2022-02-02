@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { BreakdownItem } from '../../../../../../apm/typings/ui_filters';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 interface Props {
   selectedBreakdown: BreakdownItem | null;
