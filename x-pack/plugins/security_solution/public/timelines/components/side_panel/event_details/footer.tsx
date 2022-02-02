@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { find, get, isEmpty } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
