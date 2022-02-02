@@ -37,6 +37,7 @@ import { heatmap } from './heatmap';
 
 import { SetupInitializer } from '../plugin';
 import { ElementFactory } from '../../types';
+import { pieVis } from './pie_vis';
 
 const elementSpecs = [
   areaChart,
@@ -65,6 +66,7 @@ const elementSpecs = [
   verticalProgressPill,
   tagCloud,
   heatmap,
+  pieVis,
 ];
 
 const initializeElementFactories = [metricElementInitializer];
