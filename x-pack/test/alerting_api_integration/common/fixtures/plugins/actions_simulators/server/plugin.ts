@@ -62,10 +62,6 @@ export async function getHttpsWebhookServer(): Promise<https.Server> {
   return httpsServer;
 }
 
-export async function getXmattersServer(): Promise<http.Server> {
-  return await initXmatters();
-}
-
 export async function getSlackServer(): Promise<http.Server> {
   return await initSlack();
 }
@@ -128,6 +124,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     const router: IRouter = core.http.createRouter();
 
+    initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));

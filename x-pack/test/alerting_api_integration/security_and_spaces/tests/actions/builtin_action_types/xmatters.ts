@@ -5,31 +5,41 @@
  * 2.0.
  */
 
-import http from 'http';
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
-import getPort from 'get-port';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { getXmattersServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function xmattersTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+  const configService = getService('config');
 
   describe.only('xmatters action', () => {
     let simulatedActionId = '';
-    let xmattersServer: http.Server;
     let xmattersSimulatorURL: string = '';
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
-      xmattersServer = await getXmattersServer();
-      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
-      if (!xmattersServer.listening) {
-        xmattersServer.listen(availablePort);
-      }
-      xmattersSimulatorURL = `http://localhost:${availablePort}`;
+      xmattersSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS)
+      );
+      proxyServer = await getHttpProxyServer(
+        kibanaServer.resolveUrl('/'),
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
+      );
     });
 
     it('xmatters connector can be executed without username and password', async () => {
@@ -59,6 +69,8 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           hasAuth: false,
         },
       });
+
+      expect(typeof createdAction.id).to.be('string');
     });
 
     it('xmatters connector can be executed with valid username and password', async () => {
@@ -92,6 +104,8 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           hasAuth: true,
         },
       });
+
+      expect(typeof createdAction.id).to.be('string');
     });
 
     it('should return unsuccessfully when default xmatters url is not present in allowedHosts', async () => {
@@ -144,9 +158,9 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            summary: 'success',
-            alertActionGroupName: 'small t-shirt',
+            alertActionGroupName: 'success',
             alertId: 'abcd-1234',
+            severity: 'High',
           },
         })
         .expect(200);
@@ -155,12 +169,13 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         status: 'ok',
         connector_id: simulatedActionId,
         data: {
-          message: 'Event processed',
-          summary: 'success',
-          alertActionGroupName: 'small t-shirt',
+          alertActionGroupName: 'success',
           alertId: 'abcd-1234',
+          severity: 'High',
         },
       });
+
+      expect(proxyHaveBeenCalled).to.equal(true);
     });
 
     it('should handle a 40x xmatters error', async () => {
@@ -169,14 +184,14 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            summary: 'respond-with-40x',
-            alertActionGroupName: 'small t-shirt',
+            alertActionGroupName: 'respond-with-400',
             alertId: 'abcd-1234',
+            severity: 'High',
           },
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting xmatters event: unexpected status 418/);
+      expect(result.message).to.match(/error calling xMatters, invalid response/);
     });
 
     it('should handle a 429 xmatters error', async () => {
@@ -185,16 +200,15 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            summary: 'respond-with-429',
-            alertActionGroupName: 'small t-shirt',
+            alertActionGroupName: 'respond-with-429',
             alertId: 'abcd-1234',
+            severity: 'High',
           },
         })
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting xmatters event: http status 429, retry later/);
-      expect(result.retry).to.equal(true);
+      expect(result.message).to.match(/error calling xMatters, invalid response/);
     });
 
     it('should handle a 500 xmatters error', async () => {
@@ -203,16 +217,22 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            summary: 'respond-with-502',
-            alertActionGroupName: 'small t-shirt',
+            alertActionGroupName: 'respond-with-502',
             alertId: 'abcd-1234',
+            severity: 'High',
           },
         })
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting xmatters event: http status 502/);
+      expect(result.message).to.match(/error calling xMatters, retry later/);
       expect(result.retry).to.equal(true);
+    });
+
+    after(() => {
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }

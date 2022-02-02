@@ -5,39 +5,70 @@
  * 2.0.
  */
 
-import http from 'http';
+import { schema } from '@kbn/config-schema';
+import {
+  RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+  IKibanaResponse,
+  IRouter,
+} from 'kibana/server';
 
-export async function initPlugin() {
-  return http.createServer((request, response) => {
-    if (request.method === 'POST') {
-      let data = '';
-      request.on('data', (chunk) => {
-        data += chunk;
+export function initPlugin(router: IRouter, path: string) {
+  console.log('bubly1');
+  router.post(
+    {
+      path,
+      options: {
+        authRequired: false,
+      },
+      validate: {
+        body: schema.object({
+          alertId: schema.string(),
+          alertActionGroupName: schema.string(),
+          ruleName: schema.maybe(schema.string()),
+          date: schema.maybe(schema.string()),
+          severity: schema.string(),
+          spaceId: schema.maybe(schema.string()),
+          tags: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      console.log('bubly2');
+      const { body } = req;
+      const alertActionGroupName = body?.alertActionGroupName;
+      console.log('bubly3');
+      console.log(body);
+      console.log(alertActionGroupName);
+      switch (alertActionGroupName) {
+        case 'respond-with-400':
+          return jsonErrorResponse(res, 400, new Error(alertActionGroupName));
+        case 'respond-with-429':
+          return jsonErrorResponse(res, 429, new Error(alertActionGroupName));
+        case 'respond-with-502':
+          return jsonErrorResponse(res, 502, new Error(alertActionGroupName));
+      }
+      console.log('bubly4');
+      return jsonResponse(res, 202, {
+        status: 'success',
       });
-      request.on('end', () => {
-        switch (data) {
-          case 'success':
-            response.statusCode = 200;
-            response.end('OK');
-            return;
-          case 'respond-with-40x':
-            response.statusCode = 400;
-            response.end('Error');
-            return;
-          case 'respond-with-429':
-            response.statusCode = 429;
-            response.end('Error');
-            return;
-          case 'respond-with-502':
-            response.statusCode = 502;
-            response.end('Error');
-            return;
-        }
-      });
-    } else {
-      response.writeHead(400, { 'Content-Type': 'text/plain' });
-      response.end('Not supported http method to request xMatters simulator');
-      return;
     }
-  });
+  );
+}
+
+function jsonResponse(
+  res: KibanaResponseFactory,
+  code: number,
+  object: Record<string, unknown> = {}
+) {
+  return res.custom<Record<string, unknown>>({ body: object, statusCode: code });
+}
+
+function jsonErrorResponse(res: KibanaResponseFactory, code: number, object: Error) {
+  return res.custom<Error>({ body: object, statusCode: code });
 }
