@@ -54,8 +54,8 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  alertActionGroupName: schema.nullable(schema.string()),
-  alertId: schema.nullable(schema.string()),
+  alertActionGroupName: schema.maybe(schema.string()),
+  alertId: schema.maybe(schema.string()),
   ruleName: schema.maybe(schema.string()),
   date: schema.maybe(schema.string()),
   severity: schema.maybe(schema.string()),
@@ -253,36 +253,9 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
   };
 }
 
-function retryResultSeconds(
-  actionId: string,
-  serviceMessage: string,
-
-  retryAfter: number
-): ActionTypeExecutorResult<void> {
-  const retryEpoch = Date.now() + retryAfter * 1000;
-  const retry = new Date(retryEpoch);
-  const retryString = retry.toISOString();
-  const errMessage = i18n.translate(
-    'xpack.actions.builtin.xmatters.invalidResponseRetryDateErrorMessage',
-    {
-      defaultMessage: 'error calling xMatters, retry at {retryString}',
-      values: {
-        retryString,
-      },
-    }
-  );
-  return {
-    status: 'error',
-    message: errMessage,
-    retry,
-    actionId,
-    serviceMessage,
-  };
-}
-
 interface XmattersPayload {
-  alertActionGroupName: string;
-  alertId: string;
+  alertActionGroupName?: string;
+  alertId?: string;
   ruleName?: string;
   date?: string;
   severity?: string;

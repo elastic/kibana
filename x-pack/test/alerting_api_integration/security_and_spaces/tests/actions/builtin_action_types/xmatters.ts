@@ -22,7 +22,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
-  describe.only('xmatters action', () => {
+  describe('xmatters action', () => {
     let simulatedActionId = '';
     let xmattersSimulatorURL: string = '';
     let proxyServer: httpProxy | undefined;
