@@ -267,7 +267,7 @@ export function getUiSettings(
     },
     [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: {
       name: 'Search in frozen indices',
-      description: `Will include <a href=${docLinks.links.apis.unfreezeIndex}
+      description: `Will include <a href=${docLinks.links.elasticsearch.frozenIndices}
         target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
