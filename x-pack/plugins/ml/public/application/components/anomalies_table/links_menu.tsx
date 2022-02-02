@@ -55,7 +55,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     let unmounted = false;
     const generateDiscoverUrl = async () => {
       const {
-        services: { share },
+        services: { share, data },
       } = props.kibana;
       const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
@@ -69,7 +69,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const index = job.datafeed_config.indices[0];
       const interval = props.interval;
-      const dataViewId = (await getDataViewIdFromName(index)) || index;
+      let dataViewId = await getDataViewIdFromName(index);
+
+      // If data view doesn't exist for some reasons
+      if (!dataViewId) {
+        // Direct to Discover with index name if user has permission to create index patterns
+        // if not don't show the link at all
+        if (!(await data.dataViews.getCanSave())) return;
+        dataViewId = index;
+      }
       const record = props.anomaly.source;
 
       const earliestMoment = moment(record.timestamp).startOf(interval);
