@@ -94,7 +94,7 @@ export function ColorRangeEditButton({
     tooltipContent = i18n.translate(
       'xpack.lens.dynamicColoring.customPalette.disallowedEditMinMaxValues',
       {
-        defaultMessage: `For current configuration you can not set custom value`,
+        defaultMessage: `You cannot set custom value for current configuration`,
       }
     );
   }
