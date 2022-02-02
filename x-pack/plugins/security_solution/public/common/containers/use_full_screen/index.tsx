@@ -28,12 +28,12 @@ export const resetScroll = () => {
     }
   }, 0);
 };
-interface GlobalFullScreen {
+export interface GlobalFullScreen {
   globalFullScreen: boolean;
   setGlobalFullScreen: (fullScreen: boolean) => void;
 }
 
-interface TimelineFullScreen {
+export interface TimelineFullScreen {
   timelineFullScreen: boolean;
   setTimelineFullScreen: (fullScreen: boolean) => void;
 }
