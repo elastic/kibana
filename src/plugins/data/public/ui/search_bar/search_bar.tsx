@@ -625,15 +625,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           savedQueryManagement={savedQueryManagement}
           applySelectedSavedQueries={this.applyTimeFilterOverrideModal}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          // prepend={
-          //   this.props.showFilterBar && this.state.query
-          //     ? this.renderSavedQueryManagement(
-          //         this.props.onClearSavedQuery,
-          //         this.props.showSaveQuery,
-          //         this.props.savedQuery
-          //       )
-          //     : undefined
-          // }
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

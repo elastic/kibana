@@ -245,10 +245,10 @@ export function AddFilterModal({
             placeholder={
               selectedField
                 ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                  defaultMessage: 'Operator',
+                defaultMessage: 'Operator',
                 })
                 : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                  defaultMessage: 'Waiting',
+                defaultMessage: 'Waiting',
                 })
             }
             options={operators}
@@ -434,8 +434,8 @@ export function AddFilterModal({
               subGroup.length > 1 && groupsCount > 1
                 ? 'kbnQueryBar__filterModalSubGroups'
                 : groupsCount === 1 && subGroup.length > 1
-                  ? 'kbnQueryBar__filterModalGroups'
-                  : '';
+                ? 'kbnQueryBar__filterModalGroups'
+                : '';
             return (
               <>
                 <div className={classNames(classes)}>
@@ -510,7 +510,8 @@ export function AddFilterModal({
                                     operator: undefined,
                                     value: undefined,
                                     relationship: undefined,
-                                    groupId: filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                    groupId:
+                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
                                     subGroupId,
                                     id: localFilters.length,
                                   },

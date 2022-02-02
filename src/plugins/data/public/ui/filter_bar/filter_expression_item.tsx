@@ -474,7 +474,7 @@ export const FilterExpressionItem: FC<Props> = ({
       button={badge}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={getPanels(groupId)} />
+      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
     </EuiPopover>
   );
 };

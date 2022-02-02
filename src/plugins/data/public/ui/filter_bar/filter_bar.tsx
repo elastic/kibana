@@ -93,7 +93,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props?.onFiltersUpdated?.(filters);
   }
 
-  function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+  function onEditMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
     const mappedFilters = mapAndFlattenFilters(buildFilters);
     const mergedFilters = mappedFilters.map((filter, idx) => {
       return {
@@ -158,7 +158,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
-          onClick={() => { }}
+          onClick={() => {}}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
@@ -181,7 +181,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupId={groupId}
           groupedFilters={groupedByAlias[label]}
           indexPatterns={props?.indexPatterns}
-          onClick={() => { }}
+          onClick={() => {}}
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={1}
@@ -200,7 +200,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         {props.isEditFilterModalOpen && (
           <EditFilterModal
             onSubmit={onAddMultipleFilters}
-            onMultipleFiltersSubmit={onAddMultipleFiltersANDOR}
+            onMultipleFiltersSubmit={onEditMultipleFiltersANDOR}
             applySavedQueries={() => props.toggleEditFilterModal?.(false)}
             onCancel={() => props.toggleEditFilterModal?.(false)}
             filter={props.filters[0]}
