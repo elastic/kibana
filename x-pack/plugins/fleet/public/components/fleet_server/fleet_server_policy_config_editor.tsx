@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useMemo } from 'react';
+import React, { useState, Fragment, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import satisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,7 @@ import type { PackagePolicyEditExtensionComponentProps } from '../../../public';
 
 import type {
   NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
@@ -62,10 +63,16 @@ function deepAssignSingle(target: Record<string, any>, source: Record<string, an
   }
 }
 
+interface ConfigAnnotations {
+  [key: string]: any;
+}
+
 class ConfigMutator {
   readonly fieldMutators: FieldMutationMap;
-  constructor(mutators: FieldMutationMap) {
+  readonly configAnnotations: ConfigAnnotations;
+  constructor(mutators: FieldMutationMap, annotations: ConfigAnnotations) {
     this.fieldMutators = mutators;
+    this.configAnnotations = annotations;
   }
 
   public mutate(field: string, value: any): ReturnType<ConfigMutation> {
@@ -85,6 +92,7 @@ class ConfigMutator {
     for (const key of Object.keys(newConfig)) {
       const value = newConfig[key];
       currentPath.push(key);
+      // recurse in the case where it isn't a leaf node
       if (typeof value === 'object' && value.value == null && value.type == null) {
         const subMutation = this.applyMutations(value, oldConfig[key], currentPath);
         if (Object.keys(subMutation).length > 0) {
@@ -94,6 +102,7 @@ class ConfigMutator {
         this.fieldMutators[currentPath.join('.')] &&
         value.value !== oldConfig[key].value
       ) {
+        // compute the changes associated with the current path
         Object.assign(mutationValues, this.mutate(currentPath.join('.'), value));
       }
       currentPath.pop();
@@ -107,21 +116,37 @@ interface MutatorMap {
 }
 
 interface MutationResult {
-  [key: string]: any;
+  [key: string]: PackagePolicyConfigRecordEntry;
 }
 
+const intPattern = /^-?[0-9]+(?:.0+)?$/;
 const versionToMutator: MutatorMap = {
-  '>=1.1.1': new ConfigMutator({
-    'vars.max_connections': function toMaxAgents({ value }: { value: string }): MutationResult {
-      return { max_agents: { value: Math.ceil(parseInt(value, 10) / 2), type: 'integer' } };
+  '>=1.2.0': new ConfigMutator(
+    {
+      'vars.max_connections': function toMaxAgents({ value }: { value: string }): MutationResult {
+        if (!intPattern.test(value)) {
+          return { max_agents: { value: '', type: 'integer' } };
+        }
+        return {
+          max_agents: { value: String(Math.ceil(parseInt(value, 10) / 2)), type: 'integer' },
+        };
+      },
+      'vars.max_agents': function toMaxConnections({ value }: { value: string }): MutationResult {
+        if (!intPattern.test(value)) {
+          return { max_connections: { value: '', type: 'integer' } };
+        }
+        return { max_connections: { value: String(2 * parseInt(value, 10)), type: 'integer' } };
+      },
     },
-    'vars.max_agents': function toMaxConnections({ value }: { value: string }): MutationResult {
-      return { max_connections: { value: 2 * parseInt(value, 10), type: 'integer' } };
-    },
-  }),
+    {
+      max_connections: {
+        frozen: true,
+      },
+    }
+  ),
 };
 
-const identityMutator = new ConfigMutator({});
+const identityMutator = new ConfigMutator({}, {});
 
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
@@ -149,22 +174,43 @@ const shouldShowStreamsByDefault = (
 export const FleetServerPackagePolicyConfigExtension =
   React.memo<PackagePolicyEditExtensionComponentProps>(
     ({ onChange, validationResults, packageInfo, newPolicy }) => {
-      const packagePolicyInput = newPolicy.inputs[0];
-      const packagePolicy = newPolicy.package;
-      const forceShowErrors = false;
       const configMutator = useMemo(
         () =>
           Object.keys(versionToMutator).reduce(
             (mu: ConfigMutator | null, versionRange: string) =>
               mu
                 ? mu
-                : satisfies(packageInfo!.version, versionRange)
+                : satisfies(newPolicy.package!.version!, versionRange)
                 ? versionToMutator[versionRange]
                 : null,
             null
           ) ?? identityMutator,
-        [packageInfo]
+        [newPolicy.package]
       );
+      const packagePolicyInput = useMemo(() => newPolicy.inputs[0], [newPolicy]);
+      deepAssign(packagePolicyInput!.vars!, configMutator.configAnnotations);
+      useEffect(() => {
+        // TODO: check if there's a better hook for upgrade migrations
+        if (satisfies(newPolicy.package!.version!, '>=1.2.0')) {
+          const maxAgents = packagePolicyInput!.vars!.max_agents;
+          if (maxAgents?.value != null) {
+            deepAssign(
+              packagePolicyInput!.vars!,
+              configMutator.mutate('vars.max_agents', maxAgents)
+            );
+            return;
+          }
+          const maxConnections = packagePolicyInput!.vars!.max_connections;
+          if (maxConnections?.value != null) {
+            deepAssign(
+              packagePolicyInput!.vars!,
+              configMutator.mutate('vars.max_connections', maxConnections)
+            );
+          }
+        }
+      }, [packageInfo, configMutator, newPolicy.package, packagePolicyInput]);
+      const packagePolicy = newPolicy.package;
+      const forceShowErrors = false;
 
       const policyTemplate = useMemo(() => packageInfo!.policy_templates![0], [packageInfo]);
 

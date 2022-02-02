@@ -229,6 +229,16 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (parsedValue && varDef.type === 'integer') {
+    if (!/^-?[0-9]+(?:.0+)?$/.test(parsedValue)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
+          defaultMessage: 'Expected to be an integer',
+        })
+      );
+    }
+  }
+
   if (varDef.type === 'yaml') {
     try {
       parsedValue = safeLoadYaml(value);
