@@ -606,6 +606,132 @@ describe('Fleet - validatePackagePolicy()', () => {
         },
       });
     });
+
+    it('returns package policy validation error if input var does not exist', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            description: 'Linux Metrics',
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [
+                  {
+                    data_stream: {
+                      dataset: 'linux.memory',
+                      type: 'metrics',
+                    },
+                    enabled: true,
+                  },
+                ],
+                type: 'linux/metrics',
+                vars: {
+                  period: {
+                    type: 'string',
+                    value: '1s',
+                  },
+                },
+              },
+            ],
+            name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
+            namespace: 'default',
+            output_id: '',
+            package: {
+              name: 'linux',
+              title: 'Linux Metrics',
+              version: '0.6.2',
+            },
+            policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
+          },
+          {
+            ...mockPackage,
+            name: 'linux',
+            policy_templates: [
+              {
+                name: 'system',
+                title: 'Linux kernel metrics',
+                description: 'Collect system metrics from Linux operating systems',
+                inputs: [
+                  {
+                    title: 'Collect system metrics from Linux instances',
+                    vars: [
+                      {
+                        name: 'system.hostfs',
+                        type: 'text',
+                        title: 'Proc Filesystem Directory',
+                        multi: false,
+                        required: false,
+                        show_user: true,
+                        description: 'The proc filesystem base directory.',
+                      },
+                    ],
+                    type: 'system/metrics',
+                    description:
+                      'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
+                  },
+                  {
+                    title: 'Collect low-level system metrics from Linux instances',
+                    vars: [],
+                    type: 'linux/metrics',
+                    description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
+                  },
+                ],
+                multiple: true,
+              },
+            ],
+            data_streams: [
+              {
+                dataset: 'linux.memory',
+                package: 'linux',
+                path: 'memory',
+                streams: [
+                  {
+                    input: 'linux/metrics',
+                    title: 'Linux memory metrics',
+                    vars: [
+                      {
+                        name: 'period',
+                        type: 'text',
+                        title: 'Period',
+                        multi: false,
+                        required: true,
+                        show_user: true,
+                        default: '10s',
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    description: 'Linux paging and memory management metrics',
+                  },
+                ],
+                title: 'Linux-only memory metrics',
+                release: 'experimental',
+                type: 'metrics',
+              },
+            ],
+          },
+          safeLoad
+        )
+      ).toEqual({
+        description: null,
+        inputs: {
+          'linux/metrics': {
+            streams: {
+              'linux.memory': {
+                vars: {
+                  period: ['Period is required'],
+                },
+              },
+            },
+            vars: {
+              period: ['linux/metrics has no vars in policy template'],
+            },
+          },
+        },
+        name: null,
+        namespace: null,
+      });
+    });
   });
 
   describe('works for packages with multiple policy templates (aka integrations)', () => {
@@ -730,146 +856,5 @@ describe('Fleet - validationHasErrors()', () => {
         },
       })
     ).toBe(false);
-  });
-
-  it('returns package policy validation error if input var does not exist', () => {
-    expect(
-      validatePackagePolicy(
-        {
-          description: 'Linux Metrics',
-          enabled: true,
-          inputs: [
-            {
-              enabled: true,
-              streams: [
-                {
-                  data_stream: {
-                    dataset: 'linux.memory',
-                    type: 'metrics',
-                  },
-                  enabled: true,
-                },
-              ],
-              type: 'linux/metrics',
-              vars: {
-                period: {
-                  type: 'string',
-                  value: '1s',
-                },
-              },
-            },
-          ],
-          name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
-          namespace: 'default',
-          output_id: '',
-          package: {
-            name: 'linux',
-            title: 'Linux Metrics',
-            version: '0.6.2',
-          },
-          policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
-        },
-        {
-          format_version: '1.0.0',
-          name: 'linux',
-          title: 'Linux Metrics',
-          version: '0.6.2',
-          license: 'basic',
-          description: 'Collect metrics from Linux servers with Elastic Agent.',
-          type: 'integration',
-          categories: ['os_system'],
-          release: 'beta',
-          policy_templates: [
-            {
-              name: 'system',
-              title: 'Linux kernel metrics',
-              description: 'Collect system metrics from Linux operating systems',
-              inputs: [
-                {
-                  title: 'Collect system metrics from Linux instances',
-                  vars: [
-                    {
-                      name: 'system.hostfs',
-                      type: 'text',
-                      title: 'Proc Filesystem Directory',
-                      multi: false,
-                      required: false,
-                      show_user: true,
-                      description: 'The proc filesystem base directory.',
-                    },
-                  ],
-                  type: 'system/metrics',
-                  description:
-                    'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
-                },
-                {
-                  title: 'Collect low-level system metrics from Linux instances',
-                  vars: [],
-                  type: 'linux/metrics',
-                  description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
-                },
-              ],
-              multiple: true,
-            },
-          ],
-          owner: {
-            github: 'elastic/integrations',
-          },
-          readme: '/package/linux/0.6.2/docs/README.md',
-          data_streams: [
-            {
-              dataset: 'linux.memory',
-              package: 'linux',
-              path: 'memory',
-              streams: [
-                {
-                  input: 'linux/metrics',
-                  title: 'Linux memory metrics',
-                  vars: [
-                    {
-                      name: 'period',
-                      type: 'text',
-                      title: 'Period',
-                      multi: false,
-                      required: true,
-                      show_user: true,
-                      default: '10s',
-                    },
-                  ],
-                  template_path: 'stream.yml.hbs',
-                  description: 'Linux paging and memory management metrics',
-                },
-              ],
-              title: 'Linux-only memory metrics',
-              release: 'experimental',
-              type: 'metrics',
-            },
-          ],
-          latestVersion: '0.6.2',
-          removable: true,
-          keepPoliciesUpToDate: false,
-          status: 'installed',
-        },
-        safeLoad
-      )
-    ).toEqual({
-      description: null,
-      inputs: {
-        'linux/metrics': {
-          streams: {
-            'linux.memory': {
-              vars: {
-                period: ['Period is required'],
-              },
-            },
-          },
-          vars: {
-            period: ['linux/metrics has no vars in policy template'],
-          },
-        },
-      },
-      name: null,
-      namespace: null,
-    });
   });
 });
