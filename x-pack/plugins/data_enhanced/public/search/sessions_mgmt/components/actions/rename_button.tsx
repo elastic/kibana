@@ -113,7 +113,8 @@ export const createRenameActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />
+        <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />,
+        { theme$: core.theme.theme$ }
       )
     );
     await ref.onClose;

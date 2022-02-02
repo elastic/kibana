@@ -22,13 +22,16 @@ const paramSchema = schema.object({
 
 const querySchema = schema.object({
   date_start: schema.maybe(schema.string()),
+  number_of_executions: schema.maybe(schema.number()),
 });
 
 const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
   date_start: dateStart,
+  number_of_executions: numberOfExecutions,
   ...rest
 }) => ({
   ...rest,
+  numberOfExecutions,
   dateStart,
 });
 

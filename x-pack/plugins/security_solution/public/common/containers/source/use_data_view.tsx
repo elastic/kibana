@@ -44,7 +44,7 @@ export const useDataView = (): {
     selectedDataViewId: string,
     scopeId?: SourcererScopeName,
     needToBeInit?: boolean
-  ) => void;
+  ) => Promise<void>;
 } => {
   const { data } = useKibana().services;
   const abortCtrl = useRef<Record<string, AbortController>>({});
@@ -82,63 +82,67 @@ export const useDataView = (): {
           );
         }
 
-        const subscription = data.search
-          .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
-            {
-              dataViewId: selectedDataViewId,
-              onlyCheckIfIndicesExist: false,
-            },
-            {
-              abortSignal: abortCtrl.current[selectedDataViewId].signal,
-              strategy: 'indexFields',
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                const patternString = response.indicesExist.sort().join();
-                if (needToBeInit && scopeId) {
+        return new Promise<void>((resolve) => {
+          const subscription = data.search
+            .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
+              {
+                dataViewId: selectedDataViewId,
+                onlyCheckIfIndicesExist: false,
+              },
+              {
+                abortSignal: abortCtrl.current[selectedDataViewId].signal,
+                strategy: 'indexFields',
+              }
+            )
+            .subscribe({
+              next: async (response) => {
+                if (isCompleteResponse(response)) {
+                  const patternString = response.indicesExist.sort().join();
+                  if (needToBeInit && scopeId) {
+                    dispatch(
+                      sourcererActions.setSelectedDataView({
+                        id: scopeId,
+                        selectedDataViewId,
+                        selectedPatterns: response.indicesExist,
+                      })
+                    );
+                  }
                   dispatch(
-                    sourcererActions.setSelectedDataView({
-                      id: scopeId,
-                      selectedDataViewId,
-                      selectedPatterns: response.indicesExist,
+                    sourcererActions.setDataView({
+                      browserFields: getBrowserFields(patternString, response.indexFields),
+                      docValueFields: getDocValueFields(patternString, response.indexFields),
+                      id: selectedDataViewId,
+                      indexFields: getEsFields(response.indexFields),
+                      loading: false,
+                      runtimeMappings: response.runtimeMappings,
                     })
                   );
+                  searchSubscription$.current[selectedDataViewId]?.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  setLoading({ id: selectedDataViewId, loading: false });
+                  addWarning(i18n.ERROR_BEAT_FIELDS);
+                  searchSubscription$.current[selectedDataViewId]?.unsubscribe();
                 }
-                dispatch(
-                  sourcererActions.setDataView({
-                    browserFields: getBrowserFields(patternString, response.indexFields),
-                    docValueFields: getDocValueFields(patternString, response.indexFields),
-                    id: selectedDataViewId,
-                    indexFields: getEsFields(response.indexFields),
-                    loading: false,
-                    runtimeMappings: response.runtimeMappings,
-                  })
-                );
-                searchSubscription$.current[selectedDataViewId]?.unsubscribe();
-              } else if (isErrorResponse(response)) {
+                resolve();
+              },
+              error: (msg) => {
+                if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
+                  // reload app if security solution data view is deleted
+                  return location.reload();
+                }
                 setLoading({ id: selectedDataViewId, loading: false });
-                addWarning(i18n.ERROR_BEAT_FIELDS);
+                addError(msg, {
+                  title: i18n.FAIL_BEAT_FIELDS,
+                });
                 searchSubscription$.current[selectedDataViewId]?.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
-                // reload app if security solution data view is deleted
-                return location.reload();
-              }
-              setLoading({ id: selectedDataViewId, loading: false });
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current[selectedDataViewId]?.unsubscribe();
-            },
-          });
-        searchSubscription$.current = {
-          ...searchSubscription$.current,
-          [selectedDataViewId]: subscription,
-        };
+                resolve();
+              },
+            });
+          searchSubscription$.current = {
+            ...searchSubscription$.current,
+            [selectedDataViewId]: subscription,
+          };
+        });
       };
       if (searchSubscription$.current[selectedDataViewId]) {
         searchSubscription$.current[selectedDataViewId].unsubscribe();
@@ -146,7 +150,7 @@ export const useDataView = (): {
       if (abortCtrl.current[selectedDataViewId]) {
         abortCtrl.current[selectedDataViewId].abort();
       }
-      asyncSearch();
+      return asyncSearch();
     },
     [addError, addWarning, data.search, dispatch, setLoading]
   );

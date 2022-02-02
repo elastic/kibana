@@ -275,6 +275,7 @@ export interface ClusterPutComponentTemplateBody {
   template: {
     settings: {
       number_of_shards: number;
+      'index.mapping.total_fields.limit'?: number;
     };
     mappings: estypes.MappingTypeMapping;
   };

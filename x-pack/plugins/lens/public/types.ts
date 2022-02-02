@@ -147,7 +147,10 @@ export type DropType =
   | 'swap_compatible'
   | 'replace_duplicate_incompatible'
   | 'duplicate_incompatible'
-  | 'swap_incompatible';
+  | 'swap_incompatible'
+  | 'field_combine'
+  | 'combine_compatible'
+  | 'combine_incompatible';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
@@ -280,7 +283,11 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * The frame calls this function to display warnings about visualization
    */
-  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+  getWarningMessages?: (
+    state: T,
+    frame: FramePublicAPI,
+    setState: StateSetter<T>
+  ) => React.ReactNode[] | undefined;
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
@@ -289,6 +296,15 @@ export interface Datasource<T = unknown, P = unknown> {
    * Given the current state layer and a columnId will verify if the column configuration has errors
    */
   isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
+  /**
+   * Are these datasources equivalent?
+   */
+  isEqual: (
+    persistableState1: P,
+    references1: SavedObjectReference[],
+    persistableState2: P,
+    references2: SavedObjectReference[]
+  ) => boolean;
 }
 
 export interface DatasourceFixAction<T> {

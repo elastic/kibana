@@ -7,3 +7,4 @@
  */
 
 export * from './function_wrapper';
+export { adaptToExpressionValueFilter } from './filters_adapter';

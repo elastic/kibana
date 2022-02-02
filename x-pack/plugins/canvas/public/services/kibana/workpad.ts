@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObject } from 'kibana/public';
 import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasStartDeps } from '../../plugin';
@@ -67,6 +68,21 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
 
       return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
     },
+    export: async (id: string) => {
+      const workpad = await coreStart.http.get<SavedObject<CanvasWorkpad>>(
+        `${getApiPath()}/export/${id}`
+      );
+      const { attributes } = workpad;
+
+      return {
+        ...workpad,
+        attributes: {
+          ...attributes,
+          css: attributes.css ?? DEFAULT_WORKPAD_CSS,
+          variables: attributes.variables ?? [],
+        },
+      };
+    },
     resolve: async (id: string) => {
       const { workpad, outcome, aliasId } = await coreStart.http.get<ResolveWorkpadResponse>(
         `${getApiPath()}/resolve/${id}`
@@ -93,6 +109,14 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
         }),
       });
     },
+    import: (workpad: CanvasWorkpad) =>
+      coreStart.http.post(`${getApiPath()}/import`, {
+        body: JSON.stringify({
+          ...sanitizeWorkpad({ ...workpad }),
+          assets: workpad.assets || {},
+          variables: workpad.variables || [],
+        }),
+      }),
     createFromTemplate: (templateId: string) => {
       return coreStart.http.post(getApiPath(), {
         body: JSON.stringify({ templateId }),

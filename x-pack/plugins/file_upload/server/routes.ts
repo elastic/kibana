@@ -8,13 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import {
-  MAX_FILE_SIZE_BYTES,
-  IngestPipelineWrapper,
-  InputData,
-  Mappings,
-  Settings,
-} from '../common';
+import { MAX_FILE_SIZE_BYTES } from '../common/constants';
+import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';

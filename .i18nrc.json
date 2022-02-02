@@ -32,7 +32,7 @@
     "expressionShape": "src/plugins/expression_shape",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "fieldFormats": "src/plugins/field_formats",
-    "flot": "packages/kbn-ui-shared-deps-src/src/flot_charts",
+    "flot": "packages/kbn-flot-charts/lib",
     "home": "src/plugins/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
     "indexPatternFieldEditor": "src/plugins/data_view_field_editor",
@@ -77,8 +77,7 @@
     "visTypeVega": "src/plugins/vis_types/vega",
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
-    "visualizations": "src/plugins/visualizations",
-    "visualize": "src/plugins/visualize"
+    "visualizations": "src/plugins/visualizations"
   },
   "translations": []
 }

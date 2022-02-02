@@ -21,7 +21,6 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 // -------------------------------
 const schemaLatest = schema.object(
   {
-    ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
@@ -83,8 +82,8 @@ const config7x: PluginConfigDescriptor<ConsoleConfig7x> = {
     ui: true,
   },
   schema: schema7x,
-  deprecations: ({ deprecate, unused }) => [
-    unused('ssl'),
+  deprecations: ({ unused }) => [
+    unused('ssl', { level: 'critical' }),
     (completeConfig, rootPath, addDeprecation) => {
       if (get(completeConfig, 'console.enabled') === undefined) {
         return completeConfig;

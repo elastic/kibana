@@ -435,10 +435,6 @@ describe('CoreUsageDataService', () => {
           );
         }
 
-        it('returns expected usage data for elastic.username "elastic"', async () => {
-          return doTest({ username: 'elastic', expectedPrincipal: 'elastic_user' });
-        });
-
         it('returns expected usage data for elastic.username "kibana"', async () => {
           return doTest({ username: 'kibana', expectedPrincipal: 'kibana_user' });
         });

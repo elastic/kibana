@@ -35,7 +35,6 @@ const getUnsavedItemId = () => null;
 const doesIdMatchUnsavedId = (idToCheck: number) => idToCheck === getUnsavedItemId();
 
 interface InlineEditableTableValues<Item extends ItemWithAnID> {
-  // TODO This could likely be a selector
   isEditing: boolean;
   // TODO we should editingItemValue have editingItemValue and editingItemId should be a selector
   editingItemId: Item['id'] | null; // editingItem is null when the user is editing a new but not saved item
@@ -81,22 +80,6 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
     setRowErrors: (rowErrors) => ({ rowErrors }),
   }),
   reducers: ({ props: { columns } }) => ({
-    isEditing: [
-      false,
-      {
-        doneEditing: () => false,
-        editNewItem: () => true,
-        editExistingItem: () => true,
-      },
-    ],
-    editingItemId: [
-      null,
-      {
-        doneEditing: () => null,
-        editNewItem: () => getUnsavedItemId(),
-        editExistingItem: (_, { item }) => item.id,
-      },
-    ],
     editingItemValue: [
       null,
       {
@@ -124,6 +107,11 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
     ],
   }),
   selectors: ({ selectors }) => ({
+    editingItemId: [
+      () => [selectors.editingItemValue],
+      (editingItemValue) => editingItemValue?.id ?? null,
+    ],
+    isEditing: [() => [selectors.editingItemValue], (editingItemValue) => !!editingItemValue],
     isEditingUnsavedItem: [
       () => [selectors.isEditing, selectors.editingItemId],
       (isEditing, editingItemId) => {

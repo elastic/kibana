@@ -11,6 +11,7 @@ const createActionExecutorMock = () => {
   const mocked: jest.Mocked<ActionExecutorContract> = {
     initialize: jest.fn(),
     execute: jest.fn().mockResolvedValue({ status: 'ok', actionId: '' }),
+    logCancellation: jest.fn(),
   };
   return mocked;
 };

@@ -55,16 +55,9 @@ import {
 } from '../../screens/rule_details';
 
 import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
   changeRowsPerPageTo100,
   filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -78,7 +71,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
   const expectedUrls = getNewOverrideRule().referenceUrls.join('');
@@ -100,12 +93,7 @@ describe('Detection rules, override', () => {
   });
 
   it('Creates and activates a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
@@ -186,7 +174,9 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains('auditbeat');
     cy.get(ALERT_GRID_CELL).contains('critical');
     cy.get(ALERT_GRID_CELL).contains('80');

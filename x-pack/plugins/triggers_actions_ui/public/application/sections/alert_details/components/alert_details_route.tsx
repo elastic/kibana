@@ -117,6 +117,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
         alertType={alertType}
         actionTypes={actionTypes}
         requestRefresh={async () => requestRefresh(Date.now())}
+        refreshToken={refreshToken}
       />
     </>
   ) : (

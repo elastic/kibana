@@ -820,4 +820,46 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.etw',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
+      {
+        defaultMessage: 'Enable collection of ETW events. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.diagnostic.rollback_telemetry_enabled',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.diagnostic.rollback_telemetry_enabled',
+      {
+        defaultMessage: 'Enable diagnostic rollback telemetry. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.network_extension.enable_content_filtering',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_content_filtering',
+      {
+        defaultMessage:
+          'Enable or disable the network content filter, this will enable/disable network eventing. Host isolation will fail if this option is disabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.kernel.network_extension.enable_packet_filtering',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_packet_filtering',
+      {
+        defaultMessage:
+          'Enable or disable the network packet filter. Host isolation will fail if this option is disabled. Default: true',
+      }
+    ),
+  },
 ];

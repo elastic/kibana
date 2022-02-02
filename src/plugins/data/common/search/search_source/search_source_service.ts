@@ -16,11 +16,31 @@ import {
   SerializedSearchSourceFields,
 } from './';
 import { IndexPatternsContract } from '../..';
-import { mergeMigrationFunctionMaps } from '../../../../kibana_utils/common';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from '../../../../kibana_utils/common';
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
 
+const getAllMigrations = (): MigrateFunctionsObject => {
+  const searchSourceMigrations = {};
+
+  // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
+  // them the correct input and that we correctly map the response
+  const filterMigrations = mapValues(filtersGetAllMigrations(), (migrate) => {
+    return (state: SerializedSearchSourceFields) => ({
+      ...state,
+      filter: migrate(state.filter),
+    });
+  });
+
+  return mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations);
+};
+
 export class SearchSourceService {
-  public setup() {}
+  public setup() {
+    return { getAllMigrations };
+  }
 
   public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
     return {
@@ -39,20 +59,7 @@ export class SearchSourceService {
         return { state: newState, references };
       },
       inject: injectReferences,
-      getAllMigrations: () => {
-        const searchSourceMigrations = {};
-
-        // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
-        // them the correct input and that we correctly map the response
-        const filterMigrations = mapValues(filtersGetAllMigrations(), (migrate) => {
-          return (state: SerializedSearchSourceFields) => ({
-            ...state,
-            filter: migrate(state.filter),
-          });
-        });
-
-        return mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations);
-      },
+      getAllMigrations,
       telemetry: () => {
         return {};
       },
