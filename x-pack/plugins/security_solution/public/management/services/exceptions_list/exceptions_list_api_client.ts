@@ -11,10 +11,12 @@ import {
   ExceptionListItemSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
+  ListId,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { HttpStart } from 'kibana/public';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 /**
  * A generic class to be used for each artifact type.
@@ -22,12 +24,12 @@ import { HttpStart } from 'kibana/public';
  * Please, use the getInstance method instead of creating a new instance when using this implementation.
  */
 export class ExceptionsListApiClient {
-  private static instance: ExceptionsListApiClient;
+  private static instance: Map<ListId, ExceptionsListApiClient>;
   private ensureListExists: Promise<void>;
 
   constructor(
     private readonly http: HttpStart,
-    private readonly listId: string,
+    private readonly listId: ListId,
     private readonly listDefinition: CreateExceptionListSchema
   ) {
     this.ensureListExists = this.createExceptionList();
@@ -59,11 +61,20 @@ export class ExceptionsListApiClient {
     listId: string,
     listDefinition: CreateExceptionListSchema
   ): ExceptionsListApiClient {
-    if (!ExceptionsListApiClient.instance) {
-      ExceptionsListApiClient.instance = new ExceptionsListApiClient(http, listId, listDefinition);
-    }
+    if (!ExceptionsListApiClient.instance) ExceptionsListApiClient.instance = new Map();
 
-    return ExceptionsListApiClient.instance;
+    if (!ExceptionsListApiClient.instance.has(listId)) {
+      ExceptionsListApiClient.instance.set(
+        listId,
+        new ExceptionsListApiClient(http, listId, listDefinition)
+      );
+    }
+    const currentInstance = ExceptionsListApiClient.instance.get(listId);
+    if (currentInstance) {
+      return currentInstance;
+    } else {
+      return new ExceptionsListApiClient(http, listId, listDefinition);
+    }
   }
 
   /**
@@ -100,8 +111,8 @@ export class ExceptionsListApiClient {
    * It accepts the allowed filtering, sorting and pagination options as param.
    */
   async find({
-    perPage,
-    page,
+    perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+    page = MANAGEMENT_DEFAULT_PAGE + 1,
     sortField,
     sortOrder,
     filter,
