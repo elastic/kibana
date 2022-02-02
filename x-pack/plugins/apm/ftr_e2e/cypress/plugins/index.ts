@@ -30,6 +30,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
   const client = createEsClientForTesting({
     esUrl: config.env.ES_NODE,
     requestTimeout: config.env.ES_REQUEST_TIMEOUT,
+    isCloud: !!config.env.TEST_CLOUD,
   });
 
   const synthtraceEsClient = new apm.ApmSynthtraceEsClient(

@@ -19,6 +19,12 @@ export interface EsClientForTestingOptions extends Omit<ClientOptions, 'node' | 
   esUrl: string;
   /** overwrite the auth embedded in the url to use a different user in this client instance */
   authOverride?: { username: string; password: string };
+  /**
+   * are we running tests against cloud? this is automatically determined
+   * by checking for the TEST_CLOUD environment variable but can be overriden
+   * for special cases
+   */
+  isCloud?: boolean;
 }
 
 export function createEsClientForFtrConfig(
@@ -34,7 +40,7 @@ export function createEsClientForFtrConfig(
 }
 
 export function createEsClientForTesting(options: EsClientForTestingOptions) {
-  const { esUrl, authOverride, ...otherOptions } = options;
+  const { esUrl, authOverride, isCloud = !!process.env.TEST_CLOUD, ...otherOptions } = options;
 
   const url = options.authOverride
     ? Url.format({
@@ -45,7 +51,7 @@ export function createEsClientForTesting(options: EsClientForTestingOptions) {
 
   return new EsClient({
     Connection: HttpConnection,
-    tls: process.env.TEST_CLOUD ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
+    tls: isCloud ? undefined : { ca: Fs.readFileSync(CA_CERT_PATH) },
 
     ...otherOptions,
 
