@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('management', function () {
+  describe.only('management', function () {
     before(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
