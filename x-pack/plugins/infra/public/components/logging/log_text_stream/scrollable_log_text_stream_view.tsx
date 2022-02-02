@@ -171,7 +171,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
               defaultMessage: 'There are no log messages to display.',
             })}
             bodyText={i18n.translate('xpack.infra.logs.emptyView.noLogMessageDescription', {
-              defaultMessage: 'Try adjusting your filter.',
+              defaultMessage: 'Try adjusting your filter or checking your index privileges.',
             })}
             refetchText={i18n.translate('xpack.infra.logs.emptyView.checkForNewDataButtonLabel', {
               defaultMessage: 'Check for new data',
