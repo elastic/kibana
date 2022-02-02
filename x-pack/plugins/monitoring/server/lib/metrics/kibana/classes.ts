@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { ClusterMetric, Metric } from '../classes';
+/* eslint-disable max-classes-per-file */
+
+import { ClusterMetric, Metric, MetricOptions } from '../classes';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
+type KibanaClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'units' | 'metricAgg'
+> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class KibanaClusterMetric extends ClusterMetric {
-  constructor(opts) {
+  constructor(opts: KibanaClusterMetricOptions) {
     super({
       ...opts,
       app: 'kibana',
@@ -25,8 +33,14 @@ export class KibanaClusterMetric extends ClusterMetric {
   }
 }
 
+type KibanaEventsRateClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class KibanaEventsRateClusterMetric extends KibanaClusterMetric {
-  constructor(opts) {
+  constructor(opts: KibanaEventsRateClusterMetricOptions) {
     super({
       ...opts,
       metricAgg: 'max',
@@ -63,8 +77,14 @@ export class KibanaEventsRateClusterMetric extends KibanaClusterMetric {
   }
 }
 
+type KibanaMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'metricAgg' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class KibanaMetric extends Metric {
-  constructor(opts) {
+  constructor(opts: KibanaMetricOptions) {
     super({
       ...opts,
       app: 'kibana',

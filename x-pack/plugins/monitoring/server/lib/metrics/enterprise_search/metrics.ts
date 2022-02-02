@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchMetric } from './classes';
 import { LARGE_BYTES, SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
-import { i18n } from '@kbn/i18n';
 
 const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.entSearch.perSecondUnitLabel', {
   defaultMessage: '/s',

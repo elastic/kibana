@@ -8,9 +8,57 @@
 import _ from 'lodash';
 import { MissingRequiredError } from '../../error_missing_required';
 
+interface RequiredMetricOptions {
+  field: string;
+  label: string;
+  description: string;
+  format: string;
+  units: string;
+  timestampField: string;
+  [key: string]: string | boolean | number;
+}
+
+interface OptionalMetricOptions {
+  app?: string;
+  metricAgg?: string;
+  mbField?: string;
+  type?: string;
+}
+
+interface DefaultMetricOptions {
+  derivative?: boolean;
+}
+
+export type MetricOptions = RequiredMetricOptions & OptionalMetricOptions & DefaultMetricOptions;
+
 export class Metric {
-  constructor(opts) {
-    const props = {
+  public field!: string;
+  public docType?: string;
+  public label!: string;
+  public description!: string;
+  public format!: string;
+  public units!: string;
+  public timestampField!: string;
+  public app?: string;
+  public metricAgg?: string;
+  public mbField?: string;
+  public derivative: boolean = false;
+  public aggs?: object;
+  public dateHistogramSubAggs?: object;
+  public getDateHistogramSubAggs?: (options: any) => object;
+  public calculation?: (
+    bucket: any,
+    key?: string,
+    metric?: Metric,
+    defaultSizeInSeconds?: number
+  ) => number | null;
+  public fieldSource?: string;
+  public usageField?: string;
+  public periodsField?: string;
+  public quotaField?: string;
+
+  constructor(opts: MetricOptions) {
+    const props: Required<DefaultMetricOptions> = {
       derivative: false,
     };
 
@@ -22,14 +70,15 @@ export class Metric {
       units: opts.units,
       timestampField: opts.timestampField,
     };
+
     this.checkRequiredParams(requireds);
+
     _.assign(this, _.defaults(opts, props));
   }
 
-  checkRequiredParams(requireds) {
+  checkRequiredParams<RequiredParams = RequiredMetricOptions>(requireds: RequiredParams) {
     const undefKey = _.findKey(requireds, _.isUndefined);
     if (undefKey) {
-      console.log(`Missing required field: [${undefKey}]`);
       throw new MissingRequiredError(undefKey);
     }
   }
@@ -68,7 +117,7 @@ export class Metric {
     return fields && fields.length ? fields[0].split('.')[0] : null;
   }
 
-  static calculateLatency(timeInMillis, totalEvents) {
+  static calculateLatency(timeInMillis: number | null, totalEvents: number | null) {
     if (timeInMillis === null || totalEvents === null) {
       return null;
     } else if (timeInMillis < 0 || totalEvents < 0) {
