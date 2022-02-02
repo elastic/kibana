@@ -6,10 +6,17 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+import type { SecurityPluginSetup, AuthenticatedUser } from '../../../security/server';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../../common/constants';
 import type { GetChatUserDataResponseBody } from '../../common/types';
 import { generateSignedJwt } from '../util/generate_jwt';
+
+type MetaWithSaml = AuthenticatedUser['metadata'] & {
+  saml_name: [string];
+  saml_email: [string];
+  saml_roles: [string];
+  saml_principal: [string];
+};
 
 export const registerChatRoute = ({
   router,
@@ -33,7 +40,9 @@ export const registerChatRoute = ({
     },
     async (_context, request, response) => {
       const user = security.authc.getCurrentUser(request);
-      let { email: userEmail, username: userId } = user || {};
+      const { metadata, username } = user || {};
+      let userId = username;
+      let [userEmail] = (metadata as MetaWithSaml)?.saml_email || [];
 
       // In local development, these values are not populated.  This is a workaround
       // to allow for local testing.
