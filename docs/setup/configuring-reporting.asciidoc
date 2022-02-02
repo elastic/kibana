@@ -102,27 +102,27 @@ Granting the privilege to generate reports also grants the user the privilege to
 ==== Grant access with the role API
 With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}. Grant custom reporting roles to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
 
+NOTE: this [API request](https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html) needs to be executed against the Kibana API endpoint
 [source, sh]
 ---------------------------------------------------------------
-POST /_security/role/custom_reporting_user
+POST <kibana host>:<port>/api/_security/role/custom_reporting_user
 {
-  metadata: {},
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        dashboard: [
-          'generate_report', <1>
-          'download_csv_report' <2>
-        ],
-        discover: ['generate_report'], <3>
-        canvas: ['generate_report'], <4>
-        visualize: ['generate_report'], <5>
-      },
-      spaces: ['*'],
-    }
-  ]
+	"elasticsearch": {
+		"cluster": [],
+		"indices": [],
+		"run_as": []
+	},
+	"kibana": [{
+		"spaces": ["*"],
+		"base": [],
+		"feature": {
+			"dashboard": ["generate_report",  <1>
+      "download_csv_report"], <2>
+      "discover": ["generate_report"], <3>
+			"canvas": ["generate_report"], <4>
+			"visualize": ["generate_report"] <5>
+		}
+	}]
 }
 ---------------------------------------------------------------
 // CONSOLE
