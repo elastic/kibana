@@ -85,30 +85,28 @@ describe('collectMultiNamespaceReferences', () => {
       references?: Array<{ type: string; id: string }>;
     }>
   ) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        docs: results.map((x) => {
-          const references =
-            x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
-          return x.found
-            ? {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                _source: {
-                  namespaces: SPACES,
-                  references,
-                },
-                ...VERSION_PROPS,
-                found: true,
-              }
-            : {
-                _id: 'doesnt-matter',
-                _index: 'doesnt-matter',
-                found: false,
-              };
-        }),
-      })
-    );
+    client.mget.mockReturnResponseOnce({
+      docs: results.map((x) => {
+        const references =
+          x.references?.map(({ type, id }) => ({ type, id, name: 'ref-name' })) ?? [];
+        return x.found
+          ? {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              _source: {
+                namespaces: SPACES,
+                references,
+              },
+              ...VERSION_PROPS,
+              found: true,
+            }
+          : {
+              _id: 'doesnt-matter',
+              _index: 'doesnt-matter',
+              found: false,
+            };
+      }),
+    });
   }
 
   /** Asserts that mget is called for the given objects */

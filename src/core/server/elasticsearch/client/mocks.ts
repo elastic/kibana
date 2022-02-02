@@ -7,8 +7,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { PublicKeys } from '@kbn/utility-types';
 import { ElasticsearchClient } from './types';
 import { ICustomClusterClient } from './cluster_client';
@@ -23,9 +22,62 @@ const omittedProps = [
   'helpers',
 ] as Array<PublicKeys<Client>>;
 
+type DeeplyMockedApi<T> = {
+  [P in keyof T]: T[P] extends (...args: any[]) => any
+    ? ClientApiMockInstance<ReturnType<T[P]>, Parameters<T[P]>>
+    : DeeplyMockedApi<T[P]>;
+} & T;
+
+interface ClientApiMockInstance<T, Y extends any[]> extends jest.MockInstance<T, Y> {
+  /**
+   * Helper API around `mockReturnValue` returning either the body or the whole TransportResult
+   * depending on the `meta` parameter used during the call
+   */
+  mockReturnResponse(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
+
+  /**
+   * Helper API around `mockReturnValueOnce` returning either the body or the whole TransportResult
+   * depending on the `meta` parameter used during the call
+   */
+  mockReturnResponseOnce(value: Awaited<T>, opts?: Partial<Omit<TransportResult<T>, 'body'>>): this;
+}
+
+const createMockedApi = <
+  T = unknown,
+  Y extends [any, TransportRequestOptions] = [any, TransportRequestOptions]
+>(): ClientApiMockInstance<T, Y> => {
+  const mock: ClientApiMockInstance<T, Y> = jest.fn() as any;
+
+  mock.mockReturnResponse = (value: T, opts?: Partial<Omit<TransportResult<T>, 'body'>>) => {
+    mock.mockImplementation((args: unknown, options?: TransportRequestOptions) => {
+      const meta = options?.meta ?? false;
+      if (meta) {
+        return Promise.resolve(createApiResponse({ ...opts, body: value })) as any;
+      } else {
+        return Promise.resolve(value) as Promise<T>;
+      }
+    });
+    return mock;
+  };
+
+  mock.mockReturnResponseOnce = (value: T, opts?: Partial<Omit<TransportResult<T>, 'body'>>) => {
+    mock.mockImplementationOnce((args: unknown, options?: TransportRequestOptions) => {
+      const meta = options?.meta ?? false;
+      if (meta) {
+        return Promise.resolve(createApiResponse({ ...opts, body: value })) as any;
+      } else {
+        return Promise.resolve(value) as Promise<T>;
+      }
+    });
+    return mock;
+  };
+
+  return mock;
+};
+
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');
-const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Client> => {
+const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedApi<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
   const client = new UnmockedClient({
     node: 'http://127.0.0.1',
@@ -50,7 +102,9 @@ const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Clie
       .filter(([key]) => !omitted.includes(key))
       .forEach(([key, descriptor]) => {
         if (typeof descriptor.value === 'function') {
-          obj[key] = jest.fn(() => res ?? createSuccessTransportRequestPromise({}));
+          const mock = createMockedApi();
+          mock.mockImplementation(() => res ?? createSuccessTransportRequestPromise({}));
+          obj[key] = mock;
         } else if (typeof obj[key] === 'object' && obj[key] != null) {
           mockify(obj[key], omitted);
         }
@@ -81,10 +135,10 @@ const createInternalClientMock = (res?: Promise<unknown>): DeeplyMockedKeys<Clie
     request: jest.fn(),
   };
 
-  return client as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedApi<Client>;
 };
 
-export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
+export type ElasticsearchClientMock = DeeplyMockedApi<ElasticsearchClient>;
 
 const createClientMock = (res?: Promise<unknown>): ElasticsearchClientMock =>
   createInternalClientMock(res) as unknown as ElasticsearchClientMock;
@@ -143,7 +197,7 @@ const createSuccessTransportRequestPromise = <T>(
   return Promise.resolve(response) as Promise<TransportResult<T> & T>;
 };
 
-const createErrorTransportRequestPromise = (err: any): Promise<TransportResult<never>> => {
+const createErrorTransportRequestPromise = (err: any): Promise<never> => {
   return Promise.reject(err);
 };
 
