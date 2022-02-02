@@ -18,7 +18,6 @@ import {
   AutoAbortedAPMClient,
   callApmApi,
 } from '../services/rest/create_call_apm_api';
-import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 
 export interface FetcherResult<Data> {
   data?: Data;
@@ -79,7 +78,6 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
-  const { timeRangeId } = useTimeRangeId();
   const { addInspectorRequest } = useInspectorContext();
 
   useEffect(() => {
@@ -163,7 +161,6 @@ export function useFetcher<TReturn>(
   }, [
     counter,
     preservePreviousData,
-    timeRangeId,
     showToastOnError,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
