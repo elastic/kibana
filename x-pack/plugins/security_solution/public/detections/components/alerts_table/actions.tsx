@@ -453,7 +453,23 @@ const createThresholdTimeline = async (
       to: thresholdTo,
       ruleNote: noteContent,
     });
-  } catch (e) {
+  } catch (error) {
+    const { toasts } = KibanaServices.get().notifications;
+    toasts.addError(error, {
+      toastMessage: i18n.translate(
+        'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailure',
+        {
+          defaultMessage: 'Failed to create timeline for document _id: {id}',
+          values: { id: ecsData._id },
+        }
+      ),
+      title: i18n.translate(
+        'xpack.securitySolution.detectionEngine.alerts.createThresholdTimelineFailureTitle',
+        {
+          defaultMessage: 'Failed to create theshold alert timeline',
+        }
+      ),
+    });
     const from = DEFAULT_FROM_MOMENT.toISOString();
     const to = DEFAULT_TO_MOMENT.toISOString();
     return createTimeline({
