@@ -17,9 +17,10 @@ interface Props {
   id: string;
   monitor: SyntheticsMonitor;
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  isDisabled?: boolean;
 }
 
-export const MonitorEnabled = ({ id, monitor, setRefresh }: Props) => {
+export const MonitorEnabled = ({ id, monitor, setRefresh, isDisabled }: Props) => {
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
 
   const { notifications } = useKibana();
@@ -68,7 +69,7 @@ export const MonitorEnabled = ({ id, monitor, setRefresh }: Props) => {
     <div css={{ position: 'relative' }} aria-busy={isLoading}>
       <EuiSwitch
         checked={enabled}
-        disabled={isLoading}
+        disabled={isLoading || isDisabled}
         showLabel={false}
         label={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
         title={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}

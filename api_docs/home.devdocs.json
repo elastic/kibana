@@ -1099,7 +1099,7 @@
           "references": [
             {
               "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/public/plugin.ts"
+              "path": "x-pack/plugins/cloud/public/plugin.tsx"
             },
             {
               "plugin": "apm",
