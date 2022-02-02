@@ -51,18 +51,18 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 >;
 
 const getPaginationObject = ({
-  total,
-  perPage,
-  page,
+  total = 0,
+  perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+  page = 1,
 }: {
   total?: number;
   perPage?: number;
   page?: number;
 }) => ({
-  totalItemCount: total ?? 0,
-  pageSize: perPage ?? MANAGEMENT_DEFAULT_PAGE_SIZE,
+  totalItemCount: total,
+  pageSize: perPage,
   pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-  pageIndex: (page ?? 1) - 1,
+  pageIndex: page - 1,
 });
 
 export const HostIsolationExceptionsList = () => {
