@@ -26442,7 +26442,7 @@
     "xpack.transform.transformList.editFlyoutFormDescriptionLabel": "描述",
     "xpack.transform.transformList.editFlyoutFormDestinationButtonContent": "目标配置",
     "xpack.transform.transformList.editFlyoutFormDestinationIndexLabel": "目标索引",
-    "xpack.transform.transformList.editFlyoutFormDestinationPipelineLabel": "管道",
+    "xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel": "管道",
     "xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext": "要启用节流，请设置每秒要输入的文档限值。",
     "xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel": "每秒文档数",
     "xpack.transform.transformList.editFlyoutFormFrequencyHelpText": "在转换不间断地执行时检查源索引更改的时间间隔。还确定在转换搜索或索引时发生暂时失败时的重试时间间隔。最小值为 1 秒，最大值为 1 小时。",

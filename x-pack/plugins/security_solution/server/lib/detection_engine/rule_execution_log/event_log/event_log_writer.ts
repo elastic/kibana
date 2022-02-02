@@ -18,7 +18,7 @@ import {
   RuleExecutionLogAction,
 } from './constants';
 
-export interface IRuleExecutionEventsWriter {
+export interface IEventLogWriter {
   logStatusChange(args: StatusChangeArgs): void;
   logExecutionMetrics(args: ExecutionMetricsArgs): void;
 }
@@ -40,9 +40,7 @@ export interface ExecutionMetricsArgs extends BaseArgs {
   metrics: RuleExecutionMetrics;
 }
 
-export const createRuleExecutionEventsWriter = (
-  eventLogService: IEventLogService
-): IRuleExecutionEventsWriter => {
+export const createEventLogWriter = (eventLogService: IEventLogService): IEventLogWriter => {
   const eventLogger = eventLogService.getLogger({
     event: { provider: RULE_EXECUTION_LOG_PROVIDER },
   });
