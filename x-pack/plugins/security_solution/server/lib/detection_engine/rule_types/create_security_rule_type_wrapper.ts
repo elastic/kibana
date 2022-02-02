@@ -155,6 +155,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger,
                 buildRuleMessage,
                 ruleExecutionLogger,
+                savedObjectsClient,
               });
 
               if (!wroteWarningStatus) {

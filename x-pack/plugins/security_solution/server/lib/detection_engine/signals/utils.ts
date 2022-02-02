@@ -93,8 +93,10 @@ export const hasReadIndexPrivileges = async (args: {
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  savedObjectsClient: SavedObjectsClientContract;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger } = args;
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, savedObjectsClient } = args;
+  const isCcsWarningEnabled = await savedObjectsClient.get();
 
   const indexNames = Object.keys(privileges.index);
   const [, indexesWithNoReadPrivileges] = partition(
