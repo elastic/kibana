@@ -29,8 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('loads the job management page');
       await ml.navigation.navigateToJobManagement();
-      await ml.jobManagement.assertJobStatsBarExists();
-      await ml.jobManagement.assertJobTableExists();
+      await ml.jobManagement.assertEmptyStateVisible();
       await ml.jobManagement.assertCreateNewJobButtonExists();
 
       await ml.testExecution.logTestStep('loads the settings page');

@@ -50,5 +50,6 @@ const UserActionContentToolbarComponent = ({
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+UserActionContentToolbarComponent.displayName = 'UserActionContentToolbar';
 
 export const UserActionContentToolbar = memo(UserActionContentToolbarComponent);

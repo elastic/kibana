@@ -201,7 +201,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('Deactivate/Activate user', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/118728
+      describe.skip('Deactivate/Activate user', () => {
         it('deactivates user when confirming', async () => {
           await PageObjects.security.deactivatesUser(optionalUser);
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

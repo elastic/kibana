@@ -52,5 +52,6 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({
     </>
   );
 };
+HostIsolationCommentEventComponent.displayName = 'HostIsolationCommentEvent';
 
 export const HostIsolationCommentEvent = memo(HostIsolationCommentEventComponent);

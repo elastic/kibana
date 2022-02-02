@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  Datum,
-  PartitionFillLabel,
-  PartitionLayer,
-  ShapeTreeNode,
-  ArrayEntry,
-} from '@elastic/charts';
+import { Datum, PartitionLayer, ShapeTreeNode, ArrayEntry } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../charts/public';
@@ -137,7 +131,7 @@ export const getLayers = (
   formatter: FieldFormatsStart,
   syncColors: boolean
 ): PartitionLayer[] => {
-  const fillLabel: Partial<PartitionFillLabel> = {
+  const fillLabel: PartitionLayer['fillLabel'] = {
     valueFont: {
       fontWeight: 700,
     },

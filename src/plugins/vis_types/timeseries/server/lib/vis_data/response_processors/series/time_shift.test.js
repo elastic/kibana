@@ -73,4 +73,64 @@ describe('timeShift(resp, panel, series)', () => {
       [1483225210000 + 3600000, 2],
     ]);
   });
+
+  test('shifts in right timezone', async () => {
+    series.offset_time = '1d';
+    const dateBeforeDST = new Date('2022-03-26T12:00:00.000Z').valueOf();
+    const dateAfterDST = new Date('2022-03-28T12:00:00.000Z').valueOf();
+    resp.aggregations.test.timeseries.buckets[0].key = dateBeforeDST;
+    resp.aggregations.test.timeseries.buckets[1].key = dateAfterDST;
+    const next = await timeShift(
+      resp,
+      panel,
+      series,
+      {},
+      undefined,
+      undefined,
+      undefined,
+      'Europe/Berlin'
+    )((results) => results);
+    const results = await stdMetric(resp, panel, series, {})(next)([]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].data).toEqual([
+      // only 23h in a day because it goes over the DST switch
+      [dateBeforeDST + 1000 * 60 * 60 * 23, 1],
+      // regular 24h in a day
+      [dateAfterDST + 1000 * 60 * 60 * 24, 2],
+    ]);
+  });
+
+  test('shifts in utc if ignore daylight time is set', async () => {
+    series.offset_time = '1d';
+    panel.ignore_daylight_time = 1;
+    const dateBeforeDST = new Date('2022-03-26T12:00:00.000Z').valueOf();
+    const dateAfterDST = new Date('2022-03-28T12:00:00.000Z').valueOf();
+    resp.aggregations.test.timeseries.buckets[0].key = dateBeforeDST;
+    resp.aggregations.test.timeseries.buckets[1].key = dateAfterDST;
+    const next = await timeShift(
+      resp,
+      panel,
+      series,
+      {},
+      undefined,
+      undefined,
+      undefined,
+      'Europe/Berlin'
+    )((results) => results);
+    const results = await stdMetric(resp, panel, series, {})(next)([]);
+
+    expect(results).toHaveLength(1);
+    expect(results[0].data).toEqual([
+      // still 24h shift because DST is ignored
+      [dateBeforeDST + 1000 * 60 * 60 * 24, 1],
+      // regular 24h in a day
+      [dateAfterDST + 1000 * 60 * 60 * 24, 2],
+    ]);
+  });
+
+  test('processor is sync to avoid timezone setting leakage', () => {
+    const result = timeShift(resp, panel, series, {})((results) => results)([]);
+    expect(Array.isArray(result)).toBe(true);
+  });
 });

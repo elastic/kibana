@@ -26,9 +26,11 @@ import { formatMonitorConfig } from './formatters/format_configs';
 import {
   ConfigKey,
   MonitorFields,
+  ServiceLocations,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../common/runtime_types';
+import { getServiceLocations } from './get_service_locations';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -45,14 +47,18 @@ export class SyntheticsService {
 
   private apiKey: SyntheticsServiceApiKey | undefined;
 
+  public locations: ServiceLocations;
+
   constructor(logger: Logger, server: UptimeServerSetup, config: ServiceConfig) {
     this.logger = logger;
     this.server = server;
     this.config = config;
 
-    this.apiClient = new ServiceAPIClient(logger, this.config);
+    this.apiClient = new ServiceAPIClient(logger, this.config, this.server.kibanaVersion);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
+
+    this.locations = [];
   }
 
   public init() {
@@ -97,6 +103,13 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+
+              const { manifestUrl } = service.config;
+
+              getServiceLocations({ manifestUrl }).then((result) => {
+                service.locations = result.locations;
+                service.apiClient.locations = result.locations;
+              });
 
               await service.pushConfigs();
 
@@ -149,6 +162,7 @@ export class SyntheticsService {
       try {
         this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
       } catch (err) {
+        this.logger.error(err);
         throw err;
       }
     }
@@ -159,6 +173,8 @@ export class SyntheticsService {
       throw error;
     }
 
+    this.logger.debug('Found api key and esHosts for service.');
+
     return {
       hosts: this.esHosts,
       api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
@@ -166,6 +182,35 @@ export class SyntheticsService {
   }
 
   async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      this.logger.debug('No monitor found which can be pushed to service.');
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
+    try {
+      return await this.apiClient.post(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async runOnceConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { run_once: boolean; config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -176,7 +221,7 @@ export class SyntheticsService {
     };
 
     try {
-      return await this.apiClient.post(data);
+      return await this.apiClient.runOnce(data);
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -200,11 +245,14 @@ export class SyntheticsService {
 
     const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
+      namespaces: ['*'],
     });
 
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
+      fields_under_root: true,
+      fields: { config_id: id },
     })) as SyntheticsMonitorWithId[];
   }
 

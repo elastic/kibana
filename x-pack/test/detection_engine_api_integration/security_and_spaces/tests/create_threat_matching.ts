@@ -114,7 +114,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(rule.status).to.eql('succeeded');
+
+        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+        expect(rule?.execution_summary?.last_execution.status).to.eql('succeeded');
       });
     });
 
@@ -477,7 +479,9 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .query({ id })
             .expect(200);
-          expect(body.last_failure_message).to.contain(
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          expect(body?.execution_summary?.last_execution.message).to.contain(
             'execution has exceeded its allotted interval'
           );
         });

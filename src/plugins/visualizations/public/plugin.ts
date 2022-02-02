@@ -57,7 +57,6 @@ import {
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { showNewVisModal } from './wizard';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { esFilters } from '../../../plugins/data/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 
 import type { VisualizeServices } from './visualize_app/types';
@@ -189,7 +188,7 @@ export class VisualizationsPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: data.query.filterManager.getGlobalFilters(),
             }))
           ),
         },

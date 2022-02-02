@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiBottomBar,
   EuiCallOut,
   EuiFlexGroup,
@@ -42,6 +41,7 @@ import {
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
   sendUpgradePackagePolicyDryRun,
+  useAuthz,
 } from '../../../hooks';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
@@ -64,6 +64,8 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+
+import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
 import { hasUpgradeAvailable } from './utils';
 
@@ -122,6 +124,8 @@ export const EditPackagePolicyForm = memo<{
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
 
   const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
   useEffect(() => {
     if (forceUpgrade) {
@@ -504,6 +508,7 @@ export const EditPackagePolicyForm = memo<{
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
+              isUpdate={true}
             />
           )}
 
@@ -624,11 +629,27 @@ export const EditPackagePolicyForm = memo<{
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <EuiButtonWithTooltip
                         onClick={onSubmit}
                         isLoading={formState === 'LOADING'}
                         // Allow to save only if the package policy is upgraded or had been edited
-                        disabled={formState !== 'VALID' || (!isEdited && !isUpgrade)}
+                        isDisabled={
+                          !canWriteIntegrationPolicies ||
+                          formState !== 'VALID' ||
+                          (!isEdited && !isUpgrade)
+                        }
+                        tooltip={
+                          !canWriteIntegrationPolicies
+                            ? {
+                                content: (
+                                  <FormattedMessage
+                                    id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                  />
+                                ),
+                              }
+                            : undefined
+                        }
                         iconType="save"
                         color="primary"
                         fill
@@ -645,7 +666,7 @@ export const EditPackagePolicyForm = memo<{
                             defaultMessage="Save integration"
                           />
                         )}
-                      </EuiButton>
+                      </EuiButtonWithTooltip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

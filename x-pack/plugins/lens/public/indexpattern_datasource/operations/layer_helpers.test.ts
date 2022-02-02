@@ -378,7 +378,7 @@ describe('state_helpers', () => {
 
             // Private
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         },
       };
@@ -414,7 +414,7 @@ describe('state_helpers', () => {
 
             // Private
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         },
       };
@@ -575,7 +575,7 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                sourceField: 'Records',
+                sourceField: '___records___',
               },
             },
           },
@@ -1292,7 +1292,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -1351,7 +1351,7 @@ describe('state_helpers', () => {
               label: 'Count of records',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -1376,7 +1376,7 @@ describe('state_helpers', () => {
             id1: expect.objectContaining({
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             }),
             willBeReference: expect.objectContaining({
@@ -1392,6 +1392,42 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should combine multiple partial params if the column supports multiple fields', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'alphabetical', fallback: true },
+          orderDirection: 'desc',
+          size: 5,
+        },
+      };
+
+      replaceColumn({
+        layer: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: termsColumn,
+          },
+        },
+        indexPattern,
+        columnId: 'col1',
+        op: 'cumulative_sum',
+        visualizationGroups: [],
+        field: indexPattern.getFieldByName(termsColumn.sourceField),
+        initialParams: {
+          params: { secondaryFields: ['dest'] },
+        },
+        shouldCombineField: true,
+      });
+    });
+
     describe('switching from non-reference to reference test cases', () => {
       it('should wrap around the previous operation as a reference if possible (case new1)', () => {
         const expectedColumn = {
@@ -1399,7 +1435,7 @@ describe('state_helpers', () => {
           customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count' as const,
         };
 
@@ -1436,7 +1472,7 @@ describe('state_helpers', () => {
           customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count' as const,
         };
 
@@ -1571,7 +1607,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number' as const,
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count' as const,
             },
           },
@@ -1611,7 +1647,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number' as const,
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count' as const,
             },
           },
@@ -1684,7 +1720,7 @@ describe('state_helpers', () => {
               isBucketed: false,
 
               operationType: 'count' as const,
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
             invalid: {
               label: 'Test reference',
@@ -1736,7 +1772,7 @@ describe('state_helpers', () => {
               isBucketed: false,
 
               operationType: 'count' as const,
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
             invalid: {
               label: 'Test reference',
@@ -1954,7 +1990,7 @@ describe('state_helpers', () => {
           isBucketed: false,
 
           operationType: 'count' as const,
-          sourceField: 'Records',
+          sourceField: '___records___',
           filter: { language: 'kuery', query: 'bytes > 4000' },
           timeShift: '3h',
         };
@@ -2132,7 +2168,7 @@ describe('state_helpers', () => {
           columnOrder: ['col1', 'col2'],
           columns: {
             col1: expect.objectContaining({
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             }),
             col2: expect.objectContaining({ references: ['col1'] }),
@@ -2192,7 +2228,7 @@ describe('state_helpers', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -2246,7 +2282,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -2273,7 +2309,7 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
           col2: {
             label: 'Test reference',
@@ -2301,7 +2337,7 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
           col2: {
             label: 'Changed label',
@@ -2346,7 +2382,7 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
           col2: {
             label: 'Test reference',
@@ -2530,7 +2566,7 @@ describe('state_helpers', () => {
               operationType: 'count',
               isBucketed: false,
               scale: 'ratio',
-              sourceField: 'Records',
+              sourceField: '___records___',
               customLabel: true,
             },
             date: {
@@ -2562,7 +2598,7 @@ describe('state_helpers', () => {
               operationType: 'count',
               isBucketed: false,
               scale: 'ratio',
-              sourceField: 'Records',
+              sourceField: '___records___',
               customLabel: true,
             },
             math: {

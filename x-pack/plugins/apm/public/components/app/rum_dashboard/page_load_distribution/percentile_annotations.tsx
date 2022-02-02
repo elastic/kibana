@@ -13,7 +13,7 @@ import {
   LineAnnotationStyle,
   Position,
 } from '@elastic/charts';
-import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars } from '@kbn/ui-theme';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
