@@ -3764,6 +3764,9 @@
         "title": "New agent policy",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -3783,7 +3786,11 @@
               ]
             }
           }
-        }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
       },
       "new_package_policy": {
         "title": "New package policy",
