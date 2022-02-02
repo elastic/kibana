@@ -266,7 +266,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       query: this.state.query,
     };
 
-    if (savedQueryMeta.shouldIncludeFilters) {
+    if (savedQueryMeta.filters !== undefined) {
+      savedQueryAttributes.filters = savedQueryMeta.filters;
+    } else {
       savedQueryAttributes.filters = this.props.filters;
     }
 
@@ -308,7 +310,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         openFilterSetPopover: false,
       });
 
-      if (this.props.onSaved) {
+      if (!savedQueryMeta.filters && this.props.onSaved) {
         this.props.onSaved(response);
       }
     } catch (error) {
@@ -381,6 +383,21 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public onMultipleFiltersUpdated = (filters: Filter[]) => {
     this.setState({ multipleFilters: filters });
     // console.dir(filters);
+  };
+
+  public onFilterBadgeSave = (groupId: number, alias: string) => {
+    const multipleFilters = this.state.multipleFilters.map((filter: any) => {
+      if (Number(filter.groupId) === groupId)
+        return {
+          ...filter,
+          meta: {
+            ...filter.meta,
+            alias,
+          },
+        };
+      return filter;
+    });
+    this.setState({ multipleFilters });
   };
 
   public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
@@ -589,6 +606,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
+          multipleFilters={this.state.multipleFilters}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
@@ -631,6 +649,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           toggleAddFilterModal={this.toggleAddFilterModal}
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
+          onNewFiltersSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
         />
       );
     }
@@ -695,6 +714,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
             onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
             multipleFilters={this.state.multipleFilters}
+            savedQueryService={this.savedQueryService}
+            onFilterSave={this.onSave}
+            onFilterBadgeSave={this.onFilterBadgeSave}
           />
         </div>
       );

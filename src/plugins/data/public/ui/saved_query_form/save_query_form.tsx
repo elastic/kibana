@@ -9,6 +9,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 
@@ -19,6 +20,8 @@ interface Props {
   onClose: () => void;
   showFilterOption: boolean | undefined;
   showTimeFilterOption: boolean | undefined;
+  filters?: Filter[];
+  onFilterBadgeSave?: (alias: string) => void;
 }
 
 export interface SavedQueryMeta {
@@ -27,6 +30,7 @@ export interface SavedQueryMeta {
   description: string;
   shouldIncludeFilters: boolean;
   shouldIncludeTimefilter: boolean;
+  filters?: Filter[];
 }
 
 export function SaveQueryForm({
@@ -36,6 +40,8 @@ export function SaveQueryForm({
   onClose,
   showFilterOption = true,
   showTimeFilterOption = true,
+  filters,
+  onFilterBadgeSave,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
   const [enabledSaveButton, setEnabledSaveButton] = useState(Boolean(savedQuery));
@@ -111,7 +117,9 @@ export function SaveQueryForm({
         description,
         shouldIncludeFilters,
         shouldIncludeTimefilter,
+        filters,
       });
+      if (onFilterBadgeSave) onFilterBadgeSave(title);
     }
   }, [
     validate,
@@ -121,6 +129,8 @@ export function SaveQueryForm({
     description,
     shouldIncludeFilters,
     shouldIncludeTimefilter,
+    filters,
+    onFilterBadgeSave,
   ]);
 
   const onInputChange = useCallback((event) => {

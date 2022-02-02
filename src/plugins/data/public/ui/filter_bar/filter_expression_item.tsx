@@ -13,6 +13,8 @@ import {
   EuiTextColor,
   EuiPopover,
   EuiContextMenu,
+  EuiIcon,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
@@ -22,6 +24,8 @@ import { FILTERS } from '../../../common';
 import { existsOperator, isOneOfOperator } from './filter_editor/lib/filter_operators';
 import { IIndexPattern } from '../..';
 import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { SavedQueryService } from '../..';
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
@@ -46,6 +50,10 @@ interface Props {
   groupId: string;
   filtersGroupsCount: number;
   onUpdate?: (filters: Filter[], groupId: string, toggleNegate: boolean) => void;
+  savedQueryService?: SavedQueryService;
+  onFilterSave?: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  customLabel?: string;
+  onFilterBadgeSave?: (groupId: number, alias: string) => void;
 }
 
 export const FilterExpressionItem: FC<Props> = ({
@@ -56,8 +64,17 @@ export const FilterExpressionItem: FC<Props> = ({
   groupId,
   filtersGroupsCount,
   onUpdate,
+  savedQueryService,
+  onFilterSave,
+  customLabel,
+  onFilterBadgeSave,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const filters: Filter[] = groupedFilters.map((filter: Filter) => ({
+    $state: filter.$state,
+    meta: filter.meta,
+    query: filter.query,
+  }));
   function handleBadgeClick() {
     // if (e.shiftKey) {
     //   onToggleDisabled();
@@ -149,7 +166,7 @@ export const FilterExpressionItem: FC<Props> = ({
       },
     ];
 
-    return [
+    const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
         items: mainPanelItems,
@@ -172,6 +189,45 @@ export const FilterExpressionItem: FC<Props> = ({
       //   ),
       // },
     ];
+
+    if (!customLabel && savedQueryService && onFilterSave && onFilterBadgeSave) {
+      const saveAsFilterPanelItem = {
+        name: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
+          defaultMessage: `Save as filter`,
+        }),
+        icon: 'save',
+        panel: 2,
+        'data-test-subj': 'saveAsFilter',
+      };
+
+      const saveAsFilterPanelContent = {
+        id: 2,
+        title: i18n.translate('data.filter.filterBar.saveAsFilterButtonLabel', {
+          defaultMessage: `Save as filter`,
+        }),
+        content: (
+          <div style={{ padding: 16 }}>
+            <SaveQueryForm
+              savedQueryService={savedQueryService}
+              onSave={(savedQueryMeta) => {
+                onFilterSave(savedQueryMeta, true);
+                setIsPopoverOpen(false);
+              }}
+              onClose={() => setIsPopoverOpen(false)}
+              showTimeFilterOption={false}
+              showFilterOption={false}
+              filters={filters}
+              onFilterBadgeSave={(alias: string) => onFilterBadgeSave(Number(groupId), alias)}
+            />
+          </div>
+        ),
+      };
+
+      mainPanelItems.splice(mainPanelItems.length - 1, 0, saveAsFilterPanelItem);
+      panels.push(saveAsFilterPanelContent);
+    }
+
+    return panels;
   }
   /**
    * Checks if filter field exists in any of the index patterns provided,
@@ -406,9 +462,16 @@ export const FilterExpressionItem: FC<Props> = ({
         onClick={handleBadgeClick}
       >
         <div ref={ref}>
-          {filterExpression.map((expression) => {
-            return <>{expression}</>;
-          })}
+          {customLabel ? (
+            <>
+              <EuiIcon type="save" />
+              {customLabel}
+            </>
+          ) : (
+            filterExpression.map((expression) => {
+              return <>{expression}</>;
+            })
+          )}
         </div>
       </EuiBadge>
     </EuiFlexItem>

@@ -33,6 +33,8 @@ import { SavedQueriesItem } from './saved_queries_item';
 import { FilterExpressionItem } from './filter_expression_item';
 
 import { UI_SETTINGS } from '../../../common';
+import { SavedQueryMeta } from '../saved_query_form';
+import { SavedQueryService } from '../..';
 
 interface Props {
   filters: Filter[];
@@ -46,6 +48,9 @@ interface Props {
   selectedSavedQueries?: SavedQuery[];
   removeSelectedSavedQuery: (savedQuery: SavedQuery) => void;
   onMultipleFiltersUpdated?: (filters: Filter[]) => void;
+  savedQueryService: SavedQueryService;
+  onFilterSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  onFilterBadgeSave: (groupId: number, alias: string) => void;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -98,7 +103,13 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function renderMultipleFilters() {
-    const firstDepthGroupedFilters = groupBy(props.multipleFilters, 'groupId');
+    const groupedByAlias = groupBy(props.multipleFilters, 'meta.alias');
+    const filtersWithoutLabel = groupedByAlias.null || groupedByAlias.undefined;
+    const labels = Object.keys(groupedByAlias).filter(
+      (key) => key !== 'null' && key !== 'undefined'
+    );
+
+    const firstDepthGroupedFilters = groupBy(filtersWithoutLabel, 'groupId');
     const GroupBadge: JSX.Element[] = [];
     for (const [groupId, groupedFilters] of Object.entries(firstDepthGroupedFilters)) {
       const badge = (
@@ -110,10 +121,34 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           onRemove={onRemoveFilterGroup}
           onUpdate={onUpdateFilterGroup}
           filtersGroupsCount={Object.entries(firstDepthGroupedFilters).length}
+          savedQueryService={props.savedQueryService}
+          onFilterSave={props.onFilterSave}
+          onFilterBadgeSave={props.onFilterBadgeSave}
         />
       );
       GroupBadge.push(badge);
     }
+
+    let groupId: string;
+    labels.map((label) => {
+      // we should have same groupIds on our labeled filters group
+      groupId = (groupedByAlias[label][0] as any).groupId;
+      groupedByAlias[label].forEach((filter) => ((filter as any).groupId = groupId));
+      const labelBadge = (
+        <FilterExpressionItem
+          groupId={groupId}
+          groupedFilters={groupedByAlias[label]}
+          indexPatterns={props?.indexPatterns}
+          onClick={() => {}}
+          onRemove={onRemoveFilterGroup}
+          onUpdate={onUpdateFilterGroup}
+          filtersGroupsCount={1}
+          customLabel={label}
+        />
+      );
+      GroupBadge.push(labelBadge);
+    });
+
     return GroupBadge;
   }
 
