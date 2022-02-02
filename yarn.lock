@@ -6890,6 +6890,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__storybook@link:bazel-bin/packages/kbn-storybook/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types":
   version "0.0.0"
   uid ""
