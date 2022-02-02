@@ -6,6 +6,7 @@
  */
 import axios from 'axios';
 import { getServiceLocations } from './get_service_locations';
+
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -27,7 +28,15 @@ describe('getServiceLocations', function () {
   });
   it('should return parsed locations', async () => {
     const locations = await getServiceLocations({
-      manifestUrl: 'http://local.dev',
+      config: {
+        service: {
+          manifestUrl: 'http://local.dev',
+        },
+      },
+      // @ts-ignore
+      logger: {
+        error: jest.fn(),
+      },
     });
 
     expect(locations).toEqual({
