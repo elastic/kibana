@@ -17,72 +17,72 @@ import {
 
 export const uxFiltersByName = {
   transactionUrl: {
-    title: i18n.translate('xpack.ux.localFilters.titles.transactionUrl', {
+    title: i18n.translate('xpack.apm.localFilters.titles.transactionUrl', {
       defaultMessage: 'URL',
     }),
     fieldName: TRANSACTION_URL,
   },
   transactionUrlExcluded: {
-    title: i18n.translate('xpack.ux.localFilters.titles.transactionUrl', {
+    title: i18n.translate('xpack.apm.localFilters.titles.transactionUrl', {
       defaultMessage: 'URL',
     }),
     fieldName: TRANSACTION_URL,
     excluded: true,
   },
   browser: {
-    title: i18n.translate('xpack.ux.localFilters.titles.browser', {
+    title: i18n.translate('xpack.apm.localFilters.titles.browser', {
       defaultMessage: 'Browser',
     }),
     fieldName: USER_AGENT_NAME,
   },
   browserExcluded: {
-    title: i18n.translate('xpack.ux.localFilters.titles.browser', {
+    title: i18n.translate('xpack.apm.localFilters.titles.browser', {
       defaultMessage: 'Browser',
     }),
     fieldName: USER_AGENT_NAME,
     excluded: true,
   },
   device: {
-    title: i18n.translate('xpack.ux.localFilters.titles.device', {
+    title: i18n.translate('xpack.apm.localFilters.titles.device', {
       defaultMessage: 'Device',
     }),
     fieldName: USER_AGENT_DEVICE,
   },
   deviceExcluded: {
-    title: i18n.translate('xpack.ux.localFilters.titles.device', {
+    title: i18n.translate('xpack.apm.localFilters.titles.device', {
       defaultMessage: 'Device',
     }),
     fieldName: USER_AGENT_DEVICE,
     excluded: true,
   },
   location: {
-    title: i18n.translate('xpack.ux.localFilters.titles.location', {
+    title: i18n.translate('xpack.apm.localFilters.titles.location', {
       defaultMessage: 'Location',
     }),
     fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
   },
   locationExcluded: {
-    title: i18n.translate('xpack.ux.localFilters.titles.location', {
+    title: i18n.translate('xpack.apm.localFilters.titles.location', {
       defaultMessage: 'Location',
     }),
     fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
     excluded: true,
   },
   os: {
-    title: i18n.translate('xpack.ux.localFilters.titles.os', {
+    title: i18n.translate('xpack.apm.localFilters.titles.os', {
       defaultMessage: 'OS',
     }),
     fieldName: USER_AGENT_OS,
   },
   osExcluded: {
-    title: i18n.translate('xpack.ux.localFilters.titles.os', {
+    title: i18n.translate('xpack.apm.localFilters.titles.os', {
       defaultMessage: 'OS',
     }),
     fieldName: USER_AGENT_OS,
     excluded: true,
   },
   serviceName: {
-    title: i18n.translate('xpack.ux.localFilters.titles.serviceName', {
+    title: i18n.translate('xpack.apm.localFilters.titles.serviceName', {
       defaultMessage: 'Service name',
     }),
     fieldName: SERVICE_NAME,
