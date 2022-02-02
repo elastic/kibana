@@ -25,15 +25,21 @@ export const isLastItem = (accessor: ColorRangeAccessor) => accessor === 'end';
  * @internal
  */
 export const sortColorRanges = (colorRanges: ColorRange[]) => {
-  const maxValue = colorRanges[colorRanges.length - 1].end;
+  const lastRange = colorRanges[colorRanges.length - 1];
 
-  return [...colorRanges]
+  return [...colorRanges, { start: lastRange.end, color: lastRange.color }]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
-    .map((newColorRange, i, array) => ({
-      color: newColorRange.color,
-      start: newColorRange.start,
-      end: i !== array.length - 1 ? array[i + 1].start : maxValue,
-    }));
+    .reduce((sortedColorRange, newColorRange, i, array) => {
+      const color = i === array.length - 2 ? array[i + 1].color : newColorRange.color;
+      if (i !== array.length - 1) {
+        sortedColorRange.push({
+          color,
+          start: newColorRange.start,
+          end: array[i + 1].start,
+        });
+      }
+      return sortedColorRange;
+    }, [] as ColorRange[]);
 };
 
 /**
@@ -91,16 +97,17 @@ export const getValueForContinuity = (
     if (checkIsMaxContinuity(continuity)) {
       value = Number.POSITIVE_INFINITY;
     } else {
-      value =
+      value = roundValue(
         colorRanges[colorRanges.length - 1].start > max
           ? colorRanges[colorRanges.length - 1].start + 1
-          : max;
+          : max
+      );
     }
   } else {
     if (checkIsMinContinuity(continuity)) {
       value = Number.NEGATIVE_INFINITY;
     } else {
-      value = colorRanges[0].end < min ? colorRanges[0].end - 1 : min;
+      value = roundValue(colorRanges[0].end < min ? colorRanges[0].end - 1 : min);
     }
   }
 
