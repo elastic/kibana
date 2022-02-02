@@ -55,7 +55,7 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
         fullWidth
       >
         <EuiRange
-          min={-10}
+          min={0}
           max={10}
           step={0.1}
           value={boost.factor}

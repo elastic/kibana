@@ -42,14 +42,24 @@ describe('hitsToGeoJson', () => {
         _id: 'doc1',
         _index: 'index1',
         fields: {
-          [geoFieldName]: '20,100',
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+          ],
         },
       },
       {
         _id: 'doc2',
         _index: 'index1',
-        _source: {
-          [geoFieldName]: '30,110',
+        fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [110, 30],
+            },
+          ],
         },
       },
     ];
@@ -73,12 +83,17 @@ describe('hitsToGeoJson', () => {
   it('Should handle documents where geoField is not populated', () => {
     const hits = [
       {
-        _source: {
-          [geoFieldName]: '20,100',
+        fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+          ],
         },
       },
       {
-        _source: {},
+        fields: {},
       },
     ];
     const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
@@ -90,10 +105,15 @@ describe('hitsToGeoJson', () => {
     const hits = [
       {
         _source: {
-          [geoFieldName]: '20,100',
           myField: 8,
         },
         fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+          ],
           myScriptedField: 10,
         },
       },
@@ -109,8 +129,17 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
-          [geoFieldName]: ['20,100', '30,110'],
+        fields: {
+          [geoFieldName]: [
+            {
+              type: 'Point',
+              coordinates: [100, 20],
+            },
+            {
+              type: 'Point',
+              coordinates: [110, 30],
+            },
+          ],
           myField: 8,
         },
       },
@@ -151,15 +180,15 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
+        fields: {
           [geoFieldName]: {
             type: 'GeometryCollection',
             geometries: [
               {
-                type: 'geometrycollection', //explicitly test coercion to proper GeoJson type value
+                type: 'geometrycollection',
                 geometries: [
                   {
-                    type: 'point', //explicitly test coercion to proper GeoJson type value
+                    type: 'Point',
                     coordinates: [0, 0],
                   },
                 ],
@@ -216,8 +245,11 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
-          [geoFieldName]: '20,100',
+        fields: {
+          [geoFieldName]: {
+            type: 'Point',
+            coordinates: [100, 20],
+          },
           myDateField: '1587156257081',
         },
       },
@@ -234,16 +266,21 @@ describe('hitsToGeoJson', () => {
     const geoFieldName = 'my.location';
     const indexPatternFlattenHit = (hit) => {
       return {
-        [geoFieldName]: _.get(hit._source, geoFieldName),
+        [geoFieldName]: _.get(hit.fields, geoFieldName),
       };
     };
 
     it('Should handle geoField being an object', () => {
       const hits = [
         {
-          _source: {
+          fields: {
             my: {
-              location: '20,100',
+              location: [
+                {
+                  type: 'Point',
+                  coordinates: [100, 20],
+                },
+              ],
             },
           },
         },
@@ -258,8 +295,13 @@ describe('hitsToGeoJson', () => {
     it('Should handle geoField containing dot in the name', () => {
       const hits = [
         {
-          _source: {
-            ['my.location']: '20,100',
+          fields: {
+            ['my.location']: [
+              {
+                type: 'Point',
+                coordinates: [100, 20],
+              },
+            ],
           },
         },
       ];
@@ -273,15 +315,25 @@ describe('hitsToGeoJson', () => {
     it('Should not modify results of flattenHit', () => {
       const geoFieldName = 'location';
       const cachedProperities = {
-        [geoFieldName]: '20,100',
+        [geoFieldName]: [
+          {
+            type: 'Point',
+            coordinates: [100, 20],
+          },
+        ],
       };
       const cachedFlattenHit = () => {
         return cachedProperities;
       };
       const hits = [
         {
-          _source: {
-            [geoFieldName]: '20,100',
+          fields: {
+            [geoFieldName]: [
+              {
+                type: 'Point',
+                coordinates: [100, 20],
+              },
+            ],
           },
         },
       ];
@@ -296,8 +348,11 @@ describe('geoPointToGeometry', () => {
   const lat = 41.12;
   const lon = -71.34;
 
-  it('Should convert single docvalue_field', () => {
-    const value = `${lat},${lon}`;
+  it('Should convert value', () => {
+    const value = {
+      type: 'Point',
+      coordinates: [lon, lat],
+    };
     const points = [];
     geoPointToGeometry(value, points);
     expect(points.length).toBe(1);
@@ -305,10 +360,19 @@ describe('geoPointToGeometry', () => {
     expect(points[0].coordinates).toEqual([lon, lat]);
   });
 
-  it('Should convert multiple docvalue_fields', () => {
+  it('Should convert array of values', () => {
     const lat2 = 30;
     const lon2 = -60;
-    const value = [`${lat},${lon}`, `${lat2},${lon2}`];
+    const value = [
+      {
+        type: 'Point',
+        coordinates: [lon, lat],
+      },
+      {
+        type: 'Point',
+        coordinates: [lon2, lat2],
+      },
+    ];
     const points = [];
     geoPointToGeometry(value, points);
     expect(points.length).toBe(2);
@@ -318,13 +382,13 @@ describe('geoPointToGeometry', () => {
 });
 
 describe('geoShapeToGeometry', () => {
-  it('Should convert value stored as geojson', () => {
+  it('Should convert value', () => {
     const coordinates = [
       [-77.03653, 38.897676],
       [-77.009051, 38.889939],
     ];
     const value = {
-      type: 'linestring',
+      type: 'LineString',
       coordinates: coordinates,
     };
     const shapes = [];
@@ -340,7 +404,7 @@ describe('geoShapeToGeometry', () => {
       [101.0, 0.0],
     ];
     const value = {
-      type: 'envelope',
+      type: 'Envelope',
       coordinates: coordinates,
     };
     const shapes = [];
@@ -366,11 +430,11 @@ describe('geoShapeToGeometry', () => {
     const pointCoordinates = [125.6, 10.1];
     const value = [
       {
-        type: 'linestring',
+        type: 'LineString',
         coordinates: linestringCoordinates,
       },
       {
-        type: 'point',
+        type: 'Point',
         coordinates: pointCoordinates,
       },
     ];
@@ -381,28 +445,6 @@ describe('geoShapeToGeometry', () => {
     expect(shapes[0].coordinates).toEqual(linestringCoordinates);
     expect(shapes[1].type).toBe('Point');
     expect(shapes[1].coordinates).toEqual(pointCoordinates);
-  });
-
-  it('Should convert wkt shapes to geojson', () => {
-    const pointWkt = 'POINT (32 40)';
-    const linestringWkt = 'LINESTRING (50 60, 70 80)';
-
-    const shapes = [];
-    geoShapeToGeometry(pointWkt, shapes);
-    geoShapeToGeometry(linestringWkt, shapes);
-
-    expect(shapes.length).toBe(2);
-    expect(shapes[0]).toEqual({
-      coordinates: [32, 40],
-      type: 'Point',
-    });
-    expect(shapes[1]).toEqual({
-      coordinates: [
-        [50, 60],
-        [70, 80],
-      ],
-      type: 'LineString',
-    });
   });
 });
 

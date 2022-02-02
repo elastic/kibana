@@ -17,6 +17,14 @@ export const CHANGED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.ch
   defaultMessage: 'changed',
 });
 
+export const ENABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.enabledSetting', {
+  defaultMessage: 'enabled',
+});
+
+export const DISABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.disableSetting', {
+  defaultMessage: 'disabled',
+});
+
 export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.selectedThirdParty', {
     values: {
@@ -119,6 +127,10 @@ export const SYNC_ALERTS = i18n.translate('xpack.cases.caseView.syncAlertsLabel'
   defaultMessage: `Sync alerts`,
 });
 
+export const SYNC_ALERTS_LC = i18n.translate('xpack.cases.caseView.syncAlertsLowercaseLabel', {
+  defaultMessage: `sync alerts`,
+});
+
 export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
   defaultMessage: 'This case does not exist',
 });
@@ -135,32 +147,3 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
   defaultMessage: 'Back to Cases',
 });
-
-export const TOTAL_ALERTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.totalAlerts', {
-  defaultMessage: 'Total Alerts',
-});
-
-export const ASSOCIATED_USERS_METRIC = i18n.translate(
-  'xpack.cases.caseView.metrics.associatedUsers',
-  {
-    defaultMessage: 'Associated Users',
-  }
-);
-
-export const ASSOCIATED_HOSTS_METRIC = i18n.translate(
-  'xpack.cases.caseView.metrics.associatedHosts',
-  {
-    defaultMessage: 'Associated Hosts',
-  }
-);
-
-export const ISOLATED_HOSTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.isolatedHosts', {
-  defaultMessage: 'Isolated Hosts',
-});
-
-export const TOTAL_CONNECTORS_METRIC = i18n.translate(
-  'xpack.cases.caseView.metrics.totalConnectors',
-  {
-    defaultMessage: 'Total Connectors',
-  }
-);

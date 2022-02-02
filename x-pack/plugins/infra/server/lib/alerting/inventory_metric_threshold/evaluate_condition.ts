@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import { mapValues, last, first } from 'lodash';
-import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import {
-  isTooManyBucketsPreviewException,
-  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
-} from '../../../../common/alerting/metrics';
-import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../../adapters/framework';
-import { Comparator, InventoryMetricConditions } from './types';
+import { mapValues } from 'lodash';
+import moment from 'moment';
+import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import {
-  InfraTimerangeInput,
-  SnapshotRequest,
-  SnapshotCustomMetricInput,
-} from '../../../../common/http_api';
-import { InfraSource } from '../../sources';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
-import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
+import { InfraSource } from '../../sources';
+import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
+import { getData } from './lib/get_data';
 
 type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean[];
@@ -61,10 +52,11 @@ export const evaluateCondition = async ({
 
   const timerange = {
     to: to.valueOf(),
-    from: to.clone().subtract(condition.timeSize, condition.timeUnit).valueOf(),
+    from: calcualteFromBasedOnMetric(to, condition, nodeType, metric, customMetric),
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;
+
   if (lookbackSize) {
     timerange.lookbackSize = lookbackSize;
   }
@@ -87,18 +79,15 @@ export const evaluateCondition = async ({
   const valueEvaluator = (value?: DataValue, t?: number[], c?: Comparator) => {
     if (value === undefined || value === null || !t || !c) return [false];
     const comparisonFunction = comparatorMap[c];
-    return Array.isArray(value)
-      ? value.map((v) => comparisonFunction(Number(v), t))
-      : [comparisonFunction(value as number, t)];
+    return [comparisonFunction(value as number, t)];
   };
 
   const result = mapValues(currentValues, (value) => {
-    if (isTooManyBucketsPreviewException(value)) throw value;
     return {
       ...condition,
       shouldFire: valueEvaluator(value, threshold, comparator),
       shouldWarn: valueEvaluator(value, warningThreshold, warningComparator),
-      isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
+      isNoData: [value === null],
       isError: value === undefined,
       currentValue: getCurrentValue(value),
     };
@@ -107,82 +96,12 @@ export const evaluateCondition = async ({
   return result as Record<string, ConditionResult>;
 };
 
-const getCurrentValue: (value: any) => number = (value) => {
-  if (Array.isArray(value)) return getCurrentValue(last(value));
+const getCurrentValue: (value: number | null) => number = (value) => {
   if (value !== null) return Number(value);
   return NaN;
 };
 
-type DataValue = number | null | Array<number | string | null | undefined>;
-const getData = async (
-  esClient: ElasticsearchClient,
-  nodeType: InventoryItemType,
-  metric: SnapshotMetricType,
-  timerange: InfraTimerangeInput,
-  source: InfraSource,
-  logQueryFields: LogQueryFields | undefined,
-  compositeSize: number,
-  filterQuery?: string,
-  customMetric?: SnapshotCustomMetricInput
-) => {
-  const client = async <Hit = {}, Aggregation = undefined>(
-    options: CallWithRequestParams
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
-    // @ts-expect-error SearchResponse.body.timeout is optional
-    (await esClient.search(options)).body as InfraDatabaseSearchResponse<Hit, Aggregation>;
-
-  const metrics = [
-    metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },
-  ];
-
-  const snapshotRequest: SnapshotRequest = {
-    filterQuery,
-    nodeType,
-    groupBy: [],
-    sourceId: 'default',
-    metrics,
-    timerange,
-    includeTimeseries: Boolean(timerange.lookbackSize),
-  };
-  try {
-    const { nodes } = await getNodes(
-      client,
-      snapshotRequest,
-      source,
-      compositeSize,
-      logQueryFields
-    );
-
-    if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
-
-    return nodes.reduce((acc, n) => {
-      const { name: nodeName } = n;
-      const m = first(n.metrics);
-      if (m && m.value && m.timeseries) {
-        const { timeseries } = m;
-        const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
-        acc[nodeName] = values;
-      } else {
-        acc[nodeName] = m && m.value;
-      }
-      return acc;
-    }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
-  } catch (e) {
-    if (timerange.lookbackSize) {
-      // This code should only ever be reached when previewing the alert, not executing it
-      const causedByType = e.body?.error?.caused_by?.type;
-      if (causedByType === 'too_many_buckets_exception') {
-        return {
-          [UNGROUPED_FACTORY_KEY]: {
-            [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
-            maxBuckets: e.body.error.caused_by.max_buckets,
-          },
-        };
-      }
-    }
-    return { [UNGROUPED_FACTORY_KEY]: undefined };
-  }
-};
+type DataValue = number | null;
 
 const comparatorMap = {
   [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>

@@ -49,6 +49,23 @@ describe('createCommentUserActionBuilder', () => {
     expect(screen.getByText('edited comment')).toBeInTheDocument();
   });
 
+  it('renders correctly when deleting a comment', async () => {
+    const userAction = getUserAction('comment', Actions.delete);
+    const builder = createCommentUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('removed comment')).toBeInTheDocument();
+  });
+
   it('renders correctly a user comment', async () => {
     const userAction = getUserAction('comment', Actions.create, {
       commentId: basicCase.comments[0].id,

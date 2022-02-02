@@ -11,12 +11,15 @@ import {
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
-import { getComment } from '../../../../common/lib/utils';
+import { deleteAllCaseItems, getComment } from '../../../../common/lib/utils';
+import { CommentResponseAlertsType } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   describe('migrations', () => {
     describe('7.11.0', () => {
@@ -57,6 +60,78 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
 
         expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
+      });
+    });
+
+    describe('8.0.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('removes the rule information from alert attachments', async () => {
+        const comment = (await getComment({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          commentId: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
+        })) as CommentResponseAlertsType;
+
+        expect(comment).to.have.property('rule');
+        expect(comment.rule.id).to.be(null);
+        expect(comment.rule.name).to.be(null);
+      });
+
+      it('does not modify non-alert attachments', async () => {
+        const comment = (await getComment({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          commentId: 'ae59cdd0-cf9d-11eb-a603-13e7747d215c',
+        })) as CommentResponseAlertsType;
+
+        expect(comment).to.not.have.property('rule');
+      });
+    });
+
+    describe('8.1.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('removes the associationType field from an alert comment', async () => {
+        const comment = (await getComment({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          commentId: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
+        })) as CommentResponseAlertsType;
+
+        expect(comment).not.to.have.property('associationType');
+      });
+
+      it('removes the associationType field from a user comment', async () => {
+        const comment = (await getComment({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          commentId: 'ae59cdd0-cf9d-11eb-a603-13e7747d215c',
+        })) as CommentResponseAlertsType;
+
+        expect(comment).not.to.have.property('associationType');
       });
     });
   });

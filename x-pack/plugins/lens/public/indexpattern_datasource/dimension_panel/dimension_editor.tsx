@@ -634,6 +634,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     },
   ];
 
+  const defaultLabel = useMemo(
+    () =>
+      String(
+        selectedColumn &&
+          operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+            selectedColumn,
+            state.indexPatterns[state.layers[layerId].indexPatternId],
+            state.layers[layerId].columns
+          )
+      ),
+    [layerId, selectedColumn, state.indexPatterns, state.layers]
+  );
+
   return (
     <div id={columnId}>
       {hasTabs ? <DimensionEditorTabs tabs={tabs} /> : null}
@@ -750,7 +763,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">
           {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
             <LabelInput
+              // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
+              key={defaultLabel}
               value={selectedColumn.label}
+              defaultValue={defaultLabel}
               onChange={(value) => {
                 updateLayer({
                   columns: {

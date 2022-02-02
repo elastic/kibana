@@ -18,7 +18,8 @@ import {
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { SyncBadge } from './sync_badge';
+import { SyncBadge } from './badge/sync_badge';
+import { ColdStartBadge } from './badge/cold_start_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
@@ -200,6 +201,8 @@ export function WaterfallItem({
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
+  const isServerlessColdstart =
+    item.docType === 'transaction' && item.doc.faas?.coldstart;
 
   return (
     <Container
@@ -228,7 +231,13 @@ export function WaterfallItem({
 
         <Duration item={item} />
         <RelatedErrors item={item} errorCount={errorCount} />
-        {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
+        {item.docType === 'span' && (
+          <SyncBadge
+            sync={item.doc.span.sync}
+            agentName={item.doc.agent.name}
+          />
+        )}
+        {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
     </Container>
   );

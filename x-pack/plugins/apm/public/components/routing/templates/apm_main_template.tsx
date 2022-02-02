@@ -51,7 +51,7 @@ export function ApmMainTemplate({
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
   const { data } = useFetcher((callApmApi) => {
-    return callApmApi({ endpoint: 'GET /internal/apm/has_data' });
+    return callApmApi('GET /internal/apm/has_data');
   }, []);
 
   const noDataConfig = getNoDataConfig({

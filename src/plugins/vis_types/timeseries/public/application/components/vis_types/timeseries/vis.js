@@ -239,7 +239,7 @@ class TimeseriesVisualization extends Component {
       } else if (!mainDomainAdded) {
         const tickFormatter = checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)
           ? seriesGroupTickFormatter
-          : (val) => val;
+          : createTickFormatter(undefined, undefined, getConfig);
 
         TimeseriesVisualization.addYAxis(yAxis, {
           tickFormatter,
@@ -266,6 +266,7 @@ class TimeseriesVisualization extends Component {
             legend={Boolean(model.show_legend)}
             legendPosition={model.legend_position}
             truncateLegend={Boolean(model.truncate_legend)}
+            ignoreDaylightTime={Boolean(model.ignore_daylight_time)}
             maxLegendLines={model.max_lines_legend}
             tooltipMode={model.tooltip_mode}
             xAxisFormatter={this.xAxisFormatter(interval)}
