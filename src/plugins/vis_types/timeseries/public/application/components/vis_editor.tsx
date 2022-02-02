@@ -20,7 +20,8 @@ import { KibanaContextProvider } from '../../../../../../plugins/kibana_react/pu
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 
 import type { TimeRange } from '../../../../../../plugins/data/public';
-import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
+import type { IndexPatternValue, TimeseriesVisData, Panel, Series } from '../../../common/types';
+import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
 
 // @ts-expect-error
 import { VisEditorVisualization } from './vis_editor_visualization';
@@ -55,6 +56,13 @@ interface TimeseriesEditorState {
   model: TimeseriesVisParams;
   visFields?: VisFields;
 }
+
+const switchTimeRangeMode = (model: Panel | Series) => {
+  model.time_range_mode =
+    model.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+      ? TIME_RANGE_DATA_MODES.LAST_VALUE
+      : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
+};
 
 export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditorState> {
   private abortControllerFetchFields?: AbortController;
@@ -167,6 +175,36 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
   };
 
   onDataChange = (data: { visData?: TimeseriesVisData }) => {
+    // we should update time range mode after we got uiRestrictions
+    // as default time range mode can be not compatible with data
+    if (data.visData) {
+      const nextModel = {
+        ...this.state.model,
+      };
+      let isTimeRangeModeChanged = false;
+      if (
+        nextModel.time_range_mode &&
+        !isTimerangeModeEnabled(nextModel.time_range_mode, data.visData.uiRestrictions)
+      ) {
+        isTimeRangeModeChanged = true;
+        switchTimeRangeMode(nextModel);
+      }
+      nextModel.series.forEach((series) => {
+        if (
+          series.time_range_mode &&
+          !isTimerangeModeEnabled(series.time_range_mode, data.visData!.uiRestrictions)
+        ) {
+          isTimeRangeModeChanged = true;
+          switchTimeRangeMode(series);
+        }
+      });
+      if (isTimeRangeModeChanged) {
+        this.setState({
+          model: nextModel,
+        });
+      }
+    }
+
     this.visDataSubject.next(data?.visData);
   };
 
