@@ -8,6 +8,7 @@
 import { get, map, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
 import { metrics } from '../../../metrics';
+import { Metric } from '../../../metrics/metrics';
 import { Bucket } from '../../../../types';
 
 type MetricBucket = Bucket & { metric_deriv?: { value: number; normalized_value: number } };
@@ -35,10 +36,7 @@ function calcSlope(data: Array<{ x: number; y: number }>) {
   return null; // convert possible NaN to `null` for JSON-friendliness
 }
 
-const mapBuckets = (
-  bucket: MetricBucket,
-  metric: { derivative: boolean; calculation: (b: Bucket) => number | null }
-) => {
+const mapBuckets = (bucket: MetricBucket, metric: Metric) => {
   const x = bucket.key;
 
   if (metric.calculation) {

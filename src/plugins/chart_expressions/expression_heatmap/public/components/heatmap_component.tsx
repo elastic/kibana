@@ -271,8 +271,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     // adds a very small number to the max value to make sure the max value will be included
     const smattering = 0.00001;
-    const endValue =
-      (paletteParams?.range === 'number' ? paletteParams.rangeMax : max) + smattering;
+    let endValue = max + smattering;
+    if (paletteParams?.rangeMax || paletteParams?.rangeMax === 0) {
+      endValue =
+        (paletteParams?.range === 'number'
+          ? paletteParams.rangeMax
+          : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
+    }
 
     const overwriteColors = uiState?.get('vis.colors') ?? null;
 
@@ -439,6 +444,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       },
     };
 
+    const xAxisTitle = args.gridConfig.xTitle ?? xAxisColumn?.name;
+    const yAxisTitle = args.gridConfig.yTitle ?? yAxisColumn?.name;
+
     return (
       <>
         {showLegend !== undefined && (
@@ -487,6 +495,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
             xAxisLabelName={xAxisColumn?.name}
             yAxisLabelName={yAxisColumn?.name}
+            xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
+            yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
             xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
             yAxisLabelFormatter={
               yAxisColumn

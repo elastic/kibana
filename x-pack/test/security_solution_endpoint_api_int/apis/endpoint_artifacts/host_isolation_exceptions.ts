@@ -6,6 +6,8 @@
  */
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -19,10 +21,10 @@ import {
   getImportExceptionsListSchemaMock,
   toNdJsonString,
 } from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
+import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 
 export default function ({ getService }: FtrProviderContext) {
   const USER = ROLES.detections_admin;
-
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
@@ -40,6 +42,44 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let existingExceptionData: ArtifactTestData;
+
+    const exceptionsGenerator = new ExceptionsListItemGenerator();
+
+    const anEndpointArtifactError = (res: { body: { message: string } }) => {
+      expect(res.body.message).to.match(/EndpointArtifactError/);
+    };
+
+    const anErrorMessageWith = (
+      value: string | RegExp
+    ): ((res: { body: { message: string } }) => void) => {
+      return (res) => {
+        if (value instanceof RegExp) {
+          expect(res.body.message).to.match(value);
+        } else {
+          expect(res.body.message).to.be(value);
+        }
+      };
+    };
+
+    const apiCalls: ApiCallsInterface<
+      Pick<ExceptionListItemSchema, 'item_id' | 'namespace_type' | 'os_types' | 'tags' | 'entries'>
+    > = [
+      {
+        method: 'post',
+        path: EXCEPTION_LIST_ITEM_URL,
+        getBody: () => exceptionsGenerator.generateHostIsolationExceptionForCreate(),
+      },
+      {
+        method: 'put',
+        path: EXCEPTION_LIST_ITEM_URL,
+        getBody: () =>
+          exceptionsGenerator.generateHostIsolationExceptionForUpdate({
+            id: existingExceptionData.artifact.id,
+            item_id: existingExceptionData.artifact.item_id,
+            _version: existingExceptionData.artifact._version,
+          }),
+      },
+    ];
 
     before(async () => {
       // Create an endpoint policy in fleet we can work with
@@ -90,10 +130,105 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
+    describe('and has authorization to manage endpoint security', () => {
+      describe('should error on ', () => {
+        for (const apiCall of apiCalls) {
+          it(`[${apiCall.method}] if invalid condition entry fields are used`, async () => {
+            const body = apiCall.getBody();
+
+            body.entries[0].field = 'some.invalid.field';
+
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/expected value to equal \[destination.ip\]/));
+          });
+
+          it(`[${apiCall.method}] if more than one entry`, async () => {
+            const body = apiCall.getBody();
+
+            body.entries.push({ ...body.entries[0] });
+
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/\[entries\]: array size is \[2\]/));
+          });
+
+          it(`[${apiCall.method}] if an invalid ip is used`, async () => {
+            const body = apiCall.getBody();
+
+            body.entries = [
+              {
+                field: 'destination.ip',
+                operator: 'included',
+                type: 'match',
+                value: 'not.an.ip',
+              },
+            ];
+
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/invalid ip/));
+          });
+
+          it(`[${apiCall.method}] if all OSs for os_types are not included`, async () => {
+            const body = apiCall.getBody();
+
+            body.os_types = ['linux', 'windows'];
+
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
+          });
+
+          it(`[${apiCall.method}] if policy id is invalid`, async () => {
+            const body = apiCall.getBody();
+
+            body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
+
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(anErrorMessageWith(/invalid policy ids/));
+          });
+        }
+      });
+
+      describe('should work on ', () => {
+        for (const apiCall of apiCalls) {
+          it(`[${apiCall.method}] if entry is valid`, async () => {
+            const body = apiCall.getBody();
+
+            await supertest[apiCall.method](apiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+
+            const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
+            await supertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+          });
+        }
+      });
+    });
+
     describe(`and user (${USER}) DOES NOT have authorization to manage endpoint security`, () => {
       // Define a new array that includes the prior set from above, plus additional API calls that
       // only have Authz validations setup
       const allApiCalls: ApiCallsInterface = [
+        ...apiCalls,
         {
           method: 'get',
           info: 'single item',
