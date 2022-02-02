@@ -106,9 +106,7 @@ export class SyntheticsService {
             async run() {
               const { state } = taskInstance;
 
-              const { manifestUrl } = service.config;
-
-              getServiceLocations({ manifestUrl }).then((result) => {
+              getServiceLocations(service.server).then((result) => {
                 service.locations = result.locations;
                 service.apiClient.locations = result.locations;
               });
