@@ -748,7 +748,6 @@ describe('Fleet - validationHasErrors()', () => {
                     type: 'metrics',
                   },
                   enabled: true,
-                  id: 'linux/metrics-linux.memory-b0df6872-ff9a-443f-babc-5d7785e35b98',
                 },
               ],
               type: 'linux/metrics',
