@@ -134,6 +134,7 @@ export const RangePopover = ({
               compressed
               placeholder={FROM_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
+              step={1}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -164,6 +165,7 @@ export const RangePopover = ({
                   onSubmit();
                 }
               }}
+              step={1}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
