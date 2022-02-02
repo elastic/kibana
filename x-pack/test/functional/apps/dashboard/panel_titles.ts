@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const LIBRARY_TITLE_FOR_CUSTOM_TESTS = 'Library Title for Custom Title Tests';
   const LIBRARY_TITLE_FOR_EMPTY_TESTS = 'Library Title for Empty Title Tests';
 
-  describe.only('panel titles', () => {
+  describe('panel titles', () => {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
