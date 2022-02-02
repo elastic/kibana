@@ -3,7 +3,7 @@
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
-check out the <<release-notes, release notes>>.
+check the <<release-notes, release notes>>.
 
 coming[8.0.0]
 
@@ -16,7 +16,7 @@ coming[8.0.0]
 === Security features enabled by default
 
 Authentication, authorization, and multi-tenancy
-with {kib} Spaces are on-by-default, with almost no configuration effort.
+with {kib} *Spaces* are on-by-default, with almost no configuration effort.
 When you use {kib} for the first time, you're presented with a new interactive
 UI that helps you securely set up and connect {kib} to {es}.
 Simply paste the enrollment token that you receive when you start
@@ -35,9 +35,9 @@ new and exciting features in {kib}. Your data views work
 exactly as index patterns did in previous releases.
 
 [float]
-=== Maps updates vector tiles & basemaps
+=== Vector tiles and basemap updated
 
-Elastic is offering full vector tile support, generally available, in {kib} *Maps*.
+Elastic offers full vector tile support, now generally available, in {kib} *Maps*.
 Enjoy faster performance and smooth navigation of your data at scale.
 
 [role="screenshot"]
@@ -54,7 +54,7 @@ Enable the new {kibana-ref}/show-field-statistics.html[*Field statistics*] view
 for a summary of all fields (or just selected fields) in your data.
 You'll find interesting fields to visualize and learn more about the shape of your data.
 The *Field statistics* view
-is similar to the Index Data Visualizer in {ml-app}.
+is similar to the *Index Data Visualizer* in *{ml-app}*.
 
 [role="screenshot"]
 image::images/highlights-discover.gif[Fields statistics view in Discover]
@@ -70,7 +70,7 @@ The multi-layered format enables you to create easier to understand visualizatio
 image::images/highlights-time-axis.gif[Upgraded time axis]
 
 [float]
-=== Display data labels in heatmaps
+=== Heatmaps display data labels
 
 Enable *Show* on labels, and
 when there’s room, a data label appears in each heatmap cell.
@@ -88,14 +88,9 @@ create elements and visualizations.
 [role="screenshot"]
 image::images/highlights-canvas.png[Editing toolbar in Canvas]
 
-*Canvas* now also has the following new features:
-
-* Create embedded visualizations in your *Canvas* workpads.
-Promote favorites to the *Visualization Library* for re-use.
-
-* For fewer clicks to author and edit existing workpads, editing visualizations in *Canvas* now returns you to *Canvas* when you
-click *Save and close*. 
-
+You can also now
+create embedded visualizations in your *Canvas* workpads.
+Just like in *Dashboard*, you can promote favorites to the *Visualization Library* for re-use.
 
 
 // end::notable-highlights[]
