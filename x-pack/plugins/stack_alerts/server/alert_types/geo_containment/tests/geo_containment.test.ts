@@ -22,7 +22,7 @@ import type { GeoContainmentParams } from '../alert_type';
 
 const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
   create: (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertFactory<
+    const alertInstance = alertsMock.createAlertFactory.create<
       GeoContainmentInstanceState,
       GeoContainmentInstanceContext
     >();
@@ -539,6 +539,7 @@ describe('geo_containment', () => {
 
     it('should query for shapes if state does not contain shapes', async () => {
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,
@@ -558,6 +559,7 @@ describe('geo_containment', () => {
 
     it('should not query for shapes if state contains shapes', async () => {
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,
@@ -576,6 +578,7 @@ describe('geo_containment', () => {
 
     it('should carry through shapes filters in state to next call unmodified', async () => {
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,
@@ -611,6 +614,7 @@ describe('geo_containment', () => {
         ],
       };
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,

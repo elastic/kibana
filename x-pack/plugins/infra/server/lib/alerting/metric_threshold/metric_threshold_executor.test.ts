@@ -842,7 +842,7 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
 const alertInstances = new Map<string, AlertTestInstance>();
 services.alertFactory.create.mockImplementation((instanceID: string) => {
   const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertFactory(),
+    instance: alertsMock.createAlertFactory.create(),
     actionQueue: [],
     state: {},
   };

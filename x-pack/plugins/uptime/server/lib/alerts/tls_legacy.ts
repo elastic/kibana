@@ -16,7 +16,7 @@ import { commonStateTranslations, tlsTranslations } from './translations';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 
 import { AlertInstanceContext } from '../../../../alerting/common';
-import { AlertInstance } from '../../../../alerting/server';
+import { Alert } from '../../../../alerting/server';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { createUptimeESClient } from '../lib';
@@ -28,7 +28,7 @@ import {
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
 
-type TLSAlertInstance = AlertInstance<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
+type TLSAlertInstance = Alert<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
 
 interface TlsAlertState {
   count: number;

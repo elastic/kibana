@@ -13,7 +13,7 @@ import { v4 } from 'uuid';
 import { difference } from 'lodash';
 import {
   AlertExecutorOptions,
-  AlertInstance,
+  Alert,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
@@ -62,7 +62,7 @@ export type LifecycleAlertService<
 > = (alert: {
   id: string;
   fields: ExplicitAlertFields;
-}) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+}) => Alert<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,

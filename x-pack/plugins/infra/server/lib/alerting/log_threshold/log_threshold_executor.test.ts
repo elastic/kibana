@@ -422,7 +422,7 @@ describe('Log threshold executor', () => {
         processUngroupedResults(
           results,
           ruleParams,
-          alertsMock.createAlertFactory,
+          alertsMock.createAlertFactory.create,
           alertUpdaterMock
         );
         // First call, second argument
@@ -483,7 +483,12 @@ describe('Log threshold executor', () => {
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
-        processGroupByResults(results, ruleParams, alertsMock.createAlertFactory, alertUpdaterMock);
+        processGroupByResults(
+          results,
+          ruleParams,
+          alertsMock.createAlertFactory.create,
+          alertUpdaterMock
+        );
         expect(alertUpdaterMock.mock.calls.length).toBe(2);
         // First call, second argument
         expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);

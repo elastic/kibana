@@ -99,7 +99,9 @@ const createAlertServicesMock = <
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
 
 export const alertsMock = {
-  createAlertFactory: createAlertFactoryMock,
+  createAlertFactory: {
+    create: createAlertFactoryMock,
+  },
   createSetup: createSetupMock,
   createStart: createStartMock,
   createAlertServices: createAlertServicesMock,
