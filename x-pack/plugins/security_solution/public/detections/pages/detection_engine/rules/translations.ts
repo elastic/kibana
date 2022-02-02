@@ -88,6 +88,27 @@ export const EDIT_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const FEATURE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.tourTitle',
+  {
+    defaultMessage: "What's New",
+  }
+);
+
+export const FEATURE_TOUR_ADVANCED_SORTING_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.advancedSortingStepDescription',
+  {
+    defaultMessage: 'Try out our new UI for advanced sorting and filtering capabilities',
+  }
+);
+
+export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
+  {
+    defaultMessage: 'Did you know you can now apply bulk updates to index patterns and tags?',
+  }
+);
+
 export const REFRESH = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.refreshTitle',
   {

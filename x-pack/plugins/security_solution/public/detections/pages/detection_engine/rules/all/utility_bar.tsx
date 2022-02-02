@@ -11,6 +11,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiContextMenuPanelDescriptor,
+  EuiTourStep,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
@@ -22,6 +23,7 @@ import {
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
 import * as i18n from '../translations';
+import { useFeatureTour } from './use_feature_tour';
 
 interface AllRulesUtilityBarProps {
   canBulkEdit: boolean;
@@ -55,7 +57,9 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
-    const handleGetBuIktemsPopoverContent = useCallback(
+    const { tours, finishTour } = useFeatureTour();
+
+    const handleGetBulkItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
         if (onGetBulkItemsPopoverContent != null) {
           return (
@@ -134,17 +138,20 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                 )}
 
                 {canBulkEdit && (
-                  <UtilityBarAction
-                    disabled={hasDisabledActions}
-                    inProgress={isBulkActionInProgress}
-                    dataTestSubj="bulkActions"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverPanelPaddingSize="none"
-                    popoverContent={handleGetBuIktemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                  <EuiTourStep {...tours[1]}>
+                    <UtilityBarAction
+                      disabled={hasDisabledActions}
+                      inProgress={isBulkActionInProgress}
+                      dataTestSubj="bulkActions"
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverPanelPaddingSize="none"
+                      popoverContent={handleGetBulkItemsPopoverContent}
+                      onClick={finishTour}
+                    >
+                      {i18n.BATCH_ACTIONS}
+                    </UtilityBarAction>
+                  </EuiTourStep>
                 )}
 
                 <UtilityBarAction

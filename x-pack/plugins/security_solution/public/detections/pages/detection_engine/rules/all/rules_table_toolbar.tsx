@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
+import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+
 import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import * as i18n from '../translations';
+import { useFeatureTour } from './use_feature_tour';
 
 const ToolbarLayout = styled.div`
   display: grid;
@@ -49,6 +51,8 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
       actions: { setIsInMemorySorting },
     } = useRulesTableContext();
 
+    const { tours, goToNextStep } = useFeatureTour();
+
     return (
       <ToolbarLayout>
         <EuiTabs>
@@ -64,13 +68,18 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(
             </EuiTab>
           ))}
         </EuiTabs>
-        <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
-          <EuiSwitch
-            label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
-            checked={isInMemorySorting}
-            onChange={(e) => setIsInMemorySorting(e.target.checked)}
-          />
-        </EuiToolTip>
+        <EuiTourStep {...tours[0]}>
+          <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
+            <EuiSwitch
+              label={isInMemorySorting ? i18n.EXPERIMENTAL_ON : i18n.EXPERIMENTAL_OFF}
+              checked={isInMemorySorting}
+              onChange={(e) => {
+                goToNextStep();
+                setIsInMemorySorting(e.target.checked);
+              }}
+            />
+          </EuiToolTip>
+        </EuiTourStep>
       </ToolbarLayout>
     );
   }
