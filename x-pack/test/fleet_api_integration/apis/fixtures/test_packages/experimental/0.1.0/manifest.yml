@@ -1,6 +1,6 @@
 format_version: 1.0.0
-name: technical preview
-title: technical preview integration
+name: experimental
+title: experimental integration
 description: This is a test package for testing technical preview packages
 version: 0.1.0
 categories: []
