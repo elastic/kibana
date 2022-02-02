@@ -6,7 +6,6 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { isEmpty } from 'lodash';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,7 +19,6 @@ import { dispatchUpdateTimeline } from '../../../../timelines/components/open_ti
 import { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useFetchEcsAlertsData } from '../../../containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -76,23 +74,12 @@ export const useInvestigateInTimeline = ({
   );
 
   const showInvestigateInTimelineAction = alertIds != null;
-  const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
-    alertIds,
-    skip: alertIds == null,
-  });
 
   const investigateInTimelineAlertClick = useCallback(async () => {
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
     }
-    if (!isEmpty(alertsEcsData) && alertsEcsData !== null) {
-      await sendAlertToTimelineAction({
-        createTimeline,
-        ecsData: alertsEcsData,
-        searchStrategyClient,
-        updateTimelineIsLoading,
-      });
-    } else if (ecsRowData != null) {
+    if (ecsRowData != null) {
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: ecsRowData,
@@ -101,7 +88,6 @@ export const useInvestigateInTimeline = ({
       });
     }
   }, [
-    alertsEcsData,
     createTimeline,
     ecsRowData,
     onInvestigateInTimelineAlertClick,
@@ -114,7 +100,7 @@ export const useInvestigateInTimeline = ({
         <EuiContextMenuItem
           key="investigate-in-timeline-action-item"
           data-test-subj="investigate-in-timeline-action-item"
-          disabled={ecsRowData == null && isFetchingAlertEcs === true}
+          disabled={ecsRowData == null}
           onClick={investigateInTimelineAlertClick}
         >
           {ACTION_INVESTIGATE_IN_TIMELINE}
