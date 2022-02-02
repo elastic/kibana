@@ -44,7 +44,7 @@ Both API sets are expected to return the same response format.
 The design to have separate API sets for local vs Elasticsearch was partly
 because the UI and server components were originally developed separately and
 later merged. However, it also allows the server methods to have a single
-responsibility and makes it easier to test and verify both the server returns
+responsibility, making it easier to test and verify that the server returns
 the expected responses for the given data sources.
 
 ## Server API Responses
