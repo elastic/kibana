@@ -17,6 +17,11 @@ export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListI
     const eventFilterGenerator = new ExceptionsListItemGenerator();
     const eventFilterData: Partial<CreateExceptionListItemSchema> =
       eventFilterGenerator.generateEventFilter({
+        name: `Generated event ${this.randomString(5)}`,
+        item_id: `generator_endpoint_event_filter_${this.randomUUID()}`,
+        list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+        os_types: [this.randomOSFamily()] as CreateExceptionListItemSchema['os_types'],
+        tags: [this.randomChoice(EFFECT_SCOPE_TYPES)],
         _version: undefined,
         created_at: undefined,
         created_by: undefined,
