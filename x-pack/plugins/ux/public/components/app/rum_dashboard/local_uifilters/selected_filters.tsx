@@ -14,7 +14,7 @@ import { FilterValueLabel } from '../../../../../../observability/public';
 import { FiltersUIHook } from '../hooks/use_local_uifilters';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SelectedWildcards } from './selected_wildcards';
-import { UxLocalUIFilterName } from '../../../../../../apm/common/ux_ui_filter';
+import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 
 interface Props {
   indexPattern?: IndexPattern;

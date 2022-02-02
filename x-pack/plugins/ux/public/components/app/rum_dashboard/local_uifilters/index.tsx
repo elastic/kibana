@@ -30,12 +30,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../../apm/common/elasticsearch_fieldnames';
+
+import { ENVIRONMENT_ALL } from '../../../../../../apm/common/environment_filter_values';
 import {
   uxFiltersByName,
   UxLocalUIFilterName,
   uxLocalUIFilterNames,
-} from '../../../../../../apm/common/ux_ui_filter';
-import { ENVIRONMENT_ALL } from '../../../../../../apm/common/environment_filter_values';
+} from '../../../../../common/ux_ui_filter';
 
 const filterNames: UxLocalUIFilterName[] = [
   'location',

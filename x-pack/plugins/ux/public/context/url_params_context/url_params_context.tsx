@@ -23,7 +23,7 @@ import { UxUIFilters } from '../../../typings/ui_filters';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { UrlParams } from './types';
-import { use_deep_object_identity } from '../../hooks/useDeepObjectIdentity';
+import { useDeepObjectIdentity } from '../../hooks/use_deep_object_identity';
 
 export interface TimeRange {
   rangeFrom: string;
@@ -36,7 +36,7 @@ function useUxUiFilters(params: UrlParams): UxUIFilters {
     (val) => (val ? val.split(',') : [])
   ) as Partial<Record<UxLocalUIFilterName, string[]>>;
 
-  return use_deep_object_identity({
+  return useDeepObjectIdentity({
     environment: params.environment,
     ...localUiFilters,
   });
