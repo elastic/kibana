@@ -21,6 +21,27 @@ export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListI
       tags: [this.randomChoice(EFFECT_SCOPE_TYPES)],
       namespace_type: 'agnostic',
       meta: undefined,
+      description: `Description ${this.randomString(5)}`,
+      entries: [
+        {
+          field: 'process.pe.company',
+          operator: 'excluded',
+          type: 'match',
+          value: 'elastic',
+        },
+        {
+          entries: [
+            {
+              field: 'status',
+              operator: 'included',
+              type: 'match',
+              value: 'dfdfd',
+            },
+          ],
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+        },
+      ],
     };
 
     return Object.assign<CreateExceptionListItemSchema, Partial<CreateExceptionListItemSchema>>(
