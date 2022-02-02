@@ -15,7 +15,7 @@ import {
  *   - execution summary of a rule containing such data as the last status and metrics
  *   - execution events such as recent failures and status changes
  */
-export interface IRuleExecutionLogClient {
+export interface IRuleExecutionLogForRoutes {
   /**
    * Fetches a list of current execution summaries of multiple rules.
    * @param ruleIds A list of saved object ids of multiple rules (`rule.id`).
