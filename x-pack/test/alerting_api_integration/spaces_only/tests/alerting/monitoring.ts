@@ -31,7 +31,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       await waitForExecutionCount(1, createResponse.body.id);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
       );
       expect(getResponse.status).to.eql(200);
 
@@ -52,7 +52,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       await waitForExecutionCount(3, createResponse.body.id);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
       );
       expect(getResponse.status).to.eql(200);
 
@@ -84,7 +84,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       await waitForExecutionCount(5, createResponse.body.id);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
       );
       expect(getResponse.status).to.eql(200);
 
@@ -114,7 +114,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       await waitForExecutionCount(3, createResponse.body.id);
 
       const getResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createResponse.body.id}`
       );
       expect(getResponse.status).to.eql(200);
 
@@ -132,7 +132,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       return true;
     }
     const getResponse = await supertest.get(
-      `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${id}`
+      `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}`
     );
     expect(getResponse.status).to.eql(200);
     if (getResponse.body.monitoring.execution.history.length >= count) {
