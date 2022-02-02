@@ -15,8 +15,8 @@ const EFFECT_SCOPE_TYPES = [BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG];
 export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListItemSchema> {
   generate(): CreateExceptionListItemSchema {
     const eventFilterGenerator = new ExceptionsListItemGenerator();
-    const eventFilterData: Partial<CreateExceptionListItemSchema> =
-      eventFilterGenerator.generateEventFilter({
+    const eventFilterData: CreateExceptionListItemSchema = eventFilterGenerator.generateEventFilter(
+      {
         name: `Generated event ${this.randomString(5)}`,
         item_id: `generator_endpoint_event_filter_${this.randomUUID()}`,
         list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -29,7 +29,8 @@ export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListI
         tie_breaker_id: undefined,
         updated_at: undefined,
         updated_by: undefined,
-      });
+      }
+    );
 
     return eventFilterData;
   }
