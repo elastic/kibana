@@ -9,8 +9,9 @@ import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { BaseDataGenerator } from './base_data_generator';
 import { getCreateExceptionListItemSchemaMock } from '../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts';
 
-const EFFECT_SCOPE_TYPES = ['policy:', 'policy:all'];
+const EFFECT_SCOPE_TYPES = [BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG];
 export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListItemSchema> {
   generate(): CreateExceptionListItemSchema {
     const overrides: Partial<CreateExceptionListItemSchema> = {
