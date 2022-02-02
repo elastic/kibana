@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
@@ -38,7 +39,11 @@ export const hydrateSavedObjects = async ({
       .map((monitor) => {
         let url = '';
         esDocs.forEach((doc) => {
-          if (doc.config_id === monitor.id && doc.url?.full) {
+          if (
+            doc.config_id === monitor.id &&
+            doc.url?.full &&
+            moment(monitor.updated_at) < moment(doc['@timestamp'])
+          ) {
             url = doc.url?.full;
           }
         });
@@ -57,6 +62,14 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
       query: {
         bool: {
           filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-15m',
+                  lt: 'now',
+                },
+              },
+            },
             {
               terms: {
                 config_id: configIds,
@@ -80,7 +93,7 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
           ],
         },
       },
-      _source: ['url', 'config_id'],
+      _source: ['url', 'config_id', '@timestamp'],
       collapse: {
         field: 'config_id',
       },
