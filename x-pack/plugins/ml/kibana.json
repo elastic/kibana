@@ -29,7 +29,8 @@
     "licenseManagement",
     "maps",
     "usageCollection",
-    "dashboard"
+    "dashboard",
+    "charts"
   ],
   "server": true,
   "ui": true,
@@ -42,7 +43,8 @@
     "home",
     "maps",
     "usageCollection",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "extraPublicDirs": [
     "common"
