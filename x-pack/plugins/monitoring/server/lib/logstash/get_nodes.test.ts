@@ -9,18 +9,6 @@ import { getNodes } from './get_nodes';
 import { INDEX_PATTERN_LOGSTASH, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { LegacyRequest } from '../../types';
 
-jest.mock('../../static_globals', () => ({
-  Globals: {
-    app: {
-      config: {
-        ui: {
-          ccs: { enabled: true },
-        },
-      },
-    },
-  },
-}));
-
 describe('getNodes', () => {
   it('ensures collapse key is present query responses', async () => {
     const configs: { [key: string]: number } = { 'monitoring.ui.max_bucket_size': 10000 };
