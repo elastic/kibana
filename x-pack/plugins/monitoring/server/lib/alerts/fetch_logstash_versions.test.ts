@@ -10,6 +10,19 @@ import { fetchLogstashVersions } from './fetch_logstash_versions';
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+import { Globals } from '../../static_globals';
+
 describe('fetchLogstashVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
@@ -66,7 +79,7 @@ describe('fetchLogstashVersions', () => {
       })
     );
 
-    const result = await fetchLogstashVersions(esClient, clusters, index, size);
+    const result = await fetchLogstashVersions(esClient, clusters, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,
@@ -74,5 +87,71 @@ describe('fetchLogstashVersions', () => {
         versions: ['8.0.0', '7.2.1'],
       },
     ]);
+  });
+  it('should call ES with correct query', async () => {
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+    });
+    await fetchLogstashVersions(esClient, clusters, size);
+    expect(params).toStrictEqual({
+      index:
+        '*:.monitoring-logstash-*,.monitoring-logstash-*,*:metrics-logstash.node_stats-*,metrics-logstash.node_stats-*',
+      filter_path: ['aggregations'],
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { cluster_uuid: ['cluster123'] } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'logstash_stats' } },
+                    { term: { 'data_stream.dataset': 'logstash.node_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { range: { timestamp: { gte: 'now-2m' } } },
+            ],
+          },
+        },
+        aggs: {
+          index: { terms: { field: '_index', size: 1 } },
+          cluster: {
+            terms: { field: 'cluster_uuid', size: 1 },
+            aggs: {
+              group_by_logstash: {
+                terms: { field: 'logstash_stats.logstash.uuid', size: 10 },
+                aggs: {
+                  group_by_version: {
+                    terms: {
+                      field: 'logstash_stats.logstash.version',
+                      size: 1,
+                      order: { latest_report: 'desc' },
+                    },
+                    aggs: { latest_report: { max: { field: 'timestamp' } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+  it('should call ES with correct query  when ccs disabled', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = false;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+    });
+    await fetchLogstashVersions(esClient, clusters, size);
+    // @ts-ignore
+    expect(params.index).toBe('.monitoring-logstash-*,metrics-logstash.node_stats-*');
   });
 });

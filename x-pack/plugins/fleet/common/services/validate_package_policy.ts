@@ -143,7 +143,7 @@ export const validatePackagePolicy = (
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[inputKey][name],
+              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
               name,
               safeLoadYaml
             )
@@ -210,14 +210,19 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef === undefined) {
-    // eslint-disable-next-line no-console
-    console.debug(`No variable definition for ${varName} found`);
-
-    return null;
+    errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.nonExistentVarMessage', {
+        defaultMessage: '{varName} var definition does not exist',
+        values: {
+          varName,
+        },
+      })
+    );
+    return errors;
   }
 
   if (varDef.required) {
-    if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
+    if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',

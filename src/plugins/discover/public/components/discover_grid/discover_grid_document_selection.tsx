@@ -17,10 +17,7 @@ import {
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  euiLightVars as themeLight,
-  euiDarkVars as themeDark,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { DiscoverGridContext } from './discover_grid_context';
 import { ElasticSearchHit } from '../../types';
 

@@ -7,9 +7,10 @@
 
 import { chain, find } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
-import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -24,28 +25,34 @@ import { KibanaClusterMetric } from '../metrics';
  *  - number of instances
  *  - combined health
  */
-export function getKibanasForClusters(
-  req: LegacyRequest,
-  kbnIndexPattern: string,
-  clusters: Cluster[]
-) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in kibana/getKibanasForClusters');
-
+export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
   const config = req.server.config();
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
+
+  const moduleType = 'kibana';
+  const type = 'kibana_stats';
+  const dataset = 'stats';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs,
+  });
 
   return Promise.all(
     clusters.map((cluster) => {
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const metric = KibanaClusterMetric.getMetricFields();
       const params = {
-        index: kbnIndexPattern,
+        index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
         body: {
           query: createQuery({
-            types: ['stats', 'kibana_stats'],
+            type,
+            dsDataset: `${moduleType}.${dataset}`,
+            metricset: dataset,
             start,
             end,
             clusterUuid,
