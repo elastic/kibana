@@ -348,7 +348,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         policy!,
         packagePoliciesToAdd!,
         defaultOutput,
-        !created
+        true
       );
 
       // Add the is_managed flag after configuring package policies to avoid errors
