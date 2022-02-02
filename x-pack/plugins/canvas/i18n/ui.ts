@@ -1562,4 +1562,26 @@ export const ViewStrings = {
         defaultMessage: 'If is set to true, the last range value will be right open',
       }),
   },
+  PieVis: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.pieVisTitle', {
+        defaultMessage: '(New) Pie Visualization',
+      }),
+    getMetricColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.pieVis.args.metricDisplayName', {
+        defaultMessage: 'Metric',
+      }),
+    getMetricColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.pieVis.args.metricHelp', {
+        defaultMessage: 'Metric dimension configuration',
+      }),
+    getBucketColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.pieVis.args.bucketDisplayName', {
+        defaultMessage: 'Bucket',
+      }),
+    getBucketColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.pieVis.args.bucketHelp', {
+        defaultMessage: 'Bucket dimension configuration',
+      }),
+  },
 };
