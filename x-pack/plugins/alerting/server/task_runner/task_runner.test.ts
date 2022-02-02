@@ -29,6 +29,8 @@ import {
   savedObjectsRepositoryMock,
   httpServiceMock,
   executionContextServiceMock,
+  savedObjectsServiceMock,
+  elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -94,6 +96,8 @@ describe('Task Runner', () => {
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+  const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -104,7 +108,8 @@ describe('Task Runner', () => {
   type EnqueueFunction = (options: ExecuteOptions) => Promise<void | RunNowResult>;
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-    getServices: jest.fn().mockReturnValue(services),
+    savedObjects: savedObjectsService,
+    elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
@@ -192,7 +197,8 @@ describe('Task Runner', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+    savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
+    elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
@@ -2619,7 +2625,7 @@ describe('Task Runner', () => {
     });
 
     await taskRunner.run();
-    expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith(
+    expect(taskRunnerFactoryInitializerParams.getRulesClientWithRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: {
           // base64 encoded "123:abc"
@@ -2627,7 +2633,7 @@ describe('Task Runner', () => {
         },
       })
     );
-    const [request] = taskRunnerFactoryInitializerParams.getServices.mock.calls[0];
+    const [request] = taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mock.calls[0];
 
     expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
       request,
@@ -2654,13 +2660,13 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
-    expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith(
+    expect(taskRunnerFactoryInitializerParams.getRulesClientWithRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: {},
       })
     );
 
-    const [request] = taskRunnerFactoryInitializerParams.getServices.mock.calls[0];
+    const [request] = taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mock.calls[0];
 
     expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
       request,
@@ -3154,7 +3160,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
-    taskRunnerFactoryInitializerParams.getServices.mockImplementation(() => {
+    taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockImplementation(() => {
       throw new Error('OMG');
     });
 

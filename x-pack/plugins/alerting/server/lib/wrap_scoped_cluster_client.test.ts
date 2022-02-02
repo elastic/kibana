@@ -6,13 +6,13 @@
  */
 
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
-import { createAbortableEsClientFactory } from './create_abortable_es_client_factory';
+import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 
 const esQuery = {
   body: { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } },
 };
 
-describe('createAbortableEsClientFactory', () => {
+describe('wrapScopedClusterClient', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -24,7 +24,7 @@ describe('createAbortableEsClientFactory', () => {
   test('searches with asInternalUser when specified', async () => {
     const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const abortableSearchClient = createAbortableEsClientFactory({
+    const abortableSearchClient = wrapScopedClusterClient({
       scopedClusterClient,
       abortController,
     });
@@ -39,7 +39,7 @@ describe('createAbortableEsClientFactory', () => {
   test('searches with asCurrentUser when specified', async () => {
     const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const abortableSearchClient = createAbortableEsClientFactory({
+    const abortableSearchClient = wrapScopedClusterClient({
       scopedClusterClient,
       abortController,
     });
@@ -54,7 +54,7 @@ describe('createAbortableEsClientFactory', () => {
   test('uses search options when specified', async () => {
     const abortController = new AbortController();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    const abortableSearchClient = createAbortableEsClientFactory({
+    const abortableSearchClient = wrapScopedClusterClient({
       scopedClusterClient,
       abortController,
     });
@@ -73,7 +73,7 @@ describe('createAbortableEsClientFactory', () => {
     scopedClusterClient.asInternalUser.search.mockRejectedValueOnce(
       new Error('something went wrong!')
     );
-    const abortableSearchClient = createAbortableEsClientFactory({
+    const abortableSearchClient = wrapScopedClusterClient({
       scopedClusterClient,
       abortController,
     });
@@ -90,7 +90,7 @@ describe('createAbortableEsClientFactory', () => {
     scopedClusterClient.asInternalUser.search.mockRejectedValueOnce(
       new Error('Request has been aborted by the user')
     );
-    const abortableSearchClient = createAbortableEsClientFactory({
+    const abortableSearchClient = wrapScopedClusterClient({
       scopedClusterClient,
       abortController,
     });

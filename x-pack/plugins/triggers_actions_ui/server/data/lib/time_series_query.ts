@@ -7,7 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'kibana/server';
-import { getEsErrorMessage, IAbortableEsClient } from '../../../../alerting/server';
+import type { IScopedClusterClient } from 'src/core/server';
+import { getEsErrorMessage } from '../../../../alerting/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -16,7 +17,7 @@ export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
-  abortableEsClient: IAbortableEsClient;
+  abortableEsClient: IScopedClusterClient;
   query: TimeSeriesQuery;
 }
 

@@ -14,7 +14,6 @@ import { RulesClient } from './rules_client';
 export * from '../common';
 import {
   IScopedClusterClient,
-  KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
@@ -36,10 +35,8 @@ import {
   RuleMonitoring,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 /**
@@ -64,22 +61,18 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
-export interface Services {
-  savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: IScopedClusterClient;
-}
-
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
-> extends Services {
+> {
+  savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: IScopedClusterClient;
   alertInstanceFactory: (
     id: string
   ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
-  search: IAbortableClusterClient;
 }
 
 export interface AlertExecutorOptions<

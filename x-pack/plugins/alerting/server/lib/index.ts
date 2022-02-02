@@ -24,3 +24,4 @@ export {
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
+export { wrapScopedClusterClient } from './wrap_scoped_cluster_client';

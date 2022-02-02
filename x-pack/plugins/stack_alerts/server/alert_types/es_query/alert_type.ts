@@ -160,10 +160,10 @@ export function getAlertType(logger: Logger): RuleType<
     >
   ) {
     const { alertId, name, services, params, state } = options;
-    const { alertInstanceFactory, search } = services;
+    const { alertInstanceFactory, scopedClusterClient } = services;
     const previousTimestamp = state.latestTimestamp;
 
-    const abortableEsClient = search.asCurrentUser;
+    const abortableEsClient = scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
