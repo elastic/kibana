@@ -44,7 +44,15 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLoggerFactory }) =>
+  ({
+    lists,
+    logger,
+    config,
+    ruleDataClient,
+    eventLogService,
+    ruleExecutionLoggerFactory,
+    version,
+  }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -156,6 +164,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 buildRuleMessage,
                 ruleExecutionLogger,
                 savedObjectsClient,
+                version,
               });
 
               if (!wroteWarningStatus) {

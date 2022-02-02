@@ -65,6 +65,7 @@ import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import type { SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -94,13 +95,23 @@ export const hasReadIndexPrivileges = async (args: {
   buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   savedObjectsClient: SavedObjectsClientContract;
+  version: string;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, savedObjectsClient } = args;
-  const isCcsWarningEnabled = await savedObjectsClient.get();
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, savedObjectsClient, version } =
+    args;
+  const config = await savedObjectsClient.get<{ 'securitySolution:enableCcsWarning': boolean }>(
+    'config',
+    version
+  );
+  const isCcsPermissionWarningEnabled = config.attributes[ENABLE_CCS_READ_WARNING_SETTING];
 
   const indexNames = Object.keys(privileges.index);
+  const filteredIndexNames = isCcsPermissionWarningEnabled
+    ? indexNames
+    : indexNames.filter((indexName) => indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+
   const [, indexesWithNoReadPrivileges] = partition(
-    indexNames,
+    filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
 

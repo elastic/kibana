@@ -40,7 +40,12 @@ describe('Custom Query Alerts', () => {
     config: createMockConfig(),
     ruleDataClient,
     eventLogService,
+<<<<<<< HEAD
     ruleExecutionLoggerFactory: () => ruleExecutionLogMock.forExecutors.create(),
+=======
+    ruleExecutionLoggerFactory: () => ruleExecutionLogMock.logger.create(),
+    version: '1.0.0',
+>>>>>>> 998fcc5e16e (adds flag to disable warning)
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 

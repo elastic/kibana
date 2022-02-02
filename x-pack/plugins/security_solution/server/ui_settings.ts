@@ -224,7 +224,7 @@ export const initUiSettings = (
         defaultMessage: 'CCS Read Warning',
       }),
       value: true,
-      description: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedDescription', {
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
         defaultMessage: '<p>Enables cross cluster search read warnings</p>',
       }),
       type: 'boolean',
