@@ -37,6 +37,10 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
     },
 
+    async assertTransformEditFlyoutIngestPipelineFieldSelectExists() {
+      await testSubjects.existOrFail(`transformEditFlyoutDestinationIngestPipelineFieldSelect`);
+    },
+
     async assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(expectedValue: boolean) {
       await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,

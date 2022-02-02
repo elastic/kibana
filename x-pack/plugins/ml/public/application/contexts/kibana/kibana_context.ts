@@ -24,6 +24,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '../../../../../trigg
 import type { FieldFormatsRegistry } from '../../../../../../../src/plugins/field_formats/common';
 import type { DashboardSetup } from '../../../../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../../../../spaces/public';
+import type { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
@@ -38,6 +39,7 @@ interface StartPlugins {
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
   spacesApi: SpacesPluginStart;
+  charts?: ChartsPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {
