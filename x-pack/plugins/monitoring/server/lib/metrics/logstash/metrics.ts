@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { QuotaMetric } from '../classes';
 import {
   LogstashEventsRateClusterMetric,
@@ -22,7 +23,6 @@ import {
   SMALL_BYTES,
   LARGE_ABBREVIATED,
 } from '../../../../common/formatting';
-import { i18n } from '@kbn/i18n';
 
 const instanceSystemLoadTitle = i18n.translate(
   'xpack.monitoring.metrics.logstash.systemLoadTitle',
