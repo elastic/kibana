@@ -31,6 +31,7 @@ NODE_OPTIONS=--max_old_space_size=14336 \
 
 if [[ -d "$KIBANA_DIR/target/kibana-coverage/server" ]]; then
   echo "--- Server side code coverage collected"
+  mkdir -p target/kibana-coverage/functional
   mv target/kibana-coverage/server/coverage-final.json "target/kibana-coverage/functional/oss-${CI_GROUP}-server-coverage.json"
 fi
 

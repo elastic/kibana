@@ -33,6 +33,7 @@ cd "$KIBANA_DIR"
 
 if [[ -d "$KIBANA_DIR/target/kibana-coverage/server" ]]; then
   echo "--- Server side code coverage collected"
+  mkdir -p target/kibana-coverage/functional
   mv target/kibana-coverage/server/coverage-final.json "target/kibana-coverage/functional/xpack-${CI_GROUP}-server-coverage.json"
 fi
 
