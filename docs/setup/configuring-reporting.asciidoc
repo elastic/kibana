@@ -79,7 +79,7 @@ For more information, refer to {ref}/security-privileges.html[Security privilege
 
 .. Next to the applications you want to grant reporting privileges, click *All*.
 +
-If the *Reporting* option is unavailable, contact your administrator, or <<general-reporting-settings,enable the option in kibana.yml>>. 
+If the *Reporting* option is unavailable, contact your administrator, or <<general-reporting-settings,enable `xpack.reporting.enabled` in kibana.yml>>. 
 
 .. Click *Add {kib} privilege*.
 
