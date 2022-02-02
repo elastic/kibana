@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { PackagePolicyConfigRecord } from '../../../../../integrations/types';
 import { DURATION_APM_SETTINGS_VARS } from '../../../../constants';
 
 // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix, we should assume seconds
-export function fixApmDurationVars(vars: any) {
+export function fixApmDurationVars(vars: PackagePolicyConfigRecord) {
   const { IDLE_TIMEOUT, READ_TIMEOUT, SHUTDOWN_TIMEOUT, TAIL_SAMPLING_INTERVAL, WRITE_TIMEOUT } =
     DURATION_APM_SETTINGS_VARS;
   // convert vars to array, map each key/value pair into another pair

@@ -232,7 +232,9 @@ export const EditPackagePolicyForm = memo<{
                 };
               }
               // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
-              newVars = fixApmDurationVars(newVars);
+              if (basePackage.name === 'apm') {
+                newVars = fixApmDurationVars(newVars);
+              }
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
