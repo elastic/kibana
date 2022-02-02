@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Metric } from './classes/metric';
 import { metrics as elasticsearchMetrics } from './elasticsearch/metrics';
 import { metrics as kibanaMetrics } from './kibana/metrics';
 import { metrics as logstashMetrics } from './logstash/metrics';
@@ -12,7 +13,9 @@ import { metrics as beatsMetrics } from './beats/metrics';
 import { metrics as apmMetrics } from './apm/metrics';
 import { metrics as entSearchMetrics } from './enterprise_search/metrics';
 
-export const metrics = {
+export type { Metric } from './classes/metric';
+
+export const metrics: { [key: string]: Metric } = {
   ...elasticsearchMetrics,
   ...kibanaMetrics,
   ...logstashMetrics,
