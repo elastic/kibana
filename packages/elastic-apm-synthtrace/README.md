@@ -101,16 +101,17 @@ For a fixed time window:
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
 The following options are supported:
-| Option | Description | Default |
-| ------------------| ------------------------------------------------------- | ------------ |
-| `--target` | Elasticsearch target, including username/password. | **Required** |
-| `--from` | The start of the time window. | `now - 15m` |
-| `--to` | The end of the time window. | `now` |
-| `--live` | Continously ingest data | `false` |
-| `--clean` | Clean APM indices before indexing new data. | `false` |
-| `--workers` | Amount of Node.js worker threads | `5` |
-| `--bucketSize` | Size of bucket for which to generate data. | `15m` |
-| `--interval` | The interval at which to index data. | `10s` |
-| `--clientWorkers` | Number of simultaneously connected ES clients | `5` |
-| `--batchSize` | Number of documents per bulk index request | `1000` |
-| `--logLevel` | Log level. | `info` |
+
+| Option            | Description                                        | Default      |
+| ----------------- | -------------------------------------------------- | ------------ |
+| `--target`        | Elasticsearch target, including username/password. | **Required** |
+| `--from`          | The start of the time window.                      | `now - 15m`  |
+| `--to`            | The end of the time window.                        | `now`        |
+| `--live`          | Continously ingest data                            | `false`      |
+| `--clean`         | Clean APM indices before indexing new data.        | `false`      |
+| `--workers`       | Amount of Node.js worker threads                   | `5`          |
+| `--bucketSize`    | Size of bucket for which to generate data.         | `15m`        |
+| `--interval`      | The interval at which to index data.               | `10s`        |
+| `--clientWorkers` | Number of simultaneously connected ES clients      | `5`          |
+| `--batchSize`     | Number of documents per bulk index request         | `1000`       |
+| `--logLevel`      | Log level.                                         | `info`       |
