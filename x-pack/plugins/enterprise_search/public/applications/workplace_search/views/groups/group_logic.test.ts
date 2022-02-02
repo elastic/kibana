@@ -36,7 +36,6 @@ describe('GroupLogic', () => {
     mount();
   });
 
-
   it('has expected default values', () => {
     expect(GroupLogic.values).toEqual(mockGroupValues);
   });
@@ -70,7 +69,7 @@ describe('GroupLogic', () => {
         expect(GroupLogic.values).toEqual({
           ...mockGroupValues,
           group: renamedGroup,
-          groupNameInputValue: renamedGroup.name
+          groupNameInputValue: renamedGroup.name,
         });
       });
     });
@@ -96,7 +95,7 @@ describe('GroupLogic', () => {
         expect(GroupLogic.values).toEqual({
           ...mockGroupValues,
           groupNameInputValue: name,
-        })
+        });
       });
     });
 
@@ -106,7 +105,7 @@ describe('GroupLogic', () => {
 
         expect(GroupLogic.values).toEqual({
           ...mockGroupValues,
-          selectedGroupSources: [sourceIds[0]]
+          selectedGroupSources: [sourceIds[0]],
         });
       });
     });
@@ -119,7 +118,7 @@ describe('GroupLogic', () => {
 
         expect(GroupLogic.values).toEqual({
           ...mockGroupValues,
-          selectedGroupSources: [sourceIds[1]]
+          selectedGroupSources: [sourceIds[1]],
         });
       });
     });
@@ -366,7 +365,6 @@ describe('GroupLogic', () => {
     describe('showConfirmDeleteModal', () => {
       it('sets reducer and clears flash messages', () => {
         GroupLogic.actions.showConfirmDeleteModal();
-
 
         expect(GroupLogic.values).toEqual({
           ...mockGroupValues,

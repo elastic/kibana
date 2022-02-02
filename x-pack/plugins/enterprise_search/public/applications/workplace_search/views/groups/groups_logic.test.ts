@@ -402,8 +402,8 @@ describe('GroupsLogic', () => {
             page: {
               ...DEFAULT_META.page,
               current: activePage,
-            }
-          }
+            },
+          },
         });
 
         expect(getSearchResultsSpy).toHaveBeenCalled();
@@ -444,7 +444,7 @@ describe('GroupsLogic', () => {
 
         expect(GroupsLogic.values).toEqual({
           ...mockGroupsValues,
-          filterSourcesDropdownOpen: true
+          filterSourcesDropdownOpen: true,
         });
         expect(clearFlashMessages).toHaveBeenCalled();
       });
@@ -456,7 +456,7 @@ describe('GroupsLogic', () => {
 
         expect(GroupsLogic.values).toEqual({
           ...mockGroupsValues,
-          filterUsersDropdownOpen: true
+          filterUsersDropdownOpen: true,
         });
         expect(clearFlashMessages).toHaveBeenCalled();
       });

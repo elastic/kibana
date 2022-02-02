@@ -94,12 +94,13 @@ describe('AddSourceLogic', () => {
   });
 
   const setupExpectedState = ({ setSourceConfigData = {} } = {}) => {
-    const sourceConfigDataSettings = Object.keys(setSourceConfigData).length > 0
-      ? {
-          dataLoading: false,
-          sourceConfigData: setSourceConfigData,
-        }
-      : {};
+    const sourceConfigDataSettings =
+      Object.keys(setSourceConfigData).length > 0
+        ? {
+            dataLoading: false,
+            sourceConfigData: setSourceConfigData,
+          }
+        : {};
 
     return {
       ...defaultValues,
@@ -129,8 +130,8 @@ describe('AddSourceLogic', () => {
       expect(AddSourceLogic.values).toEqual({
         ...EXPECTED_BASE_STATE,
         sourceConnectData,
-        buttonLoading: false
-      })
+        buttonLoading: false,
+      });
     });
 
     it('setClientIdValue', () => {
@@ -253,7 +254,7 @@ describe('AddSourceLogic', () => {
         selectedGithubOrganizationsMap: {
           foo: true,
         },
-        selectedGithubOrganizations: [ 'foo' ]
+        selectedGithubOrganizations: ['foo'],
       });
     });
 
@@ -310,7 +311,7 @@ describe('AddSourceLogic', () => {
           privateKey,
           consumerKey,
         },
-      }
+      };
       AddSourceLogic.actions.setSourceConfigData(sourceConfigDataMock);
 
       const EXPECTED_BASE_STATE = setupExpectedState({ setSourceConfigData: sourceConfigDataMock });

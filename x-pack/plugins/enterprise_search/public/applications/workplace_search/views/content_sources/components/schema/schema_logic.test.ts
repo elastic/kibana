@@ -89,7 +89,11 @@ describe('SchemaLogic', () => {
     expect(SchemaLogic.values).toEqual(defaultValues);
   });
 
-  const setupExpectedState = ({ isSchemaSet = false, didInitialize = false, setSchema = schema } = {}) => {
+  const setupExpectedState = ({
+    isSchemaSet = false,
+    didInitialize = false,
+    setSchema = schema,
+  } = {}) => {
     const filteredSchemaSettings = {
       filteredSchemaFields: isSchemaSet || didInitialize ? setSchema : {},
     };
@@ -141,7 +145,7 @@ describe('SchemaLogic', () => {
         ...setupExpectedState({ isSchemaSet: true }),
         activeSchema: schema,
         serverSchema: schema,
-        mostRecentIndexJob: mostRecentIndexJob,
+        mostRecentIndexJob,
         newFieldType: SchemaType.Text,
         addFieldFormErrors: null,
         formUnchanged: true,
@@ -531,11 +535,11 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.onFieldUpdate({ schema: newSchema, formUnchanged: false });
         SchemaLogic.actions.setFilterValue('foo');
 
-        expect(SchemaLogic.values).toEqual( {
-        ...setupExpectedState({ didInitialize: true, setSchema: newSchema }),
-        filterValue: 'foo',
-        filteredSchemaFields: schema,
-        formUnchanged: false,
+        expect(SchemaLogic.values).toEqual({
+          ...setupExpectedState({ didInitialize: true, setSchema: newSchema }),
+          filterValue: 'foo',
+          filteredSchemaFields: schema,
+          formUnchanged: false,
         });
       });
     });
