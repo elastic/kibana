@@ -33,11 +33,17 @@ export function isQuickFunction(operationType: string) {
 export const LabelInput = ({
   value,
   onChange,
+  defaultValue,
 }: {
   value: string;
   onChange: (value: string) => void;
+  defaultValue?: string;
 }) => {
-  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({ onChange, value });
+  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({
+    onChange,
+    value,
+    defaultValue,
+  });
 
   return (
     <EuiFormRow

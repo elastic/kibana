@@ -638,7 +638,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     () =>
       String(
         selectedColumn &&
-          !selectedColumn.customLabel &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
             state.indexPatterns[state.layers[layerId].indexPatternId],
@@ -767,6 +766,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
               key={defaultLabel}
               value={selectedColumn.label}
+              defaultValue={defaultLabel}
               onChange={(value) => {
                 updateLayer({
                   columns: {
