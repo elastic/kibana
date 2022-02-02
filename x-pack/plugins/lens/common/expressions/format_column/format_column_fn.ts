@@ -51,6 +51,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         return withParams(col, {
           id: parentFormatId,
           params: {
+            ...col.meta.params?.params,
             id: format,
             params: {
               pattern: supportedFormats[format].decimalsToPattern(decimals),

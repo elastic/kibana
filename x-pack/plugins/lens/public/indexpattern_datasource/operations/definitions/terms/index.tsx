@@ -222,6 +222,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
         missingBucket: false,
+        parentFormat: field.type === 'number' ? { id: 'terms' } : undefined,
       },
     };
   },
@@ -285,6 +286,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       ...oldColumn.params,
       secondaryFields: undefined,
       ...(params as Partial<TermsIndexPatternColumn['params']>),
+      parentFormat: field.type === 'number' ? { id: 'terms' } : undefined,
     };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
