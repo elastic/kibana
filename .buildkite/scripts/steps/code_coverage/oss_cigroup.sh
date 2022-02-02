@@ -20,8 +20,6 @@ export CODE_COVERAGE=1
 echo "--- OSS CI Group $CI_GROUP"
 echo " -> Running Functional tests with code coverage"
 
-
-
 NODE_OPTIONS=--max_old_space_size=14336 \
   ./node_modules/.bin/nyc \
   --nycrc-path src/dev/code_coverage/nyc_config/nyc.server.config.js \

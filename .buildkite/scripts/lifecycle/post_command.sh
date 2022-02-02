@@ -11,7 +11,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/junit/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
-  buildkite-agent artifact upload 'target/kibana-coverage/server/**/*'
   buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
   buildkite-agent artifact upload 'target/test-metrics/*'
