@@ -32,7 +32,7 @@ export interface RuntimeField {
 /**
  * @deprecated
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * Use IndexPattern or IndexPatternSpec instead
+ * Use DataView or DataViewSpec instead
  */
 export interface IIndexPattern extends DataViewBase {
   title: string;
@@ -145,11 +145,6 @@ export interface IDataViewsApiClient {
   hasUserIndexPattern: () => Promise<boolean>;
 }
 
-/**
- * @deprecated Use IDataViewsApiClient. All index pattern interfaces were renamed.
- */
-export type IIndexPatternsApiClient = IDataViewsApiClient;
-
 export type { SavedObject };
 
 export type AggregationRestrictions = Record<
@@ -230,11 +225,6 @@ export interface FieldSpec extends DataViewFieldBase {
 export type DataViewFieldMap = Record<string, FieldSpec>;
 
 /**
- * @deprecated Use DataViewFieldMap. All index pattern interfaces were renamed.
- */
-export type IndexPatternFieldMap = DataViewFieldMap;
-
-/**
  * Static index pattern format
  * Serialized data object, representing index pattern attributes and state
  */
@@ -258,11 +248,6 @@ export interface DataViewSpec {
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }
-
-/**
- * @deprecated Use DataViewSpec. All index pattern interfaces were renamed.
- */
-export type IndexPatternSpec = DataViewSpec;
 
 export interface SourceFilter {
   value: string;

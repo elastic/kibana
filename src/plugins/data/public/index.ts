@@ -78,7 +78,6 @@ export type {
   IFieldType,
   IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
   AggregationRestrictions,
