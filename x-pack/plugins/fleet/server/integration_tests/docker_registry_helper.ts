@@ -32,7 +32,8 @@ export function useDockerRegistry() {
       isExited = true;
     });
 
-    while (!isExited) {
+    let retries = 0;
+    while (!isExited && retries++ <= 20) {
       try {
         const res = await fetch(`http://localhost:${packageRegistryPort}/`);
         if (res.status === 200) {
@@ -52,6 +53,7 @@ export function useDockerRegistry() {
   async function cleanupDockerRegistryServer() {
     if (dockerProcess && !dockerProcess.killed) {
       dockerProcess.kill();
+      return new Promise((resolve) => dockerProcess!.once('exit', resolve));
     }
   }
 
@@ -60,7 +62,9 @@ export function useDockerRegistry() {
     await startDockerRegistryServer();
   });
 
-  afterAll(() => cleanupDockerRegistryServer);
+  afterAll(async () => {
+    await cleanupDockerRegistryServer();
+  });
 
   return `http://localhost:${packageRegistryPort}`;
 }
