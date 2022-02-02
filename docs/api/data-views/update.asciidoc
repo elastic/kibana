@@ -7,7 +7,7 @@
 experimental[] Update part of an data view. Only the specified fields are updated in the
 data view. Unspecified fields stay as they are persisted.
 
-[float]
+
 [[data-views-api-update-request]]
 ==== Request
 
@@ -15,7 +15,7 @@ data view. Unspecified fields stay as they are persisted.
 
 `POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>`
 
-[float]
+
 [[data-views-api-update-path-params]]
 ==== Path parameters
 
@@ -25,7 +25,7 @@ data view. Unspecified fields stay as they are persisted.
 `id`::
   (Required, string) The ID of the data view you want to update.
 
-[float]
+
 [[data-views-api-update-request-body]]
 ==== Request body
 
@@ -46,14 +46,14 @@ You can partially update the following fields:
 * `type`
 * `typeMeta`
 
-[float]
+
 [[data-views-api-update-errors-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[float]
+
 [[data-views-api-update-example]]
 ==== Examples
 
