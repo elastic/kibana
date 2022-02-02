@@ -1464,7 +1464,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   id2: expect.objectContaining({
                     operationType: 'count',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                   id3: expect.objectContaining({
                     operationType: 'date_histogram',
@@ -1513,7 +1513,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   id2: expect.objectContaining({
                     operationType: 'count',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                     label: 'testLabel',
                   }),
                   id3: expect.objectContaining({
@@ -1563,7 +1563,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   id2: expect.objectContaining({
                     operationType: 'count',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                     label: 'Count of records',
                     params: expect.objectContaining({
                       format: {
@@ -1629,7 +1629,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   id2: expect.objectContaining({
                     operationType: 'count',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                   id3: expect.objectContaining({
                     operationType: 'terms',
@@ -1710,7 +1710,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   id2: expect.objectContaining({
                     operationType: 'count',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   }),
                   id3: expect.objectContaining({
                     operationType: 'filters',
