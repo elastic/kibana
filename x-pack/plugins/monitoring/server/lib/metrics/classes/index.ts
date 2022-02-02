@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { Metric } from './metric';
+export { Metric } from './metric';
+export { ClusterMetric } from './cluster_metric';
+export { QuotaMetric } from './quota_metric';
 
-export class ClusterMetric extends Metric {
-  constructor(opts) {
-    super({
-      ...opts,
-      uuidField: 'cluster_uuid',
-    });
-  }
-}
+export type { MetricOptions } from './metric';
+export type { ClusterMetricOptions } from './cluster_metric';
