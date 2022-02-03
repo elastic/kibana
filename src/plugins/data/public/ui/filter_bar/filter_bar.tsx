@@ -96,10 +96,25 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   }
 
   function onEditMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+    const mappedFilters = mapAndFlattenFilters(buildFilters);
+    const mergedFilters = mappedFilters.map((filter, idx) => {
+      return {
+        ...filter,
+        groupId: selectedFilters[idx].groupId,
+        id: selectedFilters[idx].id,
+        relationship: selectedFilters[idx].relationship,
+        subGroupId: selectedFilters[idx].subGroupId,
+      };
+    });
+
     const multipleFilters = [...props.multipleFilters];
     const index = multipleFilters.findIndex((filter) => filter.groupId === Number(groupId));
 
-    const filtersNew = [...multipleFilters.slice(0, index), ...multipleFilters.slice(index + 1)];
+    const filtersNew = [
+      ...multipleFilters.slice(0, index),
+      ...mergedFilters,
+      ...multipleFilters.slice(index + 1),
+    ];
 
     const filters = [...props.filters];
     const updatedFilters: Filter[] = [];
@@ -115,22 +130,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     props?.onMultipleFiltersUpdated?.(filtersNew);
 
     props.toggleEditFilterModal?.(false);
-
-
-    // const mappedFilters = mapAndFlattenFilters(buildFilters);
-    // const mergedFilters = mappedFilters.map((filter, idx) => {
-    //   return {
-    //     ...filter,
-    //     groupId: selectedFilters[idx].groupId,
-    //     id: selectedFilters[idx].id,
-    //     relationship: selectedFilters[idx].relationship,
-    //     subGroupId: selectedFilters[idx].subGroupId,
-    //   };
-    // });
-    // props?.onMultipleFiltersUpdated?.(mergedFilters);
-
-    // const filters = [...props.filters, ...buildFilters];
-    // props?.onFiltersUpdated?.(filters);
   }
 
   function renderItems() {
