@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -475,102 +475,119 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const { anomaly, showViewSeriesLink } = props;
   const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
 
-  const items = [];
-  if (anomaly.customUrls !== undefined) {
-    anomaly.customUrls.forEach((customUrl, index) => {
+  const contextMenuItems = useMemo(() => {
+    const items = [];
+    if (anomaly.customUrls !== undefined) {
+      anomaly.customUrls.forEach((customUrl, index) => {
+        items.push(
+          <EuiContextMenuItem
+            key={`custom_url_${index}`}
+            icon="popout"
+            onClick={() => {
+              closePopover();
+              openCustomUrl(customUrl);
+            }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
+          >
+            {customUrl.url_name}
+          </EuiContextMenuItem>
+        );
+      });
+    }
+
+    if (!isCategorizationAnomalyRecord) {
+      // Add item from the start, but disable it during the URL generation.
       items.push(
         <EuiContextMenuItem
-          key={`custom_url_${index}`}
+          key={`auto_raw_data_url`}
+          icon="discoverApp"
+          disabled={openInDiscoverUrl === undefined}
+          href={openInDiscoverUrl}
+          data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
+            defaultMessage="View in Discover"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
+      items.push(
+        <EuiContextMenuItem
+          key="view_series"
+          icon="visLine"
+          onClick={() => {
+            closePopover();
+            viewSeries();
+          }}
+          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
+            defaultMessage="View series"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (isCategorizationAnomalyRecord) {
+      items.push(
+        <EuiContextMenuItem
+          key="view_examples"
           icon="popout"
           onClick={() => {
             closePopover();
-            openCustomUrl(customUrl);
+            viewExamples();
           }}
-          data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
         >
-          {customUrl.url_name}
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
+            defaultMessage="View examples"
+          />
         </EuiContextMenuItem>
       );
-    });
-  }
+    }
 
-  if (openInDiscoverUrl) {
-    items.push(
-      <EuiContextMenuItem
-        key={`auto_raw_data_url`}
-        icon="discoverApp"
-        href={openInDiscoverUrl}
-        data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
-          defaultMessage="View in Discover"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+    if (canConfigureRules) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_rule"
+          icon="controlsHorizontal"
+          onClick={() => {
+            closePopover();
+            props.showRuleEditorFlyout(anomaly);
+          }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
+            defaultMessage="Configure job rules"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+    return items;
+  }, [
+    openInDiscoverUrl,
+    viewExamples,
+    viewSeries,
+    canConfigureRules,
+    isCategorizationAnomalyRecord,
+  ]);
 
-  if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
-    items.push(
-      <EuiContextMenuItem
-        key="view_series"
-        icon="visLine"
-        onClick={() => {
-          closePopover();
-          viewSeries();
-        }}
-        data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
-          defaultMessage="View series"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (isCategorizationAnomalyRecord) {
-    items.push(
-      <EuiContextMenuItem
-        key="view_examples"
-        icon="popout"
-        onClick={() => {
-          closePopover();
-          viewExamples();
-        }}
-        data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
-          defaultMessage="View examples"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (canConfigureRules) {
-    items.push(
-      <EuiContextMenuItem
-        key="create_rule"
-        icon="controlsHorizontal"
-        onClick={() => {
-          closePopover();
-          props.showRuleEditorFlyout(anomaly);
-        }}
-        data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
-          defaultMessage="Configure job rules"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  return <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />;
+  return (
+    <EuiContextMenuPanel
+      hasFocus={!!openInDiscoverUrl}
+      items={contextMenuItems}
+      data-test-subj="mlAnomaliesListRowActionsMenu"
+    />
+  );
 };
 
-export const LinksMenu: FC<LinksMenuProps> = (props) => {
+export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onButtonClick = setPopoverOpen.bind(null, !isPopoverOpen);
