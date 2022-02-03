@@ -8,20 +8,46 @@
 
 import { EuiCopy, EuiRadioGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
-jest.mock('../lib/url_shortener', () => ({ shortenUrl: jest.fn() }));
-
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ExportUrlAsType, UrlPanelContent } from './url_panel_content';
+import { ExportUrlAsType, UrlPanelContent, UrlPanelContentProps } from './url_panel_content';
 import { act } from 'react-dom/test-utils';
-import { shortenUrl } from '../lib/url_shortener';
 
-const defaultProps = {
+const createFromLongUrl = jest.fn(async () => ({
+  url: 'http://localhost/short/url',
+  data: {} as any,
+  locator: {} as any,
+  params: {} as any,
+}));
+
+const defaultProps: UrlPanelContentProps = {
   allowShortUrl: true,
   objectType: 'dashboard',
-  basePath: '',
-  post: () => Promise.resolve({} as any),
+  urlService: {
+    locators: {} as any,
+    shortUrls: {
+      get: () =>
+        ({
+          createFromLongUrl,
+          create: async () => {
+            throw new Error('not implemented');
+          },
+          createWithLocator: async () => {
+            throw new Error('not implemented');
+          },
+          get: async () => {
+            throw new Error('not implemented');
+          },
+          resolve: async () => {
+            throw new Error('not implemented');
+          },
+          delete: async () => {
+            throw new Error('not implemented');
+          },
+        } as any),
+    },
+  } as any,
 };
 
 describe('share url panel content', () => {
@@ -61,10 +87,6 @@ describe('share url panel content', () => {
 
   describe('short url', () => {
     test('should generate short url and put it in copy button', async () => {
-      const shortenUrlMock = shortenUrl as jest.Mock;
-      shortenUrlMock.mockReset();
-      shortenUrlMock.mockResolvedValue('http://localhost/short/url');
-
       const component = shallow(
         <UrlPanelContent
           {...defaultProps}
@@ -77,9 +99,8 @@ describe('share url panel content', () => {
           target: { checked: true },
         } as unknown as EuiSwitchEvent);
       });
-      expect(shortenUrlMock).toHaveBeenCalledWith(
-        'http://localhost:5601/app/myapp#/?_g=()&_a=()',
-        expect.anything()
+      expect(createFromLongUrl).toHaveBeenCalledWith(
+        'http://localhost:5601/app/myapp#/?_g=()&_a=()'
       );
       expect(component.find(EuiCopy).prop('textToCopy')).toContain('http://localhost/short/url');
     });
@@ -151,10 +172,6 @@ describe('share url panel content', () => {
     });
 
     test('should generate short url with embed flag and put it in copy button', async () => {
-      const shortenUrlMock = shortenUrl as jest.Mock;
-      shortenUrlMock.mockReset();
-      shortenUrlMock.mockResolvedValue('http://localhost/short/url');
-
       const component = shallow(
         <UrlPanelContent
           {...defaultProps}
@@ -168,9 +185,8 @@ describe('share url panel content', () => {
           target: { checked: true },
         } as unknown as EuiSwitchEvent);
       });
-      expect(shortenUrlMock).toHaveBeenCalledWith(
-        'http://localhost:5601/app/myapp#/?embed=true&_g=()&_a=()',
-        expect.anything()
+      expect(createFromLongUrl).toHaveBeenCalledWith(
+        'http://localhost:5601/app/myapp#/?embed=true&_g=()&_a=()'
       );
       expect(component.find(EuiCopy).prop('textToCopy')).toContain('http://localhost/short/url');
     });

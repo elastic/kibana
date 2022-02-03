@@ -7,7 +7,7 @@
  */
 
 export { getLayers } from './get_layers';
-export { getColorPicker } from './get_color_picker';
+export { LegendColorPickerWrapper, LegendColorPickerWrapperContext } from './get_color_picker';
 export { getLegendActions } from './get_legend_actions';
 export { canFilter, getFilterClickData, getFilterEventData } from './filter_helpers';
 export { getPartitionTheme } from './get_partition_theme';
