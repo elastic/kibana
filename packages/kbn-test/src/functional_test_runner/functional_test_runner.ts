@@ -61,7 +61,9 @@ export class FunctionalTestRunner {
         ...readProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
-      await this.validateEsVersion(config);
+      if (providers.hasService('es')) {
+        await this.validateEsVersion(config);
+      }
       await providers.loadAll();
 
       const customTestRunner = config.get('testRunner');
