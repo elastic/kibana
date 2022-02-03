@@ -144,16 +144,15 @@ export class DatasourceComponent extends PureComponent {
       />
     ) : null;
 
-    const datasourceRender = () =>
-      stateDatasource.render({
-        args: stateArgs,
-        updateArgs,
-        datasourceDef,
-        isInvalid,
-        setInvalid,
-        defaultIndex,
-        renderError,
-      });
+    const datasourceRender = stateDatasource.render({
+      args: stateArgs,
+      updateArgs,
+      datasourceDef,
+      isInvalid,
+      setInvalid,
+      defaultIndex,
+      renderError,
+    });
 
     const hasExpressionArgs = Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');
 
@@ -174,7 +173,7 @@ export class DatasourceComponent extends PureComponent {
           <EuiSpacer size="s" />
           {!hasExpressionArgs ? (
             <>
-              {datasourceRender()}
+              {datasourceRender}
               <EuiHorizontalRule margin="m" />
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
