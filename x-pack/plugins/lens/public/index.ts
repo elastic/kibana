@@ -31,6 +31,8 @@ export type {
 } from '../common/types';
 
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
+export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
@@ -59,6 +61,7 @@ export type {
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
   FormulaPublicApi,
+  StaticValueIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
 
