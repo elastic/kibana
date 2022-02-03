@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
@@ -188,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });

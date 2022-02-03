@@ -85,7 +85,6 @@ describe('HttpResources service', () => {
             register(routeConfig, async (ctx, req, res) => {
               return res.renderCoreApp({
                 headers: {
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -101,7 +100,7 @@ describe('HttpResources service', () => {
               headers: {
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -131,7 +130,6 @@ describe('HttpResources service', () => {
             register(routeConfig, async (ctx, req, res) => {
               return res.renderAnonymousCoreApp({
                 headers: {
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -147,7 +145,7 @@ describe('HttpResources service', () => {
               headers: {
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -167,7 +165,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/html',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -179,7 +177,6 @@ describe('HttpResources service', () => {
                 body: htmlBody,
                 headers: {
                   'content-type': 'text/html5',
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -196,7 +193,7 @@ describe('HttpResources service', () => {
                 'content-type': 'text/html',
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -216,7 +213,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/javascript',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -228,7 +225,6 @@ describe('HttpResources service', () => {
                 body: jsBody,
                 headers: {
                   'content-type': 'text/html',
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -245,7 +241,7 @@ describe('HttpResources service', () => {
                 'content-type': 'text/javascript',
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });

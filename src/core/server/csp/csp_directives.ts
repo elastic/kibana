@@ -25,7 +25,7 @@ export type CspDirectiveName =
  * The default directives rules that are always applied
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'script-src': [`'unsafe-eval'`, `'self'`],
+  'script-src': [`'self'`],
   'worker-src': [`blob:`, `'self'`],
   'style-src': [`'unsafe-inline'`, `'self'`],
 };
@@ -134,7 +134,6 @@ const keywordTokens = [
   'strict-dynamic',
   'report-sample',
   'unsafe-inline',
-  'unsafe-eval',
   'unsafe-hashes',
   'unsafe-allow-redirects',
 ];

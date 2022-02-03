@@ -13,7 +13,7 @@ describe('http resources service', () => {
   describe('register', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     const defaultCspRules =
-      "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'";
+      "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'";
     beforeEach(async () => {
       root = kbnTestServer.createRoot({
         plugins: { initialize: false },
@@ -65,7 +65,6 @@ describe('http resources service', () => {
         resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
           res.renderAnonymousCoreApp({
             headers: {
-              'content-security-policy': "script-src 'unsafe-eval'",
               'x-kibana': '42',
             },
           })
@@ -153,7 +152,6 @@ describe('http resources service', () => {
           res.renderHtml({
             body: '<html><p>Hi</p></html>',
             headers: {
-              'content-security-policy': "script-src 'unsafe-eval'",
               'content-type': 'text/html',
               'x-kibana': '42',
             },

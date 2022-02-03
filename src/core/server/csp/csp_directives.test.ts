@@ -47,12 +47,11 @@ describe('CspDirectives', () => {
       directives.addDirectiveValue('style-src', 'strict-dynamic');
       directives.addDirectiveValue('style-src', 'report-sample');
       directives.addDirectiveValue('style-src', 'unsafe-inline');
-      directives.addDirectiveValue('style-src', 'unsafe-eval');
       directives.addDirectiveValue('style-src', 'unsafe-hashes');
       directives.addDirectiveValue('style-src', 'unsafe-allow-redirects');
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-hashes' 'unsafe-allow-redirects'"`
       );
     });
 
@@ -63,12 +62,11 @@ describe('CspDirectives', () => {
       directives.addDirectiveValue('style-src', `'strict-dynamic'`);
       directives.addDirectiveValue('style-src', `'report-sample'`);
       directives.addDirectiveValue('style-src', `'unsafe-inline'`);
-      directives.addDirectiveValue('style-src', `'unsafe-eval'`);
       directives.addDirectiveValue('style-src', `'unsafe-hashes'`);
       directives.addDirectiveValue('style-src', `'unsafe-allow-redirects'`);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-eval' 'unsafe-hashes' 'unsafe-allow-redirects'"`
+        `"style-src 'none' 'self' 'strict-dynamic' 'report-sample' 'unsafe-inline' 'unsafe-hashes' 'unsafe-allow-redirects'"`
       );
     });
   });
@@ -78,7 +76,7 @@ describe('CspDirectives', () => {
       const config = cspConfig.schema.validate({});
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
+        `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
       );
     });
 
@@ -91,7 +89,7 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'unsafe-eval' 'self' baz; worker-src blob: 'self' foo; style-src 'unsafe-inline' 'self' bar dolly"`
+        `"script-src 'self' baz; worker-src blob: 'self' foo; style-src 'unsafe-inline' 'self' bar dolly"`
       );
     });
 
@@ -108,7 +106,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -118,7 +116,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'unsafe-eval' 'self' 'unsafe-hashes'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
+        `"script-src 'self' 'unsafe-hashes'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
       );
     });
   });
