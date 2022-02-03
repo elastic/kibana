@@ -26,7 +26,7 @@ describe('useBrowserRunOnceMonitors', function () {
       },
     });
 
-    const { result } = renderHook(() => useBrowserRunOnceMonitors({ monitorId: 'test-id' }), {
+    const { result } = renderHook(() => useBrowserRunOnceMonitors({ configId: 'test-id' }), {
       wrapper: WrappedHelper,
     });
 
