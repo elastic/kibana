@@ -257,7 +257,7 @@ describe('TelemetryManagementSectionComponent', () => {
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
       ).resolves.toBe(true);
-      // TODO: Fix `mountWithIntl` types in @kbn/test/jest to make testing easier
+      // TODO: Fix `mountWithIntl` types in @kbn/test-jest-helpers to make testing easier
       expect((component.state() as { enabled: boolean }).enabled).toBe(true);
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
