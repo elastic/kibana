@@ -25,14 +25,12 @@ const configMock = {
 
 // @ts-expect-error not full interface
 const mockResponse = {
-  body: {
-    aggregations: {
-      suggestions: {
-        buckets: [{ key: 'whoa' }, { key: 'amazing' }],
-      },
+  aggregations: {
+    suggestions: {
+      buckets: [{ key: 'whoa' }, { key: 'amazing' }],
     },
   },
-} as TransportResult<estypes.SearchResponse<any>>;
+} as estypes.SearchResponse<any>;
 
 jest.mock('../data_views');
 
