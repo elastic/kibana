@@ -8,7 +8,6 @@
 
 import { DeploymentService } from './deployment';
 import { ElasticsearchProvider } from './elasticsearch';
-import { ElasticsearchWithoutSystemIndicesProvider } from './elasticsearch_without_system_indices';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryService } from './retry';
@@ -22,7 +21,6 @@ import { BSearchProvider } from './bsearch';
 export const services = {
   deployment: DeploymentService,
   es: ElasticsearchProvider,
-  esWithoutSystemIndices: ElasticsearchWithoutSystemIndicesProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
   retry: RetryService,
