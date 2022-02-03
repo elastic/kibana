@@ -141,10 +141,11 @@
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
-/x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
+/x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
@@ -283,6 +284,9 @@
 #CC# /src/plugins/home/server/services/ @elastic/kibana-core
 #CC# /src/plugins/home/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
+
+# Kibana Docs
+/packages/kbn-doc-links/ @elastic/kibana-docs
 
 # Kibana Telemetry
 /packages/kbn-analytics/ @elastic/kibana-core

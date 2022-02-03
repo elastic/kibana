@@ -28,6 +28,7 @@ import {
   applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataViewPluginMocks } from '../../../../data_views/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
@@ -132,7 +133,7 @@ describe('SavedObjectsTable', () => {
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
-      indexPatterns: dataPluginMock.createStartContract().indexPatterns,
+      dataViews: dataViewPluginMocks.createStartContract(),
       http,
       overlays,
       notifications,
@@ -580,7 +581,7 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().delete();
 
-      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
+      expect(defaultProps.dataViews.clearCache).toHaveBeenCalled();
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
         mockSavedObjects[0].type,
         mockSavedObjects[0].id,
@@ -626,7 +627,7 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().delete();
 
-      expect(defaultProps.indexPatterns.clearCache).toHaveBeenCalled();
+      expect(defaultProps.dataViews.clearCache).toHaveBeenCalled();
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', '1', {
         force: true,

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { SETTINGS_API_ROUTES } from '../../constants';
+import type { FleetRequestHandler } from '../../types';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
 import type { FleetAuthzRouter } from '../security';
 
-export const getSettingsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
+  const soClient = context.fleet.epm.internalSoClient;
 
   try {
     const settings = await settingsService.getSettings(soClient);
@@ -26,7 +26,7 @@ export const getSettingsHandler: RequestHandler = async (context, request, respo
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Setings not found` },
+        body: { message: `Settings not found` },
       });
     }
 
@@ -34,12 +34,12 @@ export const getSettingsHandler: RequestHandler = async (context, request, respo
   }
 };
 
-export const putSettingsHandler: RequestHandler<
+export const putSettingsHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
 
@@ -55,7 +55,7 @@ export const putSettingsHandler: RequestHandler<
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Setings not found` },
+        body: { message: `Settings not found` },
       });
     }
 
