@@ -69,6 +69,13 @@ const tourConfig = {
 
 const RulesFeatureTourContext = createContext<RulesFeatureTourContextType | null>(null);
 
+/**
+ * Context for new rules features, displayed in demo tour(euiTour)
+ * It has a common state in useEuiTour, which allows transition from one step to the next, for components within it[context]
+ * It also stores tour's state in localStorage
+ *
+ * @returns ReactNode
+ */
 export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const { storage } = useKibana().services;
   const initialStore = useMemo(() => storage.get(STORAGE_KEY) ?? tourConfig, [storage]);
@@ -138,6 +145,14 @@ export const useRulesFeatureTourContextOptional = (): RulesFeatureTourContextTyp
   return rulesFeatureTourContext;
 };
 
+/**
+ * This component can be used for tour steps, for the components outside of RulesFeatureTourContext
+ * if step props are not supplied, step will not be rendered, only children component will be
+ * @param stepProps EuiTourStepProps - optional props for tour steps
+ * @param children ReactNode
+ *
+ * @returns ReactNode
+ */
 export const OptionalEuiTourStep: FC<{ stepProps: EuiTourStepProps | undefined }> = ({
   children,
   stepProps,

@@ -59,6 +59,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     isBulkActionInProgress,
     hasDisabledActions,
   }) => {
+    // use optional rulesFeatureTourContext as AllRulesUtilityBar can be used outside the context
     const featureTour = useRulesFeatureTourContextOptional();
 
     const handleGetBulkItemsPopoverContent = useCallback(
