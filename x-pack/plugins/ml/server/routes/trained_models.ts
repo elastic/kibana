@@ -111,7 +111,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.getTrainedModelsStats({
+        const body = await mlClient.getTrainedModelsStats({
           ...(modelId ? { model_id: modelId } : {}),
         });
         return response.ok({
@@ -175,7 +175,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.deleteTrainedModel({
+        const body = await mlClient.deleteTrainedModel({
           model_id: modelId,
         });
         return response.ok({
@@ -243,7 +243,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.startTrainedModelDeployment({
+        const body = await mlClient.startTrainedModelDeployment({
           model_id: modelId,
         });
         return response.ok({
@@ -276,7 +276,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.stopTrainedModelDeployment({
+        const body = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
           force: request.query.force ?? false,
         });

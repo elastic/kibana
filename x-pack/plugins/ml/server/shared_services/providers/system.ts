@@ -62,7 +62,7 @@ export function getMlSystemProvider(
           return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
             .ok(async ({ mlClient }) => {
-              const { body: info } = await mlClient.info<MlInfoResponse>();
+              const info = await mlClient.info();
               const cloudId = cloud && cloud.cloudId;
               return {
                 ...info,

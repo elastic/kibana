@@ -24,7 +24,6 @@ import {
   defaultSearchQuery,
   DatafeedResultsChartDataParams,
 } from '../../../common/types/results';
-import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
@@ -540,7 +539,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
     // first determine from job config if stop_on_warn is true
     // if false return []
-    const { body } = await mlClient.getJobs<MlJobsResponse>({
+    const body = await mlClient.getJobs({
       job_id: jobIds.join(),
     });
 
@@ -662,7 +661,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
 
-    const [datafeedConfig, { body: jobsResponse }] = await Promise.all([
+    const [datafeedConfig, jobsResponse] = await Promise.all([
       getDatafeedByJobId(jobId),
       mlClient.getJobs({ job_id: jobId }),
     ]);
@@ -725,9 +724,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if (client) {
-      const {
-        body: { aggregations },
-      } = await client.asCurrentUser.search(esSearchRequest);
+      const { aggregations } = await client.asCurrentUser.search(esSearchRequest);
 
       finalResults.datafeedResults =
         // @ts-expect-error incorrect search response type
@@ -739,7 +736,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const { getAnnotations } = annotationServiceProvider(client!);
 
-    const [bucketResp, annotationResp, { body: modelSnapshotsResp }] = await Promise.all([
+    const [bucketResp, annotationResp, modelSnapshotsResp] = await Promise.all([
       mlClient.getBuckets({
         job_id: jobId,
         body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
@@ -757,7 +754,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       }),
     ]);
 
-    const bucketResults = bucketResp?.body?.buckets ?? [];
+    const bucketResults = bucketResp?.buckets ?? [];
     bucketResults.forEach((dataForTime) => {
       const timestamp = Number(dataForTime?.timestamp);
       const eventCount = dataForTime?.event_count;

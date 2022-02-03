@@ -34,11 +34,15 @@ export function searchProvider(
   ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
     await jobIdsCheck('anomaly-detector', jobIds);
     const { asInternalUser } = client;
-    const resp = await asInternalUser.search<T>({
-      ...searchParams,
-      index: ML_RESULTS_INDEX_PATTERN,
-    });
+    const resp = await asInternalUser.search<T>(
+      {
+        ...searchParams,
+        index: ML_RESULTS_INDEX_PATTERN,
+      },
+      { meta: true }
+    );
     return resp;
   }
+
   return { anomalySearch };
 }

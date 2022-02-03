@@ -26,7 +26,6 @@ import {
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
-import { MlJobsResponse } from '../../../common/types/job_service';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
@@ -375,9 +374,7 @@ export function alertingServiceProvider(
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
-    ).body.jobs;
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -512,9 +509,7 @@ export function alertingServiceProvider(
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
-    ).body.jobs;
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.

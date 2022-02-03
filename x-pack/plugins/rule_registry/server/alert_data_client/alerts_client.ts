@@ -59,6 +59,7 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
       source?.fields?.[SPACE_IDS][0] != null)
   );
 };
+
 export interface ConstructorOptions {
   logger: Logger;
   authorization: PublicMethodsOf<AlertingAuthorization>;
@@ -259,13 +260,16 @@ export class AlertsClient {
         };
       }
 
-      const result = await this.esClient.search<ParsedTechnicalFields>({
-        index: index ?? '.alerts-*',
-        ignore_unavailable: true,
-        // @ts-expect-error
-        body: queryBody,
-        seq_no_primary_term: true,
-      });
+      const result = await this.esClient.search<ParsedTechnicalFields>(
+        {
+          index: index ?? '.alerts-*',
+          ignore_unavailable: true,
+          // @ts-expect-error
+          body: queryBody,
+          seq_no_primary_term: true,
+        },
+        { meta: true }
+      );
 
       if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
@@ -319,7 +323,7 @@ export class AlertsClient {
         },
       });
 
-      await this.ensureAllAuthorized(mgetRes.body.docs, operation);
+      await this.ensureAllAuthorized(mgetRes.docs, operation);
 
       for (const id of ids) {
         this.auditLogger?.log(
@@ -331,7 +335,7 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+      const bulkUpdateRequest = mgetRes.docs.flatMap((item) => {
         // @ts-expect-error doesn't handle error branch in MGetResponse
         const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
@@ -525,7 +529,7 @@ export class AlertsClient {
         alert?.hits.hits[0]._source,
         status as STATUS_VALUES
       );
-      const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
+      const response = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
         index,
