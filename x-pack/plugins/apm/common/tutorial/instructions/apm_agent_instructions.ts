@@ -260,7 +260,7 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
 for details on how to enable RUM support.',
         values: {
           documentationLink:
-            '{config.docs.base_url}guide/en/apm/server/{config.docs.version}/configuration-rum.html',
+            '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/configuration-rum.html',
         },
       }
     ),
