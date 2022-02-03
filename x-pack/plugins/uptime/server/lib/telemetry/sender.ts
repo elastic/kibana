@@ -177,9 +177,9 @@ export class TelemetryEventsSender {
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.2.0',
         },
       });
-      this.logger.info(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.info(
+      this.logger.debug(
         `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
     }
