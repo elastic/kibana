@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiStat,
-  EuiBasicTable,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -21,10 +14,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import {
-  loadAlertAggregations as loadRuleAggregations,
-  loadAlerts as loadRules,
-} from '../../../../../../../plugins/triggers_actions_ui/public';
+import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
@@ -100,8 +90,6 @@ function AlertsPage() {
     error: 0,
   });
 
-  const [rules, setRules] = useState<RuleState>({ data: [] });
-
   useEffect(() => {
     syncAlertStatusFilterStatus(kuery as string);
   }, [kuery]);
@@ -113,26 +101,6 @@ function AlertsPage() {
       }),
     },
   ]);
-
-  async function loadObservabilityRules() {
-    try {
-      const response = await loadRules({
-        http,
-        page: { index: 0, size: 10 },
-        typesFilter: ['xpack.uptime.alerts.monitorStatus'],
-      });
-      console.log(response, '!!response');
-      setRules({
-        data: response.data as any,
-      });
-    } catch (_e) {
-      toasts.addDanger({
-        title: i18n.translate('xpack.observability.alerts.ruleStats.loadError', {
-          defaultMessage: 'Unable to load rules',
-        }),
-      });
-    }
-  }
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);
@@ -168,7 +136,6 @@ function AlertsPage() {
 
   useEffect(() => {
     loadRuleStats();
-    loadObservabilityRules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -273,13 +240,6 @@ function AlertsPage() {
     docsLink: core.docLinks.links.observability.guide,
   });
 
-  const rulesTableColumns = [
-    {
-      field: 'name',
-      name: 'Rule Name',
-    },
-  ];
-
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
@@ -353,21 +313,6 @@ function AlertsPage() {
             query={kuery}
             onQueryChange={onQueryChange}
           />
-        </EuiFlexItem>
-
-        {/* <EuiFlexItem>
-          {rules.data.map((rule) => {
-            console.log(rule, '!!rule');
-            return <div>{rule.name}</div>;
-          })}
-        </EuiFlexItem> */}
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h1>Rules table</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiBasicTable items={rules.data} columns={rulesTableColumns} />
         </EuiFlexItem>
 
         <EuiFlexItem>
