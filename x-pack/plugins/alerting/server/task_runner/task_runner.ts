@@ -36,11 +36,13 @@ import {
   AlertExecutionStatusErrorReasons,
   RuleTypeRegistry,
   RuleMonitoring,
+  RuleMonitoringHistory,
   RawRuleExecutionStatus,
   AlertAction,
   RuleTaskStateWithActions,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
+import { getExecutionSuccessRatio, getExecutionDurationPercentiles } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
@@ -55,6 +57,7 @@ import {
   AlertInstanceContext,
   WithoutReservedActionGroups,
   parseDuration,
+  MONITORING_HISTORY_LIMIT,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -66,7 +69,6 @@ import { createAbortableEsClientFactory } from '../lib/create_abortable_es_clien
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
-const MONITORING_HISTORY_LIMIT = 200;
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -724,15 +726,17 @@ export class TaskRunner<
     eventLogger.stopTiming(event);
     set(event, 'kibana.alerting.status', executionStatus.status);
 
-    // Copy duration into execution status if available
-    if (null != event.event?.duration) {
-      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
-    }
-
-    const monitoringHistory = {
+    const monitoringHistory: RuleMonitoringHistory = {
       success: true,
       timestamp: +new Date(),
     };
+
+    // Copy duration into execution status if available
+    if (null != event.event?.duration) {
+      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+      monitoringHistory.duration = executionStatus.lastDuration;
+    }
+
     // if executionStatus indicates an error, fill in fields in
     // event from it
     if (executionStatus.error) {
@@ -752,9 +756,11 @@ export class TaskRunner<
     }
 
     ruleMonitoring.execution.history.push(monitoringHistory);
-    ruleMonitoring.execution.calculated_metrics.success_ratio =
-      ruleMonitoring.execution.history.filter(({ success }) => success).length /
-      ruleMonitoring.execution.history.length;
+    ruleMonitoring.execution.calculated_metrics = {
+      success_ratio: getExecutionSuccessRatio(ruleMonitoring),
+      ...getExecutionDurationPercentiles(ruleMonitoring),
+    };
+
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {

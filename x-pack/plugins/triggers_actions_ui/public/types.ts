@@ -329,3 +329,9 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
 }
+
+export enum Percentiles {
+  P50 = 'P50',
+  P95 = 'P95',
+  P99 = 'P99',
+}

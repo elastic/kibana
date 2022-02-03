@@ -39,6 +39,7 @@ import { FormContext } from './form_context';
 import { CreateCaseFormFields, CreateCaseFormFieldsProps } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { Choice } from '../connectors/servicenow/types';
 
 const sampleId = 'case-id';
 
@@ -114,6 +115,7 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const postComment = jest.fn();
+  let onChoicesSuccess: (values: Choice[]) => void;
 
   beforeAll(() => {
     postCase.mockResolvedValue({
@@ -129,7 +131,12 @@ describe('Create case', () => {
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+    useGetChoicesMock.mockImplementation(
+      ({ onSuccess }: { onSuccess: (values: Choice[]) => void }) => {
+        onChoicesSuccess = onSuccess;
+        return useGetChoicesResponse;
+      }
+    );
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       tags: sampleTags,
@@ -512,6 +519,11 @@ describe('Create case', () => {
         expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
       });
 
+      // we need the choices response to conditionally show the subcategory select
+      act(() => {
+        onChoicesSuccess(useGetChoicesResponse.choices);
+      });
+
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
         wrapper
           .find(`select[data-test-subj="${subj}"]`)
@@ -600,6 +612,11 @@ describe('Create case', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeTruthy();
+      });
+
+      // we need the choices response to conditionally show the subcategory select
+      act(() => {
+        onChoicesSuccess(useGetChoicesResponse.choices);
       });
 
       wrapper
