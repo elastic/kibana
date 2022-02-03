@@ -27,4 +27,17 @@
       display: none;
     }
   }
+
+  &__isFullScreen {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  &__controls {
+    top: 24px;
+    right: 24px;
+    position: absolute;
+    z-index: 1000
+  }
 }
